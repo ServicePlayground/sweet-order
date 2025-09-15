@@ -13,7 +13,7 @@ sweet-order/
 ├─ turbo.json               # Turbo 설정
 ├─ apps/                    # 애플리케이션들
 │  ├─ web-user/             # 사용자 웹 (frontend + backend)
-│  │  ├─ frontend/          
+│  │  ├─ frontend/
 │  │  └─ backend/
 │  ├─ web-seller/           # 판매자 웹 (frontend + backend)
 │  │  ├─ frontend/
@@ -36,6 +36,9 @@ sweet-order/
 ## 🚀 주요 명령어
 
 ```bash
+# (루트경로에서만) 의존성 설치
+yarn install
+
 # 개발 서버 시작
 yarn dev
 
