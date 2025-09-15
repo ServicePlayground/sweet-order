@@ -1,0 +1,24 @@
+{
+  "name": "sweet-order",
+  "private": true,
+  "packageManager": "yarn@^4",
+  "workspaces": [
+    "apps/*",
+    "apps/*/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "turbo run format",
+    "format:check": "turbo run format:check"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "prettier": "^3.0.0"
+  }
+}
