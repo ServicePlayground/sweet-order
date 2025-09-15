@@ -9,7 +9,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "devDependencies": {
-    "typescript": "^5",
-    "prettier": "^3.0.0"
+    "prettier": "^3.0.0",
+    "typescript": "^5"
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "sweet-order",
   "private": true,
-  "packageManager": "yarn@^4",
+  "packageManager": "yarn@4.9.4",
   "workspaces": [
     "apps/*",
     "apps/*/*",
@@ -17,8 +17,8 @@
     "format:check": "turbo run format:check"
   },
   "devDependencies": {
+    "prettier": "^3.0.0",
     "turbo": "^2.0.0",
-    "typescript": "^5.5.0",
-    "prettier": "^3.0.0"
+    "typescript": "^5.5.0"
   }
 }
