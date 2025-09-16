@@ -1,9 +1,12 @@
 ---
 name: ✨ 기능 요청
 about: 새로운 기능이나 개선사항을 제안할 때 사용하는 템플릿입니다.
-title: "[FEATURE] "
-labels: ["enhancement", "needs-triage"]
+title: "[WEB-USER][FE][FEATURE]"
 ---
+
+<!-- [WEB-USER] [WEB-SELLER] [WEB-ADMIN] [APP-USER] [APP-SELLER] [ALL] [OTHER] -->
+<!-- [FE] [BE] -->
+<!-- [TASK] [BUG] [FEATURE] [CHORE] [DOCUMENTATION] [FIX] [REFACTOR] [REMOVE] [UI] [QUESTION]-->
 
 ## ✨ 기능 설명
 

@@ -1,9 +1,11 @@
 ---
 name: 🐛 버그 리포트
 about: 버그를 발견했을 때 사용하는 템플릿입니다.
-title: "[BUG] "
-labels: ["bug", "needs-triage"]
+title: "[WEB-USER][FE][BUG]"
 ---
+
+<!-- [WEB-USER] [WEB-SELLER] [WEB-ADMIN] [APP-USER] [APP-SELLER] [ALL] [OTHER] -->
+<!-- [FE] [BE] -->
 
 ## 🐛 버그 설명
 
