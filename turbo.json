@@ -4,9 +4,35 @@
     "dev": {
       "cache": false
     },
-    "build": {
-      "dependsOn": ["^build"],
+    "staging": {
+      "cache": false
+    },
+    "production": {
+      "cache": false
+    },
+    "build:dev": {
+      "dependsOn": ["^build:dev"],
       "outputs": [".next/**", "dist/**", "build/**"]
+    },
+    "build:staging": {
+      "dependsOn": ["^build:staging"],
+      "outputs": [".next/**", "dist/**", "build/**"]
+    },
+    "build:production": {
+      "dependsOn": ["^build:production"],
+      "outputs": [".next/**", "dist/**", "build/**"]
+    },
+    "serve:dev": {
+      "dependsOn": ["build:dev"],
+      "cache": false
+    },
+    "serve:staging": {
+      "dependsOn": ["build:staging"],
+      "cache": false
+    },
+    "serve:production": {
+      "dependsOn": ["build:production"],
+      "cache": false
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

@@ -3,20 +3,18 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "Node",
     "allowJs": false,
     "checkJs": false,
     "strict": true,
-    "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@ui/*": ["packages/ui/src/*"],
-      "@utils/*": ["packages/utils/src/*"],
-      "@types/*": ["packages/types/src/*"],
-      "@config/*": ["packages/config/*"]
+      "@packages/*": ["packages/*"]
     }
   }
 }
