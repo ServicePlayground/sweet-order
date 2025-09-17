@@ -1,3 +1,7 @@
 module.exports = {
-  ...require('./packages/config/prettier.config.cjs'),
+  semi: true,
+  singleQuote: false,
+  trailingComma: "all",
+  printWidth: 100,
+  tabWidth: 2,
 };
