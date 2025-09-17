@@ -56,18 +56,18 @@ export const config = {
     maxAge: process.env.CORS_MAX_AGE ? parseInt(process.env.CORS_MAX_AGE, 10) : 3600,
   },
 
-  // // Database (향후 Prisma 설정용)
+  //  // Database (향후 Prisma 설정용)
   // database: {
   //   url: process.env.DATABASE_URL || "",
   // },
 
-  // // JWT (향후 인증용)
+  //  // JWT (향후 인증용)
   // jwt: {
   //   secret: process.env.JWT_SECRET || "your-secret-key",
   //   expiresIn: process.env.JWT_EXPIRES_IN || "24h",
   // },
 
-  // // Logging
+  //  // Logging
   // logging: {
   //   level: process.env.LOG_LEVEL || "info",
   // },
