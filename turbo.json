@@ -22,18 +22,6 @@
       "dependsOn": ["^build:production"],
       "outputs": [".next/**", "dist/**", "build/**"]
     },
-    "serve:dev": {
-      "dependsOn": ["build:dev"],
-      "cache": false
-    },
-    "serve:staging": {
-      "dependsOn": ["build:staging"],
-      "cache": false
-    },
-    "serve:production": {
-      "dependsOn": ["build:production"],
-      "cache": false
-    },
     "typecheck": {
       "dependsOn": ["^typecheck"],
       "outputs": []
