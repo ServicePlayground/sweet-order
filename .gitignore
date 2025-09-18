@@ -16,6 +16,10 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+# 환경별 .env 파일들은 Git에 포함 (보안상 민감한 정보는 별도 관리)
+.env.development
+.env.staging  
+.env.production
 
 # Logs
 npm-debug.log*
