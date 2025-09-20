@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { HealthModule } from "@web-user/backend/modules/health/health.module";
+import { DatabaseModule } from "@web-user/backend/database/database.module";
 
 /**
  * NestJS 애플리케이션의 루트 모듈
@@ -15,6 +16,9 @@ import { HealthModule } from "@web-user/backend/modules/health/health.module";
         `.env.${process.env.NODE_ENV}`, // 환경별 .env 파일
       ],
     }),
+
+    // 데이터베이스 모듈
+    DatabaseModule,
 
     // 헬스 체크 모듈
     HealthModule,
