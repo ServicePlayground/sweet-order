@@ -16,17 +16,19 @@ export const API_PREFIX = "/v1" as const;
 // API 경로
 export const API_PATHS = {
   DOCS: `${API_PREFIX}/docs`,
-  HEALTH: `${API_PREFIX}/health`,
 } as const;
 
-// HTTP 상태 코드
+// HTTP 상태 코드 상수
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
+  NO_CONTENT: 204,
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
   INTERNAL_SERVER_ERROR: 500,
 } as const;
 
@@ -48,4 +50,12 @@ export const CONFIG_KEYS = {
   CORS_METHODS: "CORS_METHODS",
   CORS_ALLOWED_HEADERS: "CORS_ALLOWED_HEADERS",
   CORS_MAX_AGE: "CORS_MAX_AGE",
+} as const;
+
+/**
+ * 토큰 타입 상수
+ */
+export const TOKEN_TYPES = {
+  ACCESS: "access",
+  REFRESH: "refresh",
 } as const;

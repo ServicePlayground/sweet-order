@@ -11,12 +11,12 @@
     "lint": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "db:generate": "dotenv -e .env.development -- prisma generate",
-    "db:migrate": "dotenv -e .env.development -- prisma migrate dev",
-    "db:seed": "dotenv -e .env.development -- ts-node prisma/seed.ts",
-    "db:studio": "dotenv -e .env.development -- prisma studio",
-    "db:deploy:staging": "dotenv -e .env.staging -- prisma migrate deploy && dotenv -e .env.staging -- prisma generate",
-    "db:deploy:production": "dotenv -e .env.production -- prisma migrate deploy && dotenv -e .env.production -- prisma generate"
+    "db:reset:dev": "dotenv -e .env.development -- prisma migrate reset",
+    "db:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
+    "db:seed:dev": "dotenv -e .env.development -- ts-node prisma/seed.ts",
+    "db:studio:dev": "dotenv -e .env.development -- prisma studio",
+    "db:deploy:staging": "dotenv -e .env.staging -- prisma migrate deploy",
+    "db:deploy:production": "dotenv -e .env.production -- prisma migrate deploy"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
