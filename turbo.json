@@ -7,13 +7,6 @@
     "staging": {
       "cache": false
     },
-    "production": {
-      "cache": false
-    },
-    "build:dev": {
-      "dependsOn": ["^build:dev"],
-      "outputs": [".next/**", "dist/**", "build/**"]
-    },
     "build:staging": {
       "dependsOn": ["^build:staging"],
       "outputs": [".next/**", "dist/**", "build/**"]

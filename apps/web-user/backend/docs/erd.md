@@ -12,7 +12,6 @@ erDiagram
     User {
         string id PK
         string userId UK
-        string email
         string password_hash
         string name
         string phone UK
@@ -79,17 +78,6 @@ erDiagram
         datetime updated_at
     }
 
-    PasswordPolicy {
-        string id PK
-        int min_length
-        boolean require_uppercase
-        boolean require_lowercase
-        boolean require_numbers
-        boolean require_special_chars
-        int max_attempts
-        datetime created_at
-        datetime updated_at
-    }
 
     %% 스토어 관련
     Store {
@@ -98,7 +86,6 @@ erDiagram
         string description
         string address
         string phone
-        string email
         string business_hours
         json location
         string logo_url
@@ -387,7 +374,6 @@ erDiagram
 - **UserSettings**: 사용자 환경설정 (채팅/알림/푸시/언어 설정)
 - **LoginSession**: 로그인 세션 관리 (일반/소셜 로그인 추적)
 - **PhoneVerification**: 휴대폰 인증 관리 (인증번호, 시도횟수, 만료시간)
-- **PasswordPolicy**: 비밀번호 정책 관리 (길이, 복잡도, 시도제한)
 
 ### 2. 스토어 관련 (Store Domain)
 
@@ -460,7 +446,6 @@ erDiagram
 -- 성능 최적화를 위한 주요 인덱스
 CREATE INDEX idx_user_userId ON users(userId);
 CREATE INDEX idx_user_phone ON users(phone);
-CREATE INDEX idx_user_email ON users(email);
 CREATE INDEX idx_store_status ON stores(status);
 CREATE INDEX idx_product_store_status ON products(store_id, status);
 CREATE INDEX idx_order_user_status ON orders(user_id, status);
@@ -491,7 +476,7 @@ CREATE INDEX idx_phone_verification_expires ON phone_verifications(expires_at);
 
 1. 기본 테이블 생성 (User, Store, Product)
 2. 사용자 인증 관련 테이블 (UserAuth, UserAgreement, LoginSession)
-3. 보안 관련 테이블 (PhoneVerification, PasswordPolicy)
+3. 보안 관련 테이블 (PhoneVerification)
 4. 카테고리 및 매핑 테이블
 5. 주문 관련 테이블
 6. 소셜 기능 테이블 (리뷰, 좋아요, 채팅)
@@ -519,7 +504,6 @@ CREATE INDEX idx_phone_verification_expires ON phone_verifications(expires_at);
 - **휴대폰 인증**: is_verified 플래그로 본인인증 상태 관리
 - **아이디 중복 방지**: userId 유니크 제약 및 실시간 중복 검사
 - **휴대폰 인증 보안**: PhoneVerification 테이블로 인증번호 관리
-- **비밀번호 정책**: PasswordPolicy 테이블로 정책 관리
 
 ## 플랫폼 기능 지원
 
@@ -570,9 +554,8 @@ CREATE INDEX idx_phone_verification_expires ON phone_verifications(expires_at);
 - **본인인증 API**: 신뢰할 수 있는 인증 서비스 연동
 - **복합 유니크 제약**: phone + verification_code 조합으로 중복 방지
 
-### 2. 비밀번호 정책 시스템
+### 2. 비밀번호 보안 시스템
 
-- **PasswordPolicy 테이블**: 비밀번호 정책 중앙 관리
 - **최소 길이**: 8자 이상
 - **복잡도 요구**: 영문+숫자+특수문자 조합
 - **시도 제한**: 로그인 실패 횟수 제한
