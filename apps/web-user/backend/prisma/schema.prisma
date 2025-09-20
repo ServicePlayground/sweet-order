@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -13,11 +12,34 @@ datasource db {
 
 // User model for authentication and user management
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(cuid())              // 고유 식별자 (UUID)
+  userId           String   @unique @map("user_id")           // 사용자 ID (로그인용)
+  passwordHash     String?  @map("password_hash")             // 암호화된 비밀번호 (선택사항)
+  name             String?                                    // 사용자 실명 (선택사항)
+  phone            String?  @unique                           // 휴대폰 번호 (선택사항, 중복 불가)
+  nickname         String?                                    // 닉네임 (선택사항)
+  profileImageUrl  String?  @map("profile_image_url")         // 프로필 이미지 URL (선택사항)
+  isVerified       Boolean  @default(false) @map("is_verified") // 휴대폰 인증 여부
+  createdAt        DateTime @default(now()) @map("created_at")  // 계정 생성일시
+  updatedAt        DateTime @updatedAt @map("updated_at")        // 계정 수정일시
 
   @@map("users")
 }
+
+
+// Phone verification
+model PhoneVerification {
+  id               String   @id @default(cuid())              // 고유 식별자 (UUID)
+  phone            String                                   // 휴대폰 번호
+  verificationCode String   @map("verification_code")        // 인증번호 (6자리)
+  attemptCount     Int      @default(0) @map("attempt_count") // 인증 시도 횟수
+  expiresAt        DateTime @map("expires_at")               // 인증번호 만료시간
+  isVerified       Boolean  @default(false) @map("is_verified") // 인증 완료 여부
+  createdAt        DateTime @default(now()) @map("created_at")  // 인증 요청일시
+  updatedAt        DateTime @updatedAt @map("updated_at")        // 인증 수정일시
+
+  @@unique([phone, verificationCode])                        // 휴대폰번호 + 인증번호 조합 유니크
+  @@map("phone_verifications")
+}
+
+

@@ -1,0 +1,5 @@
+# Prisma generated files
+src/generated/
+dist/
+node_modules/
+*.d.ts

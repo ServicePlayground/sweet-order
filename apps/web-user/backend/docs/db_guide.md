@@ -3,147 +3,271 @@
 ## 환경별 데이터베이스 설정
 
 ### 개발 환경 (Development)
+
 - **데이터베이스**: 로컬 PostgreSQL
 - **연결 방식**: 직접 연결
 - **용도**: 로컬 개발 및 테스트
 
 ### 스테이징 환경 (Staging)
+
 - **데이터베이스**: AWS RDS PostgreSQL
 - **연결 방식**: Prisma Accelerate
 - **용도**: 배포 전 검증 및 테스트
 
 ### 프로덕션 환경 (Production)
+
 - **데이터베이스**: AWS RDS PostgreSQL (Multi-AZ)
 - **연결 방식**: Prisma Accelerate
 - **용도**: 실제 서비스 운영
 
-## 명령어 사용법
+# PostgreSQL 가이드
 
-### 개발 환경
-```bash
-# 스키마 동기화
-yarn run db:push
+## 개요
 
-# 마이그레이션 생성 및 적용
-yarn run db:migrate
+PostgreSQL은 오픈소스 객체-관계형 데이터베이스 관리 시스템(ORDBMS)입니다. 이 가이드는 PostgreSQL의 핵심 개념, 설치, 설정, 그리고 Sweet Order 프로젝트에서의 활용 방법을 다룹니다.
 
-# 시드 데이터 삽입
-yarn run db:seed
+## PostgreSQL 아키텍처
 
-# Prisma Studio 실행
-yarn run db:studio
+```mermaid
+graph TB
+    subgraph "Client Applications"
+        APP1[Web Application]
+        APP2[Mobile App]
+        APP3[Admin Panel]
+    end
 
-# 마이그레이션 상태 확인
-yarn run db:status
+    subgraph "PostgreSQL Server"
+        subgraph "Connection Pooler"
+            CP[pgBouncer]
+        end
+
+        subgraph "PostgreSQL Process"
+            subgraph "Backend Processes"
+                BP1[Postmaster]
+                BP2[Backend Process 1]
+                BP3[Backend Process 2]
+                BP4[Backend Process N]
+            end
+
+            subgraph "Shared Memory"
+                SM1[Shared Buffers]
+                SM2[WAL Buffers]
+                SM3[Lock Table]
+            end
+
+            subgraph "Storage"
+                ST1[Data Files]
+                ST2[WAL Files]
+                ST3[Index Files]
+            end
+        end
+    end
+
+    APP1 --> CP
+    APP2 --> CP
+    APP3 --> CP
+
+    CP --> BP1
+    BP1 --> BP2
+    BP1 --> BP3
+    BP1 --> BP4
+
+    BP2 --> SM1
+    BP3 --> SM1
+    BP4 --> SM1
+
+    SM1 --> ST1
+    SM2 --> ST2
+    SM3 --> ST1
 ```
 
-### 스테이징 환경
+## 설치 및 설정
+
+### macOS 설치 (Homebrew)
+
 ```bash
-# 스키마 동기화
-yarn run db:push:staging
+# PostgreSQL 설치
+brew install postgresql@15
+
+# PostgreSQL 서비스 시작
+brew services start postgresql@15
+
+# PostgreSQL 버전 확인
+psql --version
+
+# PostgreSQL에 접속
+psql postgres
+```
+
+### 데이터베이스 생성
+
+```sql
+-- PostgreSQL에 접속한 후 실행
+CREATE DATABASE sweet_order_db;
+CREATE USER sweet_order_user WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE sweet_order_db TO sweet_order_user;
+
+-- 데이터베이스 연결 확인
+\c sweet_order_db
+\q
+```
+
+### 환경 변수 설정
+
+```bash
+# .env.development
+DATABASE_URL="postgresql://sweet_order_user:your_secure_password@localhost:5432/sweet_order_db?schema=public"
+
+# .env.staging
+# .env.production
+```
+
+## 핵심 개념
+
+### 1. 데이터 타입
+
+PostgreSQL은 다양한 데이터 타입을 지원합니다:
+
+#### 기본 타입
+
+```sql
+-- 숫자 타입
+INTEGER, BIGINT, SMALLINT
+DECIMAL(10,2), NUMERIC(10,2)
+REAL, DOUBLE PRECISION
+
+-- 문자열 타입
+VARCHAR(255), TEXT
+CHAR(10)
+
+-- 날짜/시간 타입
+DATE, TIME, TIMESTAMP
+TIMESTAMPTZ  -- 타임존 포함
+
+-- 불린 타입
+BOOLEAN
+
+-- JSON 타입
+JSON, JSONB  -- JSONB가 더 효율적
+```
+
+## Prisma와 PostgreSQL 연동
+
+### Prisma 스키마 설정
+
+```prisma
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+```
+
+### 마이그레이션 관리
+
+```bash
+# 마이그레이션 생성
+npx prisma migrate dev --name init
 
 # 마이그레이션 적용
-yarn run db:migrate:staging
+npx prisma migrate deploy
 
-# 시드 데이터 삽입
-yarn run db:seed:staging
+# 데이터베이스 리셋
+npx prisma migrate reset
 
-# Prisma Studio 실행
-yarn run db:studio:staging
-
-# 배포 (마이그레이션 + 클라이언트 생성)
-yarn run db:deploy:staging
-
-# 백업 생성
-yarn run db:backup:staging
+# Prisma Studio 실행 (GUI)
+npx prisma studio
 ```
 
-### 프로덕션 환경
-```bash
-# 마이그레이션 배포 (안전한 배포)
-yarn run db:migrate:deploy
+### NestJS에서 Prisma 사용
 
-# Prisma Studio 실행 (읽기 전용 권장)
-yarn run db:studio:production
+```typescript
+// src/database/prisma.service.ts
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
 
-# 배포 (마이그레이션 + 클라이언트 생성)
-yarn run db:deploy:production
-
-# 백업 생성
-yarn run db:backup:production
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit {
+  async onModuleInit() {
+    await this.$connect();
+  }
+}
 ```
 
-## AWS RDS 확장성 고려사항
+```typescript
+// src/modules/users/users.service.ts
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../database/prisma.service";
 
-### 1. 데이터베이스 연결 최적화
-- **Prisma Accelerate**: 쿼리 캐싱 및 연결 풀링
-- **Connection Pooling**: 동시 연결 수 제한
-- **Read Replicas**: 읽기 전용 쿼리 분산
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
 
-### 2. 환경별 설정
-```bash
-# 개발: 로컬 PostgreSQL
-DATABASE_URL="postgresql://user:pass@localhost:5432/dev_db"
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
 
-# 스테이징: AWS RDS + Accelerate
-DATABASE_URL="prisma+postgres://localhost:51213/?api_key=staging_key"
+  async findOne(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
 
-# 프로덕션: AWS RDS Multi-AZ + Accelerate
-DATABASE_URL="prisma+postgres://localhost:51213/?api_key=prod_key"
+  async create(data: { email: string; name?: string }) {
+    return this.prisma.user.create({
+      data,
+    });
+  }
+}
 ```
 
-### 3. 보안 설정
-- **SSL 연결**: 프로덕션에서 필수
-- **VPC**: 데이터베이스를 VPC 내부에 배치
-- **IAM 역할**: 애플리케이션에서 IAM 역할 사용
-- **암호화**: 저장 시 및 전송 시 암호화
+## 모범 사례
 
-### 4. 모니터링 및 백업
-- **CloudWatch**: 데이터베이스 메트릭 모니터링
-- **자동 백업**: RDS 자동 백업 설정
-- **Point-in-Time Recovery**: 특정 시점 복구
-- **Multi-AZ**: 고가용성 보장
+### 1. 스키마 설계
 
-## 마이그레이션 전략
+- **정규화**: 적절한 수준의 정규화 유지
+- **인덱스**: 자주 조회되는 컬럼에 인덱스 생성
+- **제약조건**: 데이터 무결성을 위한 제약조건 설정
+- **네이밍**: 일관된 네이밍 컨벤션 사용
 
-### 1. 개발 단계
-```bash
-# 스키마 변경 후
-yarn run db:migrate  # 마이그레이션 파일 생성 및 적용
+### 2. 쿼리 최적화
+
+- **EXPLAIN 사용**: 쿼리 실행 계획 분석
+- **인덱스 활용**: 적절한 인덱스 사용
+- **N+1 문제 방지**: JOIN 또는 include 사용
+- **페이징**: 대용량 데이터 조회 시 LIMIT/OFFSET 사용
+
+### 3. 운영 관리
+
+- **정기 백업**: 자동화된 백업 시스템 구축
+- **모니터링**: 성능 및 리소스 모니터링
+- **업데이트**: 정기적인 PostgreSQL 업데이트
+- **보안**: 최소 권한 원칙 적용
+
 ```
 
-### 2. 스테이징 배포
-```bash
-# 마이그레이션 상태 확인
-yarn run db:status:staging
+## 참고 자료
 
-# 마이그레이션 적용
-yarn run db:deploy:staging
+- [PostgreSQL 공식 문서](https://www.postgresql.org/docs/)
+- [Prisma 공식 문서](https://www.prisma.io/docs/)
+- [NestJS 공식 문서](https://docs.nestjs.com/)
+- [PostgreSQL 튜토리얼](https://www.postgresqltutorial.com/)
+- [Prisma PostgreSQL 가이드](https://www.prisma.io/docs/concepts/database-connectors/postgresql)
+
+## 관련 문서
+
+- [NestJS 가이드](./nestjs-guide.md)
 ```
-
-### 3. 프로덕션 배포
-```bash
-# 백업 생성
-yarn run db:backup:production
-
-# 마이그레이션 적용 (Zero-downtime)
-yarn run db:deploy:production
-```
-
-## 트러블슈팅
-
-### 연결 오류
-1. 환경변수 확인: `echo $DATABASE_URL`
-2. 네트워크 연결 확인
-3. AWS 보안 그룹 설정 확인
-
-### 마이그레이션 오류
-1. 마이그레이션 상태 확인: `yarn run db:status`
-2. 충돌 해결: `yarn run db:migrate:reset` (개발 환경만)
-3. 수동 마이그레이션: `yarn run db:migrate:deploy`
-
-### 성능 이슈
-1. Prisma Accelerate 사용
-2. 쿼리 최적화
-3. 인덱스 추가
-4. Read Replica 활용
