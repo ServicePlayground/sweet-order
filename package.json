@@ -10,8 +10,6 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "staging": "turbo run staging --parallel",
-    "production": "turbo run production --parallel",
-    "build:dev": "turbo run build:dev",
     "build:staging": "turbo run build:staging",
     "build:production": "turbo run build:production",
     "typecheck": "turbo run typecheck",
