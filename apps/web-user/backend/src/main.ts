@@ -11,7 +11,7 @@ import {
   API_PREFIX,
   CONFIG_KEYS,
   SERVICE_INFO,
-} from "@web-user/backend/config/constants/app.constants";
+} from "@web-user/backend/common/constants/app.constants";
 
 /**
  * NestJS 애플리케이션의 진입점
@@ -50,7 +50,7 @@ async function bootstrap(): Promise<void> {
 
   // 전역 유효성 검사 파이프 설정
   // class-validator를 사용하여 DTO 유효성 검사 자동화
-  // 클라이언트가 API 요청 → ValidationPipe가 자동으로 DTO 검증 → 유효하지 않으면 에러 반환 → 유효하면 컨트롤러로 전달
+  // 클라이언트가 API 요청 → ValidationPipe가 DTO 검증 → 유효하지 않으면 에러 반환 → 유효하면 컨트롤러로 전달
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // DTO에 정의되지 않은 속성 제거
@@ -59,6 +59,10 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
+  // 전역 접두사 설정 (모든 API 경로에 /v1 접두사 추가)
+  // 호출 순서 중요 (설정 순서에 따라 적용되는 순서가 다름)
+  app.setGlobalPrefix(API_PREFIX);
+
   // Swagger API 문서 설정
   // 개발/스테이징/상용 어떻게 분기처리해야할지 확인필요 (상용에서 위험할 수 있음)
   if (nodeEnv === "development") {
@@ -66,15 +70,11 @@ async function bootstrap(): Promise<void> {
       .setTitle(SERVICE_INFO.DESCRIPTION)
       .setDescription(`${SERVICE_INFO.DESCRIPTION} 문서`)
       .setVersion(SERVICE_INFO.VERSION)
-      .addTag("health", "서버 상태 확인")
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup(API_PATHS.DOCS, app, document);
   }
-
-  // 전역 접두사 설정 (모든 API 경로에 /v1 접두사 추가)
-  app.setGlobalPrefix(API_PREFIX);
 
   // 서버 시작
   await app.listen(port);

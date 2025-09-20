@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { HealthModule } from "@web-user/backend/modules/health/health.module";
 import { DatabaseModule } from "@web-user/backend/database/database.module";
+import { AuthModule } from "@web-user/backend/modules/auth/auth.module";
 
 /**
  * NestJS 애플리케이션의 루트 모듈
@@ -20,11 +20,10 @@ import { DatabaseModule } from "@web-user/backend/database/database.module";
     // 데이터베이스 모듈
     DatabaseModule,
 
-    // 헬스 체크 모듈
-    HealthModule,
+    // 인증 모듈
+    AuthModule,
 
     // 향후 추가될 모듈들:
-    // - AuthModule (인증/인가)
     // - UserModule (사용자 관리)
     // - OrderModule (주문 관리)
     // - ProductModule (상품 관리)

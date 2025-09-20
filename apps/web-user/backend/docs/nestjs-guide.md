@@ -144,7 +144,6 @@ export class OrderService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly userService: UserService,
-    private readonly emailService: EmailService,
   ) {}
 }
 ```
