@@ -12,7 +12,30 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "db:generate": "dotenv -e .env.development -- prisma generate",
+    "db:generate:staging": "dotenv -e .env.staging -- prisma generate",
+    "db:generate:production": "dotenv -e .env.production -- prisma generate",
+    "db:push": "dotenv -e .env.development -- prisma db push",
+    "db:push:staging": "dotenv -e .env.staging -- prisma db push",
+    "db:push:production": "dotenv -e .env.production -- prisma db push",
+    "db:migrate": "dotenv -e .env.development -- prisma migrate dev",
+    "db:migrate:staging": "dotenv -e .env.staging -- prisma migrate dev",
+    "db:migrate:deploy": "dotenv -e .env.production -- prisma migrate deploy",
+    "db:migrate:reset": "dotenv -e .env.development -- prisma migrate reset",
+    "db:migrate:reset:staging": "dotenv -e .env.staging -- prisma migrate reset",
+    "db:seed": "dotenv -e .env.development -- ts-node prisma/seed.ts",
+    "db:seed:staging": "dotenv -e .env.staging -- ts-node prisma/seed.ts",
+    "db:studio": "dotenv -e .env.development -- prisma studio",
+    "db:studio:staging": "dotenv -e .env.staging -- prisma studio",
+    "db:studio:production": "dotenv -e .env.production -- prisma studio",
+    "db:status": "dotenv -e .env.development -- prisma migrate status",
+    "db:status:staging": "dotenv -e .env.staging -- prisma migrate status",
+    "db:status:production": "dotenv -e .env.production -- prisma migrate status",
+    "db:deploy:staging": "dotenv -e .env.staging -- prisma migrate deploy && dotenv -e .env.staging -- prisma generate",
+    "db:deploy:production": "dotenv -e .env.production -- prisma migrate deploy && dotenv -e .env.production -- prisma generate",
+    "db:backup:staging": "dotenv -e .env.staging -- pg_dump $DATABASE_URL > backup_staging_$(date +%Y%m%d_%H%M%S).sql",
+    "db:backup:production": "dotenv -e .env.production -- pg_dump $DATABASE_URL > backup_production_$(date +%Y%m%d_%H%M%S).sql"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -20,10 +43,12 @@
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.17",
+    "@prisma/client": "^6.16.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
+    "prisma": "^6.16.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
@@ -32,6 +57,9 @@
     "@nestjs/schematics": "^10.0.0",
     "@types/express": "^4.17.17",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^20.3.1"
+    "@types/node": "^20.3.1",
+    "@types/pg": "^8.15.5",
+    "dotenv-cli": "^10.0.0",
+    "ts-node": "^10.9.2"
   }
 }
