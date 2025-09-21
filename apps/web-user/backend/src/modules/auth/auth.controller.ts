@@ -17,11 +17,15 @@ import {
   CheckUserIdRequestDto,
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import { RegisterDataDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
+import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { HTTP_STATUS_MESSAGES } from "@web-user/backend/common/constants/app.constants";
 import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
 import { JwtAuthGuard } from "@web-user/backend/common/guards/jwt-auth.guard";
 import { Public } from "@web-user/backend/common/decorators/public.decorator";
+import {
+  ErrorMessageResponse,
+  AvailabilityResponse,
+} from "@web-user/backend/common/types/common.types";
 
 /**
  * 인증 컨트롤러
@@ -44,35 +48,35 @@ export class AuthController {
   @NestSwaggerApiResponse({
     status: 201,
     description: HTTP_STATUS_MESSAGES[201],
-    type: ApiResponseDto<RegisterDataDto>,
+    type: ApiResponseDto<RegisterDataResponseDto>,
   })
   @NestSwaggerApiResponse({
     status: 400,
     description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 401,
     description: HTTP_STATUS_MESSAGES[401],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 404,
     description: HTTP_STATUS_MESSAGES[404],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 409,
     description: HTTP_STATUS_MESSAGES[409],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 500,
     description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   // @Body() 데코레이터가 JSON(HTTP 요청의 본문(body)에서 데이터)을 객체로 변환
-  async register(@Body() registerDto: RegisterRequestDto): Promise<RegisterDataDto> {
+  async register(@Body() registerDto: RegisterRequestDto): Promise<RegisterDataResponseDto> {
     // AuthService의 register 메서드를 호출하여 회원가입 처리
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return this.authService.register(registerDto);
@@ -94,16 +98,16 @@ export class AuthController {
   @NestSwaggerApiResponse({
     status: 400,
     description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 500,
     description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   async sendVerificationCode(
     @Body() sendCodeDto: SendVerificationCodeRequestDto,
-  ): Promise<{ message: string }> {
+  ): Promise<ErrorMessageResponse> {
     await this.authService.sendVerificationCode(sendCodeDto);
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return { message: "인증번호가 발송되었습니다." };
@@ -125,16 +129,16 @@ export class AuthController {
   @NestSwaggerApiResponse({
     status: 400,
     description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 500,
     description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   async verifyPhoneCode(
     @Body() verifyCodeDto: VerifyPhoneCodeRequestDto,
-  ): Promise<{ message: string }> {
+  ): Promise<ErrorMessageResponse> {
     await this.authService.verifyPhoneCode(verifyCodeDto);
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return { message: "인증번호가 확인되었습니다." };
@@ -155,16 +159,16 @@ export class AuthController {
   @NestSwaggerApiResponse({
     status: 400,
     description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 500,
     description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
-  ): Promise<{ available: boolean }> {
+  ): Promise<AvailabilityResponse> {
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return this.authService.checkUserIdAvailability(checkUserIdDto);
   }
@@ -184,16 +188,16 @@ export class AuthController {
   @NestSwaggerApiResponse({
     status: 400,
     description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   @NestSwaggerApiResponse({
     status: 500,
     description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<{ message: string }>,
+    type: ApiResponseDto<ErrorMessageResponse>,
   })
   async checkPhoneAvailability(
     @Query() checkPhoneDto: CheckPhoneRequestDto, // 쿼리 파라미터에서 휴대폰 번호 추출
-  ): Promise<{ available: boolean }> {
+  ): Promise<AvailabilityResponse> {
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return this.authService.checkPhoneAvailability(checkPhoneDto);
   }

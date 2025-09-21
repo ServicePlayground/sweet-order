@@ -7,7 +7,7 @@ import { UserInfo } from "@web-user/backend/common/types/auth.types";
  */
 
 // 일반 회원가입 응답 data DTO (Response Interceptor가 자동으로 래핑)
-export class RegisterDataDto {
+export class RegisterDataResponseDto {
   @ApiProperty({
     description: "액세스 토큰",
     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",

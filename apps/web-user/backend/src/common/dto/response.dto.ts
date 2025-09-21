@@ -4,7 +4,7 @@ import { ApiProperty } from "@nestjs/swagger";
  * 통일된 API 응답 구조
  * 모든 API 응답이 동일한 형태를 가지도록 보장
  */
-export class ApiResponseDto<T = any> {
+export class ApiResponseDto<T> {
   @ApiProperty({
     description: "요청 성공 여부",
     example: true,
