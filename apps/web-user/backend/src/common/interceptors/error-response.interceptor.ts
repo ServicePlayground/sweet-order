@@ -8,6 +8,7 @@ import {
 } from "@nestjs/common";
 import { Response } from "express";
 import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
+import { ErrorMessageResponse } from "@web-user/backend/common/types/common.types";
 
 /**
  * Error Response Interceptor
@@ -35,7 +36,7 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
     const message = exception instanceof HttpException ? exception.getResponse() : "";
 
     // 통일된 에러 응답 객체 생성
-    const errorResponse: ApiResponseDto<{ message: string | object }> = {
+    const errorResponse: ApiResponseDto<ErrorMessageResponse> = {
       success: false,
       data: {
         message,

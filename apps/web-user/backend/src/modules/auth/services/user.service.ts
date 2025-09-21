@@ -8,13 +8,14 @@ import {
   CheckUserIdRequestDto,
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import { RegisterDataDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { UserInfo } from "@web-user/backend/common/types/auth.types";
+import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
+import { UserInfo, CreateUser } from "@web-user/backend/common/types/auth.types";
+import { AvailabilityResponse } from "@web-user/backend/common/types/common.types";
 
 /**
  * 사용자 관리 서비스
  *
- * ERD 요구사항에 따른 사용자 관리 관련 비즈니스 로직을 처리합니다.
+ * 요구사항에 따른 사용자 관리 관련 비즈니스 로직을 처리합니다.
  *
  * 주요 기능:
  * - 사용자 정보 중복 확인
@@ -34,7 +35,7 @@ export class UserService {
   /**
    * 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<RegisterDataDto> {
+  async register(registerDto: RegisterRequestDto): Promise<RegisterDataResponseDto> {
     const { userId, password, phone } = registerDto;
 
     // 1. 사용자 ID와 휴대폰 번호 중복 검증
@@ -87,7 +88,7 @@ export class UserService {
    */
   async checkUserIdAvailability(
     checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<{ available: boolean }> {
+  ): Promise<AvailabilityResponse> {
     const { userId } = checkUserIdDto;
 
     const existingUser = await this.prisma.user.findUnique({
@@ -103,9 +104,7 @@ export class UserService {
    * @param checkPhoneDto 휴대폰 번호 확인 요청
    * @returns 사용 가능 여부
    */
-  async checkPhoneAvailability(
-    checkPhoneDto: CheckPhoneRequestDto,
-  ): Promise<{ available: boolean }> {
+  async checkPhoneAvailability(checkPhoneDto: CheckPhoneRequestDto): Promise<AvailabilityResponse> {
     const { phone } = checkPhoneDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
@@ -119,11 +118,7 @@ export class UserService {
   /**
    * 사용자 생성
    */
-  async createUser(createUserDto: {
-    userId: string;
-    passwordHash: string;
-    phone: string;
-  }): Promise<UserInfo> {
+  async createUser(createUserDto: CreateUser): Promise<UserInfo> {
     const { userId, passwordHash, phone } = createUserDto;
 
     // 사용자 생성
@@ -139,8 +134,8 @@ export class UserService {
     return {
       id: user.id,
       userId: user.userId,
+      phone: user.phone,
       name: user.name || undefined,
-      phone: user.phone || undefined,
       nickname: user.nickname || undefined,
       profileImageUrl: user.profileImageUrl || undefined,
       isVerified: user.isVerified,
