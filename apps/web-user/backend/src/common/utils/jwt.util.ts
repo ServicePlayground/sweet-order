@@ -1,7 +1,11 @@
 import { JwtService } from "@nestjs/jwt";
 import { Injectable } from "@nestjs/common";
-import { JwtPayload, TokenPair } from "@web-user/backend/common/types/jwt.types";
 import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
+import {
+  JwtPayload,
+  JwtVerifiedPayload,
+  TokenPair,
+} from "@web-user/backend/common/types/auth.types";
 
 @Injectable()
 export class JwtUtil {
@@ -12,7 +16,7 @@ export class JwtUtil {
    * @param payload JWT 페이로드
    * @returns 토큰 쌍
    */
-  async generateTokenPair(payload: Omit<JwtPayload, "iat" | "exp">): Promise<TokenPair> {
+  async generateTokenPair(payload: JwtPayload): Promise<TokenPair> {
     const accessTokenPayload = {
       ...payload,
       type: TOKEN_TYPES.ACCESS,
@@ -44,7 +48,7 @@ export class JwtUtil {
    * @param token JWT 토큰
    * @returns 검증된 페이로드
    */
-  async verifyToken(token: string): Promise<JwtPayload> {
+  async verifyToken(token: string): Promise<JwtVerifiedPayload> {
     return this.jwtService.verifyAsync(token);
   }
 
@@ -56,10 +60,12 @@ export class JwtUtil {
    */
   async refreshAccessToken(
     refreshToken: string,
-    userInfo: { id: string; userId: string; phone?: string },
+    userInfo: { id: string; userId: string; phone: string },
   ): Promise<TokenPair> {
     // 리프레시 토큰 검증
     const payload = await this.verifyToken(refreshToken);
+
+    // TODO: 로그 아웃이 되거나 권한없음 처리 로직 추가해야함
 
     if (payload.type !== TOKEN_TYPES.REFRESH) {
       throw new Error("Invalid token type");
@@ -71,48 +77,5 @@ export class JwtUtil {
       userId: userInfo.userId,
       phone: userInfo.phone,
     });
-  }
-
-  /**
-   * 토큰 만료 시간을 초 단위로 변환합니다.
-   * @param expiresIn 만료 시간 문자열 (예: '1h', '30m', '7d')
-   * @returns 초 단위 만료 시간
-   */
-  private getTokenExpirationTime(expiresIn: string): number {
-    const timeUnit = expiresIn.slice(-1);
-    const timeValue = parseInt(expiresIn.slice(0, -1));
-
-    switch (timeUnit) {
-      case "s":
-        return timeValue;
-      case "m":
-        return timeValue * 60;
-      case "h":
-        return timeValue * 60 * 60;
-      case "d":
-        return timeValue * 24 * 60 * 60;
-      default:
-        return 3600; // 기본값: 1시간
-    }
-  }
-
-  /**
-   * 토큰에서 사용자 ID를 추출합니다.
-   * @param token JWT 토큰
-   * @returns 사용자 ID
-   */
-  async extractUserId(token: string): Promise<string> {
-    const payload = await this.verifyToken(token);
-    return payload.sub;
-  }
-
-  /**
-   * 토큰에서 사용자 식별자를 추출합니다.
-   * @param token JWT 토큰
-   * @returns 사용자 식별자
-   */
-  async extractUserIdentifier(token: string): Promise<string> {
-    const payload = await this.verifyToken(token);
-    return payload.userId;
   }
 }
