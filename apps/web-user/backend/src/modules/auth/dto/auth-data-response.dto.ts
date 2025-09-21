@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { HTTP200ResponseDto } from "@web-user/backend/common/dto/response.dto";
 import { UserInfo } from "@web-user/backend/common/types/auth.types";
 
 /**
@@ -7,8 +6,8 @@ import { UserInfo } from "@web-user/backend/common/types/auth.types";
  * 로그인, 회원가입 등 인증 성공 시 반환되는 응답 구조를 정의합니다.
  */
 
-// 일반 회원가입 응답 DTO
-export class RegisterResponseDto extends HTTP200ResponseDto {
+// 일반 회원가입 응답 data DTO (Response Interceptor가 자동으로 래핑)
+export class RegisterDataDto {
   @ApiProperty({
     description: "액세스 토큰",
     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",

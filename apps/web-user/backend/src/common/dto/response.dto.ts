@@ -1,61 +1,31 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 /**
- * 응답 DTO
- * Swagger 문서 생성을 위한 성공 응답 클래스
+ * 통일된 API 응답 구조
+ * 모든 API 응답이 동일한 형태를 가지도록 보장
  */
-export class ResponseDto {
+export class ApiResponseDto<T = any> {
   @ApiProperty({
     description: "요청 성공 여부",
-    example: [true, false],
+    example: true,
   })
   success: boolean;
-}
 
-export class HTTP200ResponseDto extends ResponseDto {
   @ApiProperty({
-    description: "성공 메시지",
-    example: "요청이 성공적으로 처리되었습니다.",
+    description: "응답 데이터",
+    example: null,
   })
-  message: string;
-}
+  data: T;
 
-export class HTTP400ResponseDto extends ResponseDto {
   @ApiProperty({
-    description: "에러 메시지",
-    example: "잘못된 요청입니다.",
+    description: "응답 시간 (ISO 8601)",
+    example: "2024-01-01T00:00:00.000Z",
   })
-  message: string;
-}
+  timestamp: string;
 
-export class HTTP401ResponseDto extends ResponseDto {
   @ApiProperty({
-    description: "에러 메시지",
-    example: "권한이 없습니다.",
+    description: "HTTP 상태 코드",
+    example: 200,
   })
-  message: string;
-}
-
-export class HTTP404ResponseDto extends ResponseDto {
-  @ApiProperty({
-    description: "에러 메시지",
-    example: "리소스를 찾을 수 없습니다.",
-  })
-  message: string;
-}
-
-export class HTTP409ResponseDto extends ResponseDto {
-  @ApiProperty({
-    description: "에러 메시지",
-    example: "중복된 사용자입니다.",
-  })
-  message: string;
-}
-
-export class HTTP500ResponseDto extends ResponseDto {
-  @ApiProperty({
-    description: "에러 메시지",
-    example: "서버 내부 오류입니다.",
-  })
-  message: string;
+  statusCode: number;
 }

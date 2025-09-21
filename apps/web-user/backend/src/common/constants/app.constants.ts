@@ -13,49 +13,36 @@ export const SERVICE_INFO = {
 // API 접두사
 export const API_PREFIX = "/v1" as const;
 
-// API 경로
-export const API_PATHS = {
-  DOCS: `${API_PREFIX}/docs`,
-} as const;
-
-// HTTP 상태 코드 상수
-export const HTTP_STATUS = {
-  OK: 200,
-  CREATED: 201,
-  NO_CONTENT: 204,
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  UNPROCESSABLE_ENTITY: 422,
-  INTERNAL_SERVER_ERROR: 500,
-} as const;
-
-// 에러 메시지
-export const ERROR_MESSAGES = {
-  INTERNAL_SERVER_ERROR: "Internal Server Error",
-  NOT_FOUND: "Not Found",
-  BAD_REQUEST: "Bad Request",
-  UNAUTHORIZED: "Unauthorized",
-  FORBIDDEN: "Forbidden",
-} as const;
-
-// .env 환경 변수 키
-export const CONFIG_KEYS = {
-  PORT: "PORT",
-  NODE_ENV: "NODE_ENV",
-  CORS_ORIGIN: "CORS_ORIGIN",
-  CORS_CREDENTIALS: "CORS_CREDENTIALS",
-  CORS_METHODS: "CORS_METHODS",
-  CORS_ALLOWED_HEADERS: "CORS_ALLOWED_HEADERS",
-  CORS_MAX_AGE: "CORS_MAX_AGE",
-} as const;
-
 /**
  * 토큰 타입 상수
  */
 export const TOKEN_TYPES = {
   ACCESS: "access",
   REFRESH: "refresh",
+} as const;
+
+/**
+ * API 응답 메시지 상수
+ */
+export const API_RESPONSE_MESSAGES = {
+  SUCCESS: "요청 성공",
+  CREATED: "리소스 생성 성공",
+  BAD_REQUEST: "잘못된 요청",
+  UNAUTHORIZED: "권한 없음",
+  NOT_FOUND: "리소스를 찾을 수 없음",
+  CONFLICT: "중복된 사용자 정보",
+  INTERNAL_SERVER_ERROR: "서버 내부 오류",
+} as const;
+
+/**
+ * HTTP 상태 코드별 응답 메시지 매핑
+ */
+export const HTTP_STATUS_MESSAGES = {
+  200: API_RESPONSE_MESSAGES.SUCCESS,
+  201: API_RESPONSE_MESSAGES.CREATED,
+  400: API_RESPONSE_MESSAGES.BAD_REQUEST,
+  401: API_RESPONSE_MESSAGES.UNAUTHORIZED,
+  404: API_RESPONSE_MESSAGES.NOT_FOUND,
+  409: API_RESPONSE_MESSAGES.CONFLICT,
+  500: API_RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
 } as const;
