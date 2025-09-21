@@ -15,25 +15,22 @@ async function main() {
 
   // Create sample users
   const users = await Promise.all([
+    // 일반 회원가입
     prisma.user.create({
       data: {
         userId: "user123",
         phone: "01012345678",
-        name: "일반 사용자",
+        passwordHash: "password123!",
+        isVerified: true,
       },
     }),
+    // 일반 회원가입
     prisma.user.create({
       data: {
-        userId: "admin123",
+        userId: "user456",
         phone: "01012345679",
-        name: "관리자",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        userId: "test123",
-        phone: "01012345680",
-        name: "테스트 사용자",
+        passwordHash: "password456!",
+        isVerified: true,
       },
     }),
   ]);

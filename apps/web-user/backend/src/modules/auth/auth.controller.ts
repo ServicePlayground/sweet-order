@@ -25,7 +25,7 @@ import { Public } from "@web-user/backend/common/decorators/public.decorator";
 import {
   ErrorMessageResponse,
   AvailabilityResponse,
-} from "@web-user/backend/common/types/auth.types";
+} from "@web-user/backend/common/types/common.types";
 
 /**
  * 인증 컨트롤러

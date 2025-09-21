@@ -8,7 +8,7 @@ import {
 } from "@nestjs/common";
 import { Response } from "express";
 import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
-import { ErrorMessageResponse } from "@web-user/backend/common/types/auth.types";
+import { ErrorMessageResponse } from "@web-user/backend/common/types/common.types";
 
 /**
  * Error Response Interceptor

@@ -9,7 +9,7 @@ import {
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { AvailabilityResponse } from "@web-user/backend/common/types/auth.types";
+import { AvailabilityResponse } from "@web-user/backend/common/types/common.types";
 
 /**
  * 인증 서비스
