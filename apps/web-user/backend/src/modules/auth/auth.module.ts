@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
+import { ConfigService } from "@nestjs/config";
 import { AuthController } from "@web-user/backend/modules/auth/auth.controller";
 import { AuthService } from "@web-user/backend/modules/auth/auth.service";
 import { UserService } from "@web-user/backend/modules/auth/services/user.service";
@@ -20,9 +21,11 @@ import { DatabaseModule } from "@web-user/backend/database/database.module";
     // Passport 인증 전략을 위한 모듈
     PassportModule,
     // JWT 토큰 처리를 위한 모듈 설정
-    JwtModule.register({
-      // JWT 서명에 사용할 비밀키
-      secret: process.env.JWT_SECRET,
+    JwtModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>("JWT_SECRET"),
+      }),
+      inject: [ConfigService],
     }),
   ],
   // 이 모듈에서 제공하는 컨트롤러들 (API 엔드포인트 정의)
