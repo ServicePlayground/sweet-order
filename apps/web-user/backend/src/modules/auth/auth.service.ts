@@ -8,7 +8,8 @@ import {
   CheckUserIdRequestDto,
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import { RegisterDataDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
+import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
+import { AvailabilityResponse } from "@web-user/backend/common/types/auth.types";
 
 /**
  * 인증 서비스
@@ -26,7 +27,7 @@ export class AuthService {
   /**
    * 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<RegisterDataDto> {
+  async register(registerDto: RegisterRequestDto): Promise<RegisterDataResponseDto> {
     return this.userService.register(registerDto);
   }
 
@@ -49,16 +50,14 @@ export class AuthService {
    */
   async checkUserIdAvailability(
     checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<{ available: boolean }> {
+  ): Promise<AvailabilityResponse> {
     return this.userService.checkUserIdAvailability(checkUserIdDto);
   }
 
   /**
    * 휴대폰 번호 중복 확인
    */
-  async checkPhoneAvailability(
-    checkPhoneDto: CheckPhoneRequestDto,
-  ): Promise<{ available: boolean }> {
+  async checkPhoneAvailability(checkPhoneDto: CheckPhoneRequestDto): Promise<AvailabilityResponse> {
     return this.userService.checkPhoneAvailability(checkPhoneDto);
   }
 }

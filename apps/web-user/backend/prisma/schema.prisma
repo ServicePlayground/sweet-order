@@ -16,7 +16,7 @@ model User {
   userId           String   @unique @map("user_id")           // 사용자 ID (로그인용)
   passwordHash     String?  @map("password_hash")             // 암호화된 비밀번호 (선택사항)
   name             String?                                    // 사용자 실명 (선택사항)
-  phone            String?  @unique                           // 휴대폰 번호 (선택사항, 중복 불가)
+  phone            String   @unique                           // 휴대폰 번호 (필수, 중복 불가)
   nickname         String?                                    // 닉네임 (선택사항)
   profileImageUrl  String?  @map("profile_image_url")         // 프로필 이미지 URL (선택사항)
   isVerified       Boolean  @default(false) @map("is_verified") // 휴대폰 인증 여부
