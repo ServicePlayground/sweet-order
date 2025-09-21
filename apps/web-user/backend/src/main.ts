@@ -5,13 +5,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { AppModule } from "@web-user/backend/app.module";
 import { ConfigService } from "@nestjs/config";
-import { GlobalExceptionFilter } from "@web-user/backend/common/filters/global-exception.filter";
-import {
-  API_PATHS,
-  API_PREFIX,
-  CONFIG_KEYS,
-  SERVICE_INFO,
-} from "@web-user/backend/common/constants/app.constants";
+import { API_PREFIX, SERVICE_INFO } from "@web-user/backend/common/constants/app.constants";
 
 /**
  * NestJS 애플리케이션의 진입점
@@ -27,16 +21,16 @@ async function bootstrap(): Promise<void> {
   const configService = app.get(ConfigService);
 
   // 포트와 환경 변수 가져오기
-  const port = configService.get(CONFIG_KEYS.PORT);
-  const nodeEnv = configService.get(CONFIG_KEYS.NODE_ENV);
+  const port = configService.get("PORT");
+  const nodeEnv = configService.get("NODE_ENV");
 
   // CORS 설정
   app.enableCors({
-    origin: configService.get(CONFIG_KEYS.CORS_ORIGIN),
-    credentials: configService.get(CONFIG_KEYS.CORS_CREDENTIALS) === "true",
-    methods: configService.get(CONFIG_KEYS.CORS_METHODS)?.split(","),
-    allowedHeaders: configService.get(CONFIG_KEYS.CORS_ALLOWED_HEADERS)?.split(","),
-    maxAge: parseInt(configService.get(CONFIG_KEYS.CORS_MAX_AGE)?.toString(), 10),
+    origin: configService.get("CORS_ORIGIN"),
+    credentials: configService.get("CORS_CREDENTIALS") === "true",
+    methods: configService.get("CORS_METHODS")?.split(","),
+    allowedHeaders: configService.get("CORS_ALLOWED_HEADERS")?.split(","),
+    maxAge: parseInt(configService.get("CORS_MAX_AGE")?.toString(), 10),
   });
 
   // 보안 헤더 설정
@@ -44,9 +38,6 @@ async function bootstrap(): Promise<void> {
 
   // HTTP 요청 로깅
   app.use(morgan("combined"));
-
-  // 전역 예외 필터 설정
-  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // 전역 유효성 검사 파이프 설정
   // class-validator를 사용하여 DTO 유효성 검사 자동화
@@ -73,7 +64,7 @@ async function bootstrap(): Promise<void> {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup(API_PATHS.DOCS, app, document);
+    SwaggerModule.setup(`${API_PREFIX}/docs`, app, document);
   }
 
   // 서버 시작
@@ -82,7 +73,7 @@ async function bootstrap(): Promise<void> {
   logger.log(`server is running on port ${port}`);
   logger.log(`Environment: ${nodeEnv}`);
   if (nodeEnv === "development") {
-    logger.log(`API Documentation: http://localhost:${port}${API_PATHS.DOCS}`);
+    logger.log(`API Documentation: http://localhost:${port}${API_PREFIX}/docs`);
   }
 }
 

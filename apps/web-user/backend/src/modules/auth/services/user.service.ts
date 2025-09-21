@@ -8,7 +8,7 @@ import {
   CheckUserIdRequestDto,
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import { RegisterResponseDto } from "@web-user/backend/modules/auth/dto/auth-response.dto";
+import { RegisterDataDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { UserInfo } from "@web-user/backend/common/types/auth.types";
 
 /**
@@ -34,7 +34,7 @@ export class UserService {
   /**
    * 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<RegisterResponseDto> {
+  async register(registerDto: RegisterRequestDto): Promise<RegisterDataDto> {
     const { userId, password, phone } = registerDto;
 
     // 1. 사용자 ID와 휴대폰 번호 중복 검증
@@ -63,10 +63,8 @@ export class UserService {
       phone: user.phone,
     });
 
-    // 6. 응답 반환
+    // 6. 응답 data 반환 (Response Interceptor 래핑하여 자동으로 success, message, timestamp, statusCode를 추가)
     return {
-      success: true,
-      message: "회원가입이 완료되었습니다.",
       accessToken: tokenPair.accessToken,
       refreshToken: tokenPair.refreshToken,
       user: {

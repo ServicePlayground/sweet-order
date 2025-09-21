@@ -8,7 +8,7 @@ import {
   CheckUserIdRequestDto,
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import { RegisterResponseDto } from "@web-user/backend/modules/auth/dto/auth-response.dto";
+import { RegisterDataDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 
 /**
  * 인증 서비스
@@ -26,7 +26,7 @@ export class AuthService {
   /**
    * 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<RegisterResponseDto> {
+  async register(registerDto: RegisterRequestDto): Promise<RegisterDataDto> {
     return this.userService.register(registerDto);
   }
 
