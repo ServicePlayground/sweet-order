@@ -1,5 +1,10 @@
-import { IsString, MinLength, Matches, Length, IsPhoneNumber } from "class-validator";
+import { IsString, Length } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import {
+  IsValidUserId,
+  IsValidPassword,
+  IsValidKoreanPhone,
+} from "@web-user/backend/common/decorators/validators.decorator";
 
 // 일반 회원가입 요청 DTO
 export class RegisterRequestDto {
@@ -10,8 +15,7 @@ export class RegisterRequestDto {
     maxLength: 20,
   })
   @IsString()
-  @MinLength(4, { message: "아이디는 최소 4자 이상이어야 합니다." })
-  @Matches(/^[a-zA-Z0-9_]+$/, { message: "아이디는 영문, 숫자, 언더스코어만 사용할 수 있습니다." })
+  @IsValidUserId()
   userId: string;
 
   @ApiProperty({
@@ -20,17 +24,15 @@ export class RegisterRequestDto {
     minLength: 8,
   })
   @IsString()
-  @MinLength(8, { message: "비밀번호는 최소 8자 이상이어야 합니다." })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message: "비밀번호는 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.",
-  })
+  @IsValidPassword()
   password: string;
 
   @ApiProperty({
     description: "휴대폰 번호",
     example: "010-1234-5678",
   })
-  @IsPhoneNumber("KR", { message: "올바른 휴대폰 번호 형식이 아닙니다." })
+  @IsString()
+  @IsValidKoreanPhone()
   phone: string;
 }
 
@@ -40,7 +42,8 @@ export class SendVerificationCodeRequestDto {
     description: "휴대폰 번호",
     example: "010-1234-5678",
   })
-  @IsPhoneNumber("KR", { message: "올바른 휴대폰 번호 형식이 아닙니다." })
+  @IsString()
+  @IsValidKoreanPhone()
   phone: string;
 }
 
@@ -50,7 +53,8 @@ export class VerifyPhoneCodeRequestDto {
     description: "휴대폰 번호",
     example: "010-1234-5678",
   })
-  @IsPhoneNumber("KR", { message: "올바른 휴대폰 번호 형식이 아닙니다." })
+  @IsString()
+  @IsValidKoreanPhone()
   phone: string;
 
   @ApiProperty({
@@ -69,8 +73,7 @@ export class CheckUserIdRequestDto {
     example: "user123",
   })
   @IsString()
-  @MinLength(4, { message: "아이디는 최소 4자 이상이어야 합니다." })
-  @Matches(/^[a-zA-Z0-9_]+$/, { message: "아이디는 영문, 숫자, 언더스코어만 사용할 수 있습니다." })
+  @IsValidUserId()
   userId: string;
 }
 
@@ -80,6 +83,7 @@ export class CheckPhoneRequestDto {
     description: "확인할 휴대폰 번호",
     example: "010-1234-5678",
   })
-  @IsPhoneNumber("KR", { message: "올바른 휴대폰 번호 형식이 아닙니다." })
+  @IsString()
+  @IsValidKoreanPhone()
   phone: string;
 }

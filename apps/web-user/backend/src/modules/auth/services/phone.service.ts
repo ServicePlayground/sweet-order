@@ -28,18 +28,13 @@ export class PhoneService {
     const { phone } = sendCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 1. 휴대폰 번호 형식 검증
-    if (!PhoneUtil.validatePhoneFormat(normalizedPhone)) {
-      throw new BadRequestException("올바른 휴대폰 번호 형식이 아닙니다.");
-    }
-
-    // 2. 기존 인증 정보 확인 - PhoneVerification 테이블 조회
+    // 1. 기존 인증 정보 확인 - PhoneVerification 테이블 조회
     const existingVerification = await this.prisma.phoneVerification.findFirst({
       where: { phone: normalizedPhone },
       orderBy: { createdAt: "desc" },
     });
 
-    // 3. 재발송 제한 확인 - 1분 이내 재발송 방지
+    // 2. 재발송 제한 확인 - 1분 이내 재발송 방지
     if (existingVerification) {
       const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
       if (existingVerification.createdAt > oneMinuteAgo) {
@@ -47,11 +42,11 @@ export class PhoneService {
       }
     }
 
-    // 4. 인증번호 생성 - 6자리 인증번호
+    // 3. 인증번호 생성 - 6자리 인증번호
     const verificationCode = PhoneUtil.generateVerificationCode();
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
-    // 5. 인증 정보 저장 - PhoneVerification 테이블
+    // 4. 인증 정보 저장 - PhoneVerification 테이블
     await this.prisma.phoneVerification.create({
       data: {
         phone: normalizedPhone,
@@ -61,7 +56,7 @@ export class PhoneService {
       },
     });
 
-    // 6. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
+    // 5. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
     // TODO: 실제 SMS 발송 서비스 연동 시 로그 제거
     // console.log(
     //   `SMS 발송: ${PhoneUtil.formatPhoneForDisplay(normalizedPhone)} - 인증번호: ${verificationCode}`,
