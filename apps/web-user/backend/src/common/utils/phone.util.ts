@@ -10,18 +10,6 @@ export class PhoneUtil {
   }
 
   /**
-   * 휴대폰 번호 형식을 검증합니다.
-   */
-  static validatePhoneFormat(phone: string): boolean {
-    const normalizedPhone = this.normalizePhone(phone);
-
-    // 한국 휴대폰 번호 패턴: 010, 011, 016, 017, 018, 019로 시작하는 11자리
-    const phonePattern = /^01[0-9]\d{7,8}$/;
-
-    return phonePattern.test(normalizedPhone);
-  }
-
-  /**
    * 6자리 인증번호를 생성합니다.
    * @returns 6자리 인증번호
    */
