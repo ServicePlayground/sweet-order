@@ -10,7 +10,7 @@ import {
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { UserInfo, CreateUser } from "@web-user/backend/common/types/auth.types";
-import { AvailabilityResponse } from "@web-user/backend/common/types/common.types";
+import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 
 /**
  * 사용자 관리 서비스
@@ -88,7 +88,7 @@ export class UserService {
    */
   async checkUserIdAvailability(
     checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<AvailabilityResponse> {
+  ): Promise<AvailabilityResponseDto> {
     const { userId } = checkUserIdDto;
 
     const existingUser = await this.prisma.user.findUnique({
@@ -104,7 +104,9 @@ export class UserService {
    * @param checkPhoneDto 휴대폰 번호 확인 요청
    * @returns 사용 가능 여부
    */
-  async checkPhoneAvailability(checkPhoneDto: CheckPhoneRequestDto): Promise<AvailabilityResponse> {
+  async checkPhoneAvailability(
+    checkPhoneDto: CheckPhoneRequestDto,
+  ): Promise<AvailabilityResponseDto> {
     const { phone } = checkPhoneDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
