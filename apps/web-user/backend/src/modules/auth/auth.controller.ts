@@ -8,7 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse as NestSwaggerApiResponse } from "@nestjs/swagger";
+import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { AuthService } from "@web-user/backend/modules/auth/auth.service";
 import {
   RegisterRequestDto,
@@ -18,10 +18,10 @@ import {
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { HTTP_STATUS_MESSAGES } from "@web-user/backend/common/constants/app.constants";
-import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
 import { JwtAuthGuard } from "@web-user/backend/common/guards/jwt-auth.guard";
 import { Public } from "@web-user/backend/common/decorators/public.decorator";
+import { ApiSuccessResponse } from "@web-user/backend/common/decorators/swagger-success-response.decorator";
+import { ApiErrorResponse } from "@web-user/backend/common/decorators/swagger-error-response.decorator";
 import {
   ErrorMessageResponse,
   AvailabilityResponse,
@@ -45,36 +45,21 @@ export class AuthController {
   @Public() // 인증을 건너뛰는 엔드포인트 (회원가입은 인증이 필요 없음)
   @HttpCode(HttpStatus.CREATED) // HTTP 201 상태 코드 반환
   @ApiOperation({ summary: "일반 회원가입" })
-  @NestSwaggerApiResponse({
-    status: 201,
-    description: HTTP_STATUS_MESSAGES[201],
-    type: ApiResponseDto<RegisterDataResponseDto>,
+  @ApiSuccessResponse<RegisterDataResponseDto>(201, {
+    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    user: {
+      id: "user123",
+      userId: "testuser",
+      name: "test",
+      phone: "01012345678",
+      nickname: "test",
+      profileImageUrl: "https://test.com/test.jpg",
+      isVerified: true,
+    },
   })
-  @NestSwaggerApiResponse({
-    status: 400,
-    description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 401,
-    description: HTTP_STATUS_MESSAGES[401],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 404,
-    description: HTTP_STATUS_MESSAGES[404],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 409,
-    description: HTTP_STATUS_MESSAGES[409],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 500,
-    description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
+  @ApiErrorResponse(400, "아이디는 4-20자의 영문, 숫자, 언더스코어만 사용할 수 있습니다.")
+  @ApiErrorResponse(409, "이미 존재하는 사용자입니다.")
   // @Body() 데코레이터가 JSON(HTTP 요청의 본문(body)에서 데이터)을 객체로 변환
   async register(@Body() registerDto: RegisterRequestDto): Promise<RegisterDataResponseDto> {
     // AuthService의 register 메서드를 호출하여 회원가입 처리
@@ -90,21 +75,11 @@ export class AuthController {
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 발송은 인증이 필요 없음)
   @HttpCode(HttpStatus.OK) // HTTP 200 상태 코드 반환
   @ApiOperation({ summary: "휴대폰 인증번호 발송" })
-  @NestSwaggerApiResponse({
-    status: 200,
-    description: HTTP_STATUS_MESSAGES[200],
-    type: ApiResponseDto,
+  @ApiSuccessResponse<ErrorMessageResponse>(200, {
+    message: "인증번호가 발송되었습니다.",
   })
-  @NestSwaggerApiResponse({
-    status: 400,
-    description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 500,
-    description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
+  @ApiErrorResponse(400, "잘못된 요청입니다.")
+  @ApiErrorResponse(500, "서버 내부 오류가 발생했습니다.")
   async sendVerificationCode(
     @Body() sendCodeDto: SendVerificationCodeRequestDto,
   ): Promise<ErrorMessageResponse> {
@@ -121,21 +96,11 @@ export class AuthController {
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 확인은 인증이 필요 없음)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "휴대폰 인증번호 확인" })
-  @NestSwaggerApiResponse({
-    status: 200,
-    description: HTTP_STATUS_MESSAGES[200],
-    type: ApiResponseDto,
+  @ApiSuccessResponse<ErrorMessageResponse>(200, {
+    message: "인증번호가 확인되었습니다.",
   })
-  @NestSwaggerApiResponse({
-    status: 400,
-    description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 500,
-    description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
+  @ApiErrorResponse(400, "잘못된 요청입니다.")
+  @ApiErrorResponse(500, "서버 내부 오류가 발생했습니다.")
   async verifyPhoneCode(
     @Body() verifyCodeDto: VerifyPhoneCodeRequestDto,
   ): Promise<ErrorMessageResponse> {
@@ -151,20 +116,8 @@ export class AuthController {
   @Get("check-user-id")
   @Public()
   @ApiOperation({ summary: "사용자 ID 중복 확인" })
-  @NestSwaggerApiResponse({
-    status: 200,
-    description: HTTP_STATUS_MESSAGES[200],
-    type: ApiResponseDto,
-  })
-  @NestSwaggerApiResponse({
-    status: 400,
-    description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 500,
-    description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<ErrorMessageResponse>,
+  @ApiSuccessResponse<AvailabilityResponse>(200, {
+    available: true,
   })
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
@@ -180,20 +133,8 @@ export class AuthController {
   @Get("check-phone")
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 번호 중복 확인은 인증이 필요 없음)
   @ApiOperation({ summary: "휴대폰 번호 중복 확인" })
-  @NestSwaggerApiResponse({
-    status: 200,
-    description: HTTP_STATUS_MESSAGES[200],
-    type: ApiResponseDto,
-  })
-  @NestSwaggerApiResponse({
-    status: 400,
-    description: HTTP_STATUS_MESSAGES[400],
-    type: ApiResponseDto<ErrorMessageResponse>,
-  })
-  @NestSwaggerApiResponse({
-    status: 500,
-    description: HTTP_STATUS_MESSAGES[500],
-    type: ApiResponseDto<ErrorMessageResponse>,
+  @ApiSuccessResponse<AvailabilityResponse>(200, {
+    available: true,
   })
   async checkPhoneAvailability(
     @Query() checkPhoneDto: CheckPhoneRequestDto, // 쿼리 파라미터에서 휴대폰 번호 추출

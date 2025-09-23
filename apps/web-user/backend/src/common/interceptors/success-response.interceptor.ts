@@ -2,7 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from "@nes
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { Reflector } from "@nestjs/core";
-import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
+import { SuccessResponseDto } from "@web-user/backend/common/dto/success-response.dto";
 
 /**
  * Success Response Interceptor
@@ -14,11 +14,10 @@ import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
  */
 
 @Injectable()
-export class SuccessResponseInterceptor<T> implements NestInterceptor<T, ApiResponseDto<T>> {
+export class SuccessResponseInterceptor<T> implements NestInterceptor<T, SuccessResponseDto<T>> {
   constructor(private reflector: Reflector) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponseDto<T>> {
-    const request = context.switchToHttp().getRequest();
+  intercept(context: ExecutionContext, next: CallHandler): Observable<SuccessResponseDto<T>> {
     const response = context.switchToHttp().getResponse();
 
     // SkipResponseTransform 데코레이터가 있는 경우 변환하지 않음
@@ -31,7 +30,7 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T, ApiResp
     }
 
     return next.handle().pipe(
-      map((data) => {
+      map((data: T) => {
         // 통일된 응답 형태로 변환
         return {
           success: true,
@@ -47,8 +46,12 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T, ApiResp
    * Response 변환을 건너뛰는 데코레이터
    * 특정 엔드포인트에서 기본 응답 형태를 유지하고 싶을 때 사용
    */
-  SkipResponseTransform = () => {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  SkipResponseTransform = (): any => {
+    return (
+      target: any,
+      propertyKey: string,
+      descriptor: PropertyDescriptor,
+    ): PropertyDescriptor => {
       Reflect.defineMetadata("skipResponseTransform", true, descriptor.value);
       return descriptor;
     };
