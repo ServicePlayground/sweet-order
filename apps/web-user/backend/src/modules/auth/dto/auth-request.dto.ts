@@ -20,7 +20,7 @@ export class RegisterRequestDto {
 
   @ApiProperty({
     description: "비밀번호",
-    example: "password123!",
+    example: "Password123!",
     minLength: 8,
   })
   @IsString()

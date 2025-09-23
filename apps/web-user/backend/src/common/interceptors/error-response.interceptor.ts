@@ -7,8 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Response } from "express";
-import { ApiResponseDto } from "@web-user/backend/common/dto/response.dto";
-import { ErrorMessageResponse } from "@web-user/backend/common/types/common.types";
+import { ErrorResponseDto } from "@web-user/backend/common/dto/error-response.dto";
 
 /**
  * Error Response Interceptor
@@ -35,12 +34,21 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
     // 에러 메시지 추출
     const message = exception instanceof HttpException ? exception.getResponse() : "";
 
+    // 메시지 처리 로직 개선
+    let errorMessage: string;
+    if (typeof message === "string") {
+      errorMessage = message;
+    } else if (typeof message === "object" && message !== null) {
+      // 객체인 경우 message 속성이 있으면 사용, 없으면 전체 객체를 문자열로 변환
+      errorMessage = (message as any).message || (message as any).error || JSON.stringify(message);
+    } else {
+      errorMessage = "요청 처리 중 오류가 발생했습니다.";
+    }
+
     // 통일된 에러 응답 객체 생성
-    const errorResponse: ApiResponseDto<ErrorMessageResponse> = {
+    const errorResponse: ErrorResponseDto = {
       success: false,
-      data: {
-        message,
-      },
+      message: errorMessage,
       timestamp: new Date().toISOString(),
       statusCode: status,
     };
