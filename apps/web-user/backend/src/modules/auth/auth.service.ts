@@ -9,7 +9,7 @@ import {
   CheckPhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { AvailabilityResponse } from "@web-user/backend/common/types/common.types";
+import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 
 /**
  * 인증 서비스
@@ -50,14 +50,16 @@ export class AuthService {
    */
   async checkUserIdAvailability(
     checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<AvailabilityResponse> {
+  ): Promise<AvailabilityResponseDto> {
     return this.userService.checkUserIdAvailability(checkUserIdDto);
   }
 
   /**
    * 휴대폰 번호 중복 확인
    */
-  async checkPhoneAvailability(checkPhoneDto: CheckPhoneRequestDto): Promise<AvailabilityResponse> {
+  async checkPhoneAvailability(
+    checkPhoneDto: CheckPhoneRequestDto,
+  ): Promise<AvailabilityResponseDto> {
     return this.userService.checkPhoneAvailability(checkPhoneDto);
   }
 }

@@ -23,9 +23,9 @@ import { Public } from "@web-user/backend/common/decorators/public.decorator";
 import { ApiSuccessResponse } from "@web-user/backend/common/decorators/swagger-success-response.decorator";
 import { ApiErrorResponse } from "@web-user/backend/common/decorators/swagger-error-response.decorator";
 import {
-  ErrorMessageResponse,
-  AvailabilityResponse,
-} from "@web-user/backend/common/types/common.types";
+  ErrorMessageResponseDto,
+  AvailabilityResponseDto,
+} from "@web-user/backend/common/dto/common.dto";
 
 /**
  * 인증 컨트롤러
@@ -75,14 +75,14 @@ export class AuthController {
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 발송은 인증이 필요 없음)
   @HttpCode(HttpStatus.OK) // HTTP 200 상태 코드 반환
   @ApiOperation({ summary: "휴대폰 인증번호 발송" })
-  @ApiSuccessResponse<ErrorMessageResponse>(200, {
+  @ApiSuccessResponse<ErrorMessageResponseDto>(200, {
     message: "인증번호가 발송되었습니다.",
   })
   @ApiErrorResponse(400, "잘못된 요청입니다.")
   @ApiErrorResponse(500, "서버 내부 오류가 발생했습니다.")
   async sendVerificationCode(
     @Body() sendCodeDto: SendVerificationCodeRequestDto,
-  ): Promise<ErrorMessageResponse> {
+  ): Promise<ErrorMessageResponseDto> {
     await this.authService.sendVerificationCode(sendCodeDto);
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return { message: "인증번호가 발송되었습니다." };
@@ -96,14 +96,14 @@ export class AuthController {
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 확인은 인증이 필요 없음)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "휴대폰 인증번호 확인" })
-  @ApiSuccessResponse<ErrorMessageResponse>(200, {
+  @ApiSuccessResponse<ErrorMessageResponseDto>(200, {
     message: "인증번호가 확인되었습니다.",
   })
   @ApiErrorResponse(400, "잘못된 요청입니다.")
   @ApiErrorResponse(500, "서버 내부 오류가 발생했습니다.")
   async verifyPhoneCode(
     @Body() verifyCodeDto: VerifyPhoneCodeRequestDto,
-  ): Promise<ErrorMessageResponse> {
+  ): Promise<ErrorMessageResponseDto> {
     await this.authService.verifyPhoneCode(verifyCodeDto);
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return { message: "인증번호가 확인되었습니다." };
@@ -116,12 +116,12 @@ export class AuthController {
   @Get("check-user-id")
   @Public()
   @ApiOperation({ summary: "사용자 ID 중복 확인" })
-  @ApiSuccessResponse<AvailabilityResponse>(200, {
+  @ApiSuccessResponse<AvailabilityResponseDto>(200, {
     available: true,
   })
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
-  ): Promise<AvailabilityResponse> {
+  ): Promise<AvailabilityResponseDto> {
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return this.authService.checkUserIdAvailability(checkUserIdDto);
   }
@@ -133,12 +133,12 @@ export class AuthController {
   @Get("check-phone")
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 번호 중복 확인은 인증이 필요 없음)
   @ApiOperation({ summary: "휴대폰 번호 중복 확인" })
-  @ApiSuccessResponse<AvailabilityResponse>(200, {
+  @ApiSuccessResponse<AvailabilityResponseDto>(200, {
     available: true,
   })
   async checkPhoneAvailability(
     @Query() checkPhoneDto: CheckPhoneRequestDto, // 쿼리 파라미터에서 휴대폰 번호 추출
-  ): Promise<AvailabilityResponse> {
+  ): Promise<AvailabilityResponseDto> {
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
     return this.authService.checkPhoneAvailability(checkPhoneDto);
   }
