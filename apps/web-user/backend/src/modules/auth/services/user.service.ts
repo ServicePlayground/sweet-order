@@ -160,7 +160,7 @@ export class UserService {
         throw new ConflictException("이미 사용 중인 아이디입니다."); // GlobalExceptionFilter에서 처리
       }
       if (existingUser.phone === normalizedPhone) {
-        throw new ConflictException("이미 사용 중인 휴대폰 번호입니다.");
+        throw new ConflictException("이미 사용 중인 휴대폰 번호입니다."); // 409
       }
     }
   }

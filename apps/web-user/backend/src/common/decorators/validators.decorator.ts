@@ -1,17 +1,12 @@
-import {
-  registerDecorator,
-  ValidationOptions,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-  ValidationArguments,
-} from "class-validator";
+import { registerDecorator, ValidatorConstraint } from "class-validator";
+import type { ValidationOptions, ValidatorConstraintInterface } from "class-validator";
 
 /**
  * 사용자 ID 유효성 검증 제약 조건
  */
 @ValidatorConstraint({ name: "isValidUserId", async: false })
 export class IsValidUserIdConstraint implements ValidatorConstraintInterface {
-  validate(userId: string, args: ValidationArguments) {
+  validate(userId: string): boolean {
     if (!userId || typeof userId !== "string") {
       return false;
     }
@@ -26,7 +21,7 @@ export class IsValidUserIdConstraint implements ValidatorConstraintInterface {
     return userIdPattern.test(userId);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(): string {
     return "아이디는 4-20자의 영문, 숫자, 언더스코어만 사용할 수 있습니다.";
   }
 }
@@ -36,7 +31,7 @@ export class IsValidUserIdConstraint implements ValidatorConstraintInterface {
  */
 @ValidatorConstraint({ name: "isValidPassword", async: false })
 export class IsValidPasswordConstraint implements ValidatorConstraintInterface {
-  validate(password: string, args: ValidationArguments) {
+  validate(password: string): boolean {
     if (!password || typeof password !== "string") {
       return false;
     }
@@ -51,7 +46,7 @@ export class IsValidPasswordConstraint implements ValidatorConstraintInterface {
     return passwordPattern.test(password);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(): string {
     return "비밀번호는 8자 이상의 영문 대소문자, 숫자, 특수문자(@$!%*?&)를 포함해야 합니다.";
   }
 }
@@ -61,7 +56,7 @@ export class IsValidPasswordConstraint implements ValidatorConstraintInterface {
  */
 @ValidatorConstraint({ name: "isValidKoreanPhone", async: false })
 export class IsValidKoreanPhoneConstraint implements ValidatorConstraintInterface {
-  validate(phone: string, args: ValidationArguments) {
+  validate(phone: string): boolean {
     if (!phone || typeof phone !== "string") {
       return false;
     }
@@ -74,7 +69,7 @@ export class IsValidKoreanPhoneConstraint implements ValidatorConstraintInterfac
     return phonePattern.test(normalizedPhone);
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(): string {
     return "올바른 한국 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)";
   }
 }
@@ -83,7 +78,7 @@ export class IsValidKoreanPhoneConstraint implements ValidatorConstraintInterfac
  * 사용자 ID 유효성 검증 데코레이터
  */
 export function IsValidUserId(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
@@ -98,7 +93,7 @@ export function IsValidUserId(validationOptions?: ValidationOptions) {
  * 비밀번호 정책 유효성 검증 데코레이터
  */
 export function IsValidPassword(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
@@ -113,7 +108,7 @@ export function IsValidPassword(validationOptions?: ValidationOptions) {
  * 한국 휴대폰 번호 유효성 검증 데코레이터
  */
 export function IsValidKoreanPhone(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string): void {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,

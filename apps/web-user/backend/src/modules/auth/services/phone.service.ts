@@ -38,7 +38,7 @@ export class PhoneService {
     if (existingVerification) {
       const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
       if (existingVerification.createdAt > oneMinuteAgo) {
-        throw new BadRequestException("인증번호는 1분 후에 다시 요청할 수 있습니다.");
+        throw new BadRequestException("인증번호는 1분 후에 다시 요청할 수 있습니다."); // 400
       }
     }
 
@@ -86,7 +86,7 @@ export class PhoneService {
 
     // 인증 정보가 존재하지 않는 경우
     if (!phoneVerification) {
-      throw new BadRequestException("인증번호가 올바르지 않습니다.");
+      throw new BadRequestException("인증번호가 올바르지 않습니다."); // 400
     }
 
     // 2. 인증 상태 확인 - is_verified 플래그 확인

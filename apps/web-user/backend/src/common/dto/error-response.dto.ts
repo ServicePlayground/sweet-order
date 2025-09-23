@@ -1,21 +1,21 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 /**
- * 통일된 API 응답 구조
- * 모든 API 응답이 동일한 형태를 가지도록 보장
+ * 기본 에러 응답 DTO 클래스
+ * 인터셉터에서 사용하기 위한 기본 클래스
  */
-export class ApiResponseDto<T> {
+export class ErrorResponseDto {
   @ApiProperty({
     description: "요청 성공 여부",
-    example: true,
+    example: false,
   })
   success: boolean;
 
   @ApiProperty({
-    description: "응답 데이터",
-    example: null,
+    description: "에러 메시지",
+    example: "요청 처리 중 오류가 발생했습니다.",
   })
-  data: T;
+  message: string;
 
   @ApiProperty({
     description: "응답 시간 (ISO 8601)",
@@ -25,7 +25,7 @@ export class ApiResponseDto<T> {
 
   @ApiProperty({
     description: "HTTP 상태 코드",
-    example: 200,
+    example: 500,
   })
   statusCode: number;
 }
