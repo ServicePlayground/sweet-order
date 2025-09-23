@@ -1,4 +1,4 @@
-import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
+// import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
 
 /**
  * 인증 관련 타입 정의
