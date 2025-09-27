@@ -6,12 +6,13 @@ import { AuthController } from "@web-user/backend/modules/auth/auth.controller";
 import { AuthService } from "@web-user/backend/modules/auth/auth.service";
 import { UserService } from "@web-user/backend/modules/auth/services/user.service";
 import { PhoneService } from "@web-user/backend/modules/auth/services/phone.service";
+import { GoogleService } from "@web-user/backend/modules/auth/services/google.service";
 import { JwtUtil } from "@web-user/backend/common/utils/jwt.util";
 import { DatabaseModule } from "@web-user/backend/database/database.module";
 
 /**
  * 인증 모듈
- * 사용자 인증, JWT 토큰 관리, 휴대폰 인증 등의 기능을 제공합니다.
+ * 사용자 인증, JWT 토큰 관리, 휴대폰 인증, 구글 OAuth 등의 기능을 제공합니다.
  */
 @Module({
   // 이 모듈에서 사용할 다른 모듈들을 import합니다
@@ -31,6 +32,6 @@ import { DatabaseModule } from "@web-user/backend/database/database.module";
   // 이 모듈에서 제공하는 컨트롤러들 (API 엔드포인트 정의)
   controllers: [AuthController],
   // 이 모듈에서 제공하는 서비스들 (비즈니스 로직 처리)
-  providers: [AuthService, UserService, PhoneService, JwtUtil],
+  providers: [AuthService, UserService, PhoneService, GoogleService, JwtUtil],
 })
 export class AuthModule {}
