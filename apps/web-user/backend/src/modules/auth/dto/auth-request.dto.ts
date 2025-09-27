@@ -66,17 +66,6 @@ export class LoginRequestDto {
   password: string;
 }
 
-// 일반 - ID 찾기 요청 DTO
-export class FindUserIdRequestDto {
-  @ApiProperty({
-    description: "휴대폰 번호",
-    example: "010-1234-5678",
-  })
-  @IsString()
-  @IsValidKoreanPhone()
-  phone: string;
-}
-
 // 일반 - 비밀번호 변경 요청 DTO
 export class ChangePasswordRequestDto {
   @ApiProperty({
@@ -103,6 +92,56 @@ export class ChangePasswordRequestDto {
   @IsString()
   @IsValidPassword()
   newPassword: string;
+}
+
+// 계정 찾기 요청 DTO
+export class FindAccountRequestDto {
+  @ApiProperty({
+    description: "휴대폰 번호",
+    example: "010-1234-5678",
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  phone: string;
+}
+
+/**
+ * 구글 로그인 요청 DTO (Authorization Code)
+ */
+export class GoogleLoginRequestDto {
+  @ApiProperty({
+    description: "구글에서 받은 Authorization Code",
+    example: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
+  })
+  @IsString()
+  code: string;
+}
+
+/**
+ * 구글 로그인 회원가입 요청 DTO
+ */
+export class GoogleRegisterRequestDto {
+  @ApiProperty({
+    description: "구글 ID",
+    example: "google123",
+  })
+  @IsString()
+  googleId: string;
+
+  @ApiProperty({
+    description: "구글 이메일",
+    example: "user@gmail.com",
+  })
+  @IsString()
+  googleEmail: string;
+
+  @ApiProperty({
+    description: "휴대폰 번호",
+    example: "010-1234-5678",
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  phone: string;
 }
 
 // 휴대폰 인증번호 발송 요청 DTO
@@ -138,52 +177,12 @@ export class VerifyPhoneCodeRequestDto {
 // 휴대폰 번호 변경 요청 DTO
 export class ChangePhoneRequestDto {
   @ApiProperty({
-    description: "기존 휴대폰 번호",
-    example: "010-1234-5678",
-  })
-  @IsString()
-  @IsValidKoreanPhone()
-  oldPhone: string;
-
-  @ApiProperty({
-    description: "새로운 휴대폰 번호",
+    description: "새로운 휴대폰 번호 (인증 완료된 번호)",
     example: "010-9876-5432",
   })
   @IsString()
   @IsValidKoreanPhone()
   newPhone: string;
-}
-
-/**
- * 구글 로그인 요청 DTO (Authorization Code)
- */
-export class GoogleLoginRequestDto {
-  @ApiProperty({
-    description: "구글에서 받은 Authorization Code",
-    example: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
-  })
-  @IsString()
-  code: string;
-}
-
-/**
- * 구글 로그인 회원가입 요청 DTO
- */
-export class GoogleRegisterRequestDto {
-  @ApiProperty({
-    description: "구글 ID",
-    example: "google123",
-  })
-  @IsString()
-  googleId: string;
-
-  @ApiProperty({
-    description: "휴대폰 번호",
-    example: "010-1234-5678",
-  })
-  @IsString()
-  @IsValidKoreanPhone()
-  phone: string;
 }
 
 /**
