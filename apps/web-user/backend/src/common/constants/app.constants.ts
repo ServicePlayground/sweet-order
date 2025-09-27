@@ -14,14 +14,6 @@ export const SERVICE_INFO = {
 export const API_PREFIX = "/v1" as const;
 
 /**
- * 토큰 타입 상수
- */
-export const TOKEN_TYPES = {
-  ACCESS: "access",
-  REFRESH: "refresh",
-} as const;
-
-/**
  * API 응답 메시지 상수
  */
 export const API_RESPONSE_MESSAGES = {
@@ -31,18 +23,20 @@ export const API_RESPONSE_MESSAGES = {
   UNAUTHORIZED: "권한 없음",
   NOT_FOUND: "리소스를 찾을 수 없음",
   CONFLICT: "중복된 사용자 정보",
+  THROTTLE_LIMIT_EXCEEDED: "요청 횟수가 제한을 초과했습니다.",
   INTERNAL_SERVER_ERROR: "서버 내부 오류",
 } as const;
 
 /**
  * HTTP 상태 코드별 응답 메시지 매핑
  */
-export const HTTP_STATUS_MESSAGES = {
+export const HTTP_STATUS_MESSAGES: Record<number, string> = {
   200: API_RESPONSE_MESSAGES.SUCCESS,
   201: API_RESPONSE_MESSAGES.CREATED,
   400: API_RESPONSE_MESSAGES.BAD_REQUEST,
   401: API_RESPONSE_MESSAGES.UNAUTHORIZED,
   404: API_RESPONSE_MESSAGES.NOT_FOUND,
   409: API_RESPONSE_MESSAGES.CONFLICT,
+  429: API_RESPONSE_MESSAGES.THROTTLE_LIMIT_EXCEEDED,
   500: API_RESPONSE_MESSAGES.INTERNAL_SERVER_ERROR,
 } as const;

@@ -1,8 +1,5 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from "@nestjs/common";
-import { Observable } from "rxjs";
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from "@nestjs/common";
 import { map } from "rxjs/operators";
-import { Reflector } from "@nestjs/core";
-import { SuccessResponseDto } from "@web-user/backend/common/dto/success-response.dto";
 
 /**
  * Success Response Interceptor
@@ -10,27 +7,24 @@ import { SuccessResponseDto } from "@web-user/backend/common/dto/success-respons
  *
  * 사용법:
  * 1. 전역 적용: app.module.ts에서 APP_INTERCEPTOR로 등록
- * 2. 특정 메서드에서 제외: @SkipResponseTransform() 데코레이터 사용
  */
 
 @Injectable()
-export class SuccessResponseInterceptor<T> implements NestInterceptor<T, SuccessResponseDto<T>> {
-  constructor(private reflector: Reflector) {}
+export class SuccessResponseInterceptor<T> implements NestInterceptor<T> {
+  private readonly logger = new Logger(SuccessResponseInterceptor.name);
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<SuccessResponseDto<T>> {
+  intercept(context: ExecutionContext, next: CallHandler) {
+    const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 
-    // SkipResponseTransform 데코레이터가 있는 경우 변환하지 않음
-    const skipTransform = this.reflector.get<boolean>(
-      "skipResponseTransform",
-      context.getHandler(),
-    );
-    if (skipTransform) {
-      return next.handle();
-    }
+    // 현재는 모든 응답을 변환 (필요시 특정 메서드 제외 로직 추가 가능)
 
     return next.handle().pipe(
-      map((data: T) => {
+      map((data: string | object) => {
+        if (process.env.NODE_ENV === "development") {
+          this.logger.debug(`Success: ${request.method} ${request.url} - ${response.statusCode}`);
+        }
+
         // 통일된 응답 형태로 변환
         return {
           success: true,
@@ -41,19 +35,4 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T, Success
       }),
     );
   }
-
-  /**
-   * Response 변환을 건너뛰는 데코레이터
-   * 특정 엔드포인트에서 기본 응답 형태를 유지하고 싶을 때 사용
-   */
-  SkipResponseTransform = (): any => {
-    return (
-      target: any,
-      propertyKey: string,
-      descriptor: PropertyDescriptor,
-    ): PropertyDescriptor => {
-      Reflect.defineMetadata("skipResponseTransform", true, descriptor.value);
-      return descriptor;
-    };
-  };
 }

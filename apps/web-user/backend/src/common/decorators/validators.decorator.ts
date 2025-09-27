@@ -1,5 +1,6 @@
 import { registerDecorator, ValidatorConstraint } from "class-validator";
 import type { ValidationOptions, ValidatorConstraintInterface } from "class-validator";
+import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
 
 /**
  * 사용자 ID 유효성 검증 제약 조건
@@ -22,7 +23,7 @@ export class IsValidUserIdConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return "아이디는 4-20자의 영문, 숫자, 언더스코어만 사용할 수 있습니다.";
+    return AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT;
   }
 }
 
@@ -47,7 +48,7 @@ export class IsValidPasswordConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return "비밀번호는 8자 이상의 영문 대소문자, 숫자, 특수문자(@$!%*?&)를 포함해야 합니다.";
+    return AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT;
   }
 }
 
@@ -70,7 +71,27 @@ export class IsValidKoreanPhoneConstraint implements ValidatorConstraintInterfac
   }
 
   defaultMessage(): string {
-    return "올바른 한국 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)";
+    return AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT;
+  }
+}
+
+/**
+ * 인증번호 유효성 검증 제약 조건
+ */
+@ValidatorConstraint({ name: "isValidVerificationCode", async: false })
+export class IsValidVerificationCodeConstraint implements ValidatorConstraintInterface {
+  validate(verificationCode: string): boolean {
+    if (!verificationCode || typeof verificationCode !== "string") {
+      return false;
+    }
+
+    // 정확히 6자리 숫자
+    const verificationCodePattern = /^\d{6}$/;
+    return verificationCodePattern.test(verificationCode);
+  }
+
+  defaultMessage(): string {
+    return AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT;
   }
 }
 
@@ -115,6 +136,21 @@ export function IsValidKoreanPhone(validationOptions?: ValidationOptions) {
       options: validationOptions,
       constraints: [],
       validator: IsValidKoreanPhoneConstraint,
+    });
+  };
+}
+
+/**
+ * 인증번호 유효성 검증 데코레이터
+ */
+export function IsValidVerificationCode(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string): void {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsValidVerificationCodeConstraint,
     });
   };
 }

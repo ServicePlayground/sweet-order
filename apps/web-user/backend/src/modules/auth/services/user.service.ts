@@ -8,11 +8,7 @@ import { PrismaService } from "@web-user/backend/database/prisma.service";
 import { PasswordUtil } from "@web-user/backend/modules/auth/utils/password.util";
 import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
 import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
-import {
-  JwtVerifiedPayload,
-  UserInfo,
-  CreateUser,
-} from "@web-user/backend/common/types/auth.types";
+import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
 import {
   RegisterRequestDto,
   CheckUserIdRequestDto,
@@ -21,11 +17,8 @@ import {
   ChangePasswordRequestDto,
   ChangePhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import {
-  UserDataResponseDto,
-  FindAccountDataResponseDto,
-} from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
+import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
+import { UserMapperUtil } from "@web-user/backend/modules/auth/utils/user-mapper.util";
 
 /**
  * 사용자 관리 서비스
@@ -50,7 +43,7 @@ export class UserService {
   /**
    * 일반 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<UserDataResponseDto> {
+  async register(registerDto: RegisterRequestDto) {
     const { userId, password, phone } = registerDto;
 
     // 1. 사용자 ID와 휴대폰 번호 중복 검증
@@ -65,7 +58,7 @@ export class UserService {
     // 3. 휴대폰 인증 상태 확인
     const isPhoneVerified = await this.checkPhoneVerificationStatus(normalizedPhone);
     if (!isPhoneVerified) {
-      throw new BadRequestException("휴대폰 인증이 필요합니다."); // 400
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED); // 400
     }
 
     // 4. 비밀번호 해싱
@@ -96,21 +89,7 @@ export class UserService {
       return {
         accessToken: tokenPair.accessToken,
         refreshToken: tokenPair.refreshToken,
-        user: {
-          id: user.id,
-          phone: user.phone,
-          name: user.name ?? "",
-          nickname: user.nickname ?? "",
-          email: user.email ?? "",
-          profileImageUrl: user.profileImageUrl ?? "",
-          isPhoneVerified: user.isPhoneVerified,
-          isActive: user.isActive,
-          userId: user.userId ?? "",
-          googleId: user.googleId ?? "",
-          googleEmail: user.googleEmail ?? "",
-          createdAt: user.createdAt,
-          lastLoginAt: user.lastLoginAt ?? new Date(),
-        },
+        user: UserMapperUtil.mapToUserInfo(user),
       };
     });
   }
@@ -121,9 +100,7 @@ export class UserService {
    * @param checkUserIdDto 사용자 ID 확인 요청
    * @returns 사용 가능 여부
    */
-  async checkUserIdAvailability(
-    checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<AvailabilityResponseDto> {
+  async checkUserIdAvailability(checkUserIdDto: CheckUserIdRequestDto) {
     const { userId } = checkUserIdDto;
 
     const existingUser = await this.prisma.user.findUnique({
@@ -148,24 +125,22 @@ export class UserService {
 
     if (existingUser) {
       if (existingUser.userId === userId) {
-        throw new ConflictException("이미 사용 중인 아이디입니다."); // GlobalExceptionFilter에서 처리
+        throw new ConflictException(AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS); // GlobalExceptionFilter에서 처리
       }
       if (existingUser.phone === normalizedPhone) {
         // 휴대폰 번호가 중복되는 경우, 기존 계정의 타입을 확인하여 적절한 메시지 제공
         if (existingUser.userId && existingUser.googleId) {
           // 일반 로그인과 구글 로그인 모두 가능한 계정
-          throw new ConflictException(
-            "해당 휴대폰 번호로 일반 로그인과 구글 로그인 계정이 모두 존재합니다.",
-          );
+          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS);
         } else if (existingUser.userId) {
           // 일반 로그인 계정만 존재
-          throw new ConflictException("해당 휴대폰 번호로 일반 로그인 계정이 존재합니다.");
+          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS);
         } else if (existingUser.googleId) {
           // 구글 로그인 계정만 존재
-          throw new ConflictException("해당 휴대폰 번호로 구글 로그인 계정이 존재합니다.");
+          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
         } else {
           // 기본 메시지
-          throw new ConflictException("이미 사용 중인 휴대폰 번호입니다.");
+          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS);
         }
       }
     }
@@ -174,7 +149,7 @@ export class UserService {
   /**
    * 일반 회원가입 - 일반 로그인
    */
-  async login(loginDto: LoginRequestDto): Promise<UserDataResponseDto> {
+  async login(loginDto: LoginRequestDto) {
     const { userId, password } = loginDto;
 
     // 1. 사용자 조회
@@ -183,18 +158,18 @@ export class UserService {
     });
 
     if (!user) {
-      throw new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다."); // 401
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND); // 400
     }
 
     // 2. 비밀번호 검증
     const isPasswordValid = await PasswordUtil.verifyPassword(password, user.passwordHash || "");
     if (!isPasswordValid) {
-      throw new UnauthorizedException("아이디 또는 비밀번호가 올바르지 않습니다.");
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     // 3. 휴대폰 인증 상태 확인
-    if (!(user as any).isPhoneVerified) {
-      throw new UnauthorizedException("휴대폰 인증이 필요합니다.");
+    if (!user.isPhoneVerified) {
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
     // 4. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
@@ -216,21 +191,7 @@ export class UserService {
       return {
         accessToken: tokenPair.accessToken,
         refreshToken: tokenPair.refreshToken,
-        user: {
-          id: user.id,
-          phone: user.phone,
-          name: user.name ?? "",
-          nickname: user.nickname ?? "",
-          email: user.email ?? "",
-          profileImageUrl: user.profileImageUrl ?? "",
-          isPhoneVerified: user.isPhoneVerified,
-          isActive: user.isActive,
-          userId: user.userId ?? "",
-          googleId: user.googleId ?? "",
-          googleEmail: user.googleEmail ?? "",
-          createdAt: user.createdAt,
-          lastLoginAt: new Date(),
-        },
+        user: UserMapperUtil.mapToUserInfo(user, new Date()),
       };
     });
   }
@@ -241,7 +202,7 @@ export class UserService {
    * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
    * 둘 다 있는 경우 모두 반환합니다.
    */
-  async findAccount(findAccountDto: FindAccountRequestDto): Promise<FindAccountDataResponseDto> {
+  async findAccount(findAccountDto: FindAccountRequestDto) {
     const { phone } = findAccountDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
@@ -255,7 +216,7 @@ export class UserService {
     });
 
     if (!phoneVerification) {
-      throw new BadRequestException("휴대폰 인증이 필요합니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
     // 2. 사용자 조회
@@ -264,11 +225,11 @@ export class UserService {
     });
 
     if (!user) {
-      throw new BadRequestException("해당 휴대폰 번호로 등록된 계정이 없습니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
     }
 
     // 3. 계정 정보 반환
-    const result: FindAccountDataResponseDto = {};
+    const result: { userId?: string; googleEmail?: string } = {};
 
     if (user.userId) {
       result.userId = user.userId;
@@ -280,7 +241,7 @@ export class UserService {
 
     // 둘 다 없는 경우 (예외 상황)
     if (!result.userId && !result.googleEmail) {
-      throw new BadRequestException("해당 휴대폰 번호로 등록된 계정이 없습니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
     }
 
     return result;
@@ -299,12 +260,12 @@ export class UserService {
     });
 
     if (!user) {
-      throw new BadRequestException("해당 아이디로 등록된 계정이 없습니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
     }
 
     // 2. 휴대폰 번호 일치 확인
     if (user.phone !== normalizedPhone) {
-      throw new BadRequestException("아이디와 휴대폰 번호가 일치하지 않습니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH);
     }
 
     // 3. 휴대폰 인증 확인
@@ -317,7 +278,7 @@ export class UserService {
     });
 
     if (!phoneVerification) {
-      throw new BadRequestException("휴대폰 인증이 필요합니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
     // 4. 트랜잭션으로 새 비밀번호 해시화 및 업데이트
@@ -347,7 +308,7 @@ export class UserService {
     });
 
     if (!currentUser) {
-      throw new BadRequestException("사용자를 찾을 수 없습니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
     // 2. 새 휴대폰 번호 중복 확인
@@ -356,7 +317,7 @@ export class UserService {
     });
 
     if (existingUser) {
-      throw new ConflictException("이미 사용 중인 휴대폰 번호입니다.");
+      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS);
     }
 
     // 3. 새 휴대폰 인증 확인 (인증 완료된 상태인지 확인)
@@ -369,7 +330,7 @@ export class UserService {
     });
 
     if (!phoneVerification) {
-      throw new BadRequestException("새 휴대폰 번호 인증이 필요합니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
     // 4. 트랜잭션으로 휴대폰 번호 변경

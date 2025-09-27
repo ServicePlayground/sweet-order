@@ -1,7 +1,10 @@
 import { JwtService } from "@nestjs/jwt";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
+import {
+  TOKEN_TYPES,
+  AUTH_ERROR_MESSAGES,
+} from "@web-user/backend/modules/auth/constants/auth.constants";
 import {
   JwtPayload,
   JwtVerifiedPayload,
@@ -71,7 +74,7 @@ export class JwtUtil {
 
       // 토큰 타입이 refresh token인지 확인
       if (payload.type !== TOKEN_TYPES.REFRESH) {
-        throw new UnauthorizedException("유효하지 않은 리프레시 토큰입니다.");
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
       }
 
       // 새로운 Access Token 생성
@@ -94,7 +97,7 @@ export class JwtUtil {
         throw error;
       }
       // JWT 검증 실패 등 기타 오류는 401로 처리
-      throw new UnauthorizedException("유효하지 않은 리프레시 토큰입니다.");
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.INVALID_REFRESH_TOKEN);
     }
   }
 }
