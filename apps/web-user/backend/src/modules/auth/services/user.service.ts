@@ -71,61 +71,48 @@ export class UserService {
     // 4. 비밀번호 해싱
     const passwordHash = await PasswordUtil.hashPassword(password);
 
-    // 5. 사용자 생성
-    const user = await this.createUser({
-      userId,
-      passwordHash,
-      phone: normalizedPhone,
+    // 5. 트랜잭션으로 사용자 생성 및 JWT 토큰 생성
+    return await this.prisma.$transaction(async (tx) => {
+      // 사용자 생성
+      const user = await tx.user.create({
+        data: {
+          userId,
+          passwordHash,
+          phone: normalizedPhone,
+          isPhoneVerified: true,
+          lastLoginAt: new Date(),
+        },
+      });
+
+      // JWT 토큰 생성
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: user.id,
+        phone: user.phone,
+        loginType: "general",
+        loginId: user.userId ?? "",
+      });
+
+      // 응답 data 반환
+      return {
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          name: user.name ?? "",
+          nickname: user.nickname ?? "",
+          email: user.email ?? "",
+          profileImageUrl: user.profileImageUrl ?? "",
+          isPhoneVerified: user.isPhoneVerified,
+          isActive: user.isActive,
+          userId: user.userId ?? "",
+          googleId: user.googleId ?? "",
+          googleEmail: user.googleEmail ?? "",
+          createdAt: user.createdAt,
+          lastLoginAt: user.lastLoginAt ?? new Date(),
+        },
+      };
     });
-
-    // 6. JWT 토큰 생성
-    const tokenPair = await this.jwtUtil.generateTokenPair({
-      sub: user.id,
-      phone: user.phone,
-      loginType: "general",
-      loginId: user.userId ?? "",
-    });
-
-    // 7. 응답 data 반환 (Response Interceptor 래핑하여 자동으로 success, message, timestamp, statusCode를 추가)
-    return {
-      accessToken: tokenPair.accessToken,
-      refreshToken: tokenPair.refreshToken,
-      user,
-    };
-  }
-
-  /**
-   * 일반 회원가입 - 사용자 생성
-   */
-  async createUser(createUserDto: CreateUser): Promise<UserInfo> {
-    const { userId, passwordHash, phone } = createUserDto;
-
-    // 사용자 생성
-    const user = await this.prisma.user.create({
-      data: {
-        userId,
-        passwordHash,
-        phone,
-        isPhoneVerified: true,
-        lastLoginAt: new Date(),
-      },
-    });
-
-    return {
-      id: user.id,
-      phone: user.phone,
-      name: user.name ?? "",
-      nickname: user.nickname ?? "",
-      email: user.email ?? "",
-      profileImageUrl: user.profileImageUrl ?? "",
-      isPhoneVerified: user.isPhoneVerified,
-      isActive: user.isActive,
-      userId: user.userId ?? "",
-      googleId: user.googleId ?? "",
-      googleEmail: user.googleEmail ?? "",
-      createdAt: user.createdAt,
-      lastLoginAt: user.lastLoginAt ?? new Date(),
-    };
   }
 
   /**
@@ -210,39 +197,42 @@ export class UserService {
       throw new UnauthorizedException("휴대폰 인증이 필요합니다.");
     }
 
-    // 4. JWT 토큰 생성
-    const tokenPair = await this.jwtUtil.generateTokenPair({
-      sub: user.id,
-      phone: user.phone,
-      loginType: "general",
-      loginId: user.userId ?? "",
-    });
-
-    // 5. 마지막 로그인 시간 업데이트
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
-
-    return {
-      accessToken: tokenPair.accessToken,
-      refreshToken: tokenPair.refreshToken,
-      user: {
-        id: user.id,
+    // 4. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
+    return await this.prisma.$transaction(async (tx) => {
+      // JWT 토큰 생성
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: user.id,
         phone: user.phone,
-        name: user.name ?? "",
-        nickname: user.nickname ?? "",
-        email: user.email ?? "",
-        profileImageUrl: user.profileImageUrl ?? "",
-        isPhoneVerified: user.isPhoneVerified,
-        isActive: user.isActive,
-        userId: user.userId ?? "",
-        googleId: user.googleId ?? "",
-        googleEmail: user.googleEmail ?? "",
-        createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt ?? new Date(),
-      },
-    };
+        loginType: "general",
+        loginId: user.userId ?? "",
+      });
+
+      // 마지막 로그인 시간 업데이트
+      await tx.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+
+      return {
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          name: user.name ?? "",
+          nickname: user.nickname ?? "",
+          email: user.email ?? "",
+          profileImageUrl: user.profileImageUrl ?? "",
+          isPhoneVerified: user.isPhoneVerified,
+          isActive: user.isActive,
+          userId: user.userId ?? "",
+          googleId: user.googleId ?? "",
+          googleEmail: user.googleEmail ?? "",
+          createdAt: user.createdAt,
+          lastLoginAt: new Date(),
+        },
+      };
+    });
   }
 
   /**
@@ -330,12 +320,14 @@ export class UserService {
       throw new BadRequestException("휴대폰 인증이 필요합니다.");
     }
 
-    // 4. 새 비밀번호 해시화 및 업데이트
-    const hashedPassword = await PasswordUtil.hashPassword(newPassword);
+    // 4. 트랜잭션으로 새 비밀번호 해시화 및 업데이트
+    await this.prisma.$transaction(async (tx) => {
+      const hashedPassword = await PasswordUtil.hashPassword(newPassword);
 
-    await this.prisma.user.update({
-      where: { userId },
-      data: { passwordHash: hashedPassword },
+      await tx.user.update({
+        where: { userId },
+        data: { passwordHash: hashedPassword },
+      });
     });
   }
 
@@ -380,10 +372,12 @@ export class UserService {
       throw new BadRequestException("새 휴대폰 번호 인증이 필요합니다.");
     }
 
-    // 4. 휴대폰 번호 변경
-    await this.prisma.user.update({
-      where: { id: currentUser.id },
-      data: { phone: normalizedNewPhone },
+    // 4. 트랜잭션으로 휴대폰 번호 변경
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: currentUser.id },
+        data: { phone: normalizedNewPhone },
+      });
     });
   }
 

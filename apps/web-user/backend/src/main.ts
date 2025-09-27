@@ -36,8 +36,10 @@ async function bootstrap(): Promise<void> {
   // 보안 헤더 설정
   app.use(helmet());
 
-  // HTTP 요청 로깅
-  app.use(morgan("combined"));
+  // HTTP 요청 로깅 - 상용 환경에서는 비활성화
+  if (nodeEnv !== "production") {
+    app.use(morgan("combined"));
+  }
 
   // 전역 유효성 검사 파이프 설정
   // class-validator를 사용하여 DTO 유효성 검사 자동화

@@ -137,36 +137,39 @@ export class GoogleService {
           loginId: user.googleId ?? "",
         };
 
-        const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
-          await this.jwtUtil.generateTokenPair(jwtPayload);
+        // 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
+        return await this.prisma.$transaction(async (tx) => {
+          const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
+            await this.jwtUtil.generateTokenPair(jwtPayload);
 
-        // 마지막 로그인 시간 업데이트
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: {
-            lastLoginAt: new Date(),
-          },
+          // 마지막 로그인 시간 업데이트
+          await tx.user.update({
+            where: { id: user.id },
+            data: {
+              lastLoginAt: new Date(),
+            },
+          });
+
+          return {
+            accessToken: jwtAccessToken,
+            refreshToken: jwtRefreshToken,
+            user: {
+              id: user.id,
+              phone: user.phone,
+              name: user.name ?? "",
+              nickname: user.nickname ?? "",
+              email: user.email ?? "",
+              profileImageUrl: user.profileImageUrl ?? "",
+              isPhoneVerified: user.isPhoneVerified,
+              isActive: user.isActive,
+              userId: user.userId ?? "",
+              googleId: user.googleId ?? "",
+              googleEmail: user.googleEmail ?? "",
+              createdAt: user.createdAt,
+              lastLoginAt: new Date(),
+            },
+          };
         });
-
-        return {
-          accessToken: jwtAccessToken,
-          refreshToken: jwtRefreshToken,
-          user: {
-            id: user.id,
-            phone: user.phone,
-            name: user.name ?? "",
-            nickname: user.nickname ?? "",
-            email: user.email ?? "",
-            profileImageUrl: user.profileImageUrl ?? "",
-            isPhoneVerified: user.isPhoneVerified,
-            isActive: user.isActive,
-            userId: user.userId ?? "",
-            googleId: user.googleId ?? "",
-            googleEmail: user.googleEmail ?? "",
-            createdAt: user.createdAt,
-            lastLoginAt: new Date(),
-          },
-        };
       } else {
         // 휴대폰 인증이 안된 경우 -> 휴대폰 인증 필요
         throw new ConflictException({
@@ -197,36 +200,36 @@ export class GoogleService {
     try {
       const { googleId, googleEmail, phone } = googleRegisterDto;
 
-      // 1. 휴대폰 번호로 기존 사용자 확인 (모든 계정 유형)
-      const existingPhoneUser = await this.prisma.user.findFirst({
-        where: { phone },
-      });
-
-      // 2. googleId로 기존 사용자 확인
-      const existingGoogleUser = await this.prisma.user.findUnique({
-        where: { googleId },
-      });
-
-      let user;
-
-      if (existingPhoneUser && existingGoogleUser) {
-        // 케이스: googleId, phone이 모두 중복되어 있는 경우
-        // 둘 다 정보 업데이트 후 로그인 처리
-        user = await this.prisma.user.update({
-          where: { id: existingGoogleUser.id },
-          data: {
-            phone,
-            googleEmail,
-            isPhoneVerified: true,
-            lastLoginAt: new Date(),
-          },
+      // 트랜잭션으로 사용자 처리 및 JWT 토큰 생성
+      return await this.prisma.$transaction(async (tx) => {
+        // 1. 휴대폰 번호로 기존 사용자 확인 (모든 계정 유형)
+        const existingPhoneUser = await tx.user.findFirst({
+          where: { phone },
         });
-      } else if (existingPhoneUser && !existingGoogleUser) {
-        // 케이스: phone이 중복되어 있지만 googleId는 중복되지 않은 경우
-        if (existingPhoneUser.googleId) {
-          // 케이스: 휴대폰번호가 구글 계정에서 사용중인 경우
-          // 현재 googleId 정보 업데이트 후 로그인 처리
-          user = await this.prisma.user.update({
+
+        // 2. googleId로 기존 사용자 확인
+        const existingGoogleUser = await tx.user.findUnique({
+          where: { googleId },
+        });
+
+        let user;
+
+        if (existingPhoneUser && existingGoogleUser) {
+          // 케이스: googleId, phone이 모두 중복되어 있는 경우
+          // 둘 다 정보 업데이트 후 로그인 처리
+          user = await tx.user.update({
+            where: { id: existingGoogleUser.id },
+            data: {
+              phone,
+              googleEmail,
+              isPhoneVerified: true,
+              lastLoginAt: new Date(),
+            },
+          });
+        } else if (existingPhoneUser && !existingGoogleUser) {
+          // 케이스: phone이 중복되어 있지만 googleId는 중복되지 않은 경우
+          // googleId 정보 업데이트 후 로그인 처리
+          user = await tx.user.update({
             where: { id: existingPhoneUser.id },
             data: {
               googleId,
@@ -234,85 +237,63 @@ export class GoogleService {
               lastLoginAt: new Date(),
             },
           });
-        } else if (existingPhoneUser.userId) {
-          // 케이스: 휴대폰번호가 일반 로그인에 사용중인 경우
-          // googleId 정보 업데이트 후 로그인 처리
-          user = await this.prisma.user.update({
-            where: { id: existingPhoneUser.id },
+        } else if (!existingPhoneUser && existingGoogleUser) {
+          // 케이스: googleId가 중복되어 있지만 phone은 중복되지 않은 경우
+          // 휴대폰번호가 인증되어 있지만 않다면 phone 업데이트 후 로그인 처리
+          user = await tx.user.update({
+            where: { id: existingGoogleUser.id },
             data: {
-              googleId,
+              phone,
               googleEmail,
+              isPhoneVerified: true,
               lastLoginAt: new Date(),
             },
           });
         } else {
-          // 케이스: 휴대폰번호만 있고 계정 정보가 없는 경우
-          // googleId 정보 업데이트 후 로그인 처리
-          user = await this.prisma.user.update({
-            where: { id: existingPhoneUser.id },
+          // 케이스: googleId, phone이 모두 중복되지 않은 경우
+          // 새 사용자 생성
+          user = await tx.user.create({
             data: {
               googleId,
               googleEmail,
+              phone,
+              isPhoneVerified: true,
               lastLoginAt: new Date(),
             },
           });
         }
-      } else if (!existingPhoneUser && existingGoogleUser) {
-        // 케이스: googleId가 중복되어 있지만 phone은 중복되지 않은 경우
-        // 휴대폰번호가 인증되어 있지만 않다면 phone 업데이트 후 로그인 처리
-        user = await this.prisma.user.update({
-          where: { id: existingGoogleUser.id },
-          data: {
-            phone,
-            googleEmail,
-            isPhoneVerified: true,
-            lastLoginAt: new Date(),
-          },
-        });
-      } else {
-        // 케이스: googleId, phone이 모두 중복되지 않은 경우
-        // 새 사용자 생성
-        user = await this.prisma.user.create({
-          data: {
-            googleId,
-            googleEmail,
-            phone,
-            isPhoneVerified: true,
-            lastLoginAt: new Date(),
-          },
-        });
-      }
 
-      // 3. JWT 토큰 생성
-      const jwtPayload: JwtPayload = {
-        sub: user.id,
-        phone: user.phone,
-        loginType: "google",
-        loginId: user.googleId ?? "",
-      };
-
-      const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
-        await this.jwtUtil.generateTokenPair(jwtPayload);
-
-      return {
-        accessToken: jwtAccessToken,
-        refreshToken: jwtRefreshToken,
-        user: {
-          id: user.id,
+        // 3. JWT 토큰 생성
+        const jwtPayload: JwtPayload = {
+          sub: user.id,
           phone: user.phone,
-          name: user.name ?? "",
-          nickname: user.nickname ?? "",
-          email: user.email ?? "",
-          profileImageUrl: user.profileImageUrl ?? "",
-          isPhoneVerified: user.isPhoneVerified,
-          isActive: user.isActive,
-          userId: user.userId ?? "",
-          googleId: user.googleId ?? "",
-          googleEmail: user.googleEmail ?? "",
-          createdAt: user.createdAt,
-          lastLoginAt: user.lastLoginAt ?? new Date(),
-        },
-      };
+          loginType: "google",
+          loginId: user.googleId ?? "",
+        };
+
+        const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
+          await this.jwtUtil.generateTokenPair(jwtPayload);
+
+        return {
+          accessToken: jwtAccessToken,
+          refreshToken: jwtRefreshToken,
+          user: {
+            id: user.id,
+            phone: user.phone,
+            name: user.name ?? "",
+            nickname: user.nickname ?? "",
+            email: user.email ?? "",
+            profileImageUrl: user.profileImageUrl ?? "",
+            isPhoneVerified: user.isPhoneVerified,
+            isActive: user.isActive,
+            userId: user.userId ?? "",
+            googleId: user.googleId ?? "",
+            googleEmail: user.googleEmail ?? "",
+            createdAt: user.createdAt,
+            lastLoginAt: user.lastLoginAt ?? new Date(),
+          },
+        };
+      });
     } catch (error) {
       throw new BadRequestException(
         `구글 로그인 회원가입에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`,
