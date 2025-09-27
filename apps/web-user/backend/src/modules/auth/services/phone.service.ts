@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@web-user/backend/database/prisma.service";
-import { PhoneUtil } from "@web-user/backend/common/utils/phone.util";
+import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,

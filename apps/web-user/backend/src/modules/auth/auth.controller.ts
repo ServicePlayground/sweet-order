@@ -21,19 +21,19 @@ import {
   ChangePhoneRequestDto,
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
+  RefreshTokenRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import {
   FindUserIdDataResponseDto,
   UserDataResponseDto,
+  RefreshTokenResponseDto,
 } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { JwtAuthGuard } from "@web-user/backend/common/guards/jwt-auth.guard";
+import { JwtAuthGuard } from "@web-user/backend/modules/auth/guards/jwt-auth.guard";
 import { Public } from "@web-user/backend/common/decorators/public.decorator";
 import { ApiSuccessResponse } from "@web-user/backend/common/decorators/swagger-success-response.decorator";
 import { ApiErrorResponse } from "@web-user/backend/common/decorators/swagger-error-response.decorator";
-import {
-  AvailabilityResponseDto,
-  SuccessMessageResponseDto,
-} from "@web-user/backend/common/dto/common.dto";
+import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
+import { SuccessMessageResponseDto } from "@web-user/backend/common/dto/success-response.dto";
 
 /**
  * 인증 컨트롤러
@@ -41,7 +41,9 @@ import {
  */
 @ApiTags("인증")
 @Controller("auth")
-@UseGuards(JwtAuthGuard) // 기본적으로 모든 엔드포인트에 JWT 인증 가드 적용 // @Public() 데코레이터가 있는 엔드포인트는 인증을 건너뜀
+// 기본적으로 모든 엔드포인트에 JWT 인증 가드 적용 // @Public() 데코레이터가 있는 엔드포인트는 인증을 건너뜀
+// 요청 → JwtAuthGuard → Passport → JwtStrategy → validate() → req.user
+@UseGuards(JwtAuthGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -289,5 +291,22 @@ export class AuthController {
   ): Promise<SuccessMessageResponseDto> {
     await this.authService.changePhone(changePhoneDto);
     return { message: "휴대폰 번호가 변경되었습니다." };
+  }
+
+  /**
+   * Refresh Token을 사용하여 Access Token을 갱신하는 API
+   */
+  @Post("refresh")
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Access Token 갱신" })
+  @ApiSuccessResponse<RefreshTokenResponseDto>(200, {
+    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  })
+  @ApiErrorResponse(401, "유효하지 않은 리프레시 토큰입니다.")
+  async refreshToken(
+    @Body() refreshTokenDto: RefreshTokenRequestDto,
+  ): Promise<RefreshTokenResponseDto> {
+    return this.authService.refreshToken(refreshTokenDto);
   }
 }
