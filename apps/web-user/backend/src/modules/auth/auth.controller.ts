@@ -209,6 +209,7 @@ export class AuthController {
   @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
   @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
   async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
     return await this.authService.googleRegisterWithPhone(registerDto);

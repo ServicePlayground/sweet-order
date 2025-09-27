@@ -136,4 +136,26 @@ export class PhoneService {
       });
     });
   }
+
+  /**
+   * 휴대폰 인증 상태 확인
+   * 인증 완료 후 1시간 이내의 인증만 유효한 것으로 간주
+   */
+  async checkPhoneVerificationStatus(phone: string): Promise<boolean> {
+    const normalizedPhone = PhoneUtil.normalizePhone(phone);
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000); // 1시간 전
+
+    const phoneVerification = await this.prisma.phoneVerification.findFirst({
+      where: {
+        phone: normalizedPhone,
+        isVerified: true,
+        createdAt: {
+          gte: oneHourAgo, // 1시간 이내에 인증된 것만 유효
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return !!phoneVerification;
+  }
 }

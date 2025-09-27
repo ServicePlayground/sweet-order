@@ -177,6 +177,12 @@ export class GoogleService {
     try {
       const { googleId, googleEmail, phone } = googleRegisterDto;
 
+      // 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
+      const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(phone);
+      if (!isPhoneVerified) {
+        throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
+      }
+
       // 트랜잭션으로 사용자 처리 및 JWT 토큰 생성
       return await this.prisma.$transaction(async (tx) => {
         // 1. 휴대폰 번호로 기존 사용자 확인 (모든 계정 유형)

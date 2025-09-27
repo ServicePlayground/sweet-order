@@ -19,6 +19,7 @@ import {
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@web-user/backend/modules/auth/utils/user-mapper.util";
+import { PhoneService } from "./phone.service";
 
 /**
  * 사용자 관리 서비스
@@ -38,6 +39,7 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtUtil: JwtUtil,
+    private readonly phoneService: PhoneService,
   ) {}
 
   /**
@@ -56,7 +58,7 @@ export class UserService {
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
     // 3. 휴대폰 인증 상태 확인
-    const isPhoneVerified = await this.checkPhoneVerificationStatus(normalizedPhone);
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
     if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED); // 400
     }
@@ -206,16 +208,9 @@ export class UserService {
     const { phone } = findAccountDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 1. 휴대폰 인증 확인
-    const phoneVerification = await this.prisma.phoneVerification.findFirst({
-      where: {
-        phone: normalizedPhone,
-        isVerified: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!phoneVerification) {
+    // 1. 휴대폰 인증 확인 (1시간 이내 인증만 유효)
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -268,16 +263,9 @@ export class UserService {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH);
     }
 
-    // 3. 휴대폰 인증 확인
-    const phoneVerification = await this.prisma.phoneVerification.findFirst({
-      where: {
-        phone: normalizedPhone,
-        isVerified: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!phoneVerification) {
+    // 3. 휴대폰 인증 확인 (1시간 이내 인증만 유효)
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -320,16 +308,10 @@ export class UserService {
       throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS);
     }
 
-    // 3. 새 휴대폰 인증 확인 (인증 완료된 상태인지 확인)
-    const phoneVerification = await this.prisma.phoneVerification.findFirst({
-      where: {
-        phone: normalizedNewPhone,
-        isVerified: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!phoneVerification) {
+    // 3. 새 휴대폰 인증 확인 (1시간 이내 인증만 유효)
+    const isPhoneVerified =
+      await this.phoneService.checkPhoneVerificationStatus(normalizedNewPhone);
+    if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -340,22 +322,5 @@ export class UserService {
         data: { phone: normalizedNewPhone },
       });
     });
-  }
-
-  /**
-   * 휴대폰 인증 상태 확인
-   */
-  async checkPhoneVerificationStatus(phone: string): Promise<boolean> {
-    const normalizedPhone = PhoneUtil.normalizePhone(phone);
-
-    const phoneVerification = await this.prisma.phoneVerification.findFirst({
-      where: {
-        phone: normalizedPhone,
-        isVerified: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return !!phoneVerification;
   }
 }
