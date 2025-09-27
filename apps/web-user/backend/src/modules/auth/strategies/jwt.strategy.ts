@@ -3,7 +3,10 @@ import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { ConfigService } from "@nestjs/config";
 import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
-import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
+import {
+  AUTH_ERROR_MESSAGES,
+  TOKEN_TYPES,
+} from "@web-user/backend/modules/auth/constants/auth.constants";
 
 /**
  * JWT 전략
@@ -49,20 +52,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     try {
       // 1. 토큰 타입 검증: ACCESS 토큰만 허용 (REFRESH 토큰은 별도 처리)
       if (payload.type !== TOKEN_TYPES.ACCESS) {
-        throw new UnauthorizedException("유효하지 않은 토큰 타입입니다.");
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.INVALID_TOKEN_TYPE);
       }
 
       // 2. 필수 필드 검증: 사용자 식별에 필요한 정보가 모두 있는지 확인
       if (!payload.sub || !payload.phone || !payload.loginType || !payload.loginId) {
-        throw new UnauthorizedException("토큰에 필수 정보가 누락되었습니다.");
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.TOKEN_MISSING_REQUIRED_INFO);
       }
 
       // 모든 검증을 통과한 경우 사용자 정보 반환
       // 이 정보는 @Request() 데코레이터로 접근 가능한 req.user에 저장됩니다
       return payload;
     } catch (error) {
+      // 이미 UnauthorizedException인 경우 그대로 던지기
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       // 예상치 못한 오류 발생 시에도 인증 실패로 처리
-      throw new UnauthorizedException("토큰 검증에 실패했습니다.");
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.TOKEN_VERIFICATION_FAILED);
     }
   }
 }

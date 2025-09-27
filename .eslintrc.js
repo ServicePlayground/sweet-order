@@ -26,8 +26,8 @@ module.exports = {
     "@typescript-eslint/no-var-requires": "off", // require()
 
     // 함수 관련 규칙
-    "@typescript-eslint/explicit-function-return-type": "warn", // 함수 반환 타입 명시 시 경고
-    "@typescript-eslint/explicit-module-boundary-types": "warn", // 모듈 경계 타입 명시 강제하지 않음
+    "@typescript-eslint/explicit-function-return-type": "off", // 함수 반환 타입 명시 강제하지 않음
+    "@typescript-eslint/explicit-module-boundary-types": "off", // 모듈 경계 타입 명시 강제하지 않음
 
     // 기타 규칙
     "prefer-const": "warn", // 재할당되지 않는 변수는 const 사용 권장

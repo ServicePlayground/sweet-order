@@ -1,20 +1,21 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiResponse } from "@nestjs/swagger";
 import { HTTP_STATUS_MESSAGES } from "../constants/app.constants";
+import { SWAGGER_EXAMPLES } from "@web-user/backend/modules/auth/constants/auth.constants";
 
 /**
- * 성공 응답을 위한 커스텀 데코레이터
+ * Swagger 응답을 위한 커스텀 데코레이터
  */
-// SuccessResponseDto 형식과 동일하게 사용
-export function ApiSuccessResponse<T = any>(
+export function SwaggerResponse(
   statusCode: number,
-  dataExample?: T,
+  dataExample: string | object,
   description?: string,
 ): any {
+  const success = statusCode >= 200 && statusCode < 300;
   return applyDecorators(
     ApiResponse({
       status: statusCode,
-      description: description || (HTTP_STATUS_MESSAGES as any)[statusCode] || "요청 성공",
+      description: description || HTTP_STATUS_MESSAGES[statusCode] || "",
       schema: {
         type: "object",
         properties: {
@@ -23,7 +24,7 @@ export function ApiSuccessResponse<T = any>(
             description: "요청 성공 여부",
           },
           data: {
-            type: "object",
+            type: "string | object",
             description: "응답 데이터",
           },
           timestamp: {
@@ -36,9 +37,9 @@ export function ApiSuccessResponse<T = any>(
           },
         },
         example: {
-          success: true,
+          success: success,
           data: dataExample,
-          timestamp: "2024-01-01T00:00:00.000Z",
+          timestamp: SWAGGER_EXAMPLES.USER_DATA.createdAt,
           statusCode: statusCode,
         },
       },

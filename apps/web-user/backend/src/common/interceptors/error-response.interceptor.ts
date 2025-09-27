@@ -7,7 +7,6 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Response } from "express";
-import { ErrorResponseDto } from "@web-user/backend/common/dto/error-response.dto";
 
 /**
  * Error Response Interceptor
@@ -25,6 +24,7 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
    */
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
+    const request = ctx.getRequest();
     const response = ctx.getResponse<Response>();
 
     // HTTP 상태 코드 결정
@@ -32,26 +32,19 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
       exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     // 에러 메시지 추출
-    const message = exception instanceof HttpException ? exception.getResponse() : "";
-
-    // 메시지 처리 로직 개선
-    let errorMessage: string | object;
-    if (typeof message === "string") {
-      errorMessage = message;
-    } else if (typeof message === "object" && message !== null) {
-      // 객체인 경우 그대로 전달
-      errorMessage = message;
-    } else {
-      errorMessage = "요청 처리 중 오류가 발생했습니다.";
-    }
+    const data = exception instanceof HttpException ? exception.getResponse() : "";
 
     // 통일된 에러 응답 객체 생성
-    const errorResponse: ErrorResponseDto = {
+    const errorResponse = {
       success: false,
-      message: errorMessage,
+      data: data,
       timestamp: new Date().toISOString(),
       statusCode: status,
     };
+
+    if (process.env.NODE_ENV === "development") {
+      this.logger.error(`Error: ${request.method} ${request.url} - ${status}`, data);
+    }
 
     // 클라이언트에게 통일된 JSON 형태로 에러 응답 전송
     response.status(status).json(errorResponse);

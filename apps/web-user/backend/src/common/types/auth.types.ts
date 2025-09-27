@@ -1,5 +1,3 @@
-// import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
-
 /**
  * 인증 관련 타입 정의
  * 사용자 인증과 관련된 모든 타입들을 중앙 집중식으로 관리합니다.
@@ -23,12 +21,6 @@ export interface UserInfo {
   googleEmail?: string;
   createdAt: Date;
   lastLoginAt?: Date;
-}
-
-export interface CreateUser {
-  userId: string;
-  passwordHash: string;
-  phone: string;
 }
 
 /**
@@ -66,8 +58,6 @@ export interface TokenPair {
  * 구글에서 받은 사용자 정보 구조를 정의합니다.
  */
 export interface GoogleUserInfo {
-  // accessToken: string;
-  // refreshToken?: string;
   userInfo: {
     googleId: string;
     googleEmail: string;
