@@ -55,31 +55,4 @@ export class JwtUtil {
   async verifyToken(token: string): Promise<JwtVerifiedPayload> {
     return this.jwtService.verifyAsync(token);
   }
-
-  /**
-   * 리프레시 토큰으로 새로운 액세스 토큰을 생성합니다.
-   * @param refreshToken 리프레시 토큰
-   * @param userInfo 사용자 정보
-   * @returns 새로운 토큰 쌍
-   */
-  async refreshAccessToken(
-    refreshToken: string,
-    userInfo: { id: string; userId: string; phone: string },
-  ): Promise<TokenPair> {
-    // 리프레시 토큰 검증
-    const payload = await this.verifyToken(refreshToken);
-
-    // TODO: 로그 아웃이 되거나 권한없음 처리 로직 추가해야함
-
-    if (payload.type !== TOKEN_TYPES.REFRESH) {
-      throw new Error("Invalid token type");
-    }
-
-    // 새로운 토큰 쌍 생성
-    return this.generateTokenPair({
-      sub: userInfo.id,
-      userId: userInfo.userId,
-      phone: userInfo.phone,
-    });
-  }
 }

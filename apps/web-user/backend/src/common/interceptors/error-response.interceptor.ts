@@ -35,12 +35,12 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
     const message = exception instanceof HttpException ? exception.getResponse() : "";
 
     // 메시지 처리 로직 개선
-    let errorMessage: string;
+    let errorMessage: string | object;
     if (typeof message === "string") {
       errorMessage = message;
     } else if (typeof message === "object" && message !== null) {
-      // 객체인 경우 message 속성이 있으면 사용, 없으면 전체 객체를 문자열로 변환
-      errorMessage = (message as any).message || (message as any).error || JSON.stringify(message);
+      // 객체인 경우 그대로 전달
+      errorMessage = message;
     } else {
       errorMessage = "요청 처리 중 오류가 발생했습니다.";
     }

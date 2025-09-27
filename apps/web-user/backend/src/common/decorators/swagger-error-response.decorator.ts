@@ -6,7 +6,11 @@ import { HTTP_STATUS_MESSAGES } from "../constants/app.constants";
  * 에러 응답을 위한 커스텀 데코레이터
  */
 // ErrorResponseDto 형식과 동일하게 사용
-export function ApiErrorResponse(statusCode: number, message?: string, description?: string): any {
+export function ApiErrorResponse(
+  statusCode: number,
+  message?: string | object,
+  description?: string,
+): any {
   const errorMessage =
     message || (HTTP_STATUS_MESSAGES as any)[statusCode] || "요청 처리 중 오류가 발생했습니다.";
 
@@ -22,7 +26,7 @@ export function ApiErrorResponse(statusCode: number, message?: string, descripti
             description: "요청 성공 여부",
           },
           message: {
-            type: "string",
+            type: "string | object",
             description: "에러 메시지",
           },
           timestamp: {
