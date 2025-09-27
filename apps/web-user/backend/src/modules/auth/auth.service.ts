@@ -15,12 +15,6 @@ import {
   GoogleRegisterRequestDto,
   RefreshTokenRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import {
-  UserDataResponseDto,
-  FindAccountDataResponseDto,
-  RefreshTokenResponseDto,
-} from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
 import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
 
@@ -42,30 +36,28 @@ export class AuthService {
   /**
    * 일반 - 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<UserDataResponseDto> {
+  async register(registerDto: RegisterRequestDto) {
     return this.userService.register(registerDto);
   }
 
   /**
    * 일반 - ID 중복 확인
    */
-  async checkUserIdAvailability(
-    checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<AvailabilityResponseDto> {
+  async checkUserIdAvailability(checkUserIdDto: CheckUserIdRequestDto) {
     return this.userService.checkUserIdAvailability(checkUserIdDto);
   }
 
   /**
    * 일반 - 로그인
    */
-  async login(loginDto: LoginRequestDto): Promise<UserDataResponseDto> {
+  async login(loginDto: LoginRequestDto) {
     return this.userService.login(loginDto);
   }
 
   /**
    * 일반 - 비밀번호 변경
    */
-  async changePassword(changePasswordDto: ChangePasswordRequestDto): Promise<void> {
+  async changePassword(changePasswordDto: ChangePasswordRequestDto) {
     return this.userService.changePassword(changePasswordDto);
   }
 
@@ -75,54 +67,49 @@ export class AuthService {
    * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
    * 둘 다 있는 경우 모두 반환합니다.
    */
-  async findAccount(findAccountDto: FindAccountRequestDto): Promise<FindAccountDataResponseDto> {
+  async findAccount(findAccountDto: FindAccountRequestDto) {
     return this.userService.findAccount(findAccountDto);
   }
 
   /**
    * 구글 - Authorization Code로 구글 로그인 처리
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
     return this.googleService.googleLoginWithCode(codeDto);
   }
 
   /**
    * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
    */
-  async googleRegisterWithPhone(
-    googleRegisterDto: GoogleRegisterRequestDto,
-  ): Promise<UserDataResponseDto> {
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
     return this.googleService.googleRegisterWithPhone(googleRegisterDto);
   }
 
   /**
    * 휴대폰 인증번호 발송
    */
-  async sendVerificationCode(sendCodeDto: SendVerificationCodeRequestDto): Promise<void> {
+  async sendVerificationCode(sendCodeDto: SendVerificationCodeRequestDto) {
     return this.phoneService.sendVerificationCode(sendCodeDto);
   }
 
   /**
    * 휴대폰 인증번호 확인
    */
-  async verifyPhoneCode(verifyCodeDto: VerifyPhoneCodeRequestDto): Promise<void> {
+  async verifyPhoneCode(verifyCodeDto: VerifyPhoneCodeRequestDto) {
     return this.phoneService.verifyPhoneCode(verifyCodeDto);
   }
 
   /**
    * 휴대폰 번호 변경
    */
-  async changePhone(
-    changePhoneDto: ChangePhoneRequestDto,
-    user: JwtVerifiedPayload,
-  ): Promise<void> {
+  async changePhone(changePhoneDto: ChangePhoneRequestDto, user: JwtVerifiedPayload) {
     return this.userService.changePhone(changePhoneDto, user);
   }
 
   /**
    * Refresh Token을 사용하여 Access Token을 갱신합니다.
    */
-  async refreshToken(refreshTokenDto: RefreshTokenRequestDto): Promise<RefreshTokenResponseDto> {
+  async refreshToken(refreshTokenDto: RefreshTokenRequestDto) {
     const newAccessToken = await this.jwtUtil.refreshAccessToken(refreshTokenDto);
     return { accessToken: newAccessToken };
   }

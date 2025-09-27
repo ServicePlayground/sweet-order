@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@web-user/backend/database/prisma.service";
 import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
+import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
@@ -57,7 +58,7 @@ export class PhoneService {
     });
 
     if (recentVerifications >= 10) {
-      throw new BadRequestException("24시간 내 최대 발송 횟수(10회)를 초과했습니다."); // 400
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_LIMIT_EXCEEDED);
     }
 
     // 2. 인증번호 생성 - 6자리 인증번호
@@ -76,11 +77,6 @@ export class PhoneService {
     });
 
     // 4. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
-    // TODO: 실제 SMS 발송 서비스 연동 시 로그 제거
-    // console.log(
-    //   `SMS 발송: ${PhoneUtil.formatPhoneForDisplay(normalizedPhone)} - 인증번호: ${verificationCode}`,
-    // );
-
     // TODO: 실제 SMS 발송 서비스 연동 (예: 네이버 클라우드 플랫폼, 카카오 알림톡 등)
   }
 
@@ -105,17 +101,17 @@ export class PhoneService {
 
     // 인증 정보가 존재하지 않는 경우
     if (!phoneVerification) {
-      throw new BadRequestException("인증번호가 올바르지 않습니다."); // 400
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
     }
 
     // 2. 인증 상태 확인 - is_verified 플래그 확인
     if (phoneVerification.isVerified) {
-      throw new BadRequestException("이미 인증된 번호입니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_ALREADY_VERIFIED);
     }
 
     // 3. 만료 시간 확인 - 5분 후 자동 만료
     if (phoneVerification.expiresAt < new Date()) {
-      throw new BadRequestException("인증번호가 만료되었습니다.");
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
     }
 
     // 4. 인증 성공 처리 - 트랜잭션으로 안전하게 처리
