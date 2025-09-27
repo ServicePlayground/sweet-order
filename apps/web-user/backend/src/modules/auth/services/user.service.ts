@@ -2,13 +2,12 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
-  NotFoundException,
   BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "@web-user/backend/database/prisma.service";
-import { PasswordUtil } from "@web-user/backend/common/utils/password.util";
-import { PhoneUtil } from "@web-user/backend/common/utils/phone.util";
-import { JwtUtil } from "@web-user/backend/common/utils/jwt.util";
+import { PasswordUtil } from "@web-user/backend/modules/auth/utils/password.util";
+import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
+import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
 import {
   RegisterRequestDto,
   CheckUserIdRequestDto,

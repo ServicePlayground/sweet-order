@@ -1,6 +1,6 @@
 import { Injectable, ConflictException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@web-user/backend/database/prisma.service";
-import { JwtUtil } from "@web-user/backend/common/utils/jwt.util";
+import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import { UserDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
@@ -82,7 +82,7 @@ export class GoogleService {
         },
       );
 
-      const { access_token, refresh_token, token_type } = tokenResponse.data;
+      const { access_token, token_type } = tokenResponse.data;
 
       // Access Token으로 사용자 정보 요청
       const userInfoResponse = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
