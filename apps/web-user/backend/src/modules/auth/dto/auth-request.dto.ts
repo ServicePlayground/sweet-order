@@ -6,7 +6,7 @@ import {
   IsValidKoreanPhone,
 } from "@web-user/backend/common/decorators/validators.decorator";
 
-// 일반 회원가입 요청 DTO
+// 일반 - 회원가입 요청 DTO
 export class RegisterRequestDto {
   @ApiProperty({
     description: "사용자 아이디",
@@ -34,6 +34,75 @@ export class RegisterRequestDto {
   @IsString()
   @IsValidKoreanPhone()
   phone: string;
+}
+
+// 일반 - ID 중복 확인 요청 DTO
+export class CheckUserIdRequestDto {
+  @ApiProperty({
+    description: "확인할 사용자 아이디",
+    example: "user123",
+  })
+  @IsString()
+  @IsValidUserId()
+  userId: string;
+}
+
+// 일반 - 로그인 요청 DTO
+export class LoginRequestDto {
+  @ApiProperty({
+    description: "사용자 아이디",
+    example: "user123",
+  })
+  @IsString()
+  @IsValidUserId()
+  userId: string;
+
+  @ApiProperty({
+    description: "비밀번호",
+    example: "Password123!",
+  })
+  @IsString()
+  @IsValidPassword()
+  password: string;
+}
+
+// 일반 - ID 찾기 요청 DTO
+export class FindUserIdRequestDto {
+  @ApiProperty({
+    description: "휴대폰 번호",
+    example: "010-1234-5678",
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  phone: string;
+}
+
+// 일반 - 비밀번호 변경 요청 DTO
+export class ChangePasswordRequestDto {
+  @ApiProperty({
+    description: "사용자 아이디",
+    example: "user123",
+  })
+  @IsString()
+  @IsValidUserId()
+  userId: string;
+
+  @ApiProperty({
+    description: "휴대폰 번호",
+    example: "010-1234-5678",
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  phone: string;
+
+  @ApiProperty({
+    description: "새로운 비밀번호",
+    example: "NewPassword123!",
+    minLength: 8,
+  })
+  @IsString()
+  @IsValidPassword()
+  newPassword: string;
 }
 
 // 휴대폰 인증번호 발송 요청 DTO
@@ -66,21 +135,50 @@ export class VerifyPhoneCodeRequestDto {
   verificationCode: string;
 }
 
-// 사용자 ID 중복 확인 요청 DTO
-export class CheckUserIdRequestDto {
+// 휴대폰 번호 변경 요청 DTO
+export class ChangePhoneRequestDto {
   @ApiProperty({
-    description: "확인할 사용자 아이디",
-    example: "user123",
+    description: "기존 휴대폰 번호",
+    example: "010-1234-5678",
   })
   @IsString()
-  @IsValidUserId()
-  userId: string;
+  @IsValidKoreanPhone()
+  oldPhone: string;
+
+  @ApiProperty({
+    description: "새로운 휴대폰 번호",
+    example: "010-9876-5432",
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  newPhone: string;
 }
 
-// 휴대폰 번호 중복 확인 요청 DTO
-export class CheckPhoneRequestDto {
+/**
+ * 구글 로그인 요청 DTO (Authorization Code)
+ */
+export class GoogleLoginRequestDto {
   @ApiProperty({
-    description: "확인할 휴대폰 번호",
+    description: "구글에서 받은 Authorization Code",
+    example: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
+  })
+  @IsString()
+  code: string;
+}
+
+/**
+ * 구글 로그인 회원가입 요청 DTO
+ */
+export class GoogleRegisterRequestDto {
+  @ApiProperty({
+    description: "구글 ID",
+    example: "google123",
+  })
+  @IsString()
+  googleId: string;
+
+  @ApiProperty({
+    description: "휴대폰 번호",
     example: "010-1234-5678",
   })
   @IsString()

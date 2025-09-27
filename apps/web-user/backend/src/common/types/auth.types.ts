@@ -11,12 +11,17 @@
  */
 export interface UserInfo {
   id: string;
-  userId: string;
+  userId?: string;
   phone: string;
   name?: string;
   nickname?: string;
+  email?: string;
   profileImageUrl?: string;
-  isVerified: boolean;
+  isPhoneVerified: boolean;
+  isActive: boolean;
+  googleId?: string;
+  createdAt: Date;
+  lastLoginAt?: Date;
 }
 
 export interface CreateUser {
@@ -52,4 +57,16 @@ export interface JwtVerifiedPayload extends JwtPayload {
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;
+}
+
+/**
+ * 구글 OAuth 사용자 정보 인터페이스
+ * 구글에서 받은 사용자 정보 구조를 정의합니다.
+ */
+export interface GoogleUserInfo {
+  // accessToken: string;
+  // refreshToken?: string;
+  userInfo: {
+    googleId: string;
+  };
 }

@@ -12,10 +12,10 @@ export class ErrorResponseDto {
   success: boolean;
 
   @ApiProperty({
-    description: "에러 메시지",
+    description: "에러 메시지 (문자열 또는 객체)",
     example: "요청 처리 중 오류가 발생했습니다.",
   })
-  message: string;
+  message: string | object;
 
   @ApiProperty({
     description: "응답 시간 (ISO 8601)",
