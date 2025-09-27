@@ -2,10 +2,10 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
-import { DatabaseModule } from "@web-user/backend/database/database.module";
-import { AuthModule } from "@web-user/backend/modules/auth/auth.module";
-import { SuccessResponseInterceptor } from "@web-user/backend/common/interceptors/success-response.interceptor";
-import { ErrorResponseInterceptor } from "@web-user/backend/common/interceptors/error-response.interceptor";
+import { DatabaseModule } from "./database/database.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { SuccessResponseInterceptor } from "./common/interceptors/success-response.interceptor";
+import { ErrorResponseInterceptor } from "./common/interceptors/error-response.interceptor";
 
 /**
  * NestJS 애플리케이션의 루트 모듈
