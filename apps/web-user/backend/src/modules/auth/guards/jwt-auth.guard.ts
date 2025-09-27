@@ -1,7 +1,11 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from "@nestjs/common";
+import { Injectable, ExecutionContext } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { Reflector } from "@nestjs/core";
 
+/**
+ * JWT 인증 가드
+ * Passport JWT 가드를 확장하여 Public 데코레이터가 있는 엔드포인트는 인증을 건너뜁니다.
+ */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
   constructor(private reflector: Reflector) {
@@ -22,12 +26,5 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     }
 
     return super.canActivate(context);
-  }
-
-  handleRequest(err: unknown, user: unknown): any {
-    if (err || !user) {
-      throw err || new UnauthorizedException("인증이 필요합니다.");
-    }
-    return user;
   }
 }

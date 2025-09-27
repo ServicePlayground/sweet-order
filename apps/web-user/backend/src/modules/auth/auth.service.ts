@@ -13,12 +13,15 @@ import {
   ChangePhoneRequestDto,
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
+  RefreshTokenRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import {
   UserDataResponseDto,
   FindUserIdDataResponseDto,
+  RefreshTokenResponseDto,
 } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
+import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
 
 /**
  * 인증 서비스
@@ -32,6 +35,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly phoneService: PhoneService,
     private readonly googleService: GoogleService,
+    private readonly jwtUtil: JwtUtil,
   ) {}
 
   /**
@@ -106,5 +110,13 @@ export class AuthService {
     googleRegisterDto: GoogleRegisterRequestDto,
   ): Promise<UserDataResponseDto> {
     return this.googleService.googleRegisterWithPhone(googleRegisterDto);
+  }
+
+  /**
+   * Refresh Token을 사용하여 Access Token을 갱신합니다.
+   */
+  async refreshToken(refreshTokenDto: RefreshTokenRequestDto): Promise<RefreshTokenResponseDto> {
+    const newAccessToken = await this.jwtUtil.refreshAccessToken(refreshTokenDto);
+    return { accessToken: newAccessToken };
   }
 }
