@@ -91,13 +91,16 @@ export class FeatureModule {}
 HTTP 요청을 받아 처리하고 응답을 반환하는 역할을 담당합니다.
 
 ```typescript
-@Controller("feature")
-export class FeatureController {
-  constructor(private readonly featureService: FeatureService) {}
+@Controller("auth")
+@UseGuards(JwtAuthGuard)
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
 
-  @Get()
-  getFeature(): FeatureResponseDto {
-    return this.featureService.getFeature();
+  @Post("login")
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() loginDto: LoginRequestDto) {
+    return this.authService.login(loginDto);
   }
 }
 ```
@@ -108,14 +111,14 @@ export class FeatureController {
 
 ```typescript
 @Injectable()
-export class FeatureService {
-  getFeature(): FeatureResponseDto {
-    return {
-      id: 1,
-      name: "Feature Name",
-      description: "Feature Description",
-      createdAt: new Date().toISOString(),
-    };
+export class AuthService {
+  constructor(
+    private readonly userService: UserService,
+    private readonly phoneService: PhoneService,
+  ) {}
+
+  async login(loginDto: LoginRequestDto) {
+    return this.userService.login(loginDto);
   }
 }
 ```
@@ -123,14 +126,17 @@ export class FeatureService {
 ### 상세 처리 과정
 
 1. **요청 수신**: 클라이언트가 HTTP 요청을 서버로 전송
-2. **라우팅**: NestJS가 요청 URL을 분석하여 적절한 컨트롤러와 메서드 찾기
-3. **미들웨어 처리**: 인증, 로깅, CORS 등 미들웨어 실행
-4. **유효성 검사**: ValidationPipe를 통한 DTO 검증
-5. **컨트롤러 실행**: 해당 컨트롤러 메서드 호출
-6. **서비스 호출**: 컨트롤러에서 비즈니스 로직을 담당하는 서비스 호출
-7. **비즈니스 로직 처리**: 서비스에서 실제 데이터 처리 및 계산
-8. **응답 생성**: 처리 결과를 DTO 형태로 변환
-9. **HTTP 응답**: 클라이언트에게 JSON 응답 반환
+2. **전역 접두사 적용**: `/v1` 접두사가 자동으로 추가됨
+3. **CORS 및 보안 헤더**: helmet, CORS 설정 적용
+4. **Rate Limiting**: ThrottlerGuard를 통한 요청 제한 검사
+5. **라우팅**: NestJS가 요청 URL을 분석하여 적절한 컨트롤러와 메서드 찾기
+6. **JWT 인증**: JwtAuthGuard를 통한 인증 검사 (Public 데코레이터가 없는 경우)
+7. **유효성 검사**: ValidationPipe를 통한 DTO 검증
+8. **컨트롤러 실행**: 해당 컨트롤러 메서드 호출
+9. **서비스 호출**: 컨트롤러에서 비즈니스 로직을 담당하는 서비스 호출
+10. **비즈니스 로직 처리**: 서비스에서 실제 데이터 처리 및 계산
+11. **응답 인터셉터**: SuccessResponseInterceptor가 응답을 통일된 형태로 래핑
+12. **HTTP 응답**: 클라이언트에게 JSON 응답 반환
 
 ## 의존성 주입 (Dependency Injection)
 
@@ -140,10 +146,12 @@ NestJS는 강력한 의존성 주입 시스템을 제공합니다.
 
 ```typescript
 @Injectable()
-export class OrderService {
+export class AuthService {
   constructor(
-    private readonly orderRepository: OrderRepository,
     private readonly userService: UserService,
+    private readonly phoneService: PhoneService,
+    private readonly googleService: GoogleService,
+    private readonly jwtUtil: JwtUtil,
   ) {}
 }
 ```
@@ -155,15 +163,24 @@ src/
 ├── main.ts                 # 애플리케이션 진입점
 ├── app.module.ts          # 루트 모듈 (모든 모듈을 통합)
 ├── modules/               # 기능별 모듈들
-│   ├── feature1/         # 기능 모듈 1
-│   ├── feature2/         # 기능 모듈 2
-│   └── feature3/         # 기능 모듈 3
+│   └── auth/             # 인증 모듈
+│       ├── auth.controller.ts
+│       ├── auth.module.ts
+│       ├── auth.service.ts
+│       ├── constants/    # 상수 정의
+│       ├── dto/         # 요청/응답 DTO
+│       ├── guards/      # 인증 가드
+│       ├── services/    # 세부 서비스들
+│       ├── strategies/  # Passport 전략
+│       └── utils/       # 유틸리티 함수들
 ├── common/               # 공통 유틸리티
-│   ├── decorators/       # 커스텀 데코레이터
-│   ├── dto/             # 공통 DTO
-│   ├── filters/         # 예외 필터
-│   └── interfaces/      # 공통 인터페이스
-└── config/              # 설정 파일들
+│   ├── constants/       # 앱 상수
+│   ├── decorators/      # 커스텀 데코레이터
+│   ├── interceptors/    # 응답 인터셉터
+│   └── types/          # 공통 타입 정의
+└── database/            # 데이터베이스 모듈
+    ├── database.module.ts
+    └── prisma.service.ts
 ```
 
 ## 모범 사례
