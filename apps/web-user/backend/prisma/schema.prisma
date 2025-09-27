@@ -13,28 +13,38 @@ datasource db {
 // User model for authentication and user management
 model User {
   id               String   @id @default(cuid())              // 고유 식별자 (UUID)
-  userId           String   @unique @map("user_id")           // 사용자 ID (로그인용)
-  phone            String   @unique                           // 휴대폰 번호
-  passwordHash     String?  @map("password_hash")             // 암호화된 비밀번호
-  name             String?                                    // 사용자 실명 (선택사항)
-  nickname         String?                                    // 닉네임 (선택사항)
-  profileImageUrl  String?  @map("profile_image_url")         // 프로필 이미지 URL (선택사항)
-  isVerified       Boolean  @default(false) @map("is_verified") // 휴대폰 인증 여부
+  phone            String   @unique                           // 휴대폰 번호 (통합 정보 탐색용, 필수)
+  passwordHash     String?  @map("password_hash")             // 암호화된 비밀번호 (일반 회원가입용)
+  name             String?                                    // 사용자 실명
+  nickname         String?                                    // 닉네임
+  email            String?                                    // 이메일
+  profileImageUrl  String?  @map("profile_image_url")         // 프로필 이미지 URL
+  isPhoneVerified  Boolean  @default(false) @map("is_phone_verified") // 휴대폰 인증 여부
+  isActive         Boolean  @default(true) @map("is_active")  // 계정 활성화 상태
+  // 일반 회원가입 관련 필드
+  userId           String?  @unique @map("user_id")           // 사용자 ID (일반 회원가입용, 소셜 로그인 시 null 가능)
+  // 소셜 로그인 관련 필드
+  googleId         String?  @unique @map("google_id")         // 구글 사용자 ID
+  // 계정 생성/수정 정보
   createdAt        DateTime @default(now()) @map("created_at")  // 계정 생성일시
-  updatedAt        DateTime @updatedAt @map("updated_at")        // 계정 수정일시
+  lastLoginAt      DateTime? @map("last_login_at")            // 마지막 로그인 시간
 
+  @@index([phone])                                            // 휴대폰 번호 인덱스 (통합 정보 탐색용)
+  @@index([userId])                                           // 사용자 ID 인덱스 (일반 로그인용)
+  @@index([googleId])                                         // 구글 ID 인덱스 (구글 로그인용)
   @@map("users")
 }
 
 
-// Phone verification
+// Phone verification for registration and password recovery
 model PhoneVerification {
   id               String   @id @default(cuid())              // 고유 식별자 (UUID)
   phone            String                                   // 휴대폰 번호
   verificationCode String   @map("verification_code")        // 인증번호 (6자리)
-  attemptCount     Int      @default(0) @map("attempt_count") // 인증 시도 횟수
   expiresAt        DateTime @map("expires_at")               // 인증번호 만료시간
   isVerified       Boolean  @default(false) @map("is_verified") // 인증 완료 여부
+  purpose          String   @default("registration")         // 인증 목적 (registration, password_recovery, id_find)
+  userId           String?  @map("user_id")                  // 연관된 사용자 ID (비밀번호 찾기, 아이디 찾기 시)
   createdAt        DateTime @default(now()) @map("created_at")  // 인증 요청일시
   updatedAt        DateTime @updatedAt @map("updated_at")        // 인증 수정일시
 

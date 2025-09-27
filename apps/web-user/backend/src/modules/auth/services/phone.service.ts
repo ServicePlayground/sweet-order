@@ -28,35 +28,52 @@ export class PhoneService {
     const { phone } = sendCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 1. 기존 인증 정보 확인 - PhoneVerification 테이블 조회
-    const existingVerification = await this.prisma.phoneVerification.findFirst({
-      where: { phone: normalizedPhone },
-      orderBy: { createdAt: "desc" },
+    // 1. 24시간 기준 최대 10회 제한 확인 (휴대폰 인증 완료 시 카운트 초기화)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    // 마지막으로 인증이 완료된 시점을 확인
+    const lastVerifiedVerification = await this.prisma.phoneVerification.findFirst({
+      where: {
+        phone: normalizedPhone,
+        isVerified: true,
+      },
+      orderBy: { createdAt: "desc" }, // createdAt 기준
     });
 
-    // 2. 재발송 제한 확인 - 1분 이내 재발송 방지
-    if (existingVerification) {
-      const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-      if (existingVerification.createdAt > oneMinuteAgo) {
-        throw new BadRequestException("인증번호는 1분 후에 다시 요청할 수 있습니다."); // 400
-      }
+    // 인증 완료 시점 이후의 발송 횟수만 카운트 (카운트 초기화 효과)
+    const countFromDate = lastVerifiedVerification
+      ? lastVerifiedVerification.createdAt > twentyFourHoursAgo
+        ? lastVerifiedVerification.createdAt // 케이스 1: 마지막 인증 완료가 24시간 이내 → 그 시점부터 카운트
+        : twentyFourHoursAgo // 케이스 2: 마지막 인증 완료가 24시간 이전 → 24시간 전부터 카운트
+      : twentyFourHoursAgo; // 케이스 3: 인증 완료된 적 없음 → 24시간 전부터 카운트
+
+    const recentVerifications = await this.prisma.phoneVerification.count({
+      where: {
+        phone: normalizedPhone,
+        createdAt: {
+          gte: countFromDate,
+        },
+      },
+    });
+
+    if (recentVerifications >= 10) {
+      throw new BadRequestException("24시간 내 최대 발송 횟수(10회)를 초과했습니다."); // 400
     }
 
-    // 3. 인증번호 생성 - 6자리 인증번호
+    // 2. 인증번호 생성 - 6자리 인증번호
     const verificationCode = PhoneUtil.generateVerificationCode();
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
-    // 4. 인증 정보 저장 - PhoneVerification 테이블
+    // 3. 인증 정보 저장 - PhoneVerification 테이블
     await this.prisma.phoneVerification.create({
       data: {
         phone: normalizedPhone,
         verificationCode,
         expiresAt,
-        attemptCount: 0, // ERD: attempt_count 초기화
       },
     });
 
-    // 5. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
+    // 4. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
     // TODO: 실제 SMS 발송 서비스 연동 시 로그 제거
     // console.log(
     //   `SMS 발송: ${PhoneUtil.formatPhoneForDisplay(normalizedPhone)} - 인증번호: ${verificationCode}`,
@@ -99,17 +116,22 @@ export class PhoneService {
       throw new BadRequestException("인증번호가 만료되었습니다.");
     }
 
-    // 4. 시도 횟수 확인 - 일일 5회 제한
-    if (phoneVerification.attemptCount >= 5) {
-      throw new BadRequestException("인증 시도 횟수를 초과했습니다.");
-    }
-
-    // 5. 인증 성공 처리 - is_verified = true로 업데이트
+    // 4. 인증 성공 처리 - is_verified = true로 업데이트
     await this.prisma.phoneVerification.update({
       where: { id: phoneVerification.id },
       data: {
         isVerified: true, // is_verified 플래그로 본인인증 상태 관리
-        attemptCount: phoneVerification.attemptCount + 1, // 시도 횟수 증가
+      },
+    });
+
+    // 5. 휴대폰 인증 완료 시 해당 휴대폰의 모든 미완료 인증 기록 삭제 (24시간 카운트 초기화)
+    await this.prisma.phoneVerification.deleteMany({
+      where: {
+        phone: normalizedPhone,
+        isVerified: false,
+        id: {
+          not: phoneVerification.id, // 현재 인증된 기록은 제외
+        },
       },
     });
   }

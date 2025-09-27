@@ -23,3 +23,11 @@ export class ErrorMessageResponseDto {
   })
   message: string;
 }
+
+export class SuccessMessageResponseDto {
+  @ApiProperty({
+    description: "성공 메시지",
+    example: "요청 처리 중 성공했습니다.",
+  })
+  message: string;
+}

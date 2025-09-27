@@ -1,34 +1,74 @@
 import { Injectable } from "@nestjs/common";
 import { PhoneService } from "@web-user/backend/modules/auth/services/phone.service";
 import { UserService } from "@web-user/backend/modules/auth/services/user.service";
+import { GoogleService } from "@web-user/backend/modules/auth/services/google.service";
 import {
   RegisterRequestDto,
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
   CheckUserIdRequestDto,
-  CheckPhoneRequestDto,
+  LoginRequestDto,
+  FindUserIdRequestDto,
+  ChangePasswordRequestDto,
+  ChangePhoneRequestDto,
+  GoogleLoginRequestDto,
+  GoogleRegisterRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import { RegisterDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
+import {
+  UserDataResponseDto,
+  FindUserIdDataResponseDto,
+} from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 
 /**
  * 인증 서비스
  *
  * 모든 인증 관련 기능을 통합하여 제공하는 메인 서비스입니다.
- * UserManagementService, PhoneVerificationService를 조합하여 사용합니다.
+ * UserManagementService, PhoneVerificationService, GoogleService를 조합하여 사용합니다.
  */
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly phoneService: PhoneService,
+    private readonly googleService: GoogleService,
   ) {}
 
   /**
-   * 회원가입
+   * 일반 - 회원가입
    */
-  async register(registerDto: RegisterRequestDto): Promise<RegisterDataResponseDto> {
+  async register(registerDto: RegisterRequestDto): Promise<UserDataResponseDto> {
     return this.userService.register(registerDto);
+  }
+
+  /**
+   * 일반 - ID 중복 확인
+   */
+  async checkUserIdAvailability(
+    checkUserIdDto: CheckUserIdRequestDto,
+  ): Promise<AvailabilityResponseDto> {
+    return this.userService.checkUserIdAvailability(checkUserIdDto);
+  }
+
+  /**
+   * 일반 - 로그인
+   */
+  async login(loginDto: LoginRequestDto): Promise<UserDataResponseDto> {
+    return this.userService.login(loginDto);
+  }
+
+  /**
+   * 일반 - ID 찾기
+   */
+  async findUserId(findUserIdDto: FindUserIdRequestDto): Promise<FindUserIdDataResponseDto> {
+    return this.userService.findUserId(findUserIdDto);
+  }
+
+  /**
+   * 일반 - 비밀번호 변경
+   */
+  async changePassword(changePasswordDto: ChangePasswordRequestDto): Promise<void> {
+    return this.userService.changePassword(changePasswordDto);
   }
 
   /**
@@ -46,20 +86,25 @@ export class AuthService {
   }
 
   /**
-   * 사용자 ID 중복 확인
+   * 휴대폰 번호 변경
    */
-  async checkUserIdAvailability(
-    checkUserIdDto: CheckUserIdRequestDto,
-  ): Promise<AvailabilityResponseDto> {
-    return this.userService.checkUserIdAvailability(checkUserIdDto);
+  async changePhone(changePhoneDto: ChangePhoneRequestDto): Promise<void> {
+    return this.userService.changePhone(changePhoneDto);
   }
 
   /**
-   * 휴대폰 번호 중복 확인
+   * 구글 - Authorization Code로 구글 로그인 처리
    */
-  async checkPhoneAvailability(
-    checkPhoneDto: CheckPhoneRequestDto,
-  ): Promise<AvailabilityResponseDto> {
-    return this.userService.checkPhoneAvailability(checkPhoneDto);
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
+    return this.googleService.googleLoginWithCode(codeDto);
+  }
+
+  /**
+   * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
+   */
+  async googleRegisterWithPhone(
+    googleRegisterDto: GoogleRegisterRequestDto,
+  ): Promise<UserDataResponseDto> {
+    return this.googleService.googleRegisterWithPhone(googleRegisterDto);
   }
 }

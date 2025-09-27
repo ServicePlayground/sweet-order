@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -13,6 +14,10 @@ async function main() {
     },
   });
 
+  // 비밀번호 해싱
+  const hashedPassword1 = await bcrypt.hash("Password123!", 12);
+  const hashedPassword2 = await bcrypt.hash("Password456!", 12);
+
   // Create sample users
   const users = await Promise.all([
     // 일반 회원가입
@@ -20,8 +25,8 @@ async function main() {
       data: {
         userId: "user123",
         phone: "01012345678",
-        passwordHash: "password123!",
-        isVerified: true,
+        passwordHash: hashedPassword1,
+        isPhoneVerified: true,
       },
     }),
     // 일반 회원가입
@@ -29,8 +34,8 @@ async function main() {
       data: {
         userId: "user456",
         phone: "01012345679",
-        passwordHash: "password456!",
-        isVerified: true,
+        passwordHash: hashedPassword2,
+        isPhoneVerified: true,
       },
     }),
   ]);
