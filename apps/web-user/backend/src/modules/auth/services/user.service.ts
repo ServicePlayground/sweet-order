@@ -9,18 +9,22 @@ import { PasswordUtil } from "@web-user/backend/modules/auth/utils/password.util
 import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
 import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
 import {
+  JwtVerifiedPayload,
+  UserInfo,
+  CreateUser,
+} from "@web-user/backend/common/types/auth.types";
+import {
   RegisterRequestDto,
   CheckUserIdRequestDto,
   LoginRequestDto,
-  FindUserIdRequestDto,
+  FindAccountRequestDto,
   ChangePasswordRequestDto,
   ChangePhoneRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import {
   UserDataResponseDto,
-  FindUserIdDataResponseDto,
+  FindAccountDataResponseDto,
 } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
-import { UserInfo, CreateUser } from "@web-user/backend/common/types/auth.types";
 import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 
 /**
@@ -77,8 +81,9 @@ export class UserService {
     // 6. JWT 토큰 생성
     const tokenPair = await this.jwtUtil.generateTokenPair({
       sub: user.id,
-      userId: user.userId ?? "",
       phone: user.phone,
+      loginType: "general",
+      loginId: user.userId ?? "",
     });
 
     // 7. 응답 data 반환 (Response Interceptor 래핑하여 자동으로 success, message, timestamp, statusCode를 추가)
@@ -117,6 +122,7 @@ export class UserService {
       isActive: user.isActive,
       userId: user.userId ?? "",
       googleId: user.googleId ?? "",
+      googleEmail: user.googleEmail ?? "",
       createdAt: user.createdAt,
       lastLoginAt: user.lastLoginAt ?? new Date(),
     };
@@ -207,8 +213,9 @@ export class UserService {
     // 4. JWT 토큰 생성
     const tokenPair = await this.jwtUtil.generateTokenPair({
       sub: user.id,
-      userId: user.userId ?? "",
       phone: user.phone,
+      loginType: "general",
+      loginId: user.userId ?? "",
     });
 
     // 5. 마지막 로그인 시간 업데이트
@@ -231,6 +238,7 @@ export class UserService {
         isActive: user.isActive,
         userId: user.userId ?? "",
         googleId: user.googleId ?? "",
+        googleEmail: user.googleEmail ?? "",
         createdAt: user.createdAt,
         lastLoginAt: user.lastLoginAt ?? new Date(),
       },
@@ -238,10 +246,13 @@ export class UserService {
   }
 
   /**
-   * 일반 회원가입 - 사용자 ID 찾기
+   * 계정 찾기
+   * 휴대폰 인증을 통해 계정 정보를 찾습니다.
+   * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
+   * 둘 다 있는 경우 모두 반환합니다.
    */
-  async findUserId(findUserIdDto: FindUserIdRequestDto): Promise<FindUserIdDataResponseDto> {
-    const { phone } = findUserIdDto;
+  async findAccount(findAccountDto: FindAccountRequestDto): Promise<FindAccountDataResponseDto> {
+    const { phone } = findAccountDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
     // 1. 휴대폰 인증 확인
@@ -262,13 +273,27 @@ export class UserService {
       where: { phone: normalizedPhone },
     });
 
-    if (!user || !user.userId) {
+    if (!user) {
       throw new BadRequestException("해당 휴대폰 번호로 등록된 계정이 없습니다.");
     }
 
-    return {
-      userId: user.userId,
-    };
+    // 3. 계정 정보 반환
+    const result: FindAccountDataResponseDto = {};
+
+    if (user.userId) {
+      result.userId = user.userId;
+    }
+
+    if (user.googleEmail) {
+      result.googleEmail = user.googleEmail;
+    }
+
+    // 둘 다 없는 경우 (예외 상황)
+    if (!result.userId && !result.googleEmail) {
+      throw new BadRequestException("해당 휴대폰 번호로 등록된 계정이 없습니다.");
+    }
+
+    return result;
   }
 
   /**
@@ -317,18 +342,20 @@ export class UserService {
   /**
    * 휴대폰 번호 변경
    */
-  async changePhone(changePhoneDto: ChangePhoneRequestDto): Promise<void> {
-    const { oldPhone, newPhone } = changePhoneDto;
-    const normalizedOldPhone = PhoneUtil.normalizePhone(oldPhone);
+  async changePhone(
+    changePhoneDto: ChangePhoneRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<void> {
+    const { newPhone } = changePhoneDto;
     const normalizedNewPhone = PhoneUtil.normalizePhone(newPhone);
 
-    // 1. 기존 휴대폰 번호로 사용자 조회
-    const user = await this.prisma.user.findUnique({
-      where: { phone: normalizedOldPhone },
+    // 1. JWT에서 추출한 사용자 ID로 사용자 조회
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: user.sub },
     });
 
-    if (!user) {
-      throw new BadRequestException("기존 휴대폰 번호로 등록된 사용자를 찾을 수 없습니다.");
+    if (!currentUser) {
+      throw new BadRequestException("사용자를 찾을 수 없습니다.");
     }
 
     // 2. 새 휴대폰 번호 중복 확인
@@ -355,7 +382,7 @@ export class UserService {
 
     // 4. 휴대폰 번호 변경
     await this.prisma.user.update({
-      where: { id: user.id },
+      where: { id: currentUser.id },
       data: { phone: normalizedNewPhone },
     });
   }

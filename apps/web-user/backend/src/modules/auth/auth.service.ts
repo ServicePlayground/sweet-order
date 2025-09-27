@@ -8,7 +8,7 @@ import {
   VerifyPhoneCodeRequestDto,
   CheckUserIdRequestDto,
   LoginRequestDto,
-  FindUserIdRequestDto,
+  FindAccountRequestDto,
   ChangePasswordRequestDto,
   ChangePhoneRequestDto,
   GoogleLoginRequestDto,
@@ -17,11 +17,12 @@ import {
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import {
   UserDataResponseDto,
-  FindUserIdDataResponseDto,
+  FindAccountDataResponseDto,
   RefreshTokenResponseDto,
 } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
+import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
 
 /**
  * 인증 서비스
@@ -62,17 +63,36 @@ export class AuthService {
   }
 
   /**
-   * 일반 - ID 찾기
-   */
-  async findUserId(findUserIdDto: FindUserIdRequestDto): Promise<FindUserIdDataResponseDto> {
-    return this.userService.findUserId(findUserIdDto);
-  }
-
-  /**
    * 일반 - 비밀번호 변경
    */
   async changePassword(changePasswordDto: ChangePasswordRequestDto): Promise<void> {
     return this.userService.changePassword(changePasswordDto);
+  }
+
+  /**
+   * 계정 찾기
+   * 휴대폰 인증을 통해 계정 정보를 찾습니다.
+   * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
+   * 둘 다 있는 경우 모두 반환합니다.
+   */
+  async findAccount(findAccountDto: FindAccountRequestDto): Promise<FindAccountDataResponseDto> {
+    return this.userService.findAccount(findAccountDto);
+  }
+
+  /**
+   * 구글 - Authorization Code로 구글 로그인 처리
+   */
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
+    return this.googleService.googleLoginWithCode(codeDto);
+  }
+
+  /**
+   * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
+   */
+  async googleRegisterWithPhone(
+    googleRegisterDto: GoogleRegisterRequestDto,
+  ): Promise<UserDataResponseDto> {
+    return this.googleService.googleRegisterWithPhone(googleRegisterDto);
   }
 
   /**
@@ -92,24 +112,11 @@ export class AuthService {
   /**
    * 휴대폰 번호 변경
    */
-  async changePhone(changePhoneDto: ChangePhoneRequestDto): Promise<void> {
-    return this.userService.changePhone(changePhoneDto);
-  }
-
-  /**
-   * 구글 - Authorization Code로 구글 로그인 처리
-   */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
-    return this.googleService.googleLoginWithCode(codeDto);
-  }
-
-  /**
-   * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
-   */
-  async googleRegisterWithPhone(
-    googleRegisterDto: GoogleRegisterRequestDto,
-  ): Promise<UserDataResponseDto> {
-    return this.googleService.googleRegisterWithPhone(googleRegisterDto);
+  async changePhone(
+    changePhoneDto: ChangePhoneRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<void> {
+    return this.userService.changePhone(changePhoneDto, user);
   }
 
   /**

@@ -66,7 +66,7 @@ export class JwtUtil {
     try {
       const { refreshToken } = refreshTokenDto;
 
-      // Refresh Token 검증
+      // Refresh Token 검증 (JWT 서명 및 만료시간 자동 검증)
       const payload = await this.verifyToken(refreshToken);
 
       // 토큰 타입이 refresh token인지 확인
@@ -77,8 +77,9 @@ export class JwtUtil {
       // 새로운 Access Token 생성
       const accessTokenPayload = {
         sub: payload.sub,
-        userId: payload.userId,
         phone: payload.phone,
+        loginType: payload.loginType,
+        loginId: payload.loginId,
         type: TOKEN_TYPES.ACCESS,
       };
 

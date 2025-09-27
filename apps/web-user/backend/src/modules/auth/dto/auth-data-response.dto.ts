@@ -74,6 +74,11 @@ export class UserDataResponseDto {
         description: "구글 ID",
         example: "google123",
       },
+      googleEmail: {
+        type: "string",
+        description: "구글 이메일",
+        example: "user@gmail.com",
+      },
       createdAt: {
         type: "string",
         format: "date-time",
@@ -91,13 +96,21 @@ export class UserDataResponseDto {
   user: UserInfo;
 }
 
-// 일반 - ID 찾기 응답 data DTO
-export class FindUserIdDataResponseDto {
+// 계정 찾기 응답 data DTO
+export class FindAccountDataResponseDto {
   @ApiProperty({
-    description: "찾은 사용자 ID",
+    description: "찾은 사용자 ID (일반 로그인 계정인 경우)",
     example: "user123",
+    required: false,
   })
-  userId: string;
+  userId?: string;
+
+  @ApiProperty({
+    description: "찾은 구글 이메일 (구글 로그인 계정인 경우)",
+    example: "user@gmail.com",
+    required: false,
+  })
+  googleEmail?: string;
 }
 
 // Refresh Token 응답 DTO

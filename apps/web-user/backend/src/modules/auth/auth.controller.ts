@@ -7,8 +7,9 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Request,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { AuthService } from "@web-user/backend/modules/auth/auth.service";
 import {
   RegisterRequestDto,
@@ -16,7 +17,7 @@ import {
   VerifyPhoneCodeRequestDto,
   CheckUserIdRequestDto,
   LoginRequestDto,
-  FindUserIdRequestDto,
+  FindAccountRequestDto,
   ChangePasswordRequestDto,
   ChangePhoneRequestDto,
   GoogleLoginRequestDto,
@@ -24,7 +25,7 @@ import {
   RefreshTokenRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
 import {
-  FindUserIdDataResponseDto,
+  FindAccountDataResponseDto,
   UserDataResponseDto,
   RefreshTokenResponseDto,
 } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
@@ -34,6 +35,7 @@ import { ApiSuccessResponse } from "@web-user/backend/common/decorators/swagger-
 import { ApiErrorResponse } from "@web-user/backend/common/decorators/swagger-error-response.decorator";
 import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
 import { SuccessMessageResponseDto } from "@web-user/backend/common/dto/success-response.dto";
+import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
 
 /**
  * 인증 컨트롤러
@@ -69,6 +71,7 @@ export class AuthController {
       isActive: true,
       userId: "testuser",
       googleId: "",
+      googleEmail: "",
       createdAt: new Date(),
       lastLoginAt: new Date(),
     },
@@ -120,6 +123,7 @@ export class AuthController {
       isActive: true,
       userId: "testuser",
       googleId: "",
+      googleEmail: "",
       createdAt: new Date(),
       lastLoginAt: new Date(),
     },
@@ -127,24 +131,6 @@ export class AuthController {
   @ApiErrorResponse(401, "아이디 또는 비밀번호가 올바르지 않습니다.")
   async login(@Body() loginDto: LoginRequestDto): Promise<UserDataResponseDto> {
     return this.authService.login(loginDto);
-  }
-
-  /**
-   * 일반 - ID 찾기 API
-   * 휴대폰 인증을 통해 사용자 ID를 찾습니다.
-   */
-  @Post("find-user-id")
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "일반 - ID 찾기" })
-  @ApiSuccessResponse<FindUserIdDataResponseDto>(200, {
-    userId: "user123",
-  })
-  @ApiErrorResponse(400, "해당 휴대폰 번호로 등록된 계정이 없습니다.")
-  async findUserId(
-    @Body() findUserIdDto: FindUserIdRequestDto,
-  ): Promise<FindUserIdDataResponseDto> {
-    return this.authService.findUserId(findUserIdDto);
   }
 
   /**
@@ -164,6 +150,32 @@ export class AuthController {
   ): Promise<SuccessMessageResponseDto> {
     await this.authService.changePassword(changePasswordDto);
     return { message: "비밀번호가 성공적으로 변경되었습니다." };
+  }
+
+  /**
+   * 계정 찾기 API
+   * 휴대폰 인증을 통해 계정 정보를 찾습니다.
+   * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
+   * 둘 다 있는 경우 모두 반환합니다.
+   */
+  @Post("find-account")
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "계정 찾기",
+    description:
+      "휴대폰 인증을 통해 계정 정보를 찾습니다. 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다. 둘 다 있는 경우 모두 반환합니다.",
+  })
+  @ApiSuccessResponse<FindAccountDataResponseDto>(200, {
+    userId: "user123", // 일반 로그인인 경우
+    googleEmail: "user@gmail.com", // 구글 로그인인 경우
+  })
+  @ApiErrorResponse(400, "휴대폰 인증이 필요합니다.")
+  @ApiErrorResponse(400, "해당 휴대폰 번호로 등록된 계정이 없습니다.")
+  async findAccount(
+    @Body() findAccountDto: FindAccountRequestDto,
+  ): Promise<FindAccountDataResponseDto> {
+    return this.authService.findAccount(findAccountDto);
   }
 
   /**
@@ -188,6 +200,7 @@ export class AuthController {
       isActive: true,
       userId: "testuser",
       googleId: "google123",
+      googleEmail: "user@gmail.com",
       createdAt: new Date(),
       lastLoginAt: new Date(),
     },
@@ -196,6 +209,7 @@ export class AuthController {
   @ApiErrorResponse(409, {
     message: "휴대폰 인증이 필요합니다. 휴대폰 번호를 등록하고 인증을 완료해주세요.",
     googleId: "google123",
+    googleEmail: "user@gmail.com",
   })
   async googleAuth(@Body() authDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
     return await this.authService.googleLoginWithCode(authDto);
@@ -223,6 +237,7 @@ export class AuthController {
       isActive: true,
       userId: "testuser",
       googleId: "google123",
+      googleEmail: "user@gmail.com",
       createdAt: new Date(),
       lastLoginAt: new Date(),
     },
@@ -274,22 +289,24 @@ export class AuthController {
 
   /**
    * 휴대폰 번호 변경 API
-   * 기존 휴대폰 번호를 새로운 번호로 변경합니다.
+   * 인증된 사용자의 휴대폰 번호를 새로운 번호로 변경합니다.
    * 새 휴대폰 번호는 미리 인증이 완료되어야 합니다.
    */
   @Post("change-phone")
-  @Public() // 추후 인증 필요할 수 있음
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "휴대폰 번호 변경" })
+  @ApiOperation({ summary: "휴대폰 번호 변경 (인증 필요)" })
+  @ApiBearerAuth("JWT-auth") // 스웨거에서 JWT 인증을 제외
   @ApiSuccessResponse<SuccessMessageResponseDto>(200, {
     message: "휴대폰 번호가 변경되었습니다.",
   })
-  @ApiErrorResponse(400, "기존 휴대폰 번호로 등록된 사용자를 찾을 수 없습니다.")
+  @ApiErrorResponse(400, "새 휴대폰 번호 인증이 필요합니다.")
+  @ApiErrorResponse(401, "Unauthorized")
   @ApiErrorResponse(409, "이미 사용 중인 휴대폰 번호입니다.")
   async changePhone(
     @Body() changePhoneDto: ChangePhoneRequestDto,
+    @Request() req: { user: JwtVerifiedPayload }, // JWT에서 사용자 정보 추출
   ): Promise<SuccessMessageResponseDto> {
-    await this.authService.changePhone(changePhoneDto);
+    await this.authService.changePhone(changePhoneDto, req.user);
     return { message: "휴대폰 번호가 변경되었습니다." };
   }
 
@@ -309,4 +326,10 @@ export class AuthController {
   ): Promise<RefreshTokenResponseDto> {
     return this.authService.refreshToken(refreshTokenDto);
   }
+
+  /**
+   * 로그아웃 API는 클라이언트에서 토큰을 삭제하여 처리합니다.
+   * stateless JWT 방식으로 변경하여 JWT 토큰은 서버에 저장하지 않고 클라이언트에서만 관리
+   * 따라서, 로그아웃 API는 불필요합니다.
+   */
 }
