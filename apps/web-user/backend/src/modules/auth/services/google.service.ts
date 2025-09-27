@@ -98,6 +98,7 @@ export class GoogleService {
         // refreshToken: refresh_token,
         userInfo: {
           googleId: userInfo.id,
+          googleEmail: userInfo.email,
         },
       };
     } catch (error) {
@@ -116,7 +117,7 @@ export class GoogleService {
     const {
       // accessToken,
       // refreshToken,
-      userInfo: { googleId },
+      userInfo: { googleId, googleEmail },
     } = googleUserInfo;
 
     // googleId로 기존 사용자 확인
@@ -131,8 +132,9 @@ export class GoogleService {
         // 휴대폰 인증이 완료된 경우 -> 로그인 완료
         const jwtPayload: JwtPayload = {
           sub: user.id,
-          userId: user.googleId ?? "",
           phone: user.phone,
+          loginType: "google",
+          loginId: user.googleId ?? "",
         };
 
         const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
@@ -160,6 +162,7 @@ export class GoogleService {
             isActive: user.isActive,
             userId: user.userId ?? "",
             googleId: user.googleId ?? "",
+            googleEmail: user.googleEmail ?? "",
             createdAt: user.createdAt,
             lastLoginAt: new Date(),
           },
@@ -169,6 +172,7 @@ export class GoogleService {
         throw new ConflictException({
           message: "휴대폰 인증이 필요합니다. 휴대폰 번호를 등록하고 인증을 완료해주세요.",
           googleId: googleId,
+          googleEmail: googleEmail,
         });
       }
     } else {
@@ -176,6 +180,7 @@ export class GoogleService {
       throw new ConflictException({
         message: "휴대폰 인증이 필요합니다. 휴대폰 번호를 등록하고 인증을 완료해주세요.",
         googleId: googleId,
+        googleEmail: googleEmail,
       });
     }
   }
@@ -190,7 +195,7 @@ export class GoogleService {
     googleRegisterDto: GoogleRegisterRequestDto,
   ): Promise<UserDataResponseDto> {
     try {
-      const { googleId, phone } = googleRegisterDto;
+      const { googleId, googleEmail, phone } = googleRegisterDto;
 
       // 1. 휴대폰 번호로 기존 사용자 확인 (모든 계정 유형)
       const existingPhoneUser = await this.prisma.user.findFirst({
@@ -211,6 +216,7 @@ export class GoogleService {
           where: { id: existingGoogleUser.id },
           data: {
             phone,
+            googleEmail,
             isPhoneVerified: true,
             lastLoginAt: new Date(),
           },
@@ -224,6 +230,7 @@ export class GoogleService {
             where: { id: existingPhoneUser.id },
             data: {
               googleId,
+              googleEmail,
               lastLoginAt: new Date(),
             },
           });
@@ -234,6 +241,7 @@ export class GoogleService {
             where: { id: existingPhoneUser.id },
             data: {
               googleId,
+              googleEmail,
               lastLoginAt: new Date(),
             },
           });
@@ -244,6 +252,7 @@ export class GoogleService {
             where: { id: existingPhoneUser.id },
             data: {
               googleId,
+              googleEmail,
               lastLoginAt: new Date(),
             },
           });
@@ -255,6 +264,7 @@ export class GoogleService {
           where: { id: existingGoogleUser.id },
           data: {
             phone,
+            googleEmail,
             isPhoneVerified: true,
             lastLoginAt: new Date(),
           },
@@ -265,6 +275,7 @@ export class GoogleService {
         user = await this.prisma.user.create({
           data: {
             googleId,
+            googleEmail,
             phone,
             isPhoneVerified: true,
             lastLoginAt: new Date(),
@@ -275,8 +286,9 @@ export class GoogleService {
       // 3. JWT 토큰 생성
       const jwtPayload: JwtPayload = {
         sub: user.id,
-        userId: user.googleId ?? "",
         phone: user.phone,
+        loginType: "google",
+        loginId: user.googleId ?? "",
       };
 
       const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
@@ -296,6 +308,7 @@ export class GoogleService {
           isActive: user.isActive,
           userId: user.userId ?? "",
           googleId: user.googleId ?? "",
+          googleEmail: user.googleEmail ?? "",
           createdAt: user.createdAt,
           lastLoginAt: user.lastLoginAt ?? new Date(),
         },
