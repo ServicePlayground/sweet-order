@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_INTERCEPTOR, APP_FILTER } from "@nestjs/core";
+import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { DatabaseModule } from "@web-user/backend/database/database.module";
 import { AuthModule } from "@web-user/backend/modules/auth/auth.module";
 import { SuccessResponseInterceptor } from "@web-user/backend/common/interceptors/success-response.interceptor";
@@ -19,6 +20,14 @@ import { ErrorResponseInterceptor } from "@web-user/backend/common/interceptors/
         `.env.${process.env.NODE_ENV}`, // 환경별 .env 파일
       ],
     }),
+
+    // Rate Limiting 모듈
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1분
+        limit: 100, // 1분당 100회 요청 제한
+      },
+    ]),
 
     // 데이터베이스 모듈
     DatabaseModule,
@@ -42,6 +51,11 @@ import { ErrorResponseInterceptor } from "@web-user/backend/common/interceptors/
     {
       provide: APP_FILTER,
       useClass: ErrorResponseInterceptor,
+    },
+    // 전역 Rate Limiting Guard 등록
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

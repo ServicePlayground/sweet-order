@@ -10,6 +10,7 @@ import {
   Request,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import { AuthService } from "@web-user/backend/modules/auth/auth.service";
 import {
   RegisterRequestDto,
@@ -78,6 +79,7 @@ export class AuthController {
   })
   @ApiErrorResponse(400, "아이디는 4-20자의 영문, 숫자, 언더스코어만 사용할 수 있습니다.")
   @ApiErrorResponse(409, "이미 사용 중인 휴대폰 번호입니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests") // 전역 Rate Limiting Guard 적용
   // @Body() 데코레이터가 JSON(HTTP 요청의 본문(body)에서 데이터)을 객체로 변환
   async register(@Body() registerDto: RegisterRequestDto): Promise<UserDataResponseDto> {
     // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
@@ -94,6 +96,7 @@ export class AuthController {
   @ApiSuccessResponse<AvailabilityResponseDto>(200, {
     available: true,
   })
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
   ): Promise<AvailabilityResponseDto> {
@@ -129,6 +132,7 @@ export class AuthController {
     },
   })
   @ApiErrorResponse(401, "아이디 또는 비밀번호가 올바르지 않습니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async login(@Body() loginDto: LoginRequestDto): Promise<UserDataResponseDto> {
     return this.authService.login(loginDto);
   }
@@ -145,6 +149,7 @@ export class AuthController {
     message: "비밀번호가 성공적으로 변경되었습니다.",
   })
   @ApiErrorResponse(400, "해당 아이디로 등록된 계정이 없습니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async changePassword(
     @Body() changePasswordDto: ChangePasswordRequestDto,
   ): Promise<SuccessMessageResponseDto> {
@@ -172,6 +177,7 @@ export class AuthController {
   })
   @ApiErrorResponse(400, "휴대폰 인증이 필요합니다.")
   @ApiErrorResponse(400, "해당 휴대폰 번호로 등록된 계정이 없습니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async findAccount(
     @Body() findAccountDto: FindAccountRequestDto,
   ): Promise<FindAccountDataResponseDto> {
@@ -211,6 +217,7 @@ export class AuthController {
     googleId: "google123",
     googleEmail: "user@gmail.com",
   })
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async googleAuth(@Body() authDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
     return await this.authService.googleLoginWithCode(authDto);
   }
@@ -243,6 +250,7 @@ export class AuthController {
     },
   })
   @ApiErrorResponse(400, "구글 로그인 회원가입에 실패했습니다")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async googleRegisterWithPhone(
     @Body() registerDto: GoogleRegisterRequestDto,
   ): Promise<UserDataResponseDto> {
@@ -256,11 +264,13 @@ export class AuthController {
   @Post("send-verification-code")
   @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 발송은 인증이 필요 없음)
   @HttpCode(HttpStatus.OK) // HTTP 200 상태 코드 반환
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 1분당 10회로 제한 (전역에서는 1분당 100회로 제한 설정되어 있음)
   @ApiOperation({ summary: "휴대폰 인증번호 발송" })
   @ApiSuccessResponse<SuccessMessageResponseDto>(200, {
     message: "인증번호가 발송되었습니다.",
   })
   @ApiErrorResponse(400, "24시간 내 최대 발송 횟수(10회)를 초과했습니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async sendVerificationCode(
     @Body() sendCodeDto: SendVerificationCodeRequestDto,
   ): Promise<SuccessMessageResponseDto> {
@@ -280,6 +290,7 @@ export class AuthController {
     message: "인증번호가 확인되었습니다.",
   })
   @ApiErrorResponse(400, "인증번호가 올바르지 않습니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async verifyPhoneCode(
     @Body() verifyCodeDto: VerifyPhoneCodeRequestDto,
   ): Promise<SuccessMessageResponseDto> {
@@ -302,6 +313,7 @@ export class AuthController {
   @ApiErrorResponse(400, "새 휴대폰 번호 인증이 필요합니다.")
   @ApiErrorResponse(401, "Unauthorized")
   @ApiErrorResponse(409, "이미 사용 중인 휴대폰 번호입니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async changePhone(
     @Body() changePhoneDto: ChangePhoneRequestDto,
     @Request() req: { user: JwtVerifiedPayload }, // JWT에서 사용자 정보 추출
@@ -321,6 +333,7 @@ export class AuthController {
     accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   })
   @ApiErrorResponse(401, "유효하지 않은 리프레시 토큰입니다.")
+  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
   async refreshToken(
     @Body() refreshTokenDto: RefreshTokenRequestDto,
   ): Promise<RefreshTokenResponseDto> {

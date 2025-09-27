@@ -64,13 +64,15 @@ export class PhoneService {
     const verificationCode = PhoneUtil.generateVerificationCode();
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
-    // 3. 인증 정보 저장 - PhoneVerification 테이블
-    await this.prisma.phoneVerification.create({
-      data: {
-        phone: normalizedPhone,
-        verificationCode,
-        expiresAt,
-      },
+    // 3. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
+    await this.prisma.$transaction(async (tx) => {
+      await tx.phoneVerification.create({
+        data: {
+          phone: normalizedPhone,
+          verificationCode,
+          expiresAt,
+        },
+      });
     });
 
     // 4. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
@@ -116,23 +118,26 @@ export class PhoneService {
       throw new BadRequestException("인증번호가 만료되었습니다.");
     }
 
-    // 4. 인증 성공 처리 - is_verified = true로 업데이트
-    await this.prisma.phoneVerification.update({
-      where: { id: phoneVerification.id },
-      data: {
-        isVerified: true, // is_verified 플래그로 본인인증 상태 관리
-      },
-    });
-
-    // 5. 휴대폰 인증 완료 시 해당 휴대폰의 모든 미완료 인증 기록 삭제 (24시간 카운트 초기화)
-    await this.prisma.phoneVerification.deleteMany({
-      where: {
-        phone: normalizedPhone,
-        isVerified: false,
-        id: {
-          not: phoneVerification.id, // 현재 인증된 기록은 제외
+    // 4. 인증 성공 처리 - 트랜잭션으로 안전하게 처리
+    await this.prisma.$transaction(async (tx) => {
+      // 현재 인증을 완료 상태로 업데이트
+      await tx.phoneVerification.update({
+        where: { id: phoneVerification.id },
+        data: {
+          isVerified: true, // is_verified 플래그로 본인인증 상태 관리
         },
-      },
+      });
+
+      // 해당 휴대폰의 모든 미완료 인증 기록 삭제 (24시간 카운트 초기화)
+      await tx.phoneVerification.deleteMany({
+        where: {
+          phone: normalizedPhone,
+          isVerified: false,
+          id: {
+            not: phoneVerification.id, // 현재 인증된 기록은 제외
+          },
+        },
+      });
     });
   }
 }
