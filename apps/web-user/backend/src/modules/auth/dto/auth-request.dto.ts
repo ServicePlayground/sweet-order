@@ -1,4 +1,4 @@
-import { IsString, Length } from "class-validator";
+import { IsString, Length, IsNotEmpty } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import {
   IsValidUserId,
@@ -184,4 +184,17 @@ export class GoogleRegisterRequestDto {
   @IsString()
   @IsValidKoreanPhone()
   phone: string;
+}
+
+/**
+ * Refresh Token 갱신 요청 DTO
+ */
+export class RefreshTokenRequestDto {
+  @ApiProperty({
+    description: "리프레시 토큰",
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  })
+  @IsString()
+  @IsNotEmpty()
+  refreshToken: string;
 }

@@ -29,3 +29,15 @@ export class SuccessResponseDto<T = any> {
   })
   statusCode: number;
 }
+
+/**
+ * 성공 메시지 응답 DTO
+ * 일반적인 성공 메시지 응답
+ */
+export class SuccessMessageResponseDto {
+  @ApiProperty({
+    description: "성공 메시지",
+    example: "요청 처리 중 성공했습니다.",
+  })
+  message: string;
+}
