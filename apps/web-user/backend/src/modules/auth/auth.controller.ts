@@ -25,18 +25,16 @@ import {
   GoogleRegisterRequestDto,
   RefreshTokenRequestDto,
 } from "@web-user/backend/modules/auth/dto/auth-request.dto";
-import {
-  FindAccountDataResponseDto,
-  UserDataResponseDto,
-  RefreshTokenResponseDto,
-} from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
 import { JwtAuthGuard } from "@web-user/backend/modules/auth/guards/jwt-auth.guard";
 import { Public } from "@web-user/backend/common/decorators/public.decorator";
-import { ApiSuccessResponse } from "@web-user/backend/common/decorators/swagger-success-response.decorator";
-import { ApiErrorResponse } from "@web-user/backend/common/decorators/swagger-error-response.decorator";
-import { AvailabilityResponseDto } from "@web-user/backend/common/dto/common.dto";
-import { SuccessMessageResponseDto } from "@web-user/backend/common/dto/success-response.dto";
+import { SwaggerResponse } from "@web-user/backend/common/decorators/swagger-response.decorator";
 import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
+import {
+  AUTH_ERROR_MESSAGES,
+  AUTH_SUCCESS_MESSAGES,
+  SWAGGER_EXAMPLES,
+  SWAGGER_RESPONSE_EXAMPLES,
+} from "@web-user/backend/modules/auth/constants/auth.constants";
 
 /**
  * 인증 컨트롤러
@@ -57,32 +55,24 @@ export class AuthController {
   @Post("register")
   @Public() // 인증을 건너뛰는 엔드포인트 (회원가입은 인증이 필요 없음)
   @HttpCode(HttpStatus.CREATED) // HTTP 201 상태 코드 반환
-  @ApiOperation({ summary: "일반 - 회원가입" })
-  @ApiSuccessResponse<UserDataResponseDto>(201, {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    user: {
-      id: "user123",
-      phone: "01012345678",
-      name: "test",
-      nickname: "test",
-      email: "test@example.com",
-      profileImageUrl: "https://test.com/test.jpg",
-      isPhoneVerified: true,
-      isActive: true,
-      userId: "testuser",
-      googleId: "",
-      googleEmail: "",
-      createdAt: new Date(),
-      lastLoginAt: new Date(),
-    },
+  @ApiOperation({
+    summary: "일반 - 회원가입",
+    description:
+      "새로운 사용자를 등록하고 JWT 토큰을 발급합니다. 휴대폰 인증이 완료된 상태여야 합니다.",
   })
-  @ApiErrorResponse(400, "아이디는 4-20자의 영문, 숫자, 언더스코어만 사용할 수 있습니다.")
-  @ApiErrorResponse(409, "이미 사용 중인 휴대폰 번호입니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests") // 전역 Rate Limiting Guard 적용
-  // @Body() 데코레이터가 JSON(HTTP 요청의 본문(body)에서 데이터)을 객체로 변환
-  async register(@Body() registerDto: RegisterRequestDto): Promise<UserDataResponseDto> {
-    // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
+  @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS)
+  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS)
+  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS)
+  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS)
+  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED) // 전역 Rate Limiting Guard 적용
+  async register(@Body() registerDto: RegisterRequestDto) {
+    // Success Response Interceptor가 자동으로 래핑
     return this.authService.register(registerDto);
   }
 
@@ -92,15 +82,18 @@ export class AuthController {
    */
   @Get("check-user-id")
   @Public()
-  @ApiOperation({ summary: "일반 - ID 중복 확인" })
-  @ApiSuccessResponse<AvailabilityResponseDto>(200, {
+  @ApiOperation({
+    summary: "일반 - ID 중복 확인",
+    description: "회원가입 시 사용할 사용자 ID가 이미 존재하는지 확인합니다.",
+  })
+  @SwaggerResponse(200, {
     available: true,
   })
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
-  ): Promise<AvailabilityResponseDto> {
-    // Success Response Interceptor가 자동으로 ApiResponseDto로 래핑
+  ) {
     return this.authService.checkUserIdAvailability(checkUserIdDto);
   }
 
@@ -111,29 +104,18 @@ export class AuthController {
   @Post("login")
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "일반 - 로그인" })
-  @ApiSuccessResponse<UserDataResponseDto>(200, {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    user: {
-      id: "user123",
-      phone: "01012345678",
-      name: "test",
-      nickname: "test",
-      email: "test@example.com",
-      profileImageUrl: "https://test.com/test.jpg",
-      isPhoneVerified: true,
-      isActive: true,
-      userId: "testuser",
-      googleId: "",
-      googleEmail: "",
-      createdAt: new Date(),
-      lastLoginAt: new Date(),
-    },
+  @ApiOperation({
+    summary: "일반 - 로그인",
+    description: "아이디와 비밀번호로 로그인하고 JWT 토큰을 발급합니다.",
   })
-  @ApiErrorResponse(401, "아이디 또는 비밀번호가 올바르지 않습니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async login(@Body() loginDto: LoginRequestDto): Promise<UserDataResponseDto> {
+  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
+  @SwaggerResponse(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async login(@Body() loginDto: LoginRequestDto) {
     return this.authService.login(loginDto);
   }
 
@@ -144,17 +126,23 @@ export class AuthController {
   @Post("change-password")
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "일반 - 비밀번호 변경" })
-  @ApiSuccessResponse<SuccessMessageResponseDto>(200, {
-    message: "비밀번호가 성공적으로 변경되었습니다.",
+  @ApiOperation({
+    summary: "일반 - 비밀번호 변경",
+    description: "아이디와 휴대폰 인증을 통해 비밀번호를 변경합니다.",
   })
-  @ApiErrorResponse(400, "해당 아이디로 등록된 계정이 없습니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async changePassword(
-    @Body() changePasswordDto: ChangePasswordRequestDto,
-  ): Promise<SuccessMessageResponseDto> {
+  @SwaggerResponse(200, {
+    message: AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED,
+  })
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async changePassword(@Body() changePasswordDto: ChangePasswordRequestDto) {
     await this.authService.changePassword(changePasswordDto);
-    return { message: "비밀번호가 성공적으로 변경되었습니다." };
+    return { message: AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED };
   }
 
   /**
@@ -171,16 +159,15 @@ export class AuthController {
     description:
       "휴대폰 인증을 통해 계정 정보를 찾습니다. 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다. 둘 다 있는 경우 모두 반환합니다.",
   })
-  @ApiSuccessResponse<FindAccountDataResponseDto>(200, {
-    userId: "user123", // 일반 로그인인 경우
-    googleEmail: "user@gmail.com", // 구글 로그인인 경우
+  @SwaggerResponse(200, {
+    userId: SWAGGER_EXAMPLES.USER_DATA.userId, // 일반 로그인인 경우 (선택적)
+    googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail, // 구글 로그인인 경우 (선택적)
   })
-  @ApiErrorResponse(400, "휴대폰 인증이 필요합니다.")
-  @ApiErrorResponse(400, "해당 휴대폰 번호로 등록된 계정이 없습니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async findAccount(
-    @Body() findAccountDto: FindAccountRequestDto,
-  ): Promise<FindAccountDataResponseDto> {
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async findAccount(@Body() findAccountDto: FindAccountRequestDto) {
     return this.authService.findAccount(findAccountDto);
   }
 
@@ -191,34 +178,20 @@ export class AuthController {
   @Post("google/login")
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "구글 로그인" })
-  @ApiSuccessResponse<UserDataResponseDto>(200, {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    user: {
-      id: "user123",
-      phone: "01012345678",
-      name: "홍길동",
-      nickname: "홍길동",
-      email: "user@example.com",
-      profileImageUrl: "https://lh3.googleusercontent.com/a/...",
-      isPhoneVerified: true,
-      isActive: true,
-      userId: "testuser",
-      googleId: "google123",
-      googleEmail: "user@gmail.com",
-      createdAt: new Date(),
-      lastLoginAt: new Date(),
-    },
+  @ApiOperation({
+    summary: "구글 로그인",
+    description: "프론트엔드에서 받은 Authorization Code로 구글 로그인을 처리합니다.",
   })
-  @ApiErrorResponse(400, "구글 로그인에 실패했습니다.")
-  @ApiErrorResponse(409, {
-    message: "휴대폰 인증이 필요합니다. 휴대폰 번호를 등록하고 인증을 완료해주세요.",
-    googleId: "google123",
-    googleEmail: "user@gmail.com",
+  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
+  @SwaggerResponse(400, {
+    message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
+    googleId: SWAGGER_EXAMPLES.USER_DATA.googleId,
+    googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
   })
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async googleAuth(@Body() authDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_LOGIN_FAILED)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async googleAuth(@Body() authDto: GoogleLoginRequestDto) {
     return await this.authService.googleLoginWithCode(authDto);
   }
 
@@ -229,31 +202,15 @@ export class AuthController {
   @Post("google/register")
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "구글 로그인 회원가입" })
-  @ApiSuccessResponse<UserDataResponseDto>(201, {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    user: {
-      id: "user123",
-      phone: "01012345678",
-      name: "홍길동",
-      nickname: "홍길동",
-      email: "user@example.com",
-      profileImageUrl: "https://lh3.googleusercontent.com/a/...",
-      isPhoneVerified: true,
-      isActive: true,
-      userId: "testuser",
-      googleId: "google123",
-      googleEmail: "user@gmail.com",
-      createdAt: new Date(),
-      lastLoginAt: new Date(),
-    },
+  @ApiOperation({
+    summary: "구글 로그인 회원가입",
+    description: "휴대폰 인증 완료 후 구글 로그인 회원가입을 처리합니다.",
   })
-  @ApiErrorResponse(400, "구글 로그인 회원가입에 실패했습니다")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async googleRegisterWithPhone(
-    @Body() registerDto: GoogleRegisterRequestDto,
-  ): Promise<UserDataResponseDto> {
+  @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
     return await this.authService.googleRegisterWithPhone(registerDto);
   }
 
@@ -262,20 +219,23 @@ export class AuthController {
    * 사용자의 휴대폰 번호로 인증번호를 발송합니다.
    */
   @Post("send-verification-code")
-  @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 발송은 인증이 필요 없음)
-  @HttpCode(HttpStatus.OK) // HTTP 200 상태 코드 반환
+  @Public()
+  @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 1분당 10회로 제한 (전역에서는 1분당 100회로 제한 설정되어 있음)
-  @ApiOperation({ summary: "휴대폰 인증번호 발송" })
-  @ApiSuccessResponse<SuccessMessageResponseDto>(200, {
-    message: "인증번호가 발송되었습니다.",
+  @ApiOperation({
+    summary: "휴대폰 인증번호 발송",
+    description:
+      "사용자의 휴대폰 번호로 인증번호를 발송합니다. 1분당 10회로 제한되며, 24시간 내 최대 10회로 제한됩니다.",
   })
-  @ApiErrorResponse(400, "24시간 내 최대 발송 횟수(10회)를 초과했습니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async sendVerificationCode(
-    @Body() sendCodeDto: SendVerificationCodeRequestDto,
-  ): Promise<SuccessMessageResponseDto> {
+  @SwaggerResponse(200, {
+    message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT,
+  })
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_LIMIT_EXCEEDED)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async sendVerificationCode(@Body() sendCodeDto: SendVerificationCodeRequestDto) {
     await this.authService.sendVerificationCode(sendCodeDto);
-    return { message: "인증번호가 발송되었습니다." };
+    return { message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT };
   }
 
   /**
@@ -283,19 +243,24 @@ export class AuthController {
    * 사용자가 입력한 인증번호가 올바른지 확인합니다.
    */
   @Post("verify-phone-code")
-  @Public() // 인증을 건너뛰는 엔드포인트 (휴대폰 인증번호 확인은 인증이 필요 없음)
+  @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "휴대폰 인증번호 확인" })
-  @ApiSuccessResponse<SuccessMessageResponseDto>(200, {
-    message: "인증번호가 확인되었습니다.",
+  @ApiOperation({
+    summary: "휴대폰 인증번호 확인",
+    description: "사용자가 입력한 인증번호가 올바른지 확인합니다.",
   })
-  @ApiErrorResponse(400, "인증번호가 올바르지 않습니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async verifyPhoneCode(
-    @Body() verifyCodeDto: VerifyPhoneCodeRequestDto,
-  ): Promise<SuccessMessageResponseDto> {
+  @SwaggerResponse(200, {
+    message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED,
+  })
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_ALREADY_VERIFIED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async verifyPhoneCode(@Body() verifyCodeDto: VerifyPhoneCodeRequestDto) {
     await this.authService.verifyPhoneCode(verifyCodeDto);
-    return { message: "인증번호가 확인되었습니다." };
+    return { message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED };
   }
 
   /**
@@ -305,21 +270,26 @@ export class AuthController {
    */
   @Post("change-phone")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "휴대폰 번호 변경 (인증 필요)" })
-  @ApiBearerAuth("JWT-auth") // 스웨거에서 JWT 인증을 제외
-  @ApiSuccessResponse<SuccessMessageResponseDto>(200, {
-    message: "휴대폰 번호가 변경되었습니다.",
+  @ApiOperation({
+    summary: "휴대폰 번호 변경 (인증 필요)",
+    description:
+      "인증된 사용자의 휴대폰 번호를 새로운 번호로 변경합니다. 새 휴대폰 번호는 미리 인증이 완료되어야 합니다.",
   })
-  @ApiErrorResponse(400, "새 휴대폰 번호 인증이 필요합니다.")
-  @ApiErrorResponse(401, "Unauthorized")
-  @ApiErrorResponse(409, "이미 사용 중인 휴대폰 번호입니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
+  @ApiBearerAuth("JWT-auth") // 스웨거에서 인증 헤더 표시
+  @SwaggerResponse(200, {
+    message: AUTH_SUCCESS_MESSAGES.PHONE_CHANGED,
+  })
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_NOT_FOUND)
+  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
+  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
   async changePhone(
     @Body() changePhoneDto: ChangePhoneRequestDto,
-    @Request() req: { user: JwtVerifiedPayload }, // JWT에서 사용자 정보 추출
-  ): Promise<SuccessMessageResponseDto> {
+    @Request() req: { user: JwtVerifiedPayload }, // JWT에서 저장된 사용자 정보
+  ) {
     await this.authService.changePhone(changePhoneDto, req.user);
-    return { message: "휴대폰 번호가 변경되었습니다." };
+    return { message: AUTH_SUCCESS_MESSAGES.PHONE_CHANGED };
   }
 
   /**
@@ -328,15 +298,16 @@ export class AuthController {
   @Post("refresh")
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Access Token 갱신" })
-  @ApiSuccessResponse<RefreshTokenResponseDto>(200, {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  @ApiOperation({
+    summary: "Access Token 갱신",
+    description: "Refresh Token을 사용하여 Access Token을 갱신합니다.",
   })
-  @ApiErrorResponse(401, "유효하지 않은 리프레시 토큰입니다.")
-  @ApiErrorResponse(429, "ThrottlerException: Too Many Requests")
-  async refreshToken(
-    @Body() refreshTokenDto: RefreshTokenRequestDto,
-  ): Promise<RefreshTokenResponseDto> {
+  @SwaggerResponse(200, {
+    accessToken: SWAGGER_EXAMPLES.ACCESS_TOKEN,
+  })
+  @SwaggerResponse(401, AUTH_ERROR_MESSAGES.INVALID_REFRESH_TOKEN)
+  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto) {
     return this.authService.refreshToken(refreshTokenDto);
   }
 

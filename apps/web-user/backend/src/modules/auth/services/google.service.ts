@@ -3,7 +3,8 @@ import { PrismaService } from "@web-user/backend/database/prisma.service";
 import { JwtUtil } from "@web-user/backend/modules/auth/utils/jwt.util";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
-import { UserDataResponseDto } from "@web-user/backend/modules/auth/dto/auth-data-response.dto";
+import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
+import { UserMapperUtil } from "@web-user/backend/modules/auth/utils/user-mapper.util";
 import { GoogleUserInfo, JwtPayload } from "@web-user/backend/common/types/auth.types";
 import { PhoneService } from "./phone.service";
 import {
@@ -37,7 +38,7 @@ export class GoogleService {
    * @param code - 구글에서 받은 Authorization Code
    * @returns JWT 토큰과 사용자 정보
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto): Promise<UserDataResponseDto> {
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
     try {
       const { code } = codeDto;
 
@@ -50,10 +51,8 @@ export class GoogleService {
       if (error instanceof ConflictException) {
         throw error;
       }
-      // 다른 에러인 경우 string 형태로 변환
-      throw new BadRequestException(
-        `구글 로그인에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      // 다른 에러인 경우 구체적인 오류 메시지로 변환
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_LOGIN_FAILED);
     }
   }
 
@@ -94,17 +93,13 @@ export class GoogleService {
       const userInfo = userInfoResponse.data;
 
       return {
-        // accessToken: access_token,
-        // refreshToken: refresh_token,
         userInfo: {
           googleId: userInfo.id,
           googleEmail: userInfo.email,
         },
       };
     } catch (error) {
-      throw new Error(
-        `구글 OAuth 토큰 교환 실패: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      throw new Error(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
     }
   }
 
@@ -113,10 +108,8 @@ export class GoogleService {
    * @param googleUserInfo - 구글 사용자 정보
    * @returns JWT 토큰과 사용자 정보
    */
-  async googleLogin(googleUserInfo: GoogleUserInfo): Promise<UserDataResponseDto> {
+  async googleLogin(googleUserInfo: GoogleUserInfo) {
     const {
-      // accessToken,
-      // refreshToken,
       userInfo: { googleId, googleEmail },
     } = googleUserInfo;
 
@@ -153,35 +146,21 @@ export class GoogleService {
           return {
             accessToken: jwtAccessToken,
             refreshToken: jwtRefreshToken,
-            user: {
-              id: user.id,
-              phone: user.phone,
-              name: user.name ?? "",
-              nickname: user.nickname ?? "",
-              email: user.email ?? "",
-              profileImageUrl: user.profileImageUrl ?? "",
-              isPhoneVerified: user.isPhoneVerified,
-              isActive: user.isActive,
-              userId: user.userId ?? "",
-              googleId: user.googleId ?? "",
-              googleEmail: user.googleEmail ?? "",
-              createdAt: user.createdAt,
-              lastLoginAt: new Date(),
-            },
+            user: UserMapperUtil.mapToUserInfo(user, new Date()),
           };
         });
       } else {
         // 휴대폰 인증이 안된 경우 -> 휴대폰 인증 필요
-        throw new ConflictException({
-          message: "휴대폰 인증이 필요합니다. 휴대폰 번호를 등록하고 인증을 완료해주세요.",
+        throw new BadRequestException({
+          message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
           googleId: googleId,
           googleEmail: googleEmail,
         });
       }
     } else {
       // 새 사용자인 경우 -> 휴대폰 인증 필요
-      throw new ConflictException({
-        message: "휴대폰 인증이 필요합니다. 휴대폰 번호를 등록하고 인증을 완료해주세요.",
+      throw new BadRequestException({
+        message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
         googleId: googleId,
         googleEmail: googleEmail,
       });
@@ -194,9 +173,7 @@ export class GoogleService {
    * @param phone - 휴대폰 번호
    * @returns JWT 토큰과 사용자 정보
    */
-  async googleRegisterWithPhone(
-    googleRegisterDto: GoogleRegisterRequestDto,
-  ): Promise<UserDataResponseDto> {
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
     try {
       const { googleId, googleEmail, phone } = googleRegisterDto;
 
@@ -277,27 +254,16 @@ export class GoogleService {
         return {
           accessToken: jwtAccessToken,
           refreshToken: jwtRefreshToken,
-          user: {
-            id: user.id,
-            phone: user.phone,
-            name: user.name ?? "",
-            nickname: user.nickname ?? "",
-            email: user.email ?? "",
-            profileImageUrl: user.profileImageUrl ?? "",
-            isPhoneVerified: user.isPhoneVerified,
-            isActive: user.isActive,
-            userId: user.userId ?? "",
-            googleId: user.googleId ?? "",
-            googleEmail: user.googleEmail ?? "",
-            createdAt: user.createdAt,
-            lastLoginAt: user.lastLoginAt ?? new Date(),
-          },
+          user: UserMapperUtil.mapToUserInfo(user),
         };
       });
     } catch (error) {
-      throw new BadRequestException(
-        `구글 로그인 회원가입에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      // ConflictException인 경우 그대로 전달 (중복 오류 등)
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+      // 다른 에러인 경우 구체적인 오류 메시지로 변환
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED);
     }
   }
 }
