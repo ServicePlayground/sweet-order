@@ -21,11 +21,16 @@ import { TOKEN_TYPES } from "@web-user/backend/common/constants/app.constants";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
+    const jwtSecret = configService.get<string>("JWT_SECRET");
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is required");
+    }
+
     super({
       // JWT 토큰을 Authorization 헤더에서 "Bearer <token>" 형태로 추출
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // JWT 서명 검증을 위한 시크릿 키 (환경변수에서 가져오거나 기본값 사용)
-      secretOrKey: configService.get<string>("JWT_SECRET")! || "default-secret",
+      // JWT 서명 검증을 위한 시크릿 키
+      secretOrKey: jwtSecret,
       // 토큰 만료 시간 검증을 활성화 (false = 만료된 토큰 거부)
       ignoreExpiration: false,
     });
@@ -48,7 +53,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
 
       // 2. 필수 필드 검증: 사용자 식별에 필요한 정보가 모두 있는지 확인
-      if (!payload.sub || !payload.userId || !payload.phone) {
+      if (!payload.sub || !payload.phone || !payload.loginType || !payload.loginId) {
         throw new UnauthorizedException("토큰에 필수 정보가 누락되었습니다.");
       }
 

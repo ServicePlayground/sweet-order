@@ -61,6 +61,18 @@ async function bootstrap(): Promise<void> {
       .setTitle(SERVICE_INFO.DESCRIPTION)
       .setDescription(`${SERVICE_INFO.DESCRIPTION} 문서`)
       .setVersion(SERVICE_INFO.VERSION)
+      .addBearerAuth(
+        {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          name: "JWT",
+          description:
+            'JWT Authorization header using the Bearer scheme. Example: "Authorization: Bearer {token}"',
+          in: "header",
+        },
+        "JWT-auth", // This name here is important for matching up with @ApiBearerAuth() in your controller!
+      )
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

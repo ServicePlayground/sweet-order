@@ -25,9 +25,12 @@ model User {
   userId           String?  @unique @map("user_id")           // 사용자 ID (일반 회원가입용, 소셜 로그인 시 null 가능)
   // 소셜 로그인 관련 필드
   googleId         String?  @unique @map("google_id")         // 구글 사용자 ID
+  googleEmail      String?  @map("google_email")              // 구글 이메일
   // 계정 생성/수정 정보
   createdAt        DateTime @default(now()) @map("created_at")  // 계정 생성일시
   lastLoginAt      DateTime? @map("last_login_at")            // 마지막 로그인 시간
+
+  // Stateless JWT 방식으로 변경하여 RefreshToken 관계 제거          // JWT 토큰은 서버에 저장하지 않고 클라이언트에서만 관리
 
   @@index([phone])                                            // 휴대폰 번호 인덱스 (통합 정보 탐색용)
   @@index([userId])                                           // 사용자 ID 인덱스 (일반 로그인용)
@@ -51,5 +54,6 @@ model PhoneVerification {
   @@unique([phone, verificationCode])                        // 휴대폰번호 + 인증번호 조합 유니크
   @@map("phone_verifications")
 }
+
 
 

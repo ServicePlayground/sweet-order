@@ -20,6 +20,7 @@ export interface UserInfo {
   isPhoneVerified: boolean;
   isActive: boolean;
   googleId?: string;
+  googleEmail?: string;
   createdAt: Date;
   lastLoginAt?: Date;
 }
@@ -35,9 +36,10 @@ export interface CreateUser {
  * JWT 토큰의 페이로드 구조를 정의합니다.
  */
 export interface JwtPayload {
-  sub: string;
-  userId: string;
-  phone: string;
+  sub: string; // 사용자 고유 ID (user.id)
+  phone: string; // 휴대폰 번호
+  loginType: "general" | "google"; // 로그인 타입
+  loginId: string; // 해당 로그인 타입의 ID
 }
 
 /**
@@ -68,5 +70,6 @@ export interface GoogleUserInfo {
   // refreshToken?: string;
   userInfo: {
     googleId: string;
+    googleEmail: string;
   };
 }
