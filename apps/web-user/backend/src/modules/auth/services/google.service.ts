@@ -40,21 +40,12 @@ export class GoogleService {
    * @returns JWT 토큰과 사용자 정보
    */
   async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
-    try {
-      const { code } = codeDto;
+    const { code } = codeDto;
 
-      // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
-      const googleUserInfo = await this.exchangeCodeForToken(code);
+    // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
+    const googleUserInfo = await this.exchangeCodeForToken(code);
 
-      return this.googleLogin(googleUserInfo);
-    } catch (error) {
-      // ConflictException이면서 객체 형태인 경우 그대로 전달
-      if (error instanceof ConflictException) {
-        throw error;
-      }
-      // 다른 에러인 경우 구체적인 오류 메시지로 변환
-      throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_LOGIN_FAILED);
-    }
+    return this.googleLogin(googleUserInfo);
   }
 
   /**

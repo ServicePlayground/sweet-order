@@ -14,7 +14,6 @@ export const AUTH_ERROR_MESSAGES = {
   VERIFICATION_CODE_INVALID_FORMAT: "인증번호는 6자리 숫자여야 합니다.",
   ACCOUNT_NOT_FOUND: "해당 아이디로 등록된 계정이 없습니다.",
   ACCOUNT_NOT_FOUND_BY_PHONE: "해당 휴대폰 번호로 등록된 계정이 없습니다.",
-  GOOGLE_LOGIN_FAILED: "구글 로그인에 실패했습니다.",
   GOOGLE_REGISTER_FAILED: "구글 로그인 회원가입에 실패했습니다.",
   INVALID_REFRESH_TOKEN: "유효하지 않은 리프레시 토큰입니다.",
   USER_NOT_FOUND: "사용자를 찾을 수 없습니다.",
@@ -26,7 +25,7 @@ export const AUTH_ERROR_MESSAGES = {
   PHONE_MULTIPLE_ACCOUNTS: "해당 휴대폰 번호로 일반 로그인과 구글 로그인 계정이 모두 존재합니다.",
   PHONE_GENERAL_ACCOUNT_EXISTS: "해당 휴대폰 번호로 일반 로그인 계정이 존재합니다.",
   PHONE_GOOGLE_ACCOUNT_EXISTS: "해당 휴대폰 번호로 구글 로그인 계정이 존재합니다.",
-  GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED: "구글 OAuth 토큰 교환 실패",
+  GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED: "구글 OAuth 토큰 교환 실패 (5분후에 다시 시도해주세요)",
   THROTTLE_LIMIT_EXCEEDED: "ThrottlerException: Too Many Requests",
   UNAUTHORIZED: "Unauthorized",
 } as const;
