@@ -91,7 +91,7 @@ export class GoogleService {
         },
       };
     } catch (error) {
-      throw new Error(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
     }
   }
 
@@ -105,51 +105,12 @@ export class GoogleService {
       userInfo: { googleId, googleEmail },
     } = googleUserInfo;
 
-    // googleId로 기존 사용자 확인
+    // 1. googleId로 기존 사용자 확인
     const user = await this.prisma.user.findUnique({
       where: { googleId },
     });
 
-    if (user) {
-      // 기존 사용자가 있는 경우
-      // 휴대폰 인증이 되어있는지 확인
-      if (user.phone && user.isPhoneVerified) {
-        // 휴대폰 인증이 완료된 경우 -> 로그인 완료
-        const jwtPayload: JwtPayload = {
-          sub: user.id,
-          phone: user.phone,
-          loginType: "google",
-          loginId: user.googleId ?? "",
-        };
-
-        // 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
-        return await this.prisma.$transaction(async (tx) => {
-          const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
-            await this.jwtUtil.generateTokenPair(jwtPayload);
-
-          // 마지막 로그인 시간 업데이트
-          await tx.user.update({
-            where: { id: user.id },
-            data: {
-              lastLoginAt: new Date(),
-            },
-          });
-
-          return {
-            accessToken: jwtAccessToken,
-            refreshToken: jwtRefreshToken,
-            user: UserMapperUtil.mapToUserInfo(user, new Date()),
-          };
-        });
-      } else {
-        // 휴대폰 인증이 안된 경우 -> 휴대폰 인증 필요
-        throw new BadRequestException({
-          message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
-          googleId: googleId,
-          googleEmail: googleEmail,
-        });
-      }
-    } else {
+    if (!user) {
       // 새 사용자인 경우 -> 휴대폰 인증 필요
       throw new BadRequestException({
         message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
@@ -157,6 +118,40 @@ export class GoogleService {
         googleEmail: googleEmail,
       });
     }
+
+    // 2. 휴대폰 인증 상태 확인
+    if (!user.phone || !user.isPhoneVerified) {
+      throw new BadRequestException({
+        message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
+        googleId: googleId,
+        googleEmail: googleEmail,
+      });
+    }
+
+    // 3. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
+    return await this.prisma.$transaction(async (tx) => {
+      // JWT 토큰 생성
+      const jwtPayload: JwtPayload = {
+        sub: user.id,
+        phone: user.phone,
+        loginType: "google",
+        loginId: user.googleId ?? "",
+      };
+
+      const { accessToken, refreshToken } = await this.jwtUtil.generateTokenPair(jwtPayload);
+
+      // 마지막 로그인 시간 업데이트
+      await tx.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
+      });
+
+      return {
+        accessToken,
+        refreshToken,
+        user: UserMapperUtil.mapToUserInfo(user, new Date()),
+      };
+    });
   }
 
   /**
@@ -166,46 +161,38 @@ export class GoogleService {
    * @returns JWT 토큰과 사용자 정보
    */
   async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
-    try {
-      const { googleId, googleEmail, phone } = googleRegisterDto;
-      const normalizedPhone = PhoneUtil.normalizePhone(phone);
+    const { googleId, googleEmail, phone } = googleRegisterDto;
+    const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-      // 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
-      const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
-      if (!isPhoneVerified) {
-        throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
-      }
+    // 1. 구글 ID 중복 검증 (필수)
+    await this.checkGoogleIdDuplication(googleId);
 
-      // 트랜잭션으로 사용자 처리 및 JWT 토큰 생성
-      return await this.prisma.$transaction(async (tx) => {
-        // 1. 휴대폰 번호로 기존 사용자 확인 (모든 계정 유형)
-        const existingPhoneUser = await tx.user.findFirst({
-          where: { phone: normalizedPhone },
-        });
+    // 2. 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    if (!isPhoneVerified) {
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
+    }
 
-        // 2. googleId로 기존 사용자 확인
-        const existingGoogleUser = await tx.user.findUnique({
-          where: { googleId },
-        });
+    // 3. 휴대폰번호 중복 확인 및 계정 타입별 처리
+    const existingPhoneUser = await this.prisma.user.findFirst({
+      where: { phone: normalizedPhone },
+    });
 
-        let user;
-
-        if (existingPhoneUser && existingGoogleUser) {
-          // 케이스: googleId, phone이 모두 중복되어 있는 경우
-          // 둘 다 정보 업데이트 후 로그인 처리
-          user = await tx.user.update({
-            where: { id: existingGoogleUser.id },
-            data: {
-              phone: normalizedPhone,
-              googleEmail,
-              isPhoneVerified: true,
-              lastLoginAt: new Date(),
-            },
-          });
-        } else if (existingPhoneUser && !existingGoogleUser) {
-          // 케이스: phone이 중복되어 있지만 googleId는 중복되지 않은 경우
-          // googleId 정보 업데이트 후 로그인 처리
-          user = await tx.user.update({
+    if (existingPhoneUser) {
+      // 휴대폰번호가 중복되는 경우, 기존 계정의 타입을 확인
+      if (existingPhoneUser.googleId) {
+        // 구글 계정(googleId)에서 이미 사용중인 경우 -> 에러 발생
+        if (existingPhoneUser.userId && existingPhoneUser.googleId) {
+          // 일반 로그인과 구글 로그인 모두 가능한 계정
+          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS);
+        } else {
+          // 구글 로그인 계정만 존재
+          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
+        }
+      } else if (existingPhoneUser.userId) {
+        // 일반 계정(userId)에서만 사용중인 경우 -> 업데이트 후 로그인 처리
+        return await this.prisma.$transaction(async (tx) => {
+          const user = await tx.user.update({
             where: { id: existingPhoneUser.id },
             data: {
               googleId,
@@ -213,56 +200,64 @@ export class GoogleService {
               lastLoginAt: new Date(),
             },
           });
-        } else if (!existingPhoneUser && existingGoogleUser) {
-          // 케이스: googleId가 중복되어 있지만 phone은 중복되지 않은 경우
-          // 휴대폰번호가 인증되어 있지만 않다면 phone 업데이트 후 로그인 처리
-          user = await tx.user.update({
-            where: { id: existingGoogleUser.id },
-            data: {
-              phone: normalizedPhone,
-              googleEmail,
-              isPhoneVerified: true,
-              lastLoginAt: new Date(),
-            },
+
+          // JWT 토큰 생성
+          const tokenPair = await this.jwtUtil.generateTokenPair({
+            sub: user.id,
+            phone: user.phone,
+            loginType: "google",
+            loginId: user.googleId ?? "",
           });
-        } else {
-          // 케이스: googleId, phone이 모두 중복되지 않은 경우
-          // 새 사용자 생성
-          user = await tx.user.create({
-            data: {
-              googleId,
-              googleEmail,
-              phone: normalizedPhone,
-              isPhoneVerified: true,
-              lastLoginAt: new Date(),
-            },
-          });
-        }
 
-        // 3. JWT 토큰 생성
-        const jwtPayload: JwtPayload = {
-          sub: user.id,
-          phone: user.phone,
-          loginType: "google",
-          loginId: user.googleId ?? "",
-        };
-
-        const { accessToken: jwtAccessToken, refreshToken: jwtRefreshToken } =
-          await this.jwtUtil.generateTokenPair(jwtPayload);
-
-        return {
-          accessToken: jwtAccessToken,
-          refreshToken: jwtRefreshToken,
-          user: UserMapperUtil.mapToUserInfo(user),
-        };
-      });
-    } catch (error) {
-      // ConflictException인 경우 그대로 전달 (중복 오류 등)
-      if (error instanceof ConflictException) {
-        throw error;
+          // 응답 data 반환
+          return {
+            accessToken: tokenPair.accessToken,
+            refreshToken: tokenPair.refreshToken,
+            user: UserMapperUtil.mapToUserInfo(user),
+          };
+        });
       }
-      // 다른 에러인 경우 구체적인 오류 메시지로 변환
-      throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED);
+    }
+
+    // 3. 휴대폰번호가 중복되지 않은 경우 - 새 사용자 생성
+    return await this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          googleId,
+          googleEmail,
+          phone: normalizedPhone,
+          isPhoneVerified: true,
+          lastLoginAt: new Date(),
+        },
+      });
+
+      // JWT 토큰 생성
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: user.id,
+        phone: user.phone,
+        loginType: "google",
+        loginId: user.googleId ?? "",
+      });
+
+      // 응답 data 반환
+      return {
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        user: UserMapperUtil.mapToUserInfo(user),
+      };
+    });
+  }
+
+  /**
+   * 구글 ID 중복 검증 (내부 메서드)
+   */
+  private async checkGoogleIdDuplication(googleId: string): Promise<void> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { googleId },
+    });
+
+    if (existingUser) {
+      throw new ConflictException(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS);
     }
   }
 }
