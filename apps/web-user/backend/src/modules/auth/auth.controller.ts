@@ -188,7 +188,6 @@ export class AuthController {
     googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
   })
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_LOGIN_FAILED))
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async googleAuth(@Body() authDto: GoogleLoginRequestDto) {
     return await this.authService.googleLoginWithCode(authDto);
