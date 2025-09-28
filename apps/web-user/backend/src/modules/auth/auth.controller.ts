@@ -225,14 +225,12 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 1분당 10회로 제한 (전역에서는 1분당 100회로 제한 설정되어 있음)
   @ApiOperation({
     summary: "휴대폰 인증번호 발송",
-    description:
-      "사용자의 휴대폰 번호로 인증번호를 발송합니다. 1분당 10회로 제한되며, 24시간 내 최대 10회로 제한됩니다.",
+    description: "사용자의 휴대폰 번호로 인증번호를 발송합니다. 1분당 10회로 제한됩니다.",
   })
   @SwaggerResponse(200, {
     message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT,
   })
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_LIMIT_EXCEEDED)
   @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
   async sendVerificationCode(@Body() sendCodeDto: SendVerificationCodeRequestDto) {
     await this.authService.sendVerificationCode(sendCodeDto);
@@ -255,7 +253,6 @@ export class AuthController {
   })
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_ALREADY_VERIFIED)
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED)
   @SwaggerResponse(400, AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT)
   @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
