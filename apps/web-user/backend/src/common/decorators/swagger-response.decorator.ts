@@ -8,7 +8,7 @@ import { SWAGGER_EXAMPLES } from "@web-user/backend/modules/auth/constants/auth.
  */
 export function SwaggerResponse(
   statusCode: number,
-  dataExample: string | object,
+  dataExample: object,
   description?: string,
 ): any {
   const success = statusCode >= 200 && statusCode < 300;
@@ -24,7 +24,7 @@ export function SwaggerResponse(
             description: "요청 성공 여부",
           },
           data: {
-            type: "string | object",
+            type: "object",
             description: "응답 데이터",
           },
           timestamp: {

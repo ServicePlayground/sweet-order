@@ -7,6 +7,7 @@ import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/au
 import { UserMapperUtil } from "@web-user/backend/modules/auth/utils/user-mapper.util";
 import { GoogleUserInfo, JwtPayload } from "@web-user/backend/common/types/auth.types";
 import { PhoneService } from "./phone.service";
+import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
 import {
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
@@ -176,9 +177,10 @@ export class GoogleService {
   async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
     try {
       const { googleId, googleEmail, phone } = googleRegisterDto;
+      const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
       // 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
-      const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(phone);
+      const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
       if (!isPhoneVerified) {
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
       }
@@ -187,7 +189,7 @@ export class GoogleService {
       return await this.prisma.$transaction(async (tx) => {
         // 1. 휴대폰 번호로 기존 사용자 확인 (모든 계정 유형)
         const existingPhoneUser = await tx.user.findFirst({
-          where: { phone },
+          where: { phone: normalizedPhone },
         });
 
         // 2. googleId로 기존 사용자 확인
@@ -203,7 +205,7 @@ export class GoogleService {
           user = await tx.user.update({
             where: { id: existingGoogleUser.id },
             data: {
-              phone,
+              phone: normalizedPhone,
               googleEmail,
               isPhoneVerified: true,
               lastLoginAt: new Date(),
@@ -226,7 +228,7 @@ export class GoogleService {
           user = await tx.user.update({
             where: { id: existingGoogleUser.id },
             data: {
-              phone,
+              phone: normalizedPhone,
               googleEmail,
               isPhoneVerified: true,
               lastLoginAt: new Date(),
@@ -239,7 +241,7 @@ export class GoogleService {
             data: {
               googleId,
               googleEmail,
-              phone,
+              phone: normalizedPhone,
               isPhoneVerified: true,
               lastLoginAt: new Date(),
             },

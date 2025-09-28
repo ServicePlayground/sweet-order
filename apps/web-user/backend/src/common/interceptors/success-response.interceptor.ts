@@ -20,7 +20,7 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T> {
     // 현재는 모든 응답을 변환 (필요시 특정 메서드 제외 로직 추가 가능)
 
     return next.handle().pipe(
-      map((data: string | object) => {
+      map((data: object) => {
         if (process.env.NODE_ENV === "development") {
           this.logger.debug(`Success: ${request.method} ${request.url} - ${response.statusCode}`);
         }

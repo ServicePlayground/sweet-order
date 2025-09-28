@@ -28,6 +28,7 @@ export const AUTH_ERROR_MESSAGES = {
   PHONE_GOOGLE_ACCOUNT_EXISTS: "해당 휴대폰 번호로 구글 로그인 계정이 존재합니다.",
   GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED: "구글 OAuth 토큰 교환 실패",
   THROTTLE_LIMIT_EXCEEDED: "ThrottlerException: Too Many Requests",
+  UNAUTHORIZED: "Unauthorized",
 } as const;
 
 /**

@@ -35,6 +35,7 @@ import {
   SWAGGER_EXAMPLES,
   SWAGGER_RESPONSE_EXAMPLES,
 } from "@web-user/backend/modules/auth/constants/auth.constants";
+import { createMessageObject } from "@web-user/backend/common/utils/message.util";
 
 /**
  * 인증 컨트롤러
@@ -61,16 +62,16 @@ export class AuthController {
       "새로운 사용자를 등록하고 JWT 토큰을 발급합니다. 휴대폰 인증이 완료된 상태여야 합니다.",
   })
   @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS)
-  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS)
-  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS)
-  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS)
-  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED) // 전역 Rate Limiting Guard 적용
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)) // 전역 Rate Limiting Guard 적용
   async register(@Body() registerDto: RegisterRequestDto) {
     // Success Response Interceptor가 자동으로 래핑
     return this.authService.register(registerDto);
@@ -89,8 +90,8 @@ export class AuthController {
   @SwaggerResponse(200, {
     available: true,
   })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
   ) {
@@ -109,12 +110,12 @@ export class AuthController {
     description: "아이디와 비밀번호로 로그인하고 JWT 토큰을 발급합니다.",
   })
   @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
-  @SwaggerResponse(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async login(@Body() loginDto: LoginRequestDto) {
     return this.authService.login(loginDto);
   }
@@ -130,19 +131,17 @@ export class AuthController {
     summary: "일반 - 비밀번호 변경",
     description: "아이디와 휴대폰 인증을 통해 비밀번호를 변경합니다.",
   })
-  @SwaggerResponse(200, {
-    message: AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED,
-  })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async changePassword(@Body() changePasswordDto: ChangePasswordRequestDto) {
     await this.authService.changePassword(changePasswordDto);
-    return { message: AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED };
+    return createMessageObject(AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED);
   }
 
   /**
@@ -163,10 +162,10 @@ export class AuthController {
     userId: SWAGGER_EXAMPLES.USER_DATA.userId, // 일반 로그인인 경우 (선택적)
     googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail, // 구글 로그인인 경우 (선택적)
   })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async findAccount(@Body() findAccountDto: FindAccountRequestDto) {
     return this.authService.findAccount(findAccountDto);
   }
@@ -188,9 +187,9 @@ export class AuthController {
     googleId: SWAGGER_EXAMPLES.USER_DATA.googleId,
     googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
   })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_LOGIN_FAILED)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_LOGIN_FAILED))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async googleAuth(@Body() authDto: GoogleLoginRequestDto) {
     return await this.authService.googleLoginWithCode(authDto);
   }
@@ -207,10 +206,10 @@ export class AuthController {
     description: "휴대폰 인증 완료 후 구글 로그인 회원가입을 처리합니다.",
   })
   @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
     return await this.authService.googleRegisterWithPhone(registerDto);
   }
@@ -227,14 +226,12 @@ export class AuthController {
     summary: "휴대폰 인증번호 발송",
     description: "사용자의 휴대폰 번호로 인증번호를 발송합니다. 1분당 10회로 제한됩니다.",
   })
-  @SwaggerResponse(200, {
-    message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT,
-  })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async sendVerificationCode(@Body() sendCodeDto: SendVerificationCodeRequestDto) {
     await this.authService.sendVerificationCode(sendCodeDto);
-    return { message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT };
+    return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT);
   }
 
   /**
@@ -248,17 +245,15 @@ export class AuthController {
     summary: "휴대폰 인증번호 확인",
     description: "사용자가 입력한 인증번호가 올바른지 확인합니다.",
   })
-  @SwaggerResponse(200, {
-    message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED,
-  })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async verifyPhoneCode(@Body() verifyCodeDto: VerifyPhoneCodeRequestDto) {
     await this.authService.verifyPhoneCode(verifyCodeDto);
-    return { message: AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED };
+    return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED);
   }
 
   /**
@@ -274,20 +269,19 @@ export class AuthController {
       "인증된 사용자의 휴대폰 번호를 새로운 번호로 변경합니다. 새 휴대폰 번호는 미리 인증이 완료되어야 합니다.",
   })
   @ApiBearerAuth("JWT-auth") // 스웨거에서 인증 헤더 표시
-  @SwaggerResponse(200, {
-    message: AUTH_SUCCESS_MESSAGES.PHONE_CHANGED,
-  })
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.USER_NOT_FOUND)
-  @SwaggerResponse(400, AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED)
-  @SwaggerResponse(409, AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_NOT_FOUND))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async changePhone(
     @Body() changePhoneDto: ChangePhoneRequestDto,
     @Request() req: { user: JwtVerifiedPayload }, // JWT에서 저장된 사용자 정보
   ) {
     await this.authService.changePhone(changePhoneDto, req.user);
-    return { message: AUTH_SUCCESS_MESSAGES.PHONE_CHANGED };
+    return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED);
   }
 
   /**
@@ -303,8 +297,8 @@ export class AuthController {
   @SwaggerResponse(200, {
     accessToken: SWAGGER_EXAMPLES.ACCESS_TOKEN,
   })
-  @SwaggerResponse(401, AUTH_ERROR_MESSAGES.INVALID_REFRESH_TOKEN)
-  @SwaggerResponse(429, AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.INVALID_REFRESH_TOKEN))
+  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto) {
     return this.authService.refreshToken(refreshTokenDto);
   }
