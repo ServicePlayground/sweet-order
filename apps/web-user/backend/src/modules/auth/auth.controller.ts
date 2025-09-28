@@ -148,9 +148,8 @@ export class AuthController {
    * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
    * 둘 다 있는 경우 모두 반환합니다.
    */
-  @Post("find-account")
+  @Get("find-account")
   @Public()
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "계정 찾기",
     description:
@@ -164,7 +163,7 @@ export class AuthController {
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE))
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
-  async findAccount(@Body() findAccountDto: FindAccountRequestDto) {
+  async findAccount(@Query() findAccountDto: FindAccountRequestDto) {
     return this.authService.findAccount(findAccountDto);
   }
 
