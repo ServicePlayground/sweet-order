@@ -59,7 +59,7 @@ export class AuthController {
   @ApiOperation({
     summary: "일반 - 회원가입",
     description:
-      "새로운 사용자를 등록하고 JWT 토큰을 발급합니다. 휴대폰 인증이 완료된 상태여야 합니다.",
+      "새로운 사용자를 등록하고 JWT 토큰을 발급합니다. 휴대폰 인증이 완료된 상태여야 합니다. 사용자 ID는 중복될 수 없으며, 휴대폰번호가 일반 계정에서 사용중이면 에러가 발생하고, 구글 계정에서만 사용중이면 기존 계정을 업데이트하고 바로 로그인 처리됩니다.",
   })
   @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
@@ -69,8 +69,6 @@ export class AuthController {
   @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS))
   @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS))
   @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS))
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)) // 전역 Rate Limiting Guard 적용
   async register(@Body() registerDto: RegisterRequestDto) {
     // Success Response Interceptor가 자동으로 래핑
@@ -202,12 +200,16 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "구글 로그인 회원가입",
-    description: "휴대폰 인증 완료 후 구글 로그인 회원가입을 처리합니다.",
+    description:
+      "새로운 구글 사용자를 등록하고 JWT 토큰을 발급합니다. 휴대폰 인증이 완료된 상태여야 합니다. 구글 ID는 중복될 수 없으며, 휴대폰번호가 구글 계정에서 사용중이면 에러가 발생하고, 일반 계정에서만 사용중이면 기존 계정을 업데이트하고 바로 로그인 처리됩니다.",
   })
   @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED))
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS))
+  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS))
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
     return await this.authService.googleRegisterWithPhone(registerDto);
