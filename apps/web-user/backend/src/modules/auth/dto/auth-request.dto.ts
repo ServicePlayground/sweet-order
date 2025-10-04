@@ -114,6 +114,7 @@ export class GoogleLoginRequestDto {
     description: SWAGGER_DESCRIPTIONS.GOOGLE_CODE,
     example: SWAGGER_EXAMPLES.GOOGLE_CODE,
   })
+  @IsNotEmpty()
   @IsString()
   code: string;
 }
@@ -126,6 +127,7 @@ export class GoogleRegisterRequestDto {
     description: SWAGGER_DESCRIPTIONS.GOOGLE_ID,
     example: SWAGGER_EXAMPLES.USER_DATA.googleId,
   })
+  @IsNotEmpty()
   @IsString()
   googleId: string;
 
@@ -133,6 +135,7 @@ export class GoogleRegisterRequestDto {
     description: SWAGGER_DESCRIPTIONS.GOOGLE_EMAIL,
     example: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
   })
+  @IsNotEmpty()
   @IsString()
   googleEmail: string;
 
@@ -194,7 +197,7 @@ export class RefreshTokenRequestDto {
     description: SWAGGER_DESCRIPTIONS.REFRESH_TOKEN,
     example: SWAGGER_EXAMPLES.REFRESH_TOKEN,
   })
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   refreshToken: string;
 }

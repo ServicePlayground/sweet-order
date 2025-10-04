@@ -32,6 +32,9 @@ model User {
 
   // Stateless JWT 방식으로 변경하여 RefreshToken 관계 제거          // JWT 토큰은 서버에 저장하지 않고 클라이언트에서만 관리
 
+  // Relations
+  productLikes   ProductLike[]
+
   @@index([phone])                                            // 휴대폰 번호 인덱스 (통합 정보 탐색용)
   @@index([userId])                                           // 사용자 ID 인덱스 (일반 로그인용)
   @@index([googleId])                                         // 구글 ID 인덱스 (구글 로그인용)
@@ -54,6 +57,161 @@ model PhoneVerification {
   @@unique([phone, verificationCode])                        // 휴대폰번호 + 인증번호 조합 유니크
   @@map("phone_verifications")
 }
+
+// Product model for product management
+model Product {
+  id                String   @id @default(cuid())              // 고유 식별자
+  
+  // 상품 정보
+  name              String                                   // 상품명 (필수)
+  description       String?                                  // 부가설명 (선택)
+  originalPrice     Int                                      // 정가 (필수)
+  salePrice         Int                                      // 판매가 (필수)
+  notice            String?                                  // 대표 안내사항
+  caution           String?                                  // 대표 주의사항
+  basicIncluded     String?  @map("basic_included")          // 기본 제공
+  location          String?                                  // 위치
+  likeCount         Int      @default(0) @map("like_count")  // 좋아요 수
+  createdAt         DateTime @default(now()) @map("created_at") // 생성일시
+  updatedAt         DateTime @updatedAt @map("updated_at")   // 수정일시
+  orderFormSchema   Json?     @map("order_form_schema")      // 커스터마이즈 동적 주문양식 폼 스키마 (JSON)
+
+  // 상세 정보
+  detailDescription String?  @map("detail_description")      // 상세설명 (HTML)
+
+  // 고시정보 (식품 판매 시 법적 필수 항목)
+  productNumber     String  @map("product_number")          // 상품번호
+  foodType          String  @map("food_type")               // 식품의 유형
+  producer          String                                  // 생산자 및 소재지
+  manufactureDate   String  @map("manufacture_date")        // 제조연월일, 유통기한
+  packageInfo       String  @map("package_info")            // 포장단위별 용량/수량
+  calories          String                                  // 개당열량
+  ingredients       String                                  // 원재료명 및 함량
+  origin            String                                  // 원산지
+  customerService   String  @map("customer_service")        // 소비자상담번호
+
+  // 필터 정보
+  mainCategory      MainCategory[] @map("main_category")     // 대분류 (배열)
+  subCategory       SubCategory[] @map("sub_category")       // 중분류 (배열)
+  targetAudience    TargetAudience[]                         // 대상 기준 (어른, 어린이, 반려동물)
+  sizeRange         SizeRange[] @map("size_range")           // 사이즈/인원 수 (배열)
+  deliveryMethod    DeliveryMethod[]                         // 수령 방식 (픽업, 배송)
+  deliveryDays      DeliveryDays[] @map("delivery_days")     // 수령 일수 (배열)
+  
+  // 해시태그
+  hashtags          String[]                                 // 해시태그 (최대 10개)
+
+  // 상품 상태
+  status            ProductStatus @default(ACTIVE)           // 상품 상태 (판매중, 판매중지, 품절)
+
+  // Relations
+  images            ProductImage[]
+  likes             ProductLike[]
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([salePrice])                                          // 가격 정렬용
+  @@index([likeCount])                                          // 좋아요순 정렬용
+  @@index([name])                                               // 상품명 검색용
+  @@index([hashtags])                                           // 해시태그 검색용
+  @@index([mainCategory])                                       // 대분류 필터용
+  @@index([subCategory])                                        // 중분류 필터용
+  @@index([targetAudience])                                     // 대상 기준 필터용
+  @@index([sizeRange])                                          // 인원 수 필터용
+  @@index([deliveryMethod])                                     // 수령 방식 필터용
+  @@index([deliveryDays])                                       // 수령 일수 필터용
+  @@map("products")
+}
+
+
+// Product image model
+model ProductImage {
+  id        String   @id @default(cuid())              // 고유 식별자
+  url       String                                   // 이미지 URL
+  alt       String?                                  // 이미지 대체 텍스트
+  order     Int      @default(0)                     // 이미지 순서
+  productId String   @map("product_id")              // 상품 ID
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// Product like model
+model ProductLike {
+  id        String   @id @default(cuid())              // 고유 식별자
+  userId    String   @map("user_id")                   // 사용자 ID
+  productId String   @map("product_id")                // 상품 ID
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("product_likes")
+}
+
+// product.constants.ts 에서 사용하는 enum들
+enum MainCategory {
+  PRODUCT     // 상품
+}
+
+enum SubCategory {
+  CAKE        // 케이크
+}
+
+enum TargetAudience {
+  ADULT       // 어른
+  CHILD       // 어린이
+  PET         // 반려동물
+}
+
+enum SizeRange {
+  ONE_TO_TWO    // 1~2인
+  TWO_TO_THREE  // 2~3인
+  THREE_TO_FOUR // 3~4인
+  FOUR_TO_FIVE  // 4~5인
+  FIVE_OR_MORE  // 5인 이상
+}
+
+enum DeliveryMethod {
+  PICKUP      // 픽업
+  DELIVERY    // 배송
+}
+
+enum DeliveryDays {
+  SAME_DAY      // 당일
+  ONE_TO_TWO    // 1~2일
+  TWO_TO_THREE  // 2~3일
+  THREE_TO_FOUR // 3~4일
+  FOUR_TO_FIVE  // 4~5일
+  FIVE_TO_SIX   // 5~6일
+  SIX_TO_SEVEN  // 6~7일
+  OVER_WEEK     // 일주일 이상
+}
+
+enum ProductStatus {
+  ACTIVE      // 판매중
+  INACTIVE    // 판매중지
+  OUT_OF_STOCK // 품절
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
