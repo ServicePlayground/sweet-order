@@ -6,11 +6,7 @@ import { SWAGGER_EXAMPLES } from "@web-user/backend/modules/auth/constants/auth.
 /**
  * Swagger 응답을 위한 커스텀 데코레이터
  */
-export function SwaggerResponse(
-  statusCode: number,
-  dataExample: object,
-  description?: string,
-): any {
+export function SwaggerResponse(statusCode: number, dataExample: object, description?: string) {
   const success = statusCode >= 200 && statusCode < 300;
   return applyDecorators(
     ApiResponse({
