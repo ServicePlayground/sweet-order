@@ -4,6 +4,7 @@ import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { DatabaseModule } from "@web-user/backend/database/database.module";
 import { AuthModule } from "@web-user/backend/modules/auth/auth.module";
+import { ProductModule } from "@web-user/backend/modules/product/product.module";
 import { SuccessResponseInterceptor } from "@web-user/backend/common/interceptors/success-response.interceptor";
 import { ErrorResponseInterceptor } from "@web-user/backend/common/interceptors/error-response.interceptor";
 
@@ -35,10 +36,13 @@ import { ErrorResponseInterceptor } from "@web-user/backend/common/interceptors/
     // 인증 모듈
     AuthModule,
 
+    // 상품 모듈
+    ProductModule,
+
     // 향후 추가될 모듈들:
     // - UserModule (사용자 관리)
     // - OrderModule (주문 관리)
-    // - ProductModule (상품 관리)
+    // - StoreModule (스토어 관리)
   ],
   controllers: [],
   providers: [
