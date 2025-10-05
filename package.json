@@ -8,14 +8,20 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --parallel",
-    "staging": "turbo run staging --parallel",
-    "build:staging": "turbo run build:staging",
-    "build:production": "turbo run build:production",
-    "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
-    "format": "turbo run format",
-    "format:check": "turbo run format:check"
+    "dev": "yarn workspace @sweet-order/web-user-backend dev",
+    "staging": "yarn workspace @sweet-order/web-user-backend staging",
+    "build:staging": "yarn workspace @sweet-order/web-user-backend build:staging",
+    "build:production": "yarn workspace @sweet-order/web-user-backend build:production",
+    "db:reset:dev": "yarn workspace @sweet-order/shared-database db:reset:dev",
+    "db:migrate:dev": "yarn workspace @sweet-order/shared-database db:migrate:dev",
+    "db:seed:dev": "yarn workspace @sweet-order/shared-database db:seed:dev",
+    "db:studio:dev": "yarn workspace @sweet-order/shared-database db:studio:dev",
+    "db:deploy:staging": "yarn workspace @sweet-order/shared-database db:deploy:staging",
+    "db:deploy:production": "yarn workspace @sweet-order/shared-database db:deploy:production",
+    "typecheck": "yarn workspace @sweet-order/web-user-backend typecheck",
+    "lint": "yarn workspace @sweet-order/web-user-backend lint",
+    "format": "yarn workspace @sweet-order/web-user-backend format",
+    "format:check": "yarn workspace @sweet-order/web-user-backend format:check"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -25,7 +31,6 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.0.0",
     "prettier": "^3.0.0",
-    "turbo": "^2.0.0",
     "typescript": "^5.5.0"
   }
 }

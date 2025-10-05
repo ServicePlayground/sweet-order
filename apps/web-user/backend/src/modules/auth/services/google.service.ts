@@ -8,6 +8,7 @@ import { UserMapperUtil } from "@web-user/backend/modules/auth/utils/user-mapper
 import { GoogleUserInfo, JwtPayload } from "@web-user/backend/common/types/auth.types";
 import { PhoneService } from "./phone.service";
 import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
+import { Prisma } from "@sweet-order/shared-database";
 import {
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
@@ -129,7 +130,7 @@ export class GoogleService {
     }
 
     // 3. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
-    return await this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // JWT 토큰 생성
       const jwtPayload: JwtPayload = {
         sub: user.id,
@@ -191,7 +192,7 @@ export class GoogleService {
         }
       } else if (existingPhoneUser.userId) {
         // 일반 계정(userId)에서만 사용중인 경우 -> 업데이트 후 로그인 처리
-        return await this.prisma.$transaction(async (tx) => {
+        return await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           const user = await tx.user.update({
             where: { id: existingPhoneUser.id },
             data: {
@@ -220,7 +221,7 @@ export class GoogleService {
     }
 
     // 3. 휴대폰번호가 중복되지 않은 경우 - 새 사용자 생성
-    return await this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.create({
         data: {
           googleId,
