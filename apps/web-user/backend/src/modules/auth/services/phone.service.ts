@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@web-user/backend/database/prisma.service";
 import { PhoneUtil } from "@web-user/backend/modules/auth/utils/phone.util";
 import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
+import { Prisma } from "@sweet-order/shared-database";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
@@ -34,7 +35,7 @@ export class PhoneService {
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.phoneVerification.create({
         data: {
           phone: normalizedPhone,
@@ -80,7 +81,7 @@ export class PhoneService {
     }
 
     // 3. 인증 성공 처리 - 트랜잭션으로 안전하게 처리
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 현재 인증을 완료 상태로 업데이트
       await tx.phoneVerification.update({
         where: { id: phoneVerification.id },

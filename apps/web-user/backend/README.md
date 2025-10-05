@@ -14,7 +14,7 @@ yarn install
 yarn dev
 
 # API 문서 확인
-# http://localhost:3000/docs
+# http://localhost:3000/v1/docs
 ```
 
 ### 데이터베이스 설정
@@ -69,6 +69,6 @@ src/
 
 자세한 개발 가이드와 API 문서는 `/docs` 폴더를 참고하세요:
 
-- [NestJS 가이드](./docs/NestJS%20-%20가이드.md)
-- [데이터베이스 가이드](./docs/데이터베이스%20-%20가이드.md)
-- [통합 로그인 및 회원가입 가이드](./docs/통합%20로그인%20및%20회원가입%20-%20가이드.md)
+- [NestJS 가이드](../../docs/backend/NestJS%20-%20가이드.md)
+- [데이터베이스 가이드](../../docs/backend/데이터베이스%20-%20가이드.md)
+- [통합 로그인 및 회원가입 가이드](../../docs/backend/통합%20로그인%20및%20회원가입%20-%20가이드.md)

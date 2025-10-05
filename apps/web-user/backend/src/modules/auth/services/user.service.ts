@@ -20,6 +20,7 @@ import {
 import { AUTH_ERROR_MESSAGES } from "@web-user/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@web-user/backend/modules/auth/utils/user-mapper.util";
 import { PhoneService } from "./phone.service";
+import { Prisma } from "@sweet-order/shared-database";
 
 /**
  * 사용자 관리 서비스
@@ -81,7 +82,7 @@ export class UserService {
         }
       } else if (existingPhoneUser.googleId) {
         // 구글 계정(googleId)에서만 사용중인 경우 -> 업데이트 후 로그인 처리
-        return await this.prisma.$transaction(async (tx) => {
+        return await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
           const user = await tx.user.update({
             where: { id: existingPhoneUser.id },
             data: {
@@ -110,7 +111,7 @@ export class UserService {
     }
 
     // 6. 휴대폰번호가 중복되지 않은 경우 - 새 사용자 생성
-    return await this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.create({
         data: {
           userId,
@@ -289,7 +290,7 @@ export class UserService {
     }
 
     // 4. 트랜잭션으로 새 비밀번호 해시화 및 업데이트
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const hashedPassword = await PasswordUtil.hashPassword(newPassword);
 
       await tx.user.update({
@@ -335,7 +336,7 @@ export class UserService {
     }
 
     // 4. 트랜잭션으로 휴대폰 번호 변경
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.user.update({
         where: { id: currentUser.id },
         data: { phone: normalizedNewPhone },

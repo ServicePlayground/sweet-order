@@ -6,7 +6,7 @@ import {
   PRODUCT_ERROR_MESSAGES,
 } from "@web-user/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@web-user/backend/common/types/auth.types";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@sweet-order/shared-database";
 
 /**
  * 상품 서비스

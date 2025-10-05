@@ -10,13 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\"",
-    "db:reset:dev": "dotenv -e .env.development -- prisma migrate reset",
-    "db:migrate:dev": "dotenv -e .env.development -- prisma migrate dev",
-    "db:seed:dev": "dotenv -e .env.development -- ts-node prisma/seed.ts",
-    "db:studio:dev": "dotenv -e .env.development -- prisma studio",
-    "db:deploy:staging": "dotenv -e .env.staging -- prisma migrate deploy",
-    "db:deploy:production": "dotenv -e .env.production -- prisma migrate deploy"
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -27,7 +21,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.1.17",
     "@nestjs/throttler": "^6.4.0",
-    "@prisma/client": "^6.16.2",
+    "@sweet-order/shared-database": "workspace:*",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
@@ -36,7 +30,6 @@
     "morgan": "^1.10.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "prisma": "^6.16.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
@@ -50,7 +43,7 @@
     "@types/passport": "^0",
     "@types/passport-jwt": "^4",
     "@types/pg": "^8.15.5",
-    "dotenv-cli": "^10.0.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
   }
 }

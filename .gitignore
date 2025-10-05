@@ -16,10 +16,9 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
-# 환경별 .env 파일들은 Git에 포함 (보안상 민감한 정보는 별도 관리)
-.env.development
-.env.staging  
-.env.production
+# 환경별 .env 파일들은 Git에 포함하지 않음
+.env.*
+!.env.example
 
 # Logs
 npm-debug.log*
@@ -121,6 +120,9 @@ Thumbs.db
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Generated sources
+**/src/generated/
 
 # Database
 *.db
