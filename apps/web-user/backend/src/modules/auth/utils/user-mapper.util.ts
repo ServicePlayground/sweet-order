@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from "@sweet-order/shared-database";
 import { UserInfo } from "@web-user/backend/common/types/auth.types";
 
 /**

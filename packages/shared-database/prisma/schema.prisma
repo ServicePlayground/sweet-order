@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 아래 모델 정의는 기존 백엔드의 스키마를 공용 패키지로 이동한 것입니다.
+// User model for authentication and user management
+model User {
+  id               String   @id @default(cuid())              // 고유 식별자 (UUID)
+  phone            String   @unique                           // 휴대폰 번호 (통합 정보 탐색용, 필수)
+  passwordHash     String?  @map("password_hash")             // 암호화된 비밀번호 (일반 회원가입용)
+  name             String?                                    // 사용자 실명
+  nickname         String?                                    // 닉네임
+  email            String?                                    // 이메일
+  profileImageUrl  String?  @map("profile_image_url")         // 프로필 이미지 URL
+  isPhoneVerified  Boolean  @default(false) @map("is_phone_verified") // 휴대폰 인증 여부
+  isActive         Boolean  @default(true) @map("is_active")  // 계정 활성화 상태
+  // 일반 회원가입 관련 필드
+  userId           String?  @unique @map("user_id")           // 사용자 ID (일반 회원가입용, 소셜 로그인 시 null 가능)
+  // 소셜 로그인 관련 필드
+  googleId         String?  @unique @map("google_id")         // 구글 사용자 ID
+  googleEmail      String?  @map("google_email")              // 구글 이메일
+  // 계정 생성/수정 정보
+  createdAt        DateTime @default(now()) @map("created_at")  // 계정 생성일시
+  lastLoginAt      DateTime? @map("last_login_at")            // 마지막 로그인 시간
+
+  // Stateless JWT 방식으로 변경하여 RefreshToken 관계 제거
+
+  // Relations
+  productLikes   ProductLike[]
+
+  @@index([phone])
+  @@index([userId])
+  @@index([googleId])
+  @@map("users")
+}
+
+// Phone verification for registration and password recovery
+model PhoneVerification {
+  id               String   @id @default(cuid())
+  phone            String
+  verificationCode String   @map("verification_code")
+  expiresAt        DateTime @map("expires_at")
+  isVerified       Boolean  @default(false) @map("is_verified")
+  purpose          String   @default("registration")
+  userId           String?  @map("user_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@unique([phone, verificationCode])
+  @@map("phone_verifications")
+}
+
+// Product model for product management
+model Product {
+  id                String   @id @default(cuid())
+  
+  // 상품 정보
+  name              String
+  description       String?
+  originalPrice     Int
+  salePrice         Int
+  notice            String?
+  caution           String?
+  basicIncluded     String?  @map("basic_included")
+  location          String?
+  likeCount         Int      @default(0) @map("like_count")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  orderFormSchema   Json?     @map("order_form_schema")
+
+  // 상세 정보
+  detailDescription String?  @map("detail_description")
+
+  // 고시정보 (식품 판매 시 법적 필수 항목)
+  productNumber     String  @map("product_number")
+  foodType          String  @map("food_type")
+  producer          String
+  manufactureDate   String  @map("manufacture_date")
+  packageInfo       String  @map("package_info")
+  calories          String
+  ingredients       String
+  origin            String
+  customerService   String  @map("customer_service")
+
+  // 필터 정보
+  mainCategory      MainCategory[] @map("main_category")
+  subCategory       SubCategory[] @map("sub_category")
+  targetAudience    TargetAudience[]
+  sizeRange         SizeRange[] @map("size_range")
+  deliveryMethod    DeliveryMethod[]
+  deliveryDays      DeliveryDays[] @map("delivery_days")
+  
+  // 해시태그
+  hashtags          String[]
+
+  // 상품 상태
+  status            ProductStatus @default(ACTIVE)
+
+  // Relations
+  images            ProductImage[]
+  likes             ProductLike[]
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([salePrice])
+  @@index([likeCount])
+  @@index([name])
+  @@index([hashtags])
+  @@index([mainCategory])
+  @@index([subCategory])
+  @@index([targetAudience])
+  @@index([sizeRange])
+  @@index([deliveryMethod])
+  @@index([deliveryDays])
+  @@map("products")
+}
+
+// Product image model
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int      @default(0)
+  productId String   @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// Product like model
+model ProductLike {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  productId String   @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("product_likes")
+}
+
+// product.constants.ts 에서 사용하는 enum들
+enum MainCategory {
+  PRODUCT
+}
+
+enum SubCategory {
+  CAKE
+}
+
+enum TargetAudience {
+  ADULT
+  CHILD
+  PET
+}
+
+enum SizeRange {
+  ONE_TO_TWO
+  TWO_TO_THREE
+  THREE_TO_FOUR
+  FOUR_TO_FIVE
+  FIVE_OR_MORE
+}
+
+enum DeliveryMethod {
+  PICKUP
+  DELIVERY
+}
+
+enum DeliveryDays {
+  SAME_DAY
+  ONE_TO_TWO
+  TWO_TO_THREE
+  THREE_TO_FOUR
+  FOUR_TO_FIVE
+  FIVE_TO_SIX
+  SIX_TO_SEVEN
+  OVER_WEEK
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+
