@@ -1,13 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": true, // 타입 선언 파일 생성
+    "declarationMap": true, // 타입 선언 맵 파일 생성
     "outDir": "./dist",
-    "rootDir": ".",
-    "module": "CommonJS",
-    "moduleResolution": "node"
+    "rootDir": "."
   },
-  "include": ["index.d.ts", "prisma/**/*"],
+  "include": ["index.d.ts", "prisma/**/*", "seed.ts"],
   "exclude": ["node_modules", "dist", "prisma/generated"]
 }
