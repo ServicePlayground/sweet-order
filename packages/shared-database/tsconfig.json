@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "module": "CommonJS",
+    "moduleResolution": "node"
+  },
+  "include": ["index.d.ts", "prisma/**/*"],
+  "exclude": ["node_modules", "dist", "prisma/generated"]
+}

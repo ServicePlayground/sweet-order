@@ -9,6 +9,7 @@
 ### 기존 node_modules 방식의 문제점
 
 #### 1. **디스크 공간 낭비**
+
 ```
 # 기존 방식 (node_modules)
 sweet-order/
@@ -25,11 +26,13 @@ sweet-order/
 ```
 
 **문제점:**
+
 - 같은 패키지가 여러 곳에 중복 저장
 - `node_modules` 폴더 하나당 수만 개의 파일
 - 디스크 공간을 엄청나게 많이 차지
 
 #### 2. **의존성 지옥 (Dependency Hell)**
+
 ```bash
 # 기존 방식에서 발생하는 문제들
 ├── node_modules/
@@ -40,11 +43,13 @@ sweet-order/
 ```
 
 **문제점:**
+
 - 같은 패키지의 다른 버전이 여러 곳에 존재
 - 어떤 버전이 실제로 사용되는지 불분명
 - "내 컴퓨터에서는 작동했는데" 문제 발생
 
 #### 3. **느린 설치 속도**
+
 ```bash
 # 기존 방식
 yarn install
@@ -56,6 +61,7 @@ yarn install
 ### PnP 방식의 해결책
 
 #### 1. **디스크 공간 절약**
+
 ```
 # PnP 방식
 sweet-order/
@@ -69,26 +75,30 @@ sweet-order/
 ```
 
 **장점:**
+
 - 패키지들이 압축된 상태로 저장
 - 중복 제거로 디스크 공간 50-70% 절약
 - `.pnp.cjs` 파일 하나로 모든 의존성 관리
 
 #### 2. **명확한 의존성 해결**
+
 ```javascript
 // .pnp.cjs 파일 내용 (간소화)
 const packageMap = {
-  "lodash": "npm:lodash@4.17.21",
+  lodash: "npm:lodash@4.17.21",
   "@nestjs/core": "npm:@nestjs/core@10.0.0",
-  "prisma": "npm:prisma@6.16.3"
+  prisma: "npm:prisma@6.16.3",
 };
 ```
 
 **장점:**
+
 - 모든 패키지의 정확한 버전이 하나의 파일에 기록
 - 어떤 버전이 사용되는지 명확
 - 의존성 충돌 자동 해결
 
 #### 3. **빠른 설치 속도**
+
 ```bash
 # PnP 방식
 yarn install
@@ -116,6 +126,7 @@ sweet-order/.yarn/cache/          # 프로젝트별 캐시
 ```
 
 **공유 방식:**
+
 1. **글로벌 캐시**: 모든 프로젝트가 공유하는 패키지 저장소
 2. **프로젝트별 캐시**: 특정 프로젝트에서만 사용하는 패키지
 3. **중복 제거**: 같은 패키지는 한 번만 다운로드하고 공유
@@ -129,7 +140,7 @@ yarn add lodash
 # → ~/.yarn/cache/에 lodash 다운로드
 
 # 프로젝트 B에서 lodash 설치
-cd project-b  
+cd project-b
 yarn add lodash
 # → 이미 다운로드된 lodash 재사용 (다운로드 없음!)
 
@@ -151,7 +162,7 @@ nodeLinker: pnp
 yarnPath: .yarn/releases/yarn-4.9.4.cjs
 
 # PnP 모드 설정
-pnpMode: loose  # strict vs loose
+pnpMode: loose # strict vs loose
 
 # 글로벌 캐시 활성화 (패키지 공유)
 enableGlobalCache: true
@@ -160,13 +171,13 @@ enableGlobalCache: true
 packageExtensions:
   "@nestjs/core@*":
     peerDependencies:
-      "typescript": "*"  # TypeScript 의존성 자동 해결
+      "typescript": "*" # TypeScript 의존성 자동 해결
   "@nestjs/schematics@*":
     peerDependencies:
       "typescript": "*"
   "@prisma/client@*":
     dependencies:
-      "@prisma/engines": "*"  # Prisma 엔진 자동 설치
+      "@prisma/engines": "*" # Prisma 엔진 자동 설치
 ```
 
 ## 🔧 PnP 모드 상세 설명
@@ -174,27 +185,32 @@ packageExtensions:
 ### `pnpMode: loose` vs `strict`
 
 #### **loose 모드 (현재 사용 중)**
+
 ```yaml
 pnpMode: loose
 ```
 
 **특징:**
+
 - 기존 코드와의 호환성을 최대한 보장
 - 일부 패키지가 PnP를 완전히 지원하지 않아도 작동
 - 개발 편의성 우선
 
 **예시:**
+
 ```javascript
 // loose 모드에서는 이런 코드도 작동
-import { someFunction } from 'some-package';  // PnP 미지원 패키지도 작동
+import { someFunction } from "some-package"; // PnP 미지원 패키지도 작동
 ```
 
 #### **strict 모드**
+
 ```yaml
 pnpMode: strict
 ```
 
 **특징:**
+
 - 모든 의존성이 명시적으로 선언되어야 함
 - 더 엄격한 보안과 성능
 - PnP를 완전히 지원하는 패키지만 사용 가능
@@ -206,6 +222,7 @@ enableGlobalCache: true
 ```
 
 **동작 방식:**
+
 1. **첫 번째 프로젝트**: 패키지를 글로벌 캐시에 다운로드
 2. **두 번째 프로젝트**: 글로벌 캐시에서 패키지 재사용
 3. **결과**: 다운로드 시간 단축, 디스크 공간 절약
@@ -219,6 +236,7 @@ enableGlobalCache: true
 ### NestJS 관련 문제 해결
 
 **문제 상황:**
+
 ```bash
 # NestJS 패키지들이 TypeScript를 요구하지만 선언되지 않음
 @nestjs/core@10.0.0 requires typescript as peerDependency
@@ -226,37 +244,42 @@ enableGlobalCache: true
 ```
 
 **해결 방법:**
+
 ```yaml
 packageExtensions:
   "@nestjs/core@*":
     peerDependencies:
-      "typescript": "*"  # TypeScript 의존성 자동 추가
+      "typescript": "*" # TypeScript 의존성 자동 추가
   "@nestjs/schematics@*":
     peerDependencies:
       "typescript": "*"
 ```
 
 **결과:**
+
 - NestJS 패키지들이 TypeScript를 자동으로 찾을 수 있음
 - 수동으로 TypeScript를 설치할 필요 없음
 
 ### Prisma 관련 문제 해결
 
 **문제 상황:**
+
 ```bash
 # Prisma 클라이언트가 엔진을 찾지 못함
 @prisma/client requires @prisma/engines but it's not installed
 ```
 
 **해결 방법:**
+
 ```yaml
 packageExtensions:
   "@prisma/client@*":
     dependencies:
-      "@prisma/engines": "*"  # Prisma 엔진 자동 설치
+      "@prisma/engines": "*" # Prisma 엔진 자동 설치
 ```
 
 **결과:**
+
 - Prisma 클라이언트가 필요한 엔진을 자동으로 설치
 - Prisma 관련 오류 해결
 
@@ -265,6 +288,7 @@ packageExtensions:
 ### 1. **성능 향상** - 설치 속도 3-5배 빨라짐
 
 **기존 방식:**
+
 ```bash
 yarn install
 # → 수만 개의 파일을 복사
@@ -273,6 +297,7 @@ yarn install
 ```
 
 **PnP 방식:**
+
 ```bash
 yarn install
 # → 패키지들을 압축된 상태로 다운로드
@@ -283,6 +308,7 @@ yarn install
 ### 2. **디스크 공간 절약** - 50-70% 공간 절약
 
 **기존 방식:**
+
 ```
 sweet-order/
 ├── node_modules/     # 2.1GB
@@ -292,6 +318,7 @@ sweet-order/
 ```
 
 **PnP 방식:**
+
 ```
 sweet-order/
 ├── .pnp.cjs         # 1KB
@@ -304,38 +331,42 @@ sweet-order/
 ### 3. **보안 강화** - 불필요한 패키지 접근 방지
 
 **기존 방식:**
+
 ```javascript
 // 어떤 패키지든 접근 가능 (보안 위험)
-import { someFunction } from 'unwanted-package';  // 의도하지 않은 패키지 접근
+import { someFunction } from "unwanted-package"; // 의도하지 않은 패키지 접근
 ```
 
 **PnP 방식:**
+
 ```javascript
 // 명시적으로 선언된 패키지만 접근 가능
-import { someFunction } from 'declared-package';  // 안전한 패키지 접근만 허용
+import { someFunction } from "declared-package"; // 안전한 패키지 접근만 허용
 ```
 
 ### 4. **일관성 보장** - "내 컴퓨터에서는 작동했는데" 문제 해결
 
 **기존 방식:**
+
 ```bash
 # 개발자 A의 컴퓨터
 node_modules/
 ├── lodash@4.17.20
 └── react@18.2.0
 
-# 개발자 B의 컴퓨터  
+# 개발자 B의 컴퓨터
 node_modules/
 ├── lodash@4.17.21  # 다른 버전!
 └── react@18.1.0    # 다른 버전!
 ```
 
 **PnP 방식:**
+
 ```javascript
 // .pnp.cjs 파일 (모든 개발자가 동일)
 const packageMap = {
-  "lodash": "npm:lodash@4.17.21",  // 정확한 버전 고정
-  "react": "npm:react@18.2.0"      // 정확한 버전 고정
+  lodash: "npm:lodash@4.17.21", // 정확한 버전 고정
+  react: "npm:react@18.2.0", // 정확한 버전 고정
 };
 ```
 
@@ -347,12 +378,14 @@ const packageMap = {
 Prisma는 현재 PnP를 완전히 지원하지 않아서 일반적인 방법으로는 작동하지 않습니다.
 
 **기존 방식 (작동하지 않음):**
+
 ```bash
 cd apps/web-user/backend
 yarn prisma generate  # ❌ 오류 발생
 ```
 
 **해결 방법:**
+
 ```bash
 # PnP 환경에서 Prisma 사용
 yarn dlx prisma generate  # ✅ 작동
@@ -363,12 +396,14 @@ yarn dlx prisma generate  # ✅ 작동
 ```
 
 **왜 `yarn dlx`를 사용하는가?**
+
 - `yarn dlx`: 패키지를 임시로 다운로드하고 실행
 - PnP 환경에서 Prisma CLI가 제대로 작동하도록 도움
 
 ### IDE 설정 - PnP 지원 활성화
 
 #### VS Code 설정
+
 ```json
 // .vscode/settings.json
 {
@@ -379,15 +414,18 @@ yarn dlx prisma generate  # ✅ 작동
 ```
 
 **왜 필요한가?**
+
 - VS Code가 `.pnp.cjs` 파일을 읽고 패키지 위치를 찾을 수 있도록 함
 - 자동 완성과 타입 체크가 제대로 작동하도록 함
 
 #### WebStorm/IntelliJ 설정
+
 1. Settings > Languages & Frameworks > Node.js and NPM
 2. Package manager: Yarn 선택
 3. Enable PnP support 체크
 
 **왜 필요한가?**
+
 - IDE가 PnP 방식으로 패키지를 찾을 수 있도록 함
 - 코드 네비게이션과 리팩토링이 제대로 작동하도록 함
 
@@ -396,6 +434,7 @@ yarn dlx prisma generate  # ✅ 작동
 ### 패키지 설치 - PnP 방식
 
 #### 루트에서 패키지 추가
+
 ```bash
 # 루트에 패키지 추가 (모든 워크스페이스에서 사용 가능)
 yarn add lodash
@@ -405,6 +444,7 @@ yarn add lodash
 ```
 
 #### 특정 워크스페이스에 패키지 추가
+
 ```bash
 # 백엔드에만 패키지 추가
 yarn workspace @sweet-order/web-user-backend add @nestjs/jwt
@@ -414,6 +454,7 @@ yarn workspace @sweet-order/web-user-backend add @nestjs/jwt
 ```
 
 #### 개발 의존성 추가
+
 ```bash
 # 루트에 개발 도구 추가
 yarn add -D prettier
@@ -424,6 +465,7 @@ yarn add -D prettier
 ### 스크립트 실행 - 워크스페이스 방식
 
 #### 루트 스크립트 실행
+
 ```bash
 # 루트 package.json의 스크립트 실행
 yarn dev                    # → yarn workspace @sweet-order/web-user-backend dev
@@ -432,6 +474,7 @@ yarn db:migrate:dev         # → yarn workspace @sweet-order/web-user-backend d
 ```
 
 #### 워크스페이스 스크립트 직접 실행
+
 ```bash
 # 특정 워크스페이스의 스크립트 직접 실행
 yarn workspace @sweet-order/web-user-backend dev
@@ -442,6 +485,7 @@ yarn workspace @sweet-order/web-user-backend lint
 ### 의존성 관리 - PnP 최적화
 
 #### 의존성 업데이트
+
 ```bash
 # 모든 패키지 업데이트
 yarn upgrade
@@ -454,6 +498,7 @@ yarn workspace @sweet-order/web-user-backend upgrade @nestjs/core
 ```
 
 #### 캐시 관리
+
 ```bash
 # 캐시 확인 및 정리
 yarn install --check-cache
@@ -471,6 +516,7 @@ yarn install
 ### 의존성 해결 오류
 
 #### peer dependency 문제 확인
+
 ```bash
 # peer dependency 문제 진단
 yarn explain peer-requirements
@@ -481,6 +527,7 @@ yarn explain peer-requirements
 ```
 
 #### 의존성 트리 확인
+
 ```bash
 # 특정 패키지가 어디서 사용되는지 확인
 yarn why lodash
@@ -494,6 +541,7 @@ yarn why lodash
 ### PnP 관련 오류
 
 #### PnP 파일 재생성
+
 ```bash
 # PnP 파일이 손상되었을 때
 rm .pnp.cjs
@@ -503,6 +551,7 @@ yarn install
 ```
 
 #### 캐시 정리
+
 ```bash
 # 캐시 문제가 있을 때
 yarn cache clean
@@ -514,6 +563,7 @@ yarn install
 ### Prisma 관련 오류
 
 #### Prisma 클라이언트 재생성
+
 ```bash
 # Prisma 클라이언트가 생성되지 않았을 때
 yarn dlx prisma generate
@@ -522,6 +572,7 @@ yarn dlx prisma generate
 ```
 
 #### Prisma 스키마 동기화
+
 ```bash
 # 데이터베이스와 스키마가 다를 때
 yarn dlx prisma db push
@@ -532,6 +583,7 @@ yarn dlx prisma db push
 ### 일반적인 오류와 해결책
 
 #### "Cannot resolve module" 오류
+
 ```bash
 # 문제: 패키지를 찾을 수 없음
 # 해결: 패키지가 .pnp.cjs에 등록되어 있는지 확인
@@ -539,6 +591,7 @@ yarn why <package-name>
 ```
 
 #### "Peer dependency not found" 오류
+
 ```bash
 # 문제: peer dependency 누락
 # 해결: packageExtensions에 추가하거나 수동 설치
@@ -546,6 +599,7 @@ yarn add <missing-package>
 ```
 
 #### IDE에서 타입 인식 안됨
+
 ```bash
 # 문제: VS Code에서 타입을 찾지 못함
 # 해결: TypeScript 서버 재시작

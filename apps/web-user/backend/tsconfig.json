@@ -1,6 +1,7 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    //"composite": true, // 추가하지 말기!!!
     "rootDir": "./src",
     "outDir": "./dist", // outDir을 여기서 선언하지 않으면, 현재 프로젝트 경로에서 import시 인식을 제대로 못하는 문제가 있음
     "experimentalDecorators": true,
