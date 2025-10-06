@@ -6,11 +6,7 @@
     "dev": "NODE_ENV=development nest start --watch",
     "staging": "NODE_ENV=staging nest start --watch",
     "build:staging": "NODE_ENV=staging nest build",
-    "build:production": "NODE_ENV=production nest build",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint \"src/**/*.ts\" --fix",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\""
+    "build:production": "NODE_ENV=production nest build"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

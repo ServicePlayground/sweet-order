@@ -3,3 +3,7 @@ node_modules/
 dist/
 build/
 .turbo/
+
+!env.development
+!env.staging
+!env.production

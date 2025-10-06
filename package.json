@@ -3,11 +3,14 @@
   "private": true,
   "packageManager": "yarn@4.9.4",
   "workspaces": [
-    "apps/*",
     "apps/*/*",
     "packages/*"
   ],
   "scripts": {
+    "lint": "eslint --cache --max-warnings=0 .",
+    "lint:fix": "eslint --cache --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev": "yarn workspace @sweet-order/web-user-backend dev",
     "staging": "yarn workspace @sweet-order/web-user-backend staging",
     "build:staging": "yarn workspace @sweet-order/web-user-backend build:staging",
@@ -17,11 +20,7 @@
     "db:seed:dev": "yarn workspace @sweet-order/shared-database db:seed:dev",
     "db:studio:dev": "yarn workspace @sweet-order/shared-database db:studio:dev",
     "db:deploy:staging": "yarn workspace @sweet-order/shared-database db:deploy:staging",
-    "db:deploy:production": "yarn workspace @sweet-order/shared-database db:deploy:production",
-    "typecheck": "yarn workspace @sweet-order/web-user-backend typecheck",
-    "lint": "yarn workspace @sweet-order/web-user-backend lint",
-    "format": "yarn workspace @sweet-order/web-user-backend format",
-    "format:check": "yarn workspace @sweet-order/web-user-backend format:check"
+    "db:deploy:production": "yarn workspace @sweet-order/shared-database db:deploy:production"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
