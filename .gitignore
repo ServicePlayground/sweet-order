@@ -124,6 +124,10 @@ Thumbs.db
 # Generated sources
 **/src/generated/
 packages/shared-database/prisma/generated/
+packages/shared-database/**/client/
+
+# App build outputs (NestJS)
+apps/web-user/backend/dist/
 
 # Database
 *.db

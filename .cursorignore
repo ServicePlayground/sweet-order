@@ -4,6 +4,13 @@ dist/
 build/
 .turbo/
 
+# Prisma generated clients (do not index)
+packages/shared-database/prisma/generated/
+packages/shared-database/**/client/
+
+# App build outputs (NestJS)
+apps/web-user/backend/dist/
+
 !env.development
 !env.staging
 !env.production

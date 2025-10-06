@@ -61,3 +61,6 @@ pnpm-lock.yaml
 # Prisma generated files
 packages/shared-database/prisma/generated/
 packages/shared-database/**/client/
+
+# App build outputs (NestJS)
+apps/web-user/backend/dist/
