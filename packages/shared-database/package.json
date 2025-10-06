@@ -11,6 +11,7 @@
     }
   },
   "scripts": {
+    "postinstall": "prisma generate",
     "db:reset:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- prisma migrate reset --force",
     "db:migrate:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- prisma migrate dev",
     "db:seed:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- ts-node -O '{\"module\":\"CommonJS\"}' prisma/seed.ts",
