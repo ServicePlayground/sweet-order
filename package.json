@@ -15,6 +15,7 @@
     "staging": "yarn workspace @sweet-order/web-user-backend staging",
     "build:staging": "yarn workspace @sweet-order/web-user-backend build:staging",
     "build:production": "yarn workspace @sweet-order/web-user-backend build:production",
+    "postinstall": "yarn workspace @sweet-order/shared-database postinstall",
     "db:reset:dev": "yarn workspace @sweet-order/shared-database db:reset:dev",
     "db:migrate:dev": "yarn workspace @sweet-order/shared-database db:migrate:dev",
     "db:seed:dev": "yarn workspace @sweet-order/shared-database db:seed:dev",

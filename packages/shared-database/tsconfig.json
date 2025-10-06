@@ -6,6 +6,6 @@
     "outDir": "./dist",
     "rootDir": "."
   },
-  "include": ["index.d.ts", "prisma/**/*", "seed.ts"],
+  "include": ["index.d.ts", "prisma/**/*", "prisma/seed.ts"],
   "exclude": ["node_modules", "dist", "prisma/generated"]
 }
