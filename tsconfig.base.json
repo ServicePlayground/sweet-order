@@ -4,7 +4,6 @@
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Node",
-    "outDir": "./dist",
     "allowJs": false,
     "checkJs": false,
     "strict": true,
@@ -14,8 +13,5 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "paths": {
-      "@packages/*": ["packages/*"]
-    }
   }
 }

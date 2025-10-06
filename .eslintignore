@@ -1,0 +1,19 @@
+# Build outputs
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Type declarations
+*.d.ts
+
+# Prisma generated
+**/src/generated/
+
+# Generated files
+**/*.generated.ts
+
+# Config and cache
+.eslintcache
+

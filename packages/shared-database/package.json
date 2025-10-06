@@ -1,0 +1,30 @@
+{
+  "name": "@sweet-order/shared-database",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "scripts": {
+    "db:reset:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- prisma migrate reset --force",
+    "db:migrate:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- prisma migrate dev",
+    "db:seed:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- ts-node -O '{\"module\":\"CommonJS\"}' prisma/seed.ts",
+    "db:studio:dev": "dotenv -e ../../apps/web-user/backend/.env.development -- prisma studio",
+    "db:deploy:staging": "dotenv -e ../../apps/web-user/backend/.env.staging -- prisma migrate deploy",
+    "db:deploy:production": "dotenv -e ../../apps/web-user/backend/.env.production -- prisma migrate deploy"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "6.0.0",
+    "@types/node": "^20.11.30",
+    "bcrypt": "^6.0.0",
+    "dotenv-cli": "^7.4.1",
+    "prisma": "6.16.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}
