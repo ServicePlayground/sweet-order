@@ -14,3 +14,12 @@ apps/web-user/backend/dist/
 !env.development
 !env.staging
 !env.production
+
+# Yarn
+.yarn/
+.yarn/cache/
+.yarn/patches/
+.yarn/plugins/
+.yarn/releases/
+.yarn/sdks/
+.yarn/versions/

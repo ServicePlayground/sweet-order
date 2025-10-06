@@ -113,7 +113,7 @@ yarn install
 
 ```bash
 # PnP의 패키지 공유 방식
-~/.yarn/cache/                    # 글로벌 캐시 (모든 프로젝트 공유)
+~/.yarn/berry/cache/              # 글로벌 캐시 (모든 프로젝트 공유)
 ├── npm-lodash-4.17.21-abc123.zip
 ├── npm-@nestjs-core-10.0.0-def456.zip
 ├── npm-typescript-5.5.0-ghi789.zip
@@ -137,7 +137,7 @@ sweet-order/.yarn/cache/          # 프로젝트별 캐시
 # 프로젝트 A에서 lodash 설치
 cd project-a
 yarn add lodash
-# → ~/.yarn/cache/에 lodash 다운로드
+# → ~/.yarn/berry/cache/에 lodash 다운로드
 
 # 프로젝트 B에서 lodash 설치
 cd project-b
@@ -226,6 +226,10 @@ enableGlobalCache: true
 1. **첫 번째 프로젝트**: 패키지를 글로벌 캐시에 다운로드
 2. **두 번째 프로젝트**: 글로벌 캐시에서 패키지 재사용
 3. **결과**: 다운로드 시간 단축, 디스크 공간 절약
+
+**주의/권장 설정:**
+
+- `enableGlobalCache: true`일 때 캐시는 로컬 프로젝트가 아닌 사용자 홈 `~/.yarn/berry/cache`에 저장됩니다.
 
 ## 🛠️ packageExtensions - 의존성 문제 해결
 
@@ -515,6 +519,25 @@ yarn install
 ```
 
 ## 🔧 문제 해결 가이드
+
+### Yarn 디렉터리 구조 이해 (`.yarn` 내부)
+
+#### `sdks/`
+
+- VS Code/IDE가 프로젝트의 정확한 버전의 TypeScript, ESLint 등을 사용하도록 하는 SDK 파일 모음입니다.
+- `yarn dlx @yarnpkg/sdks vscode` 또는 `yarn sdks`로 생성/갱신합니다.
+- IDE가 PnP 환경에서 올바른 바이너리를 참조하게 해 주므로, 타입 검사/자동완성이 안정적입니다.
+
+#### `unplugged/`
+
+- 압축된 캐시(zip) 상태로는 동작이 어려운 패키지를 Yarn이 자동으로 “펼친” 위치입니다.
+- 빌드 스크립트 실행, 파일 시스템 직접 접근 등이 필요한 패키지가 이 경로에서 동작합니다.
+- 사용자는 일반적으로 수동 관리할 필요가 없습니다.
+
+#### `install-state.gz`
+
+- 설치 단계의 스냅샷(메타데이터)으로, 재설치 시 무엇을 건너뛸 수 있는지 빠르게 판단합니다.
+- Yarn 4에서는 이 파일을 커밋하는 것이 권장됩니다. CI에서도 설치 최적화가 일관되게 적용됩니다.
 
 ### 의존성 해결 오류
 
