@@ -12,6 +12,12 @@ out/
 # Yarn
 .yarn/
 .yarn-integrity
+.yarn/cache/
+.yarn/patches/
+.yarn/plugins/
+.yarn/releases/
+.yarn/sdks/
+.yarn/versions/
 
 # Environment files
 .env*
