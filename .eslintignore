@@ -11,6 +11,10 @@ node_modules/
 # Prisma generated
 **/src/generated/
 
+# Prisma client (shared-database)
+packages/shared-database/prisma/generated/
+packages/shared-database/**/client/
+
 # Generated files
 **/*.generated.ts
 
