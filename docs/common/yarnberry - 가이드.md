@@ -377,22 +377,25 @@ const packageMap = {
 **문제:**
 Prisma는 현재 PnP를 완전히 지원하지 않아서 일반적인 방법으로는 작동하지 않습니다.
 
-**기존 방식 (작동하지 않음):**
+**기존 방식 (워크스페이스 내부에서 직접 실행 시 오류 가능):**
 
 ```bash
 cd apps/web-user/backend
-yarn prisma generate  # ❌ 오류 발생
+yarn prisma generate  # ❌ PnP 환경/워크스페이스 경로에서 오류 발생 가능
 ```
 
-**해결 방법:**
+**해결 방법:** (PnP 환경에서 CLI는 dlx로 실행하거나 shared 패키지 스크립트 사용)
 
 ```bash
 # PnP 환경에서 Prisma 사용
 yarn dlx prisma generate  # ✅ 작동
 
-# 또는 워크스페이스 내에서
-cd apps/web-user/backend
-yarn dlx prisma generate  # ✅ 작동
+# 또는 루트 스크립트로 공용 패키지의 postinstall을 통해 자동 생성
+yarn install  # ✅ @sweet-order/shared-database postinstall에서 prisma generate 실행
+
+# 데이터베이스 스크립트는 루트에서 실행 (workspace 위임)
+yarn db:migrate:dev
+yarn db:studio:dev
 ```
 
 **왜 `yarn dlx`를 사용하는가?**
