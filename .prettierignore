@@ -12,12 +12,6 @@ out/
 # Yarn
 .yarn/
 .yarn-integrity
-.yarn/cache/
-.yarn/patches/
-.yarn/plugins/
-.yarn/releases/
-.yarn/sdks/
-.yarn/versions/
 
 # Environment files
 .env*
@@ -64,9 +58,10 @@ Thumbs.db
 package-lock.json
 pnpm-lock.yaml
 
-# Prisma generated files
-packages/shared-database/prisma/generated/
-packages/shared-database/**/client/
+# Prisma client (backend)
+apps/backend/src/infra/database/prisma/generated/
+apps/backend/src/infra/database/prisma/**/client/
 
 # App build outputs (NestJS)
-apps/web-user/backend/dist/
+apps/backend/dist/
+

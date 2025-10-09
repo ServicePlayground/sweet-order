@@ -156,33 +156,6 @@ export class AuthService {
 }
 ```
 
-## 애플리케이션 구조
-
-```
-src/
-├── main.ts                 # 애플리케이션 진입점
-├── app.module.ts          # 루트 모듈 (모든 모듈을 통합)
-├── modules/               # 기능별 모듈들
-│   └── auth/             # 인증 모듈
-│       ├── auth.controller.ts
-│       ├── auth.module.ts
-│       ├── auth.service.ts
-│       ├── constants/    # 상수 정의
-│       ├── dto/         # 요청/응답 DTO
-│       ├── guards/      # 인증 가드
-│       ├── services/    # 세부 서비스들
-│       ├── strategies/  # Passport 전략
-│       └── utils/       # 유틸리티 함수들
-├── common/               # 공통 유틸리티
-│   ├── constants/       # 앱 상수
-│   ├── decorators/      # 커스텀 데코레이터
-│   ├── interceptors/    # 응답 인터셉터
-│   └── types/          # 공통 타입 정의
-└── database/            # 데이터베이스 모듈
-    ├── database.module.ts
-    └── prisma.service.ts
-```
-
 ## 모범 사례
 
 ### 1. 모듈 설계 원칙

@@ -4,6 +4,7 @@
   "packageManager": "yarn@4.9.4",
   "workspaces": [
     "apps/*/*",
+    "apps/backend",
     "packages/*"
   ],
   "scripts": {
@@ -11,17 +12,17 @@
     "lint:fix": "eslint --cache --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "dev": "yarn workspace @sweet-order/web-user-backend dev",
-    "staging": "yarn workspace @sweet-order/web-user-backend staging",
-    "build:staging": "yarn workspace @sweet-order/web-user-backend build:staging",
-    "build:production": "yarn workspace @sweet-order/web-user-backend build:production",
-    "postinstall": "yarn workspace @sweet-order/shared-database postinstall",
-    "db:reset:dev": "yarn workspace @sweet-order/shared-database db:reset:dev",
-    "db:migrate:dev": "yarn workspace @sweet-order/shared-database db:migrate:dev",
-    "db:seed:dev": "yarn workspace @sweet-order/shared-database db:seed:dev",
-    "db:studio:dev": "yarn workspace @sweet-order/shared-database db:studio:dev",
-    "db:deploy:staging": "yarn workspace @sweet-order/shared-database db:deploy:staging",
-    "db:deploy:production": "yarn workspace @sweet-order/shared-database db:deploy:production"
+    "dev": "yarn workspace @sweet-order/backend dev",
+    "staging": "yarn workspace @sweet-order/backend staging",
+    "build:staging": "yarn workspace @sweet-order/backend build:staging",
+    "build:production": "yarn workspace @sweet-order/backend build:production",
+    "postinstall": "yarn workspace @sweet-order/backend postinstall",
+    "db:reset:dev": "yarn workspace @sweet-order/backend db:reset:dev",
+    "db:migrate:dev": "yarn workspace @sweet-order/backend db:migrate:dev",
+    "db:seed:dev": "yarn workspace @sweet-order/backend db:seed:dev",
+    "db:studio:dev": "yarn workspace @sweet-order/backend db:studio:dev",
+    "db:deploy:staging": "yarn workspace @sweet-order/backend db:deploy:staging",
+    "db:deploy:production": "yarn workspace @sweet-order/backend db:deploy:production"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -34,6 +35,6 @@
     "typescript": "5.5.4"
   },
   "resolutions": {
-    "typescript": "5.5.4"
+    "@types/passport": "1.0.17"
   }
 }
