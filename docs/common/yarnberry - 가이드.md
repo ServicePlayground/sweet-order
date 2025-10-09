@@ -18,10 +18,10 @@ sweet-order/
 │   ├── @types/react/      # React 타입 정의
 │   ├── lodash/            # Lodash 유틸리티
 │   └── ... (수만 개의 패키지)
-├── apps/web-user/backend/
+├── apps/backend/
 │   └── node_modules/      # 또 다른 수만 개의 파일
 │       ├── @nestjs/core/  # NestJS 코어
-│       ├── prisma/        # Prisma ORM
+│       ├── @nestjs/jwt/   # JWT 인증
 │       └── ... (또 다른 수만 개)
 ```
 
@@ -70,7 +70,7 @@ sweet-order/
 │   ├── npm-lodash-4.17.21-abc123.zip
 │   ├── npm-@nestjs-core-10.0.0-def456.zip
 │   └── ...
-└── apps/web-user/backend/
+└── apps/backend/
     └── (node_modules 폴더 없음!)
 ```
 
@@ -87,7 +87,7 @@ sweet-order/
 const packageMap = {
   lodash: "npm:lodash@4.17.21",
   "@nestjs/core": "npm:@nestjs/core@10.0.0",
-  prisma: "npm:prisma@6.16.3",
+  "@nestjs/jwt": "npm:@nestjs/jwt@11.0.0",
 };
 ```
 
@@ -175,9 +175,6 @@ packageExtensions:
   "@nestjs/schematics@*":
     peerDependencies:
       "typescript": "*"
-  "@prisma/client@*":
-    dependencies:
-      "@prisma/engines": "*" # Prisma 엔진 자동 설치
 ```
 
 ## 🔧 PnP 모드 상세 설명
@@ -264,28 +261,6 @@ packageExtensions:
 - NestJS 패키지들이 TypeScript를 자동으로 찾을 수 있음
 - 수동으로 TypeScript를 설치할 필요 없음
 
-### Prisma 관련 문제 해결
-
-**문제 상황:**
-
-```bash
-# Prisma 클라이언트가 엔진을 찾지 못함
-@prisma/client requires @prisma/engines but it's not installed
-```
-
-**해결 방법:**
-
-```yaml
-packageExtensions:
-  "@prisma/client@*":
-    dependencies:
-      "@prisma/engines": "*" # Prisma 엔진 자동 설치
-```
-
-**결과:**
-
-- Prisma 클라이언트가 필요한 엔진을 자동으로 설치
-- Prisma 관련 오류 해결
 
 ## 🚀 PnP의 실제 장점
 
@@ -316,7 +291,7 @@ yarn install
 ```
 sweet-order/
 ├── node_modules/     # 2.1GB
-└── apps/web-user/backend/
+└── apps/backend/
     └── node_modules/ # 1.8GB
 # 총 3.9GB 사용
 ```
@@ -327,7 +302,7 @@ sweet-order/
 sweet-order/
 ├── .pnp.cjs         # 1KB
 ├── .yarn/cache/     # 1.3GB (압축된 상태)
-└── apps/web-user/backend/
+└── apps/backend/
     └── (node_modules 없음!)
 # 총 1.3GB 사용 (66% 절약!)
 ```
@@ -376,37 +351,6 @@ const packageMap = {
 
 ## ⚠️ 주의사항 및 제한사항
 
-### Prisma 호환성 문제
-
-**문제:**
-Prisma는 현재 PnP를 완전히 지원하지 않아서 일반적인 방법으로는 작동하지 않습니다.
-
-**기존 방식 (워크스페이스 내부에서 직접 실행 시 오류 가능):**
-
-```bash
-cd apps/web-user/backend
-yarn prisma generate  # ❌ PnP 환경/워크스페이스 경로에서 오류 발생 가능
-```
-
-**해결 방법:** (PnP 환경에서 CLI는 dlx로 실행하거나 shared 패키지 스크립트 사용)
-
-```bash
-# PnP 환경에서 Prisma 사용
-yarn dlx prisma generate  # ✅ 작동
-
-# 또는 루트 스크립트로 공용 패키지의 postinstall을 통해 자동 생성
-yarn install  # ✅ @sweet-order/shared-database postinstall에서 prisma generate 실행
-
-# 데이터베이스 스크립트는 루트에서 실행 (workspace 위임)
-yarn db:migrate:dev
-yarn db:studio:dev
-```
-
-**왜 `yarn dlx`를 사용하는가?**
-
-- `yarn dlx`: 패키지를 임시로 다운로드하고 실행
-- PnP 환경에서 Prisma CLI가 제대로 작동하도록 도움
-
 ### IDE 설정 - PnP 지원 활성화
 
 #### VS Code 설정
@@ -454,7 +398,7 @@ yarn add lodash
 
 ```bash
 # 백엔드에만 패키지 추가
-yarn workspace @sweet-order/web-user-backend add @nestjs/jwt
+yarn workspace @sweet-order/backend add @nestjs/jwt
 
 # 결과: 백엔드 package.json에만 추가
 # 다른 워크스페이스에서는 사용 불가
@@ -475,18 +419,17 @@ yarn add -D prettier
 
 ```bash
 # 루트 package.json의 스크립트 실행
-yarn dev                    # → yarn workspace @sweet-order/web-user-backend dev
-yarn build:production       # → yarn workspace @sweet-order/web-user-backend build:production
-yarn db:migrate:dev         # → yarn workspace @sweet-order/web-user-backend db:migrate:dev
+yarn dev                    # → yarn workspace @sweet-order/backend dev
+yarn build:production       # → yarn workspace @sweet-order/backend build:production
 ```
 
 #### 워크스페이스 스크립트 직접 실행
 
 ```bash
 # 특정 워크스페이스의 스크립트 직접 실행
-yarn workspace @sweet-order/web-user-backend dev
-yarn workspace @sweet-order/web-user-backend typecheck
-yarn workspace @sweet-order/web-user-backend lint
+yarn workspace @sweet-order/backend dev
+yarn workspace @sweet-order/backend typecheck
+yarn workspace @sweet-order/backend lint
 ```
 
 ### 의존성 관리 - PnP 최적화
@@ -501,7 +444,7 @@ yarn upgrade
 yarn upgrade lodash
 
 # 특정 워크스페이스의 패키지 업데이트
-yarn workspace @sweet-order/web-user-backend upgrade @nestjs/core
+yarn workspace @sweet-order/backend upgrade @nestjs/core
 ```
 
 #### 캐시 관리
@@ -548,7 +491,7 @@ yarn install
 yarn explain peer-requirements
 
 # 결과 예시:
-# p11f819 → ✘ @sweet-order/web-user-backend doesn't provide typescript
+# p11f819 → ✘ @sweet-order/backend doesn't provide typescript
 # → TypeScript가 누락되었다는 의미
 ```
 
@@ -559,7 +502,7 @@ yarn explain peer-requirements
 yarn why lodash
 
 # 결과 예시:
-# @sweet-order/web-user-backend@workspace:apps/web-user/backend
+# @sweet-order/backend@workspace:apps/backend
 # └─ lodash@npm:4.17.21
 #    └─ Used by: @nestjs/common
 ```
@@ -586,25 +529,6 @@ yarn install
 # 결과: 캐시를 정리하고 패키지 재다운로드
 ```
 
-### Prisma 관련 오류
-
-#### Prisma 클라이언트 재생성
-
-```bash
-# Prisma 클라이언트가 생성되지 않았을 때
-yarn dlx prisma generate
-
-# 결과: @prisma/client 패키지 재생성
-```
-
-#### Prisma 스키마 동기화
-
-```bash
-# 데이터베이스와 스키마가 다를 때
-yarn dlx prisma db push
-
-# 결과: 데이터베이스 스키마 업데이트
-```
 
 ### 일반적인 오류와 해결책
 
@@ -644,8 +568,8 @@ yarn add <missing-package>
 ### 현재 프로젝트에서의 활용
 
 - **Sweet Order 프로젝트**: Yarn Berry PnP + 워크스페이스로 모노레포 관리
-- **백엔드**: NestJS + Prisma + PostgreSQL
-- **의존성 관리**: packageExtensions로 NestJS, Prisma 호환성 문제 해결
+- **백엔드**: NestJS + PostgreSQL
+- **의존성 관리**: packageExtensions로 NestJS 호환성 문제 해결
 - **개발 환경**: VS Code PnP 지원으로 원활한 개발 경험
 
 ## 📖 참고 자료
