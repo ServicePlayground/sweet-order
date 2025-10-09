@@ -1,0 +1,18 @@
+{
+  // NestJS 백엔드 전용 오버라이드 설정
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    //"composite": true, // 추가하지 말기!!!
+    "rootDir": "./src",
+    "outDir": "./dist", // outDir을 여기서 선언하지 않으면, 현재 프로젝트 경로에서 import시 인식을 제대로 못하는 문제가 있음
+    "experimentalDecorators": true, // Nest 데코레이터 사용을 위한 필수 옵션
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false, // Nest 엔티티/DTO 초기화 유연성 확보
+    "baseUrl": "./src",
+    "paths": {
+      "@apps/backend/*": ["./*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
