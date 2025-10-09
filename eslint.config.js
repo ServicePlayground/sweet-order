@@ -9,15 +9,15 @@ module.exports = [
     ignores: [
       "**/node_modules/**",
       "**/dist/**",
+      "**/build/**",
+      "**/*.d.ts",
       "**/.yarn/**",
+      ".eslintcache",
       ".pnp.*",
       ".yarn/**",
       "eslint.config.js",
-      "packages/shared-database/prisma/generated/**",
-      "packages/shared-database/**/client/**",
-      "packages/shared-database/index.js",
-      "packages/shared-database/index.d.ts",
-      "packages/shared-database/prisma/seed.ts",
+      "apps/backend/src/infra/database/prisma/generated/**",
+      "apps/backend/src/infra/database/prisma/**/client/**",
     ],
   },
   js.configs.recommended,
@@ -54,8 +54,8 @@ module.exports = [
 
       // 기타 규칙
       "prefer-const": "warn", // 재할당되지 않는 변수는 const 사용 권장
-      "no-console": "warn", // console 사용 시 경고
-      "no-debugger": "warn", // debugger 사용 시 경고
+      "no-console": "off", // console 사용 허용
+      "no-debugger": "off", // debugger 사용 허용
     },
   },
   prettier,
