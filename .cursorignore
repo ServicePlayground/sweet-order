@@ -2,14 +2,6 @@
 node_modules/
 dist/
 build/
-.turbo/
-
-# Prisma client (backend)
-apps/backend/src/infra/database/prisma/generated/
-apps/backend/src/infra/database/prisma/**/client/
-
-# App build outputs (NestJS)
-apps/backend/dist/
 
 # Environment files
 !.env.development
@@ -18,4 +10,4 @@ apps/backend/dist/
 !.env
 
 # Yarn
-.yarn/
+!.yarn/
