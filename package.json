@@ -8,21 +8,19 @@
     "packages/*"
   ],
   "scripts": {
-    "lint": "eslint --cache --max-warnings=0 .",
-    "lint:fix": "eslint --cache --fix .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "dev": "yarn workspace @sweet-order/backend dev",
-    "staging": "yarn workspace @sweet-order/backend staging",
-    "build:staging": "yarn workspace @sweet-order/backend build:staging",
-    "build:production": "yarn workspace @sweet-order/backend build:production",
+    "common:lint": "eslint --cache --max-warnings=0 .",
+    "common:lint:fix": "eslint --cache --fix .",
+    "common:format": "prettier --write .",
+    "common:format:check": "prettier --check .",
+    "common:sdks": "yarn dlx @yarnpkg/sdks vscode",
+    "backend:dev": "yarn workspace @sweet-order/backend dev",
+    "backend:build:staging": "yarn workspace @sweet-order/backend build:staging",
+    "backend:build:production": "yarn workspace @sweet-order/backend build:production",
     "postinstall": "yarn workspace @sweet-order/backend postinstall",
     "db:reset:dev": "yarn workspace @sweet-order/backend db:reset:dev",
     "db:migrate:dev": "yarn workspace @sweet-order/backend db:migrate:dev",
     "db:seed:dev": "yarn workspace @sweet-order/backend db:seed:dev",
-    "db:studio:dev": "yarn workspace @sweet-order/backend db:studio:dev",
-    "db:deploy:staging": "yarn workspace @sweet-order/backend db:deploy:staging",
-    "db:deploy:production": "yarn workspace @sweet-order/backend db:deploy:production"
+    "db:studio:dev": "yarn workspace @sweet-order/backend db:studio:dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

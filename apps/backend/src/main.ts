@@ -50,6 +50,12 @@ async function bootstrap(): Promise<void> {
     app.use(morgan("combined"));
   }
 
+  // Health check (global prefix 제외, interceptor/guard 미적용)
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.getInstance().get("/health", (_req: any, res: any) => {
+    res.status(200).send("OK");
+  });
+
   // 전역 유효성 검사 파이프 설정
   // class-validator를 사용하여 DTO 유효성 검사 자동화
   // 클라이언트가 API 요청 → ValidationPipe가 DTO 검증 → 유효하지 않으면 에러 반환 → 유효하면 컨트롤러로 전달
