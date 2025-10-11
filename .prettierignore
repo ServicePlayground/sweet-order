@@ -1,13 +1,14 @@
 # Dependencies
 node_modules/
-.pnp
-.pnp.js
+.pnp.cjs
+.pnp.loader.mjs
 
 # Production builds
 dist/
 build/
 .next/
 out/
+apps/backend/dist/
 
 # Yarn
 .yarn/
@@ -61,7 +62,4 @@ pnpm-lock.yaml
 # Prisma client (backend)
 apps/backend/src/infra/database/prisma/generated/
 apps/backend/src/infra/database/prisma/**/client/
-
-# App build outputs (NestJS)
-apps/backend/dist/
 

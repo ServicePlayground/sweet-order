@@ -22,12 +22,10 @@
 
 <!-- 변경사항이 영향을 주는 앱이나 패키지를 선택해주세요 -->
 
+- [x] backend
 - [ ] web-user (frontend)
-- [ ] web-user (backend)
 - [ ] web-seller (frontend)
-- [ ] web-seller (backend)
 - [ ] web-admin (frontend)
-- [ ] web-admin (backend)
 - [ ] app-user
 - [ ] app-seller
 - [ ] 전체 프로젝트
