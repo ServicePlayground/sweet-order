@@ -18,10 +18,7 @@ import { ErrorResponseInterceptor } from "@apps/backend/common/interceptors/erro
     // 환경 변수 설정 모듈
     ConfigModule.forRoot({
       isGlobal: true, // 전역에서 사용 가능하도록 설정
-      envFilePath: [
-        // `.env.${process.env.NODE_ENV}`, // 환경별 .env 파일
-        ".env",
-      ],
+      envFilePath: [`.env.${process.env.NODE_ENV}`],
     }),
 
     // Rate Limiting 모듈

@@ -3,17 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nest start --watch",
-    "staging": "nest start --watch",
-    "build:staging": "nest build",
-    "build:production": "nest build",
+    "dev": "NODE_ENV=development nest start --watch",
+    "build:staging": "NODE_ENV=staging nest build",
+    "build:production": "NODE_ENV=production nest build",
     "postinstall": "prisma generate --schema ./src/infra/database/prisma/schema.prisma",
-    "db:reset:dev": "dotenv -e ./.env -- prisma migrate reset --force --schema ./src/infra/database/prisma/schema.prisma",
-    "db:migrate:dev": "dotenv -e ./.env -- prisma migrate dev --schema ./src/infra/database/prisma/schema.prisma",
-    "db:seed:dev": "dotenv -e ./.env -- ts-node -O '{\"module\":\"CommonJS\"}' src/infra/database/prisma/seed.ts",
-    "db:studio:dev": "dotenv -e ./.env -- prisma studio --schema ./src/infra/database/prisma/schema.prisma",
-    "db:deploy:staging": "prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma",
-    "db:deploy:production": "prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma"
+    "db:reset:dev": "dotenv -e ./.env.development -- prisma migrate reset --force --schema ./src/infra/database/prisma/schema.prisma",
+    "db:migrate:dev": "dotenv -e ./.env.development -- prisma migrate dev --schema ./src/infra/database/prisma/schema.prisma",
+    "db:seed:dev": "dotenv -e ./.env.development -- ts-node -O '{\"module\":\"CommonJS\"}' src/infra/database/prisma/seed.ts",
+    "db:studio:dev": "dotenv -e ./.env.development -- prisma studio --schema ./src/infra/database/prisma/schema.prisma"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

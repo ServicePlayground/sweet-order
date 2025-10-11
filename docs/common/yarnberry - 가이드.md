@@ -164,8 +164,8 @@ yarnPath: .yarn/releases/yarn-4.9.4.cjs
 # PnP 모드 설정
 pnpMode: loose # strict vs loose
 
-# 글로벌 캐시 활성화 (패키지 공유)
-enableGlobalCache: true
+# 글로벌 캐시 비활성화 (프로젝트별 캐시 사용)
+enableGlobalCache: false
 
 # 의존성 해결 최적화 (문제 해결용)
 packageExtensions:
@@ -212,21 +212,20 @@ pnpMode: strict
 - 더 엄격한 보안과 성능
 - PnP를 완전히 지원하는 패키지만 사용 가능
 
-### `enableGlobalCache: true` - 패키지 공유의 핵심
+### `enableGlobalCache: false` - 프로젝트별 캐시 사용
 
 ```yaml
-enableGlobalCache: true
+enableGlobalCache: false
 ```
 
 **동작 방식:**
 
-1. **첫 번째 프로젝트**: 패키지를 글로벌 캐시에 다운로드
-2. **두 번째 프로젝트**: 글로벌 캐시에서 패키지 재사용
-3. **결과**: 다운로드 시간 단축, 디스크 공간 절약
+1. **프로젝트별 캐시**: 각 프로젝트의 `.yarn/cache/` 디렉토리에 패키지 저장
 
-**주의/권장 설정:**
+**현재 프로젝트 설정:**
 
-- `enableGlobalCache: true`일 때 캐시는 로컬 프로젝트가 아닌 사용자 홈 `~/.yarn/berry/cache`에 저장됩니다.
+- `enableGlobalCache: false`로 설정되어 프로젝트별 캐시를 사용합니다.
+- 각 프로젝트의 `.yarn/cache/` 디렉토리에 패키지가 저장됩니다.
 
 ## 🛠️ packageExtensions - 의존성 문제 해결
 
@@ -260,7 +259,6 @@ packageExtensions:
 
 - NestJS 패키지들이 TypeScript를 자동으로 찾을 수 있음
 - 수동으로 TypeScript를 설치할 필요 없음
-
 
 ## 🚀 PnP의 실제 장점
 
@@ -465,6 +463,12 @@ yarn install
 
 ### Yarn 디렉터리 구조 이해 (`.yarn` 내부)
 
+#### `cache/`
+
+- 압축된 캐시(zip) 상태로는 동작이 어려운 패키지를 Yarn이 자동으로 “펼친” 위치입니다.
+- 빌드 스크립트 실행, 파일 시스템 직접 접근 등이 필요한 패키가 이 경로에서 동작합니다.
+- 사용자는 일반적으로 수동 관리할 필요가 없습니다.
+
 #### `sdks/`
 
 - VS Code/IDE가 프로젝트의 정확한 버전의 TypeScript, ESLint 등을 사용하도록 하는 SDK 파일 모음입니다.
@@ -529,7 +533,6 @@ yarn install
 # 결과: 캐시를 정리하고 패키지 재다운로드
 ```
 
-
 ### 일반적인 오류와 해결책
 
 #### "Cannot resolve module" 오류
@@ -564,13 +567,6 @@ yarn add <missing-package>
 2. **글로벌 캐시**: 모든 프로젝트가 패키지를 공유하여 디스크 공간 절약
 3. **명확한 의존성**: 모든 패키지의 정확한 버전이 하나의 파일에 기록
 4. **빠른 설치**: 압축된 패키지로 3-5배 빠른 설치 속도
-
-### 현재 프로젝트에서의 활용
-
-- **Sweet Order 프로젝트**: Yarn Berry PnP + 워크스페이스로 모노레포 관리
-- **백엔드**: NestJS + PostgreSQL
-- **의존성 관리**: packageExtensions로 NestJS 호환성 문제 해결
-- **개발 환경**: VS Code PnP 지원으로 원활한 개발 경험
 
 ## 📖 참고 자료
 

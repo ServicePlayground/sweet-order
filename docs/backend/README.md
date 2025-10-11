@@ -65,17 +65,32 @@ src/
 │   │   ├── controllers/       # Seller 컨트롤러들
 │   │   └── seller-api.module.ts
 │   └── admin/                 # Admin API 모듈
-│       ├── controllers/       # Admin 컨트롤러들
+│       ├── controllers/       # Admin 컨트롤러들 (비어있음)
 │       └── admin-api.module.ts
 ├── modules/                   # 비즈니스 로직 모듈
 │   ├── auth/                 # 인증 모듈
+│   │   ├── auth.module.ts    # 인증 모듈
+│   │   ├── auth.service.ts   # 인증 서비스
+│   │   ├── constants/        # 인증 상수
 │   │   ├── decorators/       # 통합 인증 데코레이터
+│   │   ├── dto/              # 인증 DTO
+│   │   ├── guards/           # 인증 가드
 │   │   ├── services/         # 인증 서비스들
+│   │   ├── strategies/       # JWT 전략
+│   │   ├── types/           # 인증 타입
 │   │   └── utils/            # 인증 유틸리티
 │   └── product/              # 상품 모듈
+│       ├── constants/        # 상품 상수
+│       ├── dto/             # 상품 DTO
+│       ├── product.module.ts # 상품 모듈
+│       ├── product.service.ts # 상품 서비스
+│       ├── services/        # 상품 서비스들
+│       └── utils/           # 상품 유틸리티
 ├── common/                    # 공통 모듈
+│   ├── constants/            # 공통 상수
 │   ├── decorators/           # 커스텀 데코레이터
 │   ├── interceptors/         # 응답 인터셉터
+│   ├── types/               # 공통 타입
 │   └── utils/                # 유틸리티 함수
 ├── infra/                     # 인프라 설정
 │   └── database/             # 데이터베이스
@@ -89,11 +104,6 @@ src/
 ## 📚 상세 문서
 
 자세한 개발 가이드와 API 문서는 `/docs` 폴더를 참고하세요:
-
-- [NestJS 가이드](./NestJS%20-%20가이드.md)
-- [데이터베이스 가이드](./데이터베이스%20-%20가이드.md)
-- [통합 로그인 및 회원가입 가이드](./통합%20로그인%20및%20회원가입%20-%20가이드.md)
-- [통합 인증 데코레이터 가이드](./통합%20인증%20데코레이터%20-%20가이드.md)
 
 ## 🔗 API 엔드포인트
 
