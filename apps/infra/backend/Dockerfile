@@ -19,8 +19,8 @@ RUN echo "nodeLinker: node-modules" > .yarnrc.yml \
  && echo "enableGlobalCache: true" >> .yarnrc.yml
 
 
-# 3️⃣ backend 의존성 설치 (postinstall 포함)
-RUN yarn workspaces focus @sweet-order/backend
+# 3️⃣ 의존성 설치 (postinstall 자동 실행)
+RUN yarn install
 
 # 4️⃣ backend 빌드
 RUN yarn run backend:build:staging
