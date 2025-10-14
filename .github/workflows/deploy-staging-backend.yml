@@ -49,10 +49,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Enable corepack
+        run: |
+         corepack enable
+
       - name: Install dependencies and build
         run: |
-          corepack enable
-          corepack prepare yarn@4.9.4 --activate
           yarn workspaces focus @sweet-order/backend # 메모리 때문에 yarn install 대신 사용
           yarn run backend:build:staging
 
