@@ -28,12 +28,6 @@ jobs:
           node-version: "20"
           cache: "yarn"
 
-      - name: Setup Yarn via Corepack
-        run: |
-          corepack enable
-          corepack prepare yarn@4.9.4 --activate
-          yarn --version
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -47,6 +41,8 @@ jobs:
 
       - name: Install dependencies and build
         run: |
+          corepack enable
+          corepack prepare yarn@4.9.4 --activate
           yarn install
           yarn run backend:build:staging
 
