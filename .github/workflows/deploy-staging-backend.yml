@@ -28,14 +28,10 @@ jobs:
           node-version: "20"
           cache: "yarn"
 
-      - name: Setup Yarn
-        uses: actions/setup-yarn@v1
-        with:
-          yarn-version: "4.9.4"
-
-      - name: Enable Yarn PnP
+      - name: Setup Yarn via Corepack
         run: |
           corepack enable
+          corepack prepare yarn@4.9.4 --activate
           yarn --version
 
       - name: Configure AWS credentials
