@@ -1,9 +1,10 @@
 generator client {
   provider      = "prisma-client-js"
   output        = "./generated/client"
-  // Dockerfile: node:20-slim은 glibc+OpenSSL 3.0이므로 linux-x64-openssl-3.0.x, linux-arm64-openssl-3.0.x 조합
+  // native: 로컬 개발 환경 (macOS, Windows, Linux)
+  // Dockerfile: node:20-slim은 glibc+OpenSSL 3.0이므로 linux-x64-openssl-3.0.x, linux-arm64-openssl-3.0.x 조합 (따라서 현재, 도커 빌드시 멀티아키로 빌드하고 있음)
   // GitHub Actions Ubuntu 환경을 위한 debian-openssl-3.0.x 추가
-  binaryTargets = ["native", "linux-x64-openssl-3.0.x", "linux-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
+  binaryTargets = ["native","debian-openssl-3.0.x","linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
