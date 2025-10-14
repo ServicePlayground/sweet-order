@@ -38,10 +38,10 @@ export class JwtUtil {
     // 액세스 토큰과 리프레시 토큰 생성
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(accessTokenPayload, {
-        expiresIn: this.configService.get<string>("JWT_ACCESS_EXPIRES_IN"),
+        expiresIn: "1h",
       }),
       this.jwtService.signAsync(refreshTokenPayload, {
-        expiresIn: this.configService.get<string>("JWT_REFRESH_EXPIRES_IN"),
+        expiresIn: "30d",
       }),
     ]);
 
