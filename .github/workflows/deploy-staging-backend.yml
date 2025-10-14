@@ -34,6 +34,11 @@ jobs:
         with:
           yarn-version: "4.9.4"
 
+      - name: Enable Yarn PnP
+        run: |
+          corepack enable
+          yarn --version
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
