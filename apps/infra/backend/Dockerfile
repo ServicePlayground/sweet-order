@@ -11,13 +11,13 @@ RUN apt-get update && apt-get install -y \
 # Yarn 및 Corepack 활성화
 RUN corepack enable && yarn set version 4.9.4
 
-# 1️⃣ Yarn 환경 설정 (PnP → node-modules 전환)
+# 1️⃣ (package.json, yarn.lock 필수)(dockerignore: node_modules 제외) 전체 프로젝트 복사
+COPY . .
+
+# 2️⃣ Yarn 환경 설정 (PnP → node-modules 전환)
 RUN echo "nodeLinker: node-modules" >> .yarnrc.yml \
  && echo "enableGlobalCache: true" >> .yarnrc.yml
 
-# 2️⃣ package.json, yarn.lock 복사 (dependency 설치용)
-COPY package.json yarn.lock ./
-COPY apps/backend/package.json apps/backend/package.json
 
 # 3️⃣ backend 의존성 설치 (postinstall 포함)
 RUN yarn workspaces focus @sweet-order/backend
