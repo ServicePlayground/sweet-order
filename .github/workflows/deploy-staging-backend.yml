@@ -22,11 +22,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -37,24 +32,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      # yarn 버전 관리 활성화
-      - name: Enable corepack
-        run: |
-         corepack enable
-        
-      # -----------------------------------------------------------
-      # Generate Prisma Client (PnP 문제 해결용 node-modules 전환)
-      # (배포 환경에서만 임시 변경) 기존 PnP 대신 node-modules 방식 사용
-      # -----------------------------------------------------------      
-      - name: Install dependencies (no scripts)
-        run: |
-          echo "nodeLinker: node-modules" >> .yarnrc.yml
-          echo "enableGlobalCache: true" >> .yarnrc.yml
-
-          yarn workspaces focus @sweet-order/backend
-
-          yarn run backend:build:staging
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
