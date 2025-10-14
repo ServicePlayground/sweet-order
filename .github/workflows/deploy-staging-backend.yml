@@ -43,18 +43,17 @@ jobs:
         run: |
          corepack enable
         
-      # focus에서는 스크립트 비활성화
+      # -----------------------------------------------------------
+      # Generate Prisma Client (PnP 문제 해결용 node-modules 전환)
+      # (배포 환경에서만 임시 변경) 기존 PnP 대신 node-modules 방식 사용
+      # -----------------------------------------------------------      
       - name: Install dependencies (no scripts)
         run: |
-          yarn install --immutable --mode=skip-build
+          echo "nodeLinker: node-modules" >> .yarnrc.yml
+          echo "enableGlobalCache: true" >> .yarnrc.yml
 
-      # root루트에서 실행 금지
-      - name: Generate Prisma Client (backend only)
-        run: |
-          yarn workspace @sweet-order/backend prisma generate --schema=src/infra/database/prisma/schema.prisma 
+          yarn workspaces focus @sweet-order/backend
 
-      - name: Build
-        run: |
           yarn run backend:build:staging
 
       - name: Build, tag, and push image to Amazon ECR
