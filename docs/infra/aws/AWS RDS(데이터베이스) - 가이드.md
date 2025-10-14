@@ -29,4 +29,4 @@
    2-1. AWS Secrets Manager 서비스로 이동
    2-2. {프로젝트명}-{환경}-db 관련 시크릿 찾기
    2-3. 보안 암호 값 > 보안 암호값 검색 > 실제 비밀번호 확인
-   2-4. apps/backend/.env.{환경} 파일의 DATABASE_URL 부분을 실제 비밀번호로 교체
+   2-4. 환경변수(현재 App Runner - Aws Secrets Manager에서 주입되는 환경변수)의 DATABASE_URL 부분을 실제 비밀번호로 교체

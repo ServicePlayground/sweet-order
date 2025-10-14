@@ -1,0 +1,82 @@
+name: Deploy Backend to AWS App Runner (Staging)
+
+on:
+  push:
+    branches: [main]
+
+# --------------------- 중요 (환경변수 - 가이드.md 참고)---------------------------
+# 여기 env에 넣지 말고, 아래에서 secrets.로 직접 넣기. 로그에 출력될 위험이 있음
+# 여기 Github Workflow 파일에서는 AWS 배포관련 환경변수만 넣기(AWS 환경변수는 마스킹 처리됨)
+#   - github > settings > secrets and variables > actions > Repository secrets > New repository secret
+# .env 환경변수들은 App Runner 런타임시 주입 (로그에 노출될 위험이 있음)
+#   - 1) aws > secrets manager > 생성 > 다른 유형의 보안 암호 > 키/값 입력 > 생성 > 보안 암호 ARN복사
+#   - 2) aws > IAM > 역할 > 생성 > 신뢰할수 있는 엔티티 선택 > 코드직접입력(AI활용) > 권한 apprunner관련 모두 + SecretsManagerReadWrite 정책 추가 > 생성
+#   - 3) aws > app runner > 구성 > 편집 > 환경 변수 추가 > 환경변수이름: "SECRETS_ARN", 환경변수값: 보안 암호 ARN복사 > (보안) 2번에서 생성한 인스턴스 역할 추가
+# ---------------------------------------------------------------------------
+env:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Setup Yarn
+        uses: actions/setup-yarn@v1
+        with:
+          yarn-version: "4.9.4"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Install dependencies and build
+        run: |
+          yarn install
+          yarn run backend:build:staging
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        run: |
+          # Build and push multi-platform image
+          docker buildx create --use
+
+          # Set environment variables
+          ENV="staging"
+          ECR="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com"
+          REPO="${{ secrets.ECR_REPOSITORY }}"
+          VERSION=$(date +%Y%m%d-%H%M)
+
+          # Build and push image
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -f apps/infra/backend/Dockerfile \
+            -t $ECR/$REPO:$ENV \
+            -t $ECR/$REPO:$ENV-$VERSION \
+            --push \
+            .
+
+      - name: Deployment completed
+        run: |
+          echo "✅ Image pushed to ECR successfully!"
+          echo "📦 Image tags:"
+          echo "  - staging"
+          echo "  - staging-$(date +%Y%m%d-%H%M)"
+          echo ""
+          echo "🚀 Please deploy manually in AWS App Runner console:"
+          echo "   https://console.aws.amazon.com/apprunner/"
