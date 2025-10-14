@@ -33,6 +33,12 @@ async function bootstrap(): Promise<void> {
   const port = configService.get("PORT");
   const nodeEnv = configService.get("NODE_ENV");
 
+  // Health check (CORS 제외, global prefix 제외, interceptor/guard 등 미적용)
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.getInstance().get("/health", (_req: any, res: any) => {
+    res.status(200).send("OK");
+  });
+
   // CORS 설정
   app.enableCors({
     origin: configService.get("CORS_ORIGIN"),
@@ -49,12 +55,6 @@ async function bootstrap(): Promise<void> {
   if (nodeEnv !== "production") {
     app.use(morgan("combined"));
   }
-
-  // Health check (global prefix 제외, interceptor/guard 미적용)
-  const httpAdapter = app.getHttpAdapter();
-  httpAdapter.getInstance().get("/health", (_req: any, res: any) => {
-    res.status(200).send("OK");
-  });
 
   // 전역 유효성 검사 파이프 설정
   // class-validator를 사용하여 DTO 유효성 검사 자동화
