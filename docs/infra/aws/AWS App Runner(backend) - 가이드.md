@@ -60,9 +60,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
 
 # 따라서 빌드할 때, --platform linux/amd64 를 명시하거나, 멀티아키텍처(amd64 + arm64) 로 푸시해야한다.
 
-# --------------------------------------------------------------------------
-
----
+# ---------------------------------------------------------------------------------------------
 
 #### 7. App Runner <-> RDS VPC 보안 그룹 생성
 
@@ -78,9 +76,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
 - 인바운드: TCP 5432 apprunner-staging-sg # APP RUNNER에서 RDS에 접근 가능하도록 함
 - 아웃바운드: 전체 0.0.0.0/0
 
----
-
-#### 7. App Runner 서비스 생성(App Runner: ECR을 기준으로 자동 배포할 수 있음)
+#### 8. App Runner 서비스 생성(App Runner: ECR을 기준으로 자동 배포할 수 있음)
 
 16. AWS > App Runner > 서비스 생성
 
@@ -103,6 +99,12 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
     - VPC: (위 6번에 작업한 것)(apprunner-staging-sg) vpc-00000 형태
     - 서브넷: (위 6번에 작업한 것)(apprunner-staging-sg) subnet-00000 형태
     - 보안 그룹: (위 6번에 작업한 것)(apprunner-staging-sg) sg-00000 형태
+
+#### 9. App Runner env 환경 변수 설정 (자세한 사항은 환경변수 - 가이드.md 참고)
+
+1. aws > secrets manager > 생성 > 다른 유형의 보안 암호 > 키/값 입력 > 생성 > 보안 암호 ARN복사
+2. aws > IAM > 역할 > 생성 > 신뢰할수 있는 엔티티 선택 > 코드직접입력(AI활용) > 권한 apprunner관련 모두 + SecretsManagerReadWrite 정책 추가 > 생성
+3. aws > app runner > 구성 > 편집 > 환경 변수 추가 > 환경변수이름: "SECRETS_ARN", 환경변수값: 보안 암호 ARN복사 > (보안) 2번에서 생성한 인스턴스 역할 추가
 
 ---
 

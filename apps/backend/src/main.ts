@@ -36,10 +36,10 @@ async function bootstrap(): Promise<void> {
   // CORS 설정
   app.enableCors({
     origin: configService.get("CORS_ORIGIN"),
-    credentials: configService.get("CORS_CREDENTIALS") === "true",
-    methods: configService.get("CORS_METHODS")?.split(","),
-    allowedHeaders: configService.get("CORS_ALLOWED_HEADERS")?.split(","),
-    maxAge: parseInt(configService.get("CORS_MAX_AGE")?.toString(), 10),
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    maxAge: 86400,
   });
 
   // 보안 헤더 설정

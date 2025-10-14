@@ -3,10 +3,6 @@
 FROM node:20-slim
 WORKDIR /app
 
-# 앱 환경 전달 (staging/production) - (외부에서 --build-arg로 주입 가능)
-ARG APP_ENV=staging
-ENV APP_ENV=${APP_ENV}
-ENV NODE_ENV=${APP_ENV}
 
 # 시스템 의존성 설치 (Prisma 바이너리용)
 RUN apt-get update && apt-get install -y \
@@ -25,8 +21,6 @@ COPY .yarn/cache/ ./.yarn/cache/
 # 백엔드 빌드 산출물 (로컬에서 사전 빌드된 dist 디렉토리)
 COPY apps/backend/dist ./apps/backend/dist
 
-# 환경 설정 파일
-COPY apps/backend/.env.${APP_ENV} ./.env.${APP_ENV}
 
 # PnP 로더 주입하여 애플리케이션 실행
 CMD ["node", "-r", "./.pnp.cjs", "apps/backend/dist/main.js"]

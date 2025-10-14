@@ -93,6 +93,7 @@ yarn install
 ### 공통 문서
 
 - **[Yarn Berry 가이드](./docs/common/yarnberry%20-%20가이드.md)**: Yarn Berry PnP 설정 및 사용법
+- **[환경변수 가이드](./docs/common/환경변수%20-%20가이드.md)**: 환경변수 관리 및 보안 정책
 
 ### 백엔드 문서
 
