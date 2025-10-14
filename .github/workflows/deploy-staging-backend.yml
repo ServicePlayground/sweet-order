@@ -26,17 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-      
-      # --- OOM 방지: 스왑 + 메모리 상향 + node-gyp 병렬 제한 ---
-      - name: Add 8GB swap
-        uses: pierotofy/set-swap-space@v1.0
-        with:
-          swap-size-gb: 8
-
-      - name: Raise Node memory & limit node-gyp jobs
-        run: |
-          echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
-          echo "npm_config_jobs=2" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -49,13 +38,21 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # yarn 버전 관리 활성화
       - name: Enable corepack
         run: |
          corepack enable
-
-      - name: Install dependencies and build
+        
+      # focus에서는 스크립트 비활성화
+      - name: Install dependencies (no scripts)
+        env:
+          YARN_ENABLE_SCRIPTS: "0"  # postinstall 등 전부 미실행
         run: |
           yarn workspaces focus @sweet-order/backend # 메모리 때문에 yarn install 대신 사용
+
+      - name: Build
+        run: |
+          yarn run postinstall
           yarn run backend:build:staging
 
       - name: Build, tag, and push image to Amazon ECR
