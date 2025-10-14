@@ -15,7 +15,7 @@ RUN corepack enable && yarn set version 4.9.4
 COPY . .
 
 # 2️⃣ Yarn 환경 설정 (PnP → node-modules 전환)
-RUN echo "nodeLinker: node-modules" >> .yarnrc.yml \
+RUN echo "nodeLinker: node-modules" > .yarnrc.yml \
  && echo "enableGlobalCache: true" >> .yarnrc.yml
 
 

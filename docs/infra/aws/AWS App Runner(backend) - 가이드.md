@@ -29,17 +29,13 @@ AWS_ACCOUNT_ID=123456789012 # aws 우상단에서 확인
 aws ecr get-login-password --region "$AWS_REGION" \
 | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-#### 5. yarn install, yarn build 실행
-
-yarn install && yarn run backend:build:staging
-
 # ------------------------(즁요 삭제하지 말것) Docker Runtime (로컬 빌드 결과물 사용)------------------
 
 # yarn install, yarn build 사전에 실행되어야 함 (YN0008/YN0009 오류 해결을 위해)
 
 # 사전에 실행될 때, 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
 
-#### 6. 이미지 태그 & 푸시
+#### 5. 이미지 태그 & 푸시
 
 docker buildx create --use
 
@@ -62,7 +58,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
 
 # ---------------------------------------------------------------------------------------------
 
-#### 7. App Runner <-> RDS VPC 보안 그룹 생성
+#### 6. App Runner <-> RDS VPC 보안 그룹 생성
 
 15. 위치: AWS > VPC > 보안 그룹 > 보안 그룹 생성 생성
 
@@ -76,7 +72,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
 - 인바운드: TCP 5432 apprunner-staging-sg # APP RUNNER에서 RDS에 접근 가능하도록 함
 - 아웃바운드: 전체 0.0.0.0/0
 
-#### 8. App Runner 서비스 생성(App Runner: ECR을 기준으로 자동 배포할 수 있음)
+#### 7. App Runner 서비스 생성(App Runner: ECR을 기준으로 자동 배포할 수 있음)
 
 16. AWS > App Runner > 서비스 생성
 
@@ -100,7 +96,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
     - 서브넷: (위 6번에 작업한 것)(apprunner-staging-sg) subnet-00000 형태
     - 보안 그룹: (위 6번에 작업한 것)(apprunner-staging-sg) sg-00000 형태
 
-#### 9. App Runner env 환경 변수 설정 (자세한 사항은 환경변수 - 가이드.md 참고)
+#### 8. App Runner env 환경 변수 설정 (자세한 사항은 환경변수 - 가이드.md 참고)
 
 1. aws > secrets manager > 생성 > 다른 유형의 보안 암호 > 키/값 입력 > 생성 > 보안 암호 ARN복사
 2. aws > IAM > 역할 > 생성 > 신뢰할수 있는 엔티티 선택 > 코드직접입력(AI활용) > 권한 apprunner관련 모두 + SecretsManagerReadWrite 정책 추가 > 생성
@@ -113,6 +109,6 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
 (1) Dockerfile / 코드 수정
 ↓
 (2) 로컬에서 docker build & push (이미지 생성) → AWS ECR (이미지 저장소)
-2-1. 위 4,5,6 번 명령어 실행
+2-1. 위 4,5 번 명령어 실행
 ↓
 (3) App Runner 서비스 → ECR 이미지 감시 → 자동 또는 수동으로 새 이미지 배포
