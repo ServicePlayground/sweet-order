@@ -45,16 +45,11 @@ jobs:
         
       # focus에서는 스크립트 비활성화
       - name: Install dependencies (no scripts)
-        env:
-          YARN_ENABLE_SCRIPTS: "0"  # postinstall 등 전부 미실행
-          PRISMA_SKIP_POSTINSTALL_GENERATE: "1" # postinstall 등 전부 미실행
         run: |
-          yarn workspaces focus @sweet-order/backend # 메모리 때문에 yarn install 대신 사용
+          yarn install --immutable --mode=skip-build
 
       # root루트에서 실행 금지
       - name: Generate Prisma Client (backend only)
-        env:
-          PRISMA_SKIP_POSTINSTALL_GENERATE: "1" # postinstall 등 전부 미실행
         run: |
           yarn workspace @sweet-order/backend prisma generate --schema=src/infra/database/prisma/schema.prisma 
 
