@@ -8,9 +8,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   constructor(private readonly configService: ConfigService) {
     const databaseUrl = configService.get<string>("DATABASE_URL");
+    const nodeEnv = configService.get<string>("NODE_ENV");
     if (!databaseUrl) {
       throw new Error(
-        "DATABASE_URL이 설정되어 있지 않습니다. .env.{NODE_ENV} 또는 런타임 ENV/Secrets를 확인하세요.",
+        `DATABASE_URL(${databaseUrl})이 설정되어 있지 않습니다. .env.${nodeEnv} 또는 런타임 ENV/Secrets를 확인하세요.`,
       );
     }
 
