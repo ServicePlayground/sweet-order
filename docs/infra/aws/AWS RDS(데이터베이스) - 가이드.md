@@ -3,7 +3,7 @@
 - 데이터베이스 생성 방식: 표준생성
 - 엔진옵션: postgresql
 - 엔진버전: Postgresql-16.4
-- 템플릿: 프리티어
+- 템플릿: 샌드박스
 - 가용성 및 내구성: 단일 AZ DB 인스턴스 배포(인스턴스 1개)
 - DB 인스턴스 식별자: {프로젝트명}-{환경}-db
 - 마스터 사용자 이름: {프로젝트명}\_admin
@@ -24,6 +24,8 @@
 - 모니터링: Database Insights - 표준
 - Performance Insights 활성화, 7일
 - 로그 내보내기: PostgreSQL 로그
+- 초기 데이터베이스 이름: sweetorder_staging_db
+- DB 파라미터 그룹: 기본값
 
 2. AWS 로컬과 RDS 연동
    2-1. AWS Secrets Manager 서비스로 이동
