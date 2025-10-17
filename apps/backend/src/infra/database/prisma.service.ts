@@ -11,7 +11,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const databaseUrl = configService.get<string>("DATABASE_URL");
     const nodeEnv = configService.get<string>("NODE_ENV");
 
-    if (!secretArn) {
+    // 배포 환경(staging, production)에서는 secretArn 값이 존재해야 함(자세한 사항은 환경변수 - 가이드.md 참고)
+    if (nodeEnv !== "development" && !secretArn) {
       throw new Error(`secretArn값이 존재하지 않습니다.`);
     }
     if (!databaseUrl) {

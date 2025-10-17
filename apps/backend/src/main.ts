@@ -4,6 +4,7 @@ import { SwaggerModule } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
 import helmet from "helmet";
 import morgan from "morgan";
+import * as express from "express";
 import { AppModule } from "@apps/backend/app.module";
 import { API_PREFIX } from "@apps/backend/common/constants/app.constants";
 import { SellerApiModule } from "@apps/backend/apis/seller/seller-api.module";
@@ -77,21 +78,50 @@ async function bootstrap(): Promise<void> {
   // 호출 순서 중요 (설정 순서에 따라 적용되는 순서가 다름)
   app.setGlobalPrefix(API_PREFIX);
 
-  // Swagger 3-way split
-  const userDoc = SwaggerModule.createDocument(app, userSwaggerConfig, {
-    include: [UserApiModule],
-  });
-  SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.USER}`, app, userDoc);
+  // Swagger 3-way split (development와 staging 환경에서만 활성화)
+  if (nodeEnv !== "production") {
+    // 스웨거 Basic Auth 미들웨어 설정
+    const swaggerUsername = configService.get("SWAGGER_USERNAME");
+    const swaggerPassword = configService.get("SWAGGER_PASSWORD");
 
-  const sellerDoc = SwaggerModule.createDocument(app, sellerSwaggerConfig, {
-    include: [SellerApiModule],
-  });
-  SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.SELLER}`, app, sellerDoc);
+    // 스웨거 경로에 Basic Auth 적용
+    app.use(
+      `${API_PREFIX}/docs`,
+      (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const auth = req.headers.authorization;
 
-  const adminDoc = SwaggerModule.createDocument(app, adminSwaggerConfig, {
-    include: [AdminApiModule],
-  });
-  SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.ADMIN}`, app, adminDoc);
+        if (!auth || !auth.startsWith("Basic ")) {
+          res.setHeader("WWW-Authenticate", 'Basic realm="Swagger Documentation"');
+          return res.status(401).send("Authentication required");
+        }
+
+        const credentials = Buffer.from(auth.slice(6), "base64").toString();
+        const [username, password] = credentials.split(":");
+
+        if (username === swaggerUsername && password === swaggerPassword) {
+          return next();
+        }
+
+        res.setHeader("WWW-Authenticate", 'Basic realm="Swagger Documentation"');
+        return res.status(401).send("Invalid credentials");
+      },
+    );
+
+    const userDoc = SwaggerModule.createDocument(app, userSwaggerConfig, {
+      include: [UserApiModule],
+    });
+    SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.USER}`, app, userDoc);
+
+    const sellerDoc = SwaggerModule.createDocument(app, sellerSwaggerConfig, {
+      include: [SellerApiModule],
+    });
+    SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.SELLER}`, app, sellerDoc);
+
+    const adminDoc = SwaggerModule.createDocument(app, adminSwaggerConfig, {
+      include: [AdminApiModule],
+    });
+    SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.ADMIN}`, app, adminDoc);
+  }
 
   // 서버 시작
   await app.listen(Number(port));
