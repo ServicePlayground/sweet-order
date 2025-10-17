@@ -74,21 +74,15 @@
 
 1. AWS > Route53 > 도메인 등록 > 사용 가능한 도메인 검색 후 결제
 
-# 2. Public Hosted Zone 생성
+# 2. App Runner 커스틈 도메인 연동
 
-1. AWS > Route53 > 호스팅 영역 > sweetorders.com
-   1-1. api-staging.sweetorders.com , CNAME , (https://제외)<your-app-runner-staging>.awsapprunner.com , 5분 , 단순 라우팅
+1. AWS > App Runner > 사용자 지정 도메인 탭 > 도메인 링크 연결
+   - Amazon Route 53, api-staging.sweetorders.com , CNAME
 
-- Registrar가 Route 53이면 기본으로 NS, SOA 레코드가 생김.
-- 다른 등록기관이면 NS를 그쪽 콘솔에 복붙해야 하지만, 지금은 Route 53에서 산 거니 패스
-- 위에는 그대로 유지하고, 추가적인 레코드를 생성하면된다.
+# 3. 결과 확인
 
-# 2. SSL 인증서 발급
+1. AWS → Route 53 → 호스팅 영역 > sweetorders.com 확인
+   - Registrar가 Route 53이면 기본으로 NS, SOA 레코드가 생김. 다른 등록기관이면 NS를 그쪽 콘솔에 복붙해야 하지만, 지금은 Route 53에서 산 거니 패스
+   - 위 1번 커스텀 도메인 연동시, SSL 인증서 발급도 자동으로 된다. (레코드 CNAME으로 3개가 자동으로 생성된다.)
 
-1. AWS > App Runner > 커스텀 도메인 등록 탭 > 해당 도메인 클릭 > 1. 인증서 검증 구성 > 레코드 이름, 값 모두 복사
-2. AWS → Route 53 → 호스팅 영역 > sweetorders.com (복사한 값이 여러개만 여러개 레코드추가)
-   2-1. 복사한 레코드 이름.sweetorders.com , CNAME , 복사한 값.acm-validations.aws , 60초 , 단순 라우팅
-
-## App Runner가 커스텀 도메인/레코드를 등록하면 자동으로 이렇게 진행돼:
-
-- App Runner → ACM(인증서 관리자) → Route 53 CNAME 레코드 조회 → 검증 → 인증서 발급 → 상태 Active
+## App Runner가 커스텀 도메인/레코드를 등록하면 자동으로 이렇게 진행돼: App Runner → ACM(인증서 관리자) → Route 53 CNAME 레코드 조회 → 검증 → 인증서 발급 → 상태 Active
