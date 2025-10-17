@@ -10,9 +10,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const secretArn = configService.get<string>("SECRETS_ARN");
     const databaseUrl = configService.get<string>("DATABASE_URL"); 
     const nodeEnv = configService.get<string>("NODE_ENV");
-    throw new Error(
-      `secretArn: ${secretArn}, databaseUrl: ${databaseUrl}, nodeEnv: ${nodeEnv}`,
-    );
 
     if (!secretArn) {
       throw new Error(
