@@ -8,16 +8,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   constructor(private readonly configService: ConfigService) {
     const secretArn = configService.get<string>("SECRETS_ARN");
-    const databaseUrl = configService.get<string>("DATABASE_URL"); 
+    const databaseUrl = configService.get<string>("DATABASE_URL");
     const nodeEnv = configService.get<string>("NODE_ENV");
-    throw new Error(
-      `secretArn: ${secretArn}, databaseUrl: ${databaseUrl}, nodeEnv: ${nodeEnv}`,
-    );
 
     if (!secretArn) {
-      throw new Error(
-        `secretArn값이 존재하지 않습니다.`,
-      );
+      throw new Error(`secretArn값이 존재하지 않습니다.`);
     }
     if (!databaseUrl) {
       throw new Error(
