@@ -7,7 +7,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   constructor(private readonly configService: ConfigService) {
-    const secretArn = configService.get<string>("SECRET_ARN");
+    const secretArn = configService.get<string>("SECRETS_ARN");
     const databaseUrl = configService.get<string>("DATABASE_URL"); 
     const nodeEnv = configService.get<string>("NODE_ENV");
     if (!secretArn) {
