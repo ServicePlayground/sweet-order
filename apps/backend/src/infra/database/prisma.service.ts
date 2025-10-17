@@ -12,12 +12,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const nodeEnv = configService.get<string>("NODE_ENV");
     if (!secretArn) {
       throw new Error(
-        `secretArn값이 존재하지 않습니다. ${process.env.SECRET_ARN}`,
+        `secretArn값이 존재하지 않습니다.`,
       );
     }
     if (!databaseUrl) {
       throw new Error(
-        `DATABASE_URL(${databaseUrl})이 설정되어 있지 않습니다. .env.${nodeEnv} 또는 런타임 ENV/Secrets를 확인하세요.`,
+        `DATABASE_URL이 설정되어 있지 않습니다. .env.${nodeEnv} 또는 런타임 ENV/Secrets를 확인하세요.`,
       );
     }
 

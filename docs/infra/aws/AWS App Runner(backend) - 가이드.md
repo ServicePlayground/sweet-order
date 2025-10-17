@@ -29,12 +29,6 @@ AWS_ACCOUNT_ID=123456789012 # aws 우상단에서 확인
 aws ecr get-login-password --region "$AWS_REGION" \
 | docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-# ------------------------(즁요 삭제하지 말것) Docker Runtime (로컬 빌드 결과물 사용)------------------
-
-# yarn install, yarn build 사전에 실행되어야 함 (YN0008/YN0009 오류 해결을 위해)
-
-# 사전에 실행될 때, 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
-
 #### 5. 이미지 태그 & 푸시
 
 docker buildx create --use
@@ -101,6 +95,7 @@ docker buildx build --platform linux/amd64,linux/arm64 -f apps/infra/backend/Doc
 1. aws > secrets manager > 생성 > 다른 유형의 보안 암호 > 키/값 입력 > 생성 > 보안 암호 ARN복사
 2. aws > IAM > 역할 > 생성 > 신뢰할수 있는 엔티티 선택 > 코드직접입력(AI활용) > 권한 apprunner관련 모두 + SecretsManagerReadWrite 정책 추가 > 생성
 3. aws > app runner > 구성 > 편집 > 환경 변수 추가 > 환경변수이름: "SECRETS_ARN", 환경변수값: 보안 암호 ARN복사 > (보안) 2번에서 생성한 인스턴스 역할 추가
+4. main.ts에서 loadSecretsFromEnv 함수 추가
 
 ---
 

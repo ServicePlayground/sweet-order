@@ -21,6 +21,11 @@ import { loadSecretsFromEnv } from "@apps/backend/common/utils/loadSecretsFromEn
  * NestJS 애플리케이션의 진입점
  */
 async function bootstrap(): Promise<void> {
+  // 배포 환경(staging, production)에서는 AWS App Runner(AWS Secrets Manager)에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
+  if (process.env.NODE_ENV !== "development") {
+    loadSecretsFromEnv();
+  }
+
   // NestJS 애플리케이션 메인 인스턴스 생성 (AppModule을 사용하여 모든 모듈을 포함하고 있음)
   const app = await NestFactory.create(AppModule);
 
@@ -33,11 +38,6 @@ async function bootstrap(): Promise<void> {
   // 포트와 환경 변수 가져오기
   const port = configService.get("PORT");
   const nodeEnv = configService.get("NODE_ENV");
-
-  // 배포 환경(staging, production)에서는 AWS App Runner(AWS Secrets Manager)에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
-  if (nodeEnv !== "development") {
-    loadSecretsFromEnv();
-  }
 
   // Health check (CORS 제외, global prefix 제외, interceptor/guard 등 미적용)
   const httpAdapter = app.getHttpAdapter();

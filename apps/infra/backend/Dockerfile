@@ -18,8 +18,8 @@ COPY . .
 RUN echo "nodeLinker: node-modules" > .yarnrc.yml \
  && echo "enableGlobalCache: true" >> .yarnrc.yml
 
-
 # 3️⃣ 의존성 설치 (postinstall 자동 실행)
+# 현재 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
 RUN yarn install
 
 # 4️⃣ backend 빌드
