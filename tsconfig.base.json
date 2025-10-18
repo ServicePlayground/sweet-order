@@ -1,8 +1,6 @@
 {
   // 모노레포 공통 타입스크립트 설정 (일단 백엔드/패키지 공용)(추후 프론트엔드 추가 예정)
   "compilerOptions": {
-    // JavaScript 파일을 TypeScript 프로젝트에서 사용할 수 있도록 허용하는 설정
-    "allowJs": true,
     // 엄격 모드
     "strict": true,
     // 외부 라이브러리 타입 검사 스킵(속도/안정성)
