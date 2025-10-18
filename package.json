@@ -22,6 +22,7 @@
     "postinstall": "yarn workspace @sweet-order/backend postinstall",
     "db:reset:dev": "yarn workspace @sweet-order/backend db:reset:dev",
     "db:migrate:dev": "yarn workspace @sweet-order/backend db:migrate:dev",
+    "db:migrate:deploy": "yarn workspace @sweet-order/backend db:migrate:deploy",
     "db:seed:dev": "yarn workspace @sweet-order/backend db:seed:dev",
     "db:studio:dev": "yarn workspace @sweet-order/backend db:studio:dev",
     "web-user:dev": "yarn workspace @sweet-order/web-user dev",

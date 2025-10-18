@@ -26,7 +26,8 @@ RUN yarn install
 RUN yarn run backend:build:staging
 
 # 5️⃣ backend 실행
-CMD ["node", "apps/backend/dist/main.js"]
+# 컨테이너 시작 -> AWS 시크릿 주입 (DATABASE_URL 등) -> yarn run db:migrate:deploy(환경 변수 필요) 실행 -> 마이그레이션 성공 후 node apps/backend/dist/main.js 실행
+CMD ["sh", "-c", "yarn run db:migrate:deploy && node apps/backend/dist/main.js"]
 
 
 # ------------------- PnP → node-modules 전환 --------------------------
