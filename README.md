@@ -72,7 +72,8 @@ yarn backend:build:production    # 백엔드 프로덕션 빌드
 yarn web-user:build:production   # 사용자 웹 프로덕션 빌드
 
 # 데이터베이스 관리
-yarn backend:db:migrate:deploy
+yarn db:migrate:deploy      # 백엔드 배포 데이터베이스 마이그레이션
+yarn db:migrate:dev         # 백엔드 개발 데이터베이스 마이그레이션
 ```
 
 ## 🛠 기술 스택
