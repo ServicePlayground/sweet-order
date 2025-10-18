@@ -21,12 +21,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       );
     }
 
-    // 필요시 Prisma 로그 레벨 켜기(초기 오류 가시화)
+    // 보안을 위해 Prisma 로그 레벨을 제한 (민감한 DB 정보 노출 방지)
     super({
       datasources: { db: { url: databaseUrl } },
       log: [
-        { level: "warn", emit: "stdout" },
-        { level: "error", emit: "stdout" },
+        { level: "error", emit: "stdout" }, // error 레벨만 출력
       ],
     });
   }
