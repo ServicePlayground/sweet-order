@@ -1,14 +1,14 @@
 # Sweet Order
 
-Yarn Berry PnP + Workspace 기반 모노레포 프로젝트로 구성된 디저트 주문 플랫폼입니다.
+Yarn Berry + Workspace 기반 모노레포 프로젝트로 구성된 디저트 주문 플랫폼입니다.
 
 ## 📁 프로젝트 구조
 
 ```
 sweet-order/
 ├─ package.json             # 루트 설정
-├─ .yarnrc.yml              # Yarn Berry PnP 설정
-├─ .pnp.cjs                 # PnP 의존성 맵 (yarn install 시 생성)
+├─ .yarnrc.yml              # Yarn Berry 설정
+├─ node_modules/            # 의존성 패키지들 (node_modules 방식)
 ├─ tsconfig.base.json       # TypeScript 기본 설정
 ├─ tsconfig.json            # TypeScript 설정
 ├─ eslint.config.js         # ESLint 설정
@@ -50,35 +50,9 @@ sweet-order/
 └─ packages/                # 공유 패키지들 (향후 구현 예정)
 ```
 
-## 🚀 주요 명령어
-
-```bash
-# 의존성 설치(자동으로 postinstall 스크립트 실행, 이름 변경시 자동실행 안됨)
-yarn install
-
-# 코드 품질 검사
-yarn common:lint
-yarn common:format
-
-# VS Code 개발 도구 설치
-yarn common:sdks
-
-# 개발 서버 시작
-yarn backend:dev          # 백엔드 개발 서버
-yarn web-user:dev         # 사용자 웹 개발 서버
-
-# 빌드
-yarn backend:build:production    # 백엔드 프로덕션 빌드
-yarn web-user:build:production   # 사용자 웹 프로덕션 빌드
-
-# 데이터베이스 관리
-yarn db:migrate:deploy      # 백엔드 배포 데이터베이스 마이그레이션
-yarn db:migrate:dev         # 백엔드 개발 데이터베이스 마이그레이션
-```
-
 ## 🛠 기술 스택
 
-- **패키지 관리**: Yarn Berry 4.9.4 (PnP)
+- **패키지 관리**: Yarn Berry 4.9.4 (node_modules)
 - **모노레포**: Yarn Workspaces
 - **언어**: TypeScript
 - **백엔드**: NestJS + PostgreSQL + Prisma
@@ -98,22 +72,37 @@ yarn db:migrate:dev         # 백엔드 개발 데이터베이스 마이그레�
 - Node.js (v20 이상)
 - Yarn (v4.9.4 이상)
 
-### 설치 및 실행
+### 로컬 개발 환경 설치 및 실행
 
 ```bash
 # 프로젝트 클론
 git clone <repository-url>
 cd sweet-order
 
-# 의존성 설치
+# 의존성 설치(자동으로 postinstall 스크립트 실행, 이름 변경시 자동실행 안됨)
 yarn install
+
+# 개발 서버 시작(.env.development 환경변수 필요)
+yarn backend:dev          # 백엔드 개발 서버
+yarn web-user:dev         # 사용자 웹 개발 서버
+
+# 데이터베이스 관리
+yarn db:migrate:dev         # 백엔드 개발 데이터베이스 마이그레이션
+yarn db:studio:dev         # 백엔드 개발 데이터베이스 스튜디오
+yarn db:seed:dev         # 백엔드 개발 데이터베이스 시드
+yarn db:reset:dev         # 백엔드 개발 데이터베이스 리셋
+
+# 코드 품질 검사
+yarn common:lint
+yarn common:format
 ```
 
 ## 📚 상세 문서
 
 ### 공통 문서
 
-- **[Yarn Berry 가이드](./docs/common/yarnberry%20-%20가이드.md)**: Yarn Berry PnP 설정 및 사용법
+- **[Yarn Berry PnP 가이드](<./docs/common/(이전버전)yarnberry%20PnP%20-%20가이드.md>)**: Yarn Berry PnP 설정 및 사용법 (이전 버전)
+- **[Yarn Berry node_modules 가이드](<./docs/common/(현재버전)yarnberry%20nodemodules%20-%20가이드.md>)**: Yarn Berry node_modules 설정 및 사용법 (현재 적용)
 - **[환경변수 가이드](./docs/common/환경변수%20-%20가이드.md)**: 환경변수 관리 및 보안 정책
 
 ### 백엔드 문서

@@ -15,7 +15,6 @@
     "common:lint:fix": "eslint --cache --fix .",
     "common:format": "prettier --write .",
     "common:format:check": "prettier --check .",
-    "common:sdks": "yarn dlx @yarnpkg/sdks vscode",
     "backend:dev": "yarn workspace @sweet-order/backend dev",
     "backend:build:staging": "yarn workspace @sweet-order/backend build:staging",
     "backend:build:production": "yarn workspace @sweet-order/backend build:production",

@@ -1,4 +1,3 @@
-# Backend PnP 문제 해결용 - 배포환경에서만 node-modules로 전환
 .pnp.cjs
 .pnp.loader.mjs
 .yarn/

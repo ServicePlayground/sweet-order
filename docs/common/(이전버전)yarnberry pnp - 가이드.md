@@ -1,4 +1,4 @@
-# Yarn Berry PnP 설정 가이드
+# Yarn Berry PnP 설정 가이드 (이전 버전)
 
 ## 개요
 
@@ -158,107 +158,9 @@ yarn add lodash
 # PnP 모드 활성화 (node_modules 대신 .pnp.cjs 사용)
 nodeLinker: pnp
 
-# Yarn Berry 버전 지정
-yarnPath: .yarn/releases/yarn-4.9.4.cjs
-
-# PnP 모드 설정
-pnpMode: loose # strict vs loose
-
 # 글로벌 캐시 비활성화 (프로젝트별 캐시 사용)
 enableGlobalCache: false
-
-# 의존성 해결 최적화 (문제 해결용)
-packageExtensions:
-  "@nestjs/core@*":
-    peerDependencies:
-      "typescript": "*" # TypeScript 의존성 자동 해결
-  "@nestjs/schematics@*":
-    peerDependencies:
-      "typescript": "*"
 ```
-
-## 🔧 PnP 모드 상세 설명
-
-### `pnpMode: loose` vs `strict`
-
-#### **loose 모드 (현재 사용 중)**
-
-```yaml
-pnpMode: loose
-```
-
-**특징:**
-
-- 기존 코드와의 호환성을 최대한 보장
-- 일부 패키지가 PnP를 완전히 지원하지 않아도 작동
-- 개발 편의성 우선
-
-**예시:**
-
-```javascript
-// loose 모드에서는 이런 코드도 작동
-import { someFunction } from "some-package"; // PnP 미지원 패키지도 작동
-```
-
-#### **strict 모드**
-
-```yaml
-pnpMode: strict
-```
-
-**특징:**
-
-- 모든 의존성이 명시적으로 선언되어야 함
-- 더 엄격한 보안과 성능
-- PnP를 완전히 지원하는 패키지만 사용 가능
-
-### `enableGlobalCache: false` - 프로젝트별 캐시 사용
-
-```yaml
-enableGlobalCache: false
-```
-
-**동작 방식:**
-
-1. **프로젝트별 캐시**: 각 프로젝트의 `.yarn/cache/` 디렉토리에 패키지 저장
-
-**현재 프로젝트 설정:**
-
-- `enableGlobalCache: false`로 설정되어 프로젝트별 캐시를 사용합니다.
-- 각 프로젝트의 `.yarn/cache/` 디렉토리에 패키지가 저장됩니다.
-
-## 🛠️ packageExtensions - 의존성 문제 해결
-
-### 왜 필요한가?
-
-일부 패키지들은 PnP를 완전히 지원하지 않아서 의존성 문제가 발생합니다.
-
-### NestJS 관련 문제 해결
-
-**문제 상황:**
-
-```bash
-# NestJS 패키지들이 TypeScript를 요구하지만 선언되지 않음
-@nestjs/core@10.0.0 requires typescript as peerDependency
-@nestjs/schematics@10.0.0 requires typescript as peerDependency
-```
-
-**해결 방법:**
-
-```yaml
-packageExtensions:
-  "@nestjs/core@*":
-    peerDependencies:
-      "typescript": "*" # TypeScript 의존성 자동 추가
-  "@nestjs/schematics@*":
-    peerDependencies:
-      "typescript": "*"
-```
-
-**결과:**
-
-- NestJS 패키지들이 TypeScript를 자동으로 찾을 수 있음
-- 수동으로 TypeScript를 설치할 필요 없음
 
 ## 🚀 PnP의 실제 장점
 
@@ -345,118 +247,6 @@ const packageMap = {
   lodash: "npm:lodash@4.17.21", // 정확한 버전 고정
   react: "npm:react@18.2.0", // 정확한 버전 고정
 };
-```
-
-## ⚠️ 주의사항 및 제한사항
-
-### IDE 설정 - PnP 지원 활성화
-
-#### VS Code 설정
-
-```json
-// .vscode/settings.json
-{
-  "typescript.preferences.includePackageJsonAutoImports": "on",
-  "typescript.suggest.autoImports": true,
-  "typescript.enablePromptUseWorkspaceTsdk": true
-}
-```
-
-**왜 필요한가?**
-
-- VS Code가 `.pnp.cjs` 파일을 읽고 패키지 위치를 찾을 수 있도록 함
-- 자동 완성과 타입 체크가 제대로 작동하도록 함
-
-#### WebStorm/IntelliJ 설정
-
-1. Settings > Languages & Frameworks > Node.js and NPM
-2. Package manager: Yarn 선택
-3. Enable PnP support 체크
-
-**왜 필요한가?**
-
-- IDE가 PnP 방식으로 패키지를 찾을 수 있도록 함
-- 코드 네비게이션과 리팩토링이 제대로 작동하도록 함
-
-## 💻 실제 개발 워크플로우
-
-### 패키지 설치 - PnP 방식
-
-#### 루트에서 패키지 추가
-
-```bash
-# 루트에 패키지 추가 (모든 워크스페이스에서 사용 가능)
-yarn add lodash
-
-# 결과: .pnp.cjs 파일에 lodash 추가
-# 모든 워크스페이스에서 import 가능
-```
-
-#### 특정 워크스페이스에 패키지 추가
-
-```bash
-# 백엔드에만 패키지 추가
-yarn workspace @sweet-order/backend add @nestjs/jwt
-
-# 결과: 백엔드 package.json에만 추가
-# 다른 워크스페이스에서는 사용 불가
-```
-
-#### 개발 의존성 추가
-
-```bash
-# 루트에 개발 도구 추가
-yarn add -D prettier
-
-# 결과: 모든 워크스페이스에서 개발 도구로 사용 가능
-```
-
-### 스크립트 실행 - 워크스페이스 방식
-
-#### 루트 스크립트 실행
-
-```bash
-# 루트 package.json의 스크립트 실행
-yarn dev                    # → yarn workspace @sweet-order/backend dev
-yarn build:production       # → yarn workspace @sweet-order/backend build:production
-```
-
-#### 워크스페이스 스크립트 직접 실행
-
-```bash
-# 특정 워크스페이스의 스크립트 직접 실행
-yarn workspace @sweet-order/backend dev
-yarn workspace @sweet-order/backend typecheck
-yarn workspace @sweet-order/backend lint
-```
-
-### 의존성 관리 - PnP 최적화
-
-#### 의존성 업데이트
-
-```bash
-# 모든 패키지 업데이트
-yarn upgrade
-
-# 특정 패키지만 업데이트
-yarn upgrade lodash
-
-# 특정 워크스페이스의 패키지 업데이트
-yarn workspace @sweet-order/backend upgrade @nestjs/core
-```
-
-#### 캐시 관리
-
-```bash
-# 캐시 확인 및 정리
-yarn install --check-cache
-
-# 글로벌 캐시 정리
-yarn cache clean
-
-# PnP 파일 재생성 (문제 해결 시)
-rm .pnp.cjs
-yarn install
 ```
 
 ## 🔧 문제 해결 가이드
@@ -555,8 +345,7 @@ yarn add <missing-package>
 
 ```bash
 # 문제: VS Code에서 타입을 찾지 못함
-# 해결: TypeScript 서버 재시작
-# VS Code: Ctrl+Shift+P → "TypeScript: Restart TS Server"
+# 해결: yarn dlx @yarnpkg/sdks vscode
 ```
 
 ## 📚 요약
