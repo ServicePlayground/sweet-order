@@ -53,8 +53,12 @@ sweet-order/
 ## 🚀 주요 명령어
 
 ```bash
-# 의존성 설치
+# 의존성 설치(자동으로 postinstall 스크립트 실행, 이름 변경시 자동실행 안됨)
 yarn install
+
+# 코드 품질 검사
+yarn common:lint
+yarn common:format
 
 # VS Code 개발 도구 설치
 yarn common:sdks
@@ -67,13 +71,8 @@ yarn web-user:dev         # 사용자 웹 개발 서버
 yarn backend:build:production    # 백엔드 프로덕션 빌드
 yarn web-user:build:production   # 사용자 웹 프로덕션 빌드
 
-# 코드 품질 검사
-yarn common:lint
-yarn common:format
-
 # 데이터베이스 관리
-yarn backend:db:migrate:dev
-yarn db:studio:dev
+yarn backend:db:migrate:deploy
 ```
 
 ## 🛠 기술 스택

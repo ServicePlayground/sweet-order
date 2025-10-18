@@ -8,9 +8,13 @@ on:
 # 여기 env에 넣지 말고, 아래에서 secrets.로 직접 넣기. 로그에 출력될 위험이 있음
 # 여기 Github Workflow 파일에서는 AWS 배포관련 환경변수만 넣기(AWS 환경변수는 마스킹 처리됨)
 #   - github > settings > secrets and variables > actions > Repository secrets > New repository secret
-# .env 환경변수들은 App Runner(aws secrets manager) 런타임시 주입 (로그에 노출될 위험이 있음)(자세한 사항은 환경변수 - 가이드.md 참고)
+# .env 환경변수들은 App Runner(aws secrets manager) 런타임시 주입 (로그에 노출될 위험이 있음)
+# [예외] DATABASE_URL은 github workflow와 App Runner 모두 필요하므로, github secrets에 설정하고, App Runner(secrets manager)에서 주입하도록 함
 # ---------------------------------------------------------------------------
 
+# ---------------------------------- 중요 ------------------------------------
+# github workflow(deploy-staging-backend.yml)와 Dockerfile에서 버전, yarn 초기 설정 등 일치해야함
+# ---------------------------------------------------------------------------
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
@@ -19,6 +23,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # (Dockerfile과 동일해야함) 버전
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      # (Dockerfile과 동일해야함) Yarn 및 Corepack 활성화
+      - name: Setup Yarn
+        run: |
+          corepack enable
+          yarn set version 4.9.4
+
+      # (Dockerfile과 동일해야함) Yarn 환경 설정 (PnP → node-modules 전환)
+      - name: Configure Yarn for node-modules
+        run: |
+          echo "nodeLinker: node-modules" > .yarnrc.yml
+          echo "enableGlobalCache: true" >> .yarnrc.yml
+
+      # (Dockerfile과 동일해야함) 의존성 설치 (postinstall 자동 실행)
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      # 데이터베이스 마이그레이션 실행(런타임 이전에 실행되어야 함)
+      - name: Run database migration
+        run: |
+          yarn run db:migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      # AWS 자격증명 설정
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -26,10 +62,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Amazon ECR 로그인
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Amazon ECR 이미지 빌드 및 푸시(Dockerfile 참고)
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         run: |
@@ -51,6 +89,7 @@ jobs:
             --push \
             .
 
+      # 배포 완료
       - name: Deployment completed
         run: |
           echo "✅ Image pushed to ECR successfully!"

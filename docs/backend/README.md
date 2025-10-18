@@ -2,36 +2,6 @@
 
 Sweet Order 플랫폼을 위한 NestJS 백엔드 서비스입니다. 3-way 분리된 API 구조로 User, Seller, Admin 역할별로 독립적인 API를 제공합니다.
 
-## 🚀 빠른 시작
-
-### 설치 및 실행
-
-```bash
-# 의존성 설치
-yarn install
-
-# 개발 서버 실행
-yarn dev
-
-# API 문서 확인
-# User API: http://localhost:3000/v1/docs/user
-# Seller API: http://localhost:3000/v1/docs/seller
-# Admin API: http://localhost:3000/v1/docs/admin
-```
-
-### 데이터베이스 설정
-
-```bash
-# 마이그레이션 실행
-yarn db:migrate:dev
-
-# 시드 데이터 생성
-yarn db:seed:dev
-
-# Prisma Studio 실행
-yarn db:studio:dev
-```
-
 ## 🏗️ 주요 기능
 
 ### ✅ 구현 완료
