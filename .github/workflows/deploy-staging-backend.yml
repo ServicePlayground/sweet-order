@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "yarn"
 
       # (Dockerfile과 동일해야함) Yarn 및 Corepack 활성화
       - name: Setup Yarn
