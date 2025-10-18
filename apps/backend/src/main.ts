@@ -17,53 +17,18 @@ import {
 } from "@apps/backend/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { loadSecretsFromEnv } from "@apps/backend/common/utils/loadSecretsFromEnv";
-import { execSync } from "child_process";
-import * as path from "path";
-import * as fs from "fs";
-
-/**
- * 데이터베이스 마이그레이션 실행
- */
-async function runMigration(): Promise<void> {
-  try {
-    // 배포 환경에서는 Docker 컨테이너의 /app 디렉토리에서 실행
-    const projectRoot = "/app";
-
-    console.log(`📁 Running migration from: ${projectRoot}`);
-    console.log(`📁 Current working directory: ${process.cwd()}`);
-    console.log(`📁 __dirname: ${__dirname}`);
-
-    // package.json 파일이 존재하는지 확인
-    const packageJsonPath = path.join(projectRoot, "package.json");
-    if (!fs.existsSync(packageJsonPath)) {
-      console.error(`❌ package.json not found at: ${packageJsonPath}`);
-      console.log(`📁 Available files in ${projectRoot}:`, fs.readdirSync(projectRoot));
-      throw new Error(`package.json not found at ${projectRoot}`);
-    }
-
-    console.log(`✅ Found package.json at: ${packageJsonPath}`);
-
-    execSync("yarn run db:migrate:deploy", {
-      stdio: "inherit",
-      cwd: projectRoot,
-    });
-    console.log("✅ Database migration completed successfully");
-  } catch (error) {
-    console.error("❌ Database migration failed:", error);
-    process.exit(1);
-  }
-}
+import { runMigration } from "@apps/backend/scripts/migration";
 
 /**
  * NestJS 애플리케이션의 진입점
  */
 async function bootstrap(): Promise<void> {
-  // 배포 환경(staging, production)에서는 AWS App Runner(AWS Secrets Manager)에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
   if (process.env.NODE_ENV !== "development") {
+    // 배포 환경(staging, production)에서는 AWS App Runner(AWS Secrets Manager)에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
     loadSecretsFromEnv();
 
-    // 배포 환경에서만 런타임 초기에 마이그레이션(yarn run db:migrate:deploy) 실행(환경변수가 필요하기 때문에 런타임시 실행)
-    // 로컬 개발환경에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리
+    // 배포 환경(staging, production)에서만 런타임 초기에 마이그레이션(yarn run db:migrate:deploy) 실행(환경변수가 필요하기 때문에 런타임시 실행)
+    // 개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리
     await runMigration();
   }
 
