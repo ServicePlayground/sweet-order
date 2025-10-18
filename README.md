@@ -56,6 +56,9 @@ sweet-order/
 # 의존성 설치
 yarn install
 
+# VS Code 개발 도구 설치
+yarn common:sdks
+
 # 개발 서버 시작
 yarn backend:dev          # 백엔드 개발 서버
 yarn web-user:dev         # 사용자 웹 개발 서버
