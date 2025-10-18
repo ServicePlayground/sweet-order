@@ -17,7 +17,7 @@
 - Virtual Private Cloud(VPC): 기본값
 - DB 서브넷 그룹: 기본값
 - 퍼블릭 액세스: 아니오
-- VPC 보안 그룹(방화벽): (AWS App Runner.md 7번 참고 - 새 VPC 보안 그룹 생성한 db-staging-sg 선택)
+- VPC 보안 그룹(방화벽): (AWS App Runner.md 6번 참고 - 새 VPC 보안 그룹 생성한 db-staging-sg 선택)
 - 가용 영역: 기본 설정 없음
 - 인증 기관: 기본값
 - 데이터베이스 인증 옵션: 암호 인증
@@ -32,4 +32,3 @@
    2-2. {프로젝트명}-{환경}-db 관련 시크릿 찾기
    2-3. 보안 암호 값 > 보안 암호값 검색 > 실제 비밀번호 확인
    2-4. AWS Secrets Manager > App Runner에 해당 하는 환경변수 클릭 > 환경변수 확인 > DATABASE_URL 부분을 형식에 맞게 실제 비밀번호로 교체 (App Runner 런타임 시 주입됨)
-   2-5. Github > Settings > Secrets and variables > Actions > Repository secrets > New repository secret > DATABASE_URL 부분을 형식에 맞게 실제 비밀번호로 교체 (github workflow에서 주입됨)

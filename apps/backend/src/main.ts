@@ -17,6 +17,31 @@ import {
 } from "@apps/backend/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { loadSecretsFromEnv } from "@apps/backend/common/utils/loadSecretsFromEnv";
+import { execSync } from "child_process";
+import * as path from "path";
+
+/**
+ * 데이터베이스 마이그레이션 실행
+ */
+async function runMigration(): Promise<void> {
+  try {
+    console.log("🔄 Running database migration...");
+
+    // 프로젝트 루트 디렉토리 경로 계산
+    // 현재 파일이 apps/backend/src/main.ts에 있으므로
+    // ../../..을 통해 루트 디렉토리로 이동
+    const projectRoot = path.resolve(__dirname, "../../../..");
+
+    execSync("yarn run db:migrate:deploy", {
+      stdio: "inherit",
+      cwd: projectRoot,
+    });
+    console.log("✅ Database migration completed successfully");
+  } catch (error) {
+    console.error("❌ Database migration failed:", error);
+    process.exit(1);
+  }
+}
 
 /**
  * NestJS 애플리케이션의 진입점
@@ -25,6 +50,9 @@ async function bootstrap(): Promise<void> {
   // 배포 환경(staging, production)에서는 AWS App Runner(AWS Secrets Manager)에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
   if (process.env.NODE_ENV !== "development") {
     loadSecretsFromEnv();
+
+    // 런타임 초기에 마이그레이션 실행
+    await runMigration();
   }
 
   // NestJS 애플리케이션 메인 인스턴스 생성 (AppModule을 사용하여 모든 모듈을 포함하고 있음)

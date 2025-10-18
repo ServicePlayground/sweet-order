@@ -1,9 +1,5 @@
 # syntax=docker/dockerfile:1
 
-# ---------------------------------- 중요 ------------------------------------
-# github workflow(deploy-staging-backend.yml)와 Dockerfile에서 버전, yarn 초기 설정 등 일치해야함
-# ---------------------------------------------------------------------------
-
 FROM node:20-slim
 WORKDIR /app
 
