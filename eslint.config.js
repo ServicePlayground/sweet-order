@@ -18,6 +18,7 @@ module.exports = [
       "eslint.config.js",
       "apps/backend/src/infra/database/prisma/generated/**",
       "apps/backend/src/infra/database/prisma/**/client/**",
+      "**/.next/**",
     ],
   },
   js.configs.recommended,

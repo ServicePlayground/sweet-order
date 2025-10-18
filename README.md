@@ -24,9 +24,24 @@ sweet-order/
 │  │  ├─ dist/              # 빌드 산출물
 │  │  ├─ nest-cli.json      # Nest CLI 설정
 │  │  └─ package.json       # 백엔드 의존성/스크립트
+│  ├─ web-user/             # 사용자 웹 애플리케이션 (Next.js + TypeScript)
+│  │  ├─ src/               # 소스 코드
+│  │  │  ├─ app/            # Next.js App Router
+│  │  │  ├─ components/     # React 컴포넌트
+│  │  │  ├─ hooks/          # 커스텀 훅
+│  │  │  ├─ lib/            # 유틸리티 라이브러리
+│  │  │  ├─ services/       # API 서비스
+│  │  │  ├─ store/          # 상태 관리
+│  │  │  ├─ styles/         # 스타일 파일
+│  │  │  └─ types/          # TypeScript 타입 정의
+│  │  ├─ public/            # 정적 파일
+│  │  ├─ next.config.ts     # Next.js 설정
+│  │  └─ package.json       # 프론트엔드 의존성/스크립트
+│  ├─ web-seller/           # 판매자 웹 애플리케이션 (향후 구현)
+│  ├─ web-admin/            # 관리자 웹 애플리케이션 (향후 구현)
 │  └─ infra/                 # 인프라 설정
 │     ├─ backend/           # 백엔드 Docker 설정
-│     └─ frontend/           # 프론트엔드 인프라 (향후 구현)
+│     └─ frontend/          # 프론트엔드 인프라 (향후 구현)
 ├─ docs/                    # 프로젝트 문서
 │  ├─ backend/              # 백엔드 관련 문서
 │  ├─ common/               # 공통 문서
@@ -42,10 +57,12 @@ sweet-order/
 yarn install
 
 # 개발 서버 시작
-yarn backend:dev
+yarn backend:dev          # 백엔드 개발 서버
+yarn web-user:dev         # 사용자 웹 개발 서버
 
 # 빌드
-yarn backend:build:production
+yarn backend:build:production    # 백엔드 프로덕션 빌드
+yarn web-user:build:production   # 사용자 웹 프로덕션 빌드
 
 # 코드 품질 검사
 yarn common:lint
@@ -62,6 +79,7 @@ yarn db:studio:dev
 - **모노레포**: Yarn Workspaces
 - **언어**: TypeScript
 - **백엔드**: NestJS + PostgreSQL + Prisma
+- **프론트엔드**: Next.js 15 + React 19 + TypeScript
 - **데이터베이스**:
   - 개발: 로컬 PostgreSQL
   - 스테이징/프로덕션: AWS RDS PostgreSQL
@@ -102,6 +120,10 @@ yarn install
 - **[로컬 데이터베이스 가이드](<./docs/backend/데이터베이스(로컬)%20-%20가이드.md>)**: 로컬 PostgreSQL 및 Prisma ORM 관리
 - **[통합 로그인 및 회원가입 가이드](./docs/backend/통합%20로그인%20및%20회원가입%20-%20가이드.md)**: 인증 시스템 구현
 - **[통합 플랫폼 인증 관리 가이드](./docs/backend/통합%20플랫폼%20인증%20관리%20-%20가이드.md)**: 통합 인증 시스템 사용법
+
+### 프론트엔드 문서
+
+- **[Web User 가이드](./docs/web-user/)**: 사용자 웹 애플리케이션 개발 및 사용법 (향후 구현)
 
 ### 인프라 문서
 

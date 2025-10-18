@@ -1,18 +1,8 @@
 {
   // 모노레포 공통 타입스크립트 설정 (일단 백엔드/패키지 공용)(추후 프론트엔드 추가 예정)
   "compilerOptions": {
-    // 최신 런타임 문법 타깃
-    "target": "ES2022",
-    // 런타임 라이브러리: 백엔드 중심이라 DOM 제외
-    "lib": ["ES2022"],
-    // NestJS/Node 실행을 위한 CJS 출력
-    "module": "CommonJS",
-    // Node 해석 규칙 사용
-    "moduleResolution": "node",
-    // JS 파일은 컴파일 대상에서 제외
-    "allowJs": false,
-    // JS 타입체크 비활성화
-    "checkJs": false,
+    // JavaScript 파일을 TypeScript 프로젝트에서 사용할 수 있도록 허용하는 설정
+    "allowJs": true,
     // 엄격 모드
     "strict": true,
     // 외부 라이브러리 타입 검사 스킵(속도/안정성)
@@ -21,14 +11,9 @@
     "resolveJsonModule": true,
     // CJS/ESM 호환성 옵션
     "esModuleInterop": true,
+    // default import 허용
     "allowSyntheticDefaultImports": true,
     // 파일명 대소문자 일관성 강제(크로스 OS 안전)
-    "forceConsistentCasingInFileNames": true,
-    // tsc가 실제 JS 출력하도록(noEmit=false)
-    "noEmit": false,
-    // TS 고립 모듈 모드 비활성화(tsc 빌드 사용)
-    "isolatedModules": false,
-    // 프로젝트 기준 소스/출력 경로(패키지에서 재정의 가능)
-    "rootDir": "."
+    "forceConsistentCasingInFileNames": true
   }
 }

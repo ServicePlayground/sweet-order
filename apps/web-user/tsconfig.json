@@ -1,0 +1,35 @@
+{
+  // Next.js 프론트엔드 전용 오버라이드 설정
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // ES2017은 대부분의 모던 브라우저에서 지원되며, 안정적
+    "target": "ES2017",
+    // Next.js 프로젝트 특성상, DOM 라이브러리 사용
+    "lib": ["dom", "dom.iterable", "es2017"],
+    // Next.js 프로젝트 특성상, ESNext 모듈 시스템 사용
+    "module": "esnext",
+    // Next.js 프로젝트 특성상, Bundler 모듈 시스템 사용
+    "moduleResolution": "bundler",
+    "rootDir": ".",
+    "outDir": "./next",
+    // Next.js는 번들러가 처리하므로 JS 출력 비활성화, next.js에서 권장
+    "noEmit": true,
+    // TS 고립 모듈 모드 활성화(tsc 빌드 사용), next.js에서 권장
+    "isolatedModules": true,
+    // JSX를 어떻게 처리할지 결정하는 TypeScript 설정, next.js에서 권장
+    "jsx": "preserve",
+    // Next.js 플러그인 사용, next.js에서 권장
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": "./src",
+    "paths": {
+      "@/apps/web-user/*": ["./*"]
+    },
+    "incremental": true
+  },
+  "include": ["src/**/*", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "next"]
+}
