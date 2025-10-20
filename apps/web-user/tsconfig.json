@@ -28,7 +28,8 @@
     "paths": {
       "@/apps/web-user/*": ["./*"]
     },
-    "incremental": true
+    "incremental": true,
+    "allowJs": true
   },
   "include": ["src/**/*", ".next/types/**/*.ts"],
   "exclude": ["node_modules", "next"]
