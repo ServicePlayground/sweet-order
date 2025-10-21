@@ -88,7 +88,6 @@ export function useMe() {
 
 // 로그아웃 뮤테이션
 export function useLogout() {
-  const queryClient = useQueryClient();
   const { logout } = useAuthStore();
   const router = useRouter();
 

@@ -13,7 +13,6 @@
     "next": "15.5.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-hook-form": "^7.65.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {

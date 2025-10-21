@@ -8,6 +8,11 @@ const AUTH_ERROR_MESSAGES = {
   INVALID_CREDENTIALS: "아이디 또는 비밀번호가 올바르지 않습니다.",
   PHONE_INVALID_FORMAT: "올바른 휴대폰번호 형식을 입력해주세요. (예: 01012345678)",
   VERIFICATION_CODE_INVALID_FORMAT: "올바른 인증번호 형식을 입력해주세요. (예: 123456)",
+  USER_ID_AVAILABLE: "사용 가능한 아이디입니다.",
+  USER_ID_ALREADY_EXISTS: "이미 사용 중인 아이디입니다.",
+  PHONE_REQUIRED: "휴대폰번호를 입력해주세요.",
+  VERIFICATION_CODE_REQUIRED: "인증번호를 입력해주세요.",
+  PHONE_VERIFICATION_REQUIRED: "휴대폰 인증을 완료해주세요.",
 } as const;
 
 export { AUTH_ERROR_MESSAGES };

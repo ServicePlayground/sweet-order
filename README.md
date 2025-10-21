@@ -80,6 +80,7 @@ git clone <repository-url>
 cd sweet-order
 
 # 의존성 설치(자동으로 postinstall 스크립트 실행, 이름 변경시 자동실행 안됨)
+# 파일 경로에 한글이 존재하면 오류가 발생할 수 있습니다.
 yarn install
 
 # 개발 서버 시작(.env.development 환경변수 필요)
