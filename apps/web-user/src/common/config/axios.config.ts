@@ -4,7 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { authApi } from "@/apps/web-user/features/auth/apis/auth.api";
 import { authQueryKeys } from "@/apps/web-user/features/auth/constants/authQueryKeys.constant";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 
 let queryClient: QueryClient | null = null;
 export const setQueryClient = (client: QueryClient) => {

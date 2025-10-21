@@ -99,4 +99,30 @@ export const authApi = {
       throw error;
     }
   },
+
+  // 구글 로그인
+  googleLogin: async (code: string): Promise<{ user: UserInfo }> => {
+    try {
+      const response = await apiClient.post("/auth/google/login", { code });
+      return response.data.data;
+    } catch (error) {
+      console.error("구글 로그인 실패:", error);
+      throw error;
+    }
+  },
+
+  // 구글 회원가입
+  googleRegister: async (data: {
+    googleId: string;
+    googleEmail: string;
+    phone: string;
+  }): Promise<{ user: UserInfo }> => {
+    try {
+      const response = await apiClient.post("/auth/google/register", data);
+      return response.data.data;
+    } catch (error) {
+      console.error("구글 회원가입 실패:", error);
+      throw error;
+    }
+  },
 };

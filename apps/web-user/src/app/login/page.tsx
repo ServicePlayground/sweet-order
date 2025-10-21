@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import { Button } from "@/apps/web-user/common/components/buttons/Button";
 
 // 로그인 페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
 export const metadata: Metadata = {
@@ -39,24 +38,22 @@ export default function LoginPage() {
       }}
     >
       <h1>로그인</h1>
-      <Link href={PATHS.AUTH.LOGIN_BASIC}>
-        <Button
-          type="button"
-          style={{
-            width: "500px",
-            height: "70px",
-            border: "none",
-            backgroundColor: "black",
-            color: "white",
-            fontSize: "16px",
-            fontWeight: "700",
-          }}
-        >
-          일반 로그인
-        </Button>
+      <Link
+        href={PATHS.AUTH.LOGIN_BASIC}
+        style={{
+          width: "500px",
+          height: "70px",
+          border: "none",
+          backgroundColor: "black",
+          color: "white",
+          fontSize: "16px",
+          fontWeight: "700",
+        }}
+      >
+        일반 로그인
       </Link>
-      <Button
-        type="button"
+      <Link
+        href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_USER_DOMAIN}${process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`}
         style={{
           width: "500px",
           height: "70px",
@@ -68,7 +65,7 @@ export default function LoginPage() {
         }}
       >
         구글 로그인
-      </Button>
+      </Link>
     </div>
   );
 }

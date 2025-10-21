@@ -135,3 +135,37 @@ export function useVerifyPhoneCode() {
     },
   });
 }
+
+// 구글 로그인 뮤테이션
+export function useGoogleLogin() {
+  const queryClient = useQueryClient();
+  const { login } = useAuthStore();
+
+  return useMutation({
+    mutationFn: authApi.googleLogin,
+    onSuccess: (data) => {
+      login(data.user);
+      queryClient.setQueryData(authQueryKeys.me, data.user);
+    },
+    onError: (error: any) => {
+      console.error("구글 로그인 실패:", error);
+    },
+  });
+}
+
+// 구글 회원가입 뮤테이션
+export function useGoogleRegister() {
+  const queryClient = useQueryClient();
+  const { login } = useAuthStore();
+
+  return useMutation({
+    mutationFn: authApi.googleRegister,
+    onSuccess: (data) => {
+      login(data.user);
+      queryClient.setQueryData(authQueryKeys.me, data.user);
+    },
+    onError: (error) => {
+      console.error("구글 회원가입 실패:", error);
+    },
+  });
+}
