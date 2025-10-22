@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  ExecutionContext,
-  CanActivate,
-  UnauthorizedException,
-  ForbiddenException,
-} from "@nestjs/common";
+import { Injectable, ExecutionContext, CanActivate, UnauthorizedException } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { Reflector } from "@nestjs/core";
 import { AuthGuard as BaseAuthGuard } from "@nestjs/passport";
@@ -53,9 +47,26 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
   }
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
-    // JWT 인증 실패 시
+    // JWT Strategy/Passport에서 발생한 에러를 커스텀 메시지로 매핑
     if (err || !user) {
-      throw err || new UnauthorizedException(AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+      // 이미 Nest UnauthorizedException으로 올라온 경우는 그대로 전달
+      if (err instanceof UnauthorizedException) {
+        throw err;
+      }
+
+      // Passport가 전달하는 info는 Error 객체일 수 있음(TokenExpiredError, JsonWebTokenError 등)
+      const errorName = info?.name || err?.name;
+
+      if (errorName === "TokenExpiredError") {
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED);
+      }
+
+      if (errorName === "JsonWebTokenError") {
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
+      }
+
+      // 그 외 토큰 누락 등 일반 인증 실패
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     // 인증 메타데이터 가져오기
@@ -65,7 +76,7 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
     if (authMetadata?.roles && authMetadata.roles.length > 0) {
       const hasRequiredRole = authMetadata.roles.includes(user.role);
       if (!hasRequiredRole) {
-        throw new ForbiddenException(AUTH_ERROR_MESSAGES.FORBIDDEN);
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED);
       }
     }
 

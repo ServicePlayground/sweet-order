@@ -37,7 +37,7 @@ export class UserProductController {
     @Query() query: GetProductsRequestDto,
     @Request() req: { user?: JwtVerifiedPayload }, // 필수는 아니지만, 사용자 정보가 있으면 좋아요와 같은 여부 판단에 사용할 수 있음
   ) {
-    return this.productService.getProducts(query, req.user);
+    return await this.productService.getProducts(query, req.user);
   }
 
   /**
@@ -53,6 +53,6 @@ export class UserProductController {
   @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.PRODUCT_DETAIL_RESPONSE)
   @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
   async getProductDetail(@Param("id") id: string, @Request() req: { user?: JwtVerifiedPayload }) {
-    return this.productService.getProductDetail(id, req.user);
+    return await this.productService.getProductDetail(id, req.user);
   }
 }

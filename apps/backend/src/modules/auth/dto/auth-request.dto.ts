@@ -188,16 +188,3 @@ export class ChangePhoneRequestDto {
   @IsValidKoreanPhone()
   newPhone: string;
 }
-
-/**
- * Refresh Token 갱신 요청 DTO
- */
-export class RefreshTokenRequestDto {
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.REFRESH_TOKEN,
-    example: SWAGGER_EXAMPLES.REFRESH_TOKEN,
-  })
-  @IsNotEmpty()
-  @IsString()
-  refreshToken: string;
-}

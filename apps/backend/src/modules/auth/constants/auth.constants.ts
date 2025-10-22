@@ -15,13 +15,24 @@ export const AUTH_ERROR_MESSAGES = {
   ACCOUNT_NOT_FOUND: "해당 아이디로 등록된 계정이 없습니다.",
   ACCOUNT_NOT_FOUND_BY_PHONE: "해당 휴대폰 번호로 등록된 계정이 없습니다.",
   GOOGLE_REGISTER_FAILED: "구글 로그인 회원가입에 실패했습니다.",
-  INVALID_REFRESH_TOKEN: "유효하지 않은 리프레시 토큰입니다.",
+  /* --------------------------------- 토큰 관련 에러 메시지 --------------------------------- */
+  REFRESH_TOKEN_EXPIRED: "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_INVALID: "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 유효하지 않습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_MISSING: "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 없습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_WRONG_TYPE: "[REFRESH_TOKEN_INVALID] 리프레시 토큰의 타입이 올바르지 않습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_MISSING_REQUIRED_INFO:
+    "[REFRESH_TOKEN_INVALID] 리프레시 토큰에 필수 정보가 누락되었습니다. 다시 로그인해주세요.",
+  ACCESS_TOKEN_EXPIRED: "[ACCESS_TOKEN_INVALID] 액세스 토큰이 만료되었습니다.",
+  ACCESS_TOKEN_INVALID: "[ACCESS_TOKEN_INVALID] 액세스 토큰이 유효하지 않습니다.",
+  ACCESS_TOKEN_MISSING: "[ACCESS_TOKEN_INVALID] 액세스 토큰이 없습니다.",
+  ACCESS_TOKEN_WRONG_TYPE: "[ACCESS_TOKEN_INVALID] 액세스 토큰의 타입이 올바르지 않습니다.",
+  ACCESS_TOKEN_MISSING_REQUIRED_INFO:
+    "[ACCESS_TOKEN_INVALID] 액세스 토큰에 필수 정보가 누락되었습니다. 다시 로그인해주세요.",
+  /* ----------------------------------------------------------------------------------- */
+  ROLE_NOT_AUTHORIZED: "권한(Role)이 없는 사용자입니다.",
   USER_NOT_FOUND: "사용자를 찾을 수 없습니다.",
   ID_PHONE_MISMATCH: "아이디와 휴대폰 번호가 일치하지 않습니다.",
   PHONE_VERIFICATION_EXPIRED: "인증번호가 만료되었습니다.",
-  INVALID_TOKEN_TYPE: "유효하지 않은 토큰 타입입니다.",
-  TOKEN_MISSING_REQUIRED_INFO: "토큰에 필수 정보가 누락되었습니다.",
-  TOKEN_VERIFICATION_FAILED: "토큰 검증에 실패했습니다.",
   PHONE_MULTIPLE_ACCOUNTS: "해당 휴대폰 번호로 일반 로그인과 구글 로그인 계정이 모두 존재합니다.",
   PHONE_GENERAL_ACCOUNT_EXISTS: "해당 휴대폰 번호로 일반 로그인 계정이 존재합니다.",
   PHONE_GOOGLE_ACCOUNT_EXISTS: "해당 휴대폰 번호로 구글 로그인 계정이 존재합니다.",
@@ -29,7 +40,6 @@ export const AUTH_ERROR_MESSAGES = {
   GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED: "구글 OAuth 토큰 교환 실패",
   THROTTLE_LIMIT_EXCEEDED: "ThrottlerException: Too Many Requests",
   UNAUTHORIZED: "Unauthorized",
-  FORBIDDEN: "Forbidden",
 } as const;
 
 /**
@@ -40,6 +50,8 @@ export const AUTH_SUCCESS_MESSAGES = {
   PHONE_VERIFICATION_CONFIRMED: "인증번호가 확인되었습니다.",
   PASSWORD_CHANGED: "비밀번호가 성공적으로 변경되었습니다.",
   PHONE_CHANGED: "휴대폰 번호가 변경되었습니다.",
+  ACCESS_TOKEN_REFRESHED: "새로운 Access Token이 발급되었습니다.",
+  LOGOUT_SUCCESS: "로그아웃이 완료되었습니다.",
 } as const;
 
 export const USER_ROLES = {
@@ -54,6 +66,20 @@ export const USER_ROLES = {
 export const TOKEN_TYPES = {
   ACCESS: "access",
   REFRESH: "refresh",
+} as const;
+
+/**
+ * 쿠키 설정 상수
+ */
+export const COOKIE_CONFIG = {
+  ACCESS_TOKEN_NAME: "access_token",
+  REFRESH_TOKEN_NAME: "refresh_token",
+  DOMAIN: ".sweetorders.com", // 서브도메인 통합을 위한 도메인 // 개발환경 localhost는 도메인 제한이 없어서 배포 환경만 도메인 제한
+  HTTP_ONLY: true, // JavaScript 접근 차단 (XSS 공격 방지)
+  // SECURE는 configService를 통해 동적으로 설정
+  SAME_SITE: "lax" as const, // CSRF 공격 방지 (lax: 서브도메인 간 쿠키 전송 허용)(strict: 서브도메인 간 쿠키 전송 불가)
+  ACCESS_TOKEN_MAX_AGE: 3600, // 1시간(JWT Access Token과 동일)
+  REFRESH_TOKEN_MAX_AGE: 2592000, // 30일(JWT Refresh Token과 동일)
 } as const;
 
 /**
@@ -77,10 +103,6 @@ export const SWAGGER_EXAMPLES = {
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     lastLoginAt: new Date("2024-01-01T00:00:00.000Z"),
   },
-  ACCESS_TOKEN:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcwNDA2NDAwMCwiZXhwIjoxNzA0MDY3NjAwfQ.example_signature",
-  REFRESH_TOKEN:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MDQwNjQwMDAsImV4cCI6MTcwNDY2ODgwMH0.example_signature",
   PASSWORD: "Password123!",
   GOOGLE_CODE: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
   VERIFICATION_CODE: "123456",
@@ -92,8 +114,6 @@ export const SWAGGER_EXAMPLES = {
  */
 export const SWAGGER_RESPONSE_EXAMPLES = {
   USER_DATA_RESPONSE: {
-    accessToken: SWAGGER_EXAMPLES.ACCESS_TOKEN,
-    refreshToken: SWAGGER_EXAMPLES.REFRESH_TOKEN,
     user: SWAGGER_EXAMPLES.USER_DATA,
   },
 } as const;
