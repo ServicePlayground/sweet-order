@@ -19,13 +19,9 @@ export default function FindAccountPage() {
 
   // 휴대폰 인증 완료 후 계정 찾기 처리
   const handlePhoneVerificationComplete = async (phone: string) => {
-    try {
       const result = await findAccountMutation.mutateAsync(phone);
       setAccountInfo(result);
       setCurrentStep("result");
-    } catch (error) {
-      console.error("계정 찾기 실패:", error);
-    }
   };
 
   const handleBackToLogin = () => {
