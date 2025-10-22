@@ -138,4 +138,19 @@ export const authApi = {
       throw error;
     }
   },
+
+  // 비밀번호 재설정
+  resetPassword: async (data: {
+    phone: string;
+    userId: string;
+    newPassword: string;
+  }): Promise<MessageResponse> => {
+    try {
+      const response = await apiClient.post("/auth/change-password", data);
+      return response.data.data;
+    } catch (error) {
+      console.error("비밀번호 재설정 실패:", error);
+      throw error;
+    }
+  },
 };

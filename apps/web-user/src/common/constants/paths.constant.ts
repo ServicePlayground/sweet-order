@@ -9,8 +9,10 @@ export const PATHS = {
   AUTH: {
     LOGIN: "/login",
     LOGIN_BASIC: "/login/basic",
+    GOOGLE_REDIRECT_URI: "/login/google",
     REGISTER_BASIC: "/register/basic",
     FIND_ACCOUNT: "/find-account",
+    RESET_PASSWORD: "/reset-password",
   },
 
   // 메인 페이지

@@ -179,3 +179,13 @@ export function useFindAccount() {
     },
   });
 }
+
+// 비밀번호 재설정 뮤테이션
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: authApi.resetPassword,
+    onError: (error) => {
+      console.error("비밀번호 재설정 실패:", error);
+    },
+  });
+}

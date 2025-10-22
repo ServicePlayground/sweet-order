@@ -48,12 +48,15 @@ export default function LoginPage() {
           color: "white",
           fontSize: "16px",
           fontWeight: "700",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         일반 로그인
       </Link>
       <Link
-        href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_USER_DOMAIN}${process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`}
+        href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_USER_DOMAIN}${PATHS.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`}
         style={{
           width: "500px",
           height: "70px",
@@ -62,6 +65,9 @@ export default function LoginPage() {
           color: "white",
           fontSize: "16px",
           fontWeight: "700",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         구글 로그인

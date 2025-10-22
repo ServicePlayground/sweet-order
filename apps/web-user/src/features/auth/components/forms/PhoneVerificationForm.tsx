@@ -68,45 +68,68 @@ export default function PhoneVerificationForm({
   };
 
   return (
-    <form>
-      <div style={{ display: "flex", gap: "10px" }}>
-        <Input
-          label="휴대폰번호"
-          type="tel"
-          name="phone"
-          value={phone}
-          onChange={handlePhoneChange}
-          error={phoneError}
-          placeholder="01012345678"
-          maxLength={11}
-        />
+    <form style={{ width: "100%" }}>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+        <div style={{ flex: 1 }}>
+          <Input
+            label="휴대폰번호"
+            type="tel"
+            name="phone"
+            value={phone}
+            onChange={handlePhoneChange}
+            error={phoneError}
+            placeholder="01012345678"
+            maxLength={11}
+          />
+        </div>
         <Button
           type="button"
           onClick={handleSendVerificationCode}
-          disabled={!phone || !!phoneError}
+          disabled={!phone || !!phoneError || sendPhoneVerificationMutation.isPending}
+          style={{
+            minWidth: "120px",
+            height: "48px",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         >
-          {"인증번호 발송"}
+          {sendPhoneVerificationMutation.isPending ? "발송 중..." : "인증번호 발송"}
         </Button>
       </div>
-      <Input
-        label="인증번호"
-        type="text"
-        name="verificationCode"
-        value={verificationCode}
-        onChange={handleVerificationCodeChange}
-        error={verificationCodeError}
-        placeholder="123456"
-        maxLength={6}
-      />
+
+      <div style={{ marginBottom: "20px" }}>
+        <Input
+          label="인증번호"
+          type="text"
+          name="verificationCode"
+          value={verificationCode}
+          onChange={handleVerificationCodeChange}
+          error={verificationCodeError}
+          placeholder="123456"
+          maxLength={6}
+        />
+      </div>
+
       <Button
         type="button"
         disabled={
-          !phone || !verificationCode || !!phoneError || !!verificationCodeError || !isCodeSent
+          !phone ||
+          !verificationCode ||
+          !!phoneError ||
+          !!verificationCodeError ||
+          !isCodeSent ||
+          verifyPhoneCodeMutation.isPending
         }
         onClick={handleVerifyCode}
-        style={{ marginTop: "10px", width: "100%", height: "40px" }}
+        style={{
+          width: "100%",
+          height: "48px",
+          borderRadius: "6px",
+          fontSize: "16px",
+          fontWeight: "600",
+        }}
       >
-        회원가입
+        {verifyPhoneCodeMutation.isPending ? "인증 중..." : "인증 완료"}
       </Button>
     </form>
   );

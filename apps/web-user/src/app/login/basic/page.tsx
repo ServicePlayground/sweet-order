@@ -24,14 +24,46 @@ export default function BasicLoginPage() {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        marginTop: "300px",
-        gap: "40px",
+        minHeight: "100vh",
+        padding: "40px 20px",
+        backgroundColor: "#fafafa",
       }}
     >
-      <h1>일반 로그인</h1>
-      <LoginForm />
-      <div style={{ border: "1px solid black", width: "500px", height: "1px" }} />
-      <Link href={PATHS.AUTH.REGISTER_BASIC}>회원가입</Link>
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "400px",
+          backgroundColor: "white",
+          padding: "40px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h1
+          style={{ textAlign: "center", marginBottom: "32px", fontSize: "24px", fontWeight: "600" }}
+        >
+          일반 로그인
+        </h1>
+        <LoginForm />
+        <div style={{ border: "1px solid #e0e0e0", width: "100%", margin: "24px 0" }} />
+        <div
+          style={{ display: "flex", gap: "16px", alignItems: "center", justifyContent: "center" }}
+        >
+          <Link
+            href={PATHS.AUTH.REGISTER_BASIC}
+            style={{ color: "#666", textDecoration: "none", fontSize: "14px" }}
+          >
+            회원가입
+          </Link>
+          <span style={{ color: "#ddd" }}>|</span>
+          <Link
+            href={PATHS.AUTH.RESET_PASSWORD}
+            style={{ color: "#666", textDecoration: "none", fontSize: "14px" }}
+          >
+            비밀번호 찾기
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

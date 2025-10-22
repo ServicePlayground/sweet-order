@@ -50,30 +50,45 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      <Input
-        label="아이디"
-        type="text"
-        name="userId"
-        value={userId}
-        onChange={handleChangeUserId}
-        error={userIdError}
-      />
-      <Input
-        label="비밀번호"
-        type="password"
-        name="password"
-        value={password}
-        onChange={handleChangePassword}
-        error={passwordError}
-      />
+    <form onSubmit={onSubmit} style={{ width: "100%" }}>
+      <div style={{ marginBottom: "20px" }}>
+        <Input
+          label="아이디"
+          type="text"
+          name="userId"
+          value={userId}
+          onChange={handleChangeUserId}
+          error={userIdError}
+          placeholder="아이디를 입력하세요"
+        />
+      </div>
+
+      <div style={{ marginBottom: "24px" }}>
+        <Input
+          label="비밀번호"
+          type="password"
+          name="password"
+          value={password}
+          onChange={handleChangePassword}
+          error={passwordError}
+          placeholder="비밀번호를 입력하세요"
+        />
+      </div>
 
       <Button
         type="submit"
-        disabled={!userId || !password || !!userIdError || !!passwordError}
-        style={{ marginTop: "10px", width: "100%", height: "40px" }}
+        disabled={
+          !userId || !password || !!userIdError || !!passwordError || loginMutation.isPending
+        }
+        style={{
+          width: "100%",
+          height: "48px",
+          borderRadius: "6px",
+          fontSize: "16px",
+          fontWeight: "600",
+        }}
       >
-        {"로그인"}
+        {loginMutation.isPending ? "로그인 중..." : "로그인"}
       </Button>
     </form>
   );
