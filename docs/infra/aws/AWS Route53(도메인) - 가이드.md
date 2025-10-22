@@ -86,3 +86,8 @@
    - 위 1번 커스텀 도메인 연동시, SSL 인증서 발급도 자동으로 된다. (레코드 CNAME으로 3개가 자동으로 생성된다.)
 
 ## App Runner가 커스텀 도메인/레코드를 등록하면 자동으로 이렇게 진행돼: App Runner → ACM(인증서 관리자) → Route 53 CNAME 레코드 조회 → 검증 → 인증서 발급 → 상태 Active
+
+# 4. 프론트엔드 Vercel 도메인 연동
+
+1. Vercel > 도메인 > Add Domain > 생성 후 > Value 확인
+2. AWS > Route53 > 호스팅 영역 > sweetorders.com > 레코드 생성 > Type: CNAME, Value: vercel-dns.com
