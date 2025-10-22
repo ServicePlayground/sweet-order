@@ -125,4 +125,17 @@ export const authApi = {
       throw error;
     }
   },
+
+  // 계정 찾기
+  findAccount: async (phone: string): Promise<{ userId?: string; googleEmail?: string }> => {
+    try {
+      const response = await apiClient.get("/auth/find-account", {
+        params: { phone },
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error("계정 찾기 실패:", error);
+      throw error;
+    }
+  },
 };

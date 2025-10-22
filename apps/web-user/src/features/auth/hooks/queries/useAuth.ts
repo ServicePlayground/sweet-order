@@ -169,3 +169,13 @@ export function useGoogleRegister() {
     },
   });
 }
+
+// 계정 찾기 뮤테이션
+export function useFindAccount() {
+  return useMutation({
+    mutationFn: authApi.findAccount,
+    onError: (error) => {
+      console.error("계정 찾기 실패:", error);
+    },
+  });
+}

@@ -66,6 +66,24 @@ export default function LoginPage() {
       >
         구글 로그인
       </Link>
+      <Link
+        href={PATHS.AUTH.FIND_ACCOUNT}
+        style={{
+          width: "500px",
+          height: "50px",
+          border: "1px solid #ddd",
+          backgroundColor: "transparent",
+          color: "#666",
+          fontSize: "14px",
+          fontWeight: "500",
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        계정 찾기
+      </Link>
     </div>
   );
 }

@@ -10,6 +10,7 @@ export const PATHS = {
     LOGIN: "/login",
     LOGIN_BASIC: "/login/basic",
     REGISTER_BASIC: "/register/basic",
+    FIND_ACCOUNT: "/find-account",
   },
 
   // 메인 페이지
