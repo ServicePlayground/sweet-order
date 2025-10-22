@@ -30,6 +30,7 @@ export default function GoogleAuthCallback() {
   }, [searchParams]);
 
   const handleGoogleCallback = async (code: string) => {
+    // 특별한 비즈니스 로직(휴대폰 인증 필요)이 있으므로 try-catch 유지
     try {
       await googleLoginMutation.mutateAsync(code);
       router.push("/");
@@ -49,15 +50,11 @@ export default function GoogleAuthCallback() {
   const handlePhoneVerificationComplete = async (phone: string) => {
     if (!googleData) return;
 
-    try {
-      await googleRegisterMutation.mutateAsync({
-        ...googleData,
-        phone,
-      });
-      router.push("/");
-    } catch (error) {
-      console.error("구글 회원가입 실패:", error);
-    }
+    await googleRegisterMutation.mutateAsync({
+      ...googleData,
+      phone,
+    });
+    router.push("/");
   };
 
   // 휴대폰 인증이 필요한 경우

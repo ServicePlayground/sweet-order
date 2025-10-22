@@ -28,9 +28,6 @@ export function useLogin() {
        */
       queryClient.setQueryData(authQueryKeys.me, data.user);
     },
-    onError: (error) => {
-      console.error("로그인 실패:", error);
-    },
   });
 }
 
@@ -46,20 +43,17 @@ export function useRegister() {
       login(data.user);
       queryClient.setQueryData(authQueryKeys.me, data.user);
     },
-    onError: (error) => {
-      console.error("회원가입 실패:", error);
-    },
   });
 }
 
 // 현재 사용자 정보 조회 (새로고침 시 자동 실행)
 export function useMe() {
   const { login, setInitialized } = useAuthStore();
-  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: authQueryKeys.me, // 자동으로 캐시 관리됨
     queryFn: authApi.me,
+    throwOnError: false,
   });
 
   // 성공 시 스토어에 로그인 정보 저장
@@ -75,13 +69,6 @@ export function useMe() {
       setInitialized(true);
     }
   }, [query.isSuccess, query.isError, setInitialized]);
-
-  // 에러 시 캐시 제거
-  useEffect(() => {
-    if (query.isError) {
-      console.error("사용자 정보 조회 실패");
-    }
-  }, [query.isError, queryClient]);
 
   return query;
 }
@@ -100,9 +87,6 @@ export function useLogout() {
       // Next.js 라우터를 사용하여 로그인 페이지로 리다이렉트
       router.push(PATHS.AUTH.LOGIN);
     },
-    onError: (error) => {
-      console.error("로그아웃 실패:", error);
-    },
   });
 }
 
@@ -110,9 +94,6 @@ export function useLogout() {
 export function useCheckUserIdDuplicate() {
   return useMutation({
     mutationFn: authApi.checkUserIdDuplicate,
-    onError: (error) => {
-      console.error("ID 중복 검사 실패:", error);
-    },
   });
 }
 
@@ -120,9 +101,6 @@ export function useCheckUserIdDuplicate() {
 export function useSendPhoneVerification() {
   return useMutation({
     mutationFn: authApi.sendPhoneVerification,
-    onError: (error) => {
-      console.error("인증번호 발송 실패:", error);
-    },
   });
 }
 
@@ -130,9 +108,6 @@ export function useSendPhoneVerification() {
 export function useVerifyPhoneCode() {
   return useMutation({
     mutationFn: authApi.verifyPhoneCode,
-    onError: (error) => {
-      console.error("인증번호 검증 실패:", error);
-    },
   });
 }
 
@@ -146,9 +121,6 @@ export function useGoogleLogin() {
     onSuccess: (data) => {
       login(data.user);
       queryClient.setQueryData(authQueryKeys.me, data.user);
-    },
-    onError: (error: any) => {
-      console.error("구글 로그인 실패:", error);
     },
   });
 }
@@ -164,9 +136,6 @@ export function useGoogleRegister() {
       login(data.user);
       queryClient.setQueryData(authQueryKeys.me, data.user);
     },
-    onError: (error) => {
-      console.error("구글 회원가입 실패:", error);
-    },
   });
 }
 
@@ -174,9 +143,6 @@ export function useGoogleRegister() {
 export function useFindAccount() {
   return useMutation({
     mutationFn: authApi.findAccount,
-    onError: (error) => {
-      console.error("계정 찾기 실패:", error);
-    },
   });
 }
 
@@ -184,8 +150,5 @@ export function useFindAccount() {
 export function useResetPassword() {
   return useMutation({
     mutationFn: authApi.resetPassword,
-    onError: (error) => {
-      console.error("비밀번호 재설정 실패:", error);
-    },
   });
 }

@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/apps/web-user/common/styles/globals.css";
 import { QueryProvider } from "@/apps/web-user/common/components/providers/QueryProvider";
+import { ErrorBoundaryProvider } from "@/apps/web-user/common/components/providers/ErrorBoundaryProvider";
 import { AuthInitializerProvider } from "@/apps/web-user/features/auth/components/providers/AuthInitializer";
+import { Alert } from "@/apps/web-user/common/components/alerts/Alert";
+import { APIErrorBoundaryProvider } from "@/apps/web-user/common/components/providers/APIErrorBoundaryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -101,10 +104,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <QueryProvider>
-          <AuthInitializerProvider />
-          {children}
-        </QueryProvider>
+        <ErrorBoundaryProvider>
+          <APIErrorBoundaryProvider>
+            <QueryProvider>
+              {children}
+              <AuthInitializerProvider />
+              <Alert />
+            </QueryProvider>
+          </APIErrorBoundaryProvider>
+        </ErrorBoundaryProvider>
       </body>
     </html>
   );
