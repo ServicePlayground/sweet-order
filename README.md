@@ -72,6 +72,10 @@ sweet-order/
 - Node.js (v20 이상)
 - Yarn (v4.9.4 이상)
 
+### 로컬 개발 환경 데이터베이스 설정
+
+- **[로컬 데이터베이스 가이드](<./docs/backend/데이터베이스(로컬)%20-%20가이드.md>)**: 로컬 PostgreSQL 및 Prisma ORM 관리
+
 ### 로컬 개발 환경 설치 및 실행
 
 ```bash
