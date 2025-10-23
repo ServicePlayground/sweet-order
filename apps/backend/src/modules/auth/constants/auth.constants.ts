@@ -69,6 +69,14 @@ export const TOKEN_TYPES = {
 } as const;
 
 /**
+ * JWT 토큰 만료 시간 상수
+ */
+export const JWT_EXPIRATION = {
+  ACCESS_TOKEN: "7d",
+  REFRESH_TOKEN: "30d",
+} as const;
+
+/**
  * 쿠키 설정 상수
  */
 export const COOKIE_CONFIG = {
@@ -78,7 +86,7 @@ export const COOKIE_CONFIG = {
   HTTP_ONLY: true, // JavaScript 접근 차단 (XSS 공격 방지)
   // SECURE는 configService를 통해 동적으로 설정
   SAME_SITE: "lax" as const, // CSRF 공격 방지 (lax: 서브도메인 간 쿠키 전송 허용)(strict: 서브도메인 간 쿠키 전송 불가)
-  ACCESS_TOKEN_MAX_AGE: 3600, // 1시간(JWT Access Token과 동일)
+  ACCESS_TOKEN_MAX_AGE: 604800, // 7일(JWT Access Token과 동일)
   REFRESH_TOKEN_MAX_AGE: 2592000, // 30일(JWT Refresh Token과 동일)
 } as const;
 

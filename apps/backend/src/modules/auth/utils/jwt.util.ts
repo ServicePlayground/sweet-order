@@ -1,7 +1,7 @@
 import { JwtService } from "@nestjs/jwt";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { TOKEN_TYPES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { TOKEN_TYPES, JWT_EXPIRATION } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   JwtPayload,
   JwtVerifiedPayload,
@@ -36,10 +36,10 @@ export class JwtUtil {
     // 액세스 토큰과 리프레시 토큰 생성
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(accessTokenPayload, {
-        expiresIn: "1h",
+        expiresIn: JWT_EXPIRATION.ACCESS_TOKEN,
       }),
       this.jwtService.signAsync(refreshTokenPayload, {
-        expiresIn: "30d",
+        expiresIn: JWT_EXPIRATION.REFRESH_TOKEN,
       }),
     ]);
 
@@ -61,7 +61,7 @@ export class JwtUtil {
     };
 
     return await this.jwtService.signAsync(accessTokenPayload, {
-      expiresIn: "1h",
+      expiresIn: JWT_EXPIRATION.ACCESS_TOKEN,
     });
   }
 
