@@ -3,6 +3,9 @@ import {
   RegisterFormData,
   PhoneVerificationData,
   UserInfo,
+  GoogleRegisterFormData,
+  FindAccountFormData,
+  ResetPasswordFormData,
 } from "@/apps/web-user/features/auth/types/auth.type";
 import { apiClient } from "@/apps/web-user/common/config/axios.config";
 import { AvailableResponse, MessageResponse } from "@/apps/web-user/common/types/api.type";
@@ -67,17 +70,13 @@ export const authApi = {
   },
 
   // 구글 회원가입
-  googleRegister: async (data: {
-    googleId: string;
-    googleEmail: string;
-    phone: string;
-  }): Promise<{ user: UserInfo }> => {
+  googleRegister: async (data: GoogleRegisterFormData): Promise<{ user: UserInfo }> => {
     const response = await apiClient.post("/auth/google/register", data);
     return response.data.data;
   },
 
   // 계정 찾기
-  findAccount: async (phone: string): Promise<{ userId?: string; googleEmail?: string }> => {
+  findAccount: async (phone: string): Promise<FindAccountFormData> => {
     const response = await apiClient.get("/auth/find-account", {
       params: { phone },
     });
@@ -85,11 +84,7 @@ export const authApi = {
   },
 
   // 비밀번호 재설정
-  resetPassword: async (data: {
-    phone: string;
-    userId: string;
-    newPassword: string;
-  }): Promise<MessageResponse> => {
+  resetPassword: async (data: ResetPasswordFormData): Promise<MessageResponse> => {
     const response = await apiClient.post("/auth/change-password", data);
     return response.data.data;
   },

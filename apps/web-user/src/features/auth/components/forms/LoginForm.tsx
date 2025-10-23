@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Input } from "@/apps/web-user/common/components/inputs/Input";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { useLogin } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
@@ -9,7 +8,6 @@ import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/aut
 import { isValidPassword, isValidUserId } from "@/apps/web-user/common/utils/validator.util";
 
 export default function LoginForm() {
-  const router = useRouter();
   const loginMutation = useLogin();
 
   const [userId, setUserId] = useState("");
@@ -46,7 +44,6 @@ export default function LoginForm() {
     e.preventDefault();
 
     await loginMutation.mutateAsync({ userId, password });
-    router.push("/");
   };
 
   return (

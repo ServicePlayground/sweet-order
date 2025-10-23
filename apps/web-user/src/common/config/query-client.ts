@@ -17,13 +17,13 @@ export const queryClient = new QueryClient({
       // 에러 발생 시 재시도 횟수
       retry: 0,
       // 가장 가까운 상위 error boundary컴포넌트에서 캐치
-      throwOnError: true,
+      // throwOnError: true,
     },
     mutations: {
       // 뮤테이션 에러 발생 시 재시도 횟수
       retry: 0,
       // 가장 가까운 상위 error boundary컴포넌트에서 캐치
-      throwOnError: true,
+      // throwOnError: true,
     },
   },
 });

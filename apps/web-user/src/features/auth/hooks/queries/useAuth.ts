@@ -6,11 +6,16 @@ import { authApi } from "@/apps/web-user/features/auth/apis/auth.api";
 import { authQueryKeys } from "@/apps/web-user/features/auth/constants/authQueryKeys.constant";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { authClient } from "@/apps/web-user/common/config/axios.config";
+import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
+import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
+import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
 
 // 로그인 뮤테이션
 export function useLogin() {
   const queryClient = useQueryClient();
   const { login } = useAuthStore();
+  const { showAlert } = useAlertStore();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.login,
@@ -27,6 +32,14 @@ export function useLogin() {
        * 5. 디버깅: 쿼리 상태를 쉽게 추적하고 디버깅 가능
        */
       queryClient.setQueryData(authQueryKeys.me, data.user);
+      router.push("/");
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
     },
   });
 }
@@ -35,6 +48,8 @@ export function useLogin() {
 export function useRegister() {
   const queryClient = useQueryClient();
   const { login } = useAuthStore();
+  const { showAlert } = useAlertStore();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.register,
@@ -42,6 +57,14 @@ export function useRegister() {
       // 회원가입 성공 시 자동 로그인 처리
       login(data.user);
       queryClient.setQueryData(authQueryKeys.me, data.user);
+      router.push("/");
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
     },
   });
 }
@@ -87,27 +110,81 @@ export function useLogout() {
       // Next.js 라우터를 사용하여 로그인 페이지로 리다이렉트
       router.push(PATHS.AUTH.LOGIN);
     },
+    onError: () => {
+      // 에러가 발생해도 백엔드에서 쿠키를 삭제하므로 무시
+      logout();
+      router.push(PATHS.AUTH.LOGIN);
+    },
   });
 }
 
 // ID 중복 검사 뮤테이션
 export function useCheckUserIdDuplicate() {
+  const { showAlert } = useAlertStore();
+
   return useMutation({
     mutationFn: authApi.checkUserIdDuplicate,
+    onSuccess: (response) => {
+      if (response.available) {
+        showAlert({
+          type: "success",
+          title: "성공",
+          message: AUTH_ERROR_MESSAGES.USER_ID_AVAILABLE,
+        });
+      } else {
+        showAlert({
+          type: "error",
+          title: "오류",
+          message: AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS,
+        });
+      }
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
+    },
   });
 }
 
 // 휴대폰 인증번호 발송 뮤테이션
 export function useSendPhoneVerification() {
+  const { showAlert } = useAlertStore();
+
   return useMutation({
     mutationFn: authApi.sendPhoneVerification,
+    onSuccess: (response) => {
+      showAlert({
+        type: "success",
+        title: "성공",
+        message: getApiMessage.success(response),
+      });
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
+    },
   });
 }
 
 // 휴대폰 인증번호 검증 뮤테이션
 export function useVerifyPhoneCode() {
+  const { showAlert } = useAlertStore();
+
   return useMutation({
     mutationFn: authApi.verifyPhoneCode,
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
+    },
   });
 }
 
@@ -115,12 +192,18 @@ export function useVerifyPhoneCode() {
 export function useGoogleLogin() {
   const queryClient = useQueryClient();
   const { login } = useAuthStore();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.googleLogin,
     onSuccess: (data) => {
       login(data.user);
       queryClient.setQueryData(authQueryKeys.me, data.user);
+      router.push("/");
+    },
+    onError: (error) => {
+      // 에러를 다시 throw하여 mutateAsync에서 catch할 수 있도록 함
+      throw error;
     },
   });
 }
@@ -141,14 +224,36 @@ export function useGoogleRegister() {
 
 // 계정 찾기 뮤테이션
 export function useFindAccount() {
+  const { showAlert } = useAlertStore();
+
   return useMutation({
     mutationFn: authApi.findAccount,
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
+    },
   });
 }
 
 // 비밀번호 재설정 뮤테이션
 export function useResetPassword() {
+  const { showAlert } = useAlertStore();
+  const router = useRouter();
+
   return useMutation({
     mutationFn: authApi.resetPassword,
+    onSuccess: () => {
+      router.push(PATHS.AUTH.LOGIN);
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
+    },
   });
 }

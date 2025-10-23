@@ -5,7 +5,8 @@ import { QueryProvider } from "@/apps/web-user/common/components/providers/Query
 import { ErrorBoundaryProvider } from "@/apps/web-user/common/components/providers/ErrorBoundaryProvider";
 import { AuthInitializerProvider } from "@/apps/web-user/features/auth/components/providers/AuthInitializer";
 import { Alert } from "@/apps/web-user/common/components/alerts/Alert";
-import { APIErrorBoundaryProvider } from "@/apps/web-user/common/components/providers/APIErrorBoundaryProvider";
+import { LoadingFallback } from "@/apps/web-user/common/components/fallbacks/LoadingFallback";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -105,13 +106,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ErrorBoundaryProvider>
-          <APIErrorBoundaryProvider>
-            <QueryProvider>
+          <QueryProvider>
+            <Suspense
+              fallback={<LoadingFallback variant="overlay" message="페이지를 불러오는 중" />}
+            >
               {children}
-              <AuthInitializerProvider />
-              <Alert />
-            </QueryProvider>
-          </APIErrorBoundaryProvider>
+            </Suspense>
+            <AuthInitializerProvider />
+            <Alert />
+          </QueryProvider>
         </ErrorBoundaryProvider>
       </body>
     </html>

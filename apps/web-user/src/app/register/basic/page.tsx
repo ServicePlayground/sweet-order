@@ -23,12 +23,28 @@ export default function BasicRegisterPage() {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        marginTop: "300px",
-        gap: "40px",
+        minHeight: "100vh",
+        padding: "40px 20px",
+        backgroundColor: "#fafafa",
       }}
     >
-      <h1>일반 회원가입</h1>
-      <RegisterForm />
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "500px",
+          backgroundColor: "white",
+          padding: "40px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h1
+          style={{ textAlign: "center", marginBottom: "32px", fontSize: "24px", fontWeight: "600" }}
+        >
+          일반 회원가입
+        </h1>
+        <RegisterForm />
+      </div>
     </div>
   );
 }

@@ -11,21 +11,6 @@ export function Alert() {
 
   if (!alert.isOpen) return null;
 
-  const getIcon = () => {
-    switch (alert.type) {
-      case "error":
-        return "⚠️";
-      case "success":
-        return "✅";
-      case "warning":
-        return "⚠️";
-      case "info":
-        return "ℹ️";
-      default:
-        return "ℹ️";
-    }
-  };
-
   const getTitleColor = () => {
     switch (alert.type) {
       case "error":
@@ -86,14 +71,6 @@ export function Alert() {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          style={{
-            fontSize: "48px",
-            marginBottom: "16px",
-          }}
-        >
-          {getIcon()}
-        </div>
         <h2
           style={{
             fontSize: "20px",

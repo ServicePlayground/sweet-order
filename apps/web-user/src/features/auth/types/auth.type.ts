@@ -30,3 +30,23 @@ export interface PhoneVerificationData {
   phone: string;
   verificationCode: string;
 }
+
+export interface GoogleLoginFormData {
+  googleId: string;
+  googleEmail: string;
+}
+
+export interface GoogleRegisterFormData extends GoogleLoginFormData {
+  phone: string;
+}
+
+export interface FindAccountFormData {
+  userId?: string;
+  googleEmail?: string;
+}
+
+export interface ResetPasswordFormData {
+  phone: string;
+  userId: string;
+  newPassword: string;
+}
