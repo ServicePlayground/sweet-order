@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { GetProductsRequestDto } from "@apps/backend/modules/product/dto/product-request.dto";
 import {
@@ -197,7 +197,7 @@ export class ProductService {
 
     // 권한 확인: 상품 소유자인지 확인
     if (product.sellerId !== user.sub) {
-      throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
+      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
     // 상품 삭제

@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import helmet from "helmet";
 import morgan from "morgan";
 import * as express from "express";
+import cookieParser from "cookie-parser";
 import { AppModule } from "@apps/backend/app.module";
 import { API_PREFIX } from "@apps/backend/common/constants/app.constants";
 import { SellerApiModule } from "@apps/backend/apis/seller/seller-api.module";
@@ -14,7 +15,7 @@ import {
   adminSwaggerConfig,
   sellerSwaggerConfig,
   userSwaggerConfig,
-} from "@apps/backend/config/swagger.config";
+} from "@apps/backend/common/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { loadSecretsFromEnv } from "@apps/backend/common/utils/loadSecretsFromEnv";
 import { runMigration } from "@apps/backend/scripts/migration";
@@ -51,14 +52,19 @@ async function bootstrap(): Promise<void> {
     res.status(200).send("OK");
   });
 
-  // CORS 설정
+  // CORS 설정 (쿠키 기반 통합 로그인을 위한 서브도메인 지원)
   app.enableCors({
-    origin: configService.get("CORS_ORIGIN"),
-    credentials: true,
+    origin: configService.get("CORS_ORIGIN").split(","),
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: ["Content-Type", "X-Requested-With", "Cookie"], // 클라이언트에서 서버로 보낼 수 있는 헤더들 (Cookie 헤더 포함)
+    exposedHeaders: ["Set-Cookie"], // 서버에서 클라이언트로 보낼 수 있는 헤더들 (서버가 쿠키를 설정할 때 필요)
+    credentials: true, // 쿠키, 인증 헤더 등을 포함한 자격 증명을 CORS 요청에 포함할 수 있도록 허용
     maxAge: 86400,
   });
+
+  // 쿠키 파서 미들웨어 설정 (쿠키 기반 통합 로그인을 위한 서브도메인 지원)
+  // 클라이언트에서 보낸 Cookie 헤더 파싱하여 req.cookies 객체에 저장
+  app.use(cookieParser());
 
   // 보안 헤더 설정
   app.use(helmet());

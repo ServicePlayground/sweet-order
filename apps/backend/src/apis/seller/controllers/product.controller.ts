@@ -31,13 +31,17 @@ export class SellerProductController {
   @Delete(":id")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: "상품 삭제",
+    summary: "(로그인 필요) 상품 삭제",
     description: "판매자가 등록한 상품을 삭제합니다.",
   })
   @SwaggerResponse(200, createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(403, createMessageObject(AUTH_ERROR_MESSAGES.FORBIDDEN))
-  @SwaggerResponse(403, createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED))
+  @SwaggerResponse(401, createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN))
   @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
   async deleteProduct(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     await this.productService.deleteProduct(id, req.user);

@@ -1,9 +1,14 @@
 import { Injectable, ConflictException, BadRequestException } from "@nestjs/common";
+import { Response } from "express";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
+import { CookieUtil } from "@apps/backend/modules/auth/utils/cookie.util";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
-import { AUTH_ERROR_MESSAGES } from "@apps/backend/modules/auth/constants/auth.constants";
+import {
+  AUTH_ERROR_MESSAGES,
+  COOKIE_CONFIG,
+} from "@apps/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
 import { GoogleUserInfo, JwtPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
@@ -22,30 +27,34 @@ export class GoogleService {
   private readonly googleClientId: string;
   private readonly googleClientSecret: string;
   private readonly googleRedirectUri: string;
+  private readonly userDomain: string;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtUtil: JwtUtil,
+    private readonly cookieUtil: CookieUtil,
     private readonly configService: ConfigService,
     private readonly phoneService: PhoneService,
   ) {
     this.googleClientId = configService.get<string>("GOOGLE_CLIENT_ID")!;
     this.googleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
     this.googleRedirectUri = configService.get<string>("GOOGLE_REDIRECT_URI")!;
+    this.userDomain = configService.get<string>("PUBLIC_USER_DOMAIN")!;
   }
 
   /**
    * Authorization Code로 구글 로그인 처리
-   * @param code - 구글에서 받은 Authorization Code
-   * @returns JWT 토큰과 사용자 정보
+   * @param codeDto - 구글에서 받은 Authorization Code
+   * @param res - Express Response 객체
+   * @returns 사용자 정보 (토큰은 쿠키에 설정)
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
     const { code } = codeDto;
 
     // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
     const googleUserInfo = await this.exchangeCodeForToken(code);
 
-    return this.googleLogin(googleUserInfo);
+    return await this.googleLogin(googleUserInfo, res);
   }
 
   /**
@@ -64,7 +73,7 @@ export class GoogleService {
           client_secret: this.googleClientSecret,
           code: decodeURIComponent(code),
           grant_type: "authorization_code",
-          redirect_uri: this.googleRedirectUri,
+          redirect_uri: `${this.userDomain}${this.googleRedirectUri}`,
         }),
         {
           headers: {
@@ -98,9 +107,10 @@ export class GoogleService {
   /**
    * 구글 로그인 처리 (내부 메서드)
    * @param googleUserInfo - 구글 사용자 정보
-   * @returns JWT 토큰과 사용자 정보
+   * @param res - Express Response 객체
+   * @returns 사용자 정보 (토큰은 쿠키에 설정)
    */
-  async googleLogin(googleUserInfo: GoogleUserInfo) {
+  async googleLogin(googleUserInfo: GoogleUserInfo, res: Response) {
     const {
       userInfo: { googleId, googleEmail },
     } = googleUserInfo;
@@ -139,7 +149,7 @@ export class GoogleService {
         role: user.role,
       };
 
-      const { accessToken, refreshToken } = await this.jwtUtil.generateTokenPair(jwtPayload);
+      const tokenPair = await this.jwtUtil.generateTokenPair(jwtPayload);
 
       // 마지막 로그인 시간 업데이트
       await tx.user.update({
@@ -147,9 +157,22 @@ export class GoogleService {
         data: { lastLoginAt: new Date() },
       });
 
+      // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
+      if (res) {
+        this.cookieUtil.setAccessTokenCookie(
+          res,
+          tokenPair.accessToken,
+          COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
+        );
+        this.cookieUtil.setRefreshTokenCookie(
+          res,
+          tokenPair.refreshToken,
+          COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
+        );
+      }
+
+      // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
       return {
-        accessToken,
-        refreshToken,
         user: UserMapperUtil.mapToUserInfo(user, new Date()),
       };
     });
@@ -157,11 +180,11 @@ export class GoogleService {
 
   /**
    * 구글 로그인 회원가입 (휴대폰 인증 완료 후)
-   * @param googleId - 구글 ID
-   * @param phone - 휴대폰 번호
-   * @returns JWT 토큰과 사용자 정보
+   * @param googleRegisterDto - 구글 회원가입 정보
+   * @param res - Express Response 객체
+   * @returns 사용자 정보 (토큰은 쿠키에 설정)
    */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto, res: Response) {
     const { googleId, googleEmail, phone } = googleRegisterDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
@@ -211,10 +234,22 @@ export class GoogleService {
             role: user.role,
           });
 
-          // 응답 data 반환
+          // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
+          if (res) {
+            this.cookieUtil.setAccessTokenCookie(
+              res,
+              tokenPair.accessToken,
+              COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
+            );
+            this.cookieUtil.setRefreshTokenCookie(
+              res,
+              tokenPair.refreshToken,
+              COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
+            );
+          }
+
+          // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
           return {
-            accessToken: tokenPair.accessToken,
-            refreshToken: tokenPair.refreshToken,
             user: UserMapperUtil.mapToUserInfo(user),
           };
         });
@@ -242,10 +277,22 @@ export class GoogleService {
         role: user.role,
       });
 
-      // 응답 data 반환
+      // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
+      if (res) {
+        this.cookieUtil.setAccessTokenCookie(
+          res,
+          tokenPair.accessToken,
+          COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
+        );
+        this.cookieUtil.setRefreshTokenCookie(
+          res,
+          tokenPair.refreshToken,
+          COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
+        );
+      }
+
+      // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
       return {
-        accessToken: tokenPair.accessToken,
-        refreshToken: tokenPair.refreshToken,
         user: UserMapperUtil.mapToUserInfo(user),
       };
     });
