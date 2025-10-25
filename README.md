@@ -150,6 +150,9 @@ yarn common:format:check       # Prettier 포맷팅 검사
 
 ## 📚 상세 문서
 
+### 플로우 차트
+- **[통합 인증 플로우 차트](./docs/common/flow-chart/인증%20-%20가이드.md)**: 통합 인증 시스템 플로우 차트
+
 ### 공통 문서
 
 - **[Yarn Berry PnP 가이드](<./docs/common/(이전버전)yarnberry%20PnP%20-%20가이드.md>)**: Yarn Berry PnP 설정 및 사용법 (이전 버전)
