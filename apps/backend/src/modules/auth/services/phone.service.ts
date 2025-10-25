@@ -29,8 +29,8 @@ export class PhoneService {
     const { phone } = sendCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 1. 인증번호 생성 - 6자리 인증번호
-    const verificationCode = PhoneUtil.generateVerificationCode();
+     // 1. 안전한 인증번호 생성 (중복 방지)
+    const verificationCode = await this.generateUniqueVerificationCode(normalizedPhone);
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
@@ -44,8 +44,39 @@ export class PhoneService {
       });
     });
 
-    // 3. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
-    // TODO: 실제 SMS 발송 서비스 연동 (예: 네이버 클라우드 플랫폼, 카카오 알림톡 등)
+      // 3. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
+      // TODO: 실제 SMS 발송 서비스 연동 (예: 네이버 클라우드 플랫폼, 카카오 알림톡 등)
+  }
+
+  /**
+   * 중복되지 않는 고유한 인증번호를 생성합니다.
+   *
+   * @param phone 휴대폰 번호
+   * @returns 고유한 6자리 인증번호
+   * @throws BadRequestException 최대 재시도 횟수 초과 시
+   */
+  async generateUniqueVerificationCode(phone: string): Promise<string> {
+    const maxRetries = 10; // 최대 10번 재시도
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      const verificationCode = PhoneUtil.generateVerificationCode();
+      
+      // 해당 휴대폰 번호와 인증번호 조합이 이미 존재하는지 확인
+      const existingRecord = await this.prisma.phoneVerification.findFirst({
+        where: {
+          phone,
+          verificationCode,
+        },
+      });
+
+      // 중복이 없으면 해당 인증번호 반환
+      if (!existingRecord) {
+        return verificationCode;
+      }
+    }
+
+    // 최대 재시도 횟수 초과 시 예외 발생
+    throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_CODE_GENERATION_FAILED);
   }
 
   /**

@@ -229,6 +229,7 @@ export class UserAuthController {
   })
   @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT))
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
+  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_CODE_GENERATION_FAILED))
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async sendVerificationCode(@Body() sendCodeDto: SendVerificationCodeRequestDto) {
     await this.authService.sendVerificationCode(sendCodeDto);

@@ -10,6 +10,7 @@ export const AUTH_ERROR_MESSAGES = {
   PHONE_INVALID_FORMAT: "올바른 한국 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)",
   PHONE_ALREADY_EXISTS: "이미 사용 중인 휴대폰 번호입니다.",
   PHONE_VERIFICATION_REQUIRED: "휴대폰 인증이 필요합니다.",
+  PHONE_VERIFICATION_CODE_GENERATION_FAILED: "인증번호 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
   PHONE_VERIFICATION_FAILED: "인증번호가 올바르지 않습니다.",
   VERIFICATION_CODE_INVALID_FORMAT: "인증번호는 6자리 숫자여야 합니다.",
   ACCOUNT_NOT_FOUND: "해당 아이디로 등록된 계정이 없습니다.",
