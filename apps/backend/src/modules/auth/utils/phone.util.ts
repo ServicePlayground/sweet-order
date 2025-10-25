@@ -14,7 +14,9 @@ export class PhoneUtil {
    * @returns 6자리 인증번호
    */
   static generateVerificationCode(): string {
-    return randomInt(100000, 999999).toString();
+    // 임시
+    return '123456'
+    // return randomInt(100000, 999999).toString();
   }
 
   /**
