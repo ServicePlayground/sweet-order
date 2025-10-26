@@ -2,7 +2,7 @@
 
 ## 개요
 
-Sweet Order 프로젝트의 web-user 애플리케이션을 Vercel에 배포하고 관리하는 가이드입니다.
+Sweet Order 프로젝트의 web-user, web-seller 애플리케이션을 Vercel에 배포하고 관리하는 가이드입니다.
 
 ## Vercel을 선택한 이유
 
