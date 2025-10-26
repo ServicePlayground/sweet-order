@@ -7,7 +7,7 @@ import { setQueryClient } from "@/apps/web-user/common/config/axios.config";
 import { useEffect } from "react";
 
 interface QueryProviderProps {
-  children: React.ReactNode | React.ReactElement;
+  children: any; // vercel 빌드 오류 방지를 위해 any 타입 사용 // Type 'bigint' is not assignable to type 'ReactNode'.
 }
 
 export function QueryProvider({ children }: QueryProviderProps) {
