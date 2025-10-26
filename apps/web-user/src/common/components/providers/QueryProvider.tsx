@@ -7,7 +7,7 @@ import { setQueryClient } from "@/apps/web-user/common/config/axios.config";
 import { useEffect } from "react";
 
 interface QueryProviderProps {
-  children: React.ReactNode;
+  children: React.ReactNode | React.ReactElement;
 }
 
 export function QueryProvider({ children }: QueryProviderProps) {
