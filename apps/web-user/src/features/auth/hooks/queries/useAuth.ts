@@ -208,12 +208,20 @@ export function useGoogleRegister() {
   const queryClient = useQueryClient();
   const { login } = useAuthStore();
   const router = useRouter();
+  const { showAlert } = useAlertStore();
 
   return useMutation({
     mutationFn: authApi.googleRegister,
     onSuccess: (data) => {
       login(data.user, router);
       queryClient.setQueryData(authQueryKeys.me, data.user);
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
     },
   });
 }

@@ -9,12 +9,15 @@ import {
 import PhoneVerificationForm from "@/apps/web-user/features/auth/components/forms/PhoneVerificationForm";
 import { GoogleLoginFormData } from "@/apps/web-user/features/auth/types/auth.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
+import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 
 export default function GoogleAuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const googleLoginMutation = useGoogleLogin();
   const googleRegisterMutation = useGoogleRegister();
+  const { showAlert } = useAlertStore();
 
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
   const [googleLoginData, setGoogleLoginData] = useState<GoogleLoginFormData | null>(null);
@@ -41,6 +44,11 @@ export default function GoogleAuthCallback() {
       } else {
         // 다른 오류의 경우 로그인 페이지로 이동
         router.push(PATHS.HOME);
+        showAlert({
+          type: "error",
+          title: "오류",
+          message: getApiMessage.error(error),
+        });
       }
     }
   };
@@ -52,7 +60,6 @@ export default function GoogleAuthCallback() {
       ...googleLoginData,
       phone,
     });
-    router.push(PATHS.HOME);
   };
 
   // 휴대폰 인증이 필요한 경우
