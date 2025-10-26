@@ -78,12 +78,14 @@ sweet-order/
 ## 🛠 기술 스택
 
 ### 공통
+
 - **패키지 관리**: Yarn Berry 4.9.4 (node_modules)
 - **모노레포**: Yarn Workspaces
 - **언어**: TypeScript
 - **코드 품질**: ESLint + Prettier
 
 ### 백엔드
+
 - **프레임워크**: NestJS
 - **데이터베이스**: PostgreSQL + Prisma ORM
 - **인증**: JWT + Passport + Google OAuth
@@ -94,8 +96,9 @@ sweet-order/
   - 스테이징/프로덕션: AWS RDS PostgreSQL
 
 ### 프론트엔드
+
 - **프레임워크**: Next.js 15 + React 19
-- **상태 관리**: 
+- **상태 관리**:
   - Zustand (클라이언트 상태)
   - TanStack Query (서버 상태)
 - **API 통신**: Axios + React Query
@@ -151,6 +154,7 @@ yarn common:format:check       # Prettier 포맷팅 검사
 ## 📚 상세 문서
 
 ### 플로우 차트
+
 - **[통합 인증 플로우 차트](./docs/common/flow-chart/인증%20-%20가이드.md)**: 통합 인증 시스템 플로우 차트
 
 ### 공통 문서

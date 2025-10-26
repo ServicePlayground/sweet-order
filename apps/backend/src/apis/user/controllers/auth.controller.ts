@@ -229,7 +229,10 @@ export class UserAuthController {
   })
   @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT))
   @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_CODE_GENERATION_FAILED))
+  @SwaggerResponse(
+    400,
+    createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_CODE_GENERATION_FAILED),
+  )
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
   async sendVerificationCode(@Body() sendCodeDto: SendVerificationCodeRequestDto) {
     await this.authService.sendVerificationCode(sendCodeDto);
@@ -356,7 +359,8 @@ export class UserAuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "로그아웃",
-    description: "쿠키의 Access Token과 Refresh Token을 삭제하여 로그아웃을 처리합니다. 인증이 필요하지 않습니다.",
+    description:
+      "쿠키의 Access Token과 Refresh Token을 삭제하여 로그아웃을 처리합니다. 인증이 필요하지 않습니다.",
   })
   @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.LOGOUT_SUCCESS))
   @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))

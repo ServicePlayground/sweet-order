@@ -1,31 +1,18 @@
-import { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { useSearchParams } from "next/navigation";
+import {
+  createUrlWithReturnUrl,
+  createGoogleOAuthUrlWithReturnUrl,
+} from "@/apps/web-user/common/utils/returnUrl.util";
 
-// 로그인 페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
-export const metadata: Metadata = {
-  title: "로그인",
-  description:
-    "Sweet Order에 로그인하여 달콤한 디저트를 주문하세요. 간편한 로그인으로 다양한 디저트를 만나보세요.",
-  keywords: [
-    "Sweet Order 로그인",
-    "디저트 주문 로그인",
-    "온라인 디저트 로그인",
-    "케이크 주문 로그인",
-  ],
-  robots: {
-    index: false, // 로그인 페이지는 검색엔진에서 제외
-    follow: false,
-  },
-  openGraph: {
-    title: "Sweet Order 로그인",
-    description: "Sweet Order에 로그인하여 달콤한 디저트를 주문하세요.",
-    type: "website",
-    url: `https://sweetorders.com${PATHS.AUTH.LOGIN}`,
-  },
-};
-
+// 사용자페이지, 판매자페이지 모두 인증이 필요할 때 여기 페이지 경로(/login 경로로 리다이렉트됨)
+// 리다이렉트는 /login 경로에서 "일반 로그인", "구글 로그인" 버튼 클릭 시에만 이루어짐
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
   return (
     <div
       style={{
@@ -74,7 +61,7 @@ export default function LoginPage() {
         </div>
 
         <Link
-          href={PATHS.AUTH.LOGIN_BASIC}
+          href={createUrlWithReturnUrl(PATHS.AUTH.LOGIN_BASIC, returnUrl || undefined)}
           style={{
             width: "100%",
             height: "52px",
@@ -96,7 +83,10 @@ export default function LoginPage() {
         </Link>
 
         <Link
-          href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_USER_DOMAIN}${PATHS.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`}
+          href={createGoogleOAuthUrlWithReturnUrl(
+            `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_USER_DOMAIN}${PATHS.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`,
+            returnUrl || undefined,
+          )}
           style={{
             width: "100%",
             height: "52px",

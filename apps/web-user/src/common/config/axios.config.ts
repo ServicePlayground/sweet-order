@@ -3,6 +3,7 @@ import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
 import { QueryClient } from "@tanstack/react-query";
 import { authApi } from "@/apps/web-user/features/auth/apis/auth.api";
 import { authQueryKeys } from "@/apps/web-user/features/auth/constants/authQueryKeys.constant";
+import { getReturnUrlFromParams } from "@/apps/web-user/common/utils/returnUrl.util";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 
@@ -60,7 +61,17 @@ apiClient.interceptors.response.use(
           }
         }
 
-        // 리프레시 성공 → 원래 요청 1회만 재시도
+        // 리프레시 성공 → returnUrl이 있으면 해당 페이지로 리다이렉트, 없으면 원래 요청 재시도
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = getReturnUrlFromParams(urlParams);
+
+        if (returnUrl) {
+          // returnUrl이 있으면 해당 페이지로 리다이렉트 (web-seller로 돌아가기)
+          window.location.href = decodeURIComponent(returnUrl);
+          return Promise.resolve(); // 요청 중단
+        }
+
+        // returnUrl이 없으면 원래 요청 재시도
         return apiClient(originalRequest);
       } catch (error) {
         // 리프레시 실패 → 즉시 로그아웃 처리 & 전파

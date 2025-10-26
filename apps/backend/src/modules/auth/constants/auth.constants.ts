@@ -10,17 +10,21 @@ export const AUTH_ERROR_MESSAGES = {
   PHONE_INVALID_FORMAT: "올바른 한국 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)",
   PHONE_ALREADY_EXISTS: "이미 사용 중인 휴대폰 번호입니다.",
   PHONE_VERIFICATION_REQUIRED: "휴대폰 인증이 필요합니다.",
-  PHONE_VERIFICATION_CODE_GENERATION_FAILED: "인증번호 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
+  PHONE_VERIFICATION_CODE_GENERATION_FAILED:
+    "인증번호 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
   PHONE_VERIFICATION_FAILED: "인증번호가 올바르지 않습니다.",
   VERIFICATION_CODE_INVALID_FORMAT: "인증번호는 6자리 숫자여야 합니다.",
   ACCOUNT_NOT_FOUND: "해당 아이디로 등록된 계정이 없습니다.",
   ACCOUNT_NOT_FOUND_BY_PHONE: "해당 휴대폰 번호로 등록된 계정이 없습니다.",
   GOOGLE_REGISTER_FAILED: "구글 로그인 회원가입에 실패했습니다.",
   /* --------------------------------- 토큰 관련 에러 메시지 --------------------------------- */
-  REFRESH_TOKEN_EXPIRED: "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.",
-  REFRESH_TOKEN_INVALID: "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 유효하지 않습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_EXPIRED:
+    "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_INVALID:
+    "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 유효하지 않습니다. 다시 로그인해주세요.",
   REFRESH_TOKEN_MISSING: "[REFRESH_TOKEN_INVALID] 리프레시 토큰이 없습니다. 다시 로그인해주세요.",
-  REFRESH_TOKEN_WRONG_TYPE: "[REFRESH_TOKEN_INVALID] 리프레시 토큰의 타입이 올바르지 않습니다. 다시 로그인해주세요.",
+  REFRESH_TOKEN_WRONG_TYPE:
+    "[REFRESH_TOKEN_INVALID] 리프레시 토큰의 타입이 올바르지 않습니다. 다시 로그인해주세요.",
   REFRESH_TOKEN_MISSING_REQUIRED_INFO:
     "[REFRESH_TOKEN_INVALID] 리프레시 토큰에 필수 정보가 누락되었습니다. 다시 로그인해주세요.",
   ACCESS_TOKEN_EXPIRED: "[ACCESS_TOKEN_INVALID] 액세스 토큰이 만료되었습니다.",

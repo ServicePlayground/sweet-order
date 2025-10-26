@@ -21,7 +21,7 @@ export function useLogin() {
     mutationFn: authApi.login,
     onSuccess: (data) => {
       // Zustand 스토어에 로그인 정보 저장 // 쿠키에는 토큰값 저장됨
-      login(data.user);
+      login(data.user, router);
 
       /**
        * 쿼리 캐시에 저장하는 이유
@@ -32,7 +32,6 @@ export function useLogin() {
        * 5. 디버깅: 쿼리 상태를 쉽게 추적하고 디버깅 가능
        */
       queryClient.setQueryData(authQueryKeys.me, data.user);
-      router.push("/");
     },
     onError: (error) => {
       showAlert({
@@ -55,9 +54,8 @@ export function useRegister() {
     mutationFn: authApi.register,
     onSuccess: (data) => {
       // 회원가입 성공 시 자동 로그인 처리
-      login(data.user);
+      login(data.user, router);
       queryClient.setQueryData(authQueryKeys.me, data.user);
-      router.push("/");
     },
     onError: (error) => {
       showAlert({
@@ -72,17 +70,19 @@ export function useRegister() {
 // 현재 사용자 정보 조회 (새로고침 시 자동 실행)
 export function useMe() {
   const { login, setInitialized } = useAuthStore();
+  const router = useRouter();
 
   const query = useQuery({
     queryKey: authQueryKeys.me, // 자동으로 캐시 관리됨
     queryFn: authApi.me,
     throwOnError: false,
+    refetchOnWindowFocus: true,
   });
 
   // 성공 시 스토어에 로그인 정보 저장
   useEffect(() => {
     if (query.isSuccess && query.data && "user" in query.data) {
-      login(query.data.user);
+      login(query.data.user, router);
     }
   }, [query.isSuccess, query.data, login]);
 
@@ -105,15 +105,11 @@ export function useLogout() {
     mutationFn: async () => await authApi.logout(authClient),
     onSuccess: () => {
       // Zustand 스토어에서 로그아웃 상태로 변경
-      logout();
-
-      // Next.js 라우터를 사용하여 로그인 페이지로 리다이렉트
-      router.push(PATHS.AUTH.LOGIN);
+      logout(router);
     },
     onError: () => {
       // 에러가 발생해도 백엔드에서 쿠키를 삭제하므로 무시
-      logout();
-      router.push(PATHS.AUTH.LOGIN);
+      logout(router);
     },
   });
 }
@@ -197,9 +193,8 @@ export function useGoogleLogin() {
   return useMutation({
     mutationFn: authApi.googleLogin,
     onSuccess: (data) => {
-      login(data.user);
+      login(data.user, router);
       queryClient.setQueryData(authQueryKeys.me, data.user);
-      router.push("/");
     },
     onError: (error) => {
       // 에러를 다시 throw하여 mutateAsync에서 catch할 수 있도록 함
@@ -212,11 +207,12 @@ export function useGoogleLogin() {
 export function useGoogleRegister() {
   const queryClient = useQueryClient();
   const { login } = useAuthStore();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: authApi.googleRegister,
     onSuccess: (data) => {
-      login(data.user);
+      login(data.user, router);
       queryClient.setQueryData(authQueryKeys.me, data.user);
     },
   });
