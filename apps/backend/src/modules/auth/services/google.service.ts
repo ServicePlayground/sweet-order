@@ -151,6 +151,17 @@ export class GoogleService {
 
         // 요청 정보도 로깅
         this.logger.error(`Google OAuth 요청 정보 - ${error}`);
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.message}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.ErrorCode}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.Error}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.fault}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.data}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.data?.message}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.data?.ErrorCode}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.data?.Error}`)
+        this.logger.error(`Google OAuth 요청 정보 - ${error.response?.data?.data?.fault}`)
       
       } else {
         const errorMessage = error instanceof Error ? error.message : String(error);
