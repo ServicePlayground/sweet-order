@@ -41,6 +41,27 @@ export class GoogleService {
     this.googleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
     this.googleRedirectUri = configService.get<string>("GOOGLE_REDIRECT_URI")!;
     this.userDomain = configService.get<string>("PUBLIC_USER_DOMAIN")!;
+    
+    // 배포 환경에서 환경변수 로깅 (보안을 위해 일부만)
+    const nodeEnv = configService.get<string>("NODE_ENV");
+    if (nodeEnv !== "development") {
+      this.logger.log(`Google OAuth 환경변수 로드 완료 - NODE_ENV: ${nodeEnv}`);
+      this.logger.log(`Google OAuth 설정 - ClientId: ${this.googleClientId ? '설정됨' : '누락'}, RedirectUri: ${this.googleRedirectUri}, UserDomain: ${this.userDomain}`);
+      
+      // 환경변수 누락 체크
+      if (!this.googleClientId) {
+        this.logger.error("GOOGLE_CLIENT_ID 환경변수가 설정되지 않았습니다.");
+      }
+      if (!this.googleClientSecret) {
+        this.logger.error("GOOGLE_CLIENT_SECRET 환경변수가 설정되지 않았습니다.");
+      }
+      if (!this.googleRedirectUri) {
+        this.logger.error("GOOGLE_REDIRECT_URI 환경변수가 설정되지 않았습니다.");
+      }
+      if (!this.userDomain) {
+        this.logger.error("PUBLIC_USER_DOMAIN 환경변수가 설정되지 않았습니다.");
+      }
+    }
   }
 
   /**
@@ -75,6 +96,20 @@ export class GoogleService {
    */
   async exchangeCodeForToken(code: string): Promise<GoogleUserInfo> {
     try {
+      // 환경변수 검증
+      if (!this.googleClientId || !this.googleClientSecret || !this.googleRedirectUri || !this.userDomain) {
+        this.logger.error("Google OAuth 환경변수가 누락되었습니다.", {
+          clientId: !!this.googleClientId,
+          clientSecret: !!this.googleClientSecret,
+          redirectUri: this.googleRedirectUri,
+          userDomain: this.userDomain,
+        });
+        throw new BadRequestException("Google OAuth 설정이 올바르지 않습니다.");
+      }
+
+      const redirectUri = `${this.userDomain}${this.googleRedirectUri}`;
+      this.logger.log(`Google OAuth 토큰 교환 요청 - RedirectUri: ${redirectUri}`);
+
       // Authorization Code를 Access Token으로 교환
       // Google OAuth는 application/x-www-form-urlencoded 형식을 요구
       const tokenResponse = await axios.post(
@@ -84,7 +119,7 @@ export class GoogleService {
           client_secret: this.googleClientSecret,
           code: decodeURIComponent(code),
           grant_type: "authorization_code",
-          redirect_uri: `${this.userDomain}${this.googleRedirectUri}`,
+          redirect_uri: redirectUri,
         }),
         {
           headers: {
@@ -119,6 +154,9 @@ export class GoogleService {
           `Data: ${JSON.stringify(error.response?.data)}, ` +
           `Code: ${code.substring(0, 20)}...`,
         );
+        
+        // 요청 정보도 로깅
+        this.logger.error(`Google OAuth 요청 정보 - URL: ${error.config?.url}, Method: ${error.config?.method}`);
         
         // Google OAuth 특정 오류 메시지 처리
         if (error.response?.data?.error) {
