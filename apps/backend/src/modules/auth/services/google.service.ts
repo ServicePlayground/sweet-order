@@ -102,18 +102,68 @@ export class GoogleService {
       };
     } catch (error: any) {
       // Google OAuth 에러 상세 분석
-      this.logger.error('=== Google OAuth 에러 상세 정보 ===');
-      this.logger.error('error.code:', error.code);
-      this.logger.error('error.message:', error.message);
-      this.logger.error('error.response.status:', error.response?.status);
-      this.logger.error('error.response.statusText:', error.response?.statusText);
-      this.logger.error('error.response.data:', error.response?.data);      
-      this.logger.error('OAuth Error:', error.response?.data?.error);
-      this.logger.error('OAuth Error Description:', error.response?.data?.error_description);
-      this.logger.error('OAuth Error URI:', error.response?.data?.error_uri);
+      console.error('=== Google OAuth 에러 상세 정보 ===');
+      console.error('error.code:', error.code);
+      console.error('error.message:', error.message);
+      console.error('error.response.status:', error.response?.status);
+      console.error('error.response.statusText:', error.response?.statusText);
+      console.error('error.response.data:', error.response?.data);      
+      console.error('OAuth Error:', error.response?.data?.error);
+      console.error('OAuth Error Description:', error.response?.data?.error_description);
+      console.error('OAuth Error URI:', error.response?.data?.error_uri);
+      console.error("Request error:", error.request);
+      console.error("Axios error:", JSON.stringify(error, null, 2));
+      console.error("Axios error:", error.toJSON ? error.toJSON() : error);
       this.logger.error('===========================');      
+      
+      const util = require('util'); // Node util 모듈 사용 (for deep inspection)
 
-      throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
+      console.error('=== Google OAuth 에러 상세 정보 ===');
+
+      // 1️⃣ Axios 에러 기본 필드
+      console.error('error.name:', error.name);
+      console.error('error.code:', error.code);
+      console.error('error.message:', error.message);
+
+      // 2️⃣ HTTP 응답 정보 (axios error.response)
+      if (error.response) {
+        console.error('error.response.status:', error.response.status);
+        console.error('error.response.statusText:', error.response.statusText);
+        console.error('error.response.data:', error.response.data);
+
+        // 3️⃣ OAuth 관련 세부 필드
+        console.error('OAuth Error:', error.response.data?.error);
+        console.error('OAuth Error Description:', error.response.data?.error_description);
+        console.error('OAuth Error URI:', error.response.data?.error_uri);
+      } else if (error.request) {
+        console.error('요청은 전송되었으나 응답이 없습니다.');
+        console.error('error.request:', util.inspect(error.request, { depth: 3 }));
+      } else {
+        console.error('요청 설정 중 에러 발생:', error.message);
+      }
+
+      // 4️⃣ Axios 내부 구조를 강제로 JSON 출력
+      try {
+        console.error('--- Axios toJSON ---');
+        console.error(
+          JSON.stringify(error.toJSON ? error.toJSON() : error, null, 2)
+        );
+      } catch (jsonErr) {
+        console.error('--- Fallback util.inspect ---');
+        console.error(util.inspect(error, { depth: 5, colors: false }));
+      }
+
+      // 5️⃣ 완전한 에러 덤프
+      console.error('--- Full Error Dump ---');
+      console.error(util.inspect(error, { depth: 10, colors: false }));
+
+      console.error('===========================');
+
+      this.logger.error(`[Google OAuth Error] ${error.message}`);
+
+      throw error;
+
+      //throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
     }
   }
 
