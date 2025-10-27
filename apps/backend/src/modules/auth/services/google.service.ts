@@ -72,7 +72,7 @@ export class GoogleService {
         new URLSearchParams({
           client_id: this.googleClientId,
           client_secret: this.googleClientSecret,
-          code: code,
+          code: decodeURIComponent(code),
           grant_type: "authorization_code",
           redirect_uri: `${this.userDomain}${this.googleRedirectUri}`,
         }),
