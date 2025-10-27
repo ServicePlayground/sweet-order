@@ -8,26 +8,14 @@ export const loadSecretsFromEnv = (): void => {
   }
 
   try {
-    const parsed = JSON.parse(raw);
-    const loadedKeys: string[] = [];
+    const parsed = JSON.parse(raw);;
     
     for (const [key, value] of Object.entries(parsed)) {
       if (process.env[key] === undefined) {
         process.env[key] = String(value);
-        loadedKeys.push(key);
       }
     }
-    
-    console.log(`Secrets loaded into process.env - ${loadedKeys.length} keys loaded:`, loadedKeys);
-    
-    // Google OAuth 관련 환경변수 확인
-    const googleKeys = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REDIRECT_URI', 'PUBLIC_USER_DOMAIN'];
-    const missingGoogleKeys = googleKeys.filter(key => !process.env[key]);
-    if (missingGoogleKeys.length > 0) {
-      console.error("Missing Google OAuth environment variables:", missingGoogleKeys);
-    } else {
-      console.log("All Google OAuth environment variables are loaded");
-    }
+    console.log("Secrets loaded into process.env");
   } catch (e) {
     console.warn("Failed to parse SECRETS_ARN JSON:", e);
   }

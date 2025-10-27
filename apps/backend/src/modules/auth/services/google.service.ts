@@ -41,27 +41,6 @@ export class GoogleService {
     this.googleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
     this.googleRedirectUri = configService.get<string>("GOOGLE_REDIRECT_URI")!;
     this.userDomain = configService.get<string>("PUBLIC_USER_DOMAIN")!;
-    
-    // 배포 환경에서 환경변수 로깅 (보안을 위해 일부만)
-    const nodeEnv = configService.get<string>("NODE_ENV");
-    if (nodeEnv !== "development") {
-      this.logger.log(`Google OAuth 환경변수 로드 완료 - NODE_ENV: ${nodeEnv}`);
-      this.logger.log(`Google OAuth 설정 - ClientId: ${this.googleClientId ? '설정됨' : '누락'}, RedirectUri: ${this.googleRedirectUri}, UserDomain: ${this.userDomain}`);
-      
-      // 환경변수 누락 체크
-      if (!this.googleClientId) {
-        this.logger.error("GOOGLE_CLIENT_ID 환경변수가 설정되지 않았습니다.");
-      }
-      if (!this.googleClientSecret) {
-        this.logger.error("GOOGLE_CLIENT_SECRET 환경변수가 설정되지 않았습니다.");
-      }
-      if (!this.googleRedirectUri) {
-        this.logger.error("GOOGLE_REDIRECT_URI 환경변수가 설정되지 않았습니다.");
-      }
-      if (!this.userDomain) {
-        this.logger.error("PUBLIC_USER_DOMAIN 환경변수가 설정되지 않았습니다.");
-      }
-    }
   }
 
   /**
@@ -73,20 +52,10 @@ export class GoogleService {
   async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
     const { code } = codeDto;
 
-    this.logger.log(`Google OAuth 로그인 시도 - Code: ${code.substring(0, 20)}...`);
+    // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
+    const googleUserInfo = await this.exchangeCodeForToken(code);
 
-    try {
-      // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
-      const googleUserInfo = await this.exchangeCodeForToken(code);
-      
-      this.logger.log(`Google OAuth 토큰 교환 성공 - GoogleId: ${googleUserInfo.userInfo.googleId}`);
-      
-      return await this.googleLogin(googleUserInfo, res);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Google OAuth 로그인 실패 - Code: ${code.substring(0, 20)}..., Error: ${errorMessage}`);
-      throw error;
-    }
+    return await this.googleLogin(googleUserInfo, res);
   }
 
   /**
@@ -96,20 +65,6 @@ export class GoogleService {
    */
   async exchangeCodeForToken(code: string): Promise<GoogleUserInfo> {
     try {
-      // 환경변수 검증
-      if (!this.googleClientId || !this.googleClientSecret || !this.googleRedirectUri || !this.userDomain) {
-        this.logger.error("Google OAuth 환경변수가 누락되었습니다.", {
-          clientId: !!this.googleClientId,
-          clientSecret: !!this.googleClientSecret,
-          redirectUri: this.googleRedirectUri,
-          userDomain: this.userDomain,
-        });
-        throw new BadRequestException("Google OAuth 설정이 올바르지 않습니다.");
-      }
-
-      const redirectUri = `${this.userDomain}${this.googleRedirectUri}`;
-      this.logger.log(`Google OAuth 토큰 교환 요청 - RedirectUri: ${redirectUri}`);
-
       // Authorization Code를 Access Token으로 교환
       // Google OAuth는 application/x-www-form-urlencoded 형식을 요구
       const tokenResponse = await axios.post(
@@ -119,7 +74,7 @@ export class GoogleService {
           client_secret: this.googleClientSecret,
           code: decodeURIComponent(code),
           grant_type: "authorization_code",
-          redirect_uri: redirectUri,
+          redirect_uri: `${this.userDomain}${this.googleRedirectUri}`,
         }),
         {
           headers: {
@@ -145,35 +100,19 @@ export class GoogleService {
           googleEmail: userInfo.email,
         },
       };
-    } catch (error) {
-      // Google OAuth 오류 상세 로깅
-      if (axios.isAxiosError(error)) {
-        this.logger.error(
-          `Google OAuth 토큰 교환 실패 - Status: ${error.response?.status}, ` +
-          `StatusText: ${error.response?.statusText}, ` +
-          `Data: ${JSON.stringify(error.response?.data)}, ` +
-          `Code: ${code.substring(0, 20)}...`,
-        );
-        
-        // 요청 정보도 로깅
-        this.logger.error(`Google OAuth 요청 정보 - URL: ${error.config?.url}, Method: ${error.config?.method}`);
-        
-        // Google OAuth 특정 오류 메시지 처리
-        if (error.response?.data?.error) {
-          const googleError = error.response.data;
-          this.logger.error(
-            `Google OAuth 오류 상세 - Error: ${googleError.error}, ` +
-            `Error Description: ${googleError.error_description}, ` +
-            `Error URI: ${googleError.error_uri}`,
-          );
-        }
-      } else {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        this.logger.error(
-          `Google OAuth 토큰 교환 중 예상치 못한 오류 발생 - ${errorMessage}`,
-        );
-      }
-      
+    } catch (error: any) {
+      // Google OAuth 에러 상세 분석
+      this.logger.error('=== Google OAuth 에러 상세 정보 ===');
+      this.logger.error('error.code:', error.code);
+      this.logger.error('error.message:', error.message);
+      this.logger.error('error.response.status:', error.response?.status);
+      this.logger.error('error.response.statusText:', error.response?.statusText);
+      this.logger.error('error.response.data:', error.response?.data);      
+      this.logger.error('OAuth Error:', error.response?.data?.error);
+      this.logger.error('OAuth Error Description:', error.response?.data?.error_description);
+      this.logger.error('OAuth Error URI:', error.response?.data?.error_uri);
+      this.logger.error('===========================');      
+
       throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
     }
   }
