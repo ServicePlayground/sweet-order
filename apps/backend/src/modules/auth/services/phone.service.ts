@@ -91,6 +91,17 @@ export class PhoneService {
 
     // 임시 처리: 인증번호 123456은 항상 통과
     if (verificationCode === "123456") {
+      // 임시 인증 정보를 데이터베이스에 저장
+      await this.prisma.$transaction(async (tx) => {
+        await tx.phoneVerification.create({
+          data: {
+            phone: normalizedPhone,
+            verificationCode: "123456",
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5분 후 만료
+            isVerified: true, // 바로 인증 완료 상태로 저장
+          },
+        });
+      });
       return;
     }
 
