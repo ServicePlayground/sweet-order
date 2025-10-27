@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException } from "@nestjs/common";
+import { Injectable, ConflictException, BadRequestException, Logger } from "@nestjs/common";
 import { Response } from "express";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
@@ -24,6 +24,7 @@ import {
  */
 @Injectable()
 export class GoogleService {
+  private readonly logger = new Logger(GoogleService.name);
   private readonly googleClientId: string;
   private readonly googleClientSecret: string;
   private readonly googleRedirectUri: string;
@@ -51,10 +52,20 @@ export class GoogleService {
   async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
     const { code } = codeDto;
 
-    // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
-    const googleUserInfo = await this.exchangeCodeForToken(code);
+    this.logger.log(`Google OAuth 로그인 시도 - Code: ${code.substring(0, 20)}...`);
 
-    return await this.googleLogin(googleUserInfo, res);
+    try {
+      // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
+      const googleUserInfo = await this.exchangeCodeForToken(code);
+      
+      this.logger.log(`Google OAuth 토큰 교환 성공 - GoogleId: ${googleUserInfo.userInfo.googleId}`);
+      
+      return await this.googleLogin(googleUserInfo, res);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Google OAuth 로그인 실패 - Code: ${code.substring(0, 20)}..., Error: ${errorMessage}`);
+      throw error;
+    }
   }
 
   /**
@@ -100,6 +111,31 @@ export class GoogleService {
         },
       };
     } catch (error) {
+      // Google OAuth 오류 상세 로깅
+      if (axios.isAxiosError(error)) {
+        this.logger.error(
+          `Google OAuth 토큰 교환 실패 - Status: ${error.response?.status}, ` +
+          `StatusText: ${error.response?.statusText}, ` +
+          `Data: ${JSON.stringify(error.response?.data)}, ` +
+          `Code: ${code.substring(0, 20)}...`,
+        );
+        
+        // Google OAuth 특정 오류 메시지 처리
+        if (error.response?.data?.error) {
+          const googleError = error.response.data;
+          this.logger.error(
+            `Google OAuth 오류 상세 - Error: ${googleError.error}, ` +
+            `Error Description: ${googleError.error_description}, ` +
+            `Error URI: ${googleError.error_uri}`,
+          );
+        }
+      } else {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error(
+          `Google OAuth 토큰 교환 중 예상치 못한 오류 발생 - ${errorMessage}`,
+        );
+      }
+      
       throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
     }
   }
