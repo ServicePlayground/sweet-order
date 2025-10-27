@@ -89,6 +89,22 @@ export class PhoneService {
     const { phone, verificationCode } = verifyCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
+    // 임시 처리: 인증번호 123456은 항상 통과
+    if (verificationCode === "123456") {
+      // 임시 인증 정보를 데이터베이스에 저장
+      await this.prisma.$transaction(async (tx) => {
+        await tx.phoneVerification.create({
+          data: {
+            phone: normalizedPhone,
+            verificationCode: "123456",
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5분 후 만료
+            isVerified: true, // 바로 인증 완료 상태로 저장
+          },
+        });
+      });
+      return;
+    }
+
     // 1. 휴대폰 번호와 인증번호로 검증 정보 조회 - PhoneVerification 테이블
     // 인증되지 않은 레코드 중에서 가장 최근 것을 찾음
     const phoneVerification = await this.prisma.phoneVerification.findFirst({
