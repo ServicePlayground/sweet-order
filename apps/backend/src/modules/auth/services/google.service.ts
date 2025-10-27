@@ -148,25 +148,10 @@ export class GoogleService {
     } catch (error) {
       // Google OAuth 오류 상세 로깅
       if (axios.isAxiosError(error)) {
-        this.logger.error(
-          `Google OAuth 토큰 교환 실패 - Status: ${error.response?.status}, ` +
-          `StatusText: ${error.response?.statusText}, ` +
-          `Data: ${JSON.stringify(error.response?.data)}, ` +
-          `Code: ${code.substring(0, 20)}...`,
-        );
-        
+
         // 요청 정보도 로깅
-        this.logger.error(`Google OAuth 요청 정보 - URL: ${error.config?.url}, Method: ${error.config?.method}`);
-        
-        // Google OAuth 특정 오류 메시지 처리
-        if (error.response?.data?.error) {
-          const googleError = error.response.data;
-          this.logger.error(
-            `Google OAuth 오류 상세 - Error: ${googleError.error}, ` +
-            `Error Description: ${googleError.error_description}, ` +
-            `Error URI: ${googleError.error_uri}`,
-          );
-        }
+        this.logger.error(`Google OAuth 요청 정보 - ${error}`);
+      
       } else {
         const errorMessage = error instanceof Error ? error.message : String(error);
         this.logger.error(
