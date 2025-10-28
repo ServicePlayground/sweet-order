@@ -95,7 +95,7 @@ export class GoogleService {
         new URLSearchParams({
           client_id: this.googleClientId,
           client_secret: this.googleClientSecret,
-          code: code,
+          code: decodeURIComponent(code),
           grant_type: "authorization_code",
           redirect_uri: `${this.userDomain}${this.googleRedirectUri}`,
         }),
@@ -134,11 +134,6 @@ export class GoogleService {
       console.error('error.message:', error.message);
       console.error('error.response.status:', error.response?.status);
       console.error('error.response.statusText:', error.response?.statusText);
-      console.error('OAuth Error:', error.response?.data?.error);
-      console.error('OAuth Error Description:', error.response?.data?.error_description);
-      console.error('OAuth Error URI:', error.response?.data?.error_uri);   
-      console.error("Response error:", error);
-      console.error("Response error:", JSON.stringify(error, null, 2));    
       console.error('===========================');      
       throw error;
     }
