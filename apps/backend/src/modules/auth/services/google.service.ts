@@ -4,7 +4,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
 import { CookieUtil } from "@apps/backend/modules/auth/utils/cookie.util";
 import { ConfigService } from "@nestjs/config";
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import {
   AUTH_ERROR_MESSAGES,
   COOKIE_CONFIG,
@@ -29,6 +29,7 @@ export class GoogleService {
   private readonly googleClientSecret: string;
   private readonly googleRedirectUri: string;
   private readonly userDomain: string;
+  private readonly httpClient: AxiosInstance;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -41,6 +42,28 @@ export class GoogleService {
     this.googleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
     this.googleRedirectUri = configService.get<string>("GOOGLE_REDIRECT_URI")!;
     this.userDomain = configService.get<string>("PUBLIC_USER_DOMAIN")!;
+    
+    // 안정적인 HTTP 클라이언트 설정
+    this.httpClient = axios.create({
+      timeout: 30000, // 30초 타임아웃
+      headers: {
+        'User-Agent': 'SweetOrder-Backend/1.0',
+        'Accept': 'application/json',
+        'Accept-Encoding': 'gzip, deflate, br',
+      },
+      // 연결 재사용을 위한 설정
+      maxRedirects: 5,
+      validateStatus: (status) => status < 500, // 5xx 에러만 재시도
+      // 배포환경에서의 네트워크 안정성을 위한 설정
+      httpsAgent: new (require('https').Agent)({
+        keepAlive: true,
+        keepAliveMsecs: 30000,
+        maxSockets: 50,
+        maxFreeSockets: 10,
+        timeout: 30000,
+        freeSocketTimeout: 30000,
+      }),
+    });
   }
 
   /**
@@ -67,7 +90,7 @@ export class GoogleService {
     try {
       // Authorization Code를 Access Token으로 교환
       // Google OAuth는 application/x-www-form-urlencoded 형식을 요구
-      const tokenResponse = await axios.post(
+      const tokenResponse = await this.httpClient.post(
         "https://oauth2.googleapis.com/token",
         new URLSearchParams({
           client_id: this.googleClientId,
@@ -86,7 +109,8 @@ export class GoogleService {
       const { access_token, token_type } = tokenResponse.data;
 
       // Access Token으로 사용자 정보 요청
-      const userInfoResponse = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
+      this.logger.log("사용자 정보 요청 시작");
+      const userInfoResponse = await this.httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo", {
         headers: {
           Authorization: `${token_type} ${access_token}`,
         },
@@ -101,69 +125,22 @@ export class GoogleService {
         },
       };
     } catch (error: any) {
-      // Google OAuth 에러 상세 분석
+      // ETIMEDOUT 에러에 대한 특별 처리
+      if (error.code === 'ETIMEDOUT') {
+        this.logger.error('구글 토큰 교환 타임아웃 발생:', error.message);
+      }
       console.error('=== Google OAuth 에러 상세 정보 ===');
       console.error('error.code:', error.code);
       console.error('error.message:', error.message);
       console.error('error.response.status:', error.response?.status);
       console.error('error.response.statusText:', error.response?.statusText);
-      console.error('error.response.data:', error.response?.data);      
       console.error('OAuth Error:', error.response?.data?.error);
       console.error('OAuth Error Description:', error.response?.data?.error_description);
-      console.error('OAuth Error URI:', error.response?.data?.error_uri);
-      console.error("Request error:", error.request);
-      console.error("Axios error:", JSON.stringify(error, null, 2));
-      console.error("Axios error:", error.toJSON ? error.toJSON() : error);
-      this.logger.error('===========================');      
-      
-      const util = require('util'); // Node util 모듈 사용 (for deep inspection)
-
-      console.error('=== Google OAuth 에러 상세 정보 ===');
-
-      // 1️⃣ Axios 에러 기본 필드
-      console.error('error.name:', error.name);
-      console.error('error.code:', error.code);
-      console.error('error.message:', error.message);
-
-      // 2️⃣ HTTP 응답 정보 (axios error.response)
-      if (error.response) {
-        console.error('error.response.status:', error.response.status);
-        console.error('error.response.statusText:', error.response.statusText);
-        console.error('error.response.data:', error.response.data);
-
-        // 3️⃣ OAuth 관련 세부 필드
-        console.error('OAuth Error:', error.response.data?.error);
-        console.error('OAuth Error Description:', error.response.data?.error_description);
-        console.error('OAuth Error URI:', error.response.data?.error_uri);
-      } else if (error.request) {
-        console.error('요청은 전송되었으나 응답이 없습니다.');
-        console.error('error.request:', util.inspect(error.request, { depth: 3 }));
-      } else {
-        console.error('요청 설정 중 에러 발생:', error.message);
-      }
-
-      // 4️⃣ Axios 내부 구조를 강제로 JSON 출력
-      try {
-        console.error('--- Axios toJSON ---');
-        console.error(
-          JSON.stringify(error.toJSON ? error.toJSON() : error, null, 2)
-        );
-      } catch (jsonErr) {
-        console.error('--- Fallback util.inspect ---');
-        console.error(util.inspect(error, { depth: 5, colors: false }));
-      }
-
-      // 5️⃣ 완전한 에러 덤프
-      console.error('--- Full Error Dump ---');
-      console.error(util.inspect(error, { depth: 10, colors: false }));
-
-      console.error('===========================');
-
-      this.logger.error(`[Google OAuth Error] ${error.message}`);
-
+      console.error('OAuth Error URI:', error.response?.data?.error_uri);   
+      console.error("Response error:", error);
+      console.error("Response error:", JSON.stringify(error, null, 2));    
+      console.error('===========================');      
       throw error;
-
-      //throw new BadRequestException(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED);
     }
   }
 
