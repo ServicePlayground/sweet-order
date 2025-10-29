@@ -29,3 +29,26 @@ export class BusinessValidationRequestDto {
   @IsValidOpeningDate()
   openingDate: string;
 }
+
+/**
+       * response.data?.data[0]?.request_param.b_no
+       * 사업자등록번호
+       * 
+       * response.data?.data[0]?.request_param.start_dt
+       * 개업일자
+       * 
+       * response.data?.data[0]?.request_param.p_nm
+       * 대표자성명1
+       * 
+       * response.data?.data[0]?.request_param.b_nm
+       * 상호명
+       * 
+       * response.data?.data[0]?.request_param.b_sector
+       * 업태명
+       * 
+       * response.data?.data[0]?.request_param.b_type
+       * 종목명
+       * 
+       * response.data?.data[0]?.request_param.b_adr
+       * 주소
+ */
