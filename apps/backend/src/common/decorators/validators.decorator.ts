@@ -1,6 +1,7 @@
 import { registerDecorator, ValidatorConstraint } from "class-validator";
 import type { ValidationOptions, ValidatorConstraintInterface } from "class-validator";
 import { AUTH_ERROR_MESSAGES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { BUSINESS_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
 
 /**
  * 사용자 ID 유효성 검증 제약 조건
@@ -96,6 +97,91 @@ export class IsValidVerificationCodeConstraint implements ValidatorConstraintInt
 }
 
 /**
+ * 사업자등록번호 유효성 검증 제약 조건
+ */
+@ValidatorConstraint({ name: "isValidBusinessRegistrationNumber", async: false })
+export class IsValidBusinessRegistrationNumberConstraint implements ValidatorConstraintInterface {
+  validate(businessNumber: string): boolean {
+    if (!businessNumber || typeof businessNumber !== "string") {
+      return false;
+    }
+
+    // 하이픈 제거
+    const normalizedNumber = businessNumber.replace(/[-\s]/g, "");
+
+    // 10자리 숫자인지 확인
+    if (normalizedNumber.length !== 10 || !/^\d{10}$/.test(normalizedNumber)) {
+      return false;
+    }
+
+    // 사업자등록번호 체크섬 검증
+    const digits = normalizedNumber.split("").map(Number);
+    const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5];
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += digits[i] * weights[i];
+    }
+    
+    sum += Math.floor((digits[8] * 5) / 10);
+    const remainder = sum % 10;
+    const checkDigit = remainder === 0 ? 0 : 10 - remainder;
+    
+    return checkDigit === digits[9];
+  }
+
+  defaultMessage(): string {
+    return BUSINESS_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_INVALID_FORMAT;
+  }
+}
+
+/**
+ * 개업일자 유효성 검증 제약 조건
+ */
+@ValidatorConstraint({ name: "isValidOpeningDate", async: false })
+export class IsValidOpeningDateConstraint implements ValidatorConstraintInterface {
+  validate(date: string): boolean {
+    if (!date || typeof date !== "string") {
+      return false;
+    }
+
+    // YYYYMMDD 형식인지 확인
+    const datePattern = /^\d{8}$/;
+    if (!datePattern.test(date)) {
+      return false;
+    }
+
+    // 실제 날짜인지 확인
+    const year = parseInt(date.substring(0, 4));
+    const month = parseInt(date.substring(4, 6));
+    const day = parseInt(date.substring(6, 8));
+
+    if (year < 1900 || year > new Date().getFullYear()) {
+      return false;
+    }
+
+    if (month < 1 || month > 12) {
+      return false;
+    }
+
+    if (day < 1 || day > 31) {
+      return false;
+    }
+
+    const dateObj = new Date(year, month - 1, day);
+    return (
+      dateObj.getFullYear() === year &&
+      dateObj.getMonth() === month - 1 &&
+      dateObj.getDate() === day
+    );
+  }
+
+  defaultMessage(): string {
+    return BUSINESS_ERROR_MESSAGES.OPENING_DATE_INVALID_FORMAT;
+  }
+}
+
+/**
  * 사용자 ID 유효성 검증 데코레이터
  */
 export function IsValidUserId(validationOptions?: ValidationOptions) {
@@ -151,6 +237,36 @@ export function IsValidVerificationCode(validationOptions?: ValidationOptions) {
       options: validationOptions,
       constraints: [],
       validator: IsValidVerificationCodeConstraint,
+    });
+  };
+}
+
+/**
+ * 사업자등록번호 유효성 검증 데코레이터
+ */
+export function IsValidBusinessRegistrationNumber(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string): void {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsValidBusinessRegistrationNumberConstraint,
+    });
+  };
+}
+
+/**
+ * 개업일자 유효성 검증 데코레이터
+ */
+export function IsValidOpeningDate(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string): void {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsValidOpeningDateConstraint,
     });
   };
 }
