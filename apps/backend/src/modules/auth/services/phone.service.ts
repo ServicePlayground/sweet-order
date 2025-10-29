@@ -97,7 +97,7 @@ export class PhoneService {
           data: {
             phone: normalizedPhone,
             verificationCode: "123456",
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5분 후 만료
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1시간 후 만료 (checkPhoneVerificationStatus와 일치)
             isVerified: true, // 바로 인증 완료 상태로 저장
           },
         });
