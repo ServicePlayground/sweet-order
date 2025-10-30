@@ -51,14 +51,17 @@ export class NtsApiService {
       const normalizedBusinessNumber = validationDto.businessRegistrationNumber.replace(/[-\s]/g, "");
 
       // 국세청 API 호출 (https://www.data.go.kr/data/15081808/openapi.do?utm_source=chatgpt.com#/%EC%82%AC%EC%97%85%EC%9E%90%EB%93%B1%EB%A1%9D%EC%A0%95%EB%B3%B4%20%EC%A7%84%EC%9C%84%ED%99%95%EC%9D%B8%20API/validate)
+      const baseBusinessPayload: Record<string, string> = {
+        b_no: normalizedBusinessNumber,
+        start_dt: validationDto.openingDate,
+        p_nm: validationDto.representativeName,
+        b_nm: validationDto.businessName,
+        b_sector: validationDto.businessSector,
+        b_type: validationDto.businessItem,
+      };
+
       const response = await this.axiosInstance.post(`${this.ntsApiUrl}/nts-businessman/v1/validate?serviceKey=${this.ntsApiKey}`, {
-        "businesses": [
-          {
-            "b_no": normalizedBusinessNumber, // 사업자등록번호
-            "start_dt": validationDto.openingDate, // 개업일자
-            "p_nm": validationDto.representativeName, // 대표자명
-          }
-        ]
+        businesses: [baseBusinessPayload],
       });
 
       if (response.data?.data[0]?.valid === BUSINESS_STATUS_CODE.INACTIVE) {

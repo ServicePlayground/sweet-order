@@ -28,6 +28,30 @@ export class BusinessValidationRequestDto {
   })
   @IsValidOpeningDate()
   openingDate: string;
+
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.COMPANY_NAME,
+    example: SWAGGER_EXAMPLES.COMPANY_NAME
+  })
+  @IsString()
+  @IsNotEmpty()
+  businessName: string;
+
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.BUSINESS_TYPE,
+    example: SWAGGER_EXAMPLES.BUSINESS_TYPE,
+  })
+  @IsString()
+  @IsNotEmpty()
+  businessSector: string;
+
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.BUSINESS_ITEM,
+    example: SWAGGER_EXAMPLES.BUSINESS_ITEM,
+  })
+  @IsString()
+  @IsNotEmpty()
+  businessItem: string;
 }
 
 /**
