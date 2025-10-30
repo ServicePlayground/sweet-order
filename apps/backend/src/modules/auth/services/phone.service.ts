@@ -35,6 +35,15 @@ export class PhoneService {
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
     await this.prisma.$transaction(async (tx) => {
+      // 기존 미인증 레코드 삭제 (UNIQUE 제약조건 방지)
+      await tx.phoneVerification.deleteMany({
+        where: {
+          phone: normalizedPhone,
+          isVerified: false,
+        },
+      });
+
+      // 새 인증 정보 생성
       await tx.phoneVerification.create({
         data: {
           phone: normalizedPhone,
@@ -91,13 +100,22 @@ export class PhoneService {
 
     // 임시 처리: 인증번호 123456은 항상 통과
     if (verificationCode === "123456") {
-      // 임시 인증 정보를 데이터베이스에 저장
+      // 임시 인증 정보를 데이터베이스에 저장 (중복 방지)
       await this.prisma.$transaction(async (tx) => {
+        // 기존 모든 레코드 삭제 (UNIQUE 제약조건 방지)
+        // 인증된 레코드와 미인증 레코드 모두 삭제하여 중복 방지
+        await tx.phoneVerification.deleteMany({
+          where: {
+            phone: normalizedPhone,
+          },
+        });
+
+        // 임시 인증 정보 생성
         await tx.phoneVerification.create({
           data: {
             phone: normalizedPhone,
             verificationCode: "123456",
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5분 후 만료
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1시간 후 만료 (checkPhoneVerificationStatus와 일치)
             isVerified: true, // 바로 인증 완료 상태로 저장
           },
         });
