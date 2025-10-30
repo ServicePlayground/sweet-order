@@ -8,71 +8,48 @@ import { SWAGGER_DESCRIPTIONS, SWAGGER_EXAMPLES } from "@apps/backend/modules/bu
  */
 export class BusinessValidationRequestDto {
   @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.BUSINESS_REGISTRATION_NUMBER,
-    example: SWAGGER_EXAMPLES.BUSINESS_REGISTRATION_NUMBER,
+    description: SWAGGER_DESCRIPTIONS.B_NO,
+    example: SWAGGER_EXAMPLES.B_NO,
   })
   @IsValidBusinessRegistrationNumber()
-  businessRegistrationNumber: string;
+  b_no: string; // 사업자등록번호
 
   @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.REPRESENTATIVE_NAME,
-    example: SWAGGER_EXAMPLES.REPRESENTATIVE_NAME,
+    description: SWAGGER_DESCRIPTIONS.P_NM,
+    example: SWAGGER_EXAMPLES.P_NM,
   })
   @IsString()
   @IsNotEmpty()
-  representativeName: string;
+  p_nm: string; // 대표자성명1
 
   @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.OPENING_DATE,
-    example: SWAGGER_EXAMPLES.OPENING_DATE,
+    description: SWAGGER_DESCRIPTIONS.START_DT,
+    example: SWAGGER_EXAMPLES.START_DT,
   })
   @IsValidOpeningDate()
-  openingDate: string;
+  start_dt: string; // 개업일자
 
   @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.COMPANY_NAME,
-    example: SWAGGER_EXAMPLES.COMPANY_NAME
+    description: SWAGGER_DESCRIPTIONS.B_NM,
+    example: SWAGGER_EXAMPLES.B_NM
   })
   @IsString()
   @IsNotEmpty()
-  businessName: string;
+  b_nm: string; // 상호명
 
   @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.BUSINESS_TYPE,
-    example: SWAGGER_EXAMPLES.BUSINESS_TYPE,
+    description: SWAGGER_DESCRIPTIONS.B_SECTOR,
+    example: SWAGGER_EXAMPLES.B_SECTOR,
   })
   @IsString()
   @IsNotEmpty()
-  businessSector: string;
+  b_sector: string; // 업태명
 
   @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.BUSINESS_ITEM,
-    example: SWAGGER_EXAMPLES.BUSINESS_ITEM,
+    description: SWAGGER_DESCRIPTIONS.B_TYPE,
+    example: SWAGGER_EXAMPLES.B_TYPE,
   })
   @IsString()
   @IsNotEmpty()
-  businessItem: string;
+  b_type: string; // 종목명
 }
-
-/**
-       * response.data?.data[0]?.request_param.b_no
-       * 사업자등록번호
-       * 
-       * response.data?.data[0]?.request_param.start_dt
-       * 개업일자
-       * 
-       * response.data?.data[0]?.request_param.p_nm
-       * 대표자성명1
-       * 
-       * response.data?.data[0]?.request_param.b_nm
-       * 상호명
-       * 
-       * response.data?.data[0]?.request_param.b_sector
-       * 업태명
-       * 
-       * response.data?.data[0]?.request_param.b_type
-       * 종목명
-       * 
-       * response.data?.data[0]?.request_param.b_adr
-       * 주소
- */

@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import { BusinessValidationRequestDto } from "@apps/backend/modules/business/dto/business-request.dto";
-import { BUSINESS_STATUS_CODE, NTS_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
+import { B_STT_CD, NTS_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
 
 /**
  * 국세청 사업자등록정보 진위확인·상태조회 API 전용 서비스
@@ -48,27 +48,27 @@ export class NtsApiService {
       }
 
       // 사업자등록번호 정규화 (하이픈 제거)
-      const normalizedBusinessNumber = validationDto.businessRegistrationNumber.replace(/[-\s]/g, "");
+      const normalizedBusinessNumber = validationDto.b_no.replace(/[-\s]/g, "");
 
       // 국세청 API 호출 (https://www.data.go.kr/data/15081808/openapi.do?utm_source=chatgpt.com#/%EC%82%AC%EC%97%85%EC%9E%90%EB%93%B1%EB%A1%9D%EC%A0%95%EB%B3%B4%20%EC%A7%84%EC%9C%84%ED%99%95%EC%9D%B8%20API/validate)
       const baseBusinessPayload: Record<string, string> = {
         b_no: normalizedBusinessNumber,
-        start_dt: validationDto.openingDate,
-        p_nm: validationDto.representativeName,
-        b_nm: validationDto.businessName,
-        b_sector: validationDto.businessSector,
-        b_type: validationDto.businessItem,
+        start_dt: validationDto.start_dt,
+        p_nm: validationDto.p_nm,
+        b_nm: validationDto.b_nm,
+        b_sector: validationDto.b_sector,
+        b_type: validationDto.b_type,
       };
 
       const response = await this.axiosInstance.post(`${this.ntsApiUrl}/nts-businessman/v1/validate?serviceKey=${this.ntsApiKey}`, {
         businesses: [baseBusinessPayload],
       });
 
-      if (response.data?.data[0]?.valid === BUSINESS_STATUS_CODE.INACTIVE) {
+      if (response.data?.data[0]?.valid === B_STT_CD.INACTIVE) {
         throw new Error(response.data?.data[0]?.valid_msg);
       }
 
-      if (response.data?.data[0]?.status.b_stt_cd === BUSINESS_STATUS_CODE.INACTIVE || response.data?.data[0]?.status.b_stt_cd === BUSINESS_STATUS_CODE.CLOSED) {
+      if (response.data?.data[0]?.status.b_stt_cd === B_STT_CD.INACTIVE || response.data?.data[0]?.status.b_stt_cd === B_STT_CD.CLOSED) {
         throw new Error(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
       }
 
