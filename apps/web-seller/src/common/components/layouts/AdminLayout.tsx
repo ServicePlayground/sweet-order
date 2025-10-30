@@ -26,7 +26,8 @@ import {
 } from "@mui/icons-material";
 import { MENU_ITEMS } from "@/apps/web-seller/common/constants/menu.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
-import { useLogout } from "@/apps/web-seller/features/auth/hooks/useAuth";
+import { useLogout } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 
 const drawerWidth = 240;
 
@@ -93,6 +94,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             판매자 관리 시스템
           </Typography>
+          <Button color="inherit" onClick={() => navigate(ROUTES.STORE_CREATE)} sx={{ mr: 1 }}>
+            스토어 만들기
+          </Button>
           {isAuthenticated && user && (
             <Button
               color="inherit"

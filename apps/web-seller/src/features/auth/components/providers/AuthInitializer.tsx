@@ -1,4 +1,4 @@
-import { useMe } from "@/apps/web-seller/features/auth/hooks/useAuth";
+import { useMe } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 import { LoadingFallback } from "@/apps/web-seller/common/components/fallbacks/LoadingFallback";
 

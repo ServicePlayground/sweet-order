@@ -42,7 +42,7 @@ const StatCard = ({
   </Card>
 );
 
-export const Home: React.FC = () => {
+export const HomePage: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
