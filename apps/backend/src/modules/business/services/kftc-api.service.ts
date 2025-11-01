@@ -71,7 +71,7 @@ export class KftcApiService {
       const items = response.data.items;
       // 데이터가 없는 경우
       if (!items || items.length === 0) {
-        throw new Error("통신판매사업자 등록 정보가 존재하지 않습니다.");
+        throw new Error(KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND);
       }
 
       // 첫 번째 항목 사용 (일반적으로 하나만 조회됨)
@@ -79,7 +79,7 @@ export class KftcApiService {
 
       // 법적 필수 검증 조건 확인
       if (detail.operSttusCdNm && detail.operSttusCdNm !== "정상영업") {
-        throw new BadRequestException(BUSINESS_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL);
+        throw new BadRequestException(KFTC_API_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL);
       }
 
       return detail;
