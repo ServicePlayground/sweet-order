@@ -1,16 +1,23 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
+import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBody } from "@nestjs/swagger";
 import { BusinessService } from "@apps/backend/modules/business/business.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
-import { BusinessValidationRequestDto } from "@apps/backend/modules/business/dto/business-request.dto";
+import {
+  BusinessValidationRequestDto,
+  OnlineTradingCompanyDetailRequestDto,
+} from "@apps/backend/modules/business/dto/business-request.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,
   USER_ROLES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
-import { BUSINESS_SUCCESS_MESSAGES, NTS_API_ERROR_MESSAGES, SWAGGER_RESPONSE_EXAMPLES } from "@apps/backend/modules/business/constants/business.contants";
-
+import {
+  NTS_API_ERROR_MESSAGES,
+  KFTC_API_ERROR_MESSAGES,
+  SWAGGER_RESPONSE_EXAMPLES,
+  BUSINESS_ERROR_MESSAGES,
+} from "@apps/backend/modules/business/constants/business.contants";
 
 /**
  * 사업서비스 관련 컨트롤러
@@ -43,9 +50,45 @@ export class SellerBusinessController {
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  async verifyBusinessRegistration(
-    @Body() validationDto: BusinessValidationRequestDto,
-  ){
+  async verifyBusinessRegistration(@Body() validationDto: BusinessValidationRequestDto) {
     return await this.businessService.verifyBusinessRegistration(validationDto);
+  }
+
+  /**
+   * 통신판매사업자 등록상세 조회 API
+   * 공정거래위원회 API를 통해 통신판매사업자 등록상세 정보를 조회합니다.
+   */
+  @Get("online-trading-company/detail")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 통신판매사업자 등록상세 조회",
+    description: "공정거래위원회 API를 통해 통신판매사업자 등록상세 정보를 조회합니다.",
+  })
+  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.ONLINE_TRADING_COMPANY_DETAIL_RESPONSE)
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["01"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["02"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["03"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["04"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["05"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["10"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["11"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["12"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["20"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["21"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["22"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["30"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["31"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["32"]))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["33"]))
+  @SwaggerResponse(400, createMessageObject(BUSINESS_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.HTTP_ERROR))
+  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.INTERNAL_ERROR))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
+  async getOnlineTradingCompanyDetail(@Query() detailDto: OnlineTradingCompanyDetailRequestDto) {
+    return await this.businessService.getOnlineTradingCompanyDetail(detailDto);
   }
 }

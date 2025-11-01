@@ -1,7 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, IsNotEmpty } from "class-validator";
-import { IsValidBusinessRegistrationNumber, IsValidOpeningDate } from "@apps/backend/common/decorators/validators.decorator";
-import { SWAGGER_DESCRIPTIONS, SWAGGER_EXAMPLES } from "@apps/backend/modules/business/constants/business.contants";
+import {
+  IsValidBusinessRegistrationNumber,
+  IsValidOpeningDate,
+  IsValidPermissionManagementNumber,
+} from "@apps/backend/common/decorators/validators.decorator";
+import {
+  SWAGGER_DESCRIPTIONS,
+  SWAGGER_EXAMPLES,
+} from "@apps/backend/modules/business/constants/business.contants";
 
 /**
  * 사업자등록번호 진위확인 요청 DTO
@@ -31,7 +38,7 @@ export class BusinessValidationRequestDto {
 
   @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.B_NM,
-    example: SWAGGER_EXAMPLES.B_NM
+    example: SWAGGER_EXAMPLES.B_NM,
   })
   @IsString()
   @IsNotEmpty()
@@ -52,4 +59,23 @@ export class BusinessValidationRequestDto {
   @IsString()
   @IsNotEmpty()
   b_type: string; // 종목명
+}
+
+/**
+ * 통신판매사업자 등록상세 조회 요청 DTO
+ */
+export class OnlineTradingCompanyDetailRequestDto {
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.B_NO,
+    example: SWAGGER_EXAMPLES.BRNO,
+  })
+  @IsValidBusinessRegistrationNumber()
+  brno: string; // 사업자등록번호
+
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.PRMMI_MNNO,
+    example: SWAGGER_EXAMPLES.PRMMI_MNNO,
+  })
+  @IsValidPermissionManagementNumber()
+  prmmiMnno: string; // 인허가관리번호(통신판매사업자 신고번호)
 }

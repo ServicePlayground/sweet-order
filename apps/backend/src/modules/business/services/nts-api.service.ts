@@ -2,7 +2,10 @@ import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import { BusinessValidationRequestDto } from "@apps/backend/modules/business/dto/business-request.dto";
-import { B_STT_CD, NTS_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
+import {
+  B_STT_CD,
+  NTS_API_ERROR_MESSAGES,
+} from "@apps/backend/modules/business/constants/business.contants";
 
 /**
  * 국세청 사업자등록정보 진위확인·상태조회 API 전용 서비스
@@ -12,17 +15,15 @@ import { B_STT_CD, NTS_API_ERROR_MESSAGES } from "@apps/backend/modules/business
 export class NtsApiService {
   private readonly logger = new Logger(NtsApiService.name);
   private readonly ntsApiUrl?: string;
-  private readonly ntsApiKey?: string;
+  private readonly dataGoKrApiKey?: string;
   private readonly axiosInstance: AxiosInstance;
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.ntsApiUrl = this.configService.get<string>("NTS_API_URL");
-    this.ntsApiKey = this.configService.get<string>("NTS_API_KEY");
-    
-    if (!this.ntsApiUrl || !this.ntsApiKey) {
-      throw new Error("NTS_API_URL 또는 NTS_API_KEY가 설정되지 않았습니다.");
+    this.dataGoKrApiKey = this.configService.get<string>("DATA_GO_KR_API_KEY");
+
+    if (!this.ntsApiUrl || !this.dataGoKrApiKey) {
+      throw new Error("NTS_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
     }
 
     // axios 인스턴스 생성
@@ -39,9 +40,7 @@ export class NtsApiService {
    * @param validationDto 사업자등록번호 진위확인 요청 데이터
    * @returns 진위확인 결과
    */
-  async verifyBusinessRegistration(
-    validationDto: BusinessValidationRequestDto,
-  ) {
+  async verifyBusinessRegistration(validationDto: BusinessValidationRequestDto) {
     try {
       if (!this.ntsApiUrl) {
         throw new Error("NTS_API_URL가 설정되지 않았습니다.");
@@ -60,27 +59,36 @@ export class NtsApiService {
         b_type: validationDto.b_type,
       };
 
-      const response = await this.axiosInstance.post(`${this.ntsApiUrl}/nts-businessman/v1/validate?serviceKey=${this.ntsApiKey}`, {
-        businesses: [baseBusinessPayload],
-      });
+      const response = await this.axiosInstance.post(
+        `${this.ntsApiUrl}/nts-businessman/v1/validate?serviceKey=${this.dataGoKrApiKey}`,
+        {
+          businesses: [baseBusinessPayload],
+        },
+      );
 
+      // 법적 필수 검증 조건 확인
       if (response.data?.data[0]?.valid === B_STT_CD.INACTIVE) {
         throw new Error(response.data?.data[0]?.valid_msg);
       }
-
-      if (response.data?.data[0]?.status.b_stt_cd === B_STT_CD.INACTIVE || response.data?.data[0]?.status.b_stt_cd === B_STT_CD.CLOSED) {
+      if (
+        response.data?.data[0]?.status.b_stt_cd === B_STT_CD.INACTIVE ||
+        response.data?.data[0]?.status.b_stt_cd === B_STT_CD.CLOSED
+      ) {
         throw new Error(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
       }
 
-      return {request: response.data?.data[0]?.request_param, response: response.data?.data[0]?.status};
-
+      return {
+        request: response.data?.data[0]?.request_param,
+        response: response.data?.data[0]?.status,
+      };
     } catch (error: any) {
       if (error.message) {
         throw new BadRequestException(error.message);
       }
 
       const statusCode = error.response?.data?.status_code;
-      const errorMessage = NTS_API_ERROR_MESSAGES[statusCode as keyof typeof NTS_API_ERROR_MESSAGES];
+      const errorMessage =
+        NTS_API_ERROR_MESSAGES[statusCode as keyof typeof NTS_API_ERROR_MESSAGES];
 
       this.logger.error(`사업자등록번호 진위확인 실패: ${errorMessage}`);
       throw new BadRequestException(errorMessage);

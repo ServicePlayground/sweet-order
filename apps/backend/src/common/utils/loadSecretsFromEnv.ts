@@ -8,8 +8,8 @@ export const loadSecretsFromEnv = (): void => {
   }
 
   try {
-    const parsed = JSON.parse(raw);;
-    
+    const parsed = JSON.parse(raw);
+
     for (const [key, value] of Object.entries(parsed)) {
       if (process.env[key] === undefined) {
         process.env[key] = String(value);

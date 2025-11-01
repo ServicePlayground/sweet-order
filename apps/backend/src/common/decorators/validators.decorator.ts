@@ -117,16 +117,16 @@ export class IsValidBusinessRegistrationNumberConstraint implements ValidatorCon
     // 사업자등록번호 체크섬 검증
     const digits = normalizedNumber.split("").map(Number);
     const weights = [1, 3, 7, 1, 3, 7, 1, 3, 5];
-    
+
     let sum = 0;
     for (let i = 0; i < 9; i++) {
       sum += digits[i] * weights[i];
     }
-    
+
     sum += Math.floor((digits[8] * 5) / 10);
     const remainder = sum % 10;
     const checkDigit = remainder === 0 ? 0 : 10 - remainder;
-    
+
     return checkDigit === digits[9];
   }
 
@@ -178,6 +178,58 @@ export class IsValidOpeningDateConstraint implements ValidatorConstraintInterfac
 
   defaultMessage(): string {
     return BUSINESS_ERROR_MESSAGES.OPENING_DATE_INVALID_FORMAT;
+  }
+}
+
+/**
+ * 인허가관리번호 유효성 검증 제약 조건
+ * 형식: YYYY-지역명-숫자 (예: 2021-서울강동-0422)
+ */
+@ValidatorConstraint({ name: "isValidPermissionManagementNumber", async: false })
+export class IsValidPermissionManagementNumberConstraint implements ValidatorConstraintInterface {
+  validate(prmmiMnno: string): boolean {
+    if (!prmmiMnno || typeof prmmiMnno !== "string") {
+      return false;
+    }
+
+    // 인허가관리번호 형식: YYYY-한글지역명-숫자4자리
+    // 예: 2021-서울강동-0422
+    const prmmiMnnoPattern = /^\d{4}-[가-힣]+-\d{4}$/;
+
+    if (!prmmiMnnoPattern.test(prmmiMnno)) {
+      return false;
+    }
+
+    // 연도 검증 (1900년부터 현재 연도까지)
+    const parts = prmmiMnno.split("-");
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    const year = parseInt(parts[0]);
+    const currentYear = new Date().getFullYear();
+
+    if (year < 1900 || year > currentYear) {
+      return false;
+    }
+
+    // 지역명이 한글로만 이루어져 있는지 확인
+    const regionName = parts[1];
+    if (!/^[가-힣]+$/.test(regionName)) {
+      return false;
+    }
+
+    // 마지막 숫자 4자리 검증
+    const number = parts[2];
+    if (!/^\d{4}$/.test(number)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  defaultMessage(): string {
+    return BUSINESS_ERROR_MESSAGES.PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT;
   }
 }
 
@@ -267,6 +319,21 @@ export function IsValidOpeningDate(validationOptions?: ValidationOptions) {
       options: validationOptions,
       constraints: [],
       validator: IsValidOpeningDateConstraint,
+    });
+  };
+}
+
+/**
+ * 인허가관리번호 유효성 검증 데코레이터
+ */
+export function IsValidPermissionManagementNumber(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string): void {
+    registerDecorator({
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      constraints: [],
+      validator: IsValidPermissionManagementNumberConstraint,
     });
   };
 }

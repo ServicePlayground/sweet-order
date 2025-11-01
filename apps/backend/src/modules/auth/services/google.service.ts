@@ -42,20 +42,20 @@ export class GoogleService {
     this.googleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
     this.googleRedirectUri = configService.get<string>("GOOGLE_REDIRECT_URI")!;
     this.userDomain = configService.get<string>("PUBLIC_USER_DOMAIN")!;
-    
+
     // 안정적인 HTTP 클라이언트 설정
     this.httpClient = axios.create({
       timeout: 30000, // 30초 타임아웃
       headers: {
-        'User-Agent': 'SweetOrder-Backend/1.0',
-        'Accept': 'application/json',
-        'Accept-Encoding': 'gzip, deflate, br',
+        "User-Agent": "SweetOrder-Backend/1.0",
+        Accept: "application/json",
+        "Accept-Encoding": "gzip, deflate, br",
       },
       // 연결 재사용을 위한 설정
       maxRedirects: 5,
       validateStatus: (status) => status < 500, // 5xx 에러만 재시도
       // 배포환경에서의 네트워크 안정성을 위한 설정
-      httpsAgent: new (require('https').Agent)({
+      httpsAgent: new (require("https").Agent)({
         keepAlive: true,
         keepAliveMsecs: 30000,
         maxSockets: 50,
@@ -110,11 +110,14 @@ export class GoogleService {
 
       // Access Token으로 사용자 정보 요청
       this.logger.log("사용자 정보 요청 시작");
-      const userInfoResponse = await this.httpClient.get("https://www.googleapis.com/oauth2/v2/userinfo", {
-        headers: {
-          Authorization: `${token_type} ${access_token}`,
+      const userInfoResponse = await this.httpClient.get(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        {
+          headers: {
+            Authorization: `${token_type} ${access_token}`,
+          },
         },
-      });
+      );
 
       const userInfo = userInfoResponse.data;
 
@@ -126,15 +129,15 @@ export class GoogleService {
       };
     } catch (error: any) {
       // ETIMEDOUT 에러에 대한 특별 처리
-      if (error.code === 'ETIMEDOUT') {
-        this.logger.error('구글 토큰 교환 타임아웃 발생:', error.message);
+      if (error.code === "ETIMEDOUT") {
+        this.logger.error("구글 토큰 교환 타임아웃 발생:", error.message);
       }
-      console.error('=== Google OAuth 에러 상세 정보 ===');
-      console.error('error.code:', error.code);
-      console.error('error.message:', error.message);
-      console.error('error.response.status:', error.response?.status);
-      console.error('error.response.statusText:', error.response?.statusText);
-      console.error('===========================');      
+      console.error("=== Google OAuth 에러 상세 정보 ===");
+      console.error("error.code:", error.code);
+      console.error("error.message:", error.message);
+      console.error("error.response.status:", error.response?.status);
+      console.error("error.response.statusText:", error.response?.statusText);
+      console.error("===========================");
       throw error;
     }
   }
