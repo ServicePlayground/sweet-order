@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiBody } from "@nestjs/swagger";
+import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { BusinessService } from "@apps/backend/modules/business/business.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";

@@ -48,3 +48,15 @@ export interface IBusinessRegistrationResponse {
     rbf_tax_type_cd: RBF_TAX_TYPE_CD; // 직전과세유형 코드
   };
 }
+
+export interface IOnlineTradingCompanyDetailForm {
+  prmmiMnno: string; // 인허가관리번호(통신판매사업자 신고번호)
+}
+
+export interface IOnlineTradingCompanyDetailRequest extends IOnlineTradingCompanyDetailForm {
+  brno: string; // 사업자등록번호
+}
+
+export interface IOnlineTradingCompanyDetailResponse {
+  [key: string]: any; // API 응답이 복잡한 객체 구조를 가지므로 any로 처리
+}

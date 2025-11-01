@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, Grid, TextField } from "@mui/material";
 import { IBusinessRegistrationForm } from "@/apps/web-seller/features/business/types/business.type";
 import {
@@ -6,25 +6,33 @@ import {
   isValidStartDateYmd,
 } from "@/apps/web-seller/common/utils/validator.util";
 import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
-import { useVerifyBusinessRegistration } from "@/apps/web-seller/features/business/hooks/queries/useBusiness";
 
 interface Props {
   onSubmit: (data: IBusinessRegistrationForm) => void;
+  initialValue?: IBusinessRegistrationForm;
 }
 
-export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit }) => {
-  const [form, setForm] = useState<IBusinessRegistrationForm>({
-    b_no: "",
-    p_nm: "",
-    start_dt: "",
-    b_nm: "",
-    b_sector: "",
-    b_type: "",
-  });
+export const defaultForm: IBusinessRegistrationForm = {
+  b_no: "",
+  p_nm: "",
+  start_dt: "",
+  b_nm: "",
+  b_sector: "",
+  b_type: "",
+};
+
+export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialValue }) => {
+  const [form, setForm] = useState<IBusinessRegistrationForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<Partial<Record<keyof IBusinessRegistrationForm, string>>>(
     {},
   );
-  const verifyBusinessRegistrationMutation = useVerifyBusinessRegistration();
+
+  useEffect(() => {
+    if (initialValue) {
+      setForm(initialValue);
+      setErrors({});
+    }
+  }, [initialValue]);
 
   const validate = () => {
     const newErrors: Partial<Record<keyof IBusinessRegistrationForm, string>> = {};
@@ -53,7 +61,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    await verifyBusinessRegistrationMutation.mutateAsync(form);
+
     onSubmit(form);
   };
 

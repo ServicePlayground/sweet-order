@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-} from "@mui/material";
+import { Box, Grid, Paper, Typography, Card, CardContent, Button } from "@mui/material";
 import {
   TrendingUp as TrendingUpIcon,
   ShoppingCart as ShoppingCartIcon,

@@ -6,6 +6,8 @@ const BUSINESS_ERROR_MESSAGES = {
   BUSINESS_NAME_REQUIRED: "상호를 입력해주세요.",
   BUSINESS_SECTOR_REQUIRED: "업태를 입력해주세요.",
   BUSINESS_TYPE_REQUIRED: "종목을 입력해주세요.",
+  PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT:
+    "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)",
 } as const;
 
 export { BUSINESS_ERROR_MESSAGES };

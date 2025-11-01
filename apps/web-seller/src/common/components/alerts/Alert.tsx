@@ -24,12 +24,12 @@ export function Alert() {
           onClose={() => handleClose(alert.id)}
           TransitionComponent={SlideTransition}
           anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
+            vertical: "bottom",
+            horizontal: "center",
           }}
           sx={{
             "& .MuiSnackbar-root": {
-              top: 24 + alerts.indexOf(alert) * 80, // 여러 알림이 겹치지 않도록
+              bottom: 24 + (alerts.length - 1 - alerts.indexOf(alert)) * 80, // 여러 알림이 겹치지 않도록
             },
           }}
         >
