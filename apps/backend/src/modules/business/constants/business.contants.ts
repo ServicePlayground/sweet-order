@@ -4,8 +4,7 @@ export const BUSINESS_ERROR_MESSAGES = {
     "사업자등록번호는 하이픈 없는 10자리 숫자이며 유효한 번호여야 합니다.",
   OPENING_DATE_INVALID_FORMAT: "개업일자는 YYYYMMDD 형식의 유효한 날짜여야 합니다.",
   PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT:
-    "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)",
-  OPERATION_STATUS_NOT_NORMAL: "통신판매사업자의 운영상태가 정상영업이 아닙니다.",
+    "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)"
 } as const;
 
 export const NTS_API_ERROR_MESSAGES = {
@@ -36,6 +35,8 @@ export const KFTC_API_ERROR_MESSAGES = {
   "33": "서명되지 않은 호출입니다.",
   HTTP_ERROR: "Http Error입니다.",
   INTERNAL_ERROR: "Internal Server Error입니다.",
+  OPERATION_STATUS_NOT_NORMAL: "통신판매사업자의 운영상태가 정상영업이 아닙니다.",
+  ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND: "통신판매사업자 등록 정보가 존재하지 않습니다.",
 } as const;
 
 export const BUSINESS_SUCCESS_MESSAGES = {
