@@ -16,7 +16,6 @@ import {
   NTS_API_ERROR_MESSAGES,
   KFTC_API_ERROR_MESSAGES,
   SWAGGER_RESPONSE_EXAMPLES,
-  BUSINESS_ERROR_MESSAGES,
 } from "@apps/backend/modules/business/constants/business.contants";
 
 /**
@@ -81,7 +80,10 @@ export class SellerBusinessController {
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["32"]))
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["33"]))
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL))
-  @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND))
+  @SwaggerResponse(
+    400,
+    createMessageObject(KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND),
+  )
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.HTTP_ERROR))
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.INTERNAL_ERROR))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
