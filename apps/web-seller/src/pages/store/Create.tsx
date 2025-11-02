@@ -6,9 +6,7 @@ import { OnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/busin
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
 import {
   IBusinessRegistrationForm,
-  IBusinessRegistrationResponse,
   IOnlineTradingCompanyDetailForm,
-  IOnlineTradingCompanyDetailResponse,
 } from "@/apps/web-seller/features/business/types/business.type";
 import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import {
@@ -19,12 +17,12 @@ import { useCreateStore } from "@/apps/web-seller/features/store/hooks/queries/u
 import { defaultForm as defaultBusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { defaultForm as defaultOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
 import { defaultForm as defaultStoreForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
+import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
+import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
 
 interface StepData {
   businessRegistrationForm: IBusinessRegistrationForm;
-  businessRegistrationResponse: IBusinessRegistrationResponse | null;
   onlineTradingCompanyDetailForm: IOnlineTradingCompanyDetailForm;
-  onlineTradingCompanyDetailResponse: IOnlineTradingCompanyDetailResponse | null;
   storeForm: IStoreForm;
 }
 
@@ -35,13 +33,12 @@ export const StoreCreatePage: React.FC = () => {
   const verifyBusinessRegistrationMutation = useVerifyBusinessRegistration();
   const getOnlineTradingCompanyDetailMutation = useGetOnlineTradingCompanyDetail();
   const createStoreMutation = useCreateStore();
+  const { addAlert } = useAlertStore();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [stepData, setStepData] = useState<StepData>({
     businessRegistrationForm: defaultBusinessRegistrationForm,
-    businessRegistrationResponse: null,
     onlineTradingCompanyDetailForm: defaultOnlineTradingCompanyDetailForm,
-    onlineTradingCompanyDetailResponse: null,
     storeForm: defaultStoreForm,
   });
 
@@ -59,25 +56,37 @@ export const StoreCreatePage: React.FC = () => {
 
   const handleSubmitStep1 = async (data: IBusinessRegistrationForm) => {
     const response = await verifyBusinessRegistrationMutation.mutateAsync(data);
-    setStepData((prev) => ({
-      ...prev,
-      businessRegistrationForm: data,
-      businessRegistrationResponse: response,
-    }));
-    handleNextStep();
+    if (response.available) {
+      setStepData((prev) => ({
+        ...prev,
+        businessRegistrationForm: data,
+      }));
+      handleNextStep();
+    } else {
+      addAlert({
+        severity: "error",
+        message: BUSINESS_ERROR_MESSAGES.BUSINESS_VALIDATION_FAILED,
+      });
+    }
   };
 
   const handleSubmitStep2 = async (data: IOnlineTradingCompanyDetailForm) => {
     const response = await getOnlineTradingCompanyDetailMutation.mutateAsync({
-      brno: stepData.businessRegistrationResponse?.response.b_no || "",
+      brno: stepData.businessRegistrationForm.b_no,
       prmmiMnno: data.prmmiMnno,
     });
-    setStepData((prev) => ({
-      ...prev,
-      onlineTradingCompanyDetailForm: data,
-      onlineTradingCompanyDetailResponse: response,
-    }));
-    handleNextStep();
+    if (response.available) {
+      setStepData((prev) => ({
+        ...prev,
+        onlineTradingCompanyDetailForm: data,
+      }));
+      handleNextStep();
+    } else {
+      addAlert({
+        severity: "error",
+        message: BUSINESS_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_VALIDATION_FAILED,
+      });
+    }
   };
 
   const handleSubmitStep3 = async (data: IStoreForm) => {
@@ -93,7 +102,7 @@ export const StoreCreatePage: React.FC = () => {
     await createStoreMutation.mutateAsync({
       businessValidation: stepData.businessRegistrationForm,
       onlineTradingCompanyDetail: {
-        brno: stepData.businessRegistrationResponse?.response.b_no || "",
+        brno: stepData.businessRegistrationForm.b_no,
         prmmiMnno: stepData.onlineTradingCompanyDetailForm.prmmiMnno,
       },
       name: data.name,

@@ -8,6 +8,8 @@ const BUSINESS_ERROR_MESSAGES = {
   BUSINESS_TYPE_REQUIRED: "종목을 입력해주세요.",
   PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT:
     "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)",
+  BUSINESS_VALIDATION_FAILED: "사업자등록번호 진위확인에 실패했습니다.",
+  ONLINE_TRADING_COMPANY_DETAIL_VALIDATION_FAILED: "통신판매사업자 등록상세 조회에 실패했습니다.",
 } as const;
 
 export { BUSINESS_ERROR_MESSAGES };
