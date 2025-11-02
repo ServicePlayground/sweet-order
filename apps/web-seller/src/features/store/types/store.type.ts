@@ -20,3 +20,13 @@ export interface ICreateStoreRequest extends IStoreForm {
 export interface ICreateStoreResponse {
   id: string;
 }
+
+// 스토어 목록 아이템
+export interface IStoreListItem {
+  id: string;
+  name: string;
+  description?: string;
+  logoImageUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}

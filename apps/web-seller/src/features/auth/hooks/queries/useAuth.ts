@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 import { authApi } from "@/apps/web-seller/features/auth/apis/auth.api";
 import { authQueryKeys } from "@/apps/web-seller/features/auth/constants/authQueryKeys.constant";
+import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStore";
 
 // 현재 사용자 정보 조회 (새로고침 시 자동 실행)
 export function useMe() {
   const { login, setInitialized } = useAuthStore();
+  const { refetch: refetchStores } = useStoreList();
 
   const query = useQuery({
     queryKey: authQueryKeys.me,
@@ -19,8 +21,9 @@ export function useMe() {
   useEffect(() => {
     if (query.isSuccess && query.data && "user" in query.data) {
       login(query.data.user);
+      refetchStores(); // 로그인 성공 시 스토어 목록 조회 (기본적으로 비활성화되어 있음 - enabled: false)
     }
-  }, [query.isSuccess, query.data, login]);
+  }, [query.isSuccess, query.data, login, refetchStores]);
 
   // 쿼리 완료(성공/에러 모두) 시 초기화 완료 처리
   useEffect(() => {
