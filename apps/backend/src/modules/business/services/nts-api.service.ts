@@ -38,7 +38,6 @@ export class NtsApiService {
   /**
    * 사업자등록번호 진위확인
    * @param validationDto 사업자등록번호 진위확인 요청 데이터
-   * @returns 진위확인 결과
    */
   async verifyBusinessRegistration(validationDto: BusinessValidationRequestDto) {
     try {
@@ -66,21 +65,23 @@ export class NtsApiService {
         },
       );
 
+      // 응답 데이터 존재 여부 확인
+      if (!response.data?.data?.[0]) {
+        throw new Error(NTS_API_ERROR_MESSAGES.DATA_NOT_FOUND);
+      }
+
+      const responseData = response.data.data[0];
+
       // 법적 필수 검증 조건 확인
-      if (response.data?.data[0]?.valid === B_STT_CD.INACTIVE) {
-        throw new Error(response.data?.data[0]?.valid_msg);
+      if (responseData.valid === B_STT_CD.INACTIVE) {
+        throw new Error(responseData.valid_msg);
       }
       if (
-        response.data?.data[0]?.status.b_stt_cd === B_STT_CD.INACTIVE ||
-        response.data?.data[0]?.status.b_stt_cd === B_STT_CD.CLOSED
+        responseData.status?.b_stt_cd === B_STT_CD.INACTIVE ||
+        responseData.status?.b_stt_cd === B_STT_CD.CLOSED
       ) {
         throw new Error(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
       }
-
-      return {
-        request: response.data?.data[0]?.request_param,
-        response: response.data?.data[0]?.status,
-      };
     } catch (error: any) {
       if (error.message) {
         throw new BadRequestException(error.message);

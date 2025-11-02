@@ -23,13 +23,13 @@ export class BusinessService {
    * 사업자등록번호 진위확인
    */
   async verifyBusinessRegistration(validationDto: BusinessValidationRequestDto) {
-    return this.ntsApiService.verifyBusinessRegistration(validationDto);
+    await this.ntsApiService.verifyBusinessRegistration(validationDto);
   }
 
   /**
    * 통신판매사업자 등록상세 조회
    */
   async getOnlineTradingCompanyDetail(detailDto: OnlineTradingCompanyDetailRequestDto) {
-    return this.kftcApiService.getOnlineTradingCompanyDetail(detailDto);
+    await this.kftcApiService.getOnlineTradingCompanyDetail(detailDto);
   }
 }

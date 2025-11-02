@@ -4,7 +4,7 @@ export const BUSINESS_ERROR_MESSAGES = {
     "사업자등록번호는 하이픈 없는 10자리 숫자이며 유효한 번호여야 합니다.",
   OPENING_DATE_INVALID_FORMAT: "개업일자는 YYYYMMDD 형식의 유효한 날짜여야 합니다.",
   PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT:
-    "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)"
+    "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)",
 } as const;
 
 export const NTS_API_ERROR_MESSAGES = {
@@ -14,6 +14,7 @@ export const NTS_API_ERROR_MESSAGES = {
   REQUEST_DATA_MALFORMED: "필수 요청 파라미터 누락되었습니다.",
   BAD_JSON_REQUEST: "	JSON 포맷에 적합하지 않는 요청입니다.",
   BUSINESS_STATUS_INACTIVE: "휴업 또는 폐업 상태입니다.",
+  DATA_NOT_FOUND: "데이터가 존재하지 않습니다.",
 } as const;
 
 export const KFTC_API_ERROR_MESSAGES = {

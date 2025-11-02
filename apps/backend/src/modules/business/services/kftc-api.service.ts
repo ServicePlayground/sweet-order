@@ -2,10 +2,7 @@ import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import { OnlineTradingCompanyDetailRequestDto } from "@apps/backend/modules/business/dto/business-request.dto";
-import {
-  KFTC_API_ERROR_MESSAGES,
-  BUSINESS_ERROR_MESSAGES,
-} from "@apps/backend/modules/business/constants/business.contants";
+import { KFTC_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
 
 /**
  * 공정거래위원회 통신판매사업자 등록상세 조회 API 전용 서비스
@@ -38,7 +35,6 @@ export class KftcApiService {
   /**
    * 통신판매사업자 등록상세 조회
    * @param detailDto 통신판매사업자 등록상세 조회 요청 데이터
-   * @returns 통신판매사업자 등록상세 정보
    */
   async getOnlineTradingCompanyDetail(detailDto: OnlineTradingCompanyDetailRequestDto) {
     try {
@@ -78,11 +74,10 @@ export class KftcApiService {
       const detail = items[0];
 
       // 법적 필수 검증 조건 확인
-      if (detail.operSttusCdNm && detail.operSttusCdNm !== "정상영업") {
+      // 운영상태가 null/undefined이거나 "정상영업"이 아닌 경우 오류 처리
+      if (!detail.operSttusCdNm || detail.operSttusCdNm !== "정상영업") {
         throw new BadRequestException(KFTC_API_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL);
       }
-
-      return detail;
     } catch (error: any) {
       if (error.message) {
         throw new BadRequestException(error.message);

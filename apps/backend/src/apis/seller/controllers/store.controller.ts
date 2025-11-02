@@ -1,12 +1,9 @@
-import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus } from "@nestjs/common";
+import { Controller, Post, Body, HttpCode, HttpStatus, Request } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
-import { BusinessService } from "@apps/backend/modules/business/business.service";
+import { StoreService } from "@apps/backend/modules/store/store.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
-import {
-  BusinessValidationRequestDto,
-  OnlineTradingCompanyDetailRequestDto,
-} from "@apps/backend/modules/business/dto/business-request.dto";
+import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,
@@ -16,56 +13,41 @@ import {
   NTS_API_ERROR_MESSAGES,
   KFTC_API_ERROR_MESSAGES,
 } from "@apps/backend/modules/business/constants/business.contants";
+import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import {
+  STORE_ERROR_MESSAGES,
+  SWAGGER_RESPONSE_EXAMPLES,
+} from "@apps/backend/modules/store/constants/store.constants";
 
 /**
- * 사업서비스 관련 컨트롤러
+ * 스토어 관련 컨트롤러
  */
-@ApiTags("사업 서비스")
-@Controller(`${USER_ROLES.SELLER}/business`)
+@ApiTags("스토어")
+@Controller(`${USER_ROLES.SELLER}/store`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // USER, SELLER, ADMIN 모두 접근 가능
-export class SellerBusinessController {
-  constructor(private readonly businessService: BusinessService) {}
+export class SellerStoreController {
+  constructor(private readonly storeService: StoreService) {}
 
   /**
-   * 사업자등록번호 진위확인 API
-   * 국세청 API를 통해 사업자등록번호, 대표자명, 개업일자의 진위를 확인합니다.
+   * 스토어 생성 API (3단계)
+   * 1단계, 2단계의 요청 파라미터를 재검증하고 스토어를 생성합니다.
    */
-  @Post("validate")
-  @HttpCode(HttpStatus.OK)
+  @Post("/create")
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: "(로그인 필요) 사업자등록번호 진위확인하여 정상 영업 상태인지 확인",
+    summary: "(로그인 필요) 스토어 생성 (3단계)",
     description:
-      "국세청 API를 통해 사업자등록번호, 대표자명, 개업일자의 진위를 확인합니다. \n휴업 또는 폐업상태인 경우 오류가 발생합니다.",
+      "1단계(사업자등록번호 진위확인)와 2단계(통신판매사업자 등록상세 조회)의 요청 파라미터를 재검증하고 스토어를 생성합니다. \n1단계 사업자등록번호는 2단계 사업자등록번호와 같아야 합니다. \n같은 사업자등록번호와 인허가관리번호(통신판매사업자 신고번호) 조합으로 이미 스토어가 존재하면 오류가 발생합니다.",
   })
-  @SwaggerResponse(200, { available: true })
+  @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.STORE_CREATED_RESPONSE)
+  // 사업자등록번호 진위확인 API 오류 응답
   @SwaggerResponse(400, createMessageObject(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE))
   @SwaggerResponse(400, createMessageObject(NTS_API_ERROR_MESSAGES.HTTP_ERROR))
   @SwaggerResponse(400, createMessageObject(NTS_API_ERROR_MESSAGES.INTERNAL_ERROR))
   @SwaggerResponse(400, createMessageObject(NTS_API_ERROR_MESSAGES.TOO_LARGE_REQUEST))
   @SwaggerResponse(400, createMessageObject(NTS_API_ERROR_MESSAGES.REQUEST_DATA_MALFORMED))
   @SwaggerResponse(400, createMessageObject(NTS_API_ERROR_MESSAGES.BAD_JSON_REQUEST))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  async verifyBusinessRegistration(@Body() validationDto: BusinessValidationRequestDto) {
-    await this.businessService.verifyBusinessRegistration(validationDto);
-    return { available: true };
-  }
-
-  /**
-   * 통신판매사업자 등록상세 조회 API
-   * 공정거래위원회 API를 통해 통신판매사업자 등록상세 정보를 조회합니다.
-   */
-  @Get("online-trading-company/detail")
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: "(로그인 필요) 통신판매사업자 등록상세 조회하여 정상 영업 상태인지 확인",
-    description:
-      "공정거래위원회 API를 통해 통신판매사업자 등록상세 정보를 조회합니다. \n휴업 또는 폐업상태인 경우 오류가 발생합니다.",
-  })
-  @SwaggerResponse(200, { available: true })
+  // 통신판매사업자 등록상세 조회 API 오류 응답
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["01"]))
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["02"]))
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES["03"]))
@@ -88,13 +70,25 @@ export class SellerBusinessController {
   )
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.HTTP_ERROR))
   @SwaggerResponse(400, createMessageObject(KFTC_API_ERROR_MESSAGES.INTERNAL_ERROR))
+  // 스토어 생성 오류 응답
+  @SwaggerResponse(
+    400,
+    createMessageObject(STORE_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_MISMATCH),
+  )
+  @SwaggerResponse(
+    400,
+    createMessageObject(STORE_ERROR_MESSAGES.STORE_ALREADY_EXISTS_WITH_SAME_BUSINESS_INFO),
+  )
+  // 인증 오류 응답
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  async getOnlineTradingCompanyDetail(@Query() detailDto: OnlineTradingCompanyDetailRequestDto) {
-    await this.businessService.getOnlineTradingCompanyDetail(detailDto);
-    return { available: true };
+  async createStore(
+    @Request() req: { user: JwtVerifiedPayload },
+    @Body() createStoreDto: CreateStoreRequestDto,
+  ) {
+    return await this.storeService.createStore(req.user.sub, createStoreDto);
   }
 }

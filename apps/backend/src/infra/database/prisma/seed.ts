@@ -8,6 +8,7 @@ async function main() {
   await prisma.productLike.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.store.deleteMany();
   await prisma.user.deleteMany();
 
   const hashedPassword1 = await bcrypt.hash("Password123!", 12);
@@ -222,11 +223,34 @@ async function main() {
     }),
   ]);
 
+  const stores = await Promise.all([
+    prisma.store.create({
+      data: {
+        userId: users[0].id, // SELLER 역할을 가진 첫 번째 사용자
+        name: "스위트오더 스토어",
+        description: "맛있는 케이크를 판매하는 스토어입니다.",
+        logoImageUrl: "https://example.com/logo.png",
+        // 사업자 정보 (1단계)
+        businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
+        representativeName: "홍길동",
+        openingDate: "20230101",
+        businessName: "스위트오더",
+        businessSector: "도매 및 소매업",
+        businessType: "전자상거래 소매 중개업",
+        // 통신판매사업자 정보 (2단계)
+        permissionManagementNumber: "2021-서울강동-0422",
+        createdAt: new Date("2024-01-15T10:30:00Z"),
+        updatedAt: new Date("2024-01-15T10:30:00Z"),
+      },
+    }),
+  ]);
+
   console.log(`✅ Created ${users.length} users`);
   console.log(`✅ Created ${phoneVerifications.length} phone verifications`);
   console.log(`✅ Created ${products.length} products`);
   console.log(`✅ Created ${productImages.length} product images`);
   console.log(`✅ Created ${productLikes.length} product likes`);
+  console.log(`✅ Created ${stores.length} stores`);
   console.log("🎉 Database seeding completed!");
 }
 

@@ -38,6 +38,7 @@ model User {
   // Relations
   productLikes   ProductLike[]
   products      Product[]
+  stores        Store[]
 
   @@index([phone])
   @@index([userId])
@@ -213,6 +214,43 @@ enum UserRole {
   USER
   SELLER
   ADMIN
+}
+
+// Store model for seller store information
+model Store {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  
+  // 스토어 정보
+  logoImageUrl      String?  @map("logo_image_url")
+  name              String
+  description       String?
+  
+  // 사업자 정보 (1단계 - 사용자 입력값만 저장)
+  businessNo        String   @map("business_no")
+  representativeName String  @map("representative_name")
+  openingDate       String   @map("opening_date")
+  businessName      String   @map("business_name")
+  businessSector    String   @map("business_sector")
+  businessType      String   @map("business_type")
+  
+  // 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
+  permissionManagementNumber String @map("permission_management_number")
+  
+  // 주의: 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
+  // 필요시 외부 API를 호출하여 최신 상태 조회
+  
+  // 계정 생성/수정 정보
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  seller            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, businessNo, permissionManagementNumber])
+  @@index([userId])
+  @@index([businessNo])
+  @@map("stores")
 }
 
 
