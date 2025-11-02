@@ -43,7 +43,23 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     const match = currentPath.match(/^\/stores\/([^/]+)/);
     return match ? match[1] : null;
   }, [currentPath]);
-  const menuItems = React.useMemo(() => getMenuItems(storeIdFromPath), [storeIdFromPath]);
+  const isStoreScopedPath = React.useMemo(() => currentPath.startsWith("/stores/"), [currentPath]);
+  const isValidStoreId = React.useMemo(
+    () => (storeIdFromPath ? stores.some((s) => s.id === storeIdFromPath) : false),
+    [storeIdFromPath, stores],
+  );
+  const menuItems = React.useMemo(() => {
+    // 1) 스토어 범위 경로 + 유효한 storeId일 때만 스토어 메뉴 노출
+    if (isStoreScopedPath && isValidStoreId) {
+      return getMenuItems(storeIdFromPath);
+    }
+    // 2) 스토어가 없고 ROOT 경로일 때는 홈 메뉴만 노출
+    if (!isStoreScopedPath && stores.length === 0 && currentPath === ROUTES.ROOT) {
+      return getMenuItems(null);
+    }
+    // 3) 그 외(유효하지 않은 storeId, 비스토어 경로 등)에는 아무 메뉴도 노출하지 않음
+    return [];
+  }, [isStoreScopedPath, isValidStoreId, storeIdFromPath, stores.length, currentPath]);
 
   const onNavigate = (path: string) => {
     navigate(path);
