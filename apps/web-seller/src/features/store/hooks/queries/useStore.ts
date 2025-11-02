@@ -18,12 +18,12 @@ export function useCreateStore() {
 
   return useMutation({
     mutationFn: (request: ICreateStoreRequest) => storeApi.createStore(request),
-    onSuccess: () => {
+    onSuccess: (response) => {
       addAlert({
         severity: "success",
         message: STORE_SUCCESS_MESSAGES.STORE_CREATED,
       });
-      navigate(ROUTES.HOME);
+      navigate(ROUTES.STORE_DETAIL_HOME(response.id));
     },
     onError: (error) => {
       addAlert({
@@ -36,7 +36,6 @@ export function useCreateStore() {
 
 // 스토어 목록 조회 쿼리
 export function useStoreList() {
-  const { isAuthenticated } = useAuthStore();
   const { setStores } = useStoreStore();
   const { addAlert } = useAlertStore();
 
@@ -48,7 +47,7 @@ export function useStoreList() {
 
   useEffect(() => {
     if (query.isSuccess) {
-      setStores(query.data);
+      setStores(query.data.stores);
     }
   }, [query.isSuccess, query.data, setStores]);
 

@@ -33,7 +33,7 @@ const StatCard = ({
   </Card>
 );
 
-export const HomePage: React.FC = () => {
+export const StoreDetailHomePage: React.FC = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>

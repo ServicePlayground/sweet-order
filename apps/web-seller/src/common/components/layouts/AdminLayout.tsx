@@ -1,15 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
-  Drawer,
   AppBar,
   Toolbar,
-  List,
   Typography,
   IconButton,
-  ListItem,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
   useTheme,
@@ -18,18 +14,13 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import {
-  Menu as MenuIcon,
-  ChevronLeft as ChevronLeftIcon,
-  AccountCircle,
-  Logout as LogoutIcon,
-} from "@mui/icons-material";
-import { MENU_ITEMS } from "@/apps/web-seller/common/constants/menu.constant";
+import { Menu as MenuIcon, AccountCircle, Logout as LogoutIcon } from "@mui/icons-material";
+import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 import { useLogout } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
-import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 
-const drawerWidth = 240;
+const drawerWidth = 300;
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -38,7 +29,6 @@ interface AdminLayoutProps {
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(!isMobile);
@@ -70,6 +60,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: "flex" }}>
+      {/* 헤더 */}
       <AppBar
         position="fixed"
         sx={{
@@ -107,57 +98,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </Toolbar>
       </AppBar>
 
-      <Box
-        component="nav"
-        sx={{ width: { md: isDrawerOpen ? drawerWidth : 0 }, flexShrink: { md: 0 } }}
-      >
-        <Drawer
-          variant={isMobile ? "temporary" : "persistent"}
-          open={isMobile ? mobileOpen : isDrawerOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-        >
-          <Box>
-            <Toolbar>
-              <Typography variant="body2" noWrap component="div">
-                SWEET ORDER
-              </Typography>
-              {!isMobile && (
-                <IconButton onClick={handleDrawerToggle} sx={{ ml: "auto" }}>
-                  <ChevronLeftIcon />
-                </IconButton>
-              )}
-            </Toolbar>
-            <List>
-              {MENU_ITEMS.map((item) => (
-                <ListItem key={item.text} disablePadding>
-                  <ListItemButton
-                    selected={location.pathname === item.path}
-                    onClick={() => {
-                      navigate(item.path);
-                      if (isMobile) {
-                        setMobileOpen(false);
-                      }
-                    }}
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        </Drawer>
-      </Box>
+      {/* 사이드바 */}
+      <AdminSidebar
+        isMobile={isMobile}
+        open={isMobile ? mobileOpen : isDrawerOpen}
+        onToggle={handleDrawerToggle}
+        drawerWidth={drawerWidth}
+      />
 
+      {/* 메인 콘텐츠 */}
       <Box
         component="main"
         sx={{

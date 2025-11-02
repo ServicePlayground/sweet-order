@@ -7,7 +7,7 @@ import {
 
 export const storeApi = {
   // 스토어 목록 조회
-  getStoreList: async (): Promise<IStoreListItem[]> => {
+  getStoreList: async (): Promise<{ stores: IStoreListItem[] }> => {
     const response = await apiClient.get("/store/list");
     return response.data.data;
   },

@@ -27,7 +27,7 @@ const App: React.FC = () => {
                       const Element = route.element;
                       return <Route key={route.path} path={route.path} element={<Element />} />;
                     })}
-                    <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+                    <Route path="*" element={<Navigate to={ROUTES.ROOT} replace />} />
                   </Routes>
                 </AdminLayout>
               </Suspense>
