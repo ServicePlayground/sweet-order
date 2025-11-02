@@ -1,3 +1,5 @@
+import { SWAGGER_EXAMPLES as BUSINESS_SWAGGER_EXAMPLES } from "@apps/backend/modules/business/constants/business.contants";
+
 export const STORE_ERROR_MESSAGES = {
   BUSINESS_REGISTRATION_NUMBER_MISMATCH:
     "1단계(사업자등록번호 진위확인)와 2단계(통신판매사업자 등록상세 조회)의 사업자등록번호가 일치하지 않습니다.",
@@ -10,7 +12,7 @@ export const STORE_SUCCESS_MESSAGES = {
 } as const;
 
 export const SWAGGER_EXAMPLES = {
-  id: "QXZw02vBqVXNQ29c4w9n9ZdG",
+  ID: "QXZw02vBqVXNQ29c4w9n9ZdG",
   NAME: "스위트오더 스토어",
   DESCRIPTION: "맛있는 케이크를 판매하는 스토어입니다.",
   LOGO_IMAGE_URL: "https://example.com/logo.png",
@@ -19,6 +21,20 @@ export const SWAGGER_EXAMPLES = {
 
 export const SWAGGER_RESPONSE_EXAMPLES = {
   STORE_CREATED_RESPONSE: {
-    id: "QXZw02vBqVXNQ29c4w9n9ZdG",
+    id: SWAGGER_EXAMPLES.ID,
+  },
+  STORE_LIST_RESPONSE: {
+    stores: [
+      {
+        id: SWAGGER_EXAMPLES.ID,
+        logoImageUrl: SWAGGER_EXAMPLES.LOGO_IMAGE_URL,
+        name: SWAGGER_EXAMPLES.NAME,
+        description: SWAGGER_EXAMPLES.DESCRIPTION,
+        businessNo: BUSINESS_SWAGGER_EXAMPLES.B_NO,
+        businessName: BUSINESS_SWAGGER_EXAMPLES.B_NM,
+        createdAt: new Date("2024-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+      },
+    ],
   },
 };

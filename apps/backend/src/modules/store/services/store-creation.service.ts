@@ -81,6 +81,14 @@ export class StoreCreationService {
       },
     });
 
+    // 스토어 생성 완료 후 사용자 role을 seller로 변경 (이미 seller인 경우 유지)
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        role: "SELLER",
+      },
+    });
+
     return {
       id: store.id,
     };

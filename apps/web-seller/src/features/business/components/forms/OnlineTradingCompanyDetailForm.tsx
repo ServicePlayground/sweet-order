@@ -62,13 +62,12 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
           <TextField
-            label="인허가관리번호(통신번호)"
+            label="인허가관리번호(2021-서울강동-0422)"
             fullWidth
             value={form.prmmiMnno}
             onChange={handleChange("prmmiMnno")}
             error={Boolean(errors.prmmiMnno)}
             helperText={errors.prmmiMnno}
-            placeholder="2021-서울강동-0422"
             required
           />
         </Grid>

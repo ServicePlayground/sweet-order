@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Request } from "@nestjs/common";
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, Request } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { StoreService } from "@apps/backend/modules/store/store.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
@@ -90,5 +90,26 @@ export class SellerStoreController {
     @Body() createStoreDto: CreateStoreRequestDto,
   ) {
     return await this.storeService.createStore(req.user.sub, createStoreDto);
+  }
+
+  /**
+   * 내 스토어 목록 조회 API
+   * 현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다.
+   */
+  @Get("/list")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 내 스토어 목록 조회",
+    description: "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다.",
+  })
+  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.STORE_LIST_RESPONSE)
+  // 인증 오류 응답
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
+  async getMyStores(@Request() req: { user: JwtVerifiedPayload }) {
+    return await this.storeService.getStoresByUserId(req.user.sub);
   }
 }

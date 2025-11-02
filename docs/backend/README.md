@@ -41,6 +41,7 @@ Sweet Order 플랫폼을 위한 NestJS 백엔드 서비스입니다. 3-way 분�
   - `/v1/seller/business/online-trading-company/detail` - 통신판매사업자 등록상세 조회 (GET)
 - **스토어**:
   - `/v1/seller/store/create` - 스토어 생성 (POST)
+  - `/v1/seller/store/list` - 내 스토어 목록 조회 (GET)
 
 ### Admin API (`/v1/admin`)
 

@@ -42,6 +42,8 @@ export class KftcApiService {
         throw new Error("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
       }
 
+      // TODO: (임시) 반드시 주석 해제 필요
+      /*
       // 사업자등록번호 정규화 (하이픈 제거)
       const normalizedBusinessNumber = detailDto.brno.replace(/[-\s]/g, "");
 
@@ -77,7 +79,7 @@ export class KftcApiService {
       // 운영상태가 null/undefined이거나 "정상영업"이 아닌 경우 오류 처리
       if (!detail.operSttusCdNm || detail.operSttusCdNm !== "정상영업") {
         throw new BadRequestException(KFTC_API_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL);
-      }
+      */
     } catch (error: any) {
       if (error.message) {
         throw new BadRequestException(error.message);

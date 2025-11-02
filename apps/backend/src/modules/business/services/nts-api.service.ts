@@ -45,6 +45,8 @@ export class NtsApiService {
         throw new Error("NTS_API_URL가 설정되지 않았습니다.");
       }
 
+      // TODO: (임시) 반드시 주석 해제 필요
+      /*
       // 사업자등록번호 정규화 (하이픈 제거)
       const normalizedBusinessNumber = validationDto.b_no.replace(/[-\s]/g, "");
 
@@ -82,6 +84,7 @@ export class NtsApiService {
       ) {
         throw new Error(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
       }
+      */
     } catch (error: any) {
       if (error.message) {
         throw new BadRequestException(error.message);
