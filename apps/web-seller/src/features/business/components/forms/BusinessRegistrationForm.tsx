@@ -10,6 +10,7 @@ import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/con
 interface Props {
   onSubmit: (data: IBusinessRegistrationForm) => void;
   initialValue?: IBusinessRegistrationForm;
+  onChange?: (data: IBusinessRegistrationForm) => void;
 }
 
 export const defaultForm: IBusinessRegistrationForm = {
@@ -21,7 +22,7 @@ export const defaultForm: IBusinessRegistrationForm = {
   b_type: "",
 };
 
-export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialValue }) => {
+export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
   const [form, setForm] = useState<IBusinessRegistrationForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<Partial<Record<keyof IBusinessRegistrationForm, string>>>(
     {},
@@ -55,7 +56,9 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
       const raw = e.target.value;
       // 숫자만 허용해야 하는 필드들: b_no(10자리), start_dt(YYYYMMDD)
       const value = key === "b_no" || key === "start_dt" ? raw.replace(/\D/g, "") : raw;
-      setForm({ ...form, [key]: value });
+      const next = { ...form, [key]: value };
+      setForm(next);
+      onChange?.(next);
     };
 
   const handleSubmit = async (e: React.FormEvent) => {

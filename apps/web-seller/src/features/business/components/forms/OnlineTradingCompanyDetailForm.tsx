@@ -8,6 +8,7 @@ interface Props {
   onSubmit: (data: IOnlineTradingCompanyDetailForm) => void;
   onPrevious?: () => void;
   initialValue?: IOnlineTradingCompanyDetailForm;
+  onChange?: (data: IOnlineTradingCompanyDetailForm) => void;
 }
 
 export const defaultForm: IOnlineTradingCompanyDetailForm = {
@@ -18,6 +19,7 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
   onSubmit,
   onPrevious,
   initialValue,
+  onChange,
 }) => {
   const [form, setForm] = useState<IOnlineTradingCompanyDetailForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<
@@ -43,7 +45,9 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
 
   const handleChange =
     (key: keyof IOnlineTradingCompanyDetailForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setForm({ ...form, [key]: e.target.value });
+      const next = { ...form, [key]: e.target.value };
+      setForm(next);
+      onChange?.(next);
     };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -3,32 +3,38 @@ import { Box, Paper, Typography } from "@mui/material";
 import { ProgressBar } from "@/apps/web-seller/common/components/progressbars/progressbar";
 import { BusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { OnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
+import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
 import {
   IBusinessRegistrationForm,
   IBusinessRegistrationResponse,
   IOnlineTradingCompanyDetailForm,
   IOnlineTradingCompanyDetailResponse,
 } from "@/apps/web-seller/features/business/types/business.type";
+import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import {
   useGetOnlineTradingCompanyDetail,
   useVerifyBusinessRegistration,
 } from "@/apps/web-seller/features/business/hooks/queries/useBusiness";
+import { useCreateStore } from "@/apps/web-seller/features/store/hooks/queries/useStore";
 import { defaultForm as defaultBusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { defaultForm as defaultOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
+import { defaultForm as defaultStoreForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
 
 interface StepData {
   businessRegistrationForm: IBusinessRegistrationForm;
   businessRegistrationResponse: IBusinessRegistrationResponse | null;
   onlineTradingCompanyDetailForm: IOnlineTradingCompanyDetailForm;
   onlineTradingCompanyDetailResponse: IOnlineTradingCompanyDetailResponse | null;
+  storeForm: IStoreForm;
 }
 
 const TOTAL_STEPS = 3;
-const STEPS = ["사업자 정보 등록", "통신판매사업자 정보 등록", "검토/완료"];
+const STEPS = ["사업자 정보 등록", "통신판매사업자 정보 등록", "스토어 정보 입력"];
 
 export const StoreCreatePage: React.FC = () => {
   const verifyBusinessRegistrationMutation = useVerifyBusinessRegistration();
   const getOnlineTradingCompanyDetailMutation = useGetOnlineTradingCompanyDetail();
+  const createStoreMutation = useCreateStore();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [stepData, setStepData] = useState<StepData>({
@@ -36,6 +42,7 @@ export const StoreCreatePage: React.FC = () => {
     businessRegistrationResponse: null,
     onlineTradingCompanyDetailForm: defaultOnlineTradingCompanyDetailForm,
     onlineTradingCompanyDetailResponse: null,
+    storeForm: defaultStoreForm,
   });
 
   const handlePreviousStep = () => {
@@ -73,6 +80,28 @@ export const StoreCreatePage: React.FC = () => {
     handleNextStep();
   };
 
+  const handleSubmitStep3 = async (data: IStoreForm) => {
+    if (!stepData.businessRegistrationForm || !stepData.onlineTradingCompanyDetailForm) {
+      return;
+    }
+
+    setStepData((prev) => ({
+      ...prev,
+      storeForm: data,
+    }));
+
+    await createStoreMutation.mutateAsync({
+      businessValidation: stepData.businessRegistrationForm,
+      onlineTradingCompanyDetail: {
+        brno: stepData.businessRegistrationResponse?.response.b_no || "",
+        prmmiMnno: stepData.onlineTradingCompanyDetailForm.prmmiMnno,
+      },
+      name: data.name,
+      description: data.description,
+      logoImageUrl: data.logoImageUrl,
+    });
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -80,6 +109,9 @@ export const StoreCreatePage: React.FC = () => {
           <BusinessRegistrationForm
             onSubmit={handleSubmitStep1}
             initialValue={stepData.businessRegistrationForm}
+            onChange={(data) =>
+              setStepData((prev) => ({ ...prev, businessRegistrationForm: data }))
+            }
           />
         );
       case 2:
@@ -88,10 +120,20 @@ export const StoreCreatePage: React.FC = () => {
             onSubmit={handleSubmitStep2}
             onPrevious={handlePreviousStep}
             initialValue={stepData.onlineTradingCompanyDetailForm}
+            onChange={(data) =>
+              setStepData((prev) => ({ ...prev, onlineTradingCompanyDetailForm: data }))
+            }
           />
         );
       case 3:
-        return <>step3</>;
+        return (
+          <StoreCreationForm
+            onSubmit={handleSubmitStep3}
+            onPrevious={handlePreviousStep}
+            initialValue={stepData.storeForm}
+            onChange={(data) => setStepData((prev) => ({ ...prev, storeForm: data }))}
+          />
+        );
       default:
         return null;
     }
