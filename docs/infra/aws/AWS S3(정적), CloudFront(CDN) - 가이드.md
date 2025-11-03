@@ -1,5 +1,7 @@
 ## 일반 파일 저장(이미지/파일 업로드·배포) 목적
 
+### AWS S3 버킷 생성
+
 1. AWS > S3 > 버킷 생성
 
 - 버킷 유형: 범용
@@ -39,6 +41,49 @@
 
 ---
 
+
+### CloudFront 생성
+
+1. AWS > CloudFront > 배포 생성
+
+- 1단계
+   - Distribution name: sweetorder-static-staging
+   - Distribution type: Single website or app
+   - Domain: (생략)
+- 2단계
+   - Origin type: Amazon S3
+   - Origin: browse S3 버튼 클릭 > 해당 버킷 선택(sweetorder-uploads-{환경}-apne1)
+   - Origin path: (생략)
+   - Settings: 선택되어 있는 상태 유지
+- 3단계
+   - Web Application Firewall: 보안 보호 비활성화
+
+2. 정책 복사 및 저장
+   - 2-1. 생성한 배포 클릭 > origin(원본) 탭 > 해당 origin 선택 후 편집 > 정책 복사 버튼 클릭
+   - 2-2. AWS > S3 > sweetorder-uploads-{환경}-apne1 버킷 클릭 > 권한 탭 > 버킷 정책 편집 > CloudFront에서 복사한 정책을 JSON 편집기에 붙여넣기 > 저장
+
+3. (SSL 인증서 요청) AWS > Certificate Manager > 인증서 요청 (4단계까지 완료후 발급될때까지 기다려야함)
+
+- 인증서 유형: 퍼블릭 인증서 요청
+- 도메인 이름: static-staging.sweetorders.com
+- 내보내기: 내보내기 비활성화
+- 검증 방법: DNS 검증
+- 키 알고리즘: RSA 2048
+
+4. (DNS 레코드 생성) AWS > Route53 > 호스팅 영역 > sweetorders.com > 레코드 생성 > Type: CNAME, 위 3번에서 발급된 값 입력 > 생성
+
+5. (CloudFront에 SSL 인증서 연결) AWS > CloudFront > 생성한 배포 클릭 > 편집
+
+- Alternate domain names (CNAMEs): (항목 추가) static-staging.sweetorders.com
+- Custom SSL certificate: 드롭다운에서 발급된 인증서 선택
+
+6. (커스텀 도메인이 CloudFront Distribution을 가리키도록 설정) 
+
+   - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > Distribution domain name에서 값(*.cloudfront.net) 복사
+   - 6-1. AWS > Route53 > 호스팅 영역 > sweetorders.com > 레코드 생성 > name: static-staging, type: A, Alais: 체크, 트래픽 라우팅 대상: CloudFront배포에 대한 별칭, 드롭다운에서 배포 선택
+
+---
+
 1. 파일 크기 제한 추가 (DoS 방지)
    FileInterceptor에 10MB 제한 추가
    빈 파일 업로드 차단
@@ -65,8 +110,6 @@
 ↓ (파일 선택)
 [프론트엔드]
 → /api/uploads/presign 요청
-← presigned URL + fileUrl 받음
-→ presigned URL로 S3 업로드
 → /api/user/profile 에 fileUrl 전달
 [백엔드]
 → fileUrl을 DB에 저장
@@ -74,72 +117,6 @@
 [프론트엔드]
 → <img src={fileUrl} /> 렌더링
 
-정리하면
-
-프론트엔드는 파일 자체를 백엔드에 전송하지 않습니다.
-→ 대신, S3로 바로 올리고 그 “결과 URL”을 백엔드에 알려줍니다.
-
-백엔드는 실제 파일을 보관하지 않고, URL만 DB에 저장합니다.
-→ 예: profile_image_url 같은 필드에 CloudFront URL이 들어감.
-
-프론트엔드는 나중에 API에서 받은 이 URL을 그대로 <img src="...">로 사용.
-
-역할 하는 일 데이터 흐름
-프론트엔드 파일 선택 → presigned URL 요청 → S3에 직접 업로드 → 업로드된 파일 URL을 백엔드에 전달 파일 → S3, URL → 백엔드
-백엔드 presigned URL 생성 / 업로드된 URL 저장 / DB 관리 요청받고 URL 생성·저장
 S3 + CloudFront 실제 파일 저장 + CDN 캐싱 제공 저장 및 서빙 담당
-
-🧩 전체 흐름 요약
-
-프론트엔드에서 업로드 준비
-
-사용자가 파일(예: 이미지)을 선택.
-
-프론트엔드가 백엔드에 “이 이미지를 업로드할 presigned URL을 달라”고 요청합니다.
-
-POST /api/uploads/presign
-body: { fileName: "profile.png", contentType: "image/png" }
-
-백엔드에서 presigned URL 생성
-
-AWS SDK로 S3에 업로드 가능한 임시 URL(presigned URL)을 만들어서 프론트로 반환.
-
-{
-"uploadUrl": "https://s3.ap-northeast-2.amazonaws.com/my-bucket/uploads/profile.png?...",
-"fileUrl": "https://cdn.myapp.com/uploads/profile.png"
-}
-
-uploadUrl → S3에 직접 PUT 요청할 주소 (짧은 시간만 유효)
-
-fileUrl → 업로드 후 최종적으로 접근할 CloudFront URL (이미지 표시용)
-
-프론트엔드에서 S3로 직접 업로드
-
-백엔드에서 받은 uploadUrl로 파일을 바로 업로드합니다.
-
-await fetch(uploadUrl, {
-method: "PUT",
-headers: { "Content-Type": file.type },
-body: file,
-});
-
-업로드가 성공하면 실제 파일은 S3에 저장됩니다.
-
-백엔드로 업로드된 파일 경로(URL) 전달
-
-업로드 완료 후, 프론트엔드는 **“이 파일이 여기 저장되어 있다”**는 정보를 백엔드로 알려줍니다.
-
-백엔드는 그 URL을 DB에 저장합니다.
-(예: 프로필 이미지 주소, 게시물 이미지 주소 등)
-
-POST /api/user/profile
-body: { imageUrl: "https://cdn.myapp.com/uploads/profile.png" }
-
-→ 백엔드는 DB에 imageUrl을 그대로 저장.
-
-프론트엔드에서 이미지 표시
-
-나중에 사용자 정보를 불러올 때 DB에 저장된 imageUrl을 받아서
-<img src={imageUrl} /> 로 바로 보여주면 됩니다.
 
 CloudFront가 앞단에 있으므로 빠르게 이미지가 로드됩니다.

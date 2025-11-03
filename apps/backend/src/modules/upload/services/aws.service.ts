@@ -11,18 +11,18 @@ import { FileValidator } from "../utils/file-validator.util";
 export class AwsService {
   private readonly logger = new Logger(AwsService.name);
   private readonly s3Client: S3Client;
-  private readonly bucket: string;
-  private readonly region: string;
+  private readonly bucket?: string;
+  private readonly region?: string;  
+  private readonly cloudfrontDomain?: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.region = this.configService.get<string>("AWS_REGION") || "ap-northeast-1";
-    const bucket = this.configService.get<string>("S3_BUCKET");
+    this.region = this.configService.get<string>("AWS_REGION");
+    this.bucket = this.configService.get<string>("S3_BUCKET");
+    this.cloudfrontDomain = this.configService.get<string>("CLOUDFRONT_DOMAIN");
 
-    if (!bucket) {
-      throw new Error("S3_BUCKET 환경 변수가 설정되어 있지 않습니다.");
+    if (!this.bucket || !this.region || !this.cloudfrontDomain) {
+      throw new Error("S3_BUCKET 또는 AWS_REGION 또는 CLOUDFRONT_DOMAIN 환경 변수가 설정되어 있지 않습니다.");
     }
-
-    this.bucket = bucket;
 
     const accessKeyId = this.configService.get<string>("AWS_ACCESS_KEY_ID");
     const secretAccessKey = this.configService.get<string>("AWS_SECRET_ACCESS_KEY");
@@ -67,11 +67,15 @@ export class AwsService {
       await this.s3Client.send(command);
 
       // 최종 파일 URL 생성 (특수문자 URL 인코딩)
-      // CloudFront가 설정되면 나중에 CloudFront URL로 변경 필요
+      // CloudFront가 설정되어 있으면 CloudFront URL 사용, 없으면 S3 URL 사용
       // S3 URL은 슬래시(/)를 경로 구분자로 사용하므로 각 경로 세그먼트를 개별 인코딩
       const pathSegments = uniqueFilename.split("/").map((segment) => encodeURIComponent(segment));
       const encodedKey = pathSegments.join("/");
-      const fileUrl = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${encodedKey}`;
+      
+      // CloudFront 도메인이 설정되어 있으면 CloudFront URL 사용
+      const fileUrl = this.cloudfrontDomain
+        ? `https://${this.cloudfrontDomain}/${encodedKey}`
+        : `https://${this.bucket}.s3.${this.region}.amazonaws.com/${encodedKey}`;
 
       this.logger.debug(`파일 업로드 완료: ${uniqueFilename} (원본: ${file.originalname})`);
 
