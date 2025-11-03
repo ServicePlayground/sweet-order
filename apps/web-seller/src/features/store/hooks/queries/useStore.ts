@@ -8,7 +8,6 @@ import { ICreateStoreRequest } from "@/apps/web-seller/features/store/types/stor
 import { STORE_SUCCESS_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { storeQueryKeys } from "../../constants/storeQueryKeys.constant";
-import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store";
 
 // 스토어 생성 뮤테이션
