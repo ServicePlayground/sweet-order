@@ -14,12 +14,12 @@ Sweet Order 플랫폼을 위한 NestJS 백엔드 서비스입니다. 3-way 분�
 - **데이터베이스**: Prisma ORM + PostgreSQL
 - **API 문서**: Swagger 3-way 분리 문서
 - **보안**: Rate Limiting, CORS, Helmet
+- **파일 업로드**: S3 + CloudFront, 백엔드 경유 업로드(10MB 제한, MIME/확장자 검증)
 
 ### 🔄 개발 중
 
 - 주문 관리 시스템
 - 결제 연동
-- 파일 업로드
 - Admin API 확장
 
 ## 📚 상세 문서
@@ -32,6 +32,7 @@ Sweet Order 플랫폼을 위한 NestJS 백엔드 서비스입니다. 3-way 분�
 
 - **인증**: `/v1/user/auth/*` - 로그인, 회원가입, 휴대폰 인증
 - **상품**: `/v1/user/products/*` - 상품 조회, 좋아요
+- **업로드**: `/v1/user/uploads/file` - 파일 업로드 (POST, multipart/form-data)
 
 ### Seller API (`/v1/seller`)
 
