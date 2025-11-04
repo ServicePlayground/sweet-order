@@ -12,7 +12,7 @@ export class AwsService {
   private readonly logger = new Logger(AwsService.name);
   private readonly s3Client: S3Client;
   private readonly bucket?: string;
-  private readonly region?: string;  
+  private readonly region?: string;
   private readonly cloudfrontDomain?: string;
 
   constructor(private readonly configService: ConfigService) {
@@ -21,7 +21,9 @@ export class AwsService {
     this.cloudfrontDomain = this.configService.get<string>("CLOUDFRONT_DOMAIN");
 
     if (!this.bucket || !this.region || !this.cloudfrontDomain) {
-      throw new Error("S3_BUCKET 또는 AWS_REGION 또는 CLOUDFRONT_DOMAIN 환경 변수가 설정되어 있지 않습니다.");
+      throw new Error(
+        "S3_BUCKET 또는 AWS_REGION 또는 CLOUDFRONT_DOMAIN 환경 변수가 설정되어 있지 않습니다.",
+      );
     }
 
     const accessKeyId = this.configService.get<string>("AWS_ACCESS_KEY_ID");
@@ -71,7 +73,7 @@ export class AwsService {
       // S3 URL은 슬래시(/)를 경로 구분자로 사용하므로 각 경로 세그먼트를 개별 인코딩
       const pathSegments = uniqueFilename.split("/").map((segment) => encodeURIComponent(segment));
       const encodedKey = pathSegments.join("/");
-      
+
       // CloudFront 도메인이 설정되어 있으면 CloudFront URL 사용
       const fileUrl = this.cloudfrontDomain
         ? `https://${this.cloudfrontDomain}/${encodedKey}`
@@ -87,4 +89,3 @@ export class AwsService {
     }
   }
 }
-

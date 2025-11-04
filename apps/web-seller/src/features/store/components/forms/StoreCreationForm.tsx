@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Button, Grid, TextField } from "@mui/material";
 import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import { STORE_ERROR_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
-import { ImageUpload } from "@/apps/web-seller/common/components/upload/ImageUpload";
+import { ImageUpload } from "@/apps/web-seller/common/components/images/ImageUpload";
 
 interface Props {
   onSubmit: (data: IStoreForm) => void;
@@ -69,6 +69,8 @@ export const StoreCreationForm: React.FC<Props> = ({
       <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
           <ImageUpload
+            width={360}
+            height={360}
             label="로고 이미지"
             value={form.logoImageUrl || ""}
             onChange={(url) => {
@@ -77,8 +79,6 @@ export const StoreCreationForm: React.FC<Props> = ({
               onChange?.(next);
             }}
             error={errors.logoImageUrl}
-            accept="image/jpeg,image/jpg,image/png"
-            aspectRatio="1/1"
           />
         </Grid>
         <Grid item xs={12} md={12}>

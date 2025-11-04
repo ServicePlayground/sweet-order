@@ -1,8 +1,5 @@
 import { authClient } from "@/apps/web-seller/common/config/axios.config";
-
-export interface IUploadFileResponse {
-  fileUrl: string;
-}
+import { IUploadFileResponse } from "@/apps/web-seller/features/upload/types/upload.type";
 
 export const uploadApi = {
   // 파일 업로드
@@ -18,4 +15,3 @@ export const uploadApi = {
     return response.data.data;
   },
 };
-

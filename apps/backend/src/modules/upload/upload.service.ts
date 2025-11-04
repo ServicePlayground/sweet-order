@@ -15,10 +15,7 @@ export class UploadService {
    * 파일 업로드 (백엔드 내부에서 S3 업로드 처리)
    * 프론트엔드에서 파일을 받아서 백엔드가 S3에 업로드하는 방식
    */
-  async uploadFile(
-    file: { originalname: string; mimetype: string; buffer: Buffer },
-  ) {
+  async uploadFile(file: { originalname: string; mimetype: string; buffer: Buffer }) {
     return await this.awsService.uploadFile(file);
   }
 }
-

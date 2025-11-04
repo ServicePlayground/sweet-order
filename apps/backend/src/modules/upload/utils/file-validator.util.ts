@@ -152,11 +152,7 @@ export class FileValidator {
   /**
    * 전체 파일 검증 (통합)
    */
-  static validateFile(file: {
-    originalname: string;
-    mimetype: string;
-    buffer: Buffer;
-  }): {
+  static validateFile(file: { originalname: string; mimetype: string; buffer: Buffer }): {
     normalizedFilename: string;
     uniqueFilename: string;
   } {
@@ -189,4 +185,3 @@ export class FileValidator {
     };
   }
 }
-

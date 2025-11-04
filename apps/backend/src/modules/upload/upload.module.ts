@@ -12,4 +12,3 @@ import { AwsService } from "./services/aws.service";
   exports: [UploadService],
 })
 export class UploadModule {}
-

@@ -41,22 +41,21 @@
 
 ---
 
-
 ### CloudFront 생성
 
 1. AWS > CloudFront > 배포 생성
 
 - 1단계
-   - Distribution name: sweetorder-static-staging
-   - Distribution type: Single website or app
-   - Domain: (생략)
+  - Distribution name: sweetorder-static-staging
+  - Distribution type: Single website or app
+  - Domain: (생략)
 - 2단계
-   - Origin type: Amazon S3
-   - Origin: browse S3 버튼 클릭 > 해당 버킷 선택(sweetorder-uploads-{환경}-apne1)
-   - Origin path: (생략)
-   - Settings: 선택되어 있는 상태 유지
+  - Origin type: Amazon S3
+  - Origin: browse S3 버튼 클릭 > 해당 버킷 선택(sweetorder-uploads-{환경}-apne1)
+  - Origin path: (생략)
+  - Settings: 선택되어 있는 상태 유지
 - 3단계
-   - Web Application Firewall: 보안 보호 비활성화
+  - Web Application Firewall: 보안 보호 비활성화
 
 2. 정책 복사 및 저장
    - 2-1. 생성한 배포 클릭 > origin(원본) 탭 > 해당 origin 선택 후 편집 > 정책 복사 버튼 클릭
@@ -77,9 +76,8 @@
 - Alternate domain names (CNAMEs): (항목 추가) static-staging.sweetorders.com
 - Custom SSL certificate: 드롭다운에서 발급된 인증서 선택
 
-6. (커스텀 도메인이 CloudFront Distribution을 가리키도록 설정) 
-
-   - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > Distribution domain name에서 값(*.cloudfront.net) 복사
+6. (커스텀 도메인이 CloudFront Distribution을 가리키도록 설정)
+   - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > Distribution domain name에서 값(\*.cloudfront.net) 복사
    - 6-1. AWS > Route53 > 호스팅 영역 > sweetorders.com > 레코드 생성 > name: static-staging, type: A, Alais: 체크, 트래픽 라우팅 대상: CloudFront배포에 대한 별칭, 드롭다운에서 배포 선택
 
 ---
