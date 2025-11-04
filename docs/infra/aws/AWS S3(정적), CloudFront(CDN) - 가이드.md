@@ -1,6 +1,6 @@
 ## 일반 파일 저장(이미지/파일 업로드·배포) 목적
 
-### AWS S3 버킷 생성
+### 1. AWS S3 버킷 생성
 
 1. AWS > S3 > 버킷 생성
 
@@ -39,9 +39,7 @@
 
 4. 백엔드에서 @aws-sdk/client-s3 설치 후 파일 업로드 API 구현
 
----
-
-### CloudFront 생성
+### 2. CloudFront 생성
 
 1. AWS > CloudFront > 배포 생성
 
@@ -82,6 +80,28 @@
 
 ---
 
+## 요약
+
+### 참고사항
+
+참고: CloudFront는 글로벌 엣지 네트워크 서비스이며, SSL 인증서(ACM)는 CloudFront 용도로는 버지니아 북부(us-east-1) 리전에 발급해야 합니다.
+
+### 현재 구현
+
+- 프론트엔드: 사용자/판매자 웹에서 파일을 선택하면 인증된 요청으로 백엔드에 바로 업로드합니다.
+  - 요청: `POST {API_BASE_URL}/v1/user/uploads/file`
+  - 헤더/바디: `multipart/form-data` (필드명 `file`), 인증 쿠키 포함
+  - 응답: `{ fileUrl: string }` (CloudFront 도메인을 포함한 최종 URL)
+- 백엔드: NestJS `FileInterceptor`로 파일을 받고, 서버에서 S3에 업로드합니다.
+  - 파일 검증: 크기(최대 10MB), 빈 파일 차단, 허용 확장자/차단 확장자, MIME 타입 및 확장자 일치 검증, 파일명 정규화, 고유 파일명 생성
+  - S3 업로드: `PutObject`로 업로드, SSE-S3(AES-256) 적용, 경로 세그먼트별 URL 인코딩
+  - URL 결정: `CLOUDFRONT_DOMAIN`이 설정되어 있으면 `https://{cloudfront}/{key}` 반환, 없으면 S3 정적 URL 반환
+- 프론트엔드 사용: 받은 `fileUrl`을 그대로 `<img src={fileUrl} />` 등으로 렌더링/저장
+
+참고: 현재 흐름은 "프리사인 URL" 방식이 아니라 "백엔드 경유 업로드" 방식입니다. 따라서 업로드 자체에는 S3 CORS 설정이 필수는 아니며(직접 브라우저→S3 업로드가 아님), 다만 정적 파일을 브라우저가 요청할 때는 CloudFront/S3 정책이 적용됩니다.
+
+### 현재 구현(백엔드 파일 검증 및 정규화 로직)
+
 1. 파일 크기 제한 추가 (DoS 방지)
    FileInterceptor에 10MB 제한 추가
    빈 파일 업로드 차단
@@ -101,20 +121,17 @@
 6. URL 인코딩 처리
    특수문자 안전 처리
    각 경로 세그먼트 개별 인코딩
+7. S3 서버 측 암호화
+   업로드 시 SSE-S3(AES-256) 적용
 
----
+### CloudFront 특징/장점
 
-[사용자]
-↓ (파일 선택)
-[프론트엔드]
-→ /api/uploads/presign 요청
-→ /api/user/profile 에 fileUrl 전달
-[백엔드]
-→ fileUrl을 DB에 저장
-← OK 응답
-[프론트엔드]
-→ <img src={fileUrl} /> 렌더링
+- 전 세계 엣지 로케이션 캐싱: 낮은 레이턴시와 빠른 응답 속도 제공
+- S3를 원본으로 연동: 정적 파일 배포에 최적화, 트래픽 오프로딩
+- HTTP/2, Brotli 압축 지원: 전송 효율 향상
+- 캐시 무효화(Invalidation) 지원: 변경 파일 신속 반영
+- 보안: HTTPS, ACM 기반 커스텀 도메인, AWS WAF/Shield 연계, 서명 URL/쿠키(선택)
+- 액세스 제어: OAI/OAC로 S3 버킷을 프라이빗으로 두고 CloudFront만 접근 가능하게 설정 가능
+- 지리적 제한(Geo restriction) 및 사용자 정의 헤더/오리진 정책 구성
 
-S3 + CloudFront 실제 파일 저장 + CDN 캐싱 제공 저장 및 서빙 담당
-
-CloudFront가 앞단에 있으므로 빠르게 이미지가 로드됩니다.
+S3 + CloudFront 조합은 실제 파일 저장(S3)과 글로벌 캐싱/서빙(CloudFront)을 분리하여, 비용 효율적이면서도 빠른 정적 리소스 제공이 가능합니다.
