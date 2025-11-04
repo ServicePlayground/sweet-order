@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Button, Grid, TextField } from "@mui/material";
 import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import { STORE_ERROR_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
+import { ImageUpload } from "@/apps/web-seller/common/components/upload/ImageUpload";
 
 interface Props {
   onSubmit: (data: IStoreForm) => void;
@@ -45,14 +46,6 @@ export const StoreCreationForm: React.FC<Props> = ({
       newErrors.description = STORE_ERROR_MESSAGES.DESCRIPTION_TOO_LONG;
     }
 
-    if (form.logoImageUrl && form.logoImageUrl.trim()) {
-      try {
-        new URL(form.logoImageUrl);
-      } catch {
-        newErrors.logoImageUrl = STORE_ERROR_MESSAGES.LOGO_IMAGE_URL_INVALID;
-      }
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -75,6 +68,20 @@ export const StoreCreationForm: React.FC<Props> = ({
     <Box component="form" onSubmit={handleSubmit} noValidate>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
+          <ImageUpload
+            label="로고 이미지"
+            value={form.logoImageUrl || ""}
+            onChange={(url) => {
+              const next = { ...form, logoImageUrl: url };
+              setForm(next);
+              onChange?.(next);
+            }}
+            error={errors.logoImageUrl}
+            accept="image/jpeg,image/jpg,image/png"
+            aspectRatio="1/1"
+          />
+        </Grid>
+        <Grid item xs={12} md={12}>
           <TextField
             label="스토어 이름(스위트오더 스토어)"
             fullWidth
@@ -95,16 +102,6 @@ export const StoreCreationForm: React.FC<Props> = ({
             onChange={handleChange("description")}
             error={Boolean(errors.description)}
             helperText={errors.description}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="로고 이미지 URL(https://example.com/logo.png)"
-            fullWidth
-            value={form.logoImageUrl || ""}
-            onChange={handleChange("logoImageUrl")}
-            error={Boolean(errors.logoImageUrl)}
-            helperText={errors.logoImageUrl}
           />
         </Grid>
       </Grid>
