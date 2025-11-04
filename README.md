@@ -234,3 +234,5 @@ yarn common:format:check       # Prettier 포맷팅 검사
 - **[AWS App Runner 가이드](<./docs/infra/aws/AWS%20App%20Runner(backend)%20-%20가이드.md>)**: AWS App Runner 백엔드 배포 가이드
 - **[AWS Region 가이드](./docs/infra/aws/AWS%20Region%20-%20가이드.md)**: AWS 리전 선택 가이드
 - **[AWS Route53 가이드](<./docs/infra/aws/AWS%20Route53(도메인)%20-%20가이드.md>)**: AWS Route53 도메인 설정 가이드
+- **[AWS S3(정적), CloudFront(CDN) 가이드](<./docs/infra/aws/AWS%20S3(정적),%20CloudFront(CDN)%20-%20가이드.md>)**: AWS S3(정적), CloudFront(CDN) 설정 가이드
+- **[Vercel 배포 가이드](./docs/infra/vercel/Vercel%20배포%20-%20가이드.md)**: Vercel 배포 가이드
