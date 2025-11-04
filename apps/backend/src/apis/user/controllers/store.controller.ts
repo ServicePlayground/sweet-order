@@ -38,4 +38,3 @@ export class UserStoreController {
     return await this.storeService.getStoreById(id);
   }
 }
-

@@ -7,6 +7,7 @@ import { AuthInitializerProvider } from "@/apps/web-user/features/auth/component
 import { Alert } from "@/apps/web-user/common/components/alerts/Alert";
 import { LoadingFallback } from "@/apps/web-user/common/components/fallbacks/LoadingFallback";
 import { Suspense } from "react";
+import Header from "@/apps/web-user/common/components/headers/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -107,6 +108,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ErrorBoundaryProvider>
           <QueryProvider>
+            <Header />
             <Suspense
               fallback={<LoadingFallback variant="overlay" message="페이지를 불러오는 중" />}
             >

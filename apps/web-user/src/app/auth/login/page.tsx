@@ -8,8 +8,8 @@ import {
   createGoogleOAuthUrlWithReturnUrl,
 } from "@/apps/web-user/common/utils/returnUrl.util";
 
-// 사용자페이지, 판매자페이지 모두 인증이 필요할 때 여기 페이지 경로(/login 경로로 리다이렉트됨)
-// 리다이렉트는 /login 경로에서 "일반 로그인", "구글 로그인" 버튼 클릭 시에만 이루어짐
+// 사용자페이지, 판매자페이지 모두 인증이 필요할 때 여기 페이지 경로(/auth/login 경로로 리다이렉트됨)
+// 리다이렉트는 /auth/login 경로에서 "일반 로그인", "구글 로그인" 버튼 클릭 시에만 이루어짐
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl");

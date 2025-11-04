@@ -15,7 +15,7 @@ export class StoreMapperUtil {
     return {
       id: store.id,
       userId: store.userId,
-      logoImageUrl: store.logoImageUrl ?? undefined,      
+      logoImageUrl: store.logoImageUrl ?? undefined,
       name: store.name,
       description: store.description ?? undefined,
       businessNo: store.businessNo,
@@ -30,4 +30,3 @@ export class StoreMapperUtil {
     };
   }
 }
-

@@ -23,9 +23,9 @@
       "http://localhost:3001",
       "http://localhost:3002",
       "http://localhost:3003",
-      "https://staging.sweetorder.com",
-      "https://seller-staging.sweetorder.com",
-      "https://admin-staging.sweetorder.com"
+      "https://staging.sweetorders.com",
+      "https://seller-staging.sweetorders.com",
+      "https://admin-staging.sweetorders.com"
     ],
     "AllowedMethods": ["GET", "HEAD", "PUT", "POST"],
     "AllowedHeaders": ["*"], // 전체 허용
@@ -61,6 +61,7 @@
 
 3. (SSL 인증서 요청) AWS > Certificate Manager > 인증서 요청 (4단계까지 완료후 발급될때까지 기다려야함)
 
+- (us-east-1)
 - 인증서 유형: 퍼블릭 인증서 요청
 - 도메인 이름: static-staging.sweetorders.com
 - 내보내기: 내보내기 비활성화
@@ -75,8 +76,7 @@
 - Custom SSL certificate: 드롭다운에서 발급된 인증서 선택
 
 6. (커스텀 도메인이 CloudFront Distribution을 가리키도록 설정)
-   - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > Distribution domain name에서 값(\*.cloudfront.net) 복사
-   - 6-1. AWS > Route53 > 호스팅 영역 > sweetorders.com > 레코드 생성 > name: static-staging, type: A, Alais: 체크, 트래픽 라우팅 대상: CloudFront배포에 대한 별칭, 드롭다운에서 배포 선택
+   - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > 대체 도메인 이름 아래 "Route domains to CloudFront" 버튼 클릭 > Set up routing automatically 클릭
 
 ---
 

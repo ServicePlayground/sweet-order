@@ -229,7 +229,8 @@ async function main() {
         userId: users[0].id, // SELLER 역할을 가진 첫 번째 사용자
         name: "스위트오더 스토어",
         description: "맛있는 케이크를 판매하는 스토어입니다.",
-        logoImageUrl: "https://example.com/logo.png",
+        logoImageUrl:
+          "https://static-staging.sweetorders.com/uploads/1__1762274005545_4bfc55b7.jpeg",
         // 사업자 정보 (1단계)
         businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
         representativeName: "홍길동",

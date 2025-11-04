@@ -10,5 +10,5 @@ export const createSellerToUserRedirectUrl = (userDomain: string): string => {
   const currentPath = window.location.pathname + window.location.search;
   const fullReturnUrl = window.location.origin + currentPath;
   const returnUrl = encodeURIComponent(fullReturnUrl);
-  return `${userDomain}/login?returnUrl=${returnUrl}`;
+  return `${userDomain}/auth/login?returnUrl=${returnUrl}`;
 };

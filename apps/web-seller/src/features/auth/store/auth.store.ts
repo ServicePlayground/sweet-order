@@ -41,6 +41,6 @@ export const useAuthStore = create<AuthState>()((set) => ({
     const currentPath = window.location.pathname + window.location.search;
     const fullReturnUrl = window.location.origin + currentPath;
     const returnUrl = encodeURIComponent(fullReturnUrl);
-    window.location.href = `${import.meta.env.VITE_PUBLIC_USER_DOMAIN}/login?returnUrl=${returnUrl}`;
+    window.location.href = `${import.meta.env.VITE_PUBLIC_USER_DOMAIN}/auth/login?returnUrl=${returnUrl}`;
   },
 }));

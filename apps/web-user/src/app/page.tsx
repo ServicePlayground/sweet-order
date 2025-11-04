@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import Layout from "@/apps/web-user/common/components/layouts/Layout";
 
 // 홈페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
 export const metadata: Metadata = {
@@ -35,10 +34,8 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <Layout>
-      <div>
-        <h1>홈</h1>
-      </div>
-    </Layout>
+    <div>
+      <h1>홈</h1>
+    </div>
   );
 }

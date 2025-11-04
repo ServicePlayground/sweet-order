@@ -34,8 +34,10 @@ export const useAuthStore = create<AuthState>()((set) => ({
     });
 
     // returnUrl이 있으면 해당 URL로, 없으면 홈으로 이동
-    const urlParams = new URLSearchParams(window.location.search);
-    handleReturnUrlRedirect(urlParams, PATHS.HOME, router);
+    if (router) {
+      const urlParams = new URLSearchParams(window.location.search);
+      handleReturnUrlRedirect(urlParams, PATHS.HOME, router);
+    }
   },
 
   // 로그아웃

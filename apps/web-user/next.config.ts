@@ -17,16 +17,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [
-      { source: "/login", destination: "/auth/login", permanent: true },
-      { source: "/login/basic", destination: "/auth/login/basic", permanent: true },
-      { source: "/login/google", destination: "/auth/login/google", permanent: true },
-      { source: "/register/basic", destination: "/auth/register/basic", permanent: true },
-      { source: "/find-account", destination: "/auth/find-account", permanent: true },
-      { source: "/reset-password", destination: "/auth/reset-password", permanent: true },
-    ];
-  },
 };
 
 export default nextConfig;

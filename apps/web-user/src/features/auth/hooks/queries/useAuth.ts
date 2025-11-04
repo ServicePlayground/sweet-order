@@ -82,7 +82,7 @@ export function useMe() {
   // 성공 시 스토어에 로그인 정보 저장
   useEffect(() => {
     if (query.isSuccess && query.data && "user" in query.data) {
-      login(query.data.user, router);
+      login(query.data.user, null);
     }
   }, [query.isSuccess, query.data, login]);
 

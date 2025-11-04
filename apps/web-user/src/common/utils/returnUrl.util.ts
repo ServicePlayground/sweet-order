@@ -1,7 +1,7 @@
 /**
  * returnUrl 관련 유틸리티 함수들
  *
- * 판매자페이지에서 인증이 필요할 때 무조건 web-user의 /login 경로로 리다이렉트되도록 처리하였음
+ * 판매자페이지에서 인증이 필요할 때 무조건 web-user의 /auth/login 경로로 리다이렉트되도록 처리하였음
  * 리다이렉트 유지는 "일반 로그인", "구글 로그인" 버튼 클릭 시에만 이루어짐
  */
 
@@ -16,7 +16,7 @@ export const getReturnUrl = (): string | null => {
 
 /**
  * returnUrl을 포함한 새로운 URL을 생성합니다.
- * @param basePath - 기본 경로 (예: '/login/basic')
+ * @param basePath - 기본 경로 (예: 'auth/login/basic')
  * @param returnUrl - 리턴할 URL (없으면 현재 URL에서 가져옴)
  */
 export const createUrlWithReturnUrl = (basePath: string, returnUrl?: string): string => {
