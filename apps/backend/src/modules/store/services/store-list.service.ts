@@ -1,5 +1,7 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
+import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
+import { StoreMapperUtil } from "@apps/backend/modules/store/utils/store-mapper.util";
 
 /**
  * 스토어 목록 조회 서비스
@@ -22,16 +24,24 @@ export class StoreListService {
     });
 
     return {
-      stores: stores.map((store) => ({
-        id: store.id,
-        logoImageUrl: store.logoImageUrl,
-        name: store.name,
-        description: store.description,
-        businessNo: store.businessNo,
-        businessName: store.businessName,
-        createdAt: store.createdAt,
-        updatedAt: store.updatedAt,
-      })),
+      stores: stores.map((store) => StoreMapperUtil.mapToStoreResponse(store)),
     };
+  }
+
+  /**
+   * 스토어 상세 조회
+   * @param storeId 스토어 ID
+   * @returns 스토어 상세 정보
+   */
+  async getStoreById(storeId: string) {
+    const store = await this.prisma.store.findFirst({
+      where: { id: storeId },
+    });
+
+    if (!store) {
+      throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    return StoreMapperUtil.mapToStoreResponse(store);
   }
 }

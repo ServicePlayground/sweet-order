@@ -32,4 +32,13 @@ export class StoreService {
   async getStoresByUserId(userId: string) {
     return await this.storeListService.getStoresByUserId(userId);
   }
+
+  /**
+   * 스토어 상세 조회
+   * @param storeId 스토어 ID
+   * @returns 스토어 상세 정보
+   */
+  async getStoreById(storeId: string) {
+    return await this.storeListService.getStoreById(storeId);
+  }
 }

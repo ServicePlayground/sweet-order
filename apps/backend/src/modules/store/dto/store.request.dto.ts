@@ -6,6 +6,7 @@ import {
   OnlineTradingCompanyDetailRequestDto,
 } from "@apps/backend/modules/business/dto/business-request.dto";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
+import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
 
 /**
  * 스토어 생성 요청 DTO (3단계)
@@ -33,7 +34,7 @@ export class CreateStoreRequestDto {
   // 3단계: 스토어 정보
   @ApiProperty({
     description: "스토어 로고 이미지 URL",
-    example: SWAGGER_EXAMPLES.LOGO_IMAGE_URL,
+    example: UPLOAD_SWAGGER_EXAMPLES.FILE_URL,
     required: false,
   })
   @IsString()
