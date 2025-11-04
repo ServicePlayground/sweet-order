@@ -5,18 +5,23 @@
  */
 
 export const PATHS = {
-  // 인증 관련 경로
-  AUTH: {
-    LOGIN: "/login",
-    LOGIN_BASIC: "/login/basic",
-    GOOGLE_REDIRECT_URI: "/login/google",
-    REGISTER_BASIC: "/register/basic",
-    FIND_ACCOUNT: "/find-account",
-    RESET_PASSWORD: "/reset-password",
-  },
-
   // 메인 페이지
   HOME: "/",
+
+  // 인증 관련 경로
+  AUTH: {
+    LOGIN: "/auth/login",
+    LOGIN_BASIC: "/auth/login/basic",
+    GOOGLE_REDIRECT_URI: "/auth/login/google",
+    REGISTER_BASIC: "/auth/register/basic",
+    FIND_ACCOUNT: "/auth/find-account",
+    RESET_PASSWORD: "/auth/reset-password",
+  },
+
+  // 스토어 관련 경로
+  STORE: {
+    DETAIL: (storeId: string) => `/store/${storeId}`,
+  },
 } as const;
 
 // 타입 안전성을 위한 경로 타입
