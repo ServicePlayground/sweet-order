@@ -73,3 +73,15 @@ export const UPLOAD_CONSTANTS = {
   UPLOAD_DIRECTORY: "uploads",
 } as const;
 
+
+export const SWAGGER_EXAMPLES = {
+  FILE_URL: "https://s3.ap-northeast-1.amazonaws.com/sweetorder-uploads-staging-apne1/uploads/profile.png",
+};
+
+export const SWAGGER_RESPONSE_EXAMPLES = {
+  UPLOAD_FILE_RESPONSE: {
+    fileUrl: SWAGGER_EXAMPLES.FILE_URL,
+  },
+} as const;
+
+

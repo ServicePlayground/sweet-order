@@ -49,7 +49,7 @@ export class AwsService {
    * @param file 업로드할 파일
    * @returns 업로드된 파일의 URL
    */
-  async uploadFile(file: { originalname: string; mimetype: string; buffer: Buffer }): Promise<string> {
+  async uploadFile(file: { originalname: string; mimetype: string; buffer: Buffer }) {
     // 파일 검증 (크기, 타입, 이름 등)
     const { uniqueFilename } = FileValidator.validateFile(file);
 

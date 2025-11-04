@@ -17,7 +17,7 @@ export class UploadService {
    */
   async uploadFile(
     file: { originalname: string; mimetype: string; buffer: Buffer },
-  ): Promise<string> {
+  ) {
     return await this.awsService.uploadFile(file);
   }
 }

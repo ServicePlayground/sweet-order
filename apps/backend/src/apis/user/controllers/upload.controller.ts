@@ -10,12 +10,11 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from "@nestjs/swagger";
 import { UploadService } from "@apps/backend/modules/upload/upload.service";
-import { UploadFileResponseDto } from "@apps/backend/modules/upload/dto/upload-response.dto";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { AUTH_ERROR_MESSAGES, USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import { UPLOAD_CONSTANTS } from "@apps/backend/modules/upload/constants/upload.constants";
+import { SWAGGER_RESPONSE_EXAMPLES, UPLOAD_CONSTANTS } from "@apps/backend/modules/upload/constants/upload.constants";
 
 /**
  * 사용자 업로드 컨트롤러
@@ -57,7 +56,7 @@ export class UserUploadController {
       },
     },
   })
-  @SwaggerResponse(200, UploadFileResponseDto)
+  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.UPLOAD_FILE_RESPONSE)
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
@@ -72,7 +71,7 @@ export class UserUploadController {
           buffer: Buffer;
         }
       | undefined,
-  ): Promise<UploadFileResponseDto> {
+  ) {
     if (!file) {
       throw new BadRequestException("파일이 업로드되지 않았습니다.");
     }
