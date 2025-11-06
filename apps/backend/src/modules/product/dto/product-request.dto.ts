@@ -15,11 +15,9 @@ import {
   OptionalStringToNumber,
 } from "@apps/backend/common/decorators/transform.decorator";
 import {
-  TargetAudience,
   DeliveryMethod,
   SortBy,
   SizeRange,
-  DeliveryDays,
 } from "@apps/backend/modules/product/constants/product.constants";
 
 /**
@@ -65,18 +63,6 @@ export class GetProductsRequestDto {
   search?: string;
 
   @ApiPropertyOptional({
-    description: "(필터) 대상 기준 - (중복가능)쉼표로 구분하여 전달",
-    enum: TargetAudience,
-    type: "string",
-    example: `${TargetAudience.ADULT},${TargetAudience.CHILD}`,
-  })
-  @StringToArray()
-  @IsOptional()
-  @IsArray()
-  @IsEnum(TargetAudience, { each: true })
-  targetAudience?: TargetAudience[];
-
-  @ApiPropertyOptional({
     description: "(필터) 인원 수 - (중복가능)쉼표로 구분하여 전달",
     enum: SizeRange,
     type: "string",
@@ -99,18 +85,6 @@ export class GetProductsRequestDto {
   @IsArray()
   @IsEnum(DeliveryMethod, { each: true })
   deliveryMethod?: DeliveryMethod[];
-
-  @ApiPropertyOptional({
-    description: "(필터) 수령 일수 - (중복가능)쉼표로 구분하여 전달",
-    enum: DeliveryDays,
-    type: "string",
-    example: `${DeliveryDays.ONE_TO_TWO},${DeliveryDays.TWO_TO_THREE}`,
-  })
-  @StringToArray()
-  @IsOptional()
-  @IsArray()
-  @IsEnum(DeliveryDays, { each: true })
-  deliveryDays?: DeliveryDays[];
 
   @ApiPropertyOptional({ description: "(필터) 최소 가격", example: 10000 })
   @OptionalStringToNumber()

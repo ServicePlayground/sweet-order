@@ -25,10 +25,8 @@ export class ProductService {
       page,
       limit,
       sortBy,
-      targetAudience,
       sizeRange,
       deliveryMethod,
-      deliveryDays,
       minPrice,
       maxPrice,
     } = query;
@@ -49,11 +47,6 @@ export class ProductService {
       );
     }
 
-    // 대상 기준 필터 처리
-    if (targetAudience && targetAudience.length > 0) {
-      where.targetAudience = { hasSome: targetAudience }; // targetAudience 배열의 값들 중 하나라도 포함된 상품들을 검색
-    }
-
     // 인원수 필터 처리
     if (sizeRange && sizeRange.length > 0) {
       where.sizeRange = { hasSome: sizeRange }; // sizeRange 배열의 값들 중 하나라도 포함된 상품들을 검색
@@ -62,12 +55,6 @@ export class ProductService {
     // 수령 방식 필터 처리
     if (deliveryMethod && deliveryMethod.length > 0) {
       where.deliveryMethod = { hasSome: deliveryMethod }; // deliveryMethod 배열의 값들 중 하나라도 포함된 상품들을 검색
-    }
-
-    // 수령 일수 필터 처리
-    // deliveryDays 배열의 값들 중 하나라도 포함된 상품들을 검색
-    if (deliveryDays && deliveryDays.length > 0) {
-      where.deliveryDays = { hasSome: deliveryDays }; // SAME_DAY, ONE_TO_TWO 등 중 선택된 것들
     }
 
     // 가격 필터 처리
@@ -183,20 +170,23 @@ export class ProductService {
    * 상품 삭제 (판매자용)
    */
   async deleteProduct(id: string, user: JwtVerifiedPayload) {
-    // 상품 존재 여부 및 소유권 확인
+    // 상품 존재 여부 및 소유권 확인 (Store 정보 포함)
     const product = await this.prisma.product.findFirst({
       where: {
         id,
       },
+      include: {
+        store: true, // Store 정보를 포함하여 sellerId 확인
+      },
     });
 
     // 상품이 존재하지 않으면 404 에러
-    if (!product) {
+    if (!product || !product.store) {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    // 권한 확인: 상품 소유자인지 확인
-    if (product.sellerId !== user.sub) {
+    // 권한 확인: 상품의 Store 소유자인지 확인
+    if (product.store.userId !== user.sub) {
       throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 

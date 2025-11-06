@@ -38,15 +38,6 @@ export enum SubCategory {
 }
 
 /**
- * (필터) 대상 기준 enum
- */
-export enum TargetAudience {
-  ADULT = "ADULT",
-  CHILD = "CHILD",
-  PET = "PET",
-}
-
-/**
  * (필터) 인원 수 enum
  */
 export enum SizeRange {
@@ -63,20 +54,6 @@ export enum SizeRange {
 export enum DeliveryMethod {
   PICKUP = "PICKUP",
   DELIVERY = "DELIVERY",
-}
-
-/**
- * (필터) 수령 일수 enum
- */
-export enum DeliveryDays {
-  SAME_DAY = "SAME_DAY", // 당일
-  ONE_TO_TWO = "ONE_TO_TWO", // 1~2일
-  TWO_TO_THREE = "TWO_TO_THREE", // 2~3일
-  THREE_TO_FOUR = "THREE_TO_FOUR", // 3~4일
-  FOUR_TO_FIVE = "FOUR_TO_FIVE", // 4~5일
-  FIVE_TO_SIX = "FIVE_TO_SIX", // 5~6일
-  SIX_TO_SEVEN = "SIX_TO_SEVEN", // 6~7일
-  OVER_WEEK = "OVER_WEEK", // 일주일 이상
 }
 
 /**
@@ -221,18 +198,16 @@ export const SWAGGER_EXAMPLES = {
     // 필터 정보
     mainCategory: [MainCategory.PRODUCT],
     subCategory: [SubCategory.CAKE],
-    targetAudience: [TargetAudience.ADULT, TargetAudience.CHILD],
     sizeRange: [SizeRange.ONE_TO_TWO, SizeRange.TWO_TO_THREE],
     deliveryMethod: [DeliveryMethod.PICKUP, DeliveryMethod.DELIVERY],
-    deliveryDays: [DeliveryDays.ONE_TO_TWO, DeliveryDays.TWO_TO_THREE],
     // 해시태그
     hashtags: ["케이크", "초콜릿", "생일", "기념일"],
     // 상품 상태
     status: ProductStatus.ACTIVE,
     // 기타
     isLiked: false,
-    // 판매자 정보
-    sellerId: "user_123456789",
+    // 판매자 정보 (Store를 통해 User(Seller) 참조)
+    storeId: "store_123456789",
   },
   PAGINATION_META: {
     currentPage: 1,

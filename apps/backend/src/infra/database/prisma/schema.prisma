@@ -37,7 +37,6 @@ model User {
 
   // Relations
   productLikes   ProductLike[]
-  products      Product[]
   stores        Store[]
 
   @@index([phone])
@@ -67,7 +66,7 @@ model Product {
   id                String   @id @default(cuid())
   
   // 판매자 정보
-  sellerId          String   @map("seller_id")
+  storeId           String   @map("store_id") // 스토어 ID
   
   // 상품 정보
   name              String
@@ -87,7 +86,7 @@ model Product {
   detailDescription String?  @map("detail_description")
 
   // 고시정보 (식품 판매 시 법적 필수 항목)
-  productNumber     String  @map("product_number")
+  productNumber     String   @map("product_number")
   foodType          String  @map("food_type")
   producer          String
   manufactureDate   String  @map("manufacture_date")
@@ -100,10 +99,8 @@ model Product {
   // 필터 정보
   mainCategory      MainCategory[] @map("main_category")
   subCategory       SubCategory[] @map("sub_category")
-  targetAudience    TargetAudience[]
   sizeRange         SizeRange[] @map("size_range")
   deliveryMethod    DeliveryMethod[]
-  deliveryDays      DeliveryDays[] @map("delivery_days")
   
   // 해시태그
   hashtags          String[]
@@ -112,11 +109,12 @@ model Product {
   status            ProductStatus @default(ACTIVE)
 
   // Relations
-  seller            User           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  // Seller는 store.seller를 통해 참조 가능
+  store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   images            ProductImage[]
   likes             ProductLike[]
   
-  @@index([sellerId])
+  @@index([storeId])
   @@index([status])
   @@index([createdAt])
   @@index([salePrice])
@@ -125,10 +123,8 @@ model Product {
   @@index([hashtags])
   @@index([mainCategory])
   @@index([subCategory])
-  @@index([targetAudience])
   @@index([sizeRange])
   @@index([deliveryMethod])
-  @@index([deliveryDays])
   @@map("products")
 }
 
@@ -174,12 +170,6 @@ enum SubCategory {
   CAKE
 }
 
-enum TargetAudience {
-  ADULT
-  CHILD
-  PET
-}
-
 enum SizeRange {
   ONE_TO_TWO
   TWO_TO_THREE
@@ -191,17 +181,6 @@ enum SizeRange {
 enum DeliveryMethod {
   PICKUP
   DELIVERY
-}
-
-enum DeliveryDays {
-  SAME_DAY
-  ONE_TO_TWO
-  TWO_TO_THREE
-  THREE_TO_FOUR
-  FOUR_TO_FIVE
-  FIVE_TO_SIX
-  SIX_TO_SEVEN
-  OVER_WEEK
 }
 
 enum ProductStatus {
@@ -246,6 +225,7 @@ model Store {
   
   // Relations
   seller            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products          Product[]
   
   @@unique([userId, businessNo, permissionManagementNumber])
   @@index([userId])

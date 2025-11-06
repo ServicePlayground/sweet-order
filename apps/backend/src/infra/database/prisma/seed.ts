@@ -161,10 +161,33 @@ async function main() {
     }),
   ]);
 
+  const stores = await Promise.all([
+    prisma.store.create({
+      data: {
+        userId: users[0].id, // SELLER 역할을 가진 첫 번째 사용자
+        name: "스위트오더 스토어",
+        description: "맛있는 케이크를 판매하는 스토어입니다.",
+        logoImageUrl:
+          "https://static-staging.sweetorders.com/uploads/1__1762274005545_4bfc55b7.jpeg",
+        // 사업자 정보 (1단계)
+        businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
+        representativeName: "홍길동",
+        openingDate: "20230101",
+        businessName: "스위트오더",
+        businessSector: "도매 및 소매업",
+        businessType: "전자상거래 소매 중개업",
+        // 통신판매사업자 정보 (2단계)
+        permissionManagementNumber: "2021-서울강동-0422",
+        createdAt: new Date("2024-01-15T10:30:00Z"),
+        updatedAt: new Date("2024-01-15T10:30:00Z"),
+      },
+    }),
+  ]);
+
   const products = await Promise.all([
     prisma.product.create({
       data: {
-        sellerId: users[0].id, // 첫 번째 사용자를 판매자로 설정
+        storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
         name: "프리미엄 초콜릿 케이크",
         description: "벨기에산 고급 초콜릿으로 만든 달콤한 케이크입니다.",
         originalPrice: 50000,
@@ -191,10 +214,8 @@ async function main() {
         customerService: "1588-1234",
         mainCategory: ["PRODUCT"],
         subCategory: ["CAKE"],
-        targetAudience: ["ADULT", "CHILD"],
         sizeRange: ["ONE_TO_TWO", "TWO_TO_THREE"],
         deliveryMethod: ["PICKUP", "DELIVERY"],
-        deliveryDays: ["ONE_TO_TWO", "TWO_TO_THREE"],
         hashtags: ["케이크", "초콜릿", "생일", "기념일"],
         status: "ACTIVE",
         createdAt: new Date("2024-01-01T00:00:00Z"),
@@ -219,29 +240,6 @@ async function main() {
       data: {
         userId: users[0].id,
         productId: products[0].id,
-      },
-    }),
-  ]);
-
-  const stores = await Promise.all([
-    prisma.store.create({
-      data: {
-        userId: users[0].id, // SELLER 역할을 가진 첫 번째 사용자
-        name: "스위트오더 스토어",
-        description: "맛있는 케이크를 판매하는 스토어입니다.",
-        logoImageUrl:
-          "https://static-staging.sweetorders.com/uploads/1__1762274005545_4bfc55b7.jpeg",
-        // 사업자 정보 (1단계)
-        businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
-        representativeName: "홍길동",
-        openingDate: "20230101",
-        businessName: "스위트오더",
-        businessSector: "도매 및 소매업",
-        businessType: "전자상거래 소매 중개업",
-        // 통신판매사업자 정보 (2단계)
-        permissionManagementNumber: "2021-서울강동-0422",
-        createdAt: new Date("2024-01-15T10:30:00Z"),
-        updatedAt: new Date("2024-01-15T10:30:00Z"),
       },
     }),
   ]);
