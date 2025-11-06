@@ -25,6 +25,7 @@ export class ProductService {
       page,
       limit,
       sortBy,
+      mainCategory,
       sizeRange,
       deliveryMethod,
       minPrice,
@@ -45,6 +46,11 @@ export class ProductService {
         { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
         { hashtags: { has: search } }, // 해시태그 배열에서 검색
       );
+    }
+
+    // 메인 카테고리 필터 처리
+    if (mainCategory) {
+      where.mainCategory = mainCategory;
     }
 
     // 인원수 필터 처리

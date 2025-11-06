@@ -97,8 +97,7 @@ model Product {
   customerService   String  @map("customer_service")
 
   // 필터 정보
-  mainCategory      MainCategory[] @map("main_category")
-  subCategory       SubCategory[] @map("sub_category")
+  mainCategory      MainCategory @map("main_category")
   sizeRange         SizeRange[] @map("size_range")
   deliveryMethod    DeliveryMethod[]
   
@@ -122,7 +121,6 @@ model Product {
   @@index([name])
   @@index([hashtags])
   @@index([mainCategory])
-  @@index([subCategory])
   @@index([sizeRange])
   @@index([deliveryMethod])
   @@map("products")
@@ -163,11 +161,9 @@ model ProductLike {
 
 // product.constants.ts 에서 사용하는 enum들
 enum MainCategory {
-  PRODUCT
-}
-
-enum SubCategory {
-  CAKE
+  CAKE    // 케이크
+  SUPPLY  // 용품
+  OTHER   // 기타
 }
 
 enum SizeRange {

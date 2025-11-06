@@ -24,17 +24,12 @@ export enum SortBy {
 }
 
 /**
- * (필터) 메인 카테고리 enum (최상위 카테고리)
+ * (필터) 메인 카테고리 enum (필수)
  */
 export enum MainCategory {
-  PRODUCT = "PRODUCT", // 상품
-}
-
-/**
- * (필터) 중분류 카테고리 enum
- */
-export enum SubCategory {
-  CAKE = "CAKE", // 케이크
+  CAKE = "CAKE",     // 케이크
+  SUPPLY = "SUPPLY", // 용품
+  OTHER = "OTHER",   // 기타
 }
 
 /**
@@ -196,8 +191,7 @@ export const SWAGGER_EXAMPLES = {
     origin: "국내산",
     customerService: "1588-1234",
     // 필터 정보
-    mainCategory: [MainCategory.PRODUCT],
-    subCategory: [SubCategory.CAKE],
+    mainCategory: MainCategory.CAKE,
     sizeRange: [SizeRange.ONE_TO_TWO, SizeRange.TWO_TO_THREE],
     deliveryMethod: [DeliveryMethod.PICKUP, DeliveryMethod.DELIVERY],
     // 해시태그

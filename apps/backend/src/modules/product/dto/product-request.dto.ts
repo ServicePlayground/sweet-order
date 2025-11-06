@@ -16,6 +16,7 @@ import {
 } from "@apps/backend/common/decorators/transform.decorator";
 import {
   DeliveryMethod,
+  MainCategory,
   SortBy,
   SizeRange,
 } from "@apps/backend/modules/product/constants/product.constants";
@@ -61,6 +62,15 @@ export class GetProductsRequestDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({
+    description: "(필터) 메인 카테고리",
+    enum: MainCategory,
+    example: MainCategory.CAKE,
+  })
+  @IsOptional()
+  @IsEnum(MainCategory)
+  mainCategory?: MainCategory;
 
   @ApiPropertyOptional({
     description: "(필터) 인원 수 - (중복가능)쉼표로 구분하여 전달",
