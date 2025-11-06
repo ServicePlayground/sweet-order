@@ -73,6 +73,7 @@ model Product {
   description       String?
   originalPrice     Int
   salePrice         Int
+  stock             Int      // 재고 수량
   notice            String?
   caution           String?
   basicIncluded     String?  @map("basic_included")

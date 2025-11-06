@@ -192,6 +192,7 @@ async function main() {
         description: "벨기에산 고급 초콜릿으로 만든 달콤한 케이크입니다.",
         originalPrice: 50000,
         salePrice: 45000,
+        stock: 100, // 재고 수량
         notice: "주문 후 1-2일 내 제작 완료",
         caution: "알레르기 주의: 우유, 계란, 밀 함유",
         basicIncluded: "케이크, 촛불, 포크",
