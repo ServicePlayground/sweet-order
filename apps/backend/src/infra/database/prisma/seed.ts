@@ -226,8 +226,6 @@ async function main() {
     prisma.productImage.create({
       data: {
         url: "https://example.com/images/chocolate-cake-1.jpg",
-        alt: "초콜릿 케이크 메인 이미지",
-        order: 1,
         productId: products[0].id,
       },
     }),

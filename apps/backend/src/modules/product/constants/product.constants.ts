@@ -4,12 +4,15 @@
 export const PRODUCT_ERROR_MESSAGES = {
   NOT_FOUND: "상품을 찾을 수 없습니다.",
   FORBIDDEN: "해당 상품을 삭제할 권한이 없습니다.",
+  STORE_NOT_FOUND: "스토어를 찾을 수 없습니다.",
+  STORE_NOT_OWNED: "해당 스토어에 대한 권한이 없습니다.",
 } as const;
 
 /**
  * 상품 관련 성공 메시지 상수
  */
 export const PRODUCT_SUCCESS_MESSAGES = {
+  PRODUCT_CREATED: "상품이 성공적으로 등록되었습니다.",
   PRODUCT_DELETED: "상품이 성공적으로 삭제되었습니다.",
 } as const;
 

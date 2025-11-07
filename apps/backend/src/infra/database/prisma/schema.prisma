@@ -131,8 +131,6 @@ model Product {
 model ProductImage {
   id        String   @id @default(cuid())
   url       String
-  alt       String?
-  order     Int      @default(0)
   productId String   @map("product_id")
   createdAt DateTime @default(now()) @map("created_at")
 
