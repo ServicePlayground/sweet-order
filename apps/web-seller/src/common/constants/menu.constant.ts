@@ -35,7 +35,6 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
     {
       text: "상품",
       icon: React.createElement(Inventory2Icon),
-      path: ROUTES.STORE_DETAIL_PRODUCTS(storeId),
       children: [
         { text: "상품 목록", path: ROUTES.STORE_DETAIL_PRODUCTS_LIST(storeId) },
         { text: "상품 등록", path: ROUTES.STORE_DETAIL_PRODUCTS_CREATE(storeId) },
