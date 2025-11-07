@@ -27,9 +27,9 @@ export enum SortBy {
  * (필터) 메인 카테고리 enum (필수)
  */
 export enum MainCategory {
-  CAKE = "CAKE",     // 케이크
+  CAKE = "CAKE", // 케이크
   SUPPLY = "SUPPLY", // 용품
-  OTHER = "OTHER",   // 기타
+  OTHER = "OTHER", // 기타
 }
 
 /**
@@ -81,80 +81,29 @@ export const SWAGGER_EXAMPLES = {
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
     orderFormSchema: {
-      title: "케이크 커스터마이징",
-      description: "원하시는 옵션을 선택해주세요",
       fields: [
         {
-          id: "deliveryMethod",
-          type: "select",
-          label: "수령 방법",
-          required: true,
-          options: [
-            {
-              value: "delivery_cod",
-              label: "택배 착불",
-              price: 0,
-              description: "수령 시 배송비 결제",
-            },
-            {
-              value: "delivery_prepaid",
-              label: "택배 선불",
-              price: 3000,
-              description: "주문 시 배송비 결제",
-            },
-            {
-              value: "pickup",
-              label: "직접 수령(지역 픽업)",
-              price: 0,
-              description: "매장에서 직접 픽업",
-            },
-            {
-              value: "delivery_free",
-              label: "택배 50,000원 이상 무료배송",
-              price: 0,
-              description: "50,000원 이상 구매 시 무료",
-            },
-          ],
-        },
-        {
-          id: "pickupDateTime",
-          type: "datetime-local",
-          label: "픽업 날짜시간",
-          required: true,
-          minDate: "today",
-          maxDate: "+30days",
-          description: "직접 수령 시 픽업 날짜와 시간을 선택해주세요",
-        },
-        {
           id: "size",
-          type: "select",
+          type: "selectbox",
           label: "사이즈 선택",
           required: true,
           options: [
-            { value: "1호", label: "1호", price: 0 },
-            { value: "2호", label: "2호", price: 10000 },
-            { value: "3호", label: "3호", price: 20000 },
+            {
+              value: "1호",
+              label: "1호",
+              price: 0,
+            },
+            {
+              value: "2호",
+              label: "2호",
+              price: 10000,
+            },
+            {
+              value: "3호",
+              label: "3호",
+              price: 20000,
+            },
           ],
-        },
-        {
-          id: "flavor",
-          type: "select",
-          label: "맛 선택",
-          required: true,
-          options: [
-            { value: "chocolate", label: "초코", price: 0 },
-            { value: "vanilla", label: "바닐라", price: 0 },
-            { value: "strawberry", label: "딸기", price: 3000 },
-          ],
-        },
-        {
-          id: "cakeMessage",
-          type: "text",
-          label: "케이크 문구입력",
-          required: true,
-          placeholder: "예: 생일 축하해요!",
-          maxLength: 20,
-          description: "케이크에 새길 메시지를 입력해주세요 (최대 20자)",
         },
         {
           id: "additionalProducts",
@@ -162,20 +111,39 @@ export const SWAGGER_EXAMPLES = {
           label: "추가 구성 상품",
           required: true,
           options: [
-            { value: "cakeBox", label: "케이크상자", price: 2000 },
-            { value: "candles", label: "캔들 추가", price: 3000 },
-            { value: "topper", label: "케이크 토퍼", price: 5000 },
-            { value: "messagePlate", label: "글씨 문구 추가", price: 4000 },
+            {
+              value: "cakeBox",
+              label: "케이크상자",
+              price: 2000,
+            },
+            {
+              value: "candles",
+              label: "캔들 추가",
+              price: 3000,
+            },
+            {
+              value: "topper",
+              label: "케이크 토퍼",
+              price: 5000,
+            },
+            {
+              value: "messagePlate",
+              label: "글씨 문구 추가",
+              price: 4000,
+            },
           ],
+        },
+        {
+          id: "cakeMessage",
+          type: "textbox",
+          required: true,
+          placeholder: "예: 생일 축하해요!",
         },
         {
           id: "additionalRequest",
           type: "textarea",
-          label: "추가요청",
           required: false,
           placeholder: "특별한 요청사항이 있으시면 입력해주세요",
-          maxLength: 200,
-          description: "알레르기, 특별한 요청사항 등을 자유롭게 입력해주세요",
         },
       ],
     },

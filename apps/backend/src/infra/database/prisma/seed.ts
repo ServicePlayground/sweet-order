@@ -199,8 +199,6 @@ async function main() {
         location: "서울시 강남구",
         likeCount: 25,
         orderFormSchema: {
-          title: "케이크 커스터마이징",
-          description: "원하시는 옵션을 선택해주세요",
           fields: [],
         },
         detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
