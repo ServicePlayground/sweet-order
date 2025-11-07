@@ -230,69 +230,69 @@ export class CreateProductRequestDto {
   @IsString()
   detailDescription?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "식품 유형",
     example: "케이크류",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  foodType: string;
+  foodType?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "제조사",
     example: "스위트오더",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  producer: string;
+  producer?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "제조일자",
     example: "제조일로부터 3일",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  manufactureDate: string;
+  manufactureDate?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "포장 정보",
     example: "1개",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  packageInfo: string;
+  packageInfo?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "칼로리",
     example: "350kcal",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  calories: string;
+  calories?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "원재료",
     example: "초콜릿, 밀가루, 설탕, 우유, 계란",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  ingredients: string;
+  ingredients?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "원산지",
     example: "국내산",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  origin: string;
+  origin?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: "고객 서비스 연락처",
     example: "1588-1234",
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  customerService: string;
+  customerService?: string;
 
   @ApiProperty({
     description: "메인 카테고리",
