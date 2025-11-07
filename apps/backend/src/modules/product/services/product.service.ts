@@ -252,23 +252,14 @@ export class ProductService {
       mainCategory: createProductDto.mainCategory,
       sizeRange: createProductDto.sizeRange,
       deliveryMethod: createProductDto.deliveryMethod,
-      hashtags: createProductDto.hashtags,
-      status: createProductDto.status,
-      images: createProductDto.images && createProductDto.images.length > 0
-        ? {
-            create: createProductDto.images.map((url) => ({
-              url,
-            })),
-          }
-        : undefined,
+      hashtags: createProductDto.hashtags || [],
+      status: createProductDto.status || ProductStatus.ACTIVE,
+      images: createProductDto.images || [],
     };
 
     // 상품 생성
     const product = await this.prisma.product.create({
       data: productData,
-      include: {
-        images: true,
-      },
     });
 
     return {

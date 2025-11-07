@@ -105,13 +105,15 @@ model Product {
   // 해시태그
   hashtags          String[]
 
+  // 상품 이미지
+  images            String[]
+
   // 상품 상태
   status            ProductStatus @default(ACTIVE)
 
   // Relations
   // Seller는 store.seller를 통해 참조 가능
   store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  images            ProductImage[]
   likes             ProductLike[]
   
   @@index([storeId])
@@ -125,20 +127,6 @@ model Product {
   @@index([sizeRange])
   @@index([deliveryMethod])
   @@map("products")
-}
-
-// Product image model
-model ProductImage {
-  id        String   @id @default(cuid())
-  url       String
-  productId String   @map("product_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  // Relations
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@index([productId])
-  @@map("product_images")
 }
 
 // Product like model

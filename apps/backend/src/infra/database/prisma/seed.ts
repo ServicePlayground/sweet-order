@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.phoneVerification.deleteMany();
   await prisma.productLike.deleteMany();
-  await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.user.deleteMany();
@@ -215,18 +214,10 @@ async function main() {
         sizeRange: ["ONE_TO_TWO", "TWO_TO_THREE"],
         deliveryMethod: ["PICKUP", "DELIVERY"],
         hashtags: ["케이크", "초콜릿", "생일", "기념일"],
+        images: ["https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg"],
         status: "ACTIVE",
         createdAt: new Date("2024-01-01T00:00:00Z"),
         updatedAt: new Date("2024-01-01T00:00:00Z"),
-      },
-    }),
-  ]);
-
-  const productImages = await Promise.all([
-    prisma.productImage.create({
-      data: {
-        url: "https://example.com/images/chocolate-cake-1.jpg",
-        productId: products[0].id,
       },
     }),
   ]);
@@ -243,7 +234,6 @@ async function main() {
   console.log(`✅ Created ${users.length} users`);
   console.log(`✅ Created ${phoneVerifications.length} phone verifications`);
   console.log(`✅ Created ${products.length} products`);
-  console.log(`✅ Created ${productImages.length} product images`);
   console.log(`✅ Created ${productLikes.length} product likes`);
   console.log(`✅ Created ${stores.length} stores`);
   console.log("🎉 Database seeding completed!");
