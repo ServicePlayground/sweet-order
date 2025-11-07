@@ -34,6 +34,7 @@ export class ProductService {
       deliveryMethod,
       minPrice,
       maxPrice,
+      storeId,
     } = query;
 
     // 필터 조건 구성
@@ -72,6 +73,11 @@ export class ProductService {
       where.salePrice = {};
       if (minPrice !== undefined) where.salePrice.gte = minPrice;
       if (maxPrice !== undefined) where.salePrice.lte = maxPrice;
+    }
+
+    // 스토어 ID 필터 처리
+    if (storeId) {
+      where.storeId = storeId;
     }
 
     // 검색어 조건을 최종 where에 추가

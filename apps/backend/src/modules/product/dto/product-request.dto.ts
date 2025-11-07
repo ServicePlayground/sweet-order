@@ -112,6 +112,14 @@ export class GetProductsRequestDto {
   @IsNumber()
   @Min(0)
   maxPrice?: number;
+
+  @ApiPropertyOptional({
+    description: "(필터) 스토어 ID - 특정 스토어의 상품만 조회",
+    example: "QXZw02vBqVXNQ29c4w9n9ZdG",
+  })
+  @IsOptional()
+  @IsString()
+  storeId?: string;
 }
 
 /**

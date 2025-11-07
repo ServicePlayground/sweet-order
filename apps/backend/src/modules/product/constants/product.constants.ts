@@ -168,6 +168,12 @@ export const SWAGGER_EXAMPLES = {
     deliveryMethod: [DeliveryMethod.PICKUP, DeliveryMethod.DELIVERY],
     // 해시태그
     hashtags: ["케이크", "초콜릿", "생일", "기념일"],
+    // 상품 이미지
+    images: [
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg",
+      "https://example.com/image3.jpg",
+    ],
     // 상품 상태
     status: ProductStatus.ACTIVE,
     // 기타
