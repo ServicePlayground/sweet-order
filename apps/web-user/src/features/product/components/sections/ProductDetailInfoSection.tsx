@@ -155,7 +155,9 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
           >
             📌 공지사항
           </div>
-          <div style={{ fontSize: "14px", color: "#78350f", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+          <div
+            style={{ fontSize: "14px", color: "#78350f", lineHeight: 1.6, whiteSpace: "pre-wrap" }}
+          >
             {product.notice.replace(/\\n/g, "\n")}
           </div>
         </div>
@@ -180,7 +182,9 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
           >
             ⚠️ 주의사항
           </div>
-          <div style={{ fontSize: "14px", color: "#7f1d1d", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+          <div
+            style={{ fontSize: "14px", color: "#7f1d1d", lineHeight: 1.6, whiteSpace: "pre-wrap" }}
+          >
             {product.caution.replace(/\\n/g, "\n")}
           </div>
         </div>
@@ -205,7 +209,9 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
           >
             📦 기본 포함
           </div>
-          <div style={{ fontSize: "14px", color: "#14532d", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+          <div
+            style={{ fontSize: "14px", color: "#14532d", lineHeight: 1.6, whiteSpace: "pre-wrap" }}
+          >
             {product.basicIncluded.replace(/\\n/g, "\n")}
           </div>
         </div>
