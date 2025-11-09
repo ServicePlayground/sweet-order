@@ -1,14 +1,19 @@
 import React from "react";
 import { Grid, TextField, Typography, Divider, Paper } from "@mui/material";
-import { IProductForm, SizeRange, DeliveryMethod, ProductStatus } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  IProductForm,
+  SizeRange,
+  DeliveryMethod,
+  ProductStatus,
+} from "@/apps/web-seller/features/product/types/product.type";
 import {
   SIZE_RANGE_OPTIONS,
   DELIVERY_METHOD_OPTIONS,
   PRODUCT_STATUS_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
-import { FormSelect } from "@/apps/web-seller/common/components/forms/FormSelect";
-import { FormMultiSelect } from "@/apps/web-seller/common/components/forms/FormMultiSelect";
-import { HashtagInput } from "@/apps/web-seller/common/components/forms/HashtagInput";
+import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
+import { MultiSelectBox } from "@/apps/web-seller/common/components/selectboxs/MultiSelectBox";
+import { HashtagInput } from "@/apps/web-seller/common/components/inputs/HashtagInput";
 
 interface Props {
   form: IProductForm;
@@ -20,7 +25,8 @@ interface Props {
   onHashtagsChange: (hashtags: string[]) => void;
 }
 
-export const AdditionalSettingsSection: React.FC<Props> = ({
+// 상품 등록 폼 - 추가 설정 섹션
+export const ProductCreationAdditionalSettingsSection: React.FC<Props> = ({
   form,
   errors,
   onStockChange,
@@ -30,14 +36,14 @@ export const AdditionalSettingsSection: React.FC<Props> = ({
   onHashtagsChange,
 }) => {
   return (
-    <Paper sx={{ p: 3, mt: 3 }}>
+    <Paper sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
         추가 설정
       </Typography>
       <Divider sx={{ mb: 3 }} />
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={12}>
           <TextField
             label="재고수량"
             fullWidth
@@ -51,8 +57,8 @@ export const AdditionalSettingsSection: React.FC<Props> = ({
           />
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <FormSelect
+        <Grid item xs={12} md={12}>
+          <SelectBox
             label="상품 상태"
             value={form.status}
             onChange={(value) => onStatusChange(value as ProductStatus)}
@@ -62,8 +68,8 @@ export const AdditionalSettingsSection: React.FC<Props> = ({
           />
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <FormMultiSelect
+        <Grid item xs={12} md={12}>
+          <MultiSelectBox
             label="인원 수"
             value={form.sizeRange}
             onChange={onSizeRangeChange}
@@ -73,8 +79,8 @@ export const AdditionalSettingsSection: React.FC<Props> = ({
           />
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <FormMultiSelect
+        <Grid item xs={12} md={12}>
+          <MultiSelectBox
             label="배송 방법"
             value={form.deliveryMethod}
             onChange={onDeliveryMethodChange}
@@ -97,4 +103,3 @@ export const AdditionalSettingsSection: React.FC<Props> = ({
     </Paper>
   );
 };
-

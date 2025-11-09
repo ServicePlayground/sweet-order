@@ -1,12 +1,21 @@
 import React from "react";
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText, SelectChangeEvent, Chip, Box } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  SelectChangeEvent,
+  Chip,
+  Box,
+} from "@mui/material";
 
 export interface SelectOption {
   readonly value: string;
   readonly label: string;
 }
 
-export interface FormMultiSelectProps {
+export interface MultiSelectBoxProps {
   label: string;
   value: string[];
   onChange: (value: string[]) => void;
@@ -17,7 +26,7 @@ export interface FormMultiSelectProps {
   disabled?: boolean;
 }
 
-export const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
+export const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
   label,
   value,
   onChange,
@@ -33,7 +42,12 @@ export const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
   };
 
   return (
-    <FormControl fullWidth={fullWidth} error={Boolean(error)} required={required} disabled={disabled}>
+    <FormControl
+      fullWidth={fullWidth}
+      error={Boolean(error)}
+      required={required}
+      disabled={disabled}
+    >
       <InputLabel>{label}</InputLabel>
       <Select
         multiple
@@ -59,4 +73,3 @@ export const FormMultiSelect: React.FC<FormMultiSelectProps> = ({
     </FormControl>
   );
 };
-

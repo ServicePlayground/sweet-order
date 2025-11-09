@@ -24,7 +24,7 @@ export enum ProductStatus {
 }
 
 // 커스텀 주문양식 필드 타입
-export type OrderFormFieldType = "selectbox" | "textbox" | "checkbox" | "textarea";
+export type OrderFormFieldType = "selectbox" | "textbox";
 
 // 커스텀 주문양식 옵션
 export interface OrderFormOption {
@@ -39,8 +39,9 @@ export interface OrderFormField {
   type: OrderFormFieldType;
   label: string;
   required: boolean;
-  placeholder?: string; // textbox, textarea용
-  options?: OrderFormOption[]; // selectbox, checkbox용
+  placeholder?: string; // textbox용
+  allowMultiple?: boolean; // selectbox용 - 중복선택허용
+  options?: OrderFormOption[]; // selectbox용
 }
 
 // 커스텀 주문양식 스키마
@@ -63,8 +64,27 @@ export interface IProductForm {
   // 커스텀 주문양식
   orderFormSchema?: OrderFormSchema;
 
-  // 상세정보 (추후 구현)
+  // 상세정보
   detailDescription?: string;
+
+  // 취소 및 환불
+  cancellationRefundDetailDescription?: string;
+
+  // 상품정보제공고시
+  productNoticeFoodType: string;
+  productNoticeProducer: string;
+  productNoticeOrigin: string;
+  productNoticeAddress: string;
+  productNoticeManufactureDate: string;
+  productNoticeExpirationDate: string;
+  productNoticePackageCapacity: string;
+  productNoticePackageQuantity: string;
+  productNoticeIngredients: string;
+  productNoticeCalories: string;
+  productNoticeSafetyNotice: string;
+  productNoticeGmoNotice: string;
+  productNoticeImportNotice: string;
+  productNoticeCustomerService: string;
 
   // 보이지 않는 부분
   stock: number | "";

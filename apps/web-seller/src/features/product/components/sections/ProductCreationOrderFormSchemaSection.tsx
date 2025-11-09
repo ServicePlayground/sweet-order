@@ -15,19 +15,39 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { OrderFormSchema, OrderFormField, OrderFormFieldType, OrderFormOption } from "@/apps/web-seller/features/product/types/product.type";
-import { FormSelect } from "@/apps/web-seller/common/components/forms/FormSelect";
-import { ORDER_FORM_FIELD_TYPE_OPTIONS, PRODUCT_ERROR_MESSAGES } from "@/apps/web-seller/features/product/constants/product.constant";
+import {
+  OrderFormSchema,
+  OrderFormField,
+  OrderFormFieldType,
+  OrderFormOption,
+} from "@/apps/web-seller/features/product/types/product.type";
+import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
+import {
+  ORDER_FORM_FIELD_TYPE_OPTIONS,
+  PRODUCT_ERROR_MESSAGES,
+} from "@/apps/web-seller/features/product/constants/product.constant";
 
-export interface OrderFormSchemaBuilderProps {
+export interface ProductCreationOrderFormSchemaSectionProps {
   value?: OrderFormSchema;
   onChange?: (schema: OrderFormSchema) => void;
   error?: string;
 }
 
-export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ value, onChange, error }) => {
+// 상품 등록 폼 - 커스텀 주문양식 섹션
+export const ProductCreationOrderFormSchemaSection: React.FC<
+  ProductCreationOrderFormSchemaSectionProps
+> = ({ value, onChange, error }) => {
   const [fields, setFields] = useState<OrderFormField[]>(value?.fields || []);
   const [fieldErrors, setFieldErrors] = useState<Record<number, string>>({});
+
+  // value prop이 변경되면 내부 state도 업데이트
+  React.useEffect(() => {
+    if (value?.fields) {
+      setFields(value.fields);
+    } else {
+      setFields([]);
+    }
+  }, [value]);
 
   const generateFieldId = () => {
     return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -43,6 +63,7 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
       type: "textbox",
       label: "",
       required: false,
+      allowMultiple: false,
     };
     const newFields = [...fields, newField];
     setFields(newFields);
@@ -75,15 +96,13 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
 
   const handleAddOption = (fieldIndex: number) => {
     const field = fields[fieldIndex];
-    if (!field.options) {
-      field.options = [];
-    }
+    const currentOptions = field.options || [];
     const newOption: OrderFormOption = {
-      value: "",
+      value: generateOptionId(), // value는 자동 생성 (UI에서 입력받지 않음)
       label: "",
       price: 0,
     };
-    const newOptions = [...field.options, newOption];
+    const newOptions = [...currentOptions, newOption];
     handleFieldChange(fieldIndex, { options: newOptions });
   };
 
@@ -94,7 +113,11 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
     handleFieldChange(fieldIndex, { options: newOptions });
   };
 
-  const handleOptionChange = (fieldIndex: number, optionIndex: number, updates: Partial<OrderFormOption>) => {
+  const handleOptionChange = (
+    fieldIndex: number,
+    optionIndex: number,
+    updates: Partial<OrderFormOption>,
+  ) => {
     const field = fields[fieldIndex];
     if (!field.options) return;
     const newOptions = [...field.options];
@@ -107,7 +130,7 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
       return PRODUCT_ERROR_MESSAGES.ORDER_FORM_FIELD_LABEL_REQUIRED;
     }
 
-    if (field.type === "selectbox" || field.type === "checkbox") {
+    if (field.type === "selectbox") {
       if (!field.options || field.options.length === 0) {
         return PRODUCT_ERROR_MESSAGES.ORDER_FORM_FIELD_OPTIONS_REQUIRED;
       }
@@ -115,9 +138,6 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
       for (const option of field.options) {
         if (!option.label.trim()) {
           return PRODUCT_ERROR_MESSAGES.ORDER_FORM_FIELD_OPTION_LABEL_REQUIRED;
-        }
-        if (!option.value.trim()) {
-          return PRODUCT_ERROR_MESSAGES.ORDER_FORM_FIELD_OPTION_VALUE_REQUIRED;
         }
       }
     }
@@ -142,6 +162,8 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
     if (fields.length > 0) {
       validateAll();
     }
+    // validateAll은 fields를 사용하지만, setFieldErrors만 호출하므로 무한 루프는 발생하지 않음
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
   return (
@@ -166,7 +188,14 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
           {fields.map((field, fieldIndex) => (
             <Card key={field.id} variant="outlined">
               <CardContent>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    mb: 2,
+                  }}
+                >
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                     필드 {fieldIndex + 1}
                   </Typography>
@@ -182,10 +211,12 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
 
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
-                    <FormSelect
+                    <SelectBox
                       label="필드 타입"
                       value={field.type}
-                      onChange={(value) => handleFieldChange(fieldIndex, { type: value as OrderFormFieldType })}
+                      onChange={(value) =>
+                        handleFieldChange(fieldIndex, { type: value as OrderFormFieldType })
+                      }
                       options={ORDER_FORM_FIELD_TYPE_OPTIONS}
                       required
                     />
@@ -200,6 +231,7 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
                       required
                       error={Boolean(fieldErrors[fieldIndex])}
                       helperText={fieldErrors[fieldIndex]}
+                      placeholder="예: 사이즈 선택"
                     />
                   </Grid>
 
@@ -208,30 +240,54 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
                       control={
                         <Checkbox
                           checked={field.required}
-                          onChange={(e) => handleFieldChange(fieldIndex, { required: e.target.checked })}
+                          onChange={(e) =>
+                            handleFieldChange(fieldIndex, { required: e.target.checked })
+                          }
                         />
                       }
                       label="필수 항목"
                     />
                   </Grid>
 
-                  {(field.type === "textbox" || field.type === "textarea") && (
+                  {field.type === "textbox" && (
                     <Grid item xs={12}>
                       <TextField
                         label="플레이스홀더"
                         fullWidth
                         value={field.placeholder || ""}
-                        onChange={(e) => handleFieldChange(fieldIndex, { placeholder: e.target.value })}
+                        onChange={(e) =>
+                          handleFieldChange(fieldIndex, { placeholder: e.target.value })
+                        }
                         placeholder="예: 케이크 문구를 입력해주세요"
                       />
                     </Grid>
                   )}
 
-                  {(field.type === "selectbox" || field.type === "checkbox") && (
+                  {field.type === "selectbox" && (
                     <>
                       <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={field.allowMultiple || false}
+                              onChange={(e) =>
+                                handleFieldChange(fieldIndex, { allowMultiple: e.target.checked })
+                              }
+                            />
+                          }
+                          label="중복선택허용"
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
                         <Divider sx={{ my: 1 }} />
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            mb: 1,
+                          }}
+                        >
                           <Typography variant="subtitle2">옵션</Typography>
                           <Button
                             startIcon={<AddIcon />}
@@ -249,46 +305,42 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
                           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                             {field.options.map((option, optionIndex) => (
                               <Card key={optionIndex} variant="outlined" sx={{ p: 2 }}>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "flex-start",
+                                  }}
+                                >
                                   <Grid container spacing={2} sx={{ flex: 1 }}>
-                                    <Grid item xs={12} md={4}>
-                                      <TextField
-                                        label="옵션값"
-                                        fullWidth
-                                        size="small"
-                                        value={option.value}
-                                        onChange={(e) =>
-                                          handleOptionChange(fieldIndex, optionIndex, { value: e.target.value })
-                                        }
-                                        placeholder="예: 1호"
-                                        required
-                                      />
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
+                                    <Grid item xs={12} md={6}>
                                       <TextField
                                         label="옵션명"
                                         fullWidth
                                         size="small"
                                         value={option.label}
                                         onChange={(e) =>
-                                          handleOptionChange(fieldIndex, optionIndex, { label: e.target.value })
+                                          handleOptionChange(fieldIndex, optionIndex, {
+                                            label: e.target.value,
+                                          })
                                         }
                                         placeholder="예: 1호"
                                         required
                                       />
                                     </Grid>
-                                    <Grid item xs={12} md={3}>
+                                    <Grid item xs={12} md={5}>
                                       <TextField
                                         label="추가 가격"
                                         fullWidth
                                         size="small"
                                         type="number"
-                                        value={option.price || 0}
-                                        onChange={(e) =>
+                                        value={option.price ?? ""}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
                                           handleOptionChange(fieldIndex, optionIndex, {
-                                            price: parseInt(e.target.value) || 0,
-                                          })
-                                        }
+                                            price: value === "" ? undefined : parseInt(value) || 0,
+                                          });
+                                        }}
                                         inputProps={{ min: 0 }}
                                       />
                                     </Grid>
@@ -319,4 +371,3 @@ export const OrderFormSchemaBuilder: React.FC<OrderFormSchemaBuilderProps> = ({ 
     </Box>
   );
 };
-

@@ -1,4 +1,9 @@
-import { MainCategory, SizeRange, DeliveryMethod, ProductStatus } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  MainCategory,
+  SizeRange,
+  DeliveryMethod,
+  ProductStatus,
+} from "@/apps/web-seller/features/product/types/product.type";
 
 export const PRODUCT_ERROR_MESSAGES = {
   MAIN_CATEGORY_REQUIRED: "카테고리를 선택해주세요.",
@@ -18,6 +23,20 @@ export const PRODUCT_ERROR_MESSAGES = {
   ORDER_FORM_FIELD_OPTIONS_REQUIRED: "옵션을 추가해주세요.",
   ORDER_FORM_FIELD_OPTION_LABEL_REQUIRED: "옵션명을 입력해주세요.",
   ORDER_FORM_FIELD_OPTION_VALUE_REQUIRED: "옵션값을 입력해주세요.",
+  PRODUCT_NOTICE_FOOD_TYPE_REQUIRED: "식품의 유형을 입력해주세요.",
+  PRODUCT_NOTICE_PRODUCER_REQUIRED: "제조사를 입력해주세요.",
+  PRODUCT_NOTICE_ORIGIN_REQUIRED: "원산지를 입력해주세요.",
+  PRODUCT_NOTICE_ADDRESS_REQUIRED: "소재지를 입력해주세요.",
+  PRODUCT_NOTICE_MANUFACTURE_DATE_REQUIRED: "제조연월일을 입력해주세요.",
+  PRODUCT_NOTICE_EXPIRATION_DATE_REQUIRED: "소비기한 또는 품질유지기한을 입력해주세요.",
+  PRODUCT_NOTICE_PACKAGE_CAPACITY_REQUIRED: "포장단위별 용량/수량을 입력해주세요.",
+  PRODUCT_NOTICE_PACKAGE_QUANTITY_REQUIRED: "포장 단위별 수량을 입력해주세요.",
+  PRODUCT_NOTICE_INGREDIENTS_REQUIRED: "원재료명 및 함량을 입력해주세요.",
+  PRODUCT_NOTICE_CALORIES_REQUIRED: "영양성분을 입력해주세요.",
+  PRODUCT_NOTICE_SAFETY_NOTICE_REQUIRED: "소비자안전을 위한 주의사항을 입력해주세요.",
+  PRODUCT_NOTICE_GMO_NOTICE_REQUIRED: "유전자변형식품에 해당하는 경우의 표시를 입력해주세요.",
+  PRODUCT_NOTICE_IMPORT_NOTICE_REQUIRED: "수입식품의 경우를 입력해주세요.",
+  PRODUCT_NOTICE_CUSTOMER_SERVICE_REQUIRED: "고객센터를 입력해주세요.",
 } as const;
 
 export const MAIN_CATEGORY_OPTIONS = [
@@ -48,6 +67,4 @@ export const PRODUCT_STATUS_OPTIONS = [
 export const ORDER_FORM_FIELD_TYPE_OPTIONS = [
   { value: "selectbox", label: "선택박스" },
   { value: "textbox", label: "텍스트박스" },
-  { value: "checkbox", label: "체크박스" },
-  { value: "textarea", label: "텍스트영역" },
 ] as const;
