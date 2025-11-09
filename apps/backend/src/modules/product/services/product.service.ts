@@ -213,7 +213,7 @@ export class ProductService {
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
-    
+
     const todayProductCount = await this.prisma.product.count({
       where: {
         mainCategory: createProductDto.mainCategory,
@@ -246,15 +246,22 @@ export class ProductService {
       location: createProductDto.location,
       orderFormSchema: createProductDto.orderFormSchema,
       detailDescription: createProductDto.detailDescription,
+      cancellationRefundDetailDescription: createProductDto.cancellationRefundDetailDescription,
       productNumber,
-      foodType: createProductDto.foodType || "",
-      producer: createProductDto.producer || "",
-      manufactureDate: createProductDto.manufactureDate || "",
-      packageInfo: createProductDto.packageInfo || "",
-      calories: createProductDto.calories || "",
-      ingredients: createProductDto.ingredients || "",
-      origin: createProductDto.origin || "",
-      customerService: createProductDto.customerService || "",
+      productNoticeFoodType: createProductDto.productNoticeFoodType,
+      productNoticeProducer: createProductDto.productNoticeProducer,
+      productNoticeOrigin: createProductDto.productNoticeOrigin,
+      productNoticeAddress: createProductDto.productNoticeAddress,
+      productNoticeManufactureDate: createProductDto.productNoticeManufactureDate,
+      productNoticeExpirationDate: createProductDto.productNoticeExpirationDate,
+      productNoticePackageCapacity: createProductDto.productNoticePackageCapacity,
+      productNoticePackageQuantity: createProductDto.productNoticePackageQuantity,
+      productNoticeIngredients: createProductDto.productNoticeIngredients,
+      productNoticeCalories: createProductDto.productNoticeCalories,
+      productNoticeSafetyNotice: createProductDto.productNoticeSafetyNotice,
+      productNoticeGmoNotice: createProductDto.productNoticeGmoNotice,
+      productNoticeImportNotice: createProductDto.productNoticeImportNotice,
+      productNoticeCustomerService: createProductDto.productNoticeCustomerService,
       mainCategory: createProductDto.mainCategory,
       sizeRange: createProductDto.sizeRange,
       deliveryMethod: createProductDto.deliveryMethod,

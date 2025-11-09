@@ -22,6 +22,11 @@ export const PATHS = {
   STORE: {
     DETAIL: (storeId: string) => `/store/${storeId}`,
   },
+
+  // 상품 관련 경로
+  PRODUCT: {
+    DETAIL: (productId: string) => `/product/${productId}`,
+  },
 } as const;
 
 // 타입 안전성을 위한 경로 타입

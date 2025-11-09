@@ -9,7 +9,7 @@ interface UseInfiniteScrollOptions {
 }
 
 /**
- * 무한 스크롤을 처리하는 커스텀 훅 
+ * 무한 스크롤을 처리하는 커스텀 훅
  * useInfiniteQuery 결과와 loadMoreRef를 받아서 무한 스크롤을 처리합니다.
  * Intersection Observer를 사용하여 하단 감지하여 useInfiniteQuery의 fetchNextPage 함수를 호출합니다.
  */
@@ -38,7 +38,7 @@ export function useInfiniteScroll({
       },
       {
         threshold: 0.1,
-      }
+      },
     );
 
     observer.observe(currentRef);
@@ -48,4 +48,3 @@ export function useInfiniteScroll({
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, enabled]);
 }
-

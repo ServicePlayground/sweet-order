@@ -86,16 +86,25 @@ model Product {
   // 상세 정보
   detailDescription String?  @map("detail_description")
 
+  // 취소 및 환불
+  cancellationRefundDetailDescription String?  @map("cancellation_refund_detail_description")
+
   // 고시정보 (식품 판매 시 법적 필수 항목)
-  productNumber     String   @map("product_number")
-  foodType          String  @map("food_type")
-  producer          String
-  manufactureDate   String  @map("manufacture_date")
-  packageInfo       String  @map("package_info")
-  calories          String
-  ingredients       String
-  origin            String
-  customerService   String  @map("customer_service")
+  productNumber     String   @map("product_number")  // 상품번호 (백엔드 자동 생성)
+  productNoticeFoodType          String  @map("product_notice_food_type")        // 식품의 유형 (필수)
+  productNoticeProducer          String  @map("product_notice_producer")         // 제조사 (필수)
+  productNoticeOrigin            String  @map("product_notice_origin")           // 원산지 (필수)
+  productNoticeAddress           String  @map("product_notice_address")          // 소재지 (필수)
+  productNoticeManufactureDate   String  @map("product_notice_manufacture_date") // 제조연월일 (필수)
+  productNoticeExpirationDate    String  @map("product_notice_expiration_date")  // 소비기한 또는 품질유지기한 (필수)
+  productNoticePackageCapacity   String  @map("product_notice_package_capacity") // 포장단위별 용량/수량 (필수)
+  productNoticePackageQuantity   String  @map("product_notice_package_quantity") // 포장 단위별 수량 (필수)
+  productNoticeIngredients       String  @map("product_notice_ingredients")      // 원재료명 및 함량 (필수)
+  productNoticeCalories          String  @map("product_notice_calories")         // 영양성분 (필수)
+  productNoticeSafetyNotice      String  @map("product_notice_safety_notice")    // 소비자안전을 위한 주의사항 (필수)
+  productNoticeGmoNotice         String  @map("product_notice_gmo_notice")       // 유전자변형식품에 해당하는 경우의 표시 (필수)
+  productNoticeImportNotice      String  @map("product_notice_import_notice")    // 수입식품의 경우 (필수)
+  productNoticeCustomerService   String  @map("product_notice_customer_service") // 고객센터 (필수)
 
   // 필터 정보
   mainCategory      MainCategory @map("main_category")

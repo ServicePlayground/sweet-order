@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Grid, TextField } from "@mui/material";
 import { IProductForm, MainCategory } from "@/apps/web-seller/features/product/types/product.type";
-import { PRODUCT_ERROR_MESSAGES, MAIN_CATEGORY_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
+import {
+  PRODUCT_ERROR_MESSAGES,
+  MAIN_CATEGORY_OPTIONS,
+} from "@/apps/web-seller/features/product/constants/product.constant";
 import { MultipleImageUpload } from "@/apps/web-seller/common/components/images/MultipleImageUpload";
 import { FormSelect } from "@/apps/web-seller/common/components/forms/FormSelect";
 
@@ -17,11 +20,7 @@ export const defaultForm: IProductForm = {
   name: "",
 };
 
-export const ProductCreationForm: React.FC<Props> = ({
-  onSubmit,
-  initialValue,
-  onChange,
-}) => {
+export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
   const [form, setForm] = useState<IProductForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<Partial<Record<keyof IProductForm, string>>>({});
 
@@ -122,4 +121,3 @@ export const ProductCreationForm: React.FC<Props> = ({
     </Box>
   );
 };
-

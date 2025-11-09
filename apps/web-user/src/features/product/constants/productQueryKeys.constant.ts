@@ -2,5 +2,5 @@ import { ProductListQueryParams } from "@/apps/web-user/features/product/types/p
 
 export const productQueryKeys = {
   list: (params: ProductListQueryParams) => ["product", "list", params] as const,
+  detail: (productId: string) => ["product", "detail", productId] as const,
 } as const;
-

@@ -9,4 +9,3 @@ export const MAIN_CATEGORY_OPTIONS = [
   { value: "SUPPLY", label: "용품" },
   { value: "OTHER", label: "기타" },
 ] as const;
-

@@ -1,4 +1,13 @@
-import { Controller, Delete, Post, Body, Param, Request, HttpCode, HttpStatus } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Post,
+  Body,
+  Param,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { ProductService } from "@apps/backend/modules/product/product.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";

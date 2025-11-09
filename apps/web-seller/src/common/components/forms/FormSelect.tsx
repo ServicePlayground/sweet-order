@@ -1,5 +1,12 @@
 import React from "react";
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText, SelectChangeEvent } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
+  SelectChangeEvent,
+} from "@mui/material";
 
 export interface SelectOption {
   readonly value: string;
@@ -32,7 +39,12 @@ export const FormSelect: React.FC<FormSelectProps> = ({
   };
 
   return (
-    <FormControl fullWidth={fullWidth} error={Boolean(error)} required={required} disabled={disabled}>
+    <FormControl
+      fullWidth={fullWidth}
+      error={Boolean(error)}
+      required={required}
+      disabled={disabled}
+    >
       <InputLabel>{label}</InputLabel>
       <Select value={value} onChange={handleChange} label={label}>
         {options.map((option) => (
@@ -45,4 +57,3 @@ export const FormSelect: React.FC<FormSelectProps> = ({
     </FormControl>
   );
 };
-

@@ -31,7 +31,7 @@ export function useProductList({
       }
       return productApi.getProducts(params);
     },
-    // 반환된 값은 다음 API 요청의 queryFn의 pageParam으로 전달됩니다.    
+    // 반환된 값은 다음 API 요청의 queryFn의 pageParam으로 전달됩니다.
     // 이 값은 hasNextPage에도 영향을 줍니다.
     getNextPageParam: (lastPage) => {
       if (lastPage.meta.hasNext) {
@@ -54,4 +54,3 @@ export function useProductList({
 
   return query;
 }
-

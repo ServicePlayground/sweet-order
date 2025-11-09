@@ -27,6 +27,38 @@ export enum DeliveryMethod {
   DELIVERY = "delivery",
 }
 
+export enum ProductStatus {
+  ACTIVE = "ACTIVE", // 판매중
+  INACTIVE = "INACTIVE", // 판매중지(비공개)
+  OUT_OF_STOCK = "OUT_OF_STOCK", // 품절
+}
+
+// 커스텀 주문양식 필드 타입
+export type OrderFormFieldType = "selectbox" | "textbox";
+
+// 커스텀 주문양식 옵션
+export interface OrderFormOption {
+  value: string;
+  label: string;
+  price?: number; // 추가 가격 (선택사항)
+}
+
+// 커스텀 주문양식 필드
+export interface OrderFormField {
+  id: string;
+  type: OrderFormFieldType;
+  label: string;
+  required: boolean;
+  placeholder?: string; // textbox용
+  allowMultiple?: boolean; // selectbox용 - 중복선택허용
+  options?: OrderFormOption[]; // selectbox용
+}
+
+// 커스텀 주문양식 스키마
+export interface OrderFormSchema {
+  fields: OrderFormField[];
+}
+
 /**
  * 상품 정보
  */
@@ -45,17 +77,24 @@ export interface Product {
   likeCount: number;
   createdAt: Date;
   updatedAt: Date;
-  orderFormSchema?: any;
+  orderFormSchema?: OrderFormSchema;
   detailDescription?: string;
+  cancellationRefundDetailDescription?: string;
   productNumber: string;
-  foodType: string;
-  producer: string;
-  manufactureDate: string;
-  packageInfo: string;
-  calories: string;
-  ingredients: string;
-  origin: string;
-  customerService: string;
+  productNoticeFoodType: string;
+  productNoticeProducer: string;
+  productNoticeOrigin: string;
+  productNoticeAddress: string;
+  productNoticeManufactureDate: string;
+  productNoticeExpirationDate: string;
+  productNoticePackageCapacity: string;
+  productNoticePackageQuantity: string;
+  productNoticeIngredients: string;
+  productNoticeCalories: string;
+  productNoticeSafetyNotice: string;
+  productNoticeGmoNotice: string;
+  productNoticeImportNotice: string;
+  productNoticeCustomerService: string;
   mainCategory: string;
   sizeRange: string[];
   deliveryMethod: string[];
@@ -106,4 +145,3 @@ export interface ProductListQueryParams {
 export interface GetProductsParams extends ProductListQueryParams {
   page: number;
 }
-

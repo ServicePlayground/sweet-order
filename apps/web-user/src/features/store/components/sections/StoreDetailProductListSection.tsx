@@ -3,8 +3,7 @@
 import { useState, useRef } from "react";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
-import { LoadingFallback } from "@/apps/web-user/common/components/fallbacks/LoadingFallback";
-import { StoreDetailProductList } from "@/apps/web-user/features/product/components/StoreDetailProductList";
+import { StoreDetailProductList } from "@/apps/web-user/features/product/components/list/StoreDetailProductList";
 import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 
@@ -40,7 +39,7 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
   const products: Product[] = data?.pages.flatMap((page) => page.data) || [];
 
   if (isLoading) {
-    return <LoadingFallback message="상품 목록을 불러오는 중..." />;
+    return <></>;
   }
 
   if (products.length === 0) {
@@ -138,4 +137,3 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
     </div>
   );
 }
-

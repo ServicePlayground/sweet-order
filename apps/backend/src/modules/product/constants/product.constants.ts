@@ -110,9 +110,10 @@ export const SWAGGER_EXAMPLES = {
         },
         {
           id: "additionalProducts",
-          type: "checkbox",
+          type: "selectbox",
           label: "추가 구성 상품",
           required: true,
+          allowMultiple: true,
           options: [
             {
               value: "cakeBox",
@@ -139,12 +140,14 @@ export const SWAGGER_EXAMPLES = {
         {
           id: "cakeMessage",
           type: "textbox",
+          label: "케이크 메시지",
           required: true,
           placeholder: "예: 생일 축하해요!",
         },
         {
           id: "additionalRequest",
-          type: "textarea",
+          type: "textbox",
+          label: "추가 요청사항",
           required: false,
           placeholder: "특별한 요청사항이 있으시면 입력해주세요",
         },
@@ -152,16 +155,25 @@ export const SWAGGER_EXAMPLES = {
     },
     // 상세 정보
     detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
+    // 취소 및 환불
+    cancellationRefundDetailDescription:
+      "<p>주문 취소 및 환불 정책: 제작 시작 전까지 취소 가능하며, 제작 시작 후에는 취소가 불가능합니다.</p>",
     // 고시정보 (식품 판매 시 법적 필수 항목)
     productNumber: "CAKE-001",
-    foodType: "케이크류",
-    producer: "스위트오더",
-    manufactureDate: "제조일로부터 3일",
-    packageInfo: "1개",
-    calories: "350kcal",
-    ingredients: "초콜릿, 밀가루, 설탕, 우유, 계란",
-    origin: "국내산",
-    customerService: "1588-1234",
+    productNoticeFoodType: "케이크류",
+    productNoticeProducer: "스위트오더",
+    productNoticeOrigin: "국내산",
+    productNoticeAddress: "서울시 강남구 테헤란로 123",
+    productNoticeManufactureDate: "2024-01-01",
+    productNoticeExpirationDate: "제조일로부터 3일",
+    productNoticePackageCapacity: "500g",
+    productNoticePackageQuantity: "1개",
+    productNoticeIngredients: "초콜릿, 밀가루, 설탕, 우유, 계란",
+    productNoticeCalories: "칼로리: 350kcal, 탄수화물: 45g, 단백질: 5g, 지방: 15g",
+    productNoticeSafetyNotice: "알레르기 주의: 우유, 계란, 밀 함유",
+    productNoticeGmoNotice: "해당사항 없음",
+    productNoticeImportNotice: "해당사항 없음",
+    productNoticeCustomerService: "1588-1234",
     // 필터 정보
     mainCategory: MainCategory.CAKE,
     sizeRange: [SizeRange.ONE_TO_TWO, SizeRange.TWO_TO_THREE],

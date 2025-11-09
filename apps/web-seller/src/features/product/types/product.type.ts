@@ -9,4 +9,3 @@ export interface IProductForm {
   imageUrls: string[];
   name: string;
 }
-

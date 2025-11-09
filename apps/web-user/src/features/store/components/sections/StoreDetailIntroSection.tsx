@@ -67,9 +67,7 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
           No Image
         </div>
       )}
-      <div
-        style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1, minWidth: 0 }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", lineHeight: 1.3 }}>
           {store.name}
         </div>
@@ -89,4 +87,3 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
     </div>
   );
 }
-
