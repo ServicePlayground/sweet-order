@@ -3353,7 +3353,7 @@ __metadata:
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
     axios: "npm:^1.12.2"
-    isomorphic-dompurify: "npm:^2.31.0"
+    isomorphic-dompurify: "npm:^2.26.0"
     next: "npm:15.5.6"
     react: "npm:19.1.0"
     react-dom: "npm:19.1.0"
@@ -7282,7 +7282,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-dompurify@npm:^2.31.0":
+"isomorphic-dompurify@npm:^2.26.0":
   version: 2.31.0
   resolution: "isomorphic-dompurify@npm:2.31.0"
   dependencies:
