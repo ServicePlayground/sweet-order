@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { GetProductsRequestDto } from "@apps/backend/modules/product/dto/product-request.dto";
+import {
+  GetProductsRequestDto,
+  CreateProductRequestDto,
+} from "@apps/backend/modules/product/dto/product-request.dto";
 import {
   SortBy,
   PRODUCT_ERROR_MESSAGES,
+  ProductStatus,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
@@ -30,6 +34,7 @@ export class ProductService {
       deliveryMethod,
       minPrice,
       maxPrice,
+      storeId,
     } = query;
 
     // 필터 조건 구성
@@ -68,6 +73,11 @@ export class ProductService {
       where.salePrice = {};
       if (minPrice !== undefined) where.salePrice.gte = minPrice;
       if (maxPrice !== undefined) where.salePrice.lte = maxPrice;
+    }
+
+    // 스토어 ID 필터 처리
+    if (storeId) {
+      where.storeId = storeId;
     }
 
     // 검색어 조건을 최종 where에 추가
@@ -169,6 +179,104 @@ export class ProductService {
     return {
       ...productData,
       isLiked: user ? likes && likes.length > 0 : false,
+    };
+  }
+
+  /**
+   * 상품 등록 (판매자용)
+   */
+  async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
+    // 스토어 존재 여부 및 소유권 확인
+    const store = await this.prisma.store.findFirst({
+      where: {
+        id: createProductDto.storeId,
+      },
+    });
+
+    // 스토어가 존재하지 않으면 404 에러
+    if (!store) {
+      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.STORE_NOT_FOUND);
+    }
+
+    // 권한 확인: 스토어 소유자인지 확인
+    if (store.userId !== user.sub) {
+      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
+    }
+
+    // productNumber 생성: 카테고리-날짜-순번 형식 (예: CAKE-20240101-001)
+    const now = new Date();
+    const dateStr = now.toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
+    const categoryCode = createProductDto.mainCategory; // CAKE, SUPPLY, OTHER
+
+    // 같은 날 같은 카테고리에서 등록된 상품 수 조회
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const todayProductCount = await this.prisma.product.count({
+      where: {
+        mainCategory: createProductDto.mainCategory,
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    // 순번 생성 (001, 002, ...)
+    const sequence = String(todayProductCount + 1).padStart(3, "0");
+    const productNumber = `${categoryCode}-${dateStr}-${sequence}`;
+
+    // 상품 데이터 준비
+    const productData: Prisma.ProductCreateInput = {
+      store: {
+        connect: {
+          id: createProductDto.storeId,
+        },
+      },
+      name: createProductDto.name,
+      description: createProductDto.description,
+      originalPrice: createProductDto.originalPrice,
+      salePrice: createProductDto.salePrice,
+      stock: createProductDto.stock,
+      notice: createProductDto.notice,
+      caution: createProductDto.caution,
+      basicIncluded: createProductDto.basicIncluded,
+      location: createProductDto.location,
+      orderFormSchema: createProductDto.orderFormSchema,
+      detailDescription: createProductDto.detailDescription,
+      cancellationRefundDetailDescription: createProductDto.cancellationRefundDetailDescription,
+      productNumber,
+      productNoticeFoodType: createProductDto.productNoticeFoodType,
+      productNoticeProducer: createProductDto.productNoticeProducer,
+      productNoticeOrigin: createProductDto.productNoticeOrigin,
+      productNoticeAddress: createProductDto.productNoticeAddress,
+      productNoticeManufactureDate: createProductDto.productNoticeManufactureDate,
+      productNoticeExpirationDate: createProductDto.productNoticeExpirationDate,
+      productNoticePackageCapacity: createProductDto.productNoticePackageCapacity,
+      productNoticePackageQuantity: createProductDto.productNoticePackageQuantity,
+      productNoticeIngredients: createProductDto.productNoticeIngredients,
+      productNoticeCalories: createProductDto.productNoticeCalories,
+      productNoticeSafetyNotice: createProductDto.productNoticeSafetyNotice,
+      productNoticeGmoNotice: createProductDto.productNoticeGmoNotice,
+      productNoticeImportNotice: createProductDto.productNoticeImportNotice,
+      productNoticeCustomerService: createProductDto.productNoticeCustomerService,
+      mainCategory: createProductDto.mainCategory,
+      sizeRange: createProductDto.sizeRange,
+      deliveryMethod: createProductDto.deliveryMethod,
+      hashtags: createProductDto.hashtags || [],
+      status: createProductDto.status || ProductStatus.ACTIVE,
+      images: createProductDto.images || [],
+    };
+
+    // 상품 생성
+    const product = await this.prisma.product.create({
+      data: productData,
+    });
+
+    return {
+      id: product.id,
     };
   }
 

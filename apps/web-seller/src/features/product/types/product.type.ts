@@ -73,4 +73,3 @@ export interface IProductForm {
   hashtags: string[];
   status: ProductStatus;
 }
-

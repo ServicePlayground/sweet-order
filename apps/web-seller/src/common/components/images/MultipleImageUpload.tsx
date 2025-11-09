@@ -244,4 +244,3 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
     </Box>
   );
 };
-

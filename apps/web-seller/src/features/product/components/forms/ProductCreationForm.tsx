@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button, Tabs, Tab, Paper, Typography } from "@mui/material";
-import { IProductForm, MainCategory, SizeRange, DeliveryMethod, ProductStatus } from "@/apps/web-seller/features/product/types/product.type";
-import { PRODUCT_ERROR_MESSAGES } from "@/apps/web-seller/features/product/constants/product.constant";
-import { OrderFormSchemaBuilder } from "@/apps/web-seller/features/product/components/forms/OrderFormSchemaBuilder";
-import { BasicInfoSection } from "@/apps/web-seller/features/product/components/forms/sections/BasicInfoSection";
-import { AdditionalSettingsSection } from "@/apps/web-seller/features/product/components/forms/sections/AdditionalSettingsSection";
+import {
+  IProductForm,
+  MainCategory,
+  SizeRange,
+  DeliveryMethod,
+  ProductStatus,
+  OrderFormSchema,
+} from "@/apps/web-seller/features/product/types/product.type";
+import { ProductCreationOrderFormSchemaSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationOrderFormSchemaSection";
+import { ProductCreationBasicInfoSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationBasicInfoSection";
+import { ProductCreationAdditionalSettingsSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationAdditionalSettingsSection";
+import { ProductCreationDetailDescriptionSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationDetailDescriptionSection";
+import { ProductCreationCancellationRefundSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCancellationRefundSection";
+import { ProductCreationProductNoticeSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationProductNoticeSection";
+import { validateProductForm } from "@/apps/web-seller/features/product/utils/validateProductForm";
 
 interface Props {
   onSubmit: (data: IProductForm) => void;
@@ -24,6 +34,21 @@ export const defaultForm: IProductForm = {
   basicIncluded: "",
   orderFormSchema: undefined,
   detailDescription: "",
+  cancellationRefundDetailDescription: "",
+  productNoticeFoodType: "",
+  productNoticeProducer: "",
+  productNoticeOrigin: "",
+  productNoticeAddress: "",
+  productNoticeManufactureDate: "",
+  productNoticeExpirationDate: "",
+  productNoticePackageCapacity: "",
+  productNoticePackageQuantity: "",
+  productNoticeIngredients: "",
+  productNoticeCalories: "",
+  productNoticeSafetyNotice: "",
+  productNoticeGmoNotice: "",
+  productNoticeImportNotice: "",
+  productNoticeCustomerService: "",
   stock: "",
   sizeRange: [],
   deliveryMethod: [],
@@ -39,7 +64,12 @@ interface TabPanelProps {
 
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   return (
-    <div role="tabpanel" hidden={value !== index} id={`product-tabpanel-${index}`} aria-labelledby={`product-tab-${index}`}>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`product-tabpanel-${index}`}
+      aria-labelledby={`product-tab-${index}`}
+    >
       {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
     </div>
   );
@@ -57,63 +87,13 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
     }
   }, [initialValue]);
 
-  const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof IProductForm, string>> = {};
-
-    // 기본 정보 검증
-    if (!form.mainCategory) {
-      newErrors.mainCategory = PRODUCT_ERROR_MESSAGES.MAIN_CATEGORY_REQUIRED;
-    }
-
-    if (form.imageUrls.length === 0) {
-      newErrors.imageUrls = PRODUCT_ERROR_MESSAGES.IMAGE_URLS_REQUIRED;
-    }
-
-    if (!form.name.trim()) {
-      newErrors.name = PRODUCT_ERROR_MESSAGES.NAME_REQUIRED;
-    }
-
-    if (form.originalPrice === "" || form.originalPrice === null || form.originalPrice === undefined) {
-      newErrors.originalPrice = PRODUCT_ERROR_MESSAGES.ORIGINAL_PRICE_REQUIRED;
-    } else if (typeof form.originalPrice === "number" && form.originalPrice <= 0) {
-      newErrors.originalPrice = PRODUCT_ERROR_MESSAGES.ORIGINAL_PRICE_INVALID;
-    }
-
-    if (form.salePrice === "" || form.salePrice === null || form.salePrice === undefined) {
-      newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_REQUIRED;
-    } else if (typeof form.salePrice === "number" && form.salePrice <= 0) {
-      newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_INVALID;
-    }
-
-    if (
-      typeof form.originalPrice === "number" &&
-      typeof form.salePrice === "number" &&
-      form.salePrice > form.originalPrice
-    ) {
-      newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_HIGHER_THAN_ORIGINAL;
-    }
-
-    // 보이지 않는 부분 검증
-    if (form.stock === "" || form.stock === null || form.stock === undefined) {
-      newErrors.stock = PRODUCT_ERROR_MESSAGES.STOCK_REQUIRED;
-    } else if (typeof form.stock === "number" && form.stock < 1) {
-      newErrors.stock = PRODUCT_ERROR_MESSAGES.STOCK_INVALID;
-    }
-
-    if (form.sizeRange.length === 0) {
-      newErrors.sizeRange = PRODUCT_ERROR_MESSAGES.SIZE_RANGE_REQUIRED;
-    }
-
-    if (form.deliveryMethod.length === 0) {
-      newErrors.deliveryMethod = PRODUCT_ERROR_MESSAGES.DELIVERY_METHOD_REQUIRED;
-    }
-
-    if (form.hashtags.length > 10) {
-      newErrors.hashtags = PRODUCT_ERROR_MESSAGES.HASHTAG_MAX;
-    }
-
+  const validate = (): {
+    isValid: boolean;
+    errors: Partial<Record<keyof IProductForm, string>>;
+  } => {
+    const newErrors = validateProductForm(form);
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return { isValid: Object.keys(newErrors).length === 0, errors: newErrors };
   };
 
   const handleChange =
@@ -121,6 +101,7 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
       const value = e.target.value;
       let next: IProductForm;
 
+      // 정가, 판매가, 재고수량은 숫자로 변환
       if (key === "originalPrice" || key === "salePrice" || key === "stock") {
         const numValue = value === "" ? "" : parseInt(value, 10);
         next = { ...form, [key]: isNaN(numValue as number) ? "" : numValue };
@@ -168,20 +149,56 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
     onChange?.(next);
   };
 
-  const handleOrderFormSchemaChange = (schema: any) => {
+  const handleOrderFormSchemaChange = (schema: OrderFormSchema) => {
     const next = { ...form, orderFormSchema: schema };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleDetailDescriptionChange = (value: string) => {
+    const next = { ...form, detailDescription: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleCancellationRefundPolicyChange = (value: string) => {
+    const next = { ...form, cancellationRefundDetailDescription: value };
     setForm(next);
     onChange?.(next);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) {
+    const { isValid, errors: validationErrors } = validate();
+    if (!isValid) {
       // 첫 번째 에러가 있는 탭으로 이동
-      const errorKeys = Object.keys(errors);
+      const errorKeys = Object.keys(validationErrors);
       if (errorKeys.length > 0) {
-        // 기본 정보 탭으로 이동
-        setActiveTab(0);
+        // 에러가 있는 탭으로 이동
+        if (validationErrors.detailDescription) {
+          setActiveTab(1); // 상세정보 탭
+        } else if (
+          validationErrors.productNoticeFoodType ||
+          validationErrors.productNoticeProducer ||
+          validationErrors.productNoticeOrigin ||
+          validationErrors.productNoticeAddress ||
+          validationErrors.productNoticeManufactureDate ||
+          validationErrors.productNoticeExpirationDate ||
+          validationErrors.productNoticePackageCapacity ||
+          validationErrors.productNoticePackageQuantity ||
+          validationErrors.productNoticeIngredients ||
+          validationErrors.productNoticeCalories ||
+          validationErrors.productNoticeSafetyNotice ||
+          validationErrors.productNoticeGmoNotice ||
+          validationErrors.productNoticeImportNotice ||
+          validationErrors.productNoticeCustomerService
+        ) {
+          setActiveTab(2); // 상품정보제공고시 탭
+        } else if (validationErrors.cancellationRefundDetailDescription) {
+          setActiveTab(3); // 취소 및 환불 탭
+        } else {
+          setActiveTab(0); // 기본 정보 탭
+        }
       }
       return;
     }
@@ -196,60 +213,77 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
       <Paper sx={{ p: 3 }}>
-        <Tabs value={activeTab} onChange={handleTabChange} aria-label="상품 등록 탭">
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="상품 등록 탭"
+          variant="fullWidth"
+        >
           <Tab label="기본 정보" />
-          <Tab label="커스텀 주문양식" />
           <Tab label="상세정보" />
-          <Tab label="안내/주의사항" />
+          <Tab label="상품정보제공고시" />
+          <Tab label="취소 및 환불" />
         </Tabs>
 
         {/* 기본 정보 탭 */}
         <TabPanel value={activeTab} index={0}>
-          <BasicInfoSection
+          <ProductCreationBasicInfoSection
             form={form}
             errors={errors}
             onCategoryChange={handleCategoryChange}
             onImageUrlsChange={handleImageUrlsChange}
             onChange={handleChange}
           />
-        </TabPanel>
 
-        {/* 커스텀 주문양식 탭 */}
-        <TabPanel value={activeTab} index={1}>
-          <OrderFormSchemaBuilder value={form.orderFormSchema} onChange={handleOrderFormSchemaChange} />
+          {/* 커스텀 주문양식 섹션 */}
+          <Paper sx={{ p: 3, mt: 4 }}>
+            <ProductCreationOrderFormSchemaSection
+              value={form.orderFormSchema}
+              onChange={handleOrderFormSchemaChange}
+            />
+          </Paper>
+
+          {/* 추가 설정 섹션 */}
+          <Box sx={{ mt: 4 }}>
+            <ProductCreationAdditionalSettingsSection
+              form={form}
+              errors={errors}
+              onStockChange={handleChange("stock")}
+              onStatusChange={handleStatusChange}
+              onSizeRangeChange={handleSizeRangeChange}
+              onDeliveryMethodChange={handleDeliveryMethodChange}
+              onHashtagsChange={handleHashtagsChange}
+            />
+          </Box>
         </TabPanel>
 
         {/* 상세정보 탭 */}
-        <TabPanel value={activeTab} index={2}>
-          <Box sx={{ p: 2, textAlign: "center", color: "text.secondary" }}>
-            <Typography variant="body1">상세정보 입력 기능은 추후 구현 예정입니다.</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              HTML 편집기로 작성 가능한 상세설명 편집기가 제공됩니다.
-            </Typography>
-          </Box>
+        <TabPanel value={activeTab} index={1}>
+          <ProductCreationDetailDescriptionSection
+            form={form}
+            errors={errors}
+            onChange={handleDetailDescriptionChange}
+          />
         </TabPanel>
 
-        {/* 안내/주의사항 탭 */}
+        {/* 상품정보제공고시 탭 */}
+        <TabPanel value={activeTab} index={2}>
+          <ProductCreationProductNoticeSection
+            form={form}
+            errors={errors}
+            onChange={handleChange}
+          />
+        </TabPanel>
+
+        {/* 취소 및 환불 탭 */}
         <TabPanel value={activeTab} index={3}>
-          <Box sx={{ p: 2, textAlign: "center", color: "text.secondary" }}>
-            <Typography variant="body1">상품정보제공고시 기능은 추후 구현 예정입니다.</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              식품 판매 시 법적으로 입력해야 하는 항목들이 포함됩니다.
-            </Typography>
-          </Box>
+          <ProductCreationCancellationRefundSection
+            form={form}
+            errors={errors}
+            onChange={handleCancellationRefundPolicyChange}
+          />
         </TabPanel>
       </Paper>
-
-      {/* 추가 설정 섹션 */}
-      <AdditionalSettingsSection
-        form={form}
-        errors={errors}
-        onStockChange={handleChange("stock")}
-        onStatusChange={handleStatusChange}
-        onSizeRangeChange={handleSizeRangeChange}
-        onDeliveryMethodChange={handleDeliveryMethodChange}
-        onHashtagsChange={handleHashtagsChange}
-      />
 
       <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
         <Button type="submit" variant="contained" size="large">

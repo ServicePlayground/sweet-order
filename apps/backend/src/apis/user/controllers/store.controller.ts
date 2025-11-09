@@ -1,13 +1,10 @@
-import { Controller, Get, Param, HttpCode, HttpStatus, Request } from "@nestjs/common";
+import { Controller, Get, Param, HttpCode, HttpStatus } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { StoreService } from "@apps/backend/modules/store/store.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   STORE_ERROR_MESSAGES,
   SWAGGER_RESPONSE_EXAMPLES,

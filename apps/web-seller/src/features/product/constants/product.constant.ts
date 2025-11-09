@@ -51,4 +51,3 @@ export const ORDER_FORM_FIELD_TYPE_OPTIONS = [
   { value: "checkbox", label: "체크박스" },
   { value: "textarea", label: "텍스트영역" },
 ] as const;
-

@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { ProductService as ProductDataService } from "@apps/backend/modules/product/services/product.service";
-import { GetProductsRequestDto } from "@apps/backend/modules/product/dto/product-request.dto";
+import {
+  GetProductsRequestDto,
+  CreateProductRequestDto,
+} from "@apps/backend/modules/product/dto/product-request.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -25,6 +28,13 @@ export class ProductService {
    */
   async getProductDetail(id: string, user?: JwtVerifiedPayload) {
     return this.productDataService.getProductDetail(id, user);
+  }
+
+  /**
+   * (판매자용) 상품 등록
+   */
+  async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
+    return this.productDataService.createProduct(createProductDto, user);
   }
 
   /**

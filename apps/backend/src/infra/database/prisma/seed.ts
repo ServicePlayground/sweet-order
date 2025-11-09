@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.phoneVerification.deleteMany();
   await prisma.productLike.deleteMany();
-  await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.user.deleteMany();
@@ -184,54 +183,122 @@ async function main() {
     }),
   ]);
 
-  const products = await Promise.all([
-    prisma.product.create({
-      data: {
-        storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
-        name: "프리미엄 초콜릿 케이크",
-        description: "벨기에산 고급 초콜릿으로 만든 달콤한 케이크입니다.",
-        originalPrice: 50000,
-        salePrice: 45000,
-        stock: 100, // 재고 수량
-        notice: "주문 후 1-2일 내 제작 완료",
-        caution: "알레르기 주의: 우유, 계란, 밀 함유",
-        basicIncluded: "케이크, 촛불, 포크",
-        location: "서울시 강남구",
-        likeCount: 25,
-        orderFormSchema: {
-          fields: [],
+  // 100개의 상품 생성
+  const products = await Promise.all(
+    Array.from({ length: 100 }, (_, index) =>
+      prisma.product.create({
+        data: {
+          storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
+          name: "프리미엄 초콜릿 케이크",
+          description: "벨기에산 고급 초콜릿으로 만든 달콤한 케이크입니다.",
+          originalPrice: 50000,
+          salePrice: 45000,
+          stock: 100, // 재고 수량
+          notice: "주문 후 1-2일 내 제작 완료",
+          caution: "알레르기 주의: 우유, 계란, 밀 함유",
+          basicIncluded: "케이크, 촛불, 포크",
+          location: "서울시 강남구",
+          likeCount: 25,
+          orderFormSchema: {
+            fields: [
+              {
+                id: "size",
+                type: "selectbox",
+                label: "사이즈 선택",
+                required: true,
+                options: [
+                  {
+                    value: "1호",
+                    label: "1호",
+                    price: 0,
+                  },
+                  {
+                    value: "2호",
+                    label: "2호",
+                    price: 10000,
+                  },
+                  {
+                    value: "3호",
+                    label: "3호",
+                    price: 20000,
+                  },
+                ],
+              },
+              {
+                id: "additionalProducts",
+                type: "selectbox",
+                label: "추가 구성 상품",
+                required: true,
+                allowMultiple: true,
+                options: [
+                  {
+                    value: "cakeBox",
+                    label: "케이크상자",
+                    price: 2000,
+                  },
+                  {
+                    value: "candles",
+                    label: "캔들 추가",
+                    price: 3000,
+                  },
+                  {
+                    value: "topper",
+                    label: "케이크 토퍼",
+                    price: 5000,
+                  },
+                  {
+                    value: "messagePlate",
+                    label: "글씨 문구 추가",
+                    price: 4000,
+                  },
+                ],
+              },
+              {
+                id: "cakeMessage",
+                type: "textbox",
+                label: "케이크 메시지",
+                required: true,
+                placeholder: "예: 생일 축하해요!",
+              },
+              {
+                id: "additionalRequest",
+                type: "textbox",
+                label: "추가 요청사항",
+                required: false,
+                placeholder: "특별한 요청사항이 있으시면 입력해주세요",
+              },
+            ],
+          },
+          detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
+          cancellationRefundDetailDescription:
+            "<p>주문 취소 및 환불 정책: 제작 시작 전까지 취소 가능하며, 제작 시작 후에는 취소가 불가능합니다.</p>",
+          productNumber: `CAKE-${String(index + 1).padStart(3, "0")}`, // CAKE-001, CAKE-002, ... CAKE-100
+          productNoticeFoodType: "케이크류",
+          productNoticeProducer: "스위트오더",
+          productNoticeOrigin: "국내산",
+          productNoticeAddress: "서울시 강남구 테헤란로 123",
+          productNoticeManufactureDate: "2024-01-01",
+          productNoticeExpirationDate: "제조일로부터 3일",
+          productNoticePackageCapacity: "500g",
+          productNoticePackageQuantity: "1개",
+          productNoticeIngredients: "초콜릿, 밀가루, 설탕, 우유, 계란",
+          productNoticeCalories: "칼로리: 350kcal, 탄수화물: 45g, 단백질: 5g, 지방: 15g",
+          productNoticeSafetyNotice: "알레르기 주의: 우유, 계란, 밀 함유",
+          productNoticeGmoNotice: "해당사항 없음",
+          productNoticeImportNotice: "해당사항 없음",
+          productNoticeCustomerService: "1588-1234",
+          mainCategory: "CAKE",
+          sizeRange: ["ONE_TO_TWO", "TWO_TO_THREE"],
+          deliveryMethod: ["PICKUP", "DELIVERY"],
+          hashtags: ["케이크", "초콜릿", "생일", "기념일"],
+          images: ["https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg"],
+          status: "ACTIVE",
+          createdAt: new Date("2024-01-01T00:00:00Z"),
+          updatedAt: new Date("2024-01-01T00:00:00Z"),
         },
-        detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
-        productNumber: "CAKE-001",
-        foodType: "케이크류",
-        producer: "스위트오더",
-        manufactureDate: "제조일로부터 3일",
-        packageInfo: "1개",
-        calories: "350kcal",
-        ingredients: "초콜릿, 밀가루, 설탕, 우유, 계란",
-        origin: "국내산",
-        customerService: "1588-1234",
-        mainCategory: "CAKE",
-        sizeRange: ["ONE_TO_TWO", "TWO_TO_THREE"],
-        deliveryMethod: ["PICKUP", "DELIVERY"],
-        hashtags: ["케이크", "초콜릿", "생일", "기념일"],
-        status: "ACTIVE",
-        createdAt: new Date("2024-01-01T00:00:00Z"),
-        updatedAt: new Date("2024-01-01T00:00:00Z"),
-      },
-    }),
-  ]);
-
-  const productImages = await Promise.all([
-    prisma.productImage.create({
-      data: {
-        url: "https://example.com/images/chocolate-cake-1.jpg",
-        alt: "초콜릿 케이크 메인 이미지",
-        order: 1,
-        productId: products[0].id,
-      },
-    }),
-  ]);
+      }),
+    ),
+  );
 
   const productLikes = await Promise.all([
     prisma.productLike.create({
@@ -245,7 +312,6 @@ async function main() {
   console.log(`✅ Created ${users.length} users`);
   console.log(`✅ Created ${phoneVerifications.length} phone verifications`);
   console.log(`✅ Created ${products.length} products`);
-  console.log(`✅ Created ${productImages.length} product images`);
   console.log(`✅ Created ${productLikes.length} product likes`);
   console.log(`✅ Created ${stores.length} stores`);
   console.log("🎉 Database seeding completed!");

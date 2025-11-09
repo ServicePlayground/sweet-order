@@ -70,7 +70,6 @@ export function useRegister() {
 // 현재 사용자 정보 조회 (새로고침 시 자동 실행)
 export function useMe() {
   const { login, setInitialized } = useAuthStore();
-  const router = useRouter();
 
   const query = useQuery({
     queryKey: authQueryKeys.me, // 자동으로 캐시 관리됨
