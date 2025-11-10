@@ -27,9 +27,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     return (
       <div
         style={{
-          maxWidth: 1440,
+          width: "100%",
           margin: "0 auto",
-          padding: "24px 16px",
+          padding: "24px 20px",
           textAlign: "center",
           color: "#6b7280",
         }}
@@ -40,7 +40,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   }
 
   return (
-    <div style={{ maxWidth: 1440, margin: "0 auto", padding: "24px 16px" }}>
+    <div style={{ width: "100%", padding: "40px 20px" }}>
       {/* 상품 이미지 및 정보 */}
       <div
         style={{

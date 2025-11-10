@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
-import { StoreDetailProductList } from "@/apps/web-user/features/product/components/list/StoreDetailProductList";
+import { ProductList } from "@/apps/web-user/features/product/components/list/ProductList";
 import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 
@@ -14,7 +14,6 @@ interface StoreDetailProductListSectionProps {
 export function StoreDetailProductListSection({ storeId }: StoreDetailProductListSectionProps) {
   const [sortBy, setSortBy] = useState<SortBy>(SortBy.POPULAR);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const {
     data,
@@ -35,8 +34,11 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
     loadMoreRef,
   });
 
-  // 상품 목록 평탄화
-  const products: Product[] = data?.pages.flatMap((page) => page.data) || [];
+  // 상품 목록 평탄화 및 중복 제거
+  const products: Product[] =
+    data?.pages
+      ?.flatMap((page) => page.data)
+      .filter((product, index, self) => self.findIndex((p) => p.id === product.id) === index) || [];
 
   if (isLoading) {
     return <></>;
@@ -65,29 +67,16 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
       >
         상품 목록
       </h2>
-      <div ref={containerRef}>
+      <div>
         {/* 정렬 선택 */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            justifyContent: "flex-end",
             marginBottom: "24px",
-            padding: "16px 24px",
-            backgroundColor: "#f9fafb",
-            borderRadius: "12px",
-            border: "1px solid #e5e7eb",
           }}
         >
-          <span
-            style={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#374151",
-            }}
-          >
-            정렬:
-          </span>
           <Select
             value={sortBy}
             onChange={(value) => setSortBy(value as SortBy)}
@@ -102,7 +91,7 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
         </div>
 
         {/* 상품 그리드 */}
-        <StoreDetailProductList products={products} />
+        <ProductList products={products} />
 
         {/* 무한 스크롤 트리거 */}
         {hasNextPage && (

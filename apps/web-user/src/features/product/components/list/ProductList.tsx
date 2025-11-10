@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
-interface StoreDetailProductListProps {
+interface ProductListProps {
   products: Product[];
 }
 
-export function StoreDetailProductList({ products }: StoreDetailProductListProps) {
+export function ProductList({ products }: ProductListProps) {
   const router = useRouter();
 
   const handleProductClick = (productId: string) => {
@@ -25,9 +25,9 @@ export function StoreDetailProductList({ products }: StoreDetailProductListProps
         marginBottom: "32px",
       }}
     >
-      {products.map((product) => (
+      {products.map((product, index) => (
         <div
-          key={product.id}
+          key={`${product.id}-${index}`}
           onClick={() => handleProductClick(product.id)}
           style={{
             backgroundColor: "#ffffff",

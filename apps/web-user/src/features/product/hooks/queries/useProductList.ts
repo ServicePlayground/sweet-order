@@ -15,11 +15,27 @@ export function useProductList({
   limit = 30,
   sortBy = SortBy.POPULAR,
   storeId,
+  search,
+  mainCategory,
+  sizeRange,
+  deliveryMethod,
+  minPrice,
+  maxPrice,
 }: Partial<ProductListQueryParams> = {}) {
   const { showAlert } = useAlertStore();
 
   const query = useInfiniteQuery<ProductListResponse>({
-    queryKey: productQueryKeys.list({ limit, sortBy, storeId }),
+    queryKey: productQueryKeys.list({
+      limit,
+      sortBy,
+      storeId,
+      search,
+      mainCategory,
+      sizeRange,
+      deliveryMethod,
+      minPrice,
+      maxPrice,
+    }),
     queryFn: ({ pageParam = 1 }) => {
       const params: GetProductsParams = {
         page: pageParam as number,
@@ -28,6 +44,24 @@ export function useProductList({
       };
       if (storeId) {
         params.storeId = storeId;
+      }
+      if (search) {
+        params.search = search;
+      }
+      if (mainCategory) {
+        params.mainCategory = mainCategory;
+      }
+      if (sizeRange && sizeRange.length > 0) {
+        params.sizeRange = sizeRange;
+      }
+      if (deliveryMethod && deliveryMethod.length > 0) {
+        params.deliveryMethod = deliveryMethod;
+      }
+      if (minPrice !== undefined) {
+        params.minPrice = minPrice;
+      }
+      if (maxPrice !== undefined) {
+        params.maxPrice = maxPrice;
       }
       return productApi.getProducts(params);
     },

@@ -9,22 +9,22 @@ export enum SortBy {
 }
 
 export enum MainCategory {
-  PRODUCT = "product",
-  SUPPLY = "supply",
-  OTHER = "other",
+  CAKE = "CAKE",
+  SUPPLY = "SUPPLY",
+  OTHER = "OTHER",
 }
 
 export enum SizeRange {
-  ONE_TO_TWO = "one_to_two",
-  TWO_TO_THREE = "two_to_three",
-  THREE_TO_FOUR = "three_to_four",
-  FOUR_TO_FIVE = "four_to_five",
-  FIVE_OR_MORE = "five_or_more",
+  ONE_TO_TWO = "ONE_TO_TWO",
+  TWO_TO_THREE = "TWO_TO_THREE",
+  THREE_TO_FOUR = "THREE_TO_FOUR",
+  FOUR_TO_FIVE = "FOUR_TO_FIVE",
+  FIVE_OR_MORE = "FIVE_OR_MORE",
 }
 
 export enum DeliveryMethod {
-  PICKUP = "pickup",
-  DELIVERY = "delivery",
+  PICKUP = "PICKUP",
+  DELIVERY = "DELIVERY",
 }
 
 export enum ProductStatus {
