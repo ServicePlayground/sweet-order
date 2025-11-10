@@ -11,8 +11,8 @@ import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/Select
 export interface ProductCreationBasicInfoSectionProps {
   form: IProductForm;
   errors: Partial<Record<keyof IProductForm, string>>;
-  onCategoryChange: (value: MainCategory | "") => void;
-  onImageUrlsChange: (urls: string[]) => void;
+  onCategoryChange: (value: MainCategory) => void;
+  onImagesChange: (urls: string[]) => void;
   onChange: (
     key: keyof IProductForm,
   ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -23,7 +23,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   form,
   errors,
   onCategoryChange,
-  onImageUrlsChange,
+  onImagesChange,
   onChange,
 }) => {
   return (
@@ -32,7 +32,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
         <SelectBox
           label="카테고리"
           value={form.mainCategory}
-          onChange={(value) => onCategoryChange(value as MainCategory | "")}
+          onChange={(value) => onCategoryChange(value as MainCategory)}
           options={MAIN_CATEGORY_OPTIONS}
           error={errors.mainCategory}
           required
@@ -42,9 +42,9 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       <Grid item xs={12} md={12}>
         <MultipleImageUpload
           label="상품 대표 이미지"
-          value={form.imageUrls}
-          onChange={onImageUrlsChange}
-          error={errors.imageUrls}
+          value={form.images || []}
+          onChange={onImagesChange}
+          error={errors.images}
           required
         />
       </Grid>
@@ -80,7 +80,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
           label="정가"
           fullWidth
           type="number"
-          value={form.originalPrice === "" ? "" : form.originalPrice}
+          value={form.originalPrice || 0}
           onChange={onChange("originalPrice")}
           error={Boolean(errors.originalPrice)}
           helperText={errors.originalPrice}
@@ -94,7 +94,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
           label="판매가"
           fullWidth
           type="number"
-          value={form.salePrice === "" ? "" : form.salePrice}
+          value={form.salePrice || 0}
           onChange={onChange("salePrice")}
           error={Boolean(errors.salePrice)}
           helperText={errors.salePrice}

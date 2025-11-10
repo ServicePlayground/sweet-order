@@ -48,7 +48,7 @@ export const ProductCreationAdditionalSettingsSection: React.FC<Props> = ({
             label="재고수량"
             fullWidth
             type="number"
-            value={form.stock === "" ? "" : form.stock}
+            value={form.stock || 0}
             onChange={onStockChange}
             error={Boolean(errors.stock)}
             helperText={errors.stock || "1개 이상 필수"}
@@ -93,7 +93,7 @@ export const ProductCreationAdditionalSettingsSection: React.FC<Props> = ({
         <Grid item xs={12} md={12}>
           <HashtagInput
             label="해시태그"
-            value={form.hashtags}
+            value={form.hashtags || []}
             onChange={onHashtagsChange}
             error={errors.hashtags}
             maxTags={10}
