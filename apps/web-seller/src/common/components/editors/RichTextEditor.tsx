@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useEffect } from "react";
 import { Box } from "@mui/material";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
 
 export interface RichTextEditorProps {
   value: string;
@@ -19,6 +20,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   minHeight = 400,
   error = false,
 }) => {
+  const quillRef = useRef<ReactQuill>(null);
+  const uploadMutation = useUploadFile();
+
   const modules = useMemo(
     () => ({
       toolbar: [
@@ -33,6 +37,87 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }),
     [],
   );
+
+  // 이미지 핸들러 설정
+  useEffect(() => {
+    // quill이 준비될 때까지 약간의 지연
+    const timer = setTimeout(() => {
+      const quill = quillRef.current?.getEditor();
+      if (!quill) return;
+
+      const toolbar = quill.getModule("toolbar");
+      if (!toolbar) return;
+
+      // 이미지 핸들러 커스터마이징
+      toolbar.addHandler("image", () => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", "image/*");
+        input.style.display = "none";
+        document.body.appendChild(input);
+        input.click();
+
+        input.onchange = () => {
+          const file = input.files?.[0];
+          document.body.removeChild(input);
+
+          if (!file) return;
+
+          // 비동기 처리
+          (async () => {
+            try {
+              // 이미지 업로드
+              const response = await uploadMutation.mutateAsync(file);
+              const imageUrl = response.fileUrl;
+
+              // Quill 에디터에 이미지 삽입
+              const editor = quillRef.current?.getEditor();
+              if (!editor) return;
+
+              // 에디터에 포커스를 주고 range 설정을 보장
+              editor.focus();
+
+              // 에디터가 준비될 때까지 약간의 지연
+              await new Promise((resolve) => setTimeout(resolve, 0));
+
+              // 현재 선택 영역 가져오기
+              let range = editor.getSelection(true);
+              const length = editor.getLength();
+
+              // range가 없거나 유효하지 않으면 끝에 커서 설정
+              if (!range || range.index < 0) {
+                // 에디터가 비어있으면 0, 아니면 끝에
+                const insertIndex = length > 1 ? length - 1 : 0;
+                editor.setSelection(insertIndex, 0);
+                // 다시 range 가져오기
+                range = editor.getSelection(true);
+              }
+
+              // range가 여전히 없으면 기본 위치 사용
+              if (!range) {
+                const insertIndex = length > 1 ? length - 1 : 0;
+                range = { index: insertIndex, length: 0 };
+              }
+
+              // 이미지 삽입
+              editor.insertEmbed(range.index, "image", imageUrl);
+              
+              // 커서를 이미지 다음으로 이동
+              setTimeout(() => {
+                editor.setSelection(range.index + 1, 0);
+              }, 0);
+            } catch (error) {
+              console.error("이미지 업로드 실패:", error);
+            }
+          })();
+        };
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [uploadMutation]);
 
   const formats = [
     "header",
@@ -78,6 +163,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }}
     >
       <ReactQuill
+        ref={quillRef}
         theme="snow"
         value={value || ""}
         onChange={onChange}
