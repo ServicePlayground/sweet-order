@@ -11,42 +11,34 @@ export const validateProductForm = (
     newErrors.mainCategory = PRODUCT_ERROR_MESSAGES.MAIN_CATEGORY_REQUIRED;
   }
 
-  if (form.imageUrls.length === 0) {
-    newErrors.imageUrls = PRODUCT_ERROR_MESSAGES.IMAGE_URLS_REQUIRED;
+  if (!form.images || form.images.length === 0) {
+    newErrors.images = PRODUCT_ERROR_MESSAGES.IMAGE_URLS_REQUIRED;
   }
 
   if (!form.name.trim()) {
     newErrors.name = PRODUCT_ERROR_MESSAGES.NAME_REQUIRED;
   }
 
-  if (
-    form.originalPrice === "" ||
-    form.originalPrice === null ||
-    form.originalPrice === undefined
-  ) {
+  if (form.originalPrice === null || form.originalPrice === undefined) {
     newErrors.originalPrice = PRODUCT_ERROR_MESSAGES.ORIGINAL_PRICE_REQUIRED;
-  } else if (typeof form.originalPrice === "number" && form.originalPrice <= 0) {
+  } else if (form.originalPrice <= 0) {
     newErrors.originalPrice = PRODUCT_ERROR_MESSAGES.ORIGINAL_PRICE_INVALID;
   }
 
-  if (form.salePrice === "" || form.salePrice === null || form.salePrice === undefined) {
+  if (form.salePrice === null || form.salePrice === undefined) {
     newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_REQUIRED;
-  } else if (typeof form.salePrice === "number" && form.salePrice <= 0) {
+  } else if (form.salePrice <= 0) {
     newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_INVALID;
   }
 
-  if (
-    typeof form.originalPrice === "number" &&
-    typeof form.salePrice === "number" &&
-    form.salePrice > form.originalPrice
-  ) {
+  if (form.originalPrice > 0 && form.salePrice > 0 && form.salePrice > form.originalPrice) {
     newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_HIGHER_THAN_ORIGINAL;
   }
 
   // 보이지 않는 부분 검증
-  if (form.stock === "" || form.stock === null || form.stock === undefined) {
+  if (form.stock === null || form.stock === undefined) {
     newErrors.stock = PRODUCT_ERROR_MESSAGES.STOCK_REQUIRED;
-  } else if (typeof form.stock === "number" && form.stock < 1) {
+  } else if (form.stock < 1) {
     newErrors.stock = PRODUCT_ERROR_MESSAGES.STOCK_INVALID;
   }
 
@@ -58,7 +50,7 @@ export const validateProductForm = (
     newErrors.deliveryMethod = PRODUCT_ERROR_MESSAGES.DELIVERY_METHOD_REQUIRED;
   }
 
-  if (form.hashtags.length > 10) {
+  if (form.hashtags && form.hashtags.length > 10) {
     newErrors.hashtags = PRODUCT_ERROR_MESSAGES.HASHTAG_MAX;
   }
 
