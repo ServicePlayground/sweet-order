@@ -74,23 +74,38 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               const editor = quillRef.current?.getEditor();
               if (!editor) return;
 
-              // 에디터에 포커스가 없으면 포커스를 주고 끝에 커서 설정
-              let range = editor.getSelection();
+              // 에디터에 포커스를 주고 range 설정을 보장
+              editor.focus();
+
+              // 에디터가 준비될 때까지 약간의 지연
+              await new Promise((resolve) => setTimeout(resolve, 0));
+
+              // 현재 선택 영역 가져오기
+              let range = editor.getSelection(true);
               const length = editor.getLength();
 
-              if (!range) {
-                // 선택 영역이 없으면 끝에 커서 설정
-                editor.focus();
-                editor.setSelection(length - 1, 0);
-                range = editor.getSelection(true);
-              } else {
+              // range가 없거나 유효하지 않으면 끝에 커서 설정
+              if (!range || range.index < 0) {
+                // 에디터가 비어있으면 0, 아니면 끝에
+                const insertIndex = length > 1 ? length - 1 : 0;
+                editor.setSelection(insertIndex, 0);
+                // 다시 range 가져오기
                 range = editor.getSelection(true);
               }
 
-              if (range) {
-                editor.insertEmbed(range.index, "image", imageUrl);
-                editor.setSelection(range.index + 1, 0);
+              // range가 여전히 없으면 기본 위치 사용
+              if (!range) {
+                const insertIndex = length > 1 ? length - 1 : 0;
+                range = { index: insertIndex, length: 0 };
               }
+
+              // 이미지 삽입
+              editor.insertEmbed(range.index, "image", imageUrl);
+              
+              // 커서를 이미지 다음으로 이동
+              setTimeout(() => {
+                editor.setSelection(range.index + 1, 0);
+              }, 0);
             } catch (error) {
               console.error("이미지 업로드 실패:", error);
             }
