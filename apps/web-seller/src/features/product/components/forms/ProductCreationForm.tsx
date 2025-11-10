@@ -23,12 +23,12 @@ interface Props {
 }
 
 export const defaultForm: IProductForm = {
-  mainCategory: "",
-  imageUrls: [],
+  mainCategory: MainCategory.CAKE,
+  images: [],
   name: "",
   description: "",
-  originalPrice: "",
-  salePrice: "",
+  originalPrice: 0,
+  salePrice: 0,
   notice: "",
   caution: "",
   basicIncluded: "",
@@ -49,7 +49,7 @@ export const defaultForm: IProductForm = {
   productNoticeGmoNotice: "",
   productNoticeImportNotice: "",
   productNoticeCustomerService: "",
-  stock: "",
+  stock: 0,
   sizeRange: [],
   deliveryMethod: [],
   hashtags: [],
@@ -103,8 +103,8 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
 
       // 정가, 판매가, 재고수량은 숫자로 변환
       if (key === "originalPrice" || key === "salePrice" || key === "stock") {
-        const numValue = value === "" ? "" : parseInt(value, 10);
-        next = { ...form, [key]: isNaN(numValue as number) ? "" : numValue };
+        const numValue = value === "" ? 0 : parseInt(value, 10);
+        next = { ...form, [key]: isNaN(numValue) ? 0 : numValue };
       } else {
         next = { ...form, [key]: value };
       }
@@ -113,14 +113,14 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
       onChange?.(next);
     };
 
-  const handleCategoryChange = (value: MainCategory | "") => {
+  const handleCategoryChange = (value: MainCategory) => {
     const next = { ...form, mainCategory: value };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleImageUrlsChange = (urls: string[]) => {
-    const next = { ...form, imageUrls: urls };
+  const handleImagesChange = (urls: string[]) => {
+    const next = { ...form, images: urls };
     setForm(next);
     onChange?.(next);
   };
@@ -231,7 +231,7 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
             form={form}
             errors={errors}
             onCategoryChange={handleCategoryChange}
-            onImageUrlsChange={handleImageUrlsChange}
+            onImagesChange={handleImagesChange}
             onChange={handleChange}
           />
 
