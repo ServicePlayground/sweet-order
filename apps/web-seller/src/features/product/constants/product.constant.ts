@@ -39,6 +39,10 @@ export const PRODUCT_ERROR_MESSAGES = {
   PRODUCT_NOTICE_CUSTOMER_SERVICE_REQUIRED: "고객센터를 입력해주세요.",
 } as const;
 
+export const PRODUCT_SUCCESS_MESSAGES = {
+  PRODUCT_CREATED: "상품이 등록되었습니다.",
+} as const;
+
 export const MAIN_CATEGORY_OPTIONS = [
   { value: MainCategory.CAKE, label: "케이크" },
   { value: MainCategory.SUPPLY, label: "용품" },

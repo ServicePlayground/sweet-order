@@ -1,4 +1,4 @@
-import { apiClient } from "@/apps/web-seller/common/config/axios.config";
+import { sellerClient } from "@/apps/web-seller/common/config/axios.config";
 import { AvailableResponse } from "@/apps/web-seller/common/types/api.type";
 import {
   IBusinessRegistrationForm,
@@ -10,7 +10,7 @@ export const businessApi = {
   verifyBusinessRegistration: async (
     form: IBusinessRegistrationForm,
   ): Promise<AvailableResponse> => {
-    const response = await apiClient.post("/business/validate", form);
+    const response = await sellerClient.post("/business/validate", form);
     return response.data.data;
   },
 
@@ -18,7 +18,7 @@ export const businessApi = {
   getOnlineTradingCompanyDetail: async (
     request: IOnlineTradingCompanyDetailRequest,
   ): Promise<AvailableResponse> => {
-    const response = await apiClient.get("/business/online-trading-company/detail", {
+    const response = await sellerClient.get("/business/online-trading-company/detail", {
       params: request,
     });
     return response.data.data;

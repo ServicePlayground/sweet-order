@@ -88,10 +88,12 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    for (let i = 0; i < files.length; i++) {
-      if (value.length + i >= maxImages) break;
-      await processFile(files[i], value.length + i);
+    // 첫 번째 파일만 처리 (1개씩만 선택)
+    if (value.length >= maxImages) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
+    await processFile(files[0], value.length);
   };
 
   // 이미지 삭제 핸들러
@@ -126,7 +128,6 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
         ref={fileInputRef}
         type="file"
         accept={accept}
-        multiple
         onChange={handleFileSelect}
         style={{ display: "none" }}
       />

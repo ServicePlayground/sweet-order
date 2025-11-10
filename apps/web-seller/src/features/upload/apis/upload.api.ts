@@ -1,4 +1,4 @@
-import { authClient } from "@/apps/web-seller/common/config/axios.config";
+import { userClient } from "@/apps/web-seller/common/config/axios.config";
 import { IUploadFileResponse } from "@/apps/web-seller/features/upload/types/upload.type";
 
 export const uploadApi = {
@@ -7,7 +7,7 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await authClient.post("/uploads/file", formData, {
+    const response = await userClient.post("/uploads/file", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

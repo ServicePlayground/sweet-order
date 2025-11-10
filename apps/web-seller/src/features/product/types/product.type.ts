@@ -51,12 +51,12 @@ export interface OrderFormSchema {
 
 export interface IProductForm {
   // 기본 정보
-  mainCategory: MainCategory | "";
-  imageUrls: string[];
+  mainCategory: MainCategory;
+  images?: string[];
   name: string;
   description?: string;
-  originalPrice: number | "";
-  salePrice: number | "";
+  originalPrice: number;
+  salePrice: number;
   notice?: string;
   caution?: string;
   basicIncluded?: string;
@@ -87,9 +87,19 @@ export interface IProductForm {
   productNoticeCustomerService: string;
 
   // 보이지 않는 부분
-  stock: number | "";
+  stock: number;
   sizeRange: SizeRange[];
   deliveryMethod: DeliveryMethod[];
-  hashtags: string[];
+  hashtags?: string[];
   status: ProductStatus;
+}
+
+// 상품 등록 요청
+export interface ICreateProductRequest extends IProductForm {
+  storeId: string;
+}
+
+// 상품 등록 응답
+export interface ICreateProductResponse {
+  id: string;
 }
