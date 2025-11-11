@@ -3,6 +3,7 @@
 import { Metadata } from "next";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import { ImageBannerSlider } from "@/apps/web-user/common/components/carousel/ImageBannerSlider";
+import { ProductRanking } from "@/apps/web-user/common/components/rankings/ProductRanking";
 
 // 홈페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
 // export const metadata: Metadata = {
@@ -71,6 +72,20 @@ export default function Home() {
       >
         <div style={{ width: "100%", maxWidth: "100%" }}>
           <ImageBannerSlider />
+        </div>
+      </div>
+
+      {/* 상품 랭킹 */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ width: "100%", maxWidth: "100%" }}>
+          <ProductRanking />
         </div>
       </div>
 
