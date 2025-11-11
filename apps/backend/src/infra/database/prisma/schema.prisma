@@ -38,6 +38,7 @@ model User {
   // Relations
   productLikes   ProductLike[]
   stores        Store[]
+  carts         Cart[]
 
   @@index([phone])
   @@index([userId])
@@ -124,6 +125,7 @@ model Product {
   // Seller는 store.seller를 통해 참조 가능
   store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   likes             ProductLike[]
+  carts             Cart[]
   
   @@index([storeId])
   @@index([status])
@@ -223,6 +225,25 @@ model Store {
   @@index([userId])
   @@index([businessNo])
   @@map("stores")
+}
+
+// Cart model for shopping cart management
+model Cart {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  productId     String   @map("product_id")
+  quantity      Int      @default(1) // 수량
+  orderFormData Json?    @map("order_form_data") // 주문 폼 데이터 (JSON)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
+  @@map("carts")
 }
 
 
