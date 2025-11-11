@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
 import { useLogout } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
@@ -23,15 +24,36 @@ export default function Header() {
   return (
     <header
       style={{
-        borderBottom: "1px solid #e0e0e0",
-        padding: "0 20px",
+        padding: "0 40px",
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
         alignItems: "center",
-        height: 64,
+        height: 80,
         backgroundColor: "#ffffff",
       }}
     >
+      {/* 로고 */}
+      <Link
+        href={PATHS.HOME}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          textDecoration: "none",
+        }}
+        aria-label="홈으로 이동"
+      >
+        <Image
+          src="/images/logo/logo1.png"
+          alt="로고"
+          width={240}
+          height={70}
+          style={{
+            objectFit: "contain",
+            cursor: "pointer",
+          }}
+        />
+      </Link>
+
       {/* 로그인 버튼 */}
       <div>
         {/* 초기화 전에는 아무 것도 렌더하지 않음 → 깜빡임 방지 */}
@@ -40,17 +62,26 @@ export default function Header() {
             <button
               onClick={handleLogout}
               style={{
-                padding: "8px 14px",
-                borderRadius: 8,
+                padding: "10px 20px",
+                borderRadius: 12,
                 fontWeight: 600,
                 lineHeight: "1",
                 cursor: "pointer",
-                color: "#333333",
+                color: "#666666",
                 backgroundColor: "#ffffff",
-                border: "1px solid #e0e0e0",
+                border: "1px solid #e8e8e8",
+                transition: "all 0.2s ease",
               }}
               disabled={logoutMutation.isPending}
               aria-label="로그아웃"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#f5f5f5";
+                e.currentTarget.style.borderColor = "#d0d0d0";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#ffffff";
+                e.currentTarget.style.borderColor = "#e8e8e8";
+              }}
             >
               {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
             </button>
@@ -59,8 +90,8 @@ export default function Header() {
           <Link
             href={PATHS.AUTH.LOGIN}
             style={{
-              padding: "8px 14px",
-              borderRadius: 8,
+              padding: "10px 20px",
+              borderRadius: 12,
               fontWeight: 600,
               lineHeight: "1",
               cursor: "pointer",
@@ -69,8 +100,17 @@ export default function Header() {
               border: "1px solid #000000",
               textDecoration: "none",
               display: "inline-block",
+              transition: "all 0.2s ease",
             }}
             aria-label="로그인"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#333333";
+              e.currentTarget.style.borderColor = "#333333";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#000000";
+              e.currentTarget.style.borderColor = "#000000";
+            }}
           >
             로그인
           </Link>
