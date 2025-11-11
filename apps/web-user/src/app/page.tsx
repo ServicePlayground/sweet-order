@@ -2,6 +2,7 @@
 
 import { Metadata } from "next";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
+import { ImageBannerSlider } from "@/apps/web-user/common/components/carousel/ImageBannerSlider";
 
 // 홈페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
 // export const metadata: Metadata = {
@@ -55,6 +56,21 @@ export default function Home() {
       >
         <div style={{ width: "100%", maxWidth: "100%" }}>
           <SearchBar placeholder="상품을 검색해보세요" />
+        </div>
+      </div>
+
+      {/* 이미지 슬라이더 */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "40px",
+        }}
+      >
+        <div style={{ width: "100%", maxWidth: "100%" }}>
+          <ImageBannerSlider />
         </div>
       </div>
 
