@@ -8,6 +8,14 @@ import { useAddCartItem } from "@/apps/web-user/features/cart/hooks/mutations/us
 import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { getDeliveryMethodLabel } from "@/apps/web-user/features/product/utils/deliveryMethod.util";
+import { calculateTotalPrice } from "@/apps/web-user/features/product/utils/price.util";
+import {
+  isProductActive,
+  isStockAvailable,
+  validateOrderFormData,
+  buildOrderFormData,
+} from "@/apps/web-user/features/product/utils/orderForm.util";
 
 interface ProductDetailOrderFormSectionProps {
   product: Product;
@@ -52,44 +60,9 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
   const [selectedOptions, setSelectedOptions] =
     useState<Record<string, string | string[]>>(initialOptionValues);
 
-  const getDeliveryMethodLabel = (method: string) => {
-    if (method === "PICKUP" || method === "pickup") return "픽업";
-    if (method === "DELIVERY" || method === "delivery") return "배송";
-    return method;
-  };
-
   // 총 가격 계산
   const totalPrice = useMemo(() => {
-    let additionalPrice = 0;
-    if (orderFormSchema?.fields) {
-      orderFormSchema.fields.forEach((field) => {
-        if (field.type === "selectbox" && field.options) {
-          const selectedValue = selectedOptions[field.id];
-          if (selectedValue) {
-            if (field.allowMultiple && Array.isArray(selectedValue)) {
-              // 다중 선택인 경우
-              selectedValue.forEach((value) => {
-                const selectedOption = field.options?.find((opt) => opt.value === value);
-                if (selectedOption && selectedOption.price !== undefined) {
-                  additionalPrice += selectedOption.price;
-                }
-              });
-            } else if (
-              !field.allowMultiple &&
-              typeof selectedValue === "string" &&
-              selectedValue !== ""
-            ) {
-              // 단일 선택인 경우 (빈 문자열 제외)
-              const selectedOption = field.options.find((opt) => opt.value === selectedValue);
-              if (selectedOption && selectedOption.price !== undefined) {
-                additionalPrice += selectedOption.price;
-              }
-            }
-          }
-        }
-      });
-    }
-    return product.salePrice + additionalPrice;
+    return calculateTotalPrice(product.salePrice, orderFormSchema, selectedOptions);
   }, [product.salePrice, selectedOptions, orderFormSchema]);
 
   const handleOptionChange = (fieldId: string, value: string) => {
@@ -123,21 +96,6 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
     }));
   };
 
-  // 주문 폼 검증
-  const validateOrderForm = (): boolean => {
-    if (!orderFormSchema?.fields) return true;
-
-    for (const field of orderFormSchema.fields) {
-      if (field.required) {
-        const value = selectedOptions[field.id];
-        if (!value || (typeof value === "string" && value.trim() === "") || (Array.isArray(value) && value.length === 0)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
   // 장바구니 추가 핸들러
   const handleAddToCart = async () => {
     // 로그인 체크
@@ -146,18 +104,18 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
       return;
     }
 
-    // 주문 폼 검증
-    if (!validateOrderForm()) {
+    // 상품 활성 상태 확인
+    if (!isProductActive(product.status)) {
       showAlert({
         type: "error",
         title: "오류",
-        message: "필수 항목을 모두 입력해주세요.",
+        message: "현재 판매 중이 아닌 상품입니다.",
       });
       return;
     }
 
     // 재고 체크
-    if (product.stock < quantity) {
+    if (!isStockAvailable(product.stock, quantity)) {
       showAlert({
         type: "error",
         title: "오류",
@@ -167,30 +125,24 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
     }
 
     // orderFormData 구성 (빈 값 제외)
-    const orderFormData: OrderFormData = {};
-    if (orderFormSchema?.fields) {
-      orderFormSchema.fields.forEach((field) => {
-        const value = selectedOptions[field.id];
-        if (value !== undefined && value !== null) {
-          if (typeof value === "string" && value.trim() !== "") {
-            orderFormData[field.id] = value;
-          } else if (Array.isArray(value) && value.length > 0) {
-            orderFormData[field.id] = value;
-          }
-        }
+    const orderFormData = buildOrderFormData(orderFormSchema, selectedOptions);
+    // orderFormData 검증
+    const validationResult = validateOrderFormData(orderFormSchema, orderFormData);
+    if (!validationResult.isValid) {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: validationResult.errorMessage || "주문 폼 데이터가 유효하지 않습니다.",
       });
+      return;
     }
 
     // 장바구니 추가
-    try {
-      await addCartItemMutation.mutateAsync({
-        productId: product.id,
-        quantity,
-        orderFormData: Object.keys(orderFormData).length > 0 ? orderFormData : undefined,
-      });
-    } catch (error) {
-      // 에러는 useAddCartItem에서 이미 처리됨
-    }
+    await addCartItemMutation.mutateAsync({
+      productId: product.id,
+      quantity,
+      orderFormData: Object.keys(orderFormData).length > 0 ? orderFormData : undefined,
+    });
   };
 
   return (
@@ -592,7 +544,11 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
               color: "#111827",
               border: "1px solid #e5e7eb",
             }}
-            disabled={product.stock === 0 || addCartItemMutation.isPending}
+            disabled={
+              !isProductActive(product.status) ||
+              product.stock === 0 ||
+              addCartItemMutation.isPending
+            }
             onClick={handleAddToCart}
           >
             {addCartItemMutation.isPending ? "처리 중..." : "장바구니 담기"}
@@ -607,9 +563,13 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
               backgroundColor: "#000000",
               color: "#ffffff",
             }}
-            disabled={product.stock === 0}
+            disabled={!isProductActive(product.status) || product.stock === 0}
           >
-            {product.stock === 0 ? "품절" : "주문하기"}
+            {!isProductActive(product.status)
+              ? "판매 중지"
+              : product.stock === 0
+                ? "품절"
+                : "주문하기"}
           </Button>
         </div>
       )}
