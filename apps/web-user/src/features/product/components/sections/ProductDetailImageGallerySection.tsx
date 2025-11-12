@@ -87,16 +87,6 @@ export function ProductDetailImageGallerySection({
                 flexShrink: 0,
                 transition: "border-color 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                if (selectedImageIndex !== index) {
-                  e.currentTarget.style.borderColor = "#9ca3af";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedImageIndex !== index) {
-                  e.currentTarget.style.borderColor = "#e5e7eb";
-                }
-              }}
             >
               <Image
                 src={image}

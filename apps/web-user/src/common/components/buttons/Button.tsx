@@ -9,22 +9,11 @@ export const Button: React.FC<ButtonProps> = ({ children, style, disabled, ...pr
       disabled={disabled}
       style={{
         border: "none",
-        backgroundColor: disabled ? "#f5f5f5" : "#000",
-        color: disabled ? "#999" : "#fff",
+        opacity: disabled ? 0.5 : 1,
         cursor: disabled ? "not-allowed" : "pointer",
         transition: "all 0.2s ease",
         fontWeight: "600",
         ...style,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = "#333";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = "#000";
-        }
       }}
     >
       {children}

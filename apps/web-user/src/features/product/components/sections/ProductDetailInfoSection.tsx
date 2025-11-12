@@ -61,12 +61,6 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
                 cursor: "pointer",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = product.isLiked ? "#fecaca" : "#f9fafb";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = product.isLiked ? "#fee2e2" : "#ffffff";
-              }}
             >
               <span>{product.isLiked ? "❤️" : "🤍"}</span>
               <span>{product.likeCount}</span>

@@ -96,12 +96,6 @@ export function SearchBar({
             transition: "background-color 0.2s ease",
             whiteSpace: "nowrap",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#333333";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#000000";
-          }}
         >
           검색
         </button>

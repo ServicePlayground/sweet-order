@@ -114,14 +114,6 @@ export default function SearchPage() {
               transition: "all 0.2s ease",
               whiteSpace: "nowrap",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#000000";
-              e.currentTarget.style.backgroundColor = "#f9fafb";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#e5e7eb";
-              e.currentTarget.style.backgroundColor = "#ffffff";
-            }}
           >
             필터
           </button>

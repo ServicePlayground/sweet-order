@@ -187,16 +187,6 @@ export function ProductFilterModal({
                   color: filters.mainCategory === category ? "#ffffff" : "#374151",
                   transition: "all 0.2s ease",
                 }}
-                onMouseEnter={(e) => {
-                  if (filters.mainCategory !== category) {
-                    e.currentTarget.style.borderColor = "#000000";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filters.mainCategory !== category) {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                  }
-                }}
               >
                 {mainCategoryLabels[category]}
               </button>
@@ -234,16 +224,6 @@ export function ProductFilterModal({
                   color: (filters.sizeRange || []).includes(sizeRange) ? "#ffffff" : "#374151",
                   transition: "all 0.2s ease",
                 }}
-                onMouseEnter={(e) => {
-                  if (!(filters.sizeRange || []).includes(sizeRange)) {
-                    e.currentTarget.style.borderColor = "#000000";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!(filters.sizeRange || []).includes(sizeRange)) {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                  }
-                }}
               >
                 {sizeRangeLabels[sizeRange]}
               </button>
@@ -280,16 +260,6 @@ export function ProductFilterModal({
                     : "#ffffff",
                   color: (filters.deliveryMethod || []).includes(method) ? "#ffffff" : "#374151",
                   transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  if (!(filters.deliveryMethod || []).includes(method)) {
-                    e.currentTarget.style.borderColor = "#000000";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!(filters.deliveryMethod || []).includes(method)) {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                  }
                 }}
               >
                 {deliveryMethodLabels[method]}
@@ -390,14 +360,6 @@ export function ProductFilterModal({
               color: "#374151",
               transition: "all 0.2s ease",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#000000";
-              e.currentTarget.style.backgroundColor = "#f9fafb";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#e5e7eb";
-              e.currentTarget.style.backgroundColor = "#ffffff";
-            }}
           >
             초기화
           </button>
@@ -413,12 +375,6 @@ export function ProductFilterModal({
               backgroundColor: "#000000",
               color: "#ffffff",
               transition: "background-color 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#333333";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#000000";
             }}
           >
             적용하기

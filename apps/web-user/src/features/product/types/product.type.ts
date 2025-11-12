@@ -59,6 +59,10 @@ export interface OrderFormSchema {
   fields: OrderFormField[];
 }
 
+// 커스텀 주문양식 데이터 타입
+// orderFormSchema의 field.id를 키로 하고, string 또는 string[]을 값으로 가집니다.
+export type OrderFormData = Record<string, string | string[]>;
+
 /**
  * 상품 정보
  */

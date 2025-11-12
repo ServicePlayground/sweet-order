@@ -74,14 +74,6 @@ export default function Header() {
               }}
               disabled={logoutMutation.isPending}
               aria-label="로그아웃"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#f5f5f5";
-                e.currentTarget.style.borderColor = "#d0d0d0";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#ffffff";
-                e.currentTarget.style.borderColor = "#e8e8e8";
-              }}
             >
               {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
             </button>
@@ -103,14 +95,6 @@ export default function Header() {
               transition: "all 0.2s ease",
             }}
             aria-label="로그인"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#333333";
-              e.currentTarget.style.borderColor = "#333333";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#000000";
-              e.currentTarget.style.borderColor = "#000000";
-            }}
           >
             로그인
           </Link>
