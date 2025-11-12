@@ -36,7 +36,7 @@ export default function Header() {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        height: 80,
+        height: 160,
         backgroundColor: "#ffffff",
       }}
     >
@@ -53,8 +53,8 @@ export default function Header() {
         <Image
           src="/images/logo/logo1.png"
           alt="로고"
-          width={240}
-          height={70}
+          width={160}
+          height={160}
           style={{
             objectFit: "contain",
             cursor: "pointer",
