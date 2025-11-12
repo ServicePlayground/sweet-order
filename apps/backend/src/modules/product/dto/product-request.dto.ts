@@ -25,6 +25,7 @@ import {
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
+import { OrderFormSchema } from "@apps/backend/modules/product/type/product.type";
 
 /**
  * 상품 목록 조회 요청 DTO (무한 스크롤)
@@ -217,7 +218,7 @@ export class CreateProductRequestDto {
   })
   @IsOptional()
   @IsObject()
-  orderFormSchema?: any;
+  orderFormSchema?: OrderFormSchema;
 
   @ApiPropertyOptional({
     description: "상세 설명 (HTML)",

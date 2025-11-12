@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.phoneVerification.deleteMany();
   await prisma.productLike.deleteMany();
+  await prisma.cart.deleteMany();
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.user.deleteMany();
@@ -309,11 +310,79 @@ async function main() {
     }),
   ]);
 
+  // 장바구니 데이터 생성
+  // users[0] (SELLER 역할을 가진 사용자)가 여러 상품을 장바구니에 담음
+  const carts = await Promise.all([
+    // 첫 번째 상품 - orderFormData 포함
+    prisma.cart.create({
+      data: {
+        userId: users[0].id, // SELLER 역할 사용자
+        productId: products[0].id,
+        quantity: 2,
+        orderFormData: {
+          size: "2호",
+          additionalProducts: ["cakeBox", "candles"],
+          cakeMessage: "생일 축하해요!",
+          additionalRequest: "예쁘게 포장해주세요",
+        },
+        createdAt: new Date("2024-01-18T10:00:00Z"),
+        updatedAt: new Date("2024-01-18T10:00:00Z"),
+      },
+    }),
+    // 두 번째 상품 - orderFormData 포함
+    prisma.cart.create({
+      data: {
+        userId: users[0].id, // SELLER 역할 사용자
+        productId: products[1].id,
+        quantity: 1,
+        orderFormData: {
+          size: "1호",
+          additionalProducts: ["topper"],
+          cakeMessage: "사랑해요",
+        },
+        createdAt: new Date("2024-01-19T14:30:00Z"),
+        updatedAt: new Date("2024-01-19T14:30:00Z"),
+      },
+    }),
+    // 세 번째 상품 - orderFormData 포함 (orderFormSchema가 있으면 필수)
+    prisma.cart.create({
+      data: {
+        userId: users[0].id, // SELLER 역할 사용자
+        productId: products[2].id,
+        quantity: 3,
+        orderFormData: {
+          size: "1호",
+          additionalProducts: ["cakeBox"],
+          cakeMessage: "감사합니다",
+        },
+        createdAt: new Date("2024-01-20T09:15:00Z"),
+        updatedAt: new Date("2024-01-20T09:15:00Z"),
+      },
+    }),
+    // 네 번째 상품 - orderFormData 포함
+    prisma.cart.create({
+      data: {
+        userId: users[0].id, // SELLER 역할 사용자
+        productId: products[5].id,
+        quantity: 1,
+        orderFormData: {
+          size: "3호",
+          additionalProducts: ["cakeBox", "candles", "messagePlate"],
+          cakeMessage: "축하합니다!",
+          additionalRequest: "신선하게 부탁드립니다",
+        },
+        createdAt: new Date("2024-01-21T11:20:00Z"),
+        updatedAt: new Date("2024-01-21T11:20:00Z"),
+      },
+    }),
+  ]);
+
   console.log(`✅ Created ${users.length} users`);
   console.log(`✅ Created ${phoneVerifications.length} phone verifications`);
   console.log(`✅ Created ${products.length} products`);
   console.log(`✅ Created ${productLikes.length} product likes`);
   console.log(`✅ Created ${stores.length} stores`);
+  console.log(`✅ Created ${carts.length} cart items`);
   console.log("🎉 Database seeding completed!");
 }
 

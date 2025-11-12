@@ -118,7 +118,7 @@ model Product {
   // 상품 이미지
   images            String[]
 
-  // 상품 상태
+  // 상품 상태 
   status            ProductStatus @default(ACTIVE)
 
   // Relations

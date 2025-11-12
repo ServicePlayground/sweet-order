@@ -1,13 +1,20 @@
+import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
+
 /**
  * 장바구니 관련 에러 메시지
  */
 export const CART_ERROR_MESSAGES = {
   NOT_FOUND: "장바구니 항목을 찾을 수 없습니다.",
   PRODUCT_NOT_FOUND: "상품을 찾을 수 없습니다.",
+  PRODUCT_DELETED: "삭제된 상품입니다.",
+  PRODUCT_INACTIVE: "판매가 종료된 상품입니다.",
+  PRODUCT_OUT_OF_STOCK: "상품이 품절되었습니다.",
+  PRODUCT_NOT_AVAILABLE: "현재 구매할 수 없는 상품입니다.",
   INSUFFICIENT_STOCK: "재고가 부족합니다.",
   INVALID_QUANTITY: "수량은 1개 이상이어야 합니다.",
   ORDER_FORM_DATA_REQUIRED: "주문 폼 데이터가 필요합니다.",
   ORDER_FORM_DATA_INVALID: "주문 폼 데이터가 유효하지 않습니다.",
+  ORDER_FORM_SCHEMA_CHANGED: "옵션이 변경되어 주문할 수 없습니다. 옵션을 다시 선택해주세요.",
   ORDER_FORM_FIELD_REQUIRED: "필수 주문 폼 필드가 누락되었습니다.",
   ORDER_FORM_FIELD_INVALID: "주문 폼 필드 값이 유효하지 않습니다.",
 } as const;
@@ -29,28 +36,31 @@ export const CART_SUCCESS_MESSAGES = {
 export const SWAGGER_EXAMPLES = {
   CART_ITEM: {
     id: "cart_123456789",
-    userId: "user_123456789",
-    productId: "prod_123456789",
     quantity: 2,
     orderFormData: {
-      size: "2호",
-      additionalProducts: ["cakeBox", "candles"],
-      cakeMessage: "생일 축하해요!",
-      additionalRequest: "예쁘게 포장해주세요",
+      [PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[0].id]: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[0].options[1].value,
+      [PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[1].id]: [PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[1].options[0].value, PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[1].options[1].value],
+      [PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[2].id]: "생일 축하해요!",
+      [PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema.fields[3].id]: "예쁘게 포장해주세요",
+    },
+    product: {
+      id: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.id,
+      storeId: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.storeId,
+      name: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.name,
+      description: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.description,
+      originalPrice: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.originalPrice,
+      salePrice: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.salePrice,
+      stock: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.stock,
+      notice: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.notice,
+      caution: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.caution,
+      basicIncluded: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.basicIncluded,
+      location: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.location,
+      images: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.images,
+      status: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.status,
+      orderFormSchema: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema,
     },
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-    product: {
-      id: "prod_123456789",
-      name: "초콜릿 케이크",
-      salePrice: 45000,
-      stock: 100,
-      images: ["https://example.com/image1.jpg"],
-      store: {
-        id: "store_123456789",
-        name: "스위트오더",
-      },
-    },
   },
 } as const;
 

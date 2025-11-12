@@ -3,12 +3,7 @@ import { IsNotEmpty, IsString, IsNumber, Min, IsOptional, IsObject } from "class
 import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/cart/constants/cart.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
-
-/**
- * OrderFormData 타입 정의
- * orderFormSchema의 field.id를 키로 하고, string 또는 string[]을 값으로 가집니다.
- */
-export type OrderFormData = Record<string, string | string[]>;
+import { OrderFormData } from "@apps/backend/modules/product/type/product.type";
 
 /**
  * 장바구니에 상품 추가 요청 DTO
@@ -24,7 +19,7 @@ export class AddCartItemRequestDto {
 
   @ApiProperty({
     description: "수량",
-    example: 2,
+    example: SWAGGER_EXAMPLES.CART_ITEM.quantity,
     minimum: 1,
   })
   @StringToNumber()
@@ -49,7 +44,7 @@ export class AddCartItemRequestDto {
 export class UpdateCartItemRequestDto {
   @ApiProperty({
     description: "수량",
-    example: 3,
+    example: SWAGGER_EXAMPLES.CART_ITEM.quantity,
     minimum: 1,
   })
   @StringToNumber()

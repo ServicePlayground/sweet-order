@@ -244,7 +244,9 @@ export class ProductService {
       caution: createProductDto.caution,
       basicIncluded: createProductDto.basicIncluded,
       location: createProductDto.location,
-      orderFormSchema: createProductDto.orderFormSchema,
+      orderFormSchema: createProductDto.orderFormSchema
+        ? (createProductDto.orderFormSchema as unknown as Prisma.InputJsonValue)
+        : undefined,
       detailDescription: createProductDto.detailDescription,
       cancellationRefundDetailDescription: createProductDto.cancellationRefundDetailDescription,
       productNumber,
