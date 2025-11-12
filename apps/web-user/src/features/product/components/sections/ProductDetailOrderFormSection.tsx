@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Product, OrderFormData } from "@/apps/web-user/features/product/types/product.type";
+import { Product, DeliveryMethod } from "@/apps/web-user/features/product/types/product.type";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { useAddCartItem } from "@/apps/web-user/features/cart/hooks/mutations/useAddCartItem";
 import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
@@ -11,10 +11,9 @@ import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { getDeliveryMethodLabel } from "@/apps/web-user/features/product/utils/deliveryMethod.util";
 import { calculateTotalPrice } from "@/apps/web-user/features/product/utils/price.util";
 import {
+  buildOrderFormData,
   isProductActive,
   isStockAvailable,
-  validateOrderFormData,
-  buildOrderFormData,
 } from "@/apps/web-user/features/product/utils/orderForm-validator.util";
 
 interface ProductDetailOrderFormSectionProps {
@@ -104,44 +103,25 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
       return;
     }
 
-    // 상품 활성 상태 확인
-    if (!isProductActive(product.status)) {
+    // deliveryMethod 필수 체크 (백엔드에서도 검증하지만, UI에서 미리 체크)
+    if (product.deliveryMethod && product.deliveryMethod.length > 0 && !selectedDeliveryMethod) {
       showAlert({
         type: "error",
         title: "오류",
-        message: "현재 판매 중이 아닌 상품입니다.",
-      });
-      return;
-    }
-
-    // 재고 체크
-    if (!isStockAvailable(product.stock, quantity)) {
-      showAlert({
-        type: "error",
-        title: "오류",
-        message: "재고가 부족합니다.",
+        message: "수령 방식을 선택해주세요.",
       });
       return;
     }
 
     // orderFormData 구성 (빈 값 제외)
     const orderFormData = buildOrderFormData(orderFormSchema, selectedOptions);
-    // orderFormData 검증
-    const validationResult = validateOrderFormData(orderFormSchema, orderFormData);
-    if (!validationResult.isValid) {
-      showAlert({
-        type: "error",
-        title: "오류",
-        message: validationResult.errorMessage || "주문 폼 데이터가 유효하지 않습니다.",
-      });
-      return;
-    }
 
     // 장바구니 추가
     await addCartItemMutation.mutateAsync({
       productId: product.id,
       quantity,
       orderFormData: Object.keys(orderFormData).length > 0 ? orderFormData : undefined,
+      deliveryMethod: selectedDeliveryMethod as DeliveryMethod,
     });
   };
 
@@ -470,8 +450,7 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
             />
             <button
               type="button"
-              onClick={() => setQuantity((prev) => Math.min(product.stock, prev + 1))}
-              disabled={quantity >= product.stock}
+              onClick={() => setQuantity((prev) => prev + 1)}
               style={{
                 width: "36px",
                 height: "36px",
@@ -480,9 +459,9 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
                 justifyContent: "center",
                 border: "1px solid #e5e7eb",
                 borderRadius: "8px",
-                backgroundColor: quantity >= product.stock ? "#f5f5f5" : "#ffffff",
-                color: quantity >= product.stock ? "#9ca3af" : "#374151",
-                cursor: quantity >= product.stock ? "not-allowed" : "pointer",
+                backgroundColor: "#f5f5f5",
+                color: "#374151",
+                cursor: "pointer",
                 fontSize: "18px",
                 fontWeight: 600,
                 transition: "all 0.2s ease",
@@ -546,7 +525,7 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
             }}
             disabled={
               !isProductActive(product.status) ||
-              product.stock === 0 ||
+              !isStockAvailable(product.stock, quantity) ||
               addCartItemMutation.isPending
             }
             onClick={handleAddToCart}
@@ -563,12 +542,14 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
               backgroundColor: "#000000",
               color: "#ffffff",
             }}
-            disabled={!isProductActive(product.status) || product.stock === 0}
+            disabled={
+              !isProductActive(product.status) || !isStockAvailable(product.stock, quantity)
+            }
           >
-            {!isProductActive(product.status)
-              ? "판매 중지"
-              : product.stock === 0
-                ? "품절"
+            {!isStockAvailable(product.stock, quantity)
+              ? "품절"
+              : !isProductActive(product.status)
+                ? "판매 중지"
                 : "주문하기"}
           </Button>
         </div>

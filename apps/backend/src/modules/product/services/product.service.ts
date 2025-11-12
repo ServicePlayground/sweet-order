@@ -203,83 +203,86 @@ export class ProductService {
       throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
     }
 
-    // productNumber 생성: 카테고리-날짜-순번 형식 (예: CAKE-20240101-001)
-    const now = new Date();
-    const dateStr = now.toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
-    const categoryCode = createProductDto.mainCategory; // CAKE, SUPPLY, OTHER
+    // productNumber 생성 및 상품 생성 - 트랜잭션으로 동시성 문제 방지
+    // 카테고리-날짜-순번 형식 (예: CAKE-20240101-001)
+    return await this.prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const dateStr = now.toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
+      const categoryCode = createProductDto.mainCategory; // CAKE, SUPPLY, OTHER
 
-    // 같은 날 같은 카테고리에서 등록된 상품 수 조회
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
+      // 같은 날 같은 카테고리에서 등록된 상품 수 조회 (트랜잭션 내에서 조회하여 동시성 보장)
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(now);
+      endOfDay.setHours(23, 59, 59, 999);
 
-    const todayProductCount = await this.prisma.product.count({
-      where: {
+      const todayProductCount = await tx.product.count({
+        where: {
+          mainCategory: createProductDto.mainCategory,
+          createdAt: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+      });
+
+      // 순번 생성 (001, 002, ...)
+      const sequence = String(todayProductCount + 1).padStart(3, "0");
+      const productNumber = `${categoryCode}-${dateStr}-${sequence}`;
+
+      // 상품 데이터 준비
+      const productData: Prisma.ProductCreateInput = {
+        store: {
+          connect: {
+            id: createProductDto.storeId,
+          },
+        },
+        name: createProductDto.name,
+        description: createProductDto.description,
+        originalPrice: createProductDto.originalPrice,
+        salePrice: createProductDto.salePrice,
+        stock: createProductDto.stock,
+        notice: createProductDto.notice,
+        caution: createProductDto.caution,
+        basicIncluded: createProductDto.basicIncluded,
+        location: createProductDto.location,
+        orderFormSchema: createProductDto.orderFormSchema
+          ? (createProductDto.orderFormSchema as unknown as Prisma.InputJsonValue)
+          : undefined,
+        detailDescription: createProductDto.detailDescription,
+        cancellationRefundDetailDescription: createProductDto.cancellationRefundDetailDescription,
+        productNumber,
+        productNoticeFoodType: createProductDto.productNoticeFoodType,
+        productNoticeProducer: createProductDto.productNoticeProducer,
+        productNoticeOrigin: createProductDto.productNoticeOrigin,
+        productNoticeAddress: createProductDto.productNoticeAddress,
+        productNoticeManufactureDate: createProductDto.productNoticeManufactureDate,
+        productNoticeExpirationDate: createProductDto.productNoticeExpirationDate,
+        productNoticePackageCapacity: createProductDto.productNoticePackageCapacity,
+        productNoticePackageQuantity: createProductDto.productNoticePackageQuantity,
+        productNoticeIngredients: createProductDto.productNoticeIngredients,
+        productNoticeCalories: createProductDto.productNoticeCalories,
+        productNoticeSafetyNotice: createProductDto.productNoticeSafetyNotice,
+        productNoticeGmoNotice: createProductDto.productNoticeGmoNotice,
+        productNoticeImportNotice: createProductDto.productNoticeImportNotice,
+        productNoticeCustomerService: createProductDto.productNoticeCustomerService,
         mainCategory: createProductDto.mainCategory,
-        createdAt: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-      },
+        sizeRange: createProductDto.sizeRange,
+        deliveryMethod: createProductDto.deliveryMethod,
+        hashtags: createProductDto.hashtags || [],
+        status: createProductDto.status || ProductStatus.ACTIVE,
+        images: createProductDto.images || [],
+      };
+
+      // 상품 생성
+      const product = await tx.product.create({
+        data: productData,
+      });
+
+      return {
+        id: product.id,
+      };
     });
-
-    // 순번 생성 (001, 002, ...)
-    const sequence = String(todayProductCount + 1).padStart(3, "0");
-    const productNumber = `${categoryCode}-${dateStr}-${sequence}`;
-
-    // 상품 데이터 준비
-    const productData: Prisma.ProductCreateInput = {
-      store: {
-        connect: {
-          id: createProductDto.storeId,
-        },
-      },
-      name: createProductDto.name,
-      description: createProductDto.description,
-      originalPrice: createProductDto.originalPrice,
-      salePrice: createProductDto.salePrice,
-      stock: createProductDto.stock,
-      notice: createProductDto.notice,
-      caution: createProductDto.caution,
-      basicIncluded: createProductDto.basicIncluded,
-      location: createProductDto.location,
-      orderFormSchema: createProductDto.orderFormSchema
-        ? (createProductDto.orderFormSchema as unknown as Prisma.InputJsonValue)
-        : undefined,
-      detailDescription: createProductDto.detailDescription,
-      cancellationRefundDetailDescription: createProductDto.cancellationRefundDetailDescription,
-      productNumber,
-      productNoticeFoodType: createProductDto.productNoticeFoodType,
-      productNoticeProducer: createProductDto.productNoticeProducer,
-      productNoticeOrigin: createProductDto.productNoticeOrigin,
-      productNoticeAddress: createProductDto.productNoticeAddress,
-      productNoticeManufactureDate: createProductDto.productNoticeManufactureDate,
-      productNoticeExpirationDate: createProductDto.productNoticeExpirationDate,
-      productNoticePackageCapacity: createProductDto.productNoticePackageCapacity,
-      productNoticePackageQuantity: createProductDto.productNoticePackageQuantity,
-      productNoticeIngredients: createProductDto.productNoticeIngredients,
-      productNoticeCalories: createProductDto.productNoticeCalories,
-      productNoticeSafetyNotice: createProductDto.productNoticeSafetyNotice,
-      productNoticeGmoNotice: createProductDto.productNoticeGmoNotice,
-      productNoticeImportNotice: createProductDto.productNoticeImportNotice,
-      productNoticeCustomerService: createProductDto.productNoticeCustomerService,
-      mainCategory: createProductDto.mainCategory,
-      sizeRange: createProductDto.sizeRange,
-      deliveryMethod: createProductDto.deliveryMethod,
-      hashtags: createProductDto.hashtags || [],
-      status: createProductDto.status || ProductStatus.ACTIVE,
-      images: createProductDto.images || [],
-    };
-
-    // 상품 생성
-    const product = await this.prisma.product.create({
-      data: productData,
-    });
-
-    return {
-      id: product.id,
-    };
   }
 
   /**

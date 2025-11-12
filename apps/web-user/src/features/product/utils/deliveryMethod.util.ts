@@ -8,4 +8,3 @@ export const getDeliveryMethodLabel = (method: string): string => {
   if (method === "DELIVERY" || method === "delivery") return "배송";
   return method;
 };
-

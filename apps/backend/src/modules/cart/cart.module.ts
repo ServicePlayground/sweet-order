@@ -12,4 +12,3 @@ import { CartService as CartDataService } from "@apps/backend/modules/cart/servi
   exports: [CartService],
 })
 export class CartModule {}
-

@@ -63,6 +63,14 @@ export interface OrderFormSchema {
 // orderFormSchema의 field.id를 키로 하고, string 또는 string[]을 값으로 가집니다.
 export type OrderFormData = Record<string, string | string[]>;
 
+// orderFormData를 표시용으로 변환하는 인터페이스
+export interface OrderFormDisplayItem {
+  fieldId: string;
+  fieldLabel: string;
+  displayValue: string;
+  additionalPrice: number;
+}
+
 /**
  * 상품 정보
  */

@@ -6,7 +6,7 @@ import {
 } from "@apps/backend/modules/cart/dto/cart-request.dto";
 
 /**
- * 장바구니 서비스 
+ * 장바구니 서비스
  *
  * 모든 장바구니 관련 기능을 통합하여 제공하는 메인 서비스입니다.
  * CartDataService를 조합하여 사용합니다.
@@ -32,7 +32,11 @@ export class CartService {
   /**
    * 장바구니 항목 수정
    */
-  async updateCartItem(userId: string, cartItemId: string, updateCartItemDto: UpdateCartItemRequestDto) {
+  async updateCartItem(
+    userId: string,
+    cartItemId: string,
+    updateCartItemDto: UpdateCartItemRequestDto,
+  ) {
     return this.cartDataService.updateCartItem(userId, cartItemId, updateCartItemDto);
   }
 
@@ -50,4 +54,3 @@ export class CartService {
     return this.cartDataService.clearCart(userId);
   }
 }
-

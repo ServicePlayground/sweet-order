@@ -2,7 +2,10 @@ import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { ProductCreationForm } from "@/apps/web-seller/features/product/components/forms/ProductCreationForm";
-import { IProductForm, ICreateProductRequest } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  IProductForm,
+  ICreateProductRequest,
+} from "@/apps/web-seller/features/product/types/product.type";
 import { useCreateProduct } from "@/apps/web-seller/features/product/hooks/queries/useProduct";
 
 export const StoreDetailProductCreatePage: React.FC = () => {
@@ -21,7 +24,7 @@ export const StoreDetailProductCreatePage: React.FC = () => {
     // IProductForm을 ICreateProductRequest로 변환
     const request: ICreateProductRequest = {
       ...data,
-      storeId
+      storeId,
     };
 
     await createProductMutation.mutateAsync(request);

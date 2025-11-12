@@ -101,7 +101,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
               // 이미지 삽입
               editor.insertEmbed(range.index, "image", imageUrl);
-              
+
               // 커서를 이미지 다음으로 이동
               setTimeout(() => {
                 editor.setSelection(range.index + 1, 0);

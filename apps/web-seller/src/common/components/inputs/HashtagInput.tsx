@@ -91,4 +91,3 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
     </Box>
   );
 };
-

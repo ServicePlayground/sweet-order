@@ -11,4 +11,3 @@ export const productApi = {
     return response.data.data;
   },
 };
-

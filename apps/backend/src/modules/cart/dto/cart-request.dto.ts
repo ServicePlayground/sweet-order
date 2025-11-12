@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, IsNumber, Min, IsOptional, IsObject } from "class-validator";
+import { IsNotEmpty, IsString, IsNumber, Min, IsOptional, IsObject, IsEnum } from "class-validator";
 import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/cart/constants/cart.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
 import { OrderFormData } from "@apps/backend/modules/product/type/product.type";
+import { DeliveryMethod } from "@apps/backend/modules/product/constants/product.constants";
 
 /**
  * 장바구니에 상품 추가 요청 DTO
@@ -36,6 +37,15 @@ export class AddCartItemRequestDto {
   @IsOptional()
   @IsObject()
   orderFormData?: OrderFormData;
+
+  @ApiPropertyOptional({
+    description: "수령 방식",
+    enum: DeliveryMethod,
+    example: SWAGGER_EXAMPLES.CART_ITEM.deliveryMethod,
+  })
+  @IsNotEmpty()
+  @IsEnum(DeliveryMethod)
+  deliveryMethod: DeliveryMethod;
 }
 
 /**
@@ -53,4 +63,3 @@ export class UpdateCartItemRequestDto {
   @Min(1)
   quantity: number;
 }
-

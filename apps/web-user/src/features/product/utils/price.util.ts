@@ -1,4 +1,7 @@
-import { OrderFormSchema, OrderFormData } from "@/apps/web-user/features/product/types/product.type";
+import {
+  OrderFormSchema,
+  OrderFormData,
+} from "@/apps/web-user/features/product/types/product.type";
 
 /**
  * 주문 폼 옵션의 추가 가격을 계산하는 함수
@@ -62,4 +65,3 @@ export const calculateTotalPrice = (
   const additionalPrice = calculateAdditionalPrice(orderFormSchema, selectedOptions);
   return basePrice + additionalPrice;
 };
-

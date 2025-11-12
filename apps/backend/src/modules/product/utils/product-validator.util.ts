@@ -18,7 +18,7 @@ export interface ProductForValidation {
  */
 export function validateProductExists(product: ProductForValidation | null | undefined): void {
   if (!product) {
-    throw new NotFoundException(CART_ERROR_MESSAGES.PRODUCT_DELETED);
+    throw new NotFoundException(CART_ERROR_MESSAGES.PRODUCT_NOT_FOUND);
   }
 }
 
@@ -65,28 +65,6 @@ export function validateProductForCart(
   validateProductExists(product);
   validateProductStatus(product!);
   validateProductStock(product!, quantity);
-}
-
-/**
- * 상품 검증 (존재 여부, 상태만 - 재고 검증 없음)
- * 조회 시 사용하며, 재고 부족은 자동 제거 대상으로 처리
- * @param product 상품 객체 (null 또는 undefined 가능)
- * @returns true: 유효함, false: 유효하지 않음 (자동 제거 대상)
- */
-export function isValidProductForCartList(
-  product: ProductForValidation | null | undefined,
-): boolean {
-  // 상품이 존재하지 않으면 유효하지 않음
-  if (!product) {
-    return false;
-  }
-
-  // ACTIVE 상태가 아니면 유효하지 않음
-  if (product.status !== "ACTIVE") {
-    return false;
-  }
-
-  return true;
 }
 
 /**
@@ -207,3 +185,31 @@ export function validateOrderFormData(
   }
 }
 
+/**
+ * deliveryMethod 검증
+ * @param productDeliveryMethods 상품의 수령 방식 배열
+ * @param selectedDeliveryMethod 선택한 수령 방식
+ * @throws BadRequestException 선택한 수령 방식이 상품의 수령 방식 목록에 없을 때
+ */
+export function validateDeliveryMethod(
+  productDeliveryMethods: string[] | null | undefined,
+  selectedDeliveryMethod: string | null | undefined,
+): void {
+  // 상품에 수령 방식이 없으면 선택한 수령 방식도 없어야 함
+  if (!productDeliveryMethods || productDeliveryMethods.length === 0) {
+    if (selectedDeliveryMethod) {
+      throw new BadRequestException(CART_ERROR_MESSAGES.DELIVERY_METHOD_INVALID);
+    }
+    return;
+  }
+
+  // 상품에 수령 방식이 있으면 선택한 수령 방식이 필요함
+  if (!selectedDeliveryMethod) {
+    throw new BadRequestException(CART_ERROR_MESSAGES.DELIVERY_METHOD_REQUIRED);
+  }
+
+  // 선택한 수령 방식이 상품의 수령 방식 목록에 포함되어 있는지 확인
+  if (!productDeliveryMethods.includes(selectedDeliveryMethod)) {
+    throw new BadRequestException(CART_ERROR_MESSAGES.DELIVERY_METHOD_INVALID);
+  }
+}

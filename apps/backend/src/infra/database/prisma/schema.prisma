@@ -229,13 +229,14 @@ model Store {
 
 // Cart model for shopping cart management
 model Cart {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  productId     String   @map("product_id")
-  quantity      Int      @default(1) // 수량
-  orderFormData Json?    @map("order_form_data") // 주문 폼 데이터 (JSON)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id            String         @id @default(cuid())
+  userId        String         @map("user_id")
+  productId     String         @map("product_id")
+  quantity      Int            @default(1) // 수량
+  orderFormData Json?          @map("order_form_data") // 주문 폼 데이터 (JSON)
+  deliveryMethod DeliveryMethod @map("delivery_method") // 수령 방식
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
 
   // Relations
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)

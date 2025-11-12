@@ -9,9 +9,9 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { OrderFormSchema, OrderFormData } from "@apps/backend/modules/product/type/product.type";
 import {
   validateProductForCart,
-  isValidProductForCartList,
   validateOrderFormData,
-} from "@apps/backend/modules/cart/utils/product-validator.util";
+  validateDeliveryMethod,
+} from "@apps/backend/modules/product/utils/product-validator.util";
 
 /**
  * 장바구니 서비스
@@ -20,7 +20,6 @@ import {
 @Injectable()
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
-
 
   /**
    * 장바구니 목록 조회
@@ -36,6 +35,7 @@ export class CartService {
         id: true,
         quantity: true,
         orderFormData: true,
+        deliveryMethod: true,
         createdAt: true,
         updatedAt: true,
         product: {
@@ -54,6 +54,7 @@ export class CartService {
             images: true,
             status: true,
             orderFormSchema: true,
+            deliveryMethod: true,
           },
         },
       },
@@ -64,17 +65,13 @@ export class CartService {
 
     // 유효하지 않은 장바구니 항목 필터링 및 제거
     const validCartItems = [];
-    const invalidCartItemIds = [];
+    const invalidCartItemIds: string[] = [];
 
     for (const item of cartItems) {
-      // 상품 존재 여부 및 상태 확인 (ACTIVE 상태만 허용)
-      if (!isValidProductForCartList(item.product)) {
-        invalidCartItemIds.push(item.id);
-        continue;
-      }
-
-      // 재고가 부족한 경우
-      if (item.product.stock < item.quantity) {
+      // 상품 존재 여부, 상태, 재고 확인 (ACTIVE 상태만 허용, 재고 부족 시 자동 제거)
+      try {
+        validateProductForCart(item.product, item.quantity);
+      } catch (error) {
         invalidCartItemIds.push(item.id);
         continue;
       }
@@ -82,9 +79,23 @@ export class CartService {
       // orderFormData 검증 (orderFormSchema가 없어도 검증 필요)
       // orderFormSchema가 없는데 orderFormData가 있으면 유효하지 않음
       try {
-        const orderFormSchema = item.product.orderFormSchema as unknown as OrderFormSchema | null | undefined;
+        const orderFormSchema = item.product.orderFormSchema as unknown as
+          | OrderFormSchema
+          | null
+          | undefined;
         const orderFormData = item.orderFormData as unknown as OrderFormData | null | undefined;
         validateOrderFormData(orderFormSchema, orderFormData);
+      } catch (error) {
+        // 검증 실패 시 해당 항목 제거
+        invalidCartItemIds.push(item.id);
+        continue;
+      }
+
+      // deliveryMethod 검증
+      try {
+        const productDeliveryMethods = (item.product.deliveryMethod as string[]) || null;
+        const cartDeliveryMethod = (item.deliveryMethod as string) || null;
+        validateDeliveryMethod(productDeliveryMethods, cartDeliveryMethod);
       } catch (error) {
         // 검증 실패 시 해당 항목 제거
         invalidCartItemIds.push(item.id);
@@ -94,12 +105,14 @@ export class CartService {
       validCartItems.push(item);
     }
 
-    // 유효하지 않은 항목 삭제
+    // 유효하지 않은 항목 삭제 - 트랜잭션으로 일관성 보장
     if (invalidCartItemIds.length > 0) {
-      await this.prisma.cart.deleteMany({
-        where: {
-          id: { in: invalidCartItemIds },
-        },
+      await this.prisma.$transaction(async (tx) => {
+        await tx.cart.deleteMany({
+          where: {
+            id: { in: invalidCartItemIds },
+          },
+        });
       });
     }
 
@@ -114,7 +127,7 @@ export class CartService {
    * @param addCartItemDto 장바구니 추가 요청 DTO
    */
   async addCartItem(userId: string, addCartItemDto: AddCartItemRequestDto) {
-    const { productId, quantity, orderFormData } = addCartItemDto;
+    const { productId, quantity, orderFormData, deliveryMethod } = addCartItemDto;
 
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
@@ -123,6 +136,7 @@ export class CartService {
         orderFormSchema: true,
         stock: true,
         status: true,
+        deliveryMethod: true,
       },
     });
 
@@ -133,12 +147,17 @@ export class CartService {
     const orderFormSchema = product!.orderFormSchema as OrderFormSchema | null | undefined;
     validateOrderFormData(orderFormSchema, orderFormData as OrderFormData | null | undefined);
 
+    // deliveryMethod 검증
+    const productDeliveryMethods = (product!.deliveryMethod as string[]) || null;
+    validateDeliveryMethod(productDeliveryMethods, deliveryMethod as string);
+
     // 새 장바구니 항목 생성
     await this.prisma.cart.create({
       data: {
         userId,
         productId,
         quantity,
+        deliveryMethod,
         ...(orderFormData && { orderFormData: orderFormData as Prisma.InputJsonValue }),
       },
     });
@@ -163,12 +182,18 @@ export class CartService {
         id: cartItemId,
         userId,
       },
-      include: {
+      select: {
+        id: true,
+        quantity: true,
+        orderFormData: true,
+        deliveryMethod: true,
         product: {
           select: {
             id: true,
             stock: true,
             status: true,
+            orderFormSchema: true,
+            deliveryMethod: true,
           },
         },
       },
@@ -180,6 +205,16 @@ export class CartService {
 
     // 상품 검증 (존재 여부, 상태, 재고)
     validateProductForCart(cartItem.product, quantity);
+
+    // orderFormData 검증
+    const orderFormSchema = cartItem.product.orderFormSchema as OrderFormSchema | null | undefined;
+    const orderFormData = cartItem.orderFormData as OrderFormData | null | undefined;
+    validateOrderFormData(orderFormSchema, orderFormData);
+
+    // deliveryMethod 검증
+    const productDeliveryMethods = (cartItem.product.deliveryMethod as string[]) || null;
+    const cartDeliveryMethod = (cartItem.deliveryMethod as string) || null;
+    validateDeliveryMethod(productDeliveryMethods, cartDeliveryMethod);
 
     // 장바구니 항목 업데이트 (수량만 수정)
     await this.prisma.cart.update({
@@ -220,4 +255,3 @@ export class CartService {
     });
   }
 }
-

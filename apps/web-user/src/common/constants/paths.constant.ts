@@ -30,6 +30,9 @@ export const PATHS = {
 
   // 검색 관련 경로
   SEARCH: "/search",
+
+  // 장바구니 관련 경로
+  CART: "/cart",
 } as const;
 
 // 타입 안전성을 위한 경로 타입

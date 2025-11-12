@@ -25,9 +25,12 @@ import {
   SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/cart/constants/cart.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import { AUTH_ERROR_MESSAGES, USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import {
+  AUTH_ERROR_MESSAGES,
+  USER_ROLES,
+} from "@apps/backend/modules/auth/constants/auth.constants";
 
-/** 
+/**
  * 사용자 장바구니 컨트롤러
  * 사용자 장바구니 관리 API 엔드포인트를 제공합니다.
  */
@@ -67,7 +70,8 @@ export class UserCartController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "(로그인필요) 장바구니에 상품 추가",
-    description: "장바구니에 새로운 상품을 추가합니다. 유효하지 않은 항목(삭제된 상품, 품절된 상품, 재고 부족, orderFormSchema 변경 등)은 오류 메시지를 반환합니다.",
+    description:
+      "장바구니에 새로운 상품을 추가합니다. 유효하지 않은 항목(삭제된 상품, 품절된 상품, 재고 부족, orderFormSchema 변경 등)은 오류 메시지를 반환합니다.",
   })
   @SwaggerResponse(201, createMessageObject(CART_SUCCESS_MESSAGES.ITEM_ADDED))
   @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.INSUFFICIENT_STOCK))
@@ -86,7 +90,6 @@ export class UserCartController {
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
   @SwaggerResponse(404, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_NOT_FOUND))
-  @SwaggerResponse(404, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_DELETED))
   async addCartItem(
     @Body() addCartItemDto: AddCartItemRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
@@ -103,20 +106,26 @@ export class UserCartController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인필요) 장바구니 항목 수정",
-    description: "장바구니 항목의 수량을 수정합니다. 유효하지 않은 항목(삭제된 상품, 품절된 상품, 재고 부족, orderFormSchema 변경 등)은 오류 메시지를 반환합니다.",
+    description:
+      "장바구니 항목의 수량을 수정합니다. 유효하지 않은 항목(삭제된 상품, 품절된 상품, 재고 부족, orderFormSchema 변경 등)은 오류 메시지를 반환합니다.",
   })
   @SwaggerResponse(200, createMessageObject(CART_SUCCESS_MESSAGES.ITEM_UPDATED))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.INSUFFICIENT_STOCK))
   @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_INACTIVE))
   @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_OUT_OF_STOCK))
   @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE))
-  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.INSUFFICIENT_STOCK))
-  @SwaggerResponse(404, createMessageObject(CART_ERROR_MESSAGES.NOT_FOUND))
-  @SwaggerResponse(404, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_DELETED))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.ORDER_FORM_DATA_INVALID))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.ORDER_FORM_DATA_REQUIRED))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.ORDER_FORM_FIELD_REQUIRED))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.ORDER_FORM_SCHEMA_CHANGED))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.ORDER_FORM_FIELD_INVALID))
+  @SwaggerResponse(400, createMessageObject(CART_ERROR_MESSAGES.ORDER_FORM_SCHEMA_CHANGED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
+  @SwaggerResponse(404, createMessageObject(CART_ERROR_MESSAGES.PRODUCT_NOT_FOUND))
   async updateCartItem(
     @Param("id") cartItemId: string,
     @Body() updateCartItemDto: UpdateCartItemRequestDto,
@@ -172,4 +181,3 @@ export class UserCartController {
     return { message: CART_SUCCESS_MESSAGES.CART_CLEARED };
   }
 }
-
