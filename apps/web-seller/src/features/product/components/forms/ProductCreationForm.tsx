@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Tabs, Tab, Paper, Typography } from "@mui/material";
+import { Box, Button, Tabs, Tab, Paper } from "@mui/material";
 import {
   IProductForm,
   MainCategory,

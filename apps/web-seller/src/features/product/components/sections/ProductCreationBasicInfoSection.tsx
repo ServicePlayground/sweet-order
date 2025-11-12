@@ -1,10 +1,7 @@
 import React from "react";
 import { Grid, TextField } from "@mui/material";
 import { IProductForm, MainCategory } from "@/apps/web-seller/features/product/types/product.type";
-import {
-  PRODUCT_ERROR_MESSAGES,
-  MAIN_CATEGORY_OPTIONS,
-} from "@/apps/web-seller/features/product/constants/product.constant";
+import { MAIN_CATEGORY_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { MultipleImageUpload } from "@/apps/web-seller/common/components/images/MultipleImageUpload";
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
 

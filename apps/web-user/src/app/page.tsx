@@ -1,6 +1,6 @@
 "use client";
 
-import { Metadata } from "next";
+// import { Metadata } from "next";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 
 // 홈페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)

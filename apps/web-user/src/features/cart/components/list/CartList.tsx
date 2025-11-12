@@ -264,9 +264,7 @@ export function CartList({
                         }}
                       >
                         <div style={{ flex: 1 }}>
-                          <strong style={{ color: "#374151" }}>
-                            {displayItem.fieldLabel}:
-                          </strong>{" "}
+                          <strong style={{ color: "#374151" }}>{displayItem.fieldLabel}:</strong>{" "}
                           <span>{displayItem.displayValue}</span>
                         </div>
                         {displayItem.additionalPrice > 0 && (
@@ -327,4 +325,3 @@ export function CartList({
     </div>
   );
 }
-

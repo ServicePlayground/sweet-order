@@ -1,11 +1,6 @@
 import React from "react";
 import { Grid, TextField, Typography, Divider, Paper } from "@mui/material";
-import {
-  IProductForm,
-  SizeRange,
-  DeliveryMethod,
-  ProductStatus,
-} from "@/apps/web-seller/features/product/types/product.type";
+import { IProductForm, ProductStatus } from "@/apps/web-seller/features/product/types/product.type";
 import {
   SIZE_RANGE_OPTIONS,
   DELIVERY_METHOD_OPTIONS,

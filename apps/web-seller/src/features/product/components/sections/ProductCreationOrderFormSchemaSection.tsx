@@ -125,7 +125,7 @@ export const ProductCreationOrderFormSchemaSection: React.FC<
     handleFieldChange(fieldIndex, { options: newOptions });
   };
 
-  const validateField = (field: OrderFormField, index: number): string | null => {
+  const validateField = (field: OrderFormField): string | null => {
     if (!field.label.trim()) {
       return PRODUCT_ERROR_MESSAGES.ORDER_FORM_FIELD_LABEL_REQUIRED;
     }
@@ -148,7 +148,7 @@ export const ProductCreationOrderFormSchemaSection: React.FC<
   const validateAll = (): boolean => {
     const errors: Record<number, string> = {};
     fields.forEach((field, index) => {
-      const error = validateField(field, index);
+      const error = validateField(field);
       if (error) {
         errors[index] = error;
       }
@@ -163,7 +163,6 @@ export const ProductCreationOrderFormSchemaSection: React.FC<
       validateAll();
     }
     // validateAll은 fields를 사용하지만, setFieldErrors만 호출하므로 무한 루프는 발생하지 않음
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
 
   return (
