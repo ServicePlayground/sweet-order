@@ -1,6 +1,93 @@
-import { BadRequestException } from "@nestjs/common";
-import { OrderFormSchema, OrderFormData } from "@apps/backend/modules/product/type/product.type";
+import { NotFoundException, BadRequestException } from "@nestjs/common";
 import { CART_ERROR_MESSAGES } from "@apps/backend/modules/cart/constants/cart.constants";
+import { OrderFormSchema, OrderFormData } from "@apps/backend/modules/product/type/product.type";
+
+/**
+ * 상품 검증을 위한 타입 정의
+ */
+export interface ProductForValidation {
+  id?: string;
+  status: string;
+  stock: number;
+}
+
+/**
+ * 상품 존재 여부 확인
+ * @param product 상품 객체 (null 또는 undefined 가능)
+ * @throws NotFoundException 상품이 존재하지 않을 때
+ */
+export function validateProductExists(product: ProductForValidation | null | undefined): void {
+  if (!product) {
+    throw new NotFoundException(CART_ERROR_MESSAGES.PRODUCT_DELETED);
+  }
+}
+
+/**
+ * 상품 상태 확인 (ACTIVE 상태만 허용)
+ * @param product 상품 객체
+ * @throws BadRequestException 상품 상태가 ACTIVE가 아닐 때
+ */
+export function validateProductStatus(product: ProductForValidation): void {
+  if (product.status !== "ACTIVE") {
+    if (product.status === "INACTIVE") {
+      throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_INACTIVE);
+    } else if (product.status === "OUT_OF_STOCK") {
+      throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_OUT_OF_STOCK);
+    } else {
+      throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE);
+    }
+  }
+}
+
+/**
+ * 재고 확인
+ * @param product 상품 객체
+ * @param quantity 요청 수량
+ * @throws BadRequestException 재고가 부족할 때
+ */
+export function validateProductStock(product: ProductForValidation, quantity: number): void {
+  if (product.stock < quantity) {
+    throw new BadRequestException(CART_ERROR_MESSAGES.INSUFFICIENT_STOCK);
+  }
+}
+
+/**
+ * 상품 검증 (존재 여부, 상태, 재고)
+ * @param product 상품 객체 (null 또는 undefined 가능)
+ * @param quantity 요청 수량
+ * @throws NotFoundException 상품이 존재하지 않을 때
+ * @throws BadRequestException 상품 상태가 ACTIVE가 아니거나 재고가 부족할 때
+ */
+export function validateProductForCart(
+  product: ProductForValidation | null | undefined,
+  quantity: number,
+): void {
+  validateProductExists(product);
+  validateProductStatus(product!);
+  validateProductStock(product!, quantity);
+}
+
+/**
+ * 상품 검증 (존재 여부, 상태만 - 재고 검증 없음)
+ * 조회 시 사용하며, 재고 부족은 자동 제거 대상으로 처리
+ * @param product 상품 객체 (null 또는 undefined 가능)
+ * @returns true: 유효함, false: 유효하지 않음 (자동 제거 대상)
+ */
+export function isValidProductForCartList(
+  product: ProductForValidation | null | undefined,
+): boolean {
+  // 상품이 존재하지 않으면 유효하지 않음
+  if (!product) {
+    return false;
+  }
+
+  // ACTIVE 상태가 아니면 유효하지 않음
+  if (product.status !== "ACTIVE") {
+    return false;
+  }
+
+  return true;
+}
 
 /**
  * orderFormData 검증

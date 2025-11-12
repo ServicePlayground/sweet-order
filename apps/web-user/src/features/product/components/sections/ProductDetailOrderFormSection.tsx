@@ -15,7 +15,7 @@ import {
   isStockAvailable,
   validateOrderFormData,
   buildOrderFormData,
-} from "@/apps/web-user/features/product/utils/orderForm.util";
+} from "@/apps/web-user/features/product/utils/orderForm-validator.util";
 
 interface ProductDetailOrderFormSectionProps {
   product: Product;

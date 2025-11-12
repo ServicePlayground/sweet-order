@@ -52,14 +52,5 @@ export class UpdateCartItemRequestDto {
   @IsNumber()
   @Min(1)
   quantity: number;
-
-  @ApiPropertyOptional({
-    description: "주문 폼 데이터 (JSON) - orderFormSchema의 field.id를 키로 하는 객체",
-    example: SWAGGER_EXAMPLES.CART_ITEM.orderFormData,
-    type: Object,
-  })
-  @IsOptional()
-  @IsObject()
-  orderFormData?: OrderFormData;
 }
 

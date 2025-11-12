@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   AddCartItemRequestDto,
@@ -7,7 +7,11 @@ import {
 import { CART_ERROR_MESSAGES } from "@apps/backend/modules/cart/constants/cart.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { OrderFormSchema, OrderFormData } from "@apps/backend/modules/product/type/product.type";
-import { validateOrderFormData } from "@apps/backend/modules/cart/utils/order-form-validator.util";
+import {
+  validateProductForCart,
+  isValidProductForCartList,
+  validateOrderFormData,
+} from "@apps/backend/modules/cart/utils/product-validator.util";
 
 /**
  * 장바구니 서비스
@@ -63,14 +67,8 @@ export class CartService {
     const invalidCartItemIds = [];
 
     for (const item of cartItems) {
-      // 상품이 존재하지 않거나 삭제된 경우 (Cascade로 자동 삭제되지만, 혹시 모를 경우 대비)
-      if (!item.product) {
-        invalidCartItemIds.push(item.id);
-        continue;
-      }
-
-      // 상품 상태 확인 (ACTIVE 상태만 허용)
-      if (item.product.status !== "ACTIVE") {
+      // 상품 존재 여부 및 상태 확인 (ACTIVE 상태만 허용)
+      if (!isValidProductForCartList(item.product)) {
         invalidCartItemIds.push(item.id);
         continue;
       }
@@ -81,17 +79,16 @@ export class CartService {
         continue;
       }
 
-      // orderFormSchema가 변경되어 orderFormData가 유효하지 않은 경우
-      if (item.product.orderFormSchema && item.orderFormData) {
-        try {
-          const orderFormSchema = item.product.orderFormSchema as unknown as OrderFormSchema | null | undefined;
-          const orderFormData = item.orderFormData as unknown as OrderFormData | null | undefined;
-          validateOrderFormData(orderFormSchema, orderFormData);
-        } catch (error) {
-          // 검증 실패 시 해당 항목 제거
-          invalidCartItemIds.push(item.id);
-          continue;
-        }
+      // orderFormData 검증 (orderFormSchema가 없어도 검증 필요)
+      // orderFormSchema가 없는데 orderFormData가 있으면 유효하지 않음
+      try {
+        const orderFormSchema = item.product.orderFormSchema as unknown as OrderFormSchema | null | undefined;
+        const orderFormData = item.orderFormData as unknown as OrderFormData | null | undefined;
+        validateOrderFormData(orderFormSchema, orderFormData);
+      } catch (error) {
+        // 검증 실패 시 해당 항목 제거
+        invalidCartItemIds.push(item.id);
+        continue;
       }
 
       validCartItems.push(item);
@@ -129,29 +126,11 @@ export class CartService {
       },
     });
 
-    // 상품 존재 여부 확인
-    if (!product) {
-      throw new NotFoundException(CART_ERROR_MESSAGES.PRODUCT_DELETED);
-    }
-  
-    // 상품 상태 확인 (ACTIVE 상태만 허용)
-    if (product.status !== "ACTIVE") {
-      if (product.status === "INACTIVE") {
-        throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_INACTIVE);
-      } else if (product.status === "OUT_OF_STOCK") {
-        throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_OUT_OF_STOCK);
-      } else {
-        throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE);
-      }
-    }
+    // 상품 검증 (존재 여부, 상태, 재고)
+    validateProductForCart(product, quantity);
 
-    // 재고 확인
-    if (product.stock < quantity) {
-      throw new BadRequestException(CART_ERROR_MESSAGES.INSUFFICIENT_STOCK);
-    }
-
-    // orderFormData 검증
-    const orderFormSchema = product.orderFormSchema as OrderFormSchema | null | undefined;
+    // orderFormData 검증 (validateProductForCart에서 product가 null이면 예외를 던지므로 여기서는 null이 아님)
+    const orderFormSchema = product!.orderFormSchema as OrderFormSchema | null | undefined;
     validateOrderFormData(orderFormSchema, orderFormData as OrderFormData | null | undefined);
 
     // 새 장바구니 항목 생성
@@ -176,7 +155,7 @@ export class CartService {
     cartItemId: string,
     updateCartItemDto: UpdateCartItemRequestDto,
   ) {
-    const { quantity, orderFormData } = updateCartItemDto;
+    const { quantity } = updateCartItemDto;
 
     // 장바구니 항목 확인
     const cartItem = await this.prisma.cart.findFirst({
@@ -189,7 +168,6 @@ export class CartService {
           select: {
             id: true,
             stock: true,
-            orderFormSchema: true,
             status: true,
           },
         },
@@ -200,37 +178,14 @@ export class CartService {
       throw new NotFoundException(CART_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    // 상품 존재 여부 확인
-    if (!cartItem.product) {
-      throw new NotFoundException(CART_ERROR_MESSAGES.PRODUCT_DELETED);
-    }
+    // 상품 검증 (존재 여부, 상태, 재고)
+    validateProductForCart(cartItem.product, quantity);
 
-    // 상품 상태 확인 (ACTIVE 상태만 허용)
-    if (cartItem.product.status !== "ACTIVE") {
-      if (cartItem.product.status === "INACTIVE") {
-        throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_INACTIVE);
-      } else if (cartItem.product.status === "OUT_OF_STOCK") {
-        throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_OUT_OF_STOCK);
-      } else {
-        throw new BadRequestException(CART_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE);
-      }
-    }
-
-    // 재고 확인
-    if (cartItem.product.stock < quantity) {
-      throw new BadRequestException(CART_ERROR_MESSAGES.INSUFFICIENT_STOCK);
-    }
-
-    // orderFormData 검증
-    const orderFormSchema = cartItem.product.orderFormSchema as OrderFormSchema | null | undefined;
-    validateOrderFormData(orderFormSchema, orderFormData as OrderFormData | null | undefined);
-
-    // 장바구니 항목 업데이트
+    // 장바구니 항목 업데이트 (수량만 수정)
     await this.prisma.cart.update({
       where: { id: cartItemId },
       data: {
         quantity,
-        ...(orderFormData !== undefined && { orderFormData: orderFormData as Prisma.InputJsonValue }),
       },
     });
   }
@@ -241,20 +196,18 @@ export class CartService {
    * @param cartItemId 장바구니 항목 ID
    */
   async removeCartItem(userId: string, cartItemId: string) {
-    const cartItem = await this.prisma.cart.findFirst({
+    // userId와 cartItemId를 함께 체크하여 삭제 (보안 및 효율성)
+    const deleteResult = await this.prisma.cart.deleteMany({
       where: {
         id: cartItemId,
         userId,
       },
     });
 
-    if (!cartItem) {
+    // 삭제된 항목이 없으면 에러 발생
+    if (deleteResult.count === 0) {
       throw new NotFoundException(CART_ERROR_MESSAGES.NOT_FOUND);
     }
-
-    await this.prisma.cart.delete({
-      where: { id: cartItemId },
-    });
   }
 
   /**
