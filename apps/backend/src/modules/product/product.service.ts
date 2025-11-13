@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ProductService as ProductDataService } from "@apps/backend/modules/product/services/product.service";
+import { ProductLikeService } from "@apps/backend/modules/product/services/product-like.service";
 import {
   GetProductsRequestDto,
   CreateProductRequestDto,
@@ -14,7 +15,10 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
  */
 @Injectable()
 export class ProductService {
-  constructor(private readonly productDataService: ProductDataService) {}
+  constructor(
+    private readonly productDataService: ProductDataService,
+    private readonly productLikeService: ProductLikeService,
+  ) {}
 
   /**
    * 상품 목록 조회 (필터링, 정렬, 무한 스크롤 지원)
@@ -42,5 +46,19 @@ export class ProductService {
    */
   async deleteProduct(id: string, user: JwtVerifiedPayload) {
     this.productDataService.deleteProduct(id, user);
+  }
+
+  /**
+   * 상품 좋아요 추가
+   */
+  async addProductLike(userId: string, productId: string) {
+    return this.productLikeService.addProductLike(userId, productId);
+  }
+
+  /**
+   * 상품 좋아요 삭제
+   */
+  async removeProductLike(userId: string, productId: string) {
+    return this.productLikeService.removeProductLike(userId, productId);
   }
 }
