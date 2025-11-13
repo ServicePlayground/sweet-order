@@ -55,6 +55,32 @@ export class UserProductController {
   }
 
   /**
+   * 상품 좋아요 여부 확인 API
+   * 특정 상품에 대한 사용자의 좋아요 여부를 확인합니다.
+   */
+  @Get(":id/is-liked")
+  @Auth({ isPublic: false }) // 인증 필수
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인필요) 상품 좋아요 여부 확인",
+    description: "특정 상품에 대한 사용자의 좋아요 여부를 확인합니다.",
+  })
+  @SwaggerResponse(200, { isLiked: true })
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
+  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
+  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
+  async isLiked(
+    @Param("id") productId: string,
+    @Request() req: { user: JwtVerifiedPayload },
+  ) {
+    const isLiked = await this.productService.isLiked(req.user.sub, productId);
+    return { isLiked };
+  }
+
+  /**
    * 상품 상세 조회 API
    * 특정 상품의 상세 정보를 조회합니다.
    */

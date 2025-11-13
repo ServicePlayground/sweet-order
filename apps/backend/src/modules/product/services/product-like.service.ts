@@ -105,5 +105,35 @@ export class ProductLikeService {
       });
     });
   }
+
+  /**
+   * 상품 좋아요 여부 확인
+   * @param userId 사용자 ID
+   * @param productId 상품 ID
+   * @returns 좋아요 여부
+   */
+  async isLiked(userId: string, productId: string): Promise<boolean> {
+    // 상품 존재 여부 확인
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true },
+    });
+
+    if (!product) {
+      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    // 좋아요 여부 확인
+    const like = await this.prisma.productLike.findUnique({
+      where: {
+        userId_productId: {
+          userId,
+          productId,
+        },
+      },
+    });
+
+    return !!like;
+  }
 }
 

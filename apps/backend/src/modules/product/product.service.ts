@@ -61,4 +61,11 @@ export class ProductService {
   async removeProductLike(userId: string, productId: string) {
     return this.productLikeService.removeProductLike(userId, productId);
   }
+
+  /**
+   * 상품 좋아요 여부 확인
+   */
+  async isLiked(userId: string, productId: string): Promise<boolean> {
+    return this.productLikeService.isLiked(userId, productId);
+  }
 }

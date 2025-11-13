@@ -192,8 +192,6 @@ export const SWAGGER_EXAMPLES = {
     ],
     // 상품 상태
     status: ProductStatus.ACTIVE,
-    // 기타
-    isLiked: false,
     // 판매자 정보 (Store를 통해 User(Seller) 참조)
     storeId: "store_123456789",
   },
