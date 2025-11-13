@@ -27,4 +27,9 @@ export const productApi = {
     const response = await apiClient.delete(`/products/${productId}/like`);
     return response.data.data;
   },
+  // 상품 좋아요 여부 확인
+  getProductIsLiked: async (productId: string): Promise<{ isLiked: boolean }> => {
+    const response = await apiClient.get(`/products/${productId}/is-liked`);
+    return response.data.data;
+  },
 };
