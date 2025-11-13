@@ -2,6 +2,8 @@
 
 import { Product } from "@/apps/web-user/features/product/types/product.type";
 import { ProductDetailOrderFormSection } from "./ProductDetailOrderFormSection";
+import { useAddProductLike } from "@/apps/web-user/features/product/hooks/mutations/useAddProductLike";
+import { useRemoveProductLike } from "@/apps/web-user/features/product/hooks/mutations/useRemoveProductLike";
 
 interface ProductDetailInfoSectionProps {
   product: Product;
@@ -12,6 +14,17 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
     product.originalPrice > product.salePrice
       ? Math.round(((product.originalPrice - product.salePrice) / product.originalPrice) * 100)
       : 0;
+
+  const addProductLike = useAddProductLike();
+  const removeProductLike = useRemoveProductLike();
+
+  const handleLikeClick = () => {
+    if (product.isLiked) {
+      removeProductLike.mutate(product.id);
+    } else {
+      addProductLike.mutate(product.id);
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -47,6 +60,8 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
             }}
           >
             <button
+              onClick={handleLikeClick}
+              disabled={addProductLike.isPending || removeProductLike.isPending}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -58,7 +73,8 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
                 color: product.isLiked ? "#ef4444" : "#6b7280",
                 fontSize: "14px",
                 fontWeight: 600,
-                cursor: "pointer",
+                cursor: addProductLike.isPending || removeProductLike.isPending ? "not-allowed" : "pointer",
+                opacity: addProductLike.isPending || removeProductLike.isPending ? 0.6 : 1,
                 transition: "all 0.2s ease",
               }}
             >
