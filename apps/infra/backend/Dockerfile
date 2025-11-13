@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Yarn 및 Corepack 활성화
-RUN corepack enable && yarn set version 4.9.4
+RUN corepack enable && corepack prepare yarn@4.9.4 --activate
 
 # 1️⃣ (package.json, yarn.lock 필수)(dockerignore: node_modules 제외) 전체 프로젝트 복사
 COPY . .
