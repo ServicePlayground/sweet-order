@@ -2,16 +2,35 @@
 
 import { Product } from "@/apps/web-user/features/product/types/product.type";
 import { ProductDetailOrderFormSection } from "./ProductDetailOrderFormSection";
+import { useAddProductLike } from "@/apps/web-user/features/product/hooks/mutations/useAddProductLike";
+import { useRemoveProductLike } from "@/apps/web-user/features/product/hooks/mutations/useRemoveProductLike";
+import { useProductIsLiked } from "@/apps/web-user/features/product/hooks/queries/useProductIsLiked";
 
 interface ProductDetailInfoSectionProps {
   product: Product;
 }
 
 export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionProps) {
+  // 좋아요 여부 조회 (로그인 상태에서만 조회)
+  const { data: isLikedData, isLoading: isLikedLoading } = useProductIsLiked(product.id);
+  const isLiked = isLikedData?.isLiked ?? false;
+  const addProductLike = useAddProductLike();
+  const removeProductLike = useRemoveProductLike();
+
   const discountRate =
     product.originalPrice > product.salePrice
       ? Math.round(((product.originalPrice - product.salePrice) / product.originalPrice) * 100)
       : 0;
+
+
+
+  const handleLikeClick = () => {
+    if (isLiked) {
+      removeProductLike.mutate(product.id);
+    } else {
+      addProductLike.mutate(product.id);
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -47,6 +66,8 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
             }}
           >
             <button
+              onClick={handleLikeClick}
+              disabled={addProductLike.isPending || removeProductLike.isPending || isLikedLoading}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -54,15 +75,16 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
                 padding: "8px 12px",
                 borderRadius: "8px",
                 border: "1px solid #e5e7eb",
-                backgroundColor: product.isLiked ? "#fee2e2" : "#ffffff",
-                color: product.isLiked ? "#ef4444" : "#6b7280",
+                backgroundColor: isLiked ? "#fee2e2" : "#ffffff",
+                color: isLiked ? "#ef4444" : "#6b7280",
                 fontSize: "14px",
                 fontWeight: 600,
-                cursor: "pointer",
+                cursor: addProductLike.isPending || removeProductLike.isPending || isLikedLoading ? "not-allowed" : "pointer",
+                opacity: addProductLike.isPending || removeProductLike.isPending || isLikedLoading ? 0.6 : 1,
                 transition: "all 0.2s ease",
               }}
             >
-              <span>{product.isLiked ? "❤️" : "🤍"}</span>
+              <span>{isLiked ? "❤️" : "🤍"}</span>
               <span>{product.likeCount}</span>
             </button>
           </div>

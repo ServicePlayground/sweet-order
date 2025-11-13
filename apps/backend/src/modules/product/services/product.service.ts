@@ -119,12 +119,6 @@ export class ProductService {
       orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
       skip, // 무한스크롤을 위한 건너뛸 항목 수
       take: limit, // 가져올 항목 수 (페이지당 상품 개수)
-      include: {
-        // 사용자별 좋아요 여부 확인
-        // - 로그인한 사용자: 해당 사용자가 좋아요한 상품만 가져옴
-        // - 비로그인 사용자: 좋아요 정보를 가져오지 않음
-        likes: user ? { where: { userId: user.sub } } : undefined,
-      },
     });
 
     // 무한스크롤 메타 정보 계산
@@ -132,13 +126,7 @@ export class ProductService {
     const hasPrev = page > 1;
 
     // 응답 데이터 변환
-    const data = products.map((product) => {
-      const { likes, ...productData } = product;
-      return {
-        ...productData,
-        isLiked: user ? likes && likes.length > 0 : false,
-      };
-    });
+    const data = products;
 
     // 무한스크롤 메타 정보
     const meta = {
@@ -157,15 +145,11 @@ export class ProductService {
    * 상품 상세 조회
    */
   async getProductDetail(id: string, user?: JwtVerifiedPayload) {
-    // 상품 상세 정보 조회 (이미지, 좋아요 정보 포함)
+    // 상품 상세 정보 조회
     const product = await this.prisma.product.findFirst({
       where: {
         id,
         // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
-      },
-      include: {
-        // 사용자별 좋아요 여부 확인
-        likes: user ? { where: { userId: user.sub } } : undefined,
       },
     });
 
@@ -174,12 +158,7 @@ export class ProductService {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    // 응답 데이터 변환
-    const { likes, ...productData } = product;
-    return {
-      ...productData,
-      isLiked: user ? likes && likes.length > 0 : false,
-    };
+    return product;
   }
 
   /**

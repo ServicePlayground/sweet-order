@@ -6,6 +6,8 @@ export const PRODUCT_ERROR_MESSAGES = {
   FORBIDDEN: "해당 상품을 삭제할 권한이 없습니다.",
   STORE_NOT_FOUND: "스토어를 찾을 수 없습니다.",
   STORE_NOT_OWNED: "해당 스토어에 대한 권한이 없습니다.",
+  LIKE_ALREADY_EXISTS: "이미 좋아요한 상품입니다.",
+  LIKE_NOT_FOUND: "좋아요한 상품이 아닙니다.",
 } as const;
 
 /**
@@ -14,6 +16,8 @@ export const PRODUCT_ERROR_MESSAGES = {
 export const PRODUCT_SUCCESS_MESSAGES = {
   PRODUCT_CREATED: "상품이 성공적으로 등록되었습니다.",
   PRODUCT_DELETED: "상품이 성공적으로 삭제되었습니다.",
+  LIKE_ADDED: "상품에 좋아요를 추가했습니다.",
+  LIKE_REMOVED: "상품 좋아요를 취소했습니다.",
 } as const;
 
 /**
@@ -188,8 +192,6 @@ export const SWAGGER_EXAMPLES = {
     ],
     // 상품 상태
     status: ProductStatus.ACTIVE,
-    // 기타
-    isLiked: false,
     // 판매자 정보 (Store를 통해 User(Seller) 참조)
     storeId: "store_123456789",
   },

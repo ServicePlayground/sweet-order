@@ -113,6 +113,9 @@ export interface Product {
   hashtags: string[];
   images: string[];
   status: string;
+}
+
+export interface ProductIsLiked {
   isLiked: boolean;
 }
 

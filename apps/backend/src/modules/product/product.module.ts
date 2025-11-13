@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ProductService } from "@apps/backend/modules/product/product.service";
 import { ProductService as ProductDataService } from "@apps/backend/modules/product/services/product.service";
+import { ProductLikeService } from "@apps/backend/modules/product/services/product-like.service";
 
 /**
  * 상품 모듈
@@ -8,7 +9,7 @@ import { ProductService as ProductDataService } from "@apps/backend/modules/prod
  */
 @Module({
   imports: [],
-  providers: [ProductService, ProductDataService],
+  providers: [ProductService, ProductDataService, ProductLikeService],
   exports: [ProductService],
 })
 export class ProductModule {}
