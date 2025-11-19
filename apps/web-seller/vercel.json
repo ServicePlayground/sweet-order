@@ -1,6 +1,6 @@
 {
-  "buildCommand": "tsc && vite build",
-  "outputDirectory": "dist",
+  "buildCommand": "yarn workspace @sweet-order/web-seller build",
+  "outputDirectory": "apps/web-seller/dist",
   "installCommand": "yarn install",
   "framework": "vite"
 }

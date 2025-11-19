@@ -78,7 +78,6 @@ jobs:
           PROJECT=${{ steps.extract-project.outputs.project }}
 
           # 태그에 따라 하나의 프로젝트만 배포됩니다
-          # 프로젝트 디렉토리와 프로젝트 ID만 설정
           # buildCommand, outputDirectory는 vercel.json에서 자동으로 읽어옵니다
           case $PROJECT in
             web-user)
@@ -128,12 +127,15 @@ jobs:
           fi
 
           # Vercel 배포 실행
-          # 프로젝트 디렉토리로 이동하여 vercel.json을 올바르게 읽도록 설정
-          # Vercel 대시보드의 Root Directory 설정과 함께 작동합니다
+          # 루트 디렉토리에서 실행하여 tsconfig.base.json 등 모노레포 파일에 접근 가능하도록 설정
+          # vercel.json의 buildCommand가 루트에서 실행되도록 설정되어 있습니다
           echo "📤 Deploying to Vercel (Staging)..."
-          cd $PROJECT_DIR
+          # 프로젝트 디렉토리의 vercel.json을 루트로 복사하여 사용
+          cp $PROJECT_DIR/vercel.json ./vercel.json
+          # 루트 디렉토리에서 실행
           vercel deploy --prod --token=$VERCEL_TOKEN --yes
-          cd -
+          # 임시로 복사한 vercel.json 삭제
+          rm -f ./vercel.json
 
           if [ $? -ne 0 ]; then
             echo "❌ Deployment failed!"
