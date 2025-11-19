@@ -128,10 +128,12 @@ jobs:
           fi
 
           # Vercel 배포 실행
-          # vercel.json의 buildCommand, outputDirectory 등을 자동으로 읽어옵니다
-          # --cwd로 프로젝트 디렉토리로 이동하여 vercel.json을 읽습니다
+          # 프로젝트 디렉토리로 이동하여 vercel.json을 올바르게 읽도록 설정
+          # Vercel 대시보드의 Root Directory 설정과 함께 작동합니다
           echo "📤 Deploying to Vercel (Staging)..."
-          vercel deploy --prod --token=$VERCEL_TOKEN --cwd=$PROJECT_DIR --yes
+          cd $PROJECT_DIR
+          vercel deploy --prod --token=$VERCEL_TOKEN --yes
+          cd -
 
           if [ $? -ne 0 ]; then
             echo "❌ Deployment failed!"
