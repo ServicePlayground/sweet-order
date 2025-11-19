@@ -1,5 +1,4 @@
 {
-  "rootDirectory": "apps/web-user",
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "installCommand": "yarn install",

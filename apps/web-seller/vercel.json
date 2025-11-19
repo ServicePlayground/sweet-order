@@ -1,5 +1,4 @@
 {
-  "rootDirectory": "apps/web-seller",
   "buildCommand": "tsc && vite build",
   "outputDirectory": "dist",
   "installCommand": "yarn install",

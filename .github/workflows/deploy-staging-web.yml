@@ -1,5 +1,6 @@
 name: Deploy to Vercel (Staging)
 
+# 트리거: web-user 또는 web-seller의 staging 태그가 푸시될 때 실행
 on:
   push:
     tags:
@@ -11,11 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 저장소 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 태그에서 프로젝트명과 환경 추출 (예: web-user/staging-v1.0.0)
       - name: Extract project name and environment from tag
         id: extract-project
         run: |
@@ -29,6 +32,7 @@ jobs:
           echo "📁 Project: $PROJECT_NAME"
           echo "🌍 Environment: $ENV_NAME"
 
+      # 프로젝트명과 환경 유효성 검증
       - name: Validate project name and environment
         run: |
           PROJECT=${{ steps.extract-project.outputs.project }}
@@ -49,20 +53,25 @@ jobs:
           echo "✅ Valid project: $PROJECT"
           echo "✅ Valid environment: $ENV"
 
+      # Node.js 환경 설정
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      # Yarn 패키지 매니저 활성화
       - name: Enable Corepack and prepare Yarn
         run: corepack enable && corepack prepare yarn@4.9.4 --activate
 
+      # 프로젝트 의존성 설치
       - name: Install dependencies
         run: yarn install
 
+      # Vercel CLI 설치
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
+      # 프로젝트별 디렉토리 경로와 Vercel 프로젝트 ID 설정
       - name: Set project-specific variables
         id: set-vars
         run: |
@@ -82,6 +91,7 @@ jobs:
               ;;
           esac
 
+      # Vercel에 프로덕션 배포 실행
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -118,7 +128,8 @@ jobs:
           fi
 
           # Vercel 배포 실행
-          # vercel.json의 buildCommand, outputDirectory, rootDirectory 등을 자동으로 읽어옵니다
+          # vercel.json의 buildCommand, outputDirectory 등을 자동으로 읽어옵니다
+          # --cwd로 프로젝트 디렉토리로 이동하여 vercel.json을 읽습니다
           echo "📤 Deploying to Vercel (Staging)..."
           vercel deploy --prod --token=$VERCEL_TOKEN --cwd=$PROJECT_DIR --yes
 
@@ -129,6 +140,7 @@ jobs:
 
           echo "✅ Deployment completed for $PROJECT (staging)"
 
+      # 배포 결과 요약 생성 (GitHub Actions UI에 표시)
       - name: Deployment summary
         run: |
           echo "## 🎉 Vercel Deployment Summary (Staging)" >> $GITHUB_STEP_SUMMARY
