@@ -1,0 +1,128 @@
+name: Deploy to Vercel (Staging)
+
+on:
+  push:
+    tags:
+      - "web-user/staging-*"
+      - "web-seller/staging-*"
+
+jobs:
+  deploy-vercel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract project name and environment from tag
+        id: extract-project
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          PROJECT_NAME=$(echo $TAG_NAME | cut -d'/' -f1)
+          ENV_NAME=$(echo $TAG_NAME | cut -d'/' -f2 | cut -d'-' -f1)
+          echo "project=$PROJECT_NAME" >> $GITHUB_OUTPUT
+          echo "environment=$ENV_NAME" >> $GITHUB_OUTPUT
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "📦 Tag: $TAG_NAME"
+          echo "📁 Project: $PROJECT_NAME"
+          echo "🌍 Environment: $ENV_NAME"
+
+      - name: Validate project name and environment
+        run: |
+          PROJECT=${{ steps.extract-project.outputs.project }}
+          ENV=${{ steps.extract-project.outputs.environment }}
+
+          if [[ "$PROJECT" != "web-user" && "$PROJECT" != "web-seller" ]]; then
+            echo "❌ Invalid project name: $PROJECT"
+            echo "Valid project names: web-user, web-seller"
+            exit 1
+          fi
+
+          if [[ "$ENV" != "staging" ]]; then
+            echo "❌ Invalid environment: $ENV"
+            echo "Valid environment: staging"
+            exit 1
+          fi
+
+          echo "✅ Valid project: $PROJECT"
+          echo "✅ Valid environment: $ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Set project-specific variables
+        id: set-vars
+        run: |
+          PROJECT=${{ steps.extract-project.outputs.project }}
+
+          # 태그에 따라 하나의 프로젝트만 배포됩니다
+          # 프로젝트 디렉토리와 프로젝트 ID만 설정
+          # buildCommand, outputDirectory는 vercel.json에서 자동으로 읽어옵니다
+          case $PROJECT in
+            web-user)
+              echo "project_dir=apps/web-user" >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_WEB_USER_STAGING }}" >> $GITHUB_OUTPUT
+              ;;
+            web-seller)
+              echo "project_dir=apps/web-seller" >> $GITHUB_OUTPUT
+              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_WEB_SELLER_STAGING }}" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          PROJECT=${{ steps.extract-project.outputs.project }}
+          TAG_NAME=${{ steps.extract-project.outputs.tag }}
+          PROJECT_DIR=${{ steps.set-vars.outputs.project_dir }}
+          PROJECT_ID=${{ steps.set-vars.outputs.project_id }}
+
+          echo "🚀 Deploying $PROJECT (staging) to Vercel..."
+          echo "📁 Project Directory: $PROJECT_DIR"
+          echo "🆔 Project ID: ${PROJECT_ID:-not set}"
+          echo "📋 Build settings will be read from vercel.json in $PROJECT_DIR"
+
+          if [ -z "$PROJECT_ID" ]; then
+            echo "⚠️  Warning: Project ID is not set. Vercel will try to auto-detect the project."
+          fi
+
+          # 환경 변수로 Vercel 설정
+          export VERCEL_TOKEN=$VERCEL_TOKEN
+          if [ -n "$PROJECT_ID" ]; then
+            export VERCEL_PROJECT_ID=$PROJECT_ID
+          fi
+
+          # Vercel 배포 실행
+          # vercel.json의 buildCommand, outputDirectory, rootDirectory 등을 자동으로 읽어옵니다
+          echo "📤 Deploying to Vercel (Staging)..."
+          vercel deploy --prod --token=$VERCEL_TOKEN --cwd=$PROJECT_DIR --yes
+
+          if [ $? -ne 0 ]; then
+            echo "❌ Deployment failed!"
+            exit 1
+          fi
+
+          echo "✅ Deployment completed for $PROJECT (staging)"
+
+      - name: Deployment summary
+        run: |
+          echo "## 🎉 Vercel Deployment Summary (Staging)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Project:** ${{ steps.extract-project.outputs.project }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** staging" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ steps.extract-project.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Successfully deployed to Vercel" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "배포가 완료되었습니다. Vercel 대시보드에서 확인하세요." >> $GITHUB_STEP_SUMMARY
