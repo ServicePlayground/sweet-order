@@ -127,12 +127,12 @@ jobs:
           fi
 
           # Vercel 배포 실행
-          # 루트 디렉토리에서 실행하여 tsconfig.base.json 등 모노레포 파일에 접근 가능하도록 설정
-          # vercel.json의 buildCommand가 루트에서 실행되도록 설정되어 있습니다
+          # 모노레포 구조이므로 루트 디렉토리에서 실행하여 yarn workspace 명령어가 정상 작동하도록 설정
+          # vercel.json은 프로젝트 디렉토리에 있지만, 루트로 복사하여 사용
           echo "📤 Deploying to Vercel (Staging)..."
-          # 프로젝트 디렉토리의 vercel.json을 루트로 복사하여 사용
+          # 프로젝트 디렉토리의 vercel.json을 루트로 복사
           cp $PROJECT_DIR/vercel.json ./vercel.json
-          # 루트 디렉토리에서 실행
+          # 루트 디렉토리에서 배포 실행 (package.json과 yarn workspace 접근 가능)
           vercel deploy --prod --token=$VERCEL_TOKEN --yes
           # 임시로 복사한 vercel.json 삭제
           rm -f ./vercel.json
