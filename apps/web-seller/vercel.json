@@ -2,6 +2,7 @@
   "buildCommand": "yarn workspace @sweet-order/web-seller build",
   "outputDirectory": "apps/web-seller/dist",
   "installCommand": "yarn install",
-  "framework": "vite"
+  "framework": "vite",
+  "rootDirectory": "apps/web-seller"
 }
 
