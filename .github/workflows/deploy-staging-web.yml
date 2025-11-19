@@ -110,6 +110,8 @@ jobs:
           export VERCEL_TOKEN=$VERCEL_TOKEN
           if [ -n "$VERCEL_TEAM_ID" ]; then
             export VERCEL_TEAM_ID=$VERCEL_TEAM_ID
+            # VERCEL_ORG_ID는 VERCEL_TEAM_ID와 동일한 값입니다
+            export VERCEL_ORG_ID=$VERCEL_TEAM_ID
           fi
           if [ -n "$PROJECT_ID" ]; then
             export VERCEL_PROJECT_ID=$PROJECT_ID
