@@ -85,6 +85,7 @@ jobs:
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
         run: |
           PROJECT=${{ steps.extract-project.outputs.project }}
           TAG_NAME=${{ steps.extract-project.outputs.tag }}
@@ -94,14 +95,22 @@ jobs:
           echo "🚀 Deploying $PROJECT (staging) to Vercel..."
           echo "📁 Project Directory: $PROJECT_DIR"
           echo "🆔 Project ID: ${PROJECT_ID:-not set}"
+          echo "🏢 Team ID: ${VERCEL_TEAM_ID:-not set}"
           echo "📋 Build settings will be read from vercel.json in $PROJECT_DIR"
 
           if [ -z "$PROJECT_ID" ]; then
             echo "⚠️  Warning: Project ID is not set. Vercel will try to auto-detect the project."
           fi
 
+          if [ -z "$VERCEL_TEAM_ID" ]; then
+            echo "⚠️  Warning: Team ID is not set. Vercel will try to auto-detect the team."
+          fi
+
           # 환경 변수로 Vercel 설정
           export VERCEL_TOKEN=$VERCEL_TOKEN
+          if [ -n "$VERCEL_TEAM_ID" ]; then
+            export VERCEL_TEAM_ID=$VERCEL_TEAM_ID
+          fi
           if [ -n "$PROJECT_ID" ]; then
             export VERCEL_PROJECT_ID=$PROJECT_ID
           fi
