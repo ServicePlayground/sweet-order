@@ -13,7 +13,7 @@ export default function FindAccountPage() {
   const [accountInfo, setAccountInfo] = useState<FindAccountFormData | null>(null);
   const [currentStep, setCurrentStep] = useState<"phoneVerification" | "result">(
     "phoneVerification",
-  );
+  ); 
 
   // 휴대폰 인증 완료 후 계정 찾기 처리
   const handlePhoneVerificationComplete = async (phone: string) => {
