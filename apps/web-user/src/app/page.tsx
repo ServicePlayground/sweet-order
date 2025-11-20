@@ -38,6 +38,8 @@ import { ProductRanking } from "@/apps/web-user/common/components/rankings/Produ
 // };
 
 export default function Home() {
+  console.log("Home");
+
   return (
     <div
       style={{
