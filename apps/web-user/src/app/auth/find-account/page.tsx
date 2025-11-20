@@ -9,7 +9,7 @@ import FindAccountResultForm from "@/apps/web-user/features/auth/components/form
 import { FindAccountFormData } from "@/apps/web-user/features/auth/types/auth.type";
 
 export default function FindAccountPage() {
-  const findAccountMutation = useFindAccount();
+  const findAccountMutation = useFindAccount(); 
   const [accountInfo, setAccountInfo] = useState<FindAccountFormData | null>(null);
   const [currentStep, setCurrentStep] = useState<"phoneVerification" | "result">(
     "phoneVerification",
