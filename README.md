@@ -182,6 +182,10 @@ yarn common:format:check       # Prettier 포맷팅 검사
 2. GitHub Actions 워크플로우 자동 실행
 3. 프로젝트별 배포 플랫폼으로 자동 배포
 
+자세한 배포 설정 및 가이드는 다음 문서를 참고하세요:
+
+- **[Vercel 배포 가이드](./docs/infra/vercel/Vercel%20배포%20-%20가이드.md)**: 웹 애플리케이션 배포
+
 ## 📚 상세 문서
 
 ### 플로우 차트
