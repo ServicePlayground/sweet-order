@@ -12,12 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 저장소 코드 체크아웃
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       # 태그에서 프로젝트명과 환경 추출 (예: web-user/staging-v1.0.0)
       - name: Extract project name and environment from tag
         id: extract-project
@@ -53,93 +47,53 @@ jobs:
           echo "✅ Valid project: $PROJECT"
           echo "✅ Valid environment: $ENV"
 
-      # Node.js 환경 설정
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      # Yarn 패키지 매니저 활성화
-      - name: Enable Corepack and prepare Yarn
-        run: corepack enable && corepack prepare yarn@4.9.4 --activate
-
-      # 프로젝트 의존성 설치
-      - name: Install dependencies
-        run: yarn install
-
-      # Vercel CLI 설치
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
-      # 프로젝트별 디렉토리 경로와 Vercel 프로젝트 ID 설정
-      - name: Set project-specific variables
-        id: set-vars
+      # 프로젝트별 Vercel 웹훅 URL 설정
+      - name: Set project-specific webhook URL
+        id: set-webhook
         run: |
           PROJECT=${{ steps.extract-project.outputs.project }}
 
-          # 태그에 따라 하나의 프로젝트만 배포됩니다
-          # buildCommand, outputDirectory는 vercel.json에서 자동으로 읽어옵니다
           case $PROJECT in
             web-user)
-              echo "project_dir=apps/web-user" >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_WEB_USER_STAGING }}" >> $GITHUB_OUTPUT
+              echo "webhook_url=${{ secrets.VERCEL_WEBHOOK_URL_WEB_USER_STAGING }}" >> $GITHUB_OUTPUT
               ;;
             web-seller)
-              echo "project_dir=apps/web-seller" >> $GITHUB_OUTPUT
-              echo "project_id=${{ secrets.VERCEL_PROJECT_ID_WEB_SELLER_STAGING }}" >> $GITHUB_OUTPUT
+              echo "webhook_url=${{ secrets.VERCEL_WEBHOOK_URL_WEB_SELLER_STAGING }}" >> $GITHUB_OUTPUT
               ;;
           esac
 
-      # Vercel에 프로덕션 배포 실행
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+      # Vercel 웹훅을 통한 배포 트리거
+      - name: Trigger Vercel deployment via webhook
         run: |
           PROJECT=${{ steps.extract-project.outputs.project }}
           TAG_NAME=${{ steps.extract-project.outputs.tag }}
-          PROJECT_DIR=${{ steps.set-vars.outputs.project_dir }}
-          PROJECT_ID=${{ steps.set-vars.outputs.project_id }}
+          WEBHOOK_URL=${{ steps.set-webhook.outputs.webhook_url }}
 
-          echo "🚀 Deploying $PROJECT (staging) to Vercel..."
-          echo "📁 Project Directory: $PROJECT_DIR"
-          echo "🆔 Project ID: ${PROJECT_ID:-not set}"
-          echo "🏢 Team ID: ${VERCEL_TEAM_ID:-not set}"
-          echo "📋 Build settings will be read from vercel.json in $PROJECT_DIR"
+          echo "🚀 Triggering deployment for $PROJECT (staging) via Vercel webhook..."
+          echo "📋 Tag: $TAG_NAME"
+          echo "🔗 Webhook URL: ${WEBHOOK_URL:0:50}..." # URL 일부만 표시 (보안)
 
-          if [ -z "$PROJECT_ID" ]; then
-            echo "⚠️  Warning: Project ID is not set. Vercel will try to auto-detect the project."
-          fi
-
-          if [ -z "$VERCEL_TEAM_ID" ]; then
-            echo "⚠️  Warning: Team ID is not set. Vercel will try to auto-detect the team."
-          fi
-
-          # 환경 변수로 Vercel 설정
-          export VERCEL_TOKEN=$VERCEL_TOKEN
-          if [ -n "$VERCEL_TEAM_ID" ]; then
-            export VERCEL_TEAM_ID=$VERCEL_TEAM_ID
-            # VERCEL_ORG_ID는 VERCEL_TEAM_ID와 동일한 값입니다
-            export VERCEL_ORG_ID=$VERCEL_TEAM_ID
-          fi
-          if [ -n "$PROJECT_ID" ]; then
-            export VERCEL_PROJECT_ID=$PROJECT_ID
-          fi
-
-          # Vercel 배포 실행
-          # 모노레포 구조에서 Vercel이 package.json을 찾을 수 있도록 프로젝트 디렉토리에서 실행
-          # vercel.json의 buildCommand는 프로젝트 디렉토리에서 직접 실행
-          # installCommand는 프로젝트 디렉토리에서 실행되지만, yarn workspace가 루트를 자동으로 찾아서 설치함
-          echo "📤 Deploying to Vercel (Staging)..."
-          # 프로젝트 디렉토리로 이동하여 배포 (Vercel이 해당 디렉토리의 package.json을 찾을 수 있도록)
-          cd $PROJECT_DIR
-          if ! vercel deploy --prod --token=$VERCEL_TOKEN --yes; then
-            echo "❌ Deployment failed!"
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "❌ Error: Webhook URL is not set for $PROJECT"
+            echo "Please set VERCEL_WEBHOOK_URL_${PROJECT^^}_STAGING secret in GitHub repository settings"
             exit 1
           fi
-          cd -
 
-          echo "✅ Deployment completed for $PROJECT (staging)"
+          # Vercel 웹훅 호출
+          echo "📤 Calling Vercel webhook..."
+          HTTP_STATUS=$(curl -s -o /tmp/vercel_response.txt -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            "$WEBHOOK_URL")
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Webhook triggered successfully (HTTP $HTTP_STATUS)"
+            cat /tmp/vercel_response.txt 2>/dev/null || echo "No response body"
+          else
+            echo "❌ Webhook call failed (HTTP $HTTP_STATUS)"
+            cat /tmp/vercel_response.txt
+            exit 1
+          fi
 
       # 배포 결과 요약 생성 (GitHub Actions UI에 표시)
       - name: Deployment summary
