@@ -117,7 +117,7 @@ sweet-order/
 
 ### 로컬 개발 환경 데이터베이스 설정
 
-- **[로컬 데이터베이스 설정 가이드](<./docs/backend/데이터베이스(로컬)%20-%20가이드.md>)**: 로컬 PostgreSQL 및 Prisma ORM 관리
+- **[로컬 데이터베이스 설정 가이드](./docs/backend/기술%20스택%20-%20가이드.md)**: 로컬 PostgreSQL 및 Prisma ORM 관리
 
 ### 로컬 개발 환경 설치 및 실행
 
@@ -162,10 +162,10 @@ yarn common:format:check       # Prettier 포맷팅 검사
 
 ### 공통 문서
 
-- **[Yarn Berry PnP 가이드](<./docs/common/(이전버전)yarnberry%20PnP%20-%20가이드.md>)**: Yarn Berry PnP 설정 및 사용법 (이전 버전)
+- **[Yarn Berry PnP 가이드](<./docs/common/(이전버전)yarnberry%20pnp%20-%20가이드.md>)**: Yarn Berry PnP 설정 및 사용법 (이전 버전)
 - **[Yarn Berry node_modules 가이드](<./docs/common/(현재버전)yarnberry%20nodemodules%20-%20가이드.md>)**: Yarn Berry node_modules 설정 및 사용법 (현재 적용)
 - **[통합 인증 가이드](./docs/common/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 사용법
-- **[통합 플랫폼 인증 가이드](./docs/common/통합%20플랫폼%20인증%20-%20가이드.md)**: 통합 플랫폼 인증 시스템 사용법
+- **[통합 플랫폼 인증 가이드](<./docs/common/통합%20플랫폼%20인증(쿠키%20기반)%20-%20가이드.md>)**: 통합 플랫폼 인증 시스템 사용법
 - **[스토어 등록(3단계) 가이드](<./docs/common/스토어%20등록(3단계)%20-%20가이드.md>)**: 스토어 등록(3단계) 가이드
 
 ### 백엔드 문서
