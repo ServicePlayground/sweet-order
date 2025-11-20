@@ -2,7 +2,8 @@ name: Deploy Backend to AWS App Runner (Staging)
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "backend/staging-*"
 
 # --------------------- 중요 (환경변수 - 가이드.md 참고)---------------------------
 # 여기 env에 넣지 말고, 아래에서 secrets.로 직접 넣기. 로그에 출력될 위험이 있음
