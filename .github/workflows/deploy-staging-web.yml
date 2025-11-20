@@ -94,15 +94,3 @@ jobs:
             cat /tmp/vercel_response.txt
             exit 1
           fi
-
-      # 배포 결과 요약 생성 (GitHub Actions UI에 표시)
-      - name: Deployment summary
-        run: |
-          echo "## 🎉 Vercel Deployment Summary (Staging)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Project:** ${{ steps.extract-project.outputs.project }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** staging" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** ${{ steps.extract-project.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** ✅ Successfully deployed to Vercel" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "배포가 완료되었습니다. Vercel 대시보드에서 확인하세요." >> $GITHUB_STEP_SUMMARY
