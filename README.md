@@ -102,51 +102,6 @@ sweet-order/
 └─ packages/                # 공유 패키지들 (향후 구현 예정)
 ```
 
-## 🛠 기술 스택
-
-### 공통
-
-- **패키지 관리**: Yarn Berry 4.9.4 (node_modules)
-- **모노레포**: Yarn Workspaces
-- **언어**: TypeScript
-- **코드 품질**: ESLint + Prettier
-
-### 백엔드
-
-- **프레임워크**: NestJS
-- **데이터베이스**: PostgreSQL + Prisma ORM
-- **인증**: JWT + Passport + Google OAuth
-- **API 문서**: Swagger (3-way 분리)
-- **보안**: Helmet + CORS + Rate Limiting
-- **데이터베이스 환경**:
-  - 개발: 로컬 PostgreSQL
-  - 스테이징/프로덕션: AWS RDS PostgreSQL
-
-### 프론트엔드
-
-#### Web User (사용자 웹)
-
-- **프레임워크**: Next.js 15 + React 19
-- **상태 관리**:
-  - Zustand (클라이언트 상태)
-  - TanStack Query (서버 상태)
-- **API 통신**: Axios + React Query
-- **에러 처리**: React Error Boundary
-- **스타일링**: CSS Modules (향후 Tailwind CSS 도입 예정)
-- **개발 도구**: React Query DevTools
-
-#### Web Seller (판매자 웹)
-
-- **프레임워크**: React 18 + Vite 6.2.0
-- **UI 라이브러리**: Material-UI 5.15.14
-- **상태 관리**:
-  - Zustand (클라이언트 상태)
-  - TanStack Query (서버 상태)
-- **라우팅**: React Router 7.9.4
-- **API 통신**: Axios
-- **에러 처리**: React Error Boundary
-- **개발 도구**: React Query DevTools
-
 ## 🚀 시작하기
 
 ### 필수 요구사항
