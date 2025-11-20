@@ -127,20 +127,17 @@ jobs:
           fi
 
           # Vercel 배포 실행
-          # 모노레포 구조이므로 루트 디렉토리에서 실행하여 yarn workspace 명령어가 정상 작동하도록 설정
-          # vercel.json은 프로젝트 디렉토리에 있지만, 루트로 복사하여 사용
+          # 모노레포 구조에서 Vercel이 package.json을 찾을 수 있도록 프로젝트 디렉토리에서 실행
+          # vercel.json의 buildCommand는 프로젝트 디렉토리에서 직접 실행
+          # installCommand는 프로젝트 디렉토리에서 실행되지만, yarn workspace가 루트를 자동으로 찾아서 설치함
           echo "📤 Deploying to Vercel (Staging)..."
-          # 프로젝트 디렉토리의 vercel.json을 루트로 복사
-          cp $PROJECT_DIR/vercel.json ./vercel.json
-          # 루트 디렉토리에서 배포 실행 (package.json과 yarn workspace 접근 가능)
-          vercel deploy --prod --token=$VERCEL_TOKEN --yes
-          # 임시로 복사한 vercel.json 삭제
-          rm -f ./vercel.json
-
-          if [ $? -ne 0 ]; then
+          # 프로젝트 디렉토리로 이동하여 배포 (Vercel이 해당 디렉토리의 package.json을 찾을 수 있도록)
+          cd $PROJECT_DIR
+          if ! vercel deploy --prod --token=$VERCEL_TOKEN --yes; then
             echo "❌ Deployment failed!"
             exit 1
           fi
+          cd -
 
           echo "✅ Deployment completed for $PROJECT (staging)"
 

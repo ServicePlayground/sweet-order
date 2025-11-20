@@ -1,6 +1,6 @@
 {
-  "buildCommand": "yarn workspace @sweet-order/web-user build",
-  "outputDirectory": "apps/web-user/.next",
+  "buildCommand": "yarn build",
+  "outputDirectory": ".next",
   "installCommand": "yarn install",
   "framework": "nextjs"
 }
