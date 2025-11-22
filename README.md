@@ -2,106 +2,6 @@
 
 Yarn Berry + Workspace 기반 모노레포 프로젝트로 구성된 디저트 주문 플랫폼입니다.
 
-## 📁 프로젝트 구조
-
-```
-sweet-order/
-├─ package.json             # 루트 설정
-├─ .yarnrc.yml              # Yarn Berry 설정
-├─ node_modules/            # 의존성 패키지들 (node_modules 방식)
-├─ tsconfig.base.json       # TypeScript 기본 설정
-├─ tsconfig.json            # TypeScript 설정
-├─ eslint.config.js         # ESLint 설정
-├─ yarn.lock                # Yarn 의존성 잠금 파일
-├─ apps/                    # 애플리케이션들
-│  ├─ backend/              # 백엔드 서비스 (NestJS + TypeScript)
-│  │  ├─ src/               # 소스 코드
-│  │  │  ├─ apis/           # API 모듈들 (User, Seller, Admin)
-│  │  │  ├─ modules/        # 비즈니스 로직 모듈들
-│  │  │  ├─ common/         # 공통 유틸리티
-│  │  │  ├─ infra/          # 인프라 설정 (데이터베이스)
-│  │  │  └─ scripts/        # 스크립트 파일들
-│  │  ├─ dist/              # 빌드 산출물
-│  │  ├─ nest-cli.json      # Nest CLI 설정
-│  │  └─ package.json       # 백엔드 의존성/스크립트
-│  ├─ web-user/             # 사용자 웹 애플리케이션 (Next.js + TypeScript)
-│  │  ├─ src/               # 소스 코드
-│  │  │  ├─ app/            # Next.js App Router
-│  │  │  │  ├─ layout.tsx   # 루트 레이아웃
-│  │  │  │  ├─ page.tsx     # 홈페이지
-│  │  │  │  ├─ login/       # 로그인 페이지
-│  │  │  │  │  ├─ basic/    # 기본 로그인
-│  │  │  │  │  └─ google/    # 구글 로그인
-│  │  │  │  ├─ register/    # 회원가입 페이지
-│  │  │  │  ├─ find-account/ # 계정 찾기
-│  │  │  │  └─ reset-password/ # 비밀번호 재설정
-│  │  │  ├─ common/         # 공통 컴포넌트 및 유틸리티
-│  │  │  │  ├─ components/  # 재사용 가능한 컴포넌트
-│  │  │  │  │  ├─ alerts/   # 알림 컴포넌트
-│  │  │  │  │  ├─ buttons/  # 버튼 컴포넌트
-│  │  │  │  │  ├─ inputs/   # 입력 컴포넌트
-│  │  │  │  │  ├─ layouts/  # 레이아웃 컴포넌트
-│  │  │  │  │  └─ providers/ # 프로바이더 컴포넌트
-│  │  │  │  ├─ config/      # 설정 파일
-│  │  │  │  ├─ constants/   # 상수
-│  │  │  │  ├─ store/       # 전역 상태
-│  │  │  │  ├─ types/       # 타입 정의
-│  │  │  │  └─ utils/       # 유틸리티 함수
-│  │  │  ├─ features/       # 기능별 모듈
-│  │  │  │  └─ auth/        # 인증 기능
-│  │  │  │      ├─ apis/    # 인증 API
-│  │  │  │      ├─ components/ # 인증 컴포넌트
-│  │  │  │      ├─ hooks/   # 인증 훅
-│  │  │  │      ├─ store/   # 인증 상태
-│  │  │  │      └─ types/   # 인증 타입
-│  │  │  ├─ components/     # React 컴포넌트
-│  │  │  ├─ hooks/          # 커스텀 훅
-│  │  │  ├─ services/       # API 서비스
-│  │  │  ├─ store/          # 상태 관리
-│  │  │  └─ types/          # TypeScript 타입 정의
-│  │  ├─ public/            # 정적 파일
-│  │  ├─ next.config.ts     # Next.js 설정
-│  │  └─ package.json       # 프론트엔드 의존성/스크립트
-│  ├─ web-seller/           # 판매자 웹 애플리케이션 (React + Vite + Material-UI)
-│  │  ├─ src/               # 소스 코드
-│  │  │  ├─ common/         # 공통 컴포넌트 및 유틸리티
-│  │  │  │  ├─ components/  # 재사용 가능한 컴포넌트
-│  │  │  │  │  ├─ alerts/   # 알림 컴포넌트
-│  │  │  │  │  ├─ fallbacks/ # 로딩/에러 폴백 컴포넌트
-│  │  │  │  │  ├─ layouts/  # 레이아웃 컴포넌트
-│  │  │  │  │  └─ providers/ # 프로바이더 컴포넌트
-│  │  │  │  ├─ config/      # 설정 파일
-│  │  │  │  ├─ constants/   # 상수
-│  │  │  │  ├─ store/       # 전역 상태
-│  │  │  │  ├─ styles/      # 스타일 및 테마
-│  │  │  │  ├─ types/       # 타입 정의
-│  │  │  │  └─ utils/       # 유틸리티 함수
-│  │  │  ├─ features/       # 기능별 모듈
-│  │  │  │  └─ auth/        # 인증 기능
-│  │  │  │      ├─ apis/    # 인증 API
-│  │  │  │      ├─ components/ # 인증 컴포넌트
-│  │  │  │      ├─ hooks/   # 인증 훅
-│  │  │  │      ├─ store/   # 인증 상태
-│  │  │  │      └─ types/   # 인증 타입
-│  │  │  └─ pages/          # 페이지 컴포넌트
-│  │  ├─ dist/              # 빌드 산출물
-│  │  ├─ index.html         # HTML 엔트리 포인트
-│  │  ├─ vite.config.ts     # Vite 설정
-│  │  └─ package.json       # 프론트엔드 의존성/스크립트
-│  ├─ web-admin/            # 관리자 웹 애플리케이션 (향후 구현)
-│  └─ infra/                 # 인프라 설정
-│     ├─ backend/           # 백엔드 Docker 설정
-│     └─ frontend/          # 프론트엔드 인프라 (향후 구현)
-├─ docs/                    # 프로젝트 문서
-│  ├─ backend/              # 백엔드 관련 문서
-│  ├─ common/               # 공통 문서
-│  ├─ web-user/             # 사용자 웹 관련 문서
-│  ├─ web-seller/           # 판매자 웹 관련 문서
-│  └─ infra/                 # 인프라 관련 문서
-│     └─ aws/               # AWS 인프라 가이드
-└─ packages/                # 공유 패키지들 (향후 구현 예정)
-```
-
 ## 🚀 시작하기
 
 ### 필수 요구사항
@@ -109,7 +9,7 @@ sweet-order/
 - Node.js (v20 이상)
 - Yarn (v4.9.4 이상)
 
-### 개발 환경변수 설정
+### 로컬 개발 환경변수 설정
 
 - backend/.env.development 삽입
 - web-seller/.env.development 삽입
@@ -186,19 +86,121 @@ yarn common:format:check       # Prettier 포맷팅 검사
 
 - **[Vercel 배포 가이드](./docs/infra/vercel/Vercel%20배포%20-%20가이드.md)**: 웹 애플리케이션 배포
 
+## 👥 협업 규칙
+
+이 문서는 Sweet Order 프로젝트의 협업 규칙을 정의합니다. 모든 팀원은 이 규칙을 준수해야 합니다.
+
+### 🌿 브랜치 전략
+
+#### 기본 원칙
+
+1. **main 브랜치 보호**
+   - `main` 브랜치로 직접 push는 **금지**됩니다.
+   - GitHub의 브랜치 보호 규칙이 설정되어 있습니다.
+   - `main` 브랜치로의 변경은 반드시 `staging` 브랜치를 거쳐야 합니다.
+
+2. **staging 브랜치**
+   - 개발 및 테스트를 위한 통합 브랜치입니다.
+   - 모든 기능 개발은 `staging` 브랜치로 병합됩니다.
+
+3. **hotfix 처리**
+   - 긴급한 버그 수정이 필요한 경우, `hotfix` 브랜치에서 작업 후 `staging` 브랜치로 **직접 push** 가능합니다.
+   - 프로덕션 환경에 즉시 반영이 필요한 경우에만 사용합니다.
+
+4. **일반 기능 개발**
+   - 모든 기능 개발은 **기능별 브랜치**를 생성하여 진행합니다.
+   - 작업 완료 후 `staging` 브랜치로 **Pull Request(PR)**를 생성합니다.
+   - PR 승인 후 병합됩니다.
+
+#### 브랜치 워크플로우
+
+```
+main (보호됨)
+  ↑
+staging (통합 브랜치)
+  ↑
+feature/xxx (기능 브랜치)
+hotfix/xxx (긴급 수정 브랜치)
+```
+
+### 📝 브랜치 네이밍 규칙
+
+브랜치 이름은 기능의 목적을 명확히 표현해야 합니다.
+
+#### 브랜치 네이밍 형식
+
+```
+{타입}/{기능-설명}
+```
+
+#### 브랜치 타입
+
+- `feature/`: 새로운 기능 개발
+- `hotfix/`: 긴급 버그 수정
+- `fix/`: 일반 버그 수정
+- `refactor/`: 코드 리팩토링
+- `docs/`: 문서 수정
+- `chore/`: 빌드, 설정 등 기타 작업
+
+### 🔄 Pull Request 규칙
+
+#### PR 생성 전 체크리스트
+
+- [ ] 브랜치가 최신 `staging` 브랜치를 기반으로 생성되었는지 확인
+- [ ] 코드가 정상적으로 작동하는지 확인
+- [ ] `yarn run common:lint` 명령어를 통과했는지 확인
+- [ ] `yarn run common:format:check` 명령어를 통과했는지 확인
+
+### 💬 커밋 메시지 규칙
+
+#### 프로젝트 타입
+
+- `[COMMON]` - Common
+- `[WEB-SELLER]` - Web Seller
+- `[WEB-USER]` - Web User
+- `[BE]` - Backend
+
+#### 커밋 타입
+
+- `[TASK]` - 일반 작업
+- `[BUG]` - 버그 수정
+- `[FEATURE]` - 새로운 기능 추가
+- `[CHORE]` - 빌드, 설정 등 기타 작업
+- `[DOCS]` - 문서 작성/수정
+- `[FIX]` - 버그 수정
+- `[REFACTOR]` - 코드 리팩토링
+- `[REMOVE]` - 코드 삭제
+- `[UI]` - UI 변경
+- `[QUESTION]` - 질문/의견
+
+#### 커밋 메시지 예시
+
+```
+[COMMON][CHORE]: 의존성 패키지 업데이트
+[WEB-SELLER][UI]: 상품 등록 폼 UI 개선
+[WEB-USER][FEATURE]: 로그인 페이지 구현
+[BE][FIX]: 인증 토큰 만료 처리 수정
+```
+
 ## 📚 상세 문서
-
-### 플로우 차트
-
-- **[통합 인증 플로우 차트](./docs/common/flow-chart/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 플로우 차트
 
 ### 공통 문서
 
-- **[Yarn Berry PnP 가이드](<./docs/common/(이전버전)yarnberry%20pnp%20-%20가이드.md>)**: Yarn Berry PnP 설정 및 사용법 (이전 버전)
-- **[Yarn Berry node_modules 가이드](<./docs/common/(현재버전)yarnberry%20nodemodules%20-%20가이드.md>)**: Yarn Berry node_modules 설정 및 사용법 (현재 적용)
-- **[통합 인증 가이드](./docs/common/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 사용법
-- **[통합 플랫폼 인증 가이드](<./docs/common/통합%20플랫폼%20인증(쿠키%20기반)%20-%20가이드.md>)**: 통합 플랫폼 인증 시스템 사용법
-- **[스토어 등록(3단계) 가이드](<./docs/common/스토어%20등록(3단계)%20-%20가이드.md>)**: 스토어 등록(3단계) 가이드
+#### 구조 관련
+
+- **[프로젝트 구조 가이드](./docs/common/structure/프로젝트%20구조%20-%20가이드.md)**: 프로젝트 전체 구조 및 디렉토리 설명
+- **[Yarn Berry PnP 가이드](<./docs/common/structure/(이전버전)yarnberry%20pnp%20-%20가이드.md>)**: Yarn Berry PnP 설정 및 사용법 (이전 버전)
+- **[Yarn Berry node_modules 가이드](<./docs/common/structure/(현재버전)yarnberry%20nodemodules%20-%20가이드.md>)**: Yarn Berry node_modules 설정 및 사용법 (현재 적용)
+
+#### 기능 관련
+
+- **[통합 인증 가이드](./docs/common/feature/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 사용법
+- **[통합 플랫폼 인증 가이드](<./docs/common/feature/통합%20플랫폼%20인증(쿠키%20기반)%20-%20가이드.md>)**: 통합 플랫폼 인증 시스템 사용법
+- **[스토어 등록(3단계) 가이드](<./docs/common/feature/스토어%20등록(3단계)%20-%20가이드.md>)**: 스토어 등록(3단계) 가이드
+
+#### 플로우 차트 관련
+
+- **[통합 인증 플로우 차트](./docs/common/flow-chart/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 플로우 차트
 
 ### 백엔드 문서
 
