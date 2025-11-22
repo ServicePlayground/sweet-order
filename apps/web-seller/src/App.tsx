@@ -12,8 +12,6 @@ import { LoadingFallback } from "./common/components/fallbacks/LoadingFallback";
 import { Alert } from "./common/components/alerts/Alert";
 
 const App: React.FC = () => {
-  console.log("App11");
-
   return (
     <ErrorBoundaryProvider>
       <QueryProvider>
