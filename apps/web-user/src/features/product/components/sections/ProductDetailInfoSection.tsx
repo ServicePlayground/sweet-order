@@ -22,8 +22,6 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
       ? Math.round(((product.originalPrice - product.salePrice) / product.originalPrice) * 100)
       : 0;
 
-
-
   const handleLikeClick = () => {
     if (isLiked) {
       removeProductLike.mutate(product.id);
@@ -79,8 +77,14 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
                 color: isLiked ? "#ef4444" : "#6b7280",
                 fontSize: "14px",
                 fontWeight: 600,
-                cursor: addProductLike.isPending || removeProductLike.isPending || isLikedLoading ? "not-allowed" : "pointer",
-                opacity: addProductLike.isPending || removeProductLike.isPending || isLikedLoading ? 0.6 : 1,
+                cursor:
+                  addProductLike.isPending || removeProductLike.isPending || isLikedLoading
+                    ? "not-allowed"
+                    : "pointer",
+                opacity:
+                  addProductLike.isPending || removeProductLike.isPending || isLikedLoading
+                    ? 0.6
+                    : 1,
                 transition: "all 0.2s ease",
               }}
             >

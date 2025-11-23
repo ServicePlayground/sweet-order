@@ -31,7 +31,6 @@ CMD ["node", "apps/backend/dist/main.js"]
 
 # ------------------- PnP → node-modules 전환 --------------------------
 # Generate Prisma Client (PnP 문제 해결용 node-modules 전환)
-# (배포 환경에서만 임시 변경) 기존 PnP 대신 node-modules 방식 사용
 # ---------------------------------------------------------------------
 # COPY .pnp.cjs ./.pnp.cjs
 # COPY .yarn/unplugged/ ./.yarn/unplugged/

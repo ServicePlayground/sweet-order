@@ -8,6 +8,7 @@ import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/aut
 import { isValidPassword } from "@/apps/web-user/common/utils/validator.util";
 import PhoneVerificationForm from "@/apps/web-user/features/auth/components/forms/PhoneVerificationForm";
 import UserIdCheckForm from "@/apps/web-user/features/auth/components/forms/UserIdCheckForm";
+import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-user/features/auth/types/auth.type";
 
 export default function RegisterForm() {
   const registerMutation = useRegister();
@@ -42,7 +43,12 @@ export default function RegisterForm() {
 
   // 휴대폰 인증 단계
   if (currentStep === "phoneVerification") {
-    return <PhoneVerificationForm onVerificationComplete={handlePhoneVerificationComplete} />;
+    return (
+      <PhoneVerificationForm
+        onVerificationComplete={handlePhoneVerificationComplete}
+        purpose={PHONE_VERIFICATION_PURPOSE.REGISTRATION}
+      />
+    );
   }
 
   const isFormValid =

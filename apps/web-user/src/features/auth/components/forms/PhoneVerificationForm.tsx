@@ -9,13 +9,16 @@ import {
 } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
 import { isValidPhone, isValidVerificationCode } from "@/apps/web-user/common/utils/validator.util";
+import { PhoneVerificationPurpose } from "@/apps/web-user/features/auth/types/auth.type";
 
 interface PhoneVerificationFormProps {
   onVerificationComplete: (phone: string) => void;
+  purpose: PhoneVerificationPurpose;
 }
 
 export default function PhoneVerificationForm({
   onVerificationComplete,
+  purpose,
 }: PhoneVerificationFormProps) {
   const sendPhoneVerificationMutation = useSendPhoneVerification();
   const verifyPhoneCodeMutation = useVerifyPhoneCode();
@@ -54,7 +57,7 @@ export default function PhoneVerificationForm({
 
   // 인증번호 발송
   const handleSendVerificationCode = async () => {
-    await sendPhoneVerificationMutation.mutateAsync(phone);
+    await sendPhoneVerificationMutation.mutateAsync({ phone, purpose });
     setIsCodeSent(true);
   };
 
@@ -63,6 +66,7 @@ export default function PhoneVerificationForm({
     await verifyPhoneCodeMutation.mutateAsync({
       phone,
       verificationCode,
+      purpose,
     });
     onVerificationComplete(phone);
   };

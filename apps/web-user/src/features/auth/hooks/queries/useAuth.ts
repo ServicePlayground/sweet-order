@@ -9,6 +9,7 @@ import { authClient } from "@/apps/web-user/common/config/axios.config";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
+import { PhoneVerificationPurpose } from "@/apps/web-user/features/auth/types/auth.type";
 
 // 로그인 뮤테이션
 export function useLogin() {
@@ -149,7 +150,8 @@ export function useSendPhoneVerification() {
   const { showAlert } = useAlertStore();
 
   return useMutation({
-    mutationFn: authApi.sendPhoneVerification,
+    mutationFn: ({ phone, purpose }: { phone: string; purpose: PhoneVerificationPurpose }) =>
+      authApi.sendPhoneVerification(phone, purpose),
     onSuccess: (response) => {
       showAlert({
         type: "success",

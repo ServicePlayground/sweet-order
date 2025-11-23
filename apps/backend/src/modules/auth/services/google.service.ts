@@ -8,6 +8,7 @@ import axios, { AxiosInstance } from "axios";
 import {
   AUTH_ERROR_MESSAGES,
   COOKIE_CONFIG,
+  PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
 import { GoogleUserInfo, JwtPayload } from "@apps/backend/modules/auth/types/auth.types";
@@ -230,7 +231,10 @@ export class GoogleService {
     await this.checkGoogleIdDuplication(googleId);
 
     // 2. 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedPhone,
+      PhoneVerificationPurpose.GOOGLE_REGISTRATION,
+    );
     if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }

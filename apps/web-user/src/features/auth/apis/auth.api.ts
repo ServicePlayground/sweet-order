@@ -6,6 +6,7 @@ import {
   GoogleRegisterFormData,
   FindAccountFormData,
   ResetPasswordFormData,
+  PhoneVerificationPurpose,
 } from "@/apps/web-user/features/auth/types/auth.type";
 import { apiClient } from "@/apps/web-user/common/config/axios.config";
 import { AvailableResponse, MessageResponse } from "@/apps/web-user/common/types/api.type";
@@ -52,8 +53,11 @@ export const authApi = {
   },
 
   // 휴대폰 인증번호 발송
-  sendPhoneVerification: async (phone: string): Promise<MessageResponse> => {
-    const response = await apiClient.post("/auth/send-verification-code", { phone });
+  sendPhoneVerification: async (
+    phone: string,
+    purpose: PhoneVerificationPurpose,
+  ): Promise<MessageResponse> => {
+    const response = await apiClient.post("/auth/send-verification-code", { phone, purpose });
     return response.data.data;
   },
 

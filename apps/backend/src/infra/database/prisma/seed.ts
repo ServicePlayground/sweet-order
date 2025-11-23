@@ -95,7 +95,6 @@ async function main() {
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
         isVerified: false,
         purpose: "password_recovery",
-        userId: "user001",
         createdAt: new Date(),
       },
     }),

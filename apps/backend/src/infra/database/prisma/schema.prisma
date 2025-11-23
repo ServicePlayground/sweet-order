@@ -54,11 +54,9 @@ model PhoneVerification {
   expiresAt        DateTime @map("expires_at")
   isVerified       Boolean  @default(false) @map("is_verified")
   purpose          String   @default("registration")
-  userId           String?  @map("user_id")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  @@unique([phone, verificationCode])
   @@map("phone_verifications")
 }
 

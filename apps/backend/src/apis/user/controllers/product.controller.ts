@@ -72,10 +72,7 @@ export class UserProductController {
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
   @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
   @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
-  async isLiked(
-    @Param("id") productId: string,
-    @Request() req: { user: JwtVerifiedPayload },
-  ) {
+  async isLiked(@Param("id") productId: string, @Request() req: { user: JwtVerifiedPayload }) {
     const isLiked = await this.productService.isLiked(req.user.sub, productId);
     return { isLiked };
   }
