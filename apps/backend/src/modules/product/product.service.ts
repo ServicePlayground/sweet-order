@@ -23,15 +23,15 @@ export class ProductService {
   /**
    * 상품 목록 조회 (필터링, 정렬, 무한 스크롤 지원)
    */
-  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    return this.productDataService.getProducts(query, user);
+  async getProducts(query: GetProductsRequestDto) {
+    return this.productDataService.getProducts(query);
   }
 
   /**
    * 상품 상세 조회
    */
-  async getProductDetail(id: string, user?: JwtVerifiedPayload) {
-    return this.productDataService.getProductDetail(id, user);
+  async getProductDetail(id: string) {
+    return this.productDataService.getProductDetail(id);
   }
 
   /**
