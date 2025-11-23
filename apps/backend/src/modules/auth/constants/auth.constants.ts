@@ -66,6 +66,17 @@ export const USER_ROLES = {
 } as const;
 
 /**
+ * 휴대폰 인증 목적 enum
+ */
+export enum PhoneVerificationPurpose {
+  REGISTRATION = "registration", // 회원가입
+  GOOGLE_REGISTRATION = "google_registration", // 구글 회원가입
+  PASSWORD_RECOVERY = "password_recovery", // 비밀번호 찾기/변경
+  ID_FIND = "id_find", // 아이디 찾기
+  PHONE_CHANGE = "phone_change", // 휴대폰 번호 변경
+}
+
+/**
  * 토큰 타입 상수
  */
 export const TOKEN_TYPES = {
@@ -144,4 +155,5 @@ export const SWAGGER_DESCRIPTIONS = {
   GOOGLE_ID: "구글 ID",
   GOOGLE_EMAIL: "구글 이메일",
   REFRESH_TOKEN: "리프레시 토큰",
+  PHONE_VERIFICATION_PURPOSE: "인증 목적",
 } as const;

@@ -6,7 +6,10 @@ import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { useResetPassword } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
 import PhoneVerificationForm from "@/apps/web-user/features/auth/components/forms/PhoneVerificationForm";
 import PasswordResetForm from "@/apps/web-user/features/auth/components/forms/PasswordResetForm";
-import { ResetPasswordFormData } from "@/apps/web-user/features/auth/types/auth.type";
+import {
+  ResetPasswordFormData,
+  PHONE_VERIFICATION_PURPOSE,
+} from "@/apps/web-user/features/auth/types/auth.type";
 
 export default function ResetPasswordPage() {
   const resetPasswordMutation = useResetPassword();
@@ -140,7 +143,10 @@ export default function ResetPasswordPage() {
           휴대폰 번호로 인증 후 비밀번호를 재설정할 수 있습니다.
         </p>
 
-        <PhoneVerificationForm onVerificationComplete={handlePhoneVerificationComplete} />
+        <PhoneVerificationForm
+          onVerificationComplete={handlePhoneVerificationComplete}
+          purpose={PHONE_VERIFICATION_PURPOSE.PASSWORD_RECOVERY}
+        />
 
         <Link
           href={PATHS.AUTH.LOGIN}

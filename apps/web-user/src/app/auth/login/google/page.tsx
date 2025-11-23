@@ -7,7 +7,10 @@ import {
   useGoogleRegister,
 } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
 import PhoneVerificationForm from "@/apps/web-user/features/auth/components/forms/PhoneVerificationForm";
-import { GoogleLoginFormData } from "@/apps/web-user/features/auth/types/auth.type";
+import {
+  GoogleLoginFormData,
+  PHONE_VERIFICATION_PURPOSE,
+} from "@/apps/web-user/features/auth/types/auth.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
@@ -87,7 +90,10 @@ export default function GoogleAuthCallback() {
           }}
         >
           <div>구글 계정으로 회원가입을 완료하려면 휴대폰 인증이 필요합니다.</div>
-          <PhoneVerificationForm onVerificationComplete={handlePhoneVerificationComplete} />
+          <PhoneVerificationForm
+            onVerificationComplete={handlePhoneVerificationComplete}
+            purpose={PHONE_VERIFICATION_PURPOSE.GOOGLE_REGISTRATION}
+          />
         </div>
       </div>
     );

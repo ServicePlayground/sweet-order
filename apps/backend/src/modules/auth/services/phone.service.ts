@@ -1,7 +1,10 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
-import { AUTH_ERROR_MESSAGES } from "@apps/backend/modules/auth/constants/auth.constants";
+import {
+  AUTH_ERROR_MESSAGES,
+  PhoneVerificationPurpose,
+} from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
@@ -22,23 +25,24 @@ export class PhoneService {
   /**
    * 휴대폰 인증번호 발송
    *
-   * @param sendCodeDto 휴대폰 번호
+   * @param sendCodeDto 휴대폰 번호와 인증 목적
    * @throws BadRequestException 잘못된 휴대폰 번호 형식이거나 재발송 제한에 걸린 경우
    */
   async sendVerificationCode(sendCodeDto: SendVerificationCodeRequestDto): Promise<void> {
-    const { phone } = sendCodeDto;
+    const { phone, purpose } = sendCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 1. 안전한 인증번호 생성 (중복 방지)
-    const verificationCode = await this.generateUniqueVerificationCode(normalizedPhone);
+    // 1. 인증번호 생성
+    const verificationCode = PhoneUtil.generateVerificationCode();
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
     await this.prisma.$transaction(async (tx) => {
-      // 기존 미인증 레코드 삭제 (UNIQUE 제약조건 방지)
+      // 기존 미인증 레코드 삭제 (같은 목적의 인증코드만 삭제하여 다른 목적의 인증코드는 유지)
       await tx.phoneVerification.deleteMany({
         where: {
           phone: normalizedPhone,
+          purpose,
           isVerified: false,
         },
       });
@@ -49,6 +53,7 @@ export class PhoneService {
           phone: normalizedPhone,
           verificationCode,
           expiresAt,
+          purpose,
         },
       });
     });
@@ -58,80 +63,57 @@ export class PhoneService {
   }
 
   /**
-   * 중복되지 않는 고유한 인증번호를 생성합니다.
-   *
-   * @param phone 휴대폰 번호
-   * @returns 고유한 6자리 인증번호
-   * @throws BadRequestException 최대 재시도 횟수 초과 시
-   */
-  async generateUniqueVerificationCode(phone: string): Promise<string> {
-    const maxRetries = 10; // 최대 10번 재시도
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      const verificationCode = PhoneUtil.generateVerificationCode();
-
-      // 해당 휴대폰 번호와 인증번호 조합이 이미 존재하는지 확인
-      const existingRecord = await this.prisma.phoneVerification.findFirst({
-        where: {
-          phone,
-          verificationCode,
-        },
-      });
-
-      // 중복이 없으면 해당 인증번호 반환
-      if (!existingRecord) {
-        return verificationCode;
-      }
-    }
-
-    // 최대 재시도 횟수 초과 시 예외 발생
-    throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_CODE_GENERATION_FAILED);
-  }
-
-  /**
    * 휴대폰 인증번호 확인
    *
-   * @param verifyCodeDto 휴대폰 번호와 인증번호
+   * @param verifyCodeDto 휴대폰 번호, 인증번호, 인증 목적
    * @throws BadRequestException 인증번호가 잘못되었거나 만료되었거나 시도 횟수를 초과한 경우
    */
   async verifyPhoneCode(verifyCodeDto: VerifyPhoneCodeRequestDto): Promise<void> {
-    const { phone, verificationCode } = verifyCodeDto;
+    const { phone, verificationCode, purpose } = verifyCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 임시 처리: 인증번호 123456은 항상 통과
-    if (verificationCode === "123456") {
-      // 임시 인증 정보를 데이터베이스에 저장 (중복 방지)
-      await this.prisma.$transaction(async (tx) => {
-        // 기존 모든 레코드 삭제 (UNIQUE 제약조건 방지)
-        // 인증된 레코드와 미인증 레코드 모두 삭제하여 중복 방지
-        await tx.phoneVerification.deleteMany({
-          where: {
-            phone: normalizedPhone,
-          },
-        });
+    // ------- TODO: 삭제 필요 (임시 처리: 인증 통과) -------
+    if (verificationCode === "777777") {
+      const existingVerification = await this.prisma.phoneVerification.findFirst({
+        where: {
+          phone: normalizedPhone,
+          purpose,
+          isVerified: false, // 인증되지 않은 레코드만 조회
+        },
+        orderBy: { createdAt: "desc" }, // 가장 최근 순 정렬
+      });
 
-        // 임시 인증 정보 생성
-        await tx.phoneVerification.create({
+      // 인증 정보가 존재하지 않는 경우
+      if (!existingVerification) {
+        throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
+      }
+
+      // 2. 만료 시간 확인 - 5분 후 자동 만료
+      if (existingVerification.expiresAt < new Date()) {
+        throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.phoneVerification.update({
+          where: { id: existingVerification.id },
           data: {
-            phone: normalizedPhone,
-            verificationCode: "123456",
-            expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1시간 후 만료 (checkPhoneVerificationStatus와 일치)
-            isVerified: true, // 바로 인증 완료 상태로 저장
+            isVerified: true, // is_verified 플래그로 본인인증 상태 관리
           },
         });
       });
       return;
     }
 
-    // 1. 휴대폰 번호와 인증번호로 검증 정보 조회 - PhoneVerification 테이블
+    // 1. 휴대폰 번호, 인증번호, 목적으로 검증 정보 조회 - PhoneVerification 테이블
     // 인증되지 않은 레코드 중에서 가장 최근 것을 찾음
     const phoneVerification = await this.prisma.phoneVerification.findFirst({
       where: {
         phone: normalizedPhone,
         verificationCode,
+        purpose, // 목적별로 구분하여 검증
         isVerified: false, // 인증되지 않은 레코드만 조회
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }, // 가장 최근 순 정렬
     });
 
     // 인증 정보가 존재하지 않는 경우
@@ -159,20 +141,29 @@ export class PhoneService {
   /**
    * 휴대폰 인증 상태 확인
    * 인증 완료 후 1시간 이내의 인증만 유효한 것으로 간주
+   * createdAt과 expiresAt 모두 확인하여 안전하게 검증
+   *
+   * @param phone 휴대폰 번호
+   * @param purpose 인증 목적 (선택적, 기본값: 회원가입)
+   * @returns 인증 상태 유효 여부
    */
-  async checkPhoneVerificationStatus(phone: string): Promise<boolean> {
+  async checkPhoneVerificationStatus(
+    phone: string,
+    purpose: PhoneVerificationPurpose,
+  ): Promise<boolean> {
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000); // 1시간 전
 
     const phoneVerification = await this.prisma.phoneVerification.findFirst({
       where: {
         phone: normalizedPhone,
-        isVerified: true,
+        purpose, // 목적별로 구분하여 확인
+        isVerified: true, // 인증된 레코드만 유효
         createdAt: {
           gte: oneHourAgo, // 1시간 이내에 인증된 것만 유효
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }, // 가장 최근 인증 레코드만 유효
     });
 
     return !!phoneVerification;

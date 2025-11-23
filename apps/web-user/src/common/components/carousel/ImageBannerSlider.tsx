@@ -40,15 +40,15 @@ export function ImageBannerSlider() {
     return () => clearInterval(interval);
   }, [sliderItems.length]);
 
-  // 이전 슬라이드
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + sliderItems.length) % sliderItems.length);
-  };
+  // // 이전 슬라이드
+  // const goToPrevious = () => {
+  //   setCurrentIndex((prev) => (prev - 1 + sliderItems.length) % sliderItems.length);
+  // };
 
-  // 다음 슬라이드
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % sliderItems.length);
-  };
+  // // 다음 슬라이드
+  // const goToNext = () => {
+  //   setCurrentIndex((prev) => (prev + 1) % sliderItems.length);
+  // };
 
   // 특정 인덱스로 이동
   const goToSlide = (index: number) => {

@@ -25,6 +25,7 @@ import {
   AUTH_ERROR_MESSAGES,
   COOKIE_CONFIG,
   TOKEN_TYPES,
+  PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
@@ -63,8 +64,11 @@ export class UserService {
     // 2. 휴대폰 번호 정규화
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
-    // 3. 휴대폰 인증 상태 확인
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    // 3. 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedPhone,
+      PhoneVerificationPurpose.REGISTRATION,
+    );
     if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED); // 400
     }
@@ -277,7 +281,10 @@ export class UserService {
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
     // 1. 휴대폰 인증 확인 (1시간 이내 인증만 유효)
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedPhone,
+      PhoneVerificationPurpose.ID_FIND,
+    );
     if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
@@ -332,7 +339,10 @@ export class UserService {
     }
 
     // 3. 휴대폰 인증 확인 (1시간 이내 인증만 유효)
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(normalizedPhone);
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedPhone,
+      PhoneVerificationPurpose.PASSWORD_RECOVERY,
+    );
     if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
@@ -377,8 +387,10 @@ export class UserService {
     }
 
     // 3. 새 휴대폰 인증 확인 (1시간 이내 인증만 유효)
-    const isPhoneVerified =
-      await this.phoneService.checkPhoneVerificationStatus(normalizedNewPhone);
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedNewPhone,
+      PhoneVerificationPurpose.PHONE_CHANGE,
+    );
     if (!isPhoneVerified) {
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }

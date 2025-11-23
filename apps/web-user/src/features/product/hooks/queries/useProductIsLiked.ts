@@ -31,4 +31,3 @@ export function useProductIsLiked(productId: string) {
 
   return query;
 }
-

@@ -14,4 +14,3 @@ export class AddProductLikeRequestDto {
   @IsString()
   productId: string;
 }
-

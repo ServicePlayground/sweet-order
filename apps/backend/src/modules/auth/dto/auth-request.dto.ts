@@ -9,6 +9,7 @@ import {
 import {
   SWAGGER_EXAMPLES,
   SWAGGER_DESCRIPTIONS,
+  PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 
 // 일반 - 회원가입 요청 DTO
@@ -157,6 +158,15 @@ export class SendVerificationCodeRequestDto {
   @IsString()
   @IsValidKoreanPhone()
   phone: string;
+
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.PHONE_VERIFICATION_PURPOSE,
+    example: PhoneVerificationPurpose.REGISTRATION,
+    enum: PhoneVerificationPurpose,
+  })
+  @IsString()
+  @IsNotEmpty()
+  purpose: PhoneVerificationPurpose;
 }
 
 // 휴대폰 인증번호 확인 요청 DTO
@@ -176,6 +186,15 @@ export class VerifyPhoneCodeRequestDto {
   @IsString()
   @IsValidVerificationCode()
   verificationCode: string;
+
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.PHONE_VERIFICATION_PURPOSE,
+    example: PhoneVerificationPurpose.REGISTRATION,
+    enum: PhoneVerificationPurpose,
+  })
+  @IsString()
+  @IsNotEmpty()
+  purpose: PhoneVerificationPurpose;
 }
 
 // 휴대폰 번호 변경 요청 DTO

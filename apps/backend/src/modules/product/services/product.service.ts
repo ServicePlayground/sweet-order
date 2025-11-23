@@ -23,7 +23,7 @@ export class ProductService {
   /**
    * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
    */
-  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
+  async getProducts(query: GetProductsRequestDto) {
     const {
       search,
       page,
@@ -144,7 +144,7 @@ export class ProductService {
   /**
    * 상품 상세 조회
    */
-  async getProductDetail(id: string, user?: JwtVerifiedPayload) {
+  async getProductDetail(id: string) {
     // 상품 상세 정보 조회
     const product = await this.prisma.product.findFirst({
       where: {
