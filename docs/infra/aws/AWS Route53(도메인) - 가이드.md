@@ -5,7 +5,7 @@
 - 루트 도메인: sweetorders.com
 
 - 상용 백엔드 사용자(App Runner): api.sweetorders.com
-- 검증 백엔드 사용자(App Runner): staging-api.sweetorders.com
+- 검증 백엔드 사용자(App Runner): api-staging.sweetorders.com
 - 상용 정적 파일: static.sweetorders.com
 - 검증 정적 파일: static-staging.sweetorders.com
 - 상용 업로드 전용 버킷: upload.sweetorders.com
@@ -53,7 +53,7 @@
 
 # Route53 CNAME레코드
 
-- 현재 도메인은 다른 도메인으로 연결된다. CNAME은 루트 도메인(sweetorders.com)에는 사용하지 못하고 서브 도메인(www.sweetorders.com, prod.sweetorders.com, api.sweetorders.com, staging-api.sweetorders.com)에 설정해야 한다.
+- 현재 도메인은 다른 도메인으로 연결된다. CNAME은 루트 도메인(sweetorders.com)에는 사용하지 못하고 서브 도메인(www.sweetorders.com, prod.sweetorders.com, api.sweetorders.com, api-staging.sweetorders.com)에 설정해야 한다.
 
 # Route53 ALIAS레코드
 
