@@ -1,17 +1,10 @@
 "use client";
 
 import { FallbackProps } from "react-error-boundary";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Alert,
-  AlertTitle,
-} from "@mui/material";
-import { ErrorOutline, Refresh, Replay } from "@mui/icons-material";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
+import { AlertCircle, RotateCcw, RotateCw } from "lucide-react";
 
 interface ErrorFallbackProps extends FallbackProps {
   error: Error;
@@ -28,69 +21,36 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
   };
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        p: 2,
-      }}
-    >
-      <Card
-        sx={{
-          maxWidth: 400,
-          width: "100%",
-          textAlign: "center",
-        }}
-      >
-        <CardContent sx={{ p: 4 }}>
-          <Stack spacing={3} alignItems="center">
-            <ErrorOutline
-              sx={{
-                fontSize: 48,
-                color: "error.main",
-              }}
-            />
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+      <Card className="max-w-md w-full text-center">
+        <CardContent className="p-8">
+          <div className="flex flex-col items-center gap-6">
+            <AlertCircle className="h-12 w-12 text-destructive" />
 
-            <Typography variant="h5" component="h2" color="error" fontWeight={600}>
+            <h2 className="text-2xl font-semibold text-destructive">
               예상치 못한 오류가 발생했습니다
-            </Typography>
+            </h2>
 
-            <Alert severity="error" sx={{ width: "100%" }}>
+            <Alert variant="destructive" className="w-full">
               <AlertTitle>오류 상세</AlertTitle>
-              {error.message || "알 수 없는 오류가 발생했습니다."}
+              <AlertDescription>
+                {error.message || "알 수 없는 오류가 발생했습니다."}
+              </AlertDescription>
             </Alert>
 
-            <Stack direction="row" spacing={2} sx={{ width: "100%" }}>
-              <Button
-                variant="contained"
-                startIcon={<Replay />}
-                onClick={handleRetry}
-                fullWidth
-                sx={{ flex: 1 }}
-              >
+            <div className="flex gap-2 w-full">
+              <Button onClick={handleRetry} className="flex-1 gap-2">
+                <RotateCcw className="h-4 w-4" />
                 다시 시도
               </Button>
-              <Button
-                variant="outlined"
-                startIcon={<Refresh />}
-                onClick={handleReload}
-                fullWidth
-                sx={{ flex: 1 }}
-              >
+              <Button variant="outline" onClick={handleReload} className="flex-1 gap-2">
+                <RotateCw className="h-4 w-4" />
                 페이지 새로고침
               </Button>
-            </Stack>
-          </Stack>
+            </div>
+          </div>
         </CardContent>
       </Card>
-    </Box>
+    </div>
   );
 }

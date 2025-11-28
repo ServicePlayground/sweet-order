@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, TextField } from "@mui/material";
 import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import { STORE_ERROR_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
 import { ImageUpload } from "@/apps/web-seller/common/components/images/ImageUpload";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Input } from "@/apps/web-seller/common/components/ui/input";
+import { Label } from "@/apps/web-seller/common/components/ui/label";
 
 interface Props {
   onSubmit: (data: IStoreForm) => void;
@@ -65,9 +67,9 @@ export const StoreCreationForm: React.FC<Props> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12}>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-6">
+        <div>
           <ImageUpload
             width={360}
             height={360}
@@ -80,42 +82,48 @@ export const StoreCreationForm: React.FC<Props> = ({
             }}
             error={errors.logoImageUrl}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="스토어 이름(스위트오더 스토어)"
-            fullWidth
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            스토어 이름
+          </Label>
+          <Input
+            placeholder="스위트오더 스토어"
             value={form.name}
             onChange={handleChange("name")}
-            error={Boolean(errors.name)}
-            helperText={errors.name}
-            required
+            className={errors.name ? "border-destructive" : ""}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="스토어 설명(맛있는 케이크를 판매하는 스토어입니다.)"
-            fullWidth
-            multiline
+          {errors.name && (
+            <p className="text-sm text-destructive mt-1">{errors.name}</p>
+          )}
+        </div>
+        <div>
+          <Label>스토어 설명</Label>
+          <textarea
+            placeholder="맛있는 케이크를 판매하는 스토어입니다."
             rows={4}
             value={form.description || ""}
             onChange={handleChange("description")}
-            error={Boolean(errors.description)}
-            helperText={errors.description}
+            className={`flex min-h-[80px] w-full rounded-md border ${
+              errors.description ? "border-destructive" : "border-input"
+            } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
           />
-        </Grid>
-      </Grid>
+          {errors.description && (
+            <p className="text-sm text-destructive mt-1">{errors.description}</p>
+          )}
+        </div>
+      </div>
 
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
+      <div className="flex justify-between mt-6">
         {onPrevious && (
-          <Button type="button" variant="outlined" onClick={onPrevious}>
+          <Button type="button" variant="outline" onClick={onPrevious}>
             이전
           </Button>
         )}
-        <Button type="submit" variant="contained" sx={{ ml: onPrevious ? "auto" : 0 }}>
+        <Button type="submit" className={onPrevious ? "ml-auto" : ""}>
           스토어 생성
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 };

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, TextField } from "@mui/material";
 import { IBusinessRegistrationForm } from "@/apps/web-seller/features/business/types/business.type";
 import {
   isValidBusinessNo,
   isValidStartDateYmd,
 } from "@/apps/web-seller/common/utils/validator.util";
 import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Input } from "@/apps/web-seller/common/components/ui/input";
+import { Label } from "@/apps/web-seller/common/components/ui/label";
 
 interface Props {
   onSubmit: (data: IBusinessRegistrationForm) => void;
@@ -69,83 +71,105 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="사업자등록번호(1234567890)"
-            fullWidth
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-6">
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            사업자등록번호
+          </Label>
+          <Input
+            placeholder="1234567890"
             value={form.b_no}
             onChange={handleChange("b_no")}
-            error={Boolean(errors.b_no)}
-            helperText={errors.b_no}
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*", maxLength: 10 }}
-            required
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={10}
+            className={errors.b_no ? "border-destructive" : ""}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="대표자명(홍길동)"
-            fullWidth
+          {errors.b_no && (
+            <p className="text-sm text-destructive mt-1">{errors.b_no}</p>
+          )}
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            대표자명
+          </Label>
+          <Input
+            placeholder="홍길동"
             value={form.p_nm}
             onChange={handleChange("p_nm")}
-            error={Boolean(errors.p_nm)}
-            helperText={errors.p_nm}
-            required
+            className={errors.p_nm ? "border-destructive" : ""}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="개업일(20251030)"
-            fullWidth
+          {errors.p_nm && (
+            <p className="text-sm text-destructive mt-1">{errors.p_nm}</p>
+          )}
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            개업일
+          </Label>
+          <Input
+            placeholder="20251030"
             value={form.start_dt}
             onChange={handleChange("start_dt")}
-            error={Boolean(errors.start_dt)}
-            helperText={errors.start_dt}
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*", maxLength: 8 }}
-            required
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={8}
+            className={errors.start_dt ? "border-destructive" : ""}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="상호(스위트오더)"
-            fullWidth
+          {errors.start_dt && (
+            <p className="text-sm text-destructive mt-1">{errors.start_dt}</p>
+          )}
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            상호
+          </Label>
+          <Input
+            placeholder="스위트오더"
             value={form.b_nm}
             onChange={handleChange("b_nm")}
-            error={Boolean(errors.b_nm)}
-            helperText={errors.b_nm}
-            required
+            className={errors.b_nm ? "border-destructive" : ""}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="업태(도매 및 소매업)"
-            fullWidth
+          {errors.b_nm && (
+            <p className="text-sm text-destructive mt-1">{errors.b_nm}</p>
+          )}
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            업태
+          </Label>
+          <Input
+            placeholder="도매 및 소매업"
             value={form.b_sector}
             onChange={handleChange("b_sector")}
-            error={Boolean(errors.b_sector)}
-            helperText={errors.b_sector}
-            required
+            className={errors.b_sector ? "border-destructive" : ""}
           />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="종목(전자상거래 소매 중개업)"
-            fullWidth
+          {errors.b_sector && (
+            <p className="text-sm text-destructive mt-1">{errors.b_sector}</p>
+          )}
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            종목
+          </Label>
+          <Input
+            placeholder="전자상거래 소매 중개업"
             value={form.b_type}
             onChange={handleChange("b_type")}
-            error={Boolean(errors.b_type)}
-            helperText={errors.b_type}
-            required
+            className={errors.b_type ? "border-destructive" : ""}
           />
-        </Grid>
-      </Grid>
+          {errors.b_type && (
+            <p className="text-sm text-destructive mt-1">{errors.b_type}</p>
+          )}
+        </div>
+      </div>
 
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button type="submit" variant="contained">
+      <div className="flex justify-end mt-6">
+        <Button type="submit">
           다음 단계
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 };
