@@ -1,5 +1,8 @@
 import React, { useState, KeyboardEvent } from "react";
-import { Box, Chip, TextField, Typography } from "@mui/material";
+import { Input } from "@/apps/web-seller/common/components/ui/input";
+import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Badge } from "@/apps/web-seller/common/components/ui/badge";
+import { X } from "lucide-react";
 
 export interface HashtagInputProps {
   value?: string[];
@@ -55,39 +58,44 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
   };
 
   return (
-    <Box>
+    <div className="w-full">
       {label && (
-        <Typography variant="body2" sx={{ mb: 1 }} component="label">
+        <Label className={required ? "after:content-['*'] after:ml-0.5 after:text-destructive mb-1" : "mb-1"}>
           {label}
-          {required && <span style={{ color: "red" }}> *</span>}
-        </Typography>
+        </Label>
       )}
 
-      <TextField
-        fullWidth
+      <Input
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={addHashtag}
         placeholder={`해시태그를 입력하고 Enter 또는 쉼표(,)를 누르세요 (최대 ${maxTags}개)`}
-        error={Boolean(error)}
-        helperText={error || `${value.length}/${maxTags}개`}
-        size="small"
+        className={error ? "border-destructive" : ""}
       />
 
-      {value.length > 0 && (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-          {value.map((hashtag, index) => (
-            <Chip
-              key={index}
-              label={`#${hashtag}`}
-              onDelete={() => removeHashtag(index)}
-              color="primary"
-              variant="outlined"
-            />
-          ))}
-        </Box>
+      {(error || value.length > 0) && (
+        <p className="text-sm text-muted-foreground mt-1">
+          {error ? <span className="text-destructive">{error}</span> : `${value.length}/${maxTags}개`}
+        </p>
       )}
-    </Box>
+
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {value.map((hashtag, index) => (
+            <Badge key={index} variant="outline" className="gap-1">
+              #{hashtag}
+              <button
+                type="button"
+                onClick={() => removeHashtag(index)}
+                className="ml-1 hover:text-destructive"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };

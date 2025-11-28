@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
-import { Box, Typography, CircularProgress, Alert, IconButton, Grid } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Alert, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
+import { CloudUpload, Trash2, Loader2 } from "lucide-react";
+import { cn } from "@/apps/web-seller/lib/utils";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
 import { UPLOAD_CONSTANTS } from "@/apps/web-seller/features/upload/constants/upload.constant";
 import { ImagePreview } from "@/apps/web-seller/common/components/images/ImagePreview";
@@ -116,12 +118,11 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
   const canAddMore = value.length < maxImages;
 
   return (
-    <Box>
+    <div className="w-full">
       {label && (
-        <Typography variant="body2" sx={{ mb: 1 }} component="label">
+        <Label className={cn("mb-1 block", required && "after:content-['*'] after:ml-0.5 after:text-destructive")}>
           {label}
-          {required && <span style={{ color: "red" }}> *</span>}
-        </Typography>
+        </Label>
       )}
 
       <input
@@ -129,119 +130,69 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
         type="file"
         accept={accept}
         onChange={handleFileSelect}
-        style={{ display: "none" }}
+        className="hidden"
       />
 
-      <Grid container spacing={2}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {value.map((url, index) => (
-          <Grid item xs={6} sm={4} md={3} key={index}>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "1",
-                borderRadius: 1,
-                overflow: "hidden",
-                border: "1px solid",
-                borderColor: uploadErrors[index] ? "error.main" : "divider",
-                backgroundColor: "grey.100",
-              }}
+          <div key={index} className="relative w-full aspect-square">
+            <div
+              className={cn(
+                "relative w-full h-full rounded-md overflow-hidden border bg-muted",
+                uploadErrors[index] && "border-destructive"
+              )}
             >
               <ImagePreview src={url} />
               {uploadingIndex === index && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                  }}
-                >
-                  <CircularProgress size={40} sx={{ color: "white" }} />
-                </Box>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <Loader2 className="h-10 w-10 animate-spin text-white" />
+                </div>
               )}
-              <IconButton
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => handleDelete(index)}
                 disabled={uploadingIndex === index}
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  backgroundColor: "white",
-                  "&:hover": { backgroundColor: "grey.200" },
-                }}
+                className="absolute top-2 right-2 bg-white hover:bg-gray-200"
               >
-                <DeleteIcon />
-              </IconButton>
+                <Trash2 className="h-4 w-4" />
+              </Button>
               {uploadErrors[index] && (
-                <Alert
-                  severity="error"
-                  sx={{
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    fontSize: "0.75rem",
-                    py: 0.5,
-                  }}
-                >
+                <div className="absolute bottom-0 left-0 right-0 bg-destructive text-destructive-foreground p-1 text-xs">
                   {uploadErrors[index]}
-                </Alert>
+                </div>
               )}
-            </Box>
-          </Grid>
+            </div>
+          </div>
         ))}
 
         {canAddMore && (
-          <Grid item xs={6} sm={4} md={3}>
-            <Box
-              sx={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "1",
-                boxSizing: "border-box",
-                borderRadius: 1,
-                overflow: "hidden",
-                border: "1px solid",
-                borderStyle: "dashed",
-                borderColor: displayError ? "error.main" : "divider",
-                backgroundColor: "grey.50",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                "&:hover": {
-                  borderColor: displayError ? "error.main" : "primary.main",
-                  backgroundColor: "grey.100",
-                },
-              }}
+          <div className="relative w-full aspect-square">
+            <div
+              className={cn(
+                "relative w-full h-full box-border rounded-md overflow-hidden border border-dashed bg-muted/50 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-muted transition-colors",
+                displayError && "border-destructive hover:border-destructive"
+              )}
               onClick={handleButtonClick}
             >
-              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                <CloudUploadIcon sx={{ fontSize: 32, color: "text.secondary" }} />
-                <Typography variant="caption" color="text.secondary">
-                  이미지 추가
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
+              <div className="flex flex-col items-center gap-1">
+                <CloudUpload className="h-8 w-8 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">이미지 추가</p>
+              </div>
+            </div>
+          </div>
         )}
-      </Grid>
+      </div>
 
       {displayError && (
-        <Alert severity="error" sx={{ mt: 1 }}>
-          {displayError}
+        <Alert variant="destructive" className="mt-2">
+          <AlertDescription>{displayError}</AlertDescription>
         </Alert>
       )}
 
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+      <p className="text-xs text-muted-foreground mt-1">
         최대 파일 크기: {maxSize / (1024 * 1024)}MB, 최대 이미지 개수: {maxImages}개
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };

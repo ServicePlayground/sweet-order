@@ -1,5 +1,5 @@
 import React from "react";
-import { Dashboard as DashboardIcon, Inventory2 as Inventory2Icon } from "@mui/icons-material";
+import { Home, Package } from "lucide-react";
 import { ROUTES } from "./paths.constant";
 
 export interface MenuChildItem {
@@ -20,7 +20,7 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
     return [
       {
         text: "홈",
-        icon: React.createElement(DashboardIcon),
+        icon: React.createElement(Home, { className: "w-5 h-5" }),
         path: ROUTES.ROOT,
       },
     ];
@@ -29,12 +29,12 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
   return [
     {
       text: "홈",
-      icon: React.createElement(DashboardIcon),
+      icon: React.createElement(Home, { className: "w-5 h-5" }),
       path: ROUTES.STORE_DETAIL_HOME(storeId),
     },
     {
       text: "상품",
-      icon: React.createElement(Inventory2Icon),
+      icon: React.createElement(Package, { className: "w-5 h-5" }),
       children: [
         { text: "상품 목록", path: ROUTES.STORE_DETAIL_PRODUCTS_LIST(storeId) },
         { text: "상품 등록", path: ROUTES.STORE_DETAIL_PRODUCTS_CREATE(storeId) },

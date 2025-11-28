@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, CircularProgress, Typography, Stack, Paper } from "@mui/material";
+import { Loader2 } from "lucide-react";
 
 interface LoadingFallbackProps {
   variant?: "overlay" | "corner";
@@ -24,55 +24,26 @@ export function LoadingFallback({
 
   if (variant === "corner") {
     return (
-      <Paper
-        elevation={3}
-        sx={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          color: "white",
-          p: 1.5,
-          borderRadius: 2,
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <CircularProgress size={16} color="inherit" />
-        <Typography variant="body2" fontWeight={500}>
+      <div className="fixed bottom-5 right-5 bg-black/80 text-white p-3 rounded-lg z-[1000] flex items-center gap-2 shadow-lg">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <p className="text-sm font-medium">
           {message}
           {dots}
-        </Typography>
-      </Paper>
+        </p>
+      </div>
     );
   }
 
   // overlay variant (기본값)
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(255, 255, 255, 0.9)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-      }}
-    >
-      <Stack spacing={2} alignItems="center">
-        <CircularProgress size={48} />
-        <Typography variant="body1" fontWeight={500} color="text.primary">
+    <div className="fixed inset-0 bg-white/90 flex flex-col items-center justify-center z-[9999]">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="text-base font-medium text-foreground">
           {message}
           {dots}
-        </Typography>
-      </Stack>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -1,11 +1,12 @@
 import React from "react";
-import { Box, Grid, Paper, Typography, Card, CardContent, Button } from "@mui/material";
+import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
 import {
-  TrendingUp as TrendingUpIcon,
-  ShoppingCart as ShoppingCartIcon,
-  Inventory as InventoryIcon,
-  AttachMoney as AttachMoneyIcon,
-} from "@mui/icons-material";
+  TrendingUp,
+  ShoppingCart,
+  Package,
+  DollarSign,
+} from "lucide-react";
 
 const StatCard = ({
   title,
@@ -18,79 +19,86 @@ const StatCard = ({
   icon: React.ReactNode;
   color: string;
 }) => (
-  <Card sx={{ height: "100%" }}>
-    <CardContent>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-        <Box sx={{ color, mr: 1 }}>{icon}</Box>
-        <Typography color="textSecondary" gutterBottom variant="body2">
+  <Card className="h-full">
+    <CardContent className="p-6">
+      <div className="flex items-center gap-2 mb-4">
+        <div style={{ color }}>{icon}</div>
+        <p className="text-sm text-muted-foreground">
           {title}
-        </Typography>
-      </Box>
-      <Typography variant="h4" component="div">
+        </p>
+      </div>
+      <h2 className="text-3xl font-bold">
         {value}
-      </Typography>
+      </h2>
     </CardContent>
   </Card>
 );
 
 export const StoreDetailHomePage: React.FC = () => {
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">
         대시보드
-      </Typography>
+      </h1>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="총 매출"
-            value="₩2,450,000"
-            icon={<AttachMoneyIcon />}
-            color="primary.main"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="총 주문" value="156" icon={<ShoppingCartIcon />} color="success.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="상품 수" value="24" icon={<InventoryIcon />} color="info.main" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="성장률" value="+12.5%" icon={<TrendingUpIcon />} color="warning.main" />
-        </Grid>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <StatCard
+          title="총 매출"
+          value="₩2,450,000"
+          icon={<DollarSign className="h-5 w-5" />}
+          color="hsl(var(--primary))"
+        />
+        <StatCard
+          title="총 주문"
+          value="156"
+          icon={<ShoppingCart className="h-5 w-5" />}
+          color="hsl(142.1 76.2% 36.3%)"
+        />
+        <StatCard
+          title="상품 수"
+          value="24"
+          icon={<Package className="h-5 w-5" />}
+          color="hsl(221.2 83.2% 53.3%)"
+        />
+        <StatCard
+          title="성장률"
+          value="+12.5%"
+          icon={<TrendingUp className="h-5 w-5" />}
+          color="hsl(24.6 95% 53.1%)"
+        />
+      </div>
 
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 2, height: 400 }}>
-            <Typography variant="h6" gutterBottom>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="md:col-span-2 h-[400px]">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-4">
               최근 주문 현황
-            </Typography>
-            <Box
-              sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}
-            >
-              <Typography color="textSecondary">차트 영역 (추후 구현)</Typography>
-            </Box>
-          </Paper>
-        </Grid>
+            </h2>
+            <div className="flex items-center justify-center h-[300px]">
+              <p className="text-muted-foreground">차트 영역 (추후 구현)</p>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2, height: 400 }}>
-            <Typography variant="h6" gutterBottom>
+        <Card className="h-[400px]">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-4">
               빠른 작업
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
-              <Button variant="contained" fullWidth>
+            </h2>
+            <div className="flex flex-col gap-4">
+              <Button className="w-full">
                 새 상품 등록
               </Button>
-              <Button variant="outlined" fullWidth>
+              <Button variant="outline" className="w-full">
                 주문 확인
               </Button>
-              <Button variant="outlined" fullWidth>
+              <Button variant="outline" className="w-full">
                 재고 관리
               </Button>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };

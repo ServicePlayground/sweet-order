@@ -1,24 +1,18 @@
 import React from "react";
-import {
-  Box,
-  Drawer,
-  Toolbar,
-  Typography,
-  IconButton,
-  FormControl,
-  Select,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  MenuItem as SelectItem,
-} from "@mui/material";
-import { ChevronLeft as ChevronLeftIcon } from "@mui/icons-material";
+import { ChevronLeft } from "lucide-react";
 import { getMenuItems } from "@/apps/web-seller/common/constants/menu.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store.ts";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/apps/web-seller/common/components/ui/select";
+import { cn } from "@/apps/web-seller/lib/utils";
 
 interface AdminSidebarProps {
   isMobile: boolean;
@@ -71,94 +65,122 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   };
 
   return (
-    <Box component="nav" sx={{ width: { md: open ? drawerWidth : 0 }, flexShrink: { md: 0 } }}>
-      <Drawer
-        variant={isMobile ? "temporary" : "persistent"}
-        open={open}
-        onClose={onToggle}
-        ModalProps={{ keepMounted: true }}
-        sx={{
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: drawerWidth,
-          },
-        }}
+    <>
+      {/* Mobile overlay backdrop */}
+      {isMobile && open && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={onToggle}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed top-0 left-0 h-full bg-background border-r z-50 transition-transform duration-300",
+          isMobile && !open && "-translate-x-full",
+          !isMobile && !open && "-translate-x-full"
+        )}
+        style={{ width: drawerWidth }}
       >
-        <Box>
-          <Toolbar>
+        <div className="flex flex-col h-full">
+          {/* Toolbar */}
+          <div className="flex items-center h-16 px-4 border-b">
             {stores.length > 0 ? (
-              <FormControl size="small" sx={{ minWidth: 160 }}>
+              <div className="min-w-[160px]">
                 <Select
                   value={storeIdFromPath || ""}
-                  onChange={(e) => onSelectStore(e.target.value as string)}
-                  displayEmpty
-                  renderValue={(value) => {
-                    const store = stores.find((s) => s.id === value);
-                    return store ? store.name : "스토어 선택";
-                  }}
+                  onValueChange={onSelectStore}
                 >
-                  {stores.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="스토어 선택">
+                      {stores.find((s) => s.id === storeIdFromPath)?.name || "스토어 선택"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stores.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              </FormControl>
+              </div>
             ) : (
-              <Typography variant="body2" noWrap component="div">
+              <div className="text-sm font-medium truncate">
                 SWEET ORDER
-              </Typography>
+              </div>
             )}
             {!isMobile && (
-              <IconButton onClick={onToggle} sx={{ ml: "auto" }}>
-                <ChevronLeftIcon />
-              </IconButton>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="ml-auto"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
             )}
-          </Toolbar>
+          </div>
 
-          <List>
-            {menuItems.map((item) => {
-              const hasChildren = Array.isArray(item.children) && item.children.length > 0;
-              const isParentSelected =
-                currentPath === (item.path ?? "") ||
-                (hasChildren && item.children!.some((c) => c.path === currentPath));
+          {/* Navigation Menu */}
+          <nav className="flex-1 overflow-y-auto">
+            <ul className="p-2 space-y-1">
+              {menuItems.map((item) => {
+                const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+                const isParentSelected =
+                  currentPath === (item.path ?? "") ||
+                  (hasChildren && item.children!.some((c) => c.path === currentPath));
 
-              return (
-                <React.Fragment key={item.text}>
-                  <ListItem disablePadding>
-                    <ListItemButton
-                      selected={isParentSelected}
+                return (
+                  <li key={item.text}>
+                    <button
                       onClick={() => {
                         if (item.path) {
                           onNavigate(item.path);
                         }
                       }}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                        isParentSelected
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent hover:text-accent-foreground"
+                      )}
                     >
-                      {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
-                      <ListItemText primary={item.text} />
-                    </ListItemButton>
-                  </ListItem>
+                      {item.icon && (
+                        <span className="flex-shrink-0 w-5 h-5">
+                          {item.icon}
+                        </span>
+                      )}
+                      <span className="flex-1 text-left">{item.text}</span>
+                    </button>
 
-                  {hasChildren && (
-                    <List sx={{ pl: 4 }}>
-                      {item.children!.map((child) => (
-                        <ListItem key={child.text} disablePadding>
-                          <ListItemButton
-                            selected={currentPath === child.path}
-                            onClick={() => onNavigate(child.path)}
-                          >
-                            <ListItemText primary={child.text} />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </List>
-        </Box>
-      </Drawer>
-    </Box>
+                    {hasChildren && (
+                      <ul className="pl-8 mt-1 space-y-1">
+                        {item.children!.map((child) => (
+                          <li key={child.text}>
+                            <button
+                              onClick={() => onNavigate(child.path)}
+                              className={cn(
+                                "w-full flex items-center px-3 py-2 rounded-md text-sm transition-colors",
+                                currentPath === child.path
+                                  ? "bg-primary text-primary-foreground"
+                                  : "hover:bg-accent hover:text-accent-foreground"
+                              )}
+                            >
+                              <span className="flex-1 text-left">{child.text}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+      </aside>
+    </>
   );
 };
