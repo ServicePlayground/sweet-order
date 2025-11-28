@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/apps/web-seller/common/components/ui/select";
-import { cn } from "@/apps/web-seller/lib/utils";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 
 interface AdminSidebarProps {
   isMobile: boolean;

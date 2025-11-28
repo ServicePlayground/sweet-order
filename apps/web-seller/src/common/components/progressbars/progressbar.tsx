@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/apps/web-seller/lib/utils";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 
 interface Props {
   activeStep: number; // 0-based index

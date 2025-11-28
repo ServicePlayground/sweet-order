@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import { Alert as AlertComponent, AlertTitle, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
 import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
-import { cn } from "@/apps/web-seller/lib/utils";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 
 export function Alert() {
   const { alerts, removeAlert } = useAlertStore();

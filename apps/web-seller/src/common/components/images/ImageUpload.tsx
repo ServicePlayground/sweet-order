@@ -3,7 +3,7 @@ import { Button } from "@/apps/web-seller/common/components/ui/button";
 import { Label } from "@/apps/web-seller/common/components/ui/label";
 import { Alert, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
 import { CloudUpload, Trash2, ImageIcon, Loader2 } from "lucide-react";
-import { cn } from "@/apps/web-seller/lib/utils";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
 import { UPLOAD_CONSTANTS } from "@/apps/web-seller/features/upload/constants/upload.constant";
 import { ImagePreview } from "@/apps/web-seller/common/components/images/ImagePreview";

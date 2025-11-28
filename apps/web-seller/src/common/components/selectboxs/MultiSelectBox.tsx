@@ -3,7 +3,7 @@ import { Label } from "@/apps/web-seller/common/components/ui/label";
 import { Badge } from "@/apps/web-seller/common/components/ui/badge";
 import { Button } from "@/apps/web-seller/common/components/ui/button";
 import { Check, ChevronDown, X } from "lucide-react";
-import { cn } from "@/apps/web-seller/lib/utils";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 
 export interface SelectOption {
   readonly value: string;

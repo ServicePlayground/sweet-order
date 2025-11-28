@@ -13,9 +13,9 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/apps/web-seller/common/components",
-    "utils": "@/apps/web-seller/lib/utils",
+    "utils": "@/apps/web-seller/common/lib/utils",
     "ui": "@/apps/web-seller/common/components/ui",
-    "lib": "@/apps/web-seller/lib",
+    "lib": "@/apps/web-seller/common/lib",
     "hooks": "@/apps/web-seller/hooks"
   }
 }

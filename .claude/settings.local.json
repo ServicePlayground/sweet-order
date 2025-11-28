@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)",
+      "Bash(yarn install:*)",
+      "Bash(yarn add:*)",
+      "Bash(yarn remove:*)",
+      "Bash(yarn dlx:*)",
       "Bash(npx shadcn@latest add:*)"
     ],
     "deny": [],
