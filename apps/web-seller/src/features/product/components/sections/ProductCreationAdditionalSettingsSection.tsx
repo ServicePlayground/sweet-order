@@ -8,9 +8,9 @@ import {
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
 import { MultiSelectBox } from "@/apps/web-seller/common/components/selectboxs/MultiSelectBox";
 import { HashtagInput } from "@/apps/web-seller/common/components/inputs/HashtagInput";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
-import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 
 interface Props {
   form: IProductForm;
@@ -35,9 +35,7 @@ export const ProductCreationAdditionalSettingsSection: React.FC<Props> = ({
   return (
     <Card>
       <CardContent className="p-6">
-        <h2 className="text-xl font-semibold mb-2">
-          추가 설정
-        </h2>
+        <h2 className="text-xl font-semibold mb-2">추가 설정</h2>
         <div className="border-t mb-6" />
 
         <div className="grid grid-cols-1 gap-6">

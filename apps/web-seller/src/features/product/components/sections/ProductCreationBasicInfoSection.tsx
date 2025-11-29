@@ -3,8 +3,8 @@ import { IProductForm, MainCategory } from "@/apps/web-seller/features/product/t
 import { MAIN_CATEGORY_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { MultipleImageUpload } from "@/apps/web-seller/common/components/images/MultipleImageUpload";
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 export interface ProductCreationBasicInfoSectionProps {
   form: IProductForm;
@@ -48,18 +48,14 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       </div>
 
       <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-          상품명
-        </Label>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">상품명</Label>
         <Input
           placeholder=""
           value={form.name}
           onChange={onChange("name")}
           className={errors.name ? "border-destructive" : ""}
         />
-        {errors.name && (
-          <p className="text-sm text-destructive mt-1">{errors.name}</p>
-        )}
+        {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
       </div>
 
       <div>
@@ -79,9 +75,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       </div>
 
       <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-          정가
-        </Label>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">정가</Label>
         <Input
           placeholder=""
           type="number"
@@ -96,9 +90,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       </div>
 
       <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-          판매가
-        </Label>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">판매가</Label>
         <Input
           placeholder=""
           type="number"
@@ -107,9 +99,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
           className={errors.salePrice ? "border-destructive" : ""}
           min={0}
         />
-        {errors.salePrice && (
-          <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>
-        )}
+        {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
       </div>
 
       <div>
@@ -123,9 +113,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
             errors.notice ? "border-destructive" : "border-input"
           } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
         />
-        {errors.notice && (
-          <p className="text-sm text-destructive mt-1">{errors.notice}</p>
-        )}
+        {errors.notice && <p className="text-sm text-destructive mt-1">{errors.notice}</p>}
       </div>
 
       <div>
@@ -139,9 +127,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
             errors.caution ? "border-destructive" : "border-input"
           } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
         />
-        {errors.caution && (
-          <p className="text-sm text-destructive mt-1">{errors.caution}</p>
-        )}
+        {errors.caution && <p className="text-sm text-destructive mt-1">{errors.caution}</p>}
       </div>
 
       <div>
@@ -155,7 +141,9 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
         {errors.basicIncluded && (
           <p className="text-sm text-destructive mt-1">{errors.basicIncluded}</p>
         )}
-        <p className="text-sm text-muted-foreground mt-1">공백이면 상품페이지에서 보이지 않습니다</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          공백이면 상품페이지에서 보이지 않습니다
+        </p>
       </div>
     </div>
   );

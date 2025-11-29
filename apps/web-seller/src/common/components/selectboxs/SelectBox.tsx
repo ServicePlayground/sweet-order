@@ -5,8 +5,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/apps/web-seller/common/components/ui/select";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
+} from "@/apps/web-seller/common/components/@shadcn-ui/select";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 export interface SelectOption {
   readonly value: string;

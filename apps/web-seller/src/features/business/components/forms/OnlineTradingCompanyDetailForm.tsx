@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { IOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/types/business.type";
 import { isValidPermissionManagementNumber } from "@/apps/web-seller/common/utils/validator.util";
 import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 interface Props {
   onSubmit: (data: IOnlineTradingCompanyDetailForm) => void;
@@ -72,9 +72,7 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
             onChange={handleChange("prmmiMnno")}
             className={errors.prmmiMnno ? "border-destructive" : ""}
           />
-          {errors.prmmiMnno && (
-            <p className="text-sm text-destructive mt-1">{errors.prmmiMnno}</p>
-          )}
+          {errors.prmmiMnno && <p className="text-sm text-destructive mt-1">{errors.prmmiMnno}</p>}
         </div>
       </div>
 

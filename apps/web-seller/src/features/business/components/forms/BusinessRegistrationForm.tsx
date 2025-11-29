@@ -5,9 +5,9 @@ import {
   isValidStartDateYmd,
 } from "@/apps/web-seller/common/utils/validator.util";
 import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 interface Props {
   onSubmit: (data: IBusinessRegistrationForm) => void;
@@ -86,9 +86,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             maxLength={10}
             className={errors.b_no ? "border-destructive" : ""}
           />
-          {errors.b_no && (
-            <p className="text-sm text-destructive mt-1">{errors.b_no}</p>
-          )}
+          {errors.b_no && <p className="text-sm text-destructive mt-1">{errors.b_no}</p>}
         </div>
         <div>
           <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
@@ -100,14 +98,10 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             onChange={handleChange("p_nm")}
             className={errors.p_nm ? "border-destructive" : ""}
           />
-          {errors.p_nm && (
-            <p className="text-sm text-destructive mt-1">{errors.p_nm}</p>
-          )}
+          {errors.p_nm && <p className="text-sm text-destructive mt-1">{errors.p_nm}</p>}
         </div>
         <div>
-          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-            개업일
-          </Label>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">개업일</Label>
           <Input
             placeholder="20251030"
             value={form.start_dt}
@@ -117,58 +111,42 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             maxLength={8}
             className={errors.start_dt ? "border-destructive" : ""}
           />
-          {errors.start_dt && (
-            <p className="text-sm text-destructive mt-1">{errors.start_dt}</p>
-          )}
+          {errors.start_dt && <p className="text-sm text-destructive mt-1">{errors.start_dt}</p>}
         </div>
         <div>
-          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-            상호
-          </Label>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">상호</Label>
           <Input
             placeholder="스위트오더"
             value={form.b_nm}
             onChange={handleChange("b_nm")}
             className={errors.b_nm ? "border-destructive" : ""}
           />
-          {errors.b_nm && (
-            <p className="text-sm text-destructive mt-1">{errors.b_nm}</p>
-          )}
+          {errors.b_nm && <p className="text-sm text-destructive mt-1">{errors.b_nm}</p>}
         </div>
         <div>
-          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-            업태
-          </Label>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">업태</Label>
           <Input
             placeholder="도매 및 소매업"
             value={form.b_sector}
             onChange={handleChange("b_sector")}
             className={errors.b_sector ? "border-destructive" : ""}
           />
-          {errors.b_sector && (
-            <p className="text-sm text-destructive mt-1">{errors.b_sector}</p>
-          )}
+          {errors.b_sector && <p className="text-sm text-destructive mt-1">{errors.b_sector}</p>}
         </div>
         <div>
-          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-            종목
-          </Label>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">종목</Label>
           <Input
             placeholder="전자상거래 소매 중개업"
             value={form.b_type}
             onChange={handleChange("b_type")}
             className={errors.b_type ? "border-destructive" : ""}
           />
-          {errors.b_type && (
-            <p className="text-sm text-destructive mt-1">{errors.b_type}</p>
-          )}
+          {errors.b_type && <p className="text-sm text-destructive mt-1">{errors.b_type}</p>}
         </div>
       </div>
 
       <div className="flex justify-end mt-6">
-        <Button type="submit">
-          다음 단계
-        </Button>
+        <Button type="submit">다음 단계</Button>
       </div>
     </form>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
-import { Badge } from "@/apps/web-seller/common/components/ui/badge";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Badge } from "@/apps/web-seller/common/components/@shadcn-ui/badge";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Check, ChevronDown, X } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/lib/utils";
 
@@ -54,10 +54,7 @@ export const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
         <Button
           type="button"
           variant="outline"
-          className={cn(
-            "w-full justify-between h-auto min-h-9",
-            error ? "border-destructive" : ""
-          )}
+          className={cn("w-full justify-between h-auto min-h-9", error ? "border-destructive" : "")}
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
         >
@@ -68,11 +65,7 @@ export const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
               value.map((val) => {
                 const option = options.find((opt) => opt.value === val);
                 return (
-                  <Badge
-                    key={val}
-                    variant="secondary"
-                    className="mr-1"
-                  >
+                  <Badge key={val} variant="secondary" className="mr-1">
                     {option?.label || val}
                     <button
                       type="button"
@@ -99,7 +92,7 @@ export const MultiSelectBox: React.FC<MultiSelectBoxProps> = ({
                   key={option.value}
                   className={cn(
                     "flex items-center px-2 py-1.5 cursor-pointer hover:bg-accent rounded-sm",
-                    value.includes(option.value) && "bg-accent"
+                    value.includes(option.value) && "bg-accent",
                   )}
                   onClick={() => toggleOption(option.value)}
                 >

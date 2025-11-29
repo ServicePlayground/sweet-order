@@ -1,7 +1,7 @@
 import React from "react";
 import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 export interface ProductCreationProductNoticeSectionProps {
   form: IProductForm;
@@ -17,9 +17,7 @@ export const ProductCreationProductNoticeSection: React.FC<
 > = ({ form, errors, onChange }) => {
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-2">
-        상품정보제공고시
-      </h2>
+      <h2 className="text-xl font-semibold mb-2">상품정보제공고시</h2>
       <p className="text-sm text-muted-foreground mb-2">
         식품 판매 시 법적으로 입력해야 하는 항목들입니다. 모든 항목은 필수 입력입니다.
       </p>

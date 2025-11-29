@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
-import { Alert, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Alert, AlertDescription } from "@/apps/web-seller/common/components/@shadcn-ui/alert";
 import { CloudUpload, Trash2, ImageIcon, Loader2 } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/lib/utils";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
@@ -108,7 +108,12 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <Label className={cn("mb-1 block", required && "after:content-['*'] after:ml-0.5 after:text-destructive")}>
+        <Label
+          className={cn(
+            "mb-1 block",
+            required && "after:content-['*'] after:ml-0.5 after:text-destructive",
+          )}
+        >
           {label}
         </Label>
       )}
@@ -128,7 +133,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           isDragging && "border-primary bg-muted",
           displayError && "border-destructive",
           !previewUrl && !isUploading && "cursor-pointer hover:border-primary hover:bg-muted",
-          isUploading && "cursor-not-allowed opacity-60"
+          isUploading && "cursor-not-allowed opacity-60",
         )}
         style={{ width, maxWidth: "100%", height }}
         onClick={!previewUrl && !isUploading ? handleButtonClick : undefined}

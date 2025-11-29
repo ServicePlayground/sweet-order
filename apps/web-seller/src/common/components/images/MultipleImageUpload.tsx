@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
-import { Alert, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Alert, AlertDescription } from "@/apps/web-seller/common/components/@shadcn-ui/alert";
 import { CloudUpload, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/lib/utils";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
@@ -120,7 +120,12 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <Label className={cn("mb-1 block", required && "after:content-['*'] after:ml-0.5 after:text-destructive")}>
+        <Label
+          className={cn(
+            "mb-1 block",
+            required && "after:content-['*'] after:ml-0.5 after:text-destructive",
+          )}
+        >
           {label}
         </Label>
       )}
@@ -139,7 +144,7 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
             <div
               className={cn(
                 "relative w-full h-full rounded-md overflow-hidden border bg-muted",
-                uploadErrors[index] && "border-destructive"
+                uploadErrors[index] && "border-destructive",
               )}
             >
               <ImagePreview src={url} />
@@ -171,7 +176,7 @@ export const MultipleImageUpload: React.FC<MultipleImageUploadProps> = ({
             <div
               className={cn(
                 "relative w-full h-full box-border rounded-md overflow-hidden border border-dashed bg-muted/50 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-muted transition-colors",
-                displayError && "border-destructive hover:border-destructive"
+                displayError && "border-destructive hover:border-destructive",
               )}
               onClick={handleButtonClick}
             >

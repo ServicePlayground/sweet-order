@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/apps/web-seller/common/components/ui/tabs";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/apps/web-seller/common/components/@shadcn-ui/tabs";
 import {
   IProductForm,
   MainCategory,
@@ -57,7 +62,6 @@ export const defaultForm: IProductForm = {
   hashtags: [],
   status: ProductStatus.ACTIVE,
 };
-
 
 export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
   const [form, setForm] = useState<IProductForm>(initialValue || defaultForm);

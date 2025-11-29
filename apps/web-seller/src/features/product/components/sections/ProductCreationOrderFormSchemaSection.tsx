@@ -10,10 +10,10 @@ import {
   ORDER_FORM_FIELD_TYPE_OPTIONS,
   PRODUCT_ERROR_MESSAGES,
 } from "@/apps/web-seller/features/product/constants/product.constant";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
-import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 
 export interface ProductCreationOrderFormSchemaSectionProps {
   value?: OrderFormSchema;
@@ -179,9 +179,7 @@ export const ProductCreationOrderFormSchemaSection: React.FC<
             <Card key={field.id}>
               <CardContent>
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-base font-bold">
-                    필드 {fieldIndex + 1}
-                  </h3>
+                  <h3 className="text-base font-bold">필드 {fieldIndex + 1}</h3>
                   <button
                     className="text-destructive hover:text-destructive/80 p-1"
                     onClick={() => handleRemoveField(fieldIndex)}
@@ -308,7 +306,8 @@ export const ProductCreationOrderFormSchemaSection: React.FC<
                                           onChange={(e) => {
                                             const value = e.target.value;
                                             handleOptionChange(fieldIndex, optionIndex, {
-                                              price: value === "" ? undefined : parseInt(value) || 0,
+                                              price:
+                                                value === "" ? undefined : parseInt(value) || 0,
                                             });
                                           }}
                                           min={0}

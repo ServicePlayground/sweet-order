@@ -4,14 +4,14 @@ import { getMenuItems } from "@/apps/web-seller/common/constants/menu.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store.ts";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/apps/web-seller/common/components/ui/select";
+} from "@/apps/web-seller/common/components/@shadcn-ui/select";
 import { cn } from "@/apps/web-seller/common/lib/utils";
 
 interface AdminSidebarProps {
@@ -67,19 +67,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   return (
     <>
       {/* Mobile overlay backdrop */}
-      {isMobile && open && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40"
-          onClick={onToggle}
-        />
-      )}
+      {isMobile && open && <div className="fixed inset-0 bg-black/50 z-40" onClick={onToggle} />}
 
       {/* Sidebar */}
       <aside
         className={cn(
           "fixed top-0 left-0 h-full bg-background border-r z-50 transition-transform duration-300",
           isMobile && !open && "-translate-x-full",
-          !isMobile && !open && "-translate-x-full"
+          !isMobile && !open && "-translate-x-full",
         )}
         style={{ width: drawerWidth }}
       >
@@ -88,10 +83,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           <div className="flex items-center h-16 px-4 border-b">
             {stores.length > 0 ? (
               <div className="min-w-[160px]">
-                <Select
-                  value={storeIdFromPath || ""}
-                  onValueChange={onSelectStore}
-                >
+                <Select value={storeIdFromPath || ""} onValueChange={onSelectStore}>
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder="스토어 선택">
                       {stores.find((s) => s.id === storeIdFromPath)?.name || "스토어 선택"}
@@ -107,17 +99,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 </Select>
               </div>
             ) : (
-              <div className="text-sm font-medium truncate">
-                SWEET ORDER
-              </div>
+              <div className="text-sm font-medium truncate">SWEET ORDER</div>
             )}
             {!isMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onToggle}
-                className="ml-auto"
-              >
+              <Button variant="ghost" size="icon" onClick={onToggle} className="ml-auto">
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             )}
@@ -144,14 +129,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                         isParentSelected
                           ? "bg-primary text-primary-foreground"
-                          : "hover:bg-accent hover:text-accent-foreground"
+                          : "hover:bg-accent hover:text-accent-foreground",
                       )}
                     >
-                      {item.icon && (
-                        <span className="flex-shrink-0 w-5 h-5">
-                          {item.icon}
-                        </span>
-                      )}
+                      {item.icon && <span className="flex-shrink-0 w-5 h-5">{item.icon}</span>}
                       <span className="flex-1 text-left">{item.text}</span>
                     </button>
 
@@ -165,7 +146,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                                 "w-full flex items-center px-3 py-2 rounded-md text-sm transition-colors",
                                 currentPath === child.path
                                   ? "bg-primary text-primary-foreground"
-                                  : "hover:bg-accent hover:text-accent-foreground"
+                                  : "hover:bg-accent hover:text-accent-foreground",
                               )}
                             >
                               <span className="flex-1 text-left">{child.text}</span>

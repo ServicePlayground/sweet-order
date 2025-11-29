@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Menu, User, LogOut } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
@@ -32,8 +32,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [mobileOpen]);
 
   const handleDrawerToggle = () => {
@@ -54,11 +54,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       {/* 헤더 */}
       <header
         className={`fixed top-0 right-0 z-10 bg-primary text-primary-foreground transition-all duration-300 ${
-          isDrawerOpen && !isMobile ? `left-[${drawerWidth}px]` : 'left-0'
+          isDrawerOpen && !isMobile ? `left-[${drawerWidth}px]` : "left-0"
         }`}
         style={{
-          width: isDrawerOpen && !isMobile ? `calc(100% - ${drawerWidth}px)` : '100%',
-          marginLeft: isDrawerOpen && !isMobile ? `${drawerWidth}px` : 0
+          width: isDrawerOpen && !isMobile ? `calc(100% - ${drawerWidth}px)` : "100%",
+          marginLeft: isDrawerOpen && !isMobile ? `${drawerWidth}px` : 0,
         }}
       >
         <div className="flex items-center h-16 px-4">
@@ -118,7 +118,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         className="flex-1 p-6 pt-20 transition-all duration-300"
         style={{
           marginLeft: isDrawerOpen && !isMobile ? `${drawerWidth}px` : 0,
-          width: isDrawerOpen && !isMobile ? `calc(100% - ${drawerWidth}px)` : '100%'
+          width: isDrawerOpen && !isMobile ? `calc(100% - ${drawerWidth}px)` : "100%",
         }}
       >
         {children}

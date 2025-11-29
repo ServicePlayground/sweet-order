@@ -14,7 +14,7 @@
   "aliases": {
     "components": "@/apps/web-user/common/components",
     "utils": "@/apps/web-user/common/lib/utils",
-    "ui": "@/apps/web-user/common/components/ui",
+    "ui": "@/apps/web-user/common/components/@shadcn/ui",
     "lib": "@/apps/web-user/common/lib",
     "hooks": "@/apps/web-user/hooks"
   },

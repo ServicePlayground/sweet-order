@@ -2,7 +2,11 @@
 
 import { useEffect } from "react";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
-import { Alert as AlertComponent, AlertTitle, AlertDescription } from "@/apps/web-seller/common/components/ui/alert";
+import {
+  Alert as AlertComponent,
+  AlertTitle,
+  AlertDescription,
+} from "@/apps/web-seller/common/components/@shadcn-ui/alert";
 import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/lib/utils";
 
@@ -62,24 +66,19 @@ export function Alert() {
           key={alert.id}
           className={cn(
             "pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300",
-            "min-w-[300px] max-w-[400px]"
+            "min-w-[300px] max-w-[400px]",
           )}
           style={{
             marginBottom: index * 8,
           }}
         >
           <AlertComponent
-            className={cn(
-              "relative shadow-lg border-2",
-              getSeverityClasses(alert.severity)
-            )}
+            className={cn("relative shadow-lg border-2", getSeverityClasses(alert.severity))}
           >
             <div className="flex items-start gap-3">
               {getIcon(alert.severity)}
               <div className="flex-1">
-                {alert.title && (
-                  <AlertTitle className="mb-1">{alert.title}</AlertTitle>
-                )}
+                {alert.title && <AlertTitle className="mb-1">{alert.title}</AlertTitle>}
                 <AlertDescription>{alert.message}</AlertDescription>
               </div>
               <button

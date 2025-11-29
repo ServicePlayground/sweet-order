@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import { STORE_ERROR_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
 import { ImageUpload } from "@/apps/web-seller/common/components/images/ImageUpload";
-import { Button } from "@/apps/web-seller/common/components/ui/button";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 interface Props {
   onSubmit: (data: IStoreForm) => void;
@@ -93,9 +93,7 @@ export const StoreCreationForm: React.FC<Props> = ({
             onChange={handleChange("name")}
             className={errors.name ? "border-destructive" : ""}
           />
-          {errors.name && (
-            <p className="text-sm text-destructive mt-1">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
         </div>
         <div>
           <Label>스토어 설명</Label>

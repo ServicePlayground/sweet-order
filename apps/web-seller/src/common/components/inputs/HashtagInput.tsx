@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from "react";
-import { Input } from "@/apps/web-seller/common/components/ui/input";
-import { Label } from "@/apps/web-seller/common/components/ui/label";
-import { Badge } from "@/apps/web-seller/common/components/ui/badge";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Badge } from "@/apps/web-seller/common/components/@shadcn-ui/badge";
 import { X } from "lucide-react";
 
 export interface HashtagInputProps {
@@ -60,7 +60,11 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <Label className={required ? "after:content-['*'] after:ml-0.5 after:text-destructive mb-1" : "mb-1"}>
+        <Label
+          className={
+            required ? "after:content-['*'] after:ml-0.5 after:text-destructive mb-1" : "mb-1"
+          }
+        >
           {label}
         </Label>
       )}
@@ -76,7 +80,11 @@ export const HashtagInput: React.FC<HashtagInputProps> = ({
 
       {(error || value.length > 0) && (
         <p className="text-sm text-muted-foreground mt-1">
-          {error ? <span className="text-destructive">{error}</span> : `${value.length}/${maxTags}개`}
+          {error ? (
+            <span className="text-destructive">{error}</span>
+          ) : (
+            `${value.length}/${maxTags}개`
+          )}
         </p>
       )}
 
