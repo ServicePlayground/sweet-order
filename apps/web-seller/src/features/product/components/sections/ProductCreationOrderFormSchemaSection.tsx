@@ -1,21 +1,5 @@
 import React, { useState } from "react";
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-  Divider,
-  FormControlLabel,
-  Checkbox,
-  Alert,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {
   OrderFormSchema,
   OrderFormField,
   OrderFormFieldType,
@@ -26,6 +10,10 @@ import {
   ORDER_FORM_FIELD_TYPE_OPTIONS,
   PRODUCT_ERROR_MESSAGES,
 } from "@/apps/web-seller/features/product/constants/product.constant";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Input } from "@/apps/web-seller/common/components/ui/input";
+import { Label } from "@/apps/web-seller/common/components/ui/label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
 
 export interface ProductCreationOrderFormSchemaSectionProps {
   value?: OrderFormSchema;
@@ -166,207 +154,189 @@ export const ProductCreationOrderFormSchemaSection: React.FC<
   }, [fields]);
 
   return (
-    <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h6">커스텀 주문양식</Typography>
-        <Button startIcon={<AddIcon />} variant="outlined" onClick={handleAddField} size="small">
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-semibold">커스텀 주문양식</h2>
+        <Button variant="outline" onClick={handleAddField} size="sm">
+          <span className="mr-2">+</span>
           필드 추가
         </Button>
-      </Box>
+      </div>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded mb-2">
           {error}
-        </Alert>
+        </div>
       )}
 
       {fields.length === 0 ? (
-        <Alert severity="info">주문양식 필드를 추가해주세요.</Alert>
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded">
+          주문양식 필드를 추가해주세요.
+        </div>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <div className="flex flex-col gap-2">
           {fields.map((field, fieldIndex) => (
-            <Card key={field.id} variant="outlined">
+            <Card key={field.id}>
               <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-base font-bold">
                     필드 {fieldIndex + 1}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    color="error"
+                  </h3>
+                  <button
+                    className="text-destructive hover:text-destructive/80 p-1"
                     onClick={() => handleRemoveField(fieldIndex)}
                     aria-label="필드 삭제"
                   >
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
+                    <span className="text-xl">×</span>
+                  </button>
+                </div>
 
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <SelectBox
-                      label="필드 타입"
-                      value={field.type}
-                      onChange={(value) =>
-                        handleFieldChange(fieldIndex, { type: value as OrderFormFieldType })
-                      }
-                      options={ORDER_FORM_FIELD_TYPE_OPTIONS}
-                      required
-                    />
-                  </Grid>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <SelectBox
+                        label="필드 타입"
+                        value={field.type}
+                        onChange={(value) =>
+                          handleFieldChange(fieldIndex, { type: value as OrderFormFieldType })
+                        }
+                        options={ORDER_FORM_FIELD_TYPE_OPTIONS}
+                        required
+                      />
+                    </div>
 
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      label="필드명"
-                      fullWidth
-                      value={field.label}
-                      onChange={(e) => handleFieldChange(fieldIndex, { label: e.target.value })}
-                      required
-                      error={Boolean(fieldErrors[fieldIndex])}
-                      helperText={fieldErrors[fieldIndex]}
-                      placeholder="예: 사이즈 선택"
-                    />
-                  </Grid>
+                    <div>
+                      <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+                        필드명
+                      </Label>
+                      <Input
+                        placeholder="예: 사이즈 선택"
+                        value={field.label}
+                        onChange={(e) => handleFieldChange(fieldIndex, { label: e.target.value })}
+                        className={fieldErrors[fieldIndex] ? "border-destructive" : ""}
+                      />
+                      {fieldErrors[fieldIndex] && (
+                        <p className="text-sm text-destructive mt-1">{fieldErrors[fieldIndex]}</p>
+                      )}
+                    </div>
+                  </div>
 
-                  <Grid item xs={12}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={field.required}
-                          onChange={(e) =>
-                            handleFieldChange(fieldIndex, { required: e.target.checked })
-                          }
-                        />
-                      }
-                      label="필수 항목"
-                    />
-                  </Grid>
+                  <div>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={field.required}
+                        onChange={(e) =>
+                          handleFieldChange(fieldIndex, { required: e.target.checked })
+                        }
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">필수 항목</span>
+                    </label>
+                  </div>
 
                   {field.type === "textbox" && (
-                    <Grid item xs={12}>
-                      <TextField
-                        label="플레이스홀더"
-                        fullWidth
+                    <div>
+                      <Label>플레이스홀더</Label>
+                      <Input
+                        placeholder="예: 케이크 문구를 입력해주세요"
                         value={field.placeholder || ""}
                         onChange={(e) =>
                           handleFieldChange(fieldIndex, { placeholder: e.target.value })
                         }
-                        placeholder="예: 케이크 문구를 입력해주세요"
                       />
-                    </Grid>
+                    </div>
                   )}
 
                   {field.type === "selectbox" && (
                     <>
-                      <Grid item xs={12}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={field.allowMultiple || false}
-                              onChange={(e) =>
-                                handleFieldChange(fieldIndex, { allowMultiple: e.target.checked })
-                              }
-                            />
-                          }
-                          label="중복선택허용"
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Divider sx={{ my: 1 }} />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            mb: 1,
-                          }}
-                        >
-                          <Typography variant="subtitle2">옵션</Typography>
+                      <div>
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={field.allowMultiple || false}
+                            onChange={(e) =>
+                              handleFieldChange(fieldIndex, { allowMultiple: e.target.checked })
+                            }
+                            className="rounded border-gray-300"
+                          />
+                          <span className="text-sm">중복선택허용</span>
+                        </label>
+                      </div>
+                      <div>
+                        <div className="border-t my-2" />
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="text-sm font-medium">옵션</h4>
                           <Button
-                            startIcon={<AddIcon />}
-                            variant="outlined"
-                            size="small"
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleAddOption(fieldIndex)}
                           >
+                            <span className="mr-2">+</span>
                             옵션 추가
                           </Button>
-                        </Box>
-                      </Grid>
+                        </div>
+                      </div>
 
                       {field.options && field.options.length > 0 && (
-                        <Grid item xs={12}>
-                          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <div>
+                          <div className="flex flex-col gap-2">
                             {field.options.map((option, optionIndex) => (
-                              <Card key={optionIndex} variant="outlined" sx={{ p: 2 }}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "flex-start",
-                                  }}
-                                >
-                                  <Grid container spacing={2} sx={{ flex: 1 }}>
-                                    <Grid item xs={12} md={6}>
-                                      <TextField
-                                        label="옵션명"
-                                        fullWidth
-                                        size="small"
-                                        value={option.label}
-                                        onChange={(e) =>
-                                          handleOptionChange(fieldIndex, optionIndex, {
-                                            label: e.target.value,
-                                          })
-                                        }
-                                        placeholder="예: 1호"
-                                        required
-                                      />
-                                    </Grid>
-                                    <Grid item xs={12} md={5}>
-                                      <TextField
-                                        label="추가 가격"
-                                        fullWidth
-                                        size="small"
-                                        type="number"
-                                        value={option.price ?? ""}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          handleOptionChange(fieldIndex, optionIndex, {
-                                            price: value === "" ? undefined : parseInt(value) || 0,
-                                          });
-                                        }}
-                                        inputProps={{ min: 0 }}
-                                      />
-                                    </Grid>
-                                  </Grid>
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() => handleRemoveOption(fieldIndex, optionIndex)}
-                                    sx={{ ml: 1 }}
-                                    aria-label="옵션 삭제"
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                </Box>
+                              <Card key={optionIndex}>
+                                <div className="p-2">
+                                  <div className="flex justify-between items-start">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-2 flex-1">
+                                      <div className="md:col-span-6">
+                                        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+                                          옵션명
+                                        </Label>
+                                        <Input
+                                          placeholder="예: 1호"
+                                          value={option.label}
+                                          onChange={(e) =>
+                                            handleOptionChange(fieldIndex, optionIndex, {
+                                              label: e.target.value,
+                                            })
+                                          }
+                                        />
+                                      </div>
+                                      <div className="md:col-span-5">
+                                        <Label>추가 가격</Label>
+                                        <Input
+                                          type="number"
+                                          value={option.price ?? ""}
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            handleOptionChange(fieldIndex, optionIndex, {
+                                              price: value === "" ? undefined : parseInt(value) || 0,
+                                            });
+                                          }}
+                                          min={0}
+                                        />
+                                      </div>
+                                    </div>
+                                    <button
+                                      className="text-destructive hover:text-destructive/80 p-1 ml-1"
+                                      onClick={() => handleRemoveOption(fieldIndex, optionIndex)}
+                                      aria-label="옵션 삭제"
+                                    >
+                                      <span className="text-xl">×</span>
+                                    </button>
+                                  </div>
+                                </div>
                               </Card>
                             ))}
-                          </Box>
-                        </Grid>
+                          </div>
+                        </div>
                       )}
                     </>
                   )}
-                </Grid>
+                </div>
               </CardContent>
             </Card>
           ))}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Tabs, Tab, Paper } from "@mui/material";
+import { Button } from "@/apps/web-seller/common/components/ui/button";
+import { Card, CardContent } from "@/apps/web-seller/common/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/apps/web-seller/common/components/ui/tabs";
 import {
   IProductForm,
   MainCategory,
@@ -56,29 +58,11 @@ export const defaultForm: IProductForm = {
   status: ProductStatus.ACTIVE,
 };
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`product-tabpanel-${index}`}
-      aria-labelledby={`product-tab-${index}`}
-    >
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
-};
 
 export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
   const [form, setForm] = useState<IProductForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<Partial<Record<keyof IProductForm, string>>>({});
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("basic");
 
   useEffect(() => {
     if (initialValue) {
@@ -176,7 +160,7 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
       if (errorKeys.length > 0) {
         // 에러가 있는 탭으로 이동
         if (validationErrors.detailDescription) {
-          setActiveTab(1); // 상세정보 탭
+          setActiveTab("detail"); // 상세정보 탭
         } else if (
           validationErrors.productNoticeFoodType ||
           validationErrors.productNoticeProducer ||
@@ -193,11 +177,11 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
           validationErrors.productNoticeImportNotice ||
           validationErrors.productNoticeCustomerService
         ) {
-          setActiveTab(2); // 상품정보제공고시 탭
+          setActiveTab("notice"); // 상품정보제공고시 탭
         } else if (validationErrors.cancellationRefundDetailDescription) {
-          setActiveTab(3); // 취소 및 환불 탭
+          setActiveTab("refund"); // 취소 및 환불 탭
         } else {
-          setActiveTab(0); // 기본 정보 탭
+          setActiveTab("basic"); // 기본 정보 탭
         }
       }
       return;
@@ -206,90 +190,87 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
     onSubmit(form);
   };
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
-
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate>
-      <Paper sx={{ p: 3 }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          aria-label="상품 등록 탭"
-          variant="fullWidth"
-        >
-          <Tab label="기본 정보" />
-          <Tab label="상세정보" />
-          <Tab label="상품정보제공고시" />
-          <Tab label="취소 및 환불" />
-        </Tabs>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="basic">기본 정보</TabsTrigger>
+              <TabsTrigger value="detail">상세정보</TabsTrigger>
+              <TabsTrigger value="notice">상품정보제공고시</TabsTrigger>
+              <TabsTrigger value="refund">취소 및 환불</TabsTrigger>
+            </TabsList>
 
-        {/* 기본 정보 탭 */}
-        <TabPanel value={activeTab} index={0}>
-          <ProductCreationBasicInfoSection
-            form={form}
-            errors={errors}
-            onCategoryChange={handleCategoryChange}
-            onImagesChange={handleImagesChange}
-            onChange={handleChange}
-          />
+            {/* 기본 정보 탭 */}
+            <TabsContent value="basic" className="space-y-6 mt-6">
+              <ProductCreationBasicInfoSection
+                form={form}
+                errors={errors}
+                onCategoryChange={handleCategoryChange}
+                onImagesChange={handleImagesChange}
+                onChange={handleChange}
+              />
 
-          {/* 커스텀 주문양식 섹션 */}
-          <Paper sx={{ p: 3, mt: 4 }}>
-            <ProductCreationOrderFormSchemaSection
-              value={form.orderFormSchema}
-              onChange={handleOrderFormSchemaChange}
-            />
-          </Paper>
+              {/* 커스텀 주문양식 섹션 */}
+              <Card>
+                <CardContent className="p-6">
+                  <ProductCreationOrderFormSchemaSection
+                    value={form.orderFormSchema}
+                    onChange={handleOrderFormSchemaChange}
+                  />
+                </CardContent>
+              </Card>
 
-          {/* 추가 설정 섹션 */}
-          <Box sx={{ mt: 4 }}>
-            <ProductCreationAdditionalSettingsSection
-              form={form}
-              errors={errors}
-              onStockChange={handleChange("stock")}
-              onStatusChange={handleStatusChange}
-              onSizeRangeChange={handleSizeRangeChange}
-              onDeliveryMethodChange={handleDeliveryMethodChange}
-              onHashtagsChange={handleHashtagsChange}
-            />
-          </Box>
-        </TabPanel>
+              {/* 추가 설정 섹션 */}
+              <div>
+                <ProductCreationAdditionalSettingsSection
+                  form={form}
+                  errors={errors}
+                  onStockChange={handleChange("stock")}
+                  onStatusChange={handleStatusChange}
+                  onSizeRangeChange={handleSizeRangeChange}
+                  onDeliveryMethodChange={handleDeliveryMethodChange}
+                  onHashtagsChange={handleHashtagsChange}
+                />
+              </div>
+            </TabsContent>
 
-        {/* 상세정보 탭 */}
-        <TabPanel value={activeTab} index={1}>
-          <ProductCreationDetailDescriptionSection
-            form={form}
-            errors={errors}
-            onChange={handleDetailDescriptionChange}
-          />
-        </TabPanel>
+            {/* 상세정보 탭 */}
+            <TabsContent value="detail" className="mt-6">
+              <ProductCreationDetailDescriptionSection
+                form={form}
+                errors={errors}
+                onChange={handleDetailDescriptionChange}
+              />
+            </TabsContent>
 
-        {/* 상품정보제공고시 탭 */}
-        <TabPanel value={activeTab} index={2}>
-          <ProductCreationProductNoticeSection
-            form={form}
-            errors={errors}
-            onChange={handleChange}
-          />
-        </TabPanel>
+            {/* 상품정보제공고시 탭 */}
+            <TabsContent value="notice" className="mt-6">
+              <ProductCreationProductNoticeSection
+                form={form}
+                errors={errors}
+                onChange={handleChange}
+              />
+            </TabsContent>
 
-        {/* 취소 및 환불 탭 */}
-        <TabPanel value={activeTab} index={3}>
-          <ProductCreationCancellationRefundSection
-            form={form}
-            errors={errors}
-            onChange={handleCancellationRefundPolicyChange}
-          />
-        </TabPanel>
-      </Paper>
+            {/* 취소 및 환불 탭 */}
+            <TabsContent value="refund" className="mt-6">
+              <ProductCreationCancellationRefundSection
+                form={form}
+                errors={errors}
+                onChange={handleCancellationRefundPolicyChange}
+              />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button type="submit" variant="contained" size="large">
+      <div className="flex justify-end">
+        <Button type="submit" size="lg">
           상품 등록
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 };

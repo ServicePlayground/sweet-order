@@ -1,12 +1,12 @@
 import React from "react";
 import {
-  FormControl,
-  InputLabel,
   Select,
-  MenuItem,
-  FormHelperText,
-  SelectChangeEvent,
-} from "@mui/material";
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/apps/web-seller/common/components/ui/select";
+import { Label } from "@/apps/web-seller/common/components/ui/label";
 
 export interface SelectOption {
   readonly value: string;
@@ -34,26 +34,24 @@ export const FormSelect: React.FC<FormSelectProps> = ({
   fullWidth = true,
   disabled = false,
 }) => {
-  const handleChange = (event: SelectChangeEvent<string>) => {
-    onChange(event.target.value);
-  };
-
   return (
-    <FormControl
-      fullWidth={fullWidth}
-      error={Boolean(error)}
-      required={required}
-      disabled={disabled}
-    >
-      <InputLabel>{label}</InputLabel>
-      <Select value={value} onChange={handleChange} label={label}>
-        {options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        ))}
+    <div className={fullWidth ? "w-full" : ""}>
+      <Label className={required ? "after:content-['*'] after:ml-0.5 after:text-destructive" : ""}>
+        {label}
+      </Label>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger className={error ? "border-destructive" : ""}>
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
-      {error && <FormHelperText>{error}</FormHelperText>}
-    </FormControl>
+      {error && <p className="text-sm text-destructive mt-1">{error}</p>}
+    </div>
   );
 };
