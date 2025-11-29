@@ -1,5 +1,4 @@
 import React from "react";
-import { Box, Typography, Paper } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { ProductCreationForm } from "@/apps/web-seller/features/product/components/forms/ProductCreationForm";
 import {
@@ -7,6 +6,7 @@ import {
   ICreateProductRequest,
 } from "@/apps/web-seller/features/product/types/product.type";
 import { useCreateProduct } from "@/apps/web-seller/features/product/hooks/queries/useProduct";
+import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 
 export const StoreDetailProductCreatePage: React.FC = () => {
   const { storeId } = useParams();
@@ -14,9 +14,9 @@ export const StoreDetailProductCreatePage: React.FC = () => {
 
   if (!storeId) {
     return (
-      <Box>
-        <Typography variant="h6">스토어가 선택되지 않았습니다.</Typography>
-      </Box>
+      <div>
+        <h2 className="text-xl font-semibold">스토어가 선택되지 않았습니다.</h2>
+      </div>
     );
   }
 
@@ -31,13 +31,13 @@ export const StoreDetailProductCreatePage: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        상품 등록
-      </Typography>
-      <Paper sx={{ p: 3 }}>
-        <ProductCreationForm onSubmit={handleSubmit} />
-      </Paper>
-    </Box>
+    <div className="space-y-4">
+      <h1 className="text-3xl font-bold">상품 등록</h1>
+      <Card>
+        <CardContent className="p-6">
+          <ProductCreationForm onSubmit={handleSubmit} />
+        </CardContent>
+      </Card>
+    </div>
   );
 };

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Grid, TextField } from "@mui/material";
 import { IOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/types/business.type";
 import { isValidPermissionManagementNumber } from "@/apps/web-seller/common/utils/validator.util";
 import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 interface Props {
   onSubmit: (data: IOnlineTradingCompanyDetailForm) => void;
@@ -58,31 +60,32 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} noValidate>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={12}>
-          <TextField
-            label="인허가관리번호(2021-서울강동-0422)"
-            fullWidth
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-6">
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            인허가관리번호
+          </Label>
+          <Input
+            placeholder="2021-서울강동-0422"
             value={form.prmmiMnno}
             onChange={handleChange("prmmiMnno")}
-            error={Boolean(errors.prmmiMnno)}
-            helperText={errors.prmmiMnno}
-            required
+            className={errors.prmmiMnno ? "border-destructive" : ""}
           />
-        </Grid>
-      </Grid>
+          {errors.prmmiMnno && <p className="text-sm text-destructive mt-1">{errors.prmmiMnno}</p>}
+        </div>
+      </div>
 
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
+      <div className="flex justify-between mt-6">
         {onPrevious && (
-          <Button type="button" variant="outlined" onClick={onPrevious}>
+          <Button type="button" variant="outline" onClick={onPrevious}>
             이전
           </Button>
         )}
-        <Button type="submit" variant="contained" sx={{ ml: onPrevious ? "auto" : 0 }}>
+        <Button type="submit" className={onPrevious ? "ml-auto" : ""}>
           다음 단계
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 };

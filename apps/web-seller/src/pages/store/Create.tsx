@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 import { ProgressBar } from "@/apps/web-seller/common/components/progressbars/progressbar";
 import { BusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { OnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
@@ -149,13 +149,13 @@ export const StoreCreatePage: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        스토어 만들기
-      </Typography>
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold">스토어 만들기</h1>
       <ProgressBar activeStep={currentStep - 1} steps={STEPS} />
 
-      <Paper sx={{ p: 3 }}>{renderStep()}</Paper>
-    </Box>
+      <Card>
+        <CardContent className="p-6">{renderStep()}</CardContent>
+      </Card>
+    </div>
   );
 };

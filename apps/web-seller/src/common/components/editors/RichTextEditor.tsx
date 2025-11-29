@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useEffect } from "react";
-import { Box } from "@mui/material";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
 
 export interface RichTextEditorProps {
@@ -135,33 +135,27 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   ];
 
   return (
-    <Box
-      sx={{
-        "& .quill": {
-          "& .ql-toolbar": {
-            borderTopLeftRadius: "4px",
-            borderTopRightRadius: "4px",
-            borderColor: error ? "error.main" : "divider",
-            backgroundColor: "grey.50",
-          },
-          "& .ql-container": {
-            minHeight: `${minHeight}px`,
-            fontSize: "16px",
-            borderBottomLeftRadius: "4px",
-            borderBottomRightRadius: "4px",
-            borderColor: error ? "error.main" : "divider",
-            "& .ql-editor": {
-              minHeight: `${minHeight}px`,
-              "&.ql-blank::before": {
-                content: `"${placeholder}"`,
-                color: "text.disabled",
-                fontStyle: "normal",
-              },
-            },
-          },
-        },
-      }}
-    >
+    <div className={cn("quill-editor-wrapper", error && "quill-error")}>
+      <style>{`
+        .quill-editor-wrapper .quill .ql-toolbar {
+          border-top-left-radius: 4px;
+          border-top-right-radius: 4px;
+          background-color: hsl(var(--muted));
+        }
+        .quill-editor-wrapper .quill .ql-container {
+          min-height: ${minHeight}px;
+          font-size: 16px;
+          border-bottom-left-radius: 4px;
+          border-bottom-right-radius: 4px;
+        }
+        .quill-editor-wrapper .quill .ql-editor {
+          min-height: ${minHeight}px;
+        }
+        .quill-error .quill .ql-toolbar,
+        .quill-error .quill .ql-container {
+          border-color: hsl(var(--destructive));
+        }
+      `}</style>
       <ReactQuill
         ref={quillRef}
         theme="snow"
@@ -171,6 +165,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         formats={formats}
         placeholder={placeholder}
       />
-    </Box>
+    </div>
   );
 };

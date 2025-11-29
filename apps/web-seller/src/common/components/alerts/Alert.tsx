@@ -1,55 +1,96 @@
 "use client";
 
-import { Alert as MuiAlert, Snackbar, AlertTitle, Slide, SlideProps } from "@mui/material";
+import { useEffect } from "react";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
-
-function SlideTransition(props: SlideProps) {
-  return <Slide {...props} direction="up" />;
-}
+import {
+  Alert as AlertComponent,
+  AlertTitle,
+  AlertDescription,
+} from "@/apps/web-seller/common/components/@shadcn-ui/alert";
+import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 
 export function Alert() {
   const { alerts, removeAlert } = useAlertStore();
+
+  useEffect(() => {
+    alerts.forEach((alert) => {
+      if (alert.autoHideDuration) {
+        const timer = setTimeout(() => {
+          removeAlert(alert.id);
+        }, alert.autoHideDuration);
+
+        return () => clearTimeout(timer);
+      }
+    });
+  }, [alerts, removeAlert]);
 
   const handleClose = (id: string) => {
     removeAlert(id);
   };
 
+  const getIcon = (severity: string) => {
+    switch (severity) {
+      case "success":
+        return <CheckCircle className="h-4 w-4" />;
+      case "error":
+        return <AlertCircle className="h-4 w-4" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4" />;
+      case "info":
+        return <Info className="h-4 w-4" />;
+      default:
+        return <Info className="h-4 w-4" />;
+    }
+  };
+
+  const getSeverityClasses = (severity: string) => {
+    switch (severity) {
+      case "success":
+        return "border-green-500 text-green-900 bg-green-50 dark:bg-green-950 dark:text-green-100";
+      case "error":
+        return "border-destructive text-destructive-foreground bg-destructive/10";
+      case "warning":
+        return "border-orange-500 text-orange-900 bg-orange-50 dark:bg-orange-950 dark:text-orange-100";
+      case "info":
+        return "border-blue-500 text-blue-900 bg-blue-50 dark:bg-blue-950 dark:text-blue-100";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <>
-      {alerts.map((alert) => (
-        <Snackbar
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col gap-2 pointer-events-none">
+      {alerts.map((alert, index) => (
+        <div
           key={alert.id}
-          open={true}
-          autoHideDuration={alert.autoHideDuration}
-          onClose={() => handleClose(alert.id)}
-          TransitionComponent={SlideTransition}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          sx={{
-            "& .MuiSnackbar-root": {
-              bottom: 24 + (alerts.length - 1 - alerts.indexOf(alert)) * 80, // 여러 알림이 겹치지 않도록
-            },
+          className={cn(
+            "pointer-events-auto animate-in slide-in-from-bottom-5 fade-in duration-300",
+            "min-w-[300px] max-w-[400px]",
+          )}
+          style={{
+            marginBottom: index * 8,
           }}
         >
-          <MuiAlert
-            onClose={() => handleClose(alert.id)}
-            severity={alert.severity}
-            variant={alert.variant}
-            sx={{
-              minWidth: 300,
-              maxWidth: 400,
-              "& .MuiAlert-message": {
-                width: "100%",
-              },
-            }}
+          <AlertComponent
+            className={cn("relative shadow-lg border-2", getSeverityClasses(alert.severity))}
           >
-            {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
-            {alert.message}
-          </MuiAlert>
-        </Snackbar>
+            <div className="flex items-start gap-3">
+              {getIcon(alert.severity)}
+              <div className="flex-1">
+                {alert.title && <AlertTitle className="mb-1">{alert.title}</AlertTitle>}
+                <AlertDescription>{alert.message}</AlertDescription>
+              </div>
+              <button
+                onClick={() => handleClose(alert.id)}
+                className="flex-shrink-0 p-1 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </AlertComponent>
+        </div>
       ))}
-    </>
+    </div>
   );
 }

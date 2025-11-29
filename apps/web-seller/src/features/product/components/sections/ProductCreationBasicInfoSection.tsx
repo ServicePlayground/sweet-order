@@ -1,9 +1,10 @@
 import React from "react";
-import { Grid, TextField } from "@mui/material";
 import { IProductForm, MainCategory } from "@/apps/web-seller/features/product/types/product.type";
 import { MAIN_CATEGORY_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { MultipleImageUpload } from "@/apps/web-seller/common/components/images/MultipleImageUpload";
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 export interface ProductCreationBasicInfoSectionProps {
   form: IProductForm;
@@ -24,8 +25,8 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   onChange,
 }) => {
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={12}>
+    <div className="grid grid-cols-1 gap-6">
+      <div>
         <SelectBox
           label="카테고리"
           value={form.mainCategory}
@@ -34,9 +35,9 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
           error={errors.mainCategory}
           required
         />
-      </Grid>
+      </div>
 
-      <Grid item xs={12} md={12}>
+      <div>
         <MultipleImageUpload
           label="상품 대표 이미지"
           value={form.images || []}
@@ -44,101 +45,106 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
           error={errors.images}
           required
         />
-      </Grid>
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="상품명"
-          fullWidth
+      <div>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">상품명</Label>
+        <Input
+          placeholder=""
           value={form.name}
           onChange={onChange("name")}
-          error={Boolean(errors.name)}
-          helperText={errors.name}
-          required
+          className={errors.name ? "border-destructive" : ""}
         />
-      </Grid>
+        {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="설명"
-          fullWidth
-          multiline
+      <div>
+        <Label>설명</Label>
+        <textarea
+          placeholder="상품에 대한 설명을 입력해주세요"
           rows={4}
           value={form.description || ""}
           onChange={onChange("description")}
-          error={Boolean(errors.description)}
-          helperText={errors.description}
-          placeholder="상품에 대한 설명을 입력해주세요"
+          className={`flex min-h-[80px] w-full rounded-md border ${
+            errors.description ? "border-destructive" : "border-input"
+          } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
         />
-      </Grid>
+        {errors.description && (
+          <p className="text-sm text-destructive mt-1">{errors.description}</p>
+        )}
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="정가"
-          fullWidth
+      <div>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">정가</Label>
+        <Input
+          placeholder=""
           type="number"
           value={form.originalPrice || 0}
           onChange={onChange("originalPrice")}
-          error={Boolean(errors.originalPrice)}
-          helperText={errors.originalPrice}
-          required
-          inputProps={{ min: 0 }}
+          className={errors.originalPrice ? "border-destructive" : ""}
+          min={0}
         />
-      </Grid>
+        {errors.originalPrice && (
+          <p className="text-sm text-destructive mt-1">{errors.originalPrice}</p>
+        )}
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="판매가"
-          fullWidth
+      <div>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">판매가</Label>
+        <Input
+          placeholder=""
           type="number"
           value={form.salePrice || 0}
           onChange={onChange("salePrice")}
-          error={Boolean(errors.salePrice)}
-          helperText={errors.salePrice}
-          required
-          inputProps={{ min: 0 }}
+          className={errors.salePrice ? "border-destructive" : ""}
+          min={0}
         />
-      </Grid>
+        {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="대표 안내 사항"
-          fullWidth
-          multiline
+      <div>
+        <Label>대표 안내 사항</Label>
+        <textarea
+          placeholder="예: 주문 후 1-2일 내 제작 완료"
           rows={2}
           value={form.notice || ""}
           onChange={onChange("notice")}
-          error={Boolean(errors.notice)}
-          helperText={errors.notice}
-          placeholder="예: 주문 후 1-2일 내 제작 완료"
+          className={`flex min-h-[80px] w-full rounded-md border ${
+            errors.notice ? "border-destructive" : "border-input"
+          } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
         />
-      </Grid>
+        {errors.notice && <p className="text-sm text-destructive mt-1">{errors.notice}</p>}
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="대표 주의사항"
-          fullWidth
-          multiline
+      <div>
+        <Label>대표 주의사항</Label>
+        <textarea
+          placeholder="예: 냉장 보관 필수, 3일 이내 섭취 권장"
           rows={2}
           value={form.caution || ""}
           onChange={onChange("caution")}
-          error={Boolean(errors.caution)}
-          helperText={errors.caution}
-          placeholder="예: 냉장 보관 필수, 3일 이내 섭취 권장"
+          className={`flex min-h-[80px] w-full rounded-md border ${
+            errors.caution ? "border-destructive" : "border-input"
+          } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
         />
-      </Grid>
+        {errors.caution && <p className="text-sm text-destructive mt-1">{errors.caution}</p>}
+      </div>
 
-      <Grid item xs={12} md={12}>
-        <TextField
-          label="기본 제공"
-          fullWidth
+      <div>
+        <Label>기본 제공</Label>
+        <Input
+          placeholder="예: 케이크, 촛불, 포크"
           value={form.basicIncluded || ""}
           onChange={onChange("basicIncluded")}
-          error={Boolean(errors.basicIncluded)}
-          helperText={errors.basicIncluded || "공백이면 상품페이지에서 보이지 않습니다"}
-          placeholder="예: 케이크, 촛불, 포크"
+          className={errors.basicIncluded ? "border-destructive" : ""}
         />
-      </Grid>
-    </Grid>
+        {errors.basicIncluded && (
+          <p className="text-sm text-destructive mt-1">{errors.basicIncluded}</p>
+        )}
+        <p className="text-sm text-muted-foreground mt-1">
+          공백이면 상품페이지에서 보이지 않습니다
+        </p>
+      </div>
+    </div>
   );
 };

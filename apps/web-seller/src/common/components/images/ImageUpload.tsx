@@ -1,8 +1,9 @@
 import React, { useState, useRef } from "react";
-import { Box, Button, Typography, CircularProgress, Alert, IconButton } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DeleteIcon from "@mui/icons-material/Delete";
-import ImageIcon from "@mui/icons-material/Image";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Alert, AlertDescription } from "@/apps/web-seller/common/components/@shadcn-ui/alert";
+import { CloudUpload, Trash2, ImageIcon, Loader2 } from "lucide-react";
+import { cn } from "@/apps/web-seller/common/lib/utils";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
 import { UPLOAD_CONSTANTS } from "@/apps/web-seller/features/upload/constants/upload.constant";
 import { ImagePreview } from "@/apps/web-seller/common/components/images/ImagePreview";
@@ -105,12 +106,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const isUploading = uploadMutation.isPending;
 
   return (
-    <Box>
+    <div className="w-full">
       {label && (
-        <Typography variant="body2" sx={{ mb: 1 }} component="label">
+        <Label
+          className={cn(
+            "mb-1 block",
+            required && "after:content-['*'] after:ml-0.5 after:text-destructive",
+          )}
+        >
           {label}
-          {required && <span style={{ color: "red" }}> *</span>}
-        </Typography>
+        </Label>
       )}
 
       <input
@@ -118,35 +123,19 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         type="file"
         accept={accept}
         onChange={handleFileSelect}
-        style={{ display: "none" }}
+        className="hidden"
       />
 
-      <Box
-        sx={{
-          position: "relative",
-          width: width,
-          maxWidth: "100%",
-          height: height,
-          boxSizing: "border-box",
-          borderRadius: 1,
-          overflow: "hidden",
-          mb: 2,
-          border: "1px solid",
-          borderStyle: previewUrl ? "solid" : "dashed",
-          borderColor: isDragging ? "primary.main" : displayError ? "error.main" : "divider",
-          backgroundColor: isDragging ? "grey.100" : previewUrl ? "grey.100" : "grey.50",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: !previewUrl && !isUploading ? "pointer" : isUploading ? "not-allowed" : "default",
-          opacity: isUploading ? 0.6 : 1,
-          "&:hover": !previewUrl
-            ? {
-                borderColor: displayError ? "error.main" : "primary.main",
-                backgroundColor: "grey.100",
-              }
-            : undefined,
-        }}
+      <div
+        className={cn(
+          "relative box-border rounded-md overflow-hidden mb-2 border flex items-center justify-center transition-colors",
+          previewUrl ? "border-solid bg-muted" : "border-dashed bg-muted/50",
+          isDragging && "border-primary bg-muted",
+          displayError && "border-destructive",
+          !previewUrl && !isUploading && "cursor-pointer hover:border-primary hover:bg-muted",
+          isUploading && "cursor-not-allowed opacity-60",
+        )}
+        style={{ width, maxWidth: "100%", height }}
         onClick={!previewUrl && !isUploading ? handleButtonClick : undefined}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
@@ -156,68 +145,51 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         {previewUrl ? (
           <ImagePreview src={previewUrl} />
         ) : isUploading ? (
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <CircularProgress size={40} />
-            <Typography variant="body2" color="text.secondary">
-              업로드 중...
-            </Typography>
-          </Box>
+          <div className="flex flex-col items-center gap-2">
+            <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">업로드 중...</p>
+          </div>
         ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary" }} />
-            <Typography variant="body2" color="text.secondary">
+          <div className="flex flex-col items-center gap-2 p-4">
+            <CloudUpload className="h-12 w-12 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground text-center">
               이미지를 클릭하거나 드래그하여 업로드
-            </Typography>
-            <Button variant="outlined" startIcon={<ImageIcon />}>
+            </p>
+            <Button variant="outline" className="gap-2">
+              <ImageIcon className="h-4 w-4" />
               파일 선택
             </Button>
-          </Box>
+          </div>
         )}
 
         {isUploading && previewUrl && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-            }}
-          >
-            <CircularProgress size={40} sx={{ color: "white" }} />
-          </Box>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <Loader2 className="h-10 w-10 animate-spin text-white" />
+          </div>
         )}
 
         {previewUrl && (
-          <IconButton
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleDelete}
             disabled={isUploading}
-            sx={{
-              position: "absolute",
-              top: 8,
-              right: 8,
-              backgroundColor: "white",
-              "&:hover": { backgroundColor: "grey.200" },
-            }}
+            className="absolute top-2 right-2 bg-white hover:bg-gray-200"
           >
-            <DeleteIcon />
-          </IconButton>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         )}
-      </Box>
+      </div>
 
       {displayError && (
-        <Alert severity="error" sx={{ mt: 1 }}>
-          {displayError}
+        <Alert variant="destructive" className="mt-2">
+          <AlertDescription>{displayError}</AlertDescription>
         </Alert>
       )}
 
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+      <p className="text-xs text-muted-foreground mt-1">
         최대 파일 크기: {maxSize / (1024 * 1024)}MB
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 };

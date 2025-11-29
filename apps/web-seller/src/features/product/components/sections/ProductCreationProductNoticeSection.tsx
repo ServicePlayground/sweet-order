@@ -1,6 +1,7 @@
 import React from "react";
-import { Grid, TextField, Typography, Box } from "@mui/material";
 import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 
 export interface ProductCreationProductNoticeSectionProps {
   form: IProductForm;
@@ -15,203 +16,236 @@ export const ProductCreationProductNoticeSection: React.FC<
   ProductCreationProductNoticeSectionProps
 > = ({ form, errors, onChange }) => {
   return (
-    <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        상품정보제공고시
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+    <div>
+      <h2 className="text-xl font-semibold mb-2">상품정보제공고시</h2>
+      <p className="text-sm text-muted-foreground mb-2">
         식품 판매 시 법적으로 입력해야 하는 항목들입니다. 모든 항목은 필수 입력입니다.
-      </Typography>
+      </p>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="식품의 유형"
-            fullWidth
-            value={form.productNoticeFoodType || ""}
-            onChange={onChange("productNoticeFoodType")}
-            error={Boolean(errors.productNoticeFoodType)}
-            helperText={errors.productNoticeFoodType}
-            required
-            placeholder="예: 케이크류"
-          />
-        </Grid>
+      <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              식품의 유형
+            </Label>
+            <Input
+              placeholder="예: 케이크류"
+              value={form.productNoticeFoodType || ""}
+              onChange={onChange("productNoticeFoodType")}
+              className={errors.productNoticeFoodType ? "border-destructive" : ""}
+            />
+            {errors.productNoticeFoodType && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeFoodType}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="제조사"
-            fullWidth
-            value={form.productNoticeProducer || ""}
-            onChange={onChange("productNoticeProducer")}
-            error={Boolean(errors.productNoticeProducer)}
-            helperText={errors.productNoticeProducer}
-            required
-            placeholder="예: 스위트오더"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              제조사
+            </Label>
+            <Input
+              placeholder="예: 스위트오더"
+              value={form.productNoticeProducer || ""}
+              onChange={onChange("productNoticeProducer")}
+              className={errors.productNoticeProducer ? "border-destructive" : ""}
+            />
+            {errors.productNoticeProducer && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeProducer}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="원산지"
-            fullWidth
-            value={form.productNoticeOrigin || ""}
-            onChange={onChange("productNoticeOrigin")}
-            error={Boolean(errors.productNoticeOrigin)}
-            helperText={errors.productNoticeOrigin}
-            required
-            placeholder="예: 국내산"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              원산지
+            </Label>
+            <Input
+              placeholder="예: 국내산"
+              value={form.productNoticeOrigin || ""}
+              onChange={onChange("productNoticeOrigin")}
+              className={errors.productNoticeOrigin ? "border-destructive" : ""}
+            />
+            {errors.productNoticeOrigin && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeOrigin}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="소재지"
-            fullWidth
-            value={form.productNoticeAddress || ""}
-            onChange={onChange("productNoticeAddress")}
-            error={Boolean(errors.productNoticeAddress)}
-            helperText={errors.productNoticeAddress}
-            required
-            placeholder="예: 서울시 강남구 테헤란로 123"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              소재지
+            </Label>
+            <Input
+              placeholder="예: 서울시 강남구 테헤란로 123"
+              value={form.productNoticeAddress || ""}
+              onChange={onChange("productNoticeAddress")}
+              className={errors.productNoticeAddress ? "border-destructive" : ""}
+            />
+            {errors.productNoticeAddress && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeAddress}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="제조연월일"
-            fullWidth
-            value={form.productNoticeManufactureDate || ""}
-            onChange={onChange("productNoticeManufactureDate")}
-            error={Boolean(errors.productNoticeManufactureDate)}
-            helperText={errors.productNoticeManufactureDate}
-            required
-            placeholder="예: 2024-01-01"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              제조연월일
+            </Label>
+            <Input
+              placeholder="예: 2024-01-01"
+              value={form.productNoticeManufactureDate || ""}
+              onChange={onChange("productNoticeManufactureDate")}
+              className={errors.productNoticeManufactureDate ? "border-destructive" : ""}
+            />
+            {errors.productNoticeManufactureDate && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeManufactureDate}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="소비기한 또는 품질유지기한"
-            fullWidth
-            value={form.productNoticeExpirationDate || ""}
-            onChange={onChange("productNoticeExpirationDate")}
-            error={Boolean(errors.productNoticeExpirationDate)}
-            helperText={errors.productNoticeExpirationDate}
-            required
-            placeholder="예: 제조일로부터 3일"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              소비기한 또는 품질유지기한
+            </Label>
+            <Input
+              placeholder="예: 제조일로부터 3일"
+              value={form.productNoticeExpirationDate || ""}
+              onChange={onChange("productNoticeExpirationDate")}
+              className={errors.productNoticeExpirationDate ? "border-destructive" : ""}
+            />
+            {errors.productNoticeExpirationDate && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeExpirationDate}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="포장단위별 용량/수량"
-            fullWidth
-            value={form.productNoticePackageCapacity || ""}
-            onChange={onChange("productNoticePackageCapacity")}
-            error={Boolean(errors.productNoticePackageCapacity)}
-            helperText={errors.productNoticePackageCapacity}
-            required
-            placeholder="예: 500g"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              포장단위별 용량/수량
+            </Label>
+            <Input
+              placeholder="예: 500g"
+              value={form.productNoticePackageCapacity || ""}
+              onChange={onChange("productNoticePackageCapacity")}
+              className={errors.productNoticePackageCapacity ? "border-destructive" : ""}
+            />
+            {errors.productNoticePackageCapacity && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticePackageCapacity}</p>
+            )}
+          </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="포장 단위별 수량"
-            fullWidth
-            value={form.productNoticePackageQuantity || ""}
-            onChange={onChange("productNoticePackageQuantity")}
-            error={Boolean(errors.productNoticePackageQuantity)}
-            helperText={errors.productNoticePackageQuantity}
-            required
-            placeholder="예: 1개"
-          />
-        </Grid>
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              포장 단위별 수량
+            </Label>
+            <Input
+              placeholder="예: 1개"
+              value={form.productNoticePackageQuantity || ""}
+              onChange={onChange("productNoticePackageQuantity")}
+              className={errors.productNoticePackageQuantity ? "border-destructive" : ""}
+            />
+            {errors.productNoticePackageQuantity && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticePackageQuantity}</p>
+            )}
+          </div>
+        </div>
 
-        <Grid item xs={12}>
-          <TextField
-            label="원재료명 및 함량"
-            fullWidth
-            multiline
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            원재료명 및 함량
+          </Label>
+          <textarea
+            placeholder="예: 초콜릿, 밀가루, 설탕, 우유, 계란"
             rows={3}
             value={form.productNoticeIngredients || ""}
             onChange={onChange("productNoticeIngredients")}
-            error={Boolean(errors.productNoticeIngredients)}
-            helperText={errors.productNoticeIngredients}
-            required
-            placeholder="예: 초콜릿, 밀가루, 설탕, 우유, 계란"
+            className={`flex min-h-[80px] w-full rounded-md border ${
+              errors.productNoticeIngredients ? "border-destructive" : "border-input"
+            } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
           />
-        </Grid>
+          {errors.productNoticeIngredients && (
+            <p className="text-sm text-destructive mt-1">{errors.productNoticeIngredients}</p>
+          )}
+        </div>
 
-        <Grid item xs={12}>
-          <TextField
-            label="영양성분"
-            fullWidth
-            multiline
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            영양성분
+          </Label>
+          <textarea
+            placeholder="예: 칼로리: 350kcal, 탄수화물: 45g, 단백질: 5g, 지방: 15g"
             rows={3}
             value={form.productNoticeCalories || ""}
             onChange={onChange("productNoticeCalories")}
-            error={Boolean(errors.productNoticeCalories)}
-            helperText={errors.productNoticeCalories}
-            required
-            placeholder="예: 칼로리: 350kcal, 탄수화물: 45g, 단백질: 5g, 지방: 15g"
+            className={`flex min-h-[80px] w-full rounded-md border ${
+              errors.productNoticeCalories ? "border-destructive" : "border-input"
+            } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
           />
-        </Grid>
+          {errors.productNoticeCalories && (
+            <p className="text-sm text-destructive mt-1">{errors.productNoticeCalories}</p>
+          )}
+        </div>
 
-        <Grid item xs={12}>
-          <TextField
-            label="소비자안전을 위한 주의사항"
-            fullWidth
-            multiline
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            소비자안전을 위한 주의사항
+          </Label>
+          <textarea
+            placeholder="예: 알레르기 주의: 우유, 계란, 밀 함유"
             rows={3}
             value={form.productNoticeSafetyNotice || ""}
             onChange={onChange("productNoticeSafetyNotice")}
-            error={Boolean(errors.productNoticeSafetyNotice)}
-            helperText={errors.productNoticeSafetyNotice}
-            required
-            placeholder="예: 알레르기 주의: 우유, 계란, 밀 함유"
+            className={`flex min-h-[80px] w-full rounded-md border ${
+              errors.productNoticeSafetyNotice ? "border-destructive" : "border-input"
+            } bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50`}
           />
-        </Grid>
+          {errors.productNoticeSafetyNotice && (
+            <p className="text-sm text-destructive mt-1">{errors.productNoticeSafetyNotice}</p>
+          )}
+        </div>
 
-        <Grid item xs={12}>
-          <TextField
-            label="유전자변형식품에 해당하는 경우의 표시"
-            fullWidth
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            유전자변형식품에 해당하는 경우의 표시
+          </Label>
+          <Input
+            placeholder="예: 해당사항 없음"
             value={form.productNoticeGmoNotice || ""}
             onChange={onChange("productNoticeGmoNotice")}
-            error={Boolean(errors.productNoticeGmoNotice)}
-            helperText={errors.productNoticeGmoNotice}
-            required
-            placeholder="예: 해당사항 없음"
+            className={errors.productNoticeGmoNotice ? "border-destructive" : ""}
           />
-        </Grid>
+          {errors.productNoticeGmoNotice && (
+            <p className="text-sm text-destructive mt-1">{errors.productNoticeGmoNotice}</p>
+          )}
+        </div>
 
-        <Grid item xs={12}>
-          <TextField
-            label="수입식품의 경우"
-            fullWidth
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            수입식품의 경우
+          </Label>
+          <Input
+            placeholder="예: 해당사항 없음"
             value={form.productNoticeImportNotice || ""}
             onChange={onChange("productNoticeImportNotice")}
-            error={Boolean(errors.productNoticeImportNotice)}
-            helperText={errors.productNoticeImportNotice}
-            required
-            placeholder="예: 해당사항 없음"
+            className={errors.productNoticeImportNotice ? "border-destructive" : ""}
           />
-        </Grid>
+          {errors.productNoticeImportNotice && (
+            <p className="text-sm text-destructive mt-1">{errors.productNoticeImportNotice}</p>
+          )}
+        </div>
 
-        <Grid item xs={12} md={6}>
-          <TextField
-            label="고객센터"
-            fullWidth
-            value={form.productNoticeCustomerService || ""}
-            onChange={onChange("productNoticeCustomerService")}
-            error={Boolean(errors.productNoticeCustomerService)}
-            helperText={errors.productNoticeCustomerService}
-            required
-            placeholder="예: 1588-1234"
-          />
-        </Grid>
-      </Grid>
-    </Box>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              고객센터
+            </Label>
+            <Input
+              placeholder="예: 1588-1234"
+              value={form.productNoticeCustomerService || ""}
+              onChange={onChange("productNoticeCustomerService")}
+              className={errors.productNoticeCustomerService ? "border-destructive" : ""}
+            />
+            {errors.productNoticeCustomerService && (
+              <p className="text-sm text-destructive mt-1">{errors.productNoticeCustomerService}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
