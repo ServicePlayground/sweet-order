@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Button, buttonVariants } from "./button";
+import { Button } from "./button";
 import { Save } from "lucide-react";
 
 const variantOptions = ["default", "destructive", "outline", "link"] as const;
