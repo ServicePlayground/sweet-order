@@ -29,7 +29,9 @@
     "web-user:storybook": "yarn workspace @sweet-order/web-user storybook",
     "web-user:storybook:build": "yarn workspace @sweet-order/web-user build-storybook",
     "web-seller:dev": "yarn workspace @sweet-order/web-seller dev",
-    "web-seller:build": "yarn workspace @sweet-order/web-seller build"
+    "web-seller:build": "yarn workspace @sweet-order/web-seller build",
+    "web-seller:storybook": "yarn workspace @sweet-order/web-seller storybook",
+    "web-seller:storybook:build": "yarn workspace @sweet-order/web-seller build-storybook"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
