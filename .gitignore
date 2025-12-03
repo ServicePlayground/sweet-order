@@ -119,3 +119,5 @@ apps/backend/src/infra/database/prisma/**/client/
 coverage/
 .nyc_output/
 junit.xml
+
+*storybook.log
