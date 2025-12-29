@@ -17,9 +17,7 @@ export const ProductCreationDetailDescriptionSection: React.FC<
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-2">
-        상품 상세정보
-      </h2>
+      <h2 className="text-xl font-semibold mb-2">상품 상세정보</h2>
       <p className="text-sm text-muted-foreground mb-2">
         상세정보는 필수 입력 항목입니다. 고객이 상품을 구매하기 전에 확인할 수 있는 상세한 정보를
         입력해주세요.

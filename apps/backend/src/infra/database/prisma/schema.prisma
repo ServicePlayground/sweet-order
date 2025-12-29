@@ -38,7 +38,6 @@ model User {
   // Relations
   productLikes   ProductLike[]
   stores        Store[]
-  carts         Cart[]
 
   @@index([phone])
   @@index([userId])
@@ -67,27 +66,19 @@ model Product {
   // 판매자 정보
   storeId           String   @map("store_id") // 스토어 ID
   
-  // 상품 정보
+  // 1. 상품명(문자열) - 필수입력값
   name              String
-  description       String?
-  originalPrice     Int
-  salePrice         Int
-  stock             Int      // 재고 수량
-  notice            String?
-  caution           String?
-  basicIncluded     String?  @map("basic_included")
-  location          String?
-  likeCount         Int      @default(0) @map("like_count")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-  orderFormSchema   Json?     @map("order_form_schema")
-
-  // 상세 정보
+  mainImage         String   @map("main_image")
+  additionalImages  String[] @default([]) @map("additional_images")
+  salePrice         Int      @map("sale_price")
+  salesStatus       EnableStatus @map("sales_status")
+  visibilityStatus  EnableStatus @map("visibility_status")
+  cakeSizeOptions Json?     @map("cake_size_options")
+  cakeFlavorOptions Json?     @map("cake_flavor_options")
+  letteringRequired OptionRequired @map("lettering_required")
+  letteringMaxLength Int @map("lettering_max_length")
+  imageUploadEnabled EnableStatus @map("image_upload_enabled")
   detailDescription String?  @map("detail_description")
-
-  // 취소 및 환불
-  cancellationRefundDetailDescription String?  @map("cancellation_refund_detail_description")
-
   // 고시정보 (식품 판매 시 법적 필수 항목)
   productNumber     String   @map("product_number")  // 상품번호 (백엔드 자동 생성)
   productNoticeFoodType          String  @map("product_notice_food_type")        // 식품의 유형 (필수)
@@ -105,36 +96,23 @@ model Product {
   productNoticeImportNotice      String  @map("product_notice_import_notice")    // 수입식품의 경우 (필수)
   productNoticeCustomerService   String  @map("product_notice_customer_service") // 고객센터 (필수)
 
-  // 필터 정보
-  mainCategory      MainCategory @map("main_category")
-  sizeRange         SizeRange[] @map("size_range")
-  deliveryMethod    DeliveryMethod[]
-  
-  // 해시태그
-  hashtags          String[]
-
-  // 상품 이미지
-  images            String[]
-
-  // 상품 상태 
-  status            ProductStatus @default(ACTIVE)
+  // 시스템 필드
+  likeCount         Int      @default(0) @map("like_count")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   // Relations
   // Seller는 store.seller를 통해 참조 가능
   store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   likes             ProductLike[]
-  carts             Cart[]
   
   @@index([storeId])
-  @@index([status])
+  @@index([salesStatus])
+  @@index([visibilityStatus])
   @@index([createdAt])
   @@index([salePrice])
   @@index([likeCount])
   @@index([name])
-  @@index([hashtags])
-  @@index([mainCategory])
-  @@index([sizeRange])
-  @@index([deliveryMethod])
   @@map("products")
 }
 
@@ -156,29 +134,15 @@ model ProductLike {
 }
 
 // product.constants.ts 에서 사용하는 enum들
-enum MainCategory {
-  CAKE    // 케이크
-  SUPPLY  // 용품
-  OTHER   // 기타
+
+enum OptionRequired {
+  REQUIRED  // 필수
+  OPTIONAL  // 선택
 }
 
-enum SizeRange {
-  ONE_TO_TWO
-  TWO_TO_THREE
-  THREE_TO_FOUR
-  FOUR_TO_FIVE
-  FIVE_OR_MORE
-}
-
-enum DeliveryMethod {
-  PICKUP
-  DELIVERY
-}
-
-enum ProductStatus {
-  ACTIVE
-  INACTIVE
-  OUT_OF_STOCK
+enum EnableStatus {
+  ENABLE   // 사용
+  DISABLE  // 미사용
 }
 
 enum UserRole {
@@ -225,24 +189,5 @@ model Store {
   @@map("stores")
 }
 
-// Cart model for shopping cart management
-model Cart {
-  id            String         @id @default(cuid())
-  userId        String         @map("user_id")
-  productId     String         @map("product_id")
-  quantity      Int            @default(1) // 수량
-  orderFormData Json?          @map("order_form_data") // 주문 폼 데이터 (JSON)
-  deliveryMethod DeliveryMethod @map("delivery_method") // 수령 방식
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-
-  // Relations
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([productId])
-  @@map("carts")
-}
 
 

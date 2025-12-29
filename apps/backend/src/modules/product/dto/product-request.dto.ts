@@ -8,24 +8,20 @@ import {
   Max,
   IsArray,
   IsNotEmpty,
-  IsObject,
-  ArrayMinSize,
 } from "class-validator";
 import {
-  StringToArray,
   StringToNumber,
   OptionalStringToNumber,
 } from "@apps/backend/common/decorators/transform.decorator";
 import {
-  DeliveryMethod,
-  MainCategory,
   SortBy,
-  SizeRange,
-  ProductStatus,
+  OptionRequired,
+  EnableStatus,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
-import { OrderFormSchema } from "@apps/backend/modules/product/type/product.type";
+import { ValidateNested, IsIn } from "class-validator";
+import { Type } from "class-transformer";
 
 /**
  * 상품 목록 조회 요청 DTO (무한 스크롤)
@@ -69,39 +65,6 @@ export class GetProductsRequestDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({
-    description: "(필터) 메인 카테고리",
-    enum: MainCategory,
-    example: MainCategory.CAKE,
-  })
-  @IsOptional()
-  @IsEnum(MainCategory)
-  mainCategory?: MainCategory;
-
-  @ApiPropertyOptional({
-    description: "(필터) 인원 수 - (중복가능)쉼표로 구분하여 전달",
-    enum: SizeRange,
-    type: "string",
-    example: `${SizeRange.ONE_TO_TWO},${SizeRange.TWO_TO_THREE}`,
-  })
-  @StringToArray()
-  @IsOptional()
-  @IsArray()
-  @IsEnum(SizeRange, { each: true })
-  sizeRange?: SizeRange[];
-
-  @ApiPropertyOptional({
-    description: "(필터) 수령 방식 - (중복가능)쉼표로 구분하여 전달",
-    enum: DeliveryMethod,
-    type: "string",
-    example: `${DeliveryMethod.PICKUP},${DeliveryMethod.DELIVERY}`,
-  })
-  @StringToArray()
-  @IsOptional()
-  @IsArray()
-  @IsEnum(DeliveryMethod, { each: true })
-  deliveryMethod?: DeliveryMethod[];
-
   @ApiPropertyOptional({ description: "(필터) 최소 가격", example: 10000 })
   @OptionalStringToNumber()
   @IsOptional()
@@ -126,6 +89,58 @@ export class GetProductsRequestDto {
 }
 
 /**
+ * 케이크 사이즈 옵션 DTO
+ */
+export class CakeSizeOptionDto {
+  @ApiProperty({
+    description: "노출 여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  visible: EnableStatus;
+
+  @ApiProperty({
+    description: "표시명",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].displayName,
+  })
+  @IsNotEmpty()
+  @IsString()
+  displayName: string;
+
+  @ApiProperty({
+    description: "설명",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].description,
+  })
+  @IsNotEmpty()
+  @IsString()
+  description: string;
+}
+
+/**
+ * 케이크 맛 옵션 DTO
+ */
+export class CakeFlavorOptionDto {
+  @ApiProperty({
+    description: "노출 여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  visible: EnableStatus;
+
+  @ApiProperty({
+    description: "표시명",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].displayName,
+  })
+  @IsNotEmpty()
+  @IsString()
+  displayName: string;
+}
+
+/**
  * 상품 등록 요청 DTO
  */
 export class CreateProductRequestDto {
@@ -145,22 +160,23 @@ export class CreateProductRequestDto {
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({
-    description: "상품 설명",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.description,
-  })
-  @IsOptional()
-  @IsString()
-  description?: string;
-
   @ApiProperty({
-    description: "원가",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.originalPrice,
+    description: "대표이미지 URL",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.mainImage,
   })
   @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  originalPrice: number;
+  @IsString()
+  mainImage: string;
+
+  @ApiPropertyOptional({
+    description: "추가이미지 URL 목록",
+    isArray: true,
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.additionalImages,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  additionalImages?: string[];
 
   @ApiProperty({
     description: "판매가",
@@ -172,54 +188,82 @@ export class CreateProductRequestDto {
   salePrice: number;
 
   @ApiProperty({
-    description: "재고 수량",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.stock,
+    description: "판매여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  salesStatus: EnableStatus;
+
+  @ApiProperty({
+    description: "노출여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  visibilityStatus: EnableStatus;
+
+  @ApiPropertyOptional({
+    description: "케이크 옵션 - 사이즈 목록",
+    type: [CakeSizeOptionDto],
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions,
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CakeSizeOptionDto)
+  cakeSizeOptions?: CakeSizeOptionDto[];
+
+  @ApiPropertyOptional({
+    description: "케이크 옵션 - 맛 목록",
+    type: [CakeFlavorOptionDto],
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions,
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CakeFlavorOptionDto)
+  cakeFlavorOptions?: CakeFlavorOptionDto[];
+
+  @ApiPropertyOptional({
+    description: "레터링 문구 사용 여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  letteringVisible: EnableStatus;
+
+  @ApiPropertyOptional({
+    description: "레터링 문구 사용 (필수/선택)",
+    enum: OptionRequired,
+    example: OptionRequired.REQUIRED,
+  })
+  @IsNotEmpty()
+  @IsEnum(OptionRequired)
+  letteringRequired: OptionRequired;
+
+  @ApiPropertyOptional({
+    description: "레터링 최대 글자 수",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.letteringMaxLength,
   })
   @IsNotEmpty()
   @IsNumber()
   @Min(0)
-  stock: number;
+  letteringMaxLength: number;
 
   @ApiPropertyOptional({
-    description: "공지사항",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.notice,
+    description: "이미지 등록 사용여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
   })
-  @IsOptional()
-  @IsString()
-  notice?: string;
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  imageUploadEnabled: EnableStatus;
 
-  @ApiPropertyOptional({
-    description: "주의사항",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.caution,
-  })
-  @IsOptional()
-  @IsString()
-  caution?: string;
-
-  @ApiPropertyOptional({
-    description: "기본 포함 사항",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.basicIncluded,
-  })
-  @IsOptional()
-  @IsString()
-  basicIncluded?: string;
-
-  @ApiPropertyOptional({
-    description: "위치",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.location,
-  })
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @ApiPropertyOptional({
-    description: "주문 폼 스키마 (JSON)",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.orderFormSchema,
-  })
-  @IsOptional()
-  @IsObject()
-  orderFormSchema?: OrderFormSchema;
-
+  // 13. 상세 정보(현재와 동일, 문자열, HTML)
   @ApiPropertyOptional({
     description: "상세 설명 (HTML)",
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.detailDescription,
@@ -227,14 +271,6 @@ export class CreateProductRequestDto {
   @IsOptional()
   @IsString()
   detailDescription?: string;
-
-  @ApiPropertyOptional({
-    description: "취소 및 환불 상세 설명",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cancellationRefundDetailDescription,
-  })
-  @IsOptional()
-  @IsString()
-  cancellationRefundDetailDescription?: string;
 
   @ApiProperty({
     description: "식품의 유형",
@@ -347,67 +383,4 @@ export class CreateProductRequestDto {
   @IsNotEmpty()
   @IsString()
   productNoticeCustomerService: string;
-
-  @ApiProperty({
-    description: "메인 카테고리",
-    enum: MainCategory,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.mainCategory,
-  })
-  @IsNotEmpty()
-  @IsEnum(MainCategory)
-  mainCategory: MainCategory;
-
-  @ApiProperty({
-    description: "인원 수 범위 (배열)",
-    enum: SizeRange,
-    isArray: true,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.sizeRange,
-  })
-  @IsNotEmpty()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsEnum(SizeRange, { each: true })
-  sizeRange: SizeRange[];
-
-  @ApiProperty({
-    description: "배송 방법 (배열)",
-    enum: DeliveryMethod,
-    isArray: true,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.deliveryMethod,
-  })
-  @IsNotEmpty()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsEnum(DeliveryMethod, { each: true })
-  deliveryMethod: DeliveryMethod[];
-
-  @ApiPropertyOptional({
-    description: "해시태그 (배열)",
-    isArray: true,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.hashtags,
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  hashtags?: string[];
-
-  @ApiPropertyOptional({
-    description: "상품 상태",
-    enum: ProductStatus,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.status,
-    default: ProductStatus.ACTIVE,
-  })
-  @IsOptional()
-  @IsEnum(ProductStatus)
-  status?: ProductStatus;
-
-  @ApiPropertyOptional({
-    description: "상품 이미지 URL 목록",
-    isArray: true,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.images,
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  images?: string[];
 }
