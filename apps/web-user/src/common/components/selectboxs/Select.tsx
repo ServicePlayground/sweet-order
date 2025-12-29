@@ -5,8 +5,10 @@ export interface SelectOption<T = string> {
   label: string;
 }
 
-interface SelectProps<T = string>
-  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "onChange" | "value"> {
+interface SelectProps<T = string> extends Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "onChange" | "value"
+> {
   value: T;
   onChange: (value: T) => void;
   options: SelectOption<T>[];

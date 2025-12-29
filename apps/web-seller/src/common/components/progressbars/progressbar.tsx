@@ -10,18 +10,10 @@ interface Props {
   stepperProps?: any;
 }
 
-export const ProgressBar: React.FC<Props> = ({
-  activeStep,
-  steps,
-  title = "",
-}) => {
+export const ProgressBar: React.FC<Props> = ({ activeStep, steps, title = "" }) => {
   return (
     <div className="mb-6">
-      {title && (
-        <h2 className="text-xl font-semibold mb-2">
-          {title}
-        </h2>
-      )}
+      {title && <h2 className="text-xl font-semibold mb-2">{title}</h2>}
       <div className="flex items-center justify-between">
         {steps.map((label, idx) => {
           const isActive = idx === activeStep;
@@ -35,7 +27,7 @@ export const ProgressBar: React.FC<Props> = ({
                     "w-10 h-10 rounded-full flex items-center justify-center font-semibold mb-2",
                     isCompleted && "bg-primary text-primary-foreground",
                     isActive && "bg-primary text-primary-foreground border-2 border-primary",
-                    !isActive && !isCompleted && "bg-muted text-muted-foreground"
+                    !isActive && !isCompleted && "bg-muted text-muted-foreground",
                   )}
                 >
                   {isCompleted ? "✓" : idx + 1}
@@ -44,7 +36,7 @@ export const ProgressBar: React.FC<Props> = ({
                   className={cn(
                     "text-sm text-center",
                     (isActive || isCompleted) && "font-medium text-foreground",
-                    !isActive && !isCompleted && "text-muted-foreground"
+                    !isActive && !isCompleted && "text-muted-foreground",
                   )}
                 >
                   {label}
@@ -55,7 +47,7 @@ export const ProgressBar: React.FC<Props> = ({
                   <div
                     className={cn(
                       "h-full transition-all",
-                      isCompleted ? "bg-primary w-full" : "bg-muted w-0"
+                      isCompleted ? "bg-primary w-full" : "bg-muted w-0",
                     )}
                   />
                 </div>
