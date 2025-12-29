@@ -8,6 +8,9 @@ export const PRODUCT_ERROR_MESSAGES = {
   STORE_NOT_OWNED: "해당 스토어에 대한 권한이 없습니다.",
   LIKE_ALREADY_EXISTS: "이미 좋아요한 상품입니다.",
   LIKE_NOT_FOUND: "좋아요한 상품이 아닙니다.",
+  PRODUCT_INACTIVE: "판매중지된 상품입니다.",
+  PRODUCT_OUT_OF_STOCK: "품절된 상품입니다.",
+  PRODUCT_NOT_AVAILABLE: "구매할 수 없는 상품입니다.",
 } as const;
 
 /**
@@ -31,40 +34,16 @@ export enum SortBy {
 }
 
 /**
- * (필터) 메인 카테고리 enum (필수)
+ * 옵션 필수/선택 enum
  */
-export enum MainCategory {
-  CAKE = "CAKE", // 케이크
-  SUPPLY = "SUPPLY", // 용품
-  OTHER = "OTHER", // 기타
+export enum OptionRequired {
+  REQUIRED = "REQUIRED", // 필수
+  OPTIONAL = "OPTIONAL", // 선택
 }
 
-/**
- * (필터) 인원 수 enum
- */
-export enum SizeRange {
-  ONE_TO_TWO = "ONE_TO_TWO", // 1~2인
-  TWO_TO_THREE = "TWO_TO_THREE", // 2~3인
-  THREE_TO_FOUR = "THREE_TO_FOUR", // 3~4인
-  FOUR_TO_FIVE = "FOUR_TO_FIVE", // 4~5인
-  FIVE_OR_MORE = "FIVE_OR_MORE", // 5인 이상
-}
-
-/**
- * (필터) 수령 방식 enum
- */
-export enum DeliveryMethod {
-  PICKUP = "PICKUP",
-  DELIVERY = "DELIVERY",
-}
-
-/**
- * 상품 상태 enum
- */
-export enum ProductStatus {
-  ACTIVE = "ACTIVE", // 판매중
-  INACTIVE = "INACTIVE", // 판매중지
-  OUT_OF_STOCK = "OUT_OF_STOCK", // 품절
+export enum EnableStatus {
+  ENABLE = "ENABLE", // 사용
+  DISABLE = "DISABLE", // 미사용
 }
 
 /**
@@ -76,92 +55,37 @@ export const SWAGGER_EXAMPLES = {
     id: "prod_123456789",
     // 상품 정보
     name: "초콜릿 케이크",
-    description: "달콤한 초콜릿으로 만든 케이크입니다.",
-    originalPrice: 50000,
     salePrice: 45000,
-    stock: 100, // 재고 수량
-    notice: "주문 후 1-2일 내 제작 완료",
-    caution: "알레르기 주의: 우유, 계란, 밀 함유",
-    basicIncluded: "케이크, 촛불, 포크",
-    location: "서울시 강남구",
     likeCount: 25,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
-    orderFormSchema: {
-      fields: [
-        {
-          id: "size",
-          type: "selectbox",
-          label: "사이즈 선택",
-          required: true,
-          options: [
-            {
-              value: "1호",
-              label: "1호",
-              price: 0,
-            },
-            {
-              value: "2호",
-              label: "2호",
-              price: 10000,
-            },
-            {
-              value: "3호",
-              label: "3호",
-              price: 20000,
-            },
-          ],
-        },
-        {
-          id: "additionalProducts",
-          type: "selectbox",
-          label: "추가 구성 상품",
-          required: true,
-          allowMultiple: true,
-          options: [
-            {
-              value: "cakeBox",
-              label: "케이크상자",
-              price: 2000,
-            },
-            {
-              value: "candles",
-              label: "캔들 추가",
-              price: 3000,
-            },
-            {
-              value: "topper",
-              label: "케이크 토퍼",
-              price: 5000,
-            },
-            {
-              value: "messagePlate",
-              label: "글씨 문구 추가",
-              price: 4000,
-            },
-          ],
-        },
-        {
-          id: "cakeMessage",
-          type: "textbox",
-          label: "케이크 메시지",
-          required: true,
-          placeholder: "예: 생일 축하해요!",
-        },
-        {
-          id: "additionalRequest",
-          type: "textbox",
-          label: "추가 요청사항",
-          required: false,
-          placeholder: "특별한 요청사항이 있으시면 입력해주세요",
-        },
-      ],
-    },
+    cakeSizeOptions: [
+      {
+        visible: EnableStatus.ENABLE,
+        displayName: "미니(10cm)",
+        description: "1~2인용",
+      },
+      {
+        visible: EnableStatus.ENABLE,
+        displayName: "1호 (15cm)",
+        description: "2~3인용",
+      },
+    ],
+    cakeFlavorOptions: [
+      {
+        visible: EnableStatus.ENABLE,
+        displayName: "초콜릿",
+      },
+      {
+        visible: EnableStatus.ENABLE,
+        displayName: "바닐라",
+      },
+    ],
+    letteringRequired: OptionRequired.OPTIONAL,
+    letteringMaxLength: 20,
+    imageUploadEnabled: EnableStatus.ENABLE,
     // 상세 정보
     detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
-    // 취소 및 환불
-    cancellationRefundDetailDescription:
-      "<p>주문 취소 및 환불 정책: 제작 시작 전까지 취소 가능하며, 제작 시작 후에는 취소가 불가능합니다.</p>",
     // 고시정보 (식품 판매 시 법적 필수 항목)
     productNumber: "CAKE-001",
     productNoticeFoodType: "케이크류",
@@ -178,21 +102,10 @@ export const SWAGGER_EXAMPLES = {
     productNoticeGmoNotice: "해당사항 없음",
     productNoticeImportNotice: "해당사항 없음",
     productNoticeCustomerService: "1588-1234",
-    // 필터 정보
-    mainCategory: MainCategory.CAKE,
-    sizeRange: [SizeRange.ONE_TO_TWO, SizeRange.TWO_TO_THREE],
-    deliveryMethod: [DeliveryMethod.PICKUP, DeliveryMethod.DELIVERY],
-    // 해시태그
-    hashtags: ["케이크", "초콜릿", "생일", "기념일"],
-    // 상품 이미지
-    images: [
-      "https://example.com/image1.jpg",
-      "https://example.com/image2.jpg",
-      "https://example.com/image3.jpg",
-    ],
-    // 상품 상태
-    status: ProductStatus.ACTIVE,
-    // 판매자 정보 (Store를 통해 User(Seller) 참조)
+    mainImage: "https://example.com/main-image.jpg",
+    additionalImages: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
+    salesStatus: EnableStatus.ENABLE,
+    visibilityStatus: EnableStatus.ENABLE,
     storeId: "store_123456789",
   },
   PAGINATION_META: {

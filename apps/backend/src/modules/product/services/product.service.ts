@@ -7,7 +7,6 @@ import {
 import {
   SortBy,
   PRODUCT_ERROR_MESSAGES,
-  ProductStatus,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
@@ -24,48 +23,19 @@ export class ProductService {
    * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
    */
   async getProducts(query: GetProductsRequestDto) {
-    const {
-      search,
-      page,
-      limit,
-      sortBy,
-      mainCategory,
-      sizeRange,
-      deliveryMethod,
-      minPrice,
-      maxPrice,
-      storeId,
-    } = query;
+    const { search, page, limit, sortBy, minPrice, maxPrice, storeId } = query;
 
     // 필터 조건 구성
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
       // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
     };
 
-    // 검색어 조건 (별도 처리)
-    // 검색어가 있으면 상품명, 해시태그에서 검색
-    // 검색어가 없으면 전체 조회 (다른 필터 조건만 적용)
+    // 검색어 조건 (상품명에서만 검색)
     const searchConditions: Prisma.ProductWhereInput[] = [];
     if (search) {
       searchConditions.push(
         { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
-        { hashtags: { has: search } }, // 해시태그 배열에서 검색
       );
-    }
-
-    // 메인 카테고리 필터 처리
-    if (mainCategory) {
-      where.mainCategory = mainCategory;
-    }
-
-    // 인원수 필터 처리
-    if (sizeRange && sizeRange.length > 0) {
-      where.sizeRange = { hasSome: sizeRange }; // sizeRange 배열의 값들 중 하나라도 포함된 상품들을 검색
-    }
-
-    // 수령 방식 필터 처리
-    if (deliveryMethod && deliveryMethod.length > 0) {
-      where.deliveryMethod = { hasSome: deliveryMethod }; // deliveryMethod 배열의 값들 중 하나라도 포함된 상품들을 검색
     }
 
     // 가격 필터 처리
@@ -183,13 +153,12 @@ export class ProductService {
     }
 
     // productNumber 생성 및 상품 생성 - 트랜잭션으로 동시성 문제 방지
-    // 카테고리-날짜-순번 형식 (예: CAKE-20240101-001)
+    // 날짜-순번 형식 (예: 20240101-001)
     return await this.prisma.$transaction(async (tx) => {
       const now = new Date();
       const dateStr = now.toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
-      const categoryCode = createProductDto.mainCategory; // CAKE, SUPPLY, OTHER
 
-      // 같은 날 같은 카테고리에서 등록된 상품 수 조회 (트랜잭션 내에서 조회하여 동시성 보장)
+      // 같은 날 등록된 상품 수 조회 (트랜잭션 내에서 조회하여 동시성 보장)
       const startOfDay = new Date(now);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(now);
@@ -197,7 +166,6 @@ export class ProductService {
 
       const todayProductCount = await tx.product.count({
         where: {
-          mainCategory: createProductDto.mainCategory,
           createdAt: {
             gte: startOfDay,
             lte: endOfDay,
@@ -207,7 +175,7 @@ export class ProductService {
 
       // 순번 생성 (001, 002, ...)
       const sequence = String(todayProductCount + 1).padStart(3, "0");
-      const productNumber = `${categoryCode}-${dateStr}-${sequence}`;
+      const productNumber = `${dateStr}-${sequence}`;
 
       // 상품 데이터 준비
       const productData: Prisma.ProductCreateInput = {
@@ -217,19 +185,22 @@ export class ProductService {
           },
         },
         name: createProductDto.name,
-        description: createProductDto.description,
-        originalPrice: createProductDto.originalPrice,
+        mainImage: createProductDto.mainImage,
+        additionalImages: createProductDto.additionalImages || [],
         salePrice: createProductDto.salePrice,
-        stock: createProductDto.stock,
-        notice: createProductDto.notice,
-        caution: createProductDto.caution,
-        basicIncluded: createProductDto.basicIncluded,
-        location: createProductDto.location,
-        orderFormSchema: createProductDto.orderFormSchema
-          ? (createProductDto.orderFormSchema as unknown as Prisma.InputJsonValue)
-          : undefined,
+        salesStatus: createProductDto.salesStatus,
+        visibilityStatus: createProductDto.visibilityStatus,
+        // 케이크 옵션을 각각 JSON 배열로 저장
+        cakeSizeOptions: createProductDto.cakeSizeOptions
+          ? (createProductDto.cakeSizeOptions as unknown as Prisma.InputJsonValue)
+          : [],
+        cakeFlavorOptions: createProductDto.cakeFlavorOptions
+          ? (createProductDto.cakeFlavorOptions as unknown as Prisma.InputJsonValue)
+          : [],
+        letteringRequired: createProductDto.letteringRequired,
+        letteringMaxLength: createProductDto.letteringMaxLength,
+        imageUploadEnabled: createProductDto.imageUploadEnabled,
         detailDescription: createProductDto.detailDescription,
-        cancellationRefundDetailDescription: createProductDto.cancellationRefundDetailDescription,
         productNumber,
         productNoticeFoodType: createProductDto.productNoticeFoodType,
         productNoticeProducer: createProductDto.productNoticeProducer,
@@ -245,12 +216,6 @@ export class ProductService {
         productNoticeGmoNotice: createProductDto.productNoticeGmoNotice,
         productNoticeImportNotice: createProductDto.productNoticeImportNotice,
         productNoticeCustomerService: createProductDto.productNoticeCustomerService,
-        mainCategory: createProductDto.mainCategory,
-        sizeRange: createProductDto.sizeRange,
-        deliveryMethod: createProductDto.deliveryMethod,
-        hashtags: createProductDto.hashtags || [],
-        status: createProductDto.status || ProductStatus.ACTIVE,
-        images: createProductDto.images || [],
       };
 
       // 상품 생성

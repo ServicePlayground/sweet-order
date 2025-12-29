@@ -3,12 +3,10 @@ import { UserAuthController } from "@apps/backend/apis/user/controllers/auth.con
 import { UserProductController } from "@apps/backend/apis/user/controllers/product.controller";
 import { UserUploadController } from "@apps/backend/apis/user/controllers/upload.controller";
 import { UserStoreController } from "@apps/backend/apis/user/controllers/store.controller";
-import { UserCartController } from "@apps/backend/apis/user/controllers/cart.controller";
 import { AuthModule } from "@apps/backend/modules/auth/auth.module";
 import { ProductModule } from "@apps/backend/modules/product/product.module";
 import { UploadModule } from "@apps/backend/modules/upload/upload.module";
 import { StoreModule } from "@apps/backend/modules/store/store.module";
-import { CartModule } from "@apps/backend/modules/cart/cart.module";
 
 /**
  * User API 모듈
@@ -17,13 +15,12 @@ import { CartModule } from "@apps/backend/modules/cart/cart.module";
  */
 
 @Module({
-  imports: [UploadModule, AuthModule, ProductModule, StoreModule, CartModule],
+  imports: [UploadModule, AuthModule, ProductModule, StoreModule],
   controllers: [
     UserUploadController,
     UserAuthController,
     UserProductController,
     UserStoreController,
-    UserCartController,
   ],
 })
 export class UserApiModule {}
