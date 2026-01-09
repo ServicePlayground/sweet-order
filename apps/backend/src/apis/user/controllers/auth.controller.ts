@@ -58,15 +58,31 @@ export class UserAuthController {
     description:
       "새로운 사용자를 등록합니다. 서브도메인 통합 로그인을 위해 쿠키에 토큰을 설정하고, 응답에서는 사용자 정보만 반환합니다. 휴대폰 인증이 완료된 상태여야 하며, 사용자 ID는 중복될 수 없으며, 휴대폰번호가 일반 계정에서 사용중이면 에러가 발생하고, 구글 계정에서만 사용중이면 기존 계정을 업데이트하고 바로 로그인 처리됩니다.",
   })
-  @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED)) // 전역 Rate Limiting Guard 적용
+  @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  }) // 전역 Rate Limiting Guard 적용
   // { passthrough: true }: 쿠키 설정과 NestJS의 자동 응답 래핑을 유지하기 위해 사용
   async register(
     @Body() registerDto: RegisterRequestDto,
@@ -85,10 +101,16 @@ export class UserAuthController {
     description: "회원가입 시 사용할 사용자 ID가 이미 존재하는지 확인합니다.",
   })
   @SwaggerResponse(200, {
-    available: true,
+    dataExample: {
+      available: true,
+    },
   })
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async checkUserIdAvailability(
     @Query() checkUserIdDto: CheckUserIdRequestDto, // 쿼리 파라미터에서 사용자 ID 추출
   ) {
@@ -106,13 +128,23 @@ export class UserAuthController {
     description:
       "아이디와 비밀번호로 로그인합니다. 서브도메인 통합 로그인을 위해 쿠키에 토큰을 설정하고, 응답에서는 사용자 정보만 반환합니다.",
   })
-  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND) })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async login(@Body() loginDto: LoginRequestDto, @Res({ passthrough: true }) res: Response) {
     return await this.authService.login(loginDto, res);
   }
@@ -127,14 +159,26 @@ export class UserAuthController {
     summary: "일반 - 비밀번호 변경",
     description: "아이디와 휴대폰 인증을 통해 비밀번호를 변경합니다.",
   })
-  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, {
+    dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.USER_ID_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PASSWORD_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND) })
+  @SwaggerResponse(400, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH) })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async changePassword(@Body() changePasswordDto: ChangePasswordRequestDto) {
     await this.authService.changePassword(changePasswordDto);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.PASSWORD_CHANGED);
@@ -153,13 +197,23 @@ export class UserAuthController {
       "휴대폰 인증을 통해 계정 정보를 찾습니다. 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다. 둘 다 있는 경우 모두 반환합니다.",
   })
   @SwaggerResponse(200, {
-    userId: SWAGGER_EXAMPLES.USER_DATA.userId, // 일반 로그인인 경우 (선택적)
-    googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail, // 구글 로그인인 경우 (선택적)
+    dataExample: {
+      userId: SWAGGER_EXAMPLES.USER_DATA.userId, // 일반 로그인인 경우 (선택적)
+      googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail, // 구글 로그인인 경우 (선택적)
+    },
   })
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async findAccount(@Query() findAccountDto: FindAccountRequestDto) {
     return await this.authService.findAccount(findAccountDto);
   }
@@ -175,14 +229,20 @@ export class UserAuthController {
     description:
       "프론트엔드에서 받은 Authorization Code로 구글 로그인을 처리합니다. 서브도메인 통합 로그인을 위해 쿠키에 토큰을 설정하고, 응답에서는 사용자 정보만 반환합니다.",
   })
-  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
+  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE })
   @SwaggerResponse(400, {
-    message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
-    googleId: SWAGGER_EXAMPLES.USER_DATA.googleId,
-    googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
+    dataExample: {
+      message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
+      googleId: SWAGGER_EXAMPLES.USER_DATA.googleId,
+      googleEmail: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
+    },
   })
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async googleAuth(
     @Body() authDto: GoogleLoginRequestDto,
     @Res({ passthrough: true }) res: Response,
@@ -201,14 +261,28 @@ export class UserAuthController {
     description:
       "새로운 구글 사용자를 등록합니다. 서브도메인 통합 로그인을 위해 쿠키에 토큰을 설정하고, 응답에서는 사용자 정보만 반환합니다. 휴대폰 인증이 완료된 상태여야 합니다. 구글 ID는 중복될 수 없으며, 휴대폰번호가 구글 계정에서 사용중이면 에러가 발생하고, 일반 계정에서만 사용중이면 기존 계정을 업데이트하고 바로 로그인 처리됩니다.",
   })
-  @SwaggerResponse(201, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_REGISTER_FAILED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async googleRegisterWithPhone(
     @Body() registerDto: GoogleRegisterRequestDto,
     @Res({ passthrough: true }) res: Response,
@@ -227,9 +301,15 @@ export class UserAuthController {
     summary: "휴대폰 인증번호 발송",
     description: "사용자의 휴대폰 번호로 인증번호를 발송합니다. 1분당 10회로 제한됩니다.",
   })
-  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, {
+    dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async sendVerificationCode(@Body() sendCodeDto: SendVerificationCodeRequestDto) {
     await this.authService.sendVerificationCode(sendCodeDto);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_SENT);
@@ -245,12 +325,24 @@ export class UserAuthController {
     summary: "휴대폰 인증번호 확인",
     description: "사용자가 입력한 인증번호가 올바른지 확인합니다.",
   })
-  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, {
+    dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.VERIFICATION_CODE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async verifyPhoneCode(@Body() verifyCodeDto: VerifyPhoneCodeRequestDto) {
     await this.authService.verifyPhoneCode(verifyCodeDto);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED);
@@ -269,22 +361,39 @@ export class UserAuthController {
     description:
       "인증된 사용자의 휴대폰 번호를 새로운 번호로 변경합니다. 새 휴대폰 번호는 미리 인증이 완료되어야 합니다.",
   })
-  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.USER_NOT_FOUND))
-  @SwaggerResponse(400, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(
-    401,
-    createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
-  )
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED))
-  @SwaggerResponse(409, createMessageObject(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, { dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED) })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_INVALID_FORMAT),
+  })
+  @SwaggerResponse(400, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.USER_NOT_FOUND) })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
+  })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async changePhone(
     @Body() changePhoneDto: ChangePhoneRequestDto,
     @Request() req: { user: JwtVerifiedPayload }, // JWT에서 저장된 사용자 정보
@@ -303,16 +412,27 @@ export class UserAuthController {
     description:
       "쿠키의 Refresh Token을 사용하여 새로운 Access Token을 생성하고 쿠키에 설정합니다. 응답에서는 성공 메시지만 반환합니다.",
   })
-  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.ACCESS_TOKEN_REFRESHED))
-  @SwaggerResponse(403, createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_EXPIRED))
-  @SwaggerResponse(403, createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_INVALID))
-  @SwaggerResponse(403, createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING))
-  @SwaggerResponse(403, createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(
-    403,
-    createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
-  )
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, {
+    dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.ACCESS_TOKEN_REFRESHED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_INVALID),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async refreshToken(@Res({ passthrough: true }) res: Response) {
     await this.authService.refreshToken(res);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.ACCESS_TOKEN_REFRESHED);
@@ -329,18 +449,29 @@ export class UserAuthController {
     description:
       "쿠키의 Access Token을 사용하여 현재 로그인한 사용자의 정보를 조회합니다. 프론트엔드 새로고침 시 사용자 정보 복원에 사용됩니다.",
   })
-  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE)
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(
-    401,
-    createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
-  )
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async getCurrentUser(@Request() req: { user: JwtVerifiedPayload }) {
     return await this.authService.getCurrentUser(req.user);
   }
@@ -358,8 +489,10 @@ export class UserAuthController {
     description:
       "쿠키의 Access Token과 Refresh Token을 삭제하여 로그아웃을 처리합니다. 인증이 필요하지 않습니다.",
   })
-  @SwaggerResponse(200, createMessageObject(AUTH_SUCCESS_MESSAGES.LOGOUT_SUCCESS))
-  @SwaggerResponse(429, createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED))
+  @SwaggerResponse(200, { dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.LOGOUT_SUCCESS) })
+  @SwaggerResponse(429, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
+  })
   async logout(@Res({ passthrough: true }) res: Response) {
     await this.authService.logout(res);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.LOGOUT_SUCCESS);
