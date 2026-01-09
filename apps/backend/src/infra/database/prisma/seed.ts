@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.phoneVerification.deleteMany();
   await prisma.productLike.deleteMany();
-  await prisma.cart.deleteMany();
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.user.deleteMany();
@@ -190,89 +189,41 @@ async function main() {
         data: {
           storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
           name: "프리미엄 초콜릿 케이크",
-          description: "벨기에산 고급 초콜릿으로 만든 달콤한 케이크입니다.",
-          originalPrice: 50000,
+          mainImage:
+            "https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg",
+          additionalImages: [],
           salePrice: 45000,
-          stock: 100, // 재고 수량
-          notice: "주문 후 1-2일 내 제작 완료",
-          caution: "알레르기 주의: 우유, 계란, 밀 함유",
-          basicIncluded: "케이크, 촛불, 포크",
-          location: "서울시 강남구",
+          salesStatus: "ENABLE",
+          visibilityStatus: "ENABLE",
           likeCount: 25,
-          orderFormSchema: {
-            fields: [
-              {
-                id: "size",
-                type: "selectbox",
-                label: "사이즈 선택",
-                required: true,
-                options: [
-                  {
-                    value: "1호",
-                    label: "1호",
-                    price: 0,
-                  },
-                  {
-                    value: "2호",
-                    label: "2호",
-                    price: 10000,
-                  },
-                  {
-                    value: "3호",
-                    label: "3호",
-                    price: 20000,
-                  },
-                ],
-              },
-              {
-                id: "additionalProducts",
-                type: "selectbox",
-                label: "추가 구성 상품",
-                required: true,
-                allowMultiple: true,
-                options: [
-                  {
-                    value: "cakeBox",
-                    label: "케이크상자",
-                    price: 2000,
-                  },
-                  {
-                    value: "candles",
-                    label: "캔들 추가",
-                    price: 3000,
-                  },
-                  {
-                    value: "topper",
-                    label: "케이크 토퍼",
-                    price: 5000,
-                  },
-                  {
-                    value: "messagePlate",
-                    label: "글씨 문구 추가",
-                    price: 4000,
-                  },
-                ],
-              },
-              {
-                id: "cakeMessage",
-                type: "textbox",
-                label: "케이크 메시지",
-                required: true,
-                placeholder: "예: 생일 축하해요!",
-              },
-              {
-                id: "additionalRequest",
-                type: "textbox",
-                label: "추가 요청사항",
-                required: false,
-                placeholder: "특별한 요청사항이 있으시면 입력해주세요",
-              },
-            ],
-          },
+          // 케이크 옵션을 각각 JSON 배열로 저장
+          cakeSizeOptions: [
+            {
+              visible: "ENABLE",
+              displayName: "미니(10cm)",
+              description: "1~2인용",
+            },
+            {
+              visible: "ENABLE",
+              displayName: "1호 (15cm)",
+              description: "2~3인용",
+            },
+          ],
+          cakeFlavorOptions: [
+            {
+              visible: "ENABLE",
+              displayName: "초콜릿",
+            },
+            {
+              visible: "ENABLE",
+              displayName: "바닐라",
+            },
+          ],
+          letteringRequired: "OPTIONAL",
+          letteringMaxLength: 20,
+          imageUploadEnabled: "ENABLE",
           detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
-          cancellationRefundDetailDescription:
-            "<p>주문 취소 및 환불 정책: 제작 시작 전까지 취소 가능하며, 제작 시작 후에는 취소가 불가능합니다.</p>",
-          productNumber: `CAKE-${String(index + 1).padStart(3, "0")}`, // CAKE-001, CAKE-002, ... CAKE-100
+          productNumber: `20240101-${String(index + 1).padStart(3, "0")}`, // 20240101-001, 20240101-002, ... 20240101-100
           productNoticeFoodType: "케이크류",
           productNoticeProducer: "스위트오더",
           productNoticeOrigin: "국내산",
@@ -287,12 +238,6 @@ async function main() {
           productNoticeGmoNotice: "해당사항 없음",
           productNoticeImportNotice: "해당사항 없음",
           productNoticeCustomerService: "1588-1234",
-          mainCategory: "CAKE",
-          sizeRange: ["ONE_TO_TWO", "TWO_TO_THREE"],
-          deliveryMethod: ["PICKUP", "DELIVERY"],
-          hashtags: ["케이크", "초콜릿", "생일", "기념일"],
-          images: ["https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg"],
-          status: "ACTIVE",
           createdAt: new Date("2024-01-01T00:00:00Z"),
           updatedAt: new Date("2024-01-01T00:00:00Z"),
         },
@@ -309,83 +254,11 @@ async function main() {
     }),
   ]);
 
-  // 장바구니 데이터 생성
-  // users[0] (SELLER 역할을 가진 사용자)가 여러 상품을 장바구니에 담음
-  const carts = await Promise.all([
-    // 첫 번째 상품 - orderFormData 포함
-    prisma.cart.create({
-      data: {
-        userId: users[0].id, // SELLER 역할 사용자
-        productId: products[0].id,
-        quantity: 2,
-        orderFormData: {
-          size: "2호",
-          additionalProducts: ["cakeBox", "candles"],
-          cakeMessage: "생일 축하해요!",
-          additionalRequest: "예쁘게 포장해주세요",
-        },
-        deliveryMethod: "PICKUP",
-        createdAt: new Date("2024-01-18T10:00:00Z"),
-        updatedAt: new Date("2024-01-18T10:00:00Z"),
-      },
-    }),
-    // 두 번째 상품 - orderFormData 포함
-    prisma.cart.create({
-      data: {
-        userId: users[0].id, // SELLER 역할 사용자
-        productId: products[1].id,
-        quantity: 1,
-        orderFormData: {
-          size: "1호",
-          additionalProducts: ["topper"],
-          cakeMessage: "사랑해요",
-        },
-        deliveryMethod: "DELIVERY",
-        createdAt: new Date("2024-01-19T14:30:00Z"),
-        updatedAt: new Date("2024-01-19T14:30:00Z"),
-      },
-    }),
-    // 세 번째 상품 - orderFormData 포함 (orderFormSchema가 있으면 필수)
-    prisma.cart.create({
-      data: {
-        userId: users[0].id, // SELLER 역할 사용자
-        productId: products[2].id,
-        quantity: 3,
-        orderFormData: {
-          size: "1호",
-          additionalProducts: ["cakeBox"],
-          cakeMessage: "감사합니다",
-        },
-        deliveryMethod: "DELIVERY",
-        createdAt: new Date("2024-01-20T09:15:00Z"),
-        updatedAt: new Date("2024-01-20T09:15:00Z"),
-      },
-    }),
-    // 네 번째 상품 - orderFormData 포함
-    prisma.cart.create({
-      data: {
-        userId: users[0].id, // SELLER 역할 사용자
-        productId: products[5].id,
-        quantity: 1,
-        orderFormData: {
-          size: "3호",
-          additionalProducts: ["cakeBox", "candles", "messagePlate"],
-          cakeMessage: "축하합니다!",
-          additionalRequest: "신선하게 부탁드립니다",
-        },
-        deliveryMethod: "PICKUP",
-        createdAt: new Date("2024-01-21T11:20:00Z"),
-        updatedAt: new Date("2024-01-21T11:20:00Z"),
-      },
-    }),
-  ]);
-
   console.log(`✅ Created ${users.length} users`);
   console.log(`✅ Created ${phoneVerifications.length} phone verifications`);
   console.log(`✅ Created ${products.length} products`);
   console.log(`✅ Created ${productLikes.length} product likes`);
   console.log(`✅ Created ${stores.length} stores`);
-  console.log(`✅ Created ${carts.length} cart items`);
   console.log("🎉 Database seeding completed!");
 }
 

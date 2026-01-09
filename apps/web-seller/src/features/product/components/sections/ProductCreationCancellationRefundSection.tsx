@@ -17,9 +17,7 @@ export const ProductCreationCancellationRefundSection: React.FC<
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-2">
-        취소 및 환불 정책
-      </h2>
+      <h2 className="text-xl font-semibold mb-2">취소 및 환불 정책</h2>
 
       <p className="text-sm text-muted-foreground mb-2">
         취소 및 환불 정보는 선택 입력 항목입니다. 고객이 확인할 수 있는 취소 및 환불 관련 정보를
