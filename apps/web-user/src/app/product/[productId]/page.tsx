@@ -6,13 +6,13 @@ import { ProductDetailImageGallerySection } from "@/apps/web-user/features/produ
 import { ProductDetailInfoSection } from "@/apps/web-user/features/product/components/sections/ProductDetailInfoSection";
 import { ProductDetailDescriptionSection } from "@/apps/web-user/features/product/components/sections/ProductDetailDescriptionSection";
 import { ProductDetailInformationNoticeSection } from "@/apps/web-user/features/product/components/sections/ProductDetailInformationNoticeSection";
-import { ProductDetailCancellationRefundSection } from "@/apps/web-user/features/product/components/sections/ProductDetailCancellationRefundSection";
+import { ProductDetailReviewSection } from "@/apps/web-user/features/product/components/sections/ProductDetailReviewSection";
 
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
 }
 
-type TabType = "detail" | "notice" | "cancellationRefund";
+type TabType = "detail" | "review" | "notice";
 
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { productId } = use(params);
@@ -87,14 +87,31 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               fontSize: "16px",
               fontWeight: activeTab === "detail" ? 700 : 500,
               color: activeTab === "detail" ? "#111827" : "#6b7280",
+              border: "none",
               borderBottom: activeTab === "detail" ? "2px solid #111827" : "2px solid transparent",
               backgroundColor: "transparent",
-              border: "none",
               cursor: "pointer",
               transition: "all 0.2s",
             }}
           >
-            상세정보
+            주문정보
+          </button>
+          <button
+            onClick={() => setActiveTab("review")}
+            style={{
+              flex: 1,
+              padding: "16px 24px",
+              fontSize: "16px",
+              fontWeight: activeTab === "review" ? 700 : 500,
+              color: activeTab === "review" ? "#111827" : "#6b7280",
+              border: "none",
+              borderBottom: activeTab === "review" ? "2px solid #111827" : "2px solid transparent",
+              backgroundColor: "transparent",
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+          >
+            후기
           </button>
           <button
             onClick={() => setActiveTab("notice")}
@@ -104,32 +121,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               fontSize: "16px",
               fontWeight: activeTab === "notice" ? 700 : 500,
               color: activeTab === "notice" ? "#111827" : "#6b7280",
+              border: "none",
               borderBottom: activeTab === "notice" ? "2px solid #111827" : "2px solid transparent",
               backgroundColor: "transparent",
-              border: "none",
               cursor: "pointer",
               transition: "all 0.2s",
             }}
           >
-            상품정보제공고시
-          </button>
-          <button
-            onClick={() => setActiveTab("cancellationRefund")}
-            style={{
-              flex: 1,
-              padding: "16px 24px",
-              fontSize: "16px",
-              fontWeight: activeTab === "cancellationRefund" ? 700 : 500,
-              color: activeTab === "cancellationRefund" ? "#111827" : "#6b7280",
-              borderBottom:
-                activeTab === "cancellationRefund" ? "2px solid #111827" : "2px solid transparent",
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            취소 및 환불
+            상세정보
           </button>
         </div>
 
@@ -141,13 +140,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               variant="tab"
             />
           )}
+          {activeTab === "review" && <ProductDetailReviewSection variant="tab" />}
           {activeTab === "notice" && (
-            <ProductDetailInformationNoticeSection product={data} variant="tab" />
-          )}
-          {activeTab === "cancellationRefund" && (
-            <ProductDetailCancellationRefundSection
-              cancellationRefundDetailDescription={data.cancellationRefundDetailDescription}
+            <ProductDetailInformationNoticeSection
+              product={data}
               variant="tab"
+              cancellationRefundDetailDescription={data.cancellationRefundDetailDescription}
             />
           )}
         </div>

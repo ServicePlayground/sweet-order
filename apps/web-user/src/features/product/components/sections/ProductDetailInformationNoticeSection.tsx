@@ -1,10 +1,17 @@
 "use client";
 
 import { Product } from "@/apps/web-user/features/product/types/product.type";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/apps/web-user/common/components/@shadcn-ui/accordion";
 
 interface ProductDetailInformationNoticeSectionProps {
   product: Product;
   variant?: "default" | "tab";
+  cancellationRefundDetailDescription?: string;
 }
 
 interface NoticeItem {
@@ -15,6 +22,7 @@ interface NoticeItem {
 export function ProductDetailInformationNoticeSection({
   product,
   variant = "default",
+  cancellationRefundDetailDescription,
 }: ProductDetailInformationNoticeSectionProps) {
   const isTabVariant = variant === "tab";
 
@@ -47,60 +55,89 @@ export function ProductDetailInformationNoticeSection({
         marginTop: isTabVariant ? 0 : "32px",
       }}
     >
-      {!isTabVariant && (
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: 700,
-            color: "#111827",
-            marginBottom: "24px",
-          }}
-        >
-          상품정보제공고시
-        </h2>
-      )}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 0,
-        }}
-      >
-        {noticeItems.map((item, index) => (
-          <div key={index}>
+      <Accordion type="single" collapsible defaultValue={!isTabVariant ? "notice-info" : undefined}>
+        <AccordionItem value="notice-info" style={{ border: "none" }}>
+          <AccordionTrigger
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              paddingBottom: "16px",
+            }}
+          >
+            상품정보제공고시
+          </AccordionTrigger>
+          <AccordionContent>
             <div
               style={{
                 display: "flex",
-                padding: "16px 0",
-                borderBottom: index < noticeItems.length - 1 ? "1px solid #e5e7eb" : "none",
+                flexDirection: "column",
+                gap: 0,
               }}
             >
-              <div
-                style={{
-                  minWidth: "200px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#6b7280",
-                  lineHeight: "1.5",
-                }}
-              >
-                {item.label}
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  fontSize: "14px",
-                  color: "#111827",
-                  lineHeight: "1.5",
-                  wordBreak: "break-word",
-                }}
-              >
-                {item.value || "-"}
-              </div>
+              {noticeItems.map((item, index) => (
+                <div key={index}>
+                  <div
+                    style={{
+                      display: "flex",
+                      padding: "16px 0",
+                      borderBottom: index < noticeItems.length - 1 ? "1px solid #e5e7eb" : "none",
+                    }}
+                  >
+                    <div
+                      style={{
+                        minWidth: "200px",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#6b7280",
+                        lineHeight: "1.5",
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        fontSize: "14px",
+                        color: "#111827",
+                        lineHeight: "1.5",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {item.value || "-"}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="cancellation-refund" style={{ border: "none" }}>
+          <AccordionTrigger
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              paddingBottom: "16px",
+            }}
+          >
+            취소 및 환불
+          </AccordionTrigger>
+          <AccordionContent>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 0,
+              }}
+            >
+              {cancellationRefundDetailDescription && (
+                <div dangerouslySetInnerHTML={{ __html: cancellationRefundDetailDescription }} />
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
