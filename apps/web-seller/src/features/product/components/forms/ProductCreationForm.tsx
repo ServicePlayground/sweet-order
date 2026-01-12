@@ -9,17 +9,15 @@ import {
 } from "@/apps/web-seller/common/components/@shadcn-ui/tabs";
 import {
   IProductForm,
-  MainCategory,
-  SizeRange,
-  DeliveryMethod,
-  ProductStatus,
-  OrderFormSchema,
+  EnableStatus,
+  OptionRequired,
+  CakeSizeOption,
+  CakeFlavorOption,
 } from "@/apps/web-seller/features/product/types/product.type";
-import { ProductCreationOrderFormSchemaSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationOrderFormSchemaSection";
 import { ProductCreationBasicInfoSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationBasicInfoSection";
-import { ProductCreationAdditionalSettingsSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationAdditionalSettingsSection";
+import { ProductCreationCakeOptionsSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCakeOptionsSection";
+import { ProductCreationLetteringPolicySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationLetteringPolicySection";
 import { ProductCreationDetailDescriptionSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationDetailDescriptionSection";
-import { ProductCreationCancellationRefundSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCancellationRefundSection";
 import { ProductCreationProductNoticeSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationProductNoticeSection";
 import { validateProductForm } from "@/apps/web-seller/features/product/utils/validateProductForm";
 
@@ -30,18 +28,19 @@ interface Props {
 }
 
 export const defaultForm: IProductForm = {
-  mainCategory: MainCategory.CAKE,
-  images: [],
+  mainImage: "",
+  additionalImages: [],
   name: "",
-  description: "",
-  originalPrice: 0,
   salePrice: 0,
-  notice: "",
-  caution: "",
-  basicIncluded: "",
-  orderFormSchema: undefined,
+  salesStatus: EnableStatus.ENABLE,
+  visibilityStatus: EnableStatus.ENABLE,
+  cakeSizeOptions: [],
+  cakeFlavorOptions: [],
+  letteringVisible: EnableStatus.ENABLE,
+  letteringRequired: OptionRequired.OPTIONAL,
+  letteringMaxLength: 0,
+  imageUploadEnabled: EnableStatus.ENABLE,
   detailDescription: "",
-  cancellationRefundDetailDescription: "",
   productNoticeFoodType: "",
   productNoticeProducer: "",
   productNoticeOrigin: "",
@@ -56,11 +55,6 @@ export const defaultForm: IProductForm = {
   productNoticeGmoNotice: "",
   productNoticeImportNotice: "",
   productNoticeCustomerService: "",
-  stock: 0,
-  sizeRange: [],
-  deliveryMethod: [],
-  hashtags: [],
-  status: ProductStatus.ACTIVE,
 };
 
 export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
@@ -89,8 +83,8 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
       const value = e.target.value;
       let next: IProductForm;
 
-      // 정가, 판매가, 재고수량은 숫자로 변환
-      if (key === "originalPrice" || key === "salePrice" || key === "stock") {
+      // 판매가는 숫자로 변환
+      if (key === "salePrice") {
         const numValue = value === "" ? 0 : parseInt(value, 10);
         next = { ...form, [key]: isNaN(numValue) ? 0 : numValue };
       } else {
@@ -101,56 +95,70 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
       onChange?.(next);
     };
 
-  const handleCategoryChange = (value: MainCategory) => {
-    const next = { ...form, mainCategory: value };
+  const handleSalesStatusChange = (value: EnableStatus) => {
+    const next = { ...form, salesStatus: value };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleImagesChange = (urls: string[]) => {
-    const next = { ...form, images: urls };
+  const handleVisibilityStatusChange = (value: EnableStatus) => {
+    const next = { ...form, visibilityStatus: value };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleSizeRangeChange = (values: string[]) => {
-    const next = { ...form, sizeRange: values as SizeRange[] };
+  const handleMainImageChange = (url: string) => {
+    const next = { ...form, mainImage: url };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleDeliveryMethodChange = (values: string[]) => {
-    const next = { ...form, deliveryMethod: values as DeliveryMethod[] };
+  const handleAdditionalImagesChange = (urls: string[]) => {
+    const next = { ...form, additionalImages: urls };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleHashtagsChange = (hashtags: string[]) => {
-    const next = { ...form, hashtags };
+  const handleCakeSizeOptionsChange = (options: CakeSizeOption[]) => {
+    const next = { ...form, cakeSizeOptions: options };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleStatusChange = (value: ProductStatus) => {
-    const next = { ...form, status: value };
+  const handleCakeFlavorOptionsChange = (options: CakeFlavorOption[]) => {
+    const next = { ...form, cakeFlavorOptions: options };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleOrderFormSchemaChange = (schema: OrderFormSchema) => {
-    const next = { ...form, orderFormSchema: schema };
+  const handleLetteringVisibleChange = (value: EnableStatus) => {
+    const next = { ...form, letteringVisible: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleLetteringRequiredChange = (value: OptionRequired) => {
+    const next = { ...form, letteringRequired: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleLetteringMaxLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numValue = value === "" ? 0 : parseInt(value, 10);
+    const next = { ...form, letteringMaxLength: isNaN(numValue) ? 0 : numValue };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleImageUploadEnabledChange = (value: EnableStatus) => {
+    const next = { ...form, imageUploadEnabled: value };
     setForm(next);
     onChange?.(next);
   };
 
   const handleDetailDescriptionChange = (value: string) => {
     const next = { ...form, detailDescription: value };
-    setForm(next);
-    onChange?.(next);
-  };
-
-  const handleCancellationRefundPolicyChange = (value: string) => {
-    const next = { ...form, cancellationRefundDetailDescription: value };
     setForm(next);
     onChange?.(next);
   };
@@ -182,8 +190,6 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
           validationErrors.productNoticeCustomerService
         ) {
           setActiveTab("notice"); // 상품정보제공고시 탭
-        } else if (validationErrors.cancellationRefundDetailDescription) {
-          setActiveTab("refund"); // 취소 및 환불 탭
         } else {
           setActiveTab("basic"); // 기본 정보 탭
         }
@@ -199,11 +205,10 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
       <Card>
         <CardContent className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="basic">기본 정보</TabsTrigger>
               <TabsTrigger value="detail">상세정보</TabsTrigger>
               <TabsTrigger value="notice">상품정보제공고시</TabsTrigger>
-              <TabsTrigger value="refund">취소 및 환불</TabsTrigger>
             </TabsList>
 
             {/* 기본 정보 탭 */}
@@ -211,33 +216,30 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
               <ProductCreationBasicInfoSection
                 form={form}
                 errors={errors}
-                onCategoryChange={handleCategoryChange}
-                onImagesChange={handleImagesChange}
+                onSalesStatusChange={handleSalesStatusChange}
+                onVisibilityStatusChange={handleVisibilityStatusChange}
+                onMainImageChange={handleMainImageChange}
+                onAdditionalImagesChange={handleAdditionalImagesChange}
                 onChange={handleChange}
               />
 
-              {/* 커스텀 주문양식 섹션 */}
-              <Card>
-                <CardContent className="p-6">
-                  <ProductCreationOrderFormSchemaSection
-                    value={form.orderFormSchema}
-                    onChange={handleOrderFormSchemaChange}
-                  />
-                </CardContent>
-              </Card>
+              {/* 케이크 옵션 섹션 */}
+              <ProductCreationCakeOptionsSection
+                form={form}
+                errors={errors}
+                onCakeSizeOptionsChange={handleCakeSizeOptionsChange}
+                onCakeFlavorOptionsChange={handleCakeFlavorOptionsChange}
+              />
 
-              {/* 추가 설정 섹션 */}
-              <div>
-                <ProductCreationAdditionalSettingsSection
-                  form={form}
-                  errors={errors}
-                  onStockChange={handleChange("stock")}
-                  onStatusChange={handleStatusChange}
-                  onSizeRangeChange={handleSizeRangeChange}
-                  onDeliveryMethodChange={handleDeliveryMethodChange}
-                  onHashtagsChange={handleHashtagsChange}
-                />
-              </div>
+              {/* 레터링 정책 섹션 */}
+              <ProductCreationLetteringPolicySection
+                form={form}
+                errors={errors}
+                onLetteringVisibleChange={handleLetteringVisibleChange}
+                onLetteringRequiredChange={handleLetteringRequiredChange}
+                onLetteringMaxLengthChange={handleLetteringMaxLengthChange}
+                onImageUploadEnabledChange={handleImageUploadEnabledChange}
+              />
             </TabsContent>
 
             {/* 상세정보 탭 */}
@@ -255,15 +257,6 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
                 form={form}
                 errors={errors}
                 onChange={handleChange}
-              />
-            </TabsContent>
-
-            {/* 취소 및 환불 탭 */}
-            <TabsContent value="refund" className="mt-6">
-              <ProductCreationCancellationRefundSection
-                form={form}
-                errors={errors}
-                onChange={handleCancellationRefundPolicyChange}
               />
             </TabsContent>
           </Tabs>

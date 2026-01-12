@@ -7,51 +7,26 @@ export const validateProductForm = (
   const newErrors: Partial<Record<keyof IProductForm, string>> = {};
 
   // 기본 정보 검증
-  if (!form.mainCategory) {
-    newErrors.mainCategory = PRODUCT_ERROR_MESSAGES.MAIN_CATEGORY_REQUIRED;
-  }
-
-  if (!form.images || form.images.length === 0) {
-    newErrors.images = PRODUCT_ERROR_MESSAGES.IMAGE_URLS_REQUIRED;
+  if (!form.mainImage || !form.mainImage.trim()) {
+    newErrors.mainImage = PRODUCT_ERROR_MESSAGES.MAIN_IMAGE_REQUIRED;
   }
 
   if (!form.name.trim()) {
     newErrors.name = PRODUCT_ERROR_MESSAGES.NAME_REQUIRED;
   }
 
-  if (form.originalPrice === null || form.originalPrice === undefined) {
-    newErrors.originalPrice = PRODUCT_ERROR_MESSAGES.ORIGINAL_PRICE_REQUIRED;
-  } else if (form.originalPrice <= 0) {
-    newErrors.originalPrice = PRODUCT_ERROR_MESSAGES.ORIGINAL_PRICE_INVALID;
+  if (!form.salesStatus) {
+    newErrors.salesStatus = PRODUCT_ERROR_MESSAGES.SALES_STATUS_REQUIRED;
+  }
+
+  if (!form.visibilityStatus) {
+    newErrors.visibilityStatus = PRODUCT_ERROR_MESSAGES.VISIBILITY_STATUS_REQUIRED;
   }
 
   if (form.salePrice === null || form.salePrice === undefined) {
     newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_REQUIRED;
   } else if (form.salePrice <= 0) {
     newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_INVALID;
-  }
-
-  if (form.originalPrice > 0 && form.salePrice > 0 && form.salePrice > form.originalPrice) {
-    newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_HIGHER_THAN_ORIGINAL;
-  }
-
-  // 보이지 않는 부분 검증
-  if (form.stock === null || form.stock === undefined) {
-    newErrors.stock = PRODUCT_ERROR_MESSAGES.STOCK_REQUIRED;
-  } else if (form.stock < 1) {
-    newErrors.stock = PRODUCT_ERROR_MESSAGES.STOCK_INVALID;
-  }
-
-  if (form.sizeRange.length === 0) {
-    newErrors.sizeRange = PRODUCT_ERROR_MESSAGES.SIZE_RANGE_REQUIRED;
-  }
-
-  if (form.deliveryMethod.length === 0) {
-    newErrors.deliveryMethod = PRODUCT_ERROR_MESSAGES.DELIVERY_METHOD_REQUIRED;
-  }
-
-  if (form.hashtags && form.hashtags.length > 10) {
-    newErrors.hashtags = PRODUCT_ERROR_MESSAGES.HASHTAG_MAX;
   }
 
   // 상품정보제공고시 검증
