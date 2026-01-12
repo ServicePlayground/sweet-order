@@ -33,6 +33,7 @@
     "@storybook/addon-onboarding": "^10.1.2",
     "@storybook/addon-vitest": "^10.1.2",
     "@storybook/nextjs-vite": "^10.1.2",
+    "@svgr/webpack": "^8.1.0",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@types/node": "^20",
     "@types/react": "^19",

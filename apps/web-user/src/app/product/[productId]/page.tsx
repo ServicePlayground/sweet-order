@@ -40,19 +40,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   }
 
   return (
-    <div style={{ width: "100%", padding: "40px 20px" }}>
+    <div>
       {/* 상품 이미지 및 정보 */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "48px",
-          marginBottom: "32px",
-        }}
-      >
+      <div>
         {/* 이미지 갤러리 */}
         <div>
-          <ProductDetailImageGallerySection images={data.images} productName={data.name} />
+          <ProductDetailImageGallerySection images={data.mainImage} productName={data.name} />
         </div>
 
         {/* 상품 정보 */}

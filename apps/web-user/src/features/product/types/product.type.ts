@@ -107,11 +107,13 @@ export interface Product {
   productNoticeGmoNotice: string;
   productNoticeImportNotice: string;
   productNoticeCustomerService: string;
+  letteringRequired: string;
   mainCategory: string;
   sizeRange: string[];
   deliveryMethod: string[];
   hashtags: string[];
-  images: string[];
+  mainImage: string;
+  additionalImages: string[];
   status: string;
 }
 
