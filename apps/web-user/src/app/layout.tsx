@@ -1,20 +1,17 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "@/apps/web-user/common/styles/globals.css";
 import { QueryProvider } from "@/apps/web-user/common/components/providers/QueryProvider";
 import { ErrorBoundaryProvider } from "@/apps/web-user/common/components/providers/ErrorBoundaryProvider";
 import { LoadingFallback } from "@/apps/web-user/common/components/fallbacks/LoadingFallback";
 import RootWrapperLayout from "@/apps/web-user/common/components/layouts/RootWrapperLayout";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const pretendard = localFont({
+  src: "../../public/fonts/PretendardVariable.woff2",
+  variable: "--font-pretendard",
+  display: "swap",
+  weight: "45 920",
 });
 
 // SEO 최적화를 위해 검색 엔진이 페이지 정보를 수집할 때 사용됨
@@ -102,8 +99,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="ko">
+      <body className={pretendard.className}>
         <ErrorBoundaryProvider>
           <QueryProvider>
             <Suspense

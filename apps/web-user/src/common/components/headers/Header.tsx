@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
 import { useLogout } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
 import { useGetCartItems } from "@/apps/web-user/features/cart/hooks/queries/useGetCartItems";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { Icon } from "@/apps/web-user/common/components/icons";
 
-export default function Header() {
-  const pathname = usePathname();
+interface HeaderProps {
+  variant?: "main" | "product" | "minimal";
+}
+
+export default function Header({ variant = "main" }: HeaderProps) {
+  const router = useRouter();
   const { isAuthenticated, user, isInitialized } = useAuthStore();
   const logoutMutation = useLogout();
-  // 로그인한 사용자에게만 장바구니 데이터 조회
   const { data: cartData } = useGetCartItems();
 
   const handleLogout = () => {
@@ -21,157 +25,82 @@ export default function Header() {
     }
   };
 
-  // 인증 관련 페이지에서는 헤더를 렌더하지 않음
-  if (pathname?.startsWith("/auth")) return null;
-
-  // 장바구니 아이템 개수 계산
   const cartItemCount = cartData?.data
     ? cartData.data.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
 
-  return (
-    <header
-      style={{
-        padding: "0 40px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        height: 160,
-        backgroundColor: "#ffffff",
-      }}
+  // 장바구니 버튼 컴포넌트 (공통)
+  const CartButton = () => (
+    <Link
+      href={PATHS.CART}
+      className="relative flex items-center justify-center rounded-lg text-gray-900 no-underline transition-all hover:bg-gray-100"
+      aria-label="장바구니"
     >
+      <Icon name="cart" width={24} height={24} />
+      {cartItemCount > 0 && (
+        <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">
+          {cartItemCount > 99 ? "99+" : cartItemCount}
+        </span>
+      )}
+    </Link>
+  );
+
+  // Product 헤더: 뒤로가기 + 장바구니
+  if (variant === "product") {
+    return (
+      <header className="px-5 flex justify-between items-center h-[52px]">
+        {/* 뒤로가기 버튼 */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center justify-center rounded-lg border-none bg-transparent text-gray-900 cursor-pointer transition-all hover:bg-gray-100"
+          aria-label="뒤로가기"
+        >
+          <Icon name="chevronLeft" width={24} height={24} />
+        </button>
+
+        {/* 장바구니 버튼 */}
+        {isInitialized && isAuthenticated && user && <CartButton />}
+      </header>
+    );
+  }
+
+  // Minimal 헤더: 헤더 없음
+  if (variant === "minimal") {
+    return null;
+  }
+
+  // Main 헤더 (기본): 로고 + 장바구니 + 로그인/로그아웃
+  return (
+    <header className="px-10 flex justify-between items-center h-[160px] bg-white">
       {/* 로고 */}
-      <Link
-        href={PATHS.HOME}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          textDecoration: "none",
-        }}
-        aria-label="홈으로 이동"
-      >
+      <Link href={PATHS.HOME} className="flex items-center no-underline" aria-label="홈으로 이동">
         <Image
           src="/images/logo/logo1.png"
           alt="로고"
           width={160}
           height={160}
-          style={{
-            objectFit: "contain",
-            cursor: "pointer",
-          }}
+          className="object-contain cursor-pointer"
         />
       </Link>
 
       {/* 우측 메뉴 */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-        }}
-      >
+      <div className="flex items-center gap-4">
         {/* 장바구니 아이콘 (로그인한 사용자만 표시) */}
-        {isInitialized && isAuthenticated && user && (
-          <Link
-            href={PATHS.CART}
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              textDecoration: "none",
-              color: "#111827",
-              transition: "all 0.2s ease",
-            }}
-            aria-label="장바구니"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#f3f4f6";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent";
-            }}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V16.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            {cartItemCount > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "-4px",
-                  right: "-4px",
-                  minWidth: "20px",
-                  height: "20px",
-                  padding: "0 6px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#ef4444",
-                  color: "#ffffff",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  borderRadius: "10px",
-                  border: "2px solid #ffffff",
-                }}
-              >
-                {cartItemCount > 99 ? "99+" : cartItemCount}
-              </span>
-            )}
-          </Link>
-        )}
+        {isInitialized && isAuthenticated && user && <CartButton />}
 
         {/* 로그인/로그아웃 버튼 */}
         <div>
-          {/* 초기화 전에는 아무 것도 렌더하지 않음 → 깜빡임 방지 */}
           {!isInitialized ? null : isAuthenticated && user ? (
             <button
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
               aria-label="로그아웃"
-              style={{
-                padding: "10px 20px",
-                borderRadius: "8px",
-                fontWeight: 500,
-                fontSize: "14px",
-                lineHeight: "1.5",
-                cursor: logoutMutation.isPending ? "not-allowed" : "pointer",
-                color: "#6b7280",
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
-                textDecoration: "none",
-                display: "inline-block",
-                transition: "all 0.2s ease",
-                opacity: logoutMutation.isPending ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!logoutMutation.isPending) {
-                  e.currentTarget.style.backgroundColor = "#f9fafb";
-                  e.currentTarget.style.borderColor = "#d1d5db";
-                  e.currentTarget.style.color = "#374151";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!logoutMutation.isPending) {
-                  e.currentTarget.style.backgroundColor = "#ffffff";
-                  e.currentTarget.style.borderColor = "#e5e7eb";
-                  e.currentTarget.style.color = "#6b7280";
-                }
-              }}
+              className={`px-5 py-2.5 rounded-lg font-medium text-sm leading-6 border transition-all inline-block
+                ${
+                  logoutMutation.isPending
+                    ? "cursor-not-allowed opacity-60 text-gray-500 bg-white border-gray-200"
+                    : "cursor-pointer text-gray-500 bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+                }`}
             >
               {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
             </button>
@@ -179,28 +108,7 @@ export default function Header() {
             <Link
               href={PATHS.AUTH.LOGIN}
               aria-label="로그인"
-              style={{
-                padding: "10px 20px",
-                borderRadius: "8px",
-                fontWeight: 500,
-                fontSize: "14px",
-                lineHeight: "1.5",
-                cursor: "pointer",
-                color: "#ffffff",
-                backgroundColor: "#111827",
-                border: "1px solid #111827",
-                textDecoration: "none",
-                display: "inline-block",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#1f2937";
-                e.currentTarget.style.borderColor = "#1f2937";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#111827";
-                e.currentTarget.style.borderColor = "#111827";
-              }}
+              className="px-5 py-2.5 rounded-lg font-medium text-sm leading-6 cursor-pointer text-white bg-gray-900 border border-gray-900 no-underline inline-block transition-all hover:bg-gray-800 hover:border-gray-800"
             >
               로그인
             </Link>

@@ -9,7 +9,7 @@ import {
   HttpStatus,
   Param,
 } from "@nestjs/common";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ProductService } from "@apps/backend/modules/product/product.service";
 import { GetProductsRequestDto } from "@apps/backend/modules/product/dto/product-request.dto";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
@@ -18,8 +18,14 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 import {
   PRODUCT_ERROR_MESSAGES,
   PRODUCT_SUCCESS_MESSAGES,
-  SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
+import {
+  ProductListResponseDto,
+  ProductResponseDto,
+  PaginationMetaResponseDto,
+  CakeSizeOptionResponseDto,
+  CakeFlavorOptionResponseDto,
+} from "@apps/backend/modules/product/dto/product-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,
@@ -31,6 +37,17 @@ import {
  * 사용자 상품 관리 API 엔드포인트를 제공합니다.
  */
 @ApiTags("상품")
+/** @ApiExtraModels
+ * Swagger 스키마에 응답 DTO를 등록합니다.
+ * SwaggerResponse 데코레이터에서 $ref를 사용하여 DTO를 참조할 때, 해당 DTO가 Swagger 스키마에 등록되어 있어야 하기 때문
+ */
+@ApiExtraModels(
+  ProductListResponseDto,
+  ProductResponseDto,
+  PaginationMetaResponseDto,
+  CakeSizeOptionResponseDto,
+  CakeFlavorOptionResponseDto,
+)
 @Controller(`${USER_ROLES.USER}/products`)
 @Auth({ isPublic: true }) // 기본적으로 모든 엔드포인트에 통합 인증 가드 적용
 export class UserProductController {
@@ -46,7 +63,7 @@ export class UserProductController {
     summary: "상품 목록 조회",
     description: "필터링, 정렬, 무한 스크롤을 지원하는 상품 목록을 조회합니다.",
   })
-  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.PRODUCT_LIST_RESPONSE)
+  @SwaggerResponse(200, { dataDto: ProductListResponseDto })
   async getProducts(@Query() query: GetProductsRequestDto) {
     return await this.productService.getProducts(query);
   }
@@ -62,13 +79,21 @@ export class UserProductController {
     summary: "(로그인필요) 상품 좋아요 여부 확인",
     description: "특정 상품에 대한 사용자의 좋아요 여부를 확인합니다.",
   })
-  @SwaggerResponse(200, { isLiked: true })
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
+  @SwaggerResponse(200, { dataExample: { isLiked: true } })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async isLiked(@Param("id") productId: string, @Request() req: { user: JwtVerifiedPayload }) {
     const isLiked = await this.productService.isLiked(req.user.sub, productId);
     return { isLiked };
@@ -84,8 +109,8 @@ export class UserProductController {
     summary: "상품 상세 조회",
     description: "특정 상품의 상세 정보를 조회합니다.",
   })
-  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.PRODUCT_DETAIL_RESPONSE)
-  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
+  @SwaggerResponse(200, { dataDto: ProductResponseDto })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async getProductDetail(@Param("id") id: string) {
     return await this.productService.getProductDetail(id);
   }
@@ -101,14 +126,24 @@ export class UserProductController {
     summary: "(로그인필요) 상품 좋아요 추가",
     description: "상품에 좋아요를 추가합니다.",
   })
-  @SwaggerResponse(201, createMessageObject(PRODUCT_SUCCESS_MESSAGES.LIKE_ADDED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
-  @SwaggerResponse(409, createMessageObject(PRODUCT_ERROR_MESSAGES.LIKE_ALREADY_EXISTS))
+  @SwaggerResponse(201, { dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.LIKE_ADDED) })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.LIKE_ALREADY_EXISTS),
+  })
   async addProductLike(
     @Param("id") productId: string,
     @Request() req: { user: JwtVerifiedPayload },
@@ -128,13 +163,21 @@ export class UserProductController {
     summary: "(로그인필요) 상품 좋아요 삭제",
     description: "상품의 좋아요를 취소합니다.",
   })
-  @SwaggerResponse(200, createMessageObject(PRODUCT_SUCCESS_MESSAGES.LIKE_REMOVED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.LIKE_NOT_FOUND))
+  @SwaggerResponse(200, { dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.LIKE_REMOVED) })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.LIKE_NOT_FOUND) })
   async removeProductLike(
     @Param("id") productId: string,
     @Request() req: { user: JwtVerifiedPayload },
