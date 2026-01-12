@@ -29,8 +29,8 @@ export class UserStoreController {
     summary: "스토어 상세 조회",
     description: "특정 스토어의 상세 정보를 조회합니다.",
   })
-  @SwaggerResponse(200, SWAGGER_RESPONSE_EXAMPLES.STORE_DETAIL_RESPONSE)
-  @SwaggerResponse(404, createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND))
+  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.STORE_DETAIL_RESPONSE })
+  @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreDetail(@Param("id") id: string) {
     return await this.storeService.getStoreById(id);
   }

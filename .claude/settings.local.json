@@ -5,7 +5,8 @@
       "Bash(yarn add:*)",
       "Bash(yarn remove:*)",
       "Bash(yarn dlx:*)",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
