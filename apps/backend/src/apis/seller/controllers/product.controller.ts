@@ -46,15 +46,29 @@ export class SellerProductController {
     description:
       "판매자가 새로운 상품을 등록합니다. 스토어 소유권을 확인하고 상품 정보를 저장합니다.",
   })
-  @SwaggerResponse(201, { id: SWAGGER_EXAMPLES.PRODUCT_DATA.id })
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED))
-  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_FOUND))
+  @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.PRODUCT_DATA.id } })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_FOUND),
+  })
   async createProduct(
     @Body() createProductDto: CreateProductRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
@@ -72,15 +86,27 @@ export class SellerProductController {
     summary: "(로그인 필요) 상품 삭제",
     description: "판매자가 등록한 상품을 삭제합니다.",
   })
-  @SwaggerResponse(200, createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE))
-  @SwaggerResponse(401, createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED))
-  @SwaggerResponse(401, createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN))
-  @SwaggerResponse(404, createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND))
+  @SwaggerResponse(200, {
+    dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED),
+  })
+  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
+  })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async deleteProduct(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     await this.productService.deleteProduct(id, req.user);
     return createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED);
