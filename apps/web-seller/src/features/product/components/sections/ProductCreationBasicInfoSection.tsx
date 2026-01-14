@@ -38,7 +38,9 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   return (
     <div className="grid grid-cols-1 gap-6">
       <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">노출 상품명</Label>
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+          노출 상품명
+        </Label>
         <Input
           placeholder=""
           value={form.name}

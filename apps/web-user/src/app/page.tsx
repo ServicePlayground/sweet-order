@@ -1,9 +1,11 @@
 "use client";
 
 // import { Metadata } from "next";
+import { useState } from "react";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import { ImageBannerSlider } from "@/apps/web-user/common/components/carousel/ImageBannerSlider";
 import { ProductRanking } from "@/apps/web-user/common/components/rankings/ProductRanking";
+import { Calendar } from "@/apps/web-user/common/components/calendars/Calendar";
 
 // 홈페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
 // export const metadata: Metadata = {
@@ -38,6 +40,9 @@ import { ProductRanking } from "@/apps/web-user/common/components/rankings/Produ
 // };
 
 export default function Home() {
+  // 달력 테스트용 상태 선언
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+
   return (
     <div
       style={{
@@ -87,6 +92,24 @@ export default function Home() {
         <div style={{ width: "100%", maxWidth: "100%" }}>
           <ProductRanking />
         </div>
+      </div>
+
+      {/* 달력 테스트 (임시) */}
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "100%",
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "40px",
+        }}
+      >
+        <Calendar
+          selectedDate={selectedDate}
+          onDateSelect={setSelectedDate}
+          minDate={new Date()}
+          initialMonth={new Date(2026, 2, 1)}
+        />
       </div>
 
       {/* 기타 콘텐츠 */}

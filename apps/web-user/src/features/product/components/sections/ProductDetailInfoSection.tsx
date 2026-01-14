@@ -1,7 +1,6 @@
 "use client";
 
 import { Product } from "@/apps/web-user/features/product/types/product.type";
-import { useEffect } from "react";
 
 interface ProductDetailInfoSectionProps {
   product: Product;
@@ -16,7 +15,9 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
         {/* 판매자명, 상품명, 가격 */}
         <div className="inline-flex items-center gap-[4px] mb-[8px] px-[6px] py-[6px] rounded-full bg-[#F6F5F5] text-xs text-gray-900 font-bold">
           <span
-            className={`w-[14px] h-[14px] rounded-full ${product.letteringRequired === "REQUIRED" ? "bg-[#FF653E]" : "bg-gray-400"}`}
+            className={`w-[14px] h-[14px] rounded-full ${
+              product.letteringRequired === "REQUIRED" ? "bg-[#FF653E]" : "bg-gray-400"
+            }`}
           ></span>
           {product.productNoticeProducer}
         </div>

@@ -189,9 +189,7 @@ async function main() {
         data: {
           storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
           name: "프리미엄 초콜릿 케이크",
-          images: [
-            "https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg",
-          ],
+          images: ["https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg"],
           salePrice: 45000,
           salesStatus: "ENABLE",
           visibilityStatus: "ENABLE",

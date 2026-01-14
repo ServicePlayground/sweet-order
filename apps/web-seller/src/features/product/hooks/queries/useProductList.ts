@@ -60,7 +60,3 @@ export function useProductList({
 
   return query;
 }
-
-
-
-

@@ -1,5 +1,9 @@
 import React from "react";
-import { IProductForm, EnableStatus, OptionRequired } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  IProductForm,
+  EnableStatus,
+  OptionRequired,
+} from "@/apps/web-seller/features/product/types/product.type";
 import {
   SALES_STATUS_OPTIONS,
   OPTION_REQUIRED_OPTIONS,
@@ -19,7 +23,9 @@ export interface ProductCreationLetteringPolicySectionProps {
 }
 
 // 상품 등록 폼 - 레터링 정책 섹션
-export const ProductCreationLetteringPolicySection: React.FC<ProductCreationLetteringPolicySectionProps> = ({
+export const ProductCreationLetteringPolicySection: React.FC<
+  ProductCreationLetteringPolicySectionProps
+> = ({
   form,
   errors,
   onLetteringVisibleChange,
@@ -57,7 +63,9 @@ export const ProductCreationLetteringPolicySection: React.FC<ProductCreationLett
           </div>
 
           <div>
-            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">최대 글자 수</Label>
+            <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+              최대 글자 수
+            </Label>
             <Input
               placeholder=""
               type="number"
@@ -86,4 +94,3 @@ export const ProductCreationLetteringPolicySection: React.FC<ProductCreationLett
     </Card>
   );
 };
-

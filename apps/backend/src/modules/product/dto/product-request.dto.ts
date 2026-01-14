@@ -20,7 +20,7 @@ import {
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
-import { ValidateNested, IsIn } from "class-validator";
+import { ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
 /**
