@@ -106,8 +106,20 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
     onChange?.(next);
   };
 
-  const handleImagesChange = (urls: string[]) => {
-    const next = { ...form, images: urls };
+  const handleMainImageChange = (url: string) => {
+    // 대표 이미지 변경 시: 새로운 대표 이미지 + 기존 추가 이미지들을 합쳐서 images 배열 생성
+    const additionalImages = form.images?.slice(1) || [];
+    const newImages = url ? [url, ...additionalImages] : additionalImages;
+    const next = { ...form, images: newImages };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleAdditionalImagesChange = (urls: string[]) => {
+    // 추가 이미지 변경 시: 기존 대표 이미지 + 새로운 추가 이미지들을 합쳐서 images 배열 생성
+    const mainImage = form.images?.[0] || "";
+    const newImages = mainImage ? [mainImage, ...urls] : urls;
+    const next = { ...form, images: newImages };
     setForm(next);
     onChange?.(next);
   };
@@ -211,7 +223,8 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
                 errors={errors}
                 onSalesStatusChange={handleSalesStatusChange}
                 onVisibilityStatusChange={handleVisibilityStatusChange}
-                onImagesChange={handleImagesChange}
+                onMainImageChange={handleMainImageChange}
+                onAdditionalImagesChange={handleAdditionalImagesChange}
                 onChange={handleChange}
               />
 

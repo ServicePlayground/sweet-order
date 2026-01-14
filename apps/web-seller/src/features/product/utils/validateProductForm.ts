@@ -6,7 +6,7 @@ export const validateProductForm = (
 ): Partial<Record<keyof IProductForm, string>> => {
   const newErrors: Partial<Record<keyof IProductForm, string>> = {};
 
-  // 기본 정보 검증
+  // 기본 정보 검증 - 대표 이미지 (images 배열의 첫 번째 요소) 필수
   if (!form.images || form.images.length === 0 || !form.images[0]?.trim()) {
     newErrors.images = PRODUCT_ERROR_MESSAGES.MAIN_IMAGE_REQUIRED;
   }
