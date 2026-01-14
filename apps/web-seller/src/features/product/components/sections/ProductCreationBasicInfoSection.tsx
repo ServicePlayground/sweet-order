@@ -31,6 +31,10 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   onAdditionalImagesChange,
   onChange,
 }) => {
+  // images 배열에서 첫 번째 요소를 대표 이미지로, 나머지를 추가 이미지로 분리
+  const mainImage = form.images?.[0] || "";
+  const additionalImages = form.images?.slice(1) || [];
+
   return (
     <div className="grid grid-cols-1 gap-6">
       <div>
@@ -79,9 +83,9 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       <div>
         <MultipleImageUpload
           label="상품 대표 이미지"
-          value={form.mainImage ? [form.mainImage] : []}
+          value={mainImage ? [mainImage] : []}
           onChange={(urls) => onMainImageChange(urls[0] || "")}
-          error={errors.mainImage}
+          error={errors.images}
           required
           maxImages={1}
         />
@@ -89,9 +93,8 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       <div>
         <MultipleImageUpload
           label="추가 이미지"
-          value={form.additionalImages || []}
+          value={additionalImages}
           onChange={onAdditionalImagesChange}
-          error={errors.additionalImages}
           maxImages={7}
         />
       </div>

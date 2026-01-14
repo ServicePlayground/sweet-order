@@ -23,8 +23,7 @@ export interface CakeFlavorOption {
 
 export interface IProductForm {
   // 기본 정보
-  mainImage: string;
-  additionalImages?: string[];
+  images: string[]; // 첫 번째 요소가 대표 이미지 (필수)
   name: string;
   salePrice: number;
   salesStatus: EnableStatus;

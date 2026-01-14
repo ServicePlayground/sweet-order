@@ -68,8 +68,7 @@ model Product {
   
   // 1. 상품명(문자열) - 필수입력값
   name              String
-  mainImage         String   @map("main_image")
-  additionalImages  String[] @default([]) @map("additional_images")
+  images            String[] @default([]) // 첫 번째 요소가 대표 이미지 (필수)
   salePrice         Int      @map("sale_price")
   salesStatus       EnableStatus @map("sales_status")
   visibilityStatus  EnableStatus @map("visibility_status")

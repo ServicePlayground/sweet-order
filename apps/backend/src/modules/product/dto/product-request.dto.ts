@@ -161,22 +161,14 @@ export class CreateProductRequestDto {
   name: string;
 
   @ApiProperty({
-    description: "대표이미지 URL",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.mainImage,
+    description: "이미지 URL 목록 (첫 번째 요소가 대표 이미지, 필수)",
+    isArray: true,
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.images,
   })
   @IsNotEmpty()
-  @IsString()
-  mainImage: string;
-
-  @ApiPropertyOptional({
-    description: "추가이미지 URL 목록",
-    isArray: true,
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.additionalImages,
-  })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  additionalImages?: string[];
+  images: string[];
 
   @ApiProperty({
     description: "판매가",

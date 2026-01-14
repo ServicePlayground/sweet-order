@@ -28,8 +28,7 @@ interface Props {
 }
 
 export const defaultForm: IProductForm = {
-  mainImage: "",
-  additionalImages: [],
+  images: [],
   name: "",
   salePrice: 0,
   salesStatus: EnableStatus.ENABLE,
@@ -108,13 +107,19 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
   };
 
   const handleMainImageChange = (url: string) => {
-    const next = { ...form, mainImage: url };
+    // 대표 이미지 변경 시: 새로운 대표 이미지 + 기존 추가 이미지들을 합쳐서 images 배열 생성
+    const additionalImages = form.images?.slice(1) || [];
+    const newImages = url ? [url, ...additionalImages] : additionalImages;
+    const next = { ...form, images: newImages };
     setForm(next);
     onChange?.(next);
   };
 
   const handleAdditionalImagesChange = (urls: string[]) => {
-    const next = { ...form, additionalImages: urls };
+    // 추가 이미지 변경 시: 기존 대표 이미지 + 새로운 추가 이미지들을 합쳐서 images 배열 생성
+    const mainImage = form.images?.[0] || "";
+    const newImages = mainImage ? [mainImage, ...urls] : urls;
+    const next = { ...form, images: newImages };
     setForm(next);
     onChange?.(next);
   };
