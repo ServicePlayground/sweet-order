@@ -48,7 +48,3 @@ export function useInfiniteScroll({
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, enabled]);
 }
-
-
-
-

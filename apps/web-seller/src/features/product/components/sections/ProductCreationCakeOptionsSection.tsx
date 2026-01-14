@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { IProductForm, EnableStatus, CakeSizeOption, CakeFlavorOption } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  IProductForm,
+  EnableStatus,
+  CakeSizeOption,
+  CakeFlavorOption,
+} from "@/apps/web-seller/features/product/types/product.type";
 import { VISIBILITY_STATUS_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
 import {
   Select,
   SelectContent,
@@ -14,7 +18,6 @@ import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 import { Trash2, Plus } from "lucide-react";
-import { cn } from "@/apps/web-seller/common/lib/utils";
 
 export interface ProductCreationCakeOptionsSectionProps {
   form: IProductForm;
@@ -24,14 +27,13 @@ export interface ProductCreationCakeOptionsSectionProps {
 }
 
 // 상품 등록 폼 - 케이크 옵션 섹션
-export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOptionsSectionProps> = ({
-  form,
-  errors,
-  onCakeSizeOptionsChange,
-  onCakeFlavorOptionsChange,
-}) => {
+export const ProductCreationCakeOptionsSection: React.FC<
+  ProductCreationCakeOptionsSectionProps
+> = ({ form, onCakeSizeOptionsChange, onCakeFlavorOptionsChange }) => {
   const [sizeOptions, setSizeOptions] = useState<CakeSizeOption[]>(form.cakeSizeOptions || []);
-  const [flavorOptions, setFlavorOptions] = useState<CakeFlavorOption[]>(form.cakeFlavorOptions || []);
+  const [flavorOptions, setFlavorOptions] = useState<CakeFlavorOption[]>(
+    form.cakeFlavorOptions || [],
+  );
 
   // form 변경 시 state 동기화
   useEffect(() => {
@@ -59,9 +61,13 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
   };
 
   // 사이즈 옵션 변경
-  const handleSizeOptionChange = (index: number, field: keyof CakeSizeOption, value: string | EnableStatus) => {
+  const handleSizeOptionChange = (
+    index: number,
+    field: keyof CakeSizeOption,
+    value: string | EnableStatus,
+  ) => {
     const updated = sizeOptions.map((option, i) =>
-      i === index ? { ...option, [field]: value } : option
+      i === index ? { ...option, [field]: value } : option,
     );
     setSizeOptions(updated);
     onCakeSizeOptionsChange(updated);
@@ -86,9 +92,13 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
   };
 
   // 맛 옵션 변경
-  const handleFlavorOptionChange = (index: number, field: keyof CakeFlavorOption, value: string | EnableStatus) => {
+  const handleFlavorOptionChange = (
+    index: number,
+    field: keyof CakeFlavorOption,
+    value: string | EnableStatus,
+  ) => {
     const updated = flavorOptions.map((option, i) =>
-      i === index ? { ...option, [field]: value } : option
+      i === index ? { ...option, [field]: value } : option,
     );
     setFlavorOptions(updated);
     onCakeFlavorOptionsChange(updated);
@@ -112,7 +122,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
             </div>
 
             {sizeOptions.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4">사이즈 옵션이 없습니다. 추가 버튼을 클릭하여 추가하세요.</p>
+              <p className="text-sm text-muted-foreground py-4">
+                사이즈 옵션이 없습니다. 추가 버튼을 클릭하여 추가하세요.
+              </p>
             ) : (
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full">
@@ -132,7 +144,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
                         <td className="px-4 py-3">
                           <Select
                             value={option.visible}
-                            onValueChange={(value) => handleSizeOptionChange(index, "visible", value as EnableStatus)}
+                            onValueChange={(value) =>
+                              handleSizeOptionChange(index, "visible", value as EnableStatus)
+                            }
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue />
@@ -150,7 +164,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
                           <Input
                             placeholder="예: 미니(10cm)"
                             value={option.displayName}
-                            onChange={(e) => handleSizeOptionChange(index, "displayName", e.target.value)}
+                            onChange={(e) =>
+                              handleSizeOptionChange(index, "displayName", e.target.value)
+                            }
                             className="w-full"
                           />
                         </td>
@@ -158,7 +174,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
                           <Input
                             placeholder="예: 1~2인용"
                             value={option.description}
-                            onChange={(e) => handleSizeOptionChange(index, "description", e.target.value)}
+                            onChange={(e) =>
+                              handleSizeOptionChange(index, "description", e.target.value)
+                            }
                             className="w-full"
                           />
                         </td>
@@ -192,7 +210,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
             </div>
 
             {flavorOptions.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4">맛 옵션이 없습니다. 추가 버튼을 클릭하여 추가하세요.</p>
+              <p className="text-sm text-muted-foreground py-4">
+                맛 옵션이 없습니다. 추가 버튼을 클릭하여 추가하세요.
+              </p>
             ) : (
               <div className="border rounded-md overflow-hidden">
                 <table className="w-full">
@@ -211,7 +231,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
                         <td className="px-4 py-3">
                           <Select
                             value={option.visible}
-                            onValueChange={(value) => handleFlavorOptionChange(index, "visible", value as EnableStatus)}
+                            onValueChange={(value) =>
+                              handleFlavorOptionChange(index, "visible", value as EnableStatus)
+                            }
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue />
@@ -229,7 +251,9 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
                           <Input
                             placeholder="예: 초콜릿"
                             value={option.displayName}
-                            onChange={(e) => handleFlavorOptionChange(index, "displayName", e.target.value)}
+                            onChange={(e) =>
+                              handleFlavorOptionChange(index, "displayName", e.target.value)
+                            }
                             className="w-full"
                           />
                         </td>
@@ -256,4 +280,3 @@ export const ProductCreationCakeOptionsSection: React.FC<ProductCreationCakeOpti
     </Card>
   );
 };
-

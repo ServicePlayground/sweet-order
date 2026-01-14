@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -13,7 +13,6 @@ import { ProductList } from "@/apps/web-seller/features/product/components/list/
 import { SortBy, IProductItem } from "@/apps/web-seller/features/product/types/product.type";
 
 export const StoreDetailProductListPage: React.FC = () => {
-  const navigate = useNavigate();
   const { storeId } = useParams();
   const [sortBy, setSortBy] = useState<SortBy>(SortBy.LATEST);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -26,13 +25,7 @@ export const StoreDetailProductListPage: React.FC = () => {
     );
   }
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useProductList({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     storeId,
     sortBy,
   });
@@ -49,8 +42,7 @@ export const StoreDetailProductListPage: React.FC = () => {
   const products: IProductItem[] =
     data?.pages
       ?.flatMap((page) => page.data)
-      .filter((product, index, self) => self.findIndex((p) => p.id === product.id) === index) ||
-    [];
+      .filter((product, index, self) => self.findIndex((p) => p.id === product.id) === index) || [];
 
   return (
     <div className="space-y-6">
@@ -84,14 +76,11 @@ export const StoreDetailProductListPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <ProductList products={products} storeId={storeId} />
+          <ProductList products={products} />
 
           {/* 무한 스크롤 트리거 */}
           {hasNextPage && (
-            <div
-              ref={loadMoreRef}
-              className="flex min-h-[100px] items-center justify-center py-8"
-            >
+            <div ref={loadMoreRef} className="flex min-h-[100px] items-center justify-center py-8">
               {isFetchingNextPage && (
                 <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />

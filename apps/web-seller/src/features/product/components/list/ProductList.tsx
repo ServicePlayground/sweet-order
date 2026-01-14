@@ -1,16 +1,13 @@
-import { useNavigate } from "react-router-dom";
 import { IProductItem } from "@/apps/web-seller/features/product/types/product.type";
-import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 
 interface ProductListProps {
   products: IProductItem[];
-  storeId: string;
 }
 
-export function ProductList({ products, storeId }: ProductListProps) {
-  const navigate = useNavigate();
+export function ProductList({ products }: ProductListProps) {
+  // const navigate = useNavigate();
 
-  const handleProductClick = (productId: string) => {
+  const handleProductClick = (/* productId: string */) => {
     // 상품 상세 페이지로 이동 (필요시 구현)
     // navigate(ROUTES.PRODUCT_DETAIL(productId));
   };
@@ -31,7 +28,7 @@ export function ProductList({ products, storeId }: ProductListProps) {
         return (
           <div
             key={product.id}
-            onClick={() => handleProductClick(product.id)}
+            onClick={() => handleProductClick(/* product.id */)}
             className="group flex cursor-pointer items-center gap-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md"
           >
             {/* 상품 이미지 - 작게 */}
@@ -80,9 +77,7 @@ export function ProductList({ products, storeId }: ProductListProps) {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>상품번호: {product.id}</span>
                   <span>좋아요 {product.likeCount}</span>
-                  <span>
-                    {new Date(product.createdAt).toLocaleDateString("ko-KR")}
-                  </span>
+                  <span>{new Date(product.createdAt).toLocaleDateString("ko-KR")}</span>
                 </div>
               </div>
               <div className="text-right">
@@ -97,7 +92,3 @@ export function ProductList({ products, storeId }: ProductListProps) {
     </div>
   );
 }
-
-
-
-
