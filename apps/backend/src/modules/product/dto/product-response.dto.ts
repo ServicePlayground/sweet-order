@@ -70,17 +70,11 @@ export class ProductResponseDto {
   name: string;
 
   @ApiProperty({
-    description: "대표이미지 URL",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.mainImage,
-  })
-  mainImage: string;
-
-  @ApiProperty({
-    description: "추가이미지 URL 목록",
+    description: "이미지 URL 목록 (첫 번째 요소가 대표 이미지)",
     type: [String],
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.additionalImages,
+    example: SWAGGER_EXAMPLES.PRODUCT_DATA.images,
   })
-  additionalImages: string[];
+  images: string[];
 
   @ApiProperty({
     description: "판매가",

@@ -26,9 +26,7 @@ export function ProductList({ products, storeId }: ProductListProps) {
   return (
     <div className="space-y-2">
       {products.map((product) => {
-        const images = product.mainImage
-          ? [product.mainImage, ...(product.additionalImages || [])]
-          : [];
+        const images = product.images || [];
 
         return (
           <div

@@ -102,8 +102,11 @@ export const SWAGGER_EXAMPLES = {
     productNoticeGmoNotice: "해당사항 없음",
     productNoticeImportNotice: "해당사항 없음",
     productNoticeCustomerService: "1588-1234",
-    mainImage: "https://example.com/main-image.jpg",
-    additionalImages: ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
+    images: [
+      "https://example.com/main-image.jpg",
+      "https://example.com/image1.jpg",
+      "https://example.com/image2.jpg",
+    ],
     salesStatus: EnableStatus.ENABLE,
     visibilityStatus: EnableStatus.ENABLE,
     storeId: "store_123456789",

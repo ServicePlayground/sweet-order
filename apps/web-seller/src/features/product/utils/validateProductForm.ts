@@ -7,8 +7,8 @@ export const validateProductForm = (
   const newErrors: Partial<Record<keyof IProductForm, string>> = {};
 
   // 기본 정보 검증
-  if (!form.mainImage || !form.mainImage.trim()) {
-    newErrors.mainImage = PRODUCT_ERROR_MESSAGES.MAIN_IMAGE_REQUIRED;
+  if (!form.images || form.images.length === 0 || !form.images[0]?.trim()) {
+    newErrors.images = PRODUCT_ERROR_MESSAGES.MAIN_IMAGE_REQUIRED;
   }
 
   if (!form.name.trim()) {

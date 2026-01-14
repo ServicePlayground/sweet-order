@@ -14,8 +14,7 @@ export interface ProductCreationBasicInfoSectionProps {
   errors: Partial<Record<keyof IProductForm, string>>;
   onSalesStatusChange: (value: EnableStatus) => void;
   onVisibilityStatusChange: (value: EnableStatus) => void;
-  onMainImageChange: (url: string) => void;
-  onAdditionalImagesChange: (urls: string[]) => void;
+  onImagesChange: (urls: string[]) => void;
   onChange: (
     key: keyof IProductForm,
   ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -27,8 +26,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   errors,
   onSalesStatusChange,
   onVisibilityStatusChange,
-  onMainImageChange,
-  onAdditionalImagesChange,
+  onImagesChange,
   onChange,
 }) => {
   return (
@@ -78,22 +76,16 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
 
       <div>
         <MultipleImageUpload
-          label="상품 대표 이미지"
-          value={form.mainImage ? [form.mainImage] : []}
-          onChange={(urls) => onMainImageChange(urls[0] || "")}
-          error={errors.mainImage}
+          label="상품 이미지"
+          value={form.images || []}
+          onChange={onImagesChange}
+          error={errors.images}
           required
-          maxImages={1}
+          maxImages={8}
         />
-      </div>
-      <div>
-        <MultipleImageUpload
-          label="추가 이미지"
-          value={form.additionalImages || []}
-          onChange={onAdditionalImagesChange}
-          error={errors.additionalImages}
-          maxImages={7}
-        />
+        <p className="text-xs text-muted-foreground mt-1">
+          첫 번째 이미지가 대표 이미지로 사용됩니다.
+        </p>
       </div>
     </div>
   );

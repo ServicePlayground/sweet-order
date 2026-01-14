@@ -28,8 +28,7 @@ interface Props {
 }
 
 export const defaultForm: IProductForm = {
-  mainImage: "",
-  additionalImages: [],
+  images: [],
   name: "",
   salePrice: 0,
   salesStatus: EnableStatus.ENABLE,
@@ -107,14 +106,8 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
     onChange?.(next);
   };
 
-  const handleMainImageChange = (url: string) => {
-    const next = { ...form, mainImage: url };
-    setForm(next);
-    onChange?.(next);
-  };
-
-  const handleAdditionalImagesChange = (urls: string[]) => {
-    const next = { ...form, additionalImages: urls };
+  const handleImagesChange = (urls: string[]) => {
+    const next = { ...form, images: urls };
     setForm(next);
     onChange?.(next);
   };
@@ -218,8 +211,7 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
                 errors={errors}
                 onSalesStatusChange={handleSalesStatusChange}
                 onVisibilityStatusChange={handleVisibilityStatusChange}
-                onMainImageChange={handleMainImageChange}
-                onAdditionalImagesChange={handleAdditionalImagesChange}
+                onImagesChange={handleImagesChange}
                 onChange={handleChange}
               />
 
