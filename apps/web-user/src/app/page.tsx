@@ -6,6 +6,7 @@ import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import { ImageBannerSlider } from "@/apps/web-user/common/components/carousel/ImageBannerSlider";
 import { ProductRanking } from "@/apps/web-user/common/components/rankings/ProductRanking";
 import { Calendar } from "@/apps/web-user/common/components/calendars/Calendar";
+import { TimePicker } from "@/apps/web-user/common/components/timepickers/TimePicker";
 
 // 홈페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
 // export const metadata: Metadata = {
@@ -42,6 +43,8 @@ import { Calendar } from "@/apps/web-user/common/components/calendars/Calendar";
 export default function Home() {
   // 달력 테스트용 상태 선언
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  // 시간 선택 테스트용 상태 선언
+  const [selectedTime, setSelectedTime] = useState<Date | null>(new Date(2026, 1, 16, 14, 0, 0));
 
   return (
     <div
@@ -110,6 +113,20 @@ export default function Home() {
           minDate={new Date()}
           initialMonth={new Date(2026, 2, 1)}
         />
+      </div>
+
+      {/* 시간 선택 테스트 (임시) */}
+      <div
+        style={{
+          width: "400px",
+          maxWidth: "100%",
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "40px",
+        }}
+      >
+      
+          <TimePicker selectedTime={selectedTime} onTimeSelect={setSelectedTime} interval={30} disabledTimes={[new Date(2026, 1, 16, 0, 0, 0), new Date(2026, 1, 16, 0, 30, 0)]}/>
       </div>
 
       {/* 기타 콘텐츠 */}
