@@ -40,9 +40,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
 
             <Alert variant="destructive" className="w-full">
               <AlertTitle>오류 상세</AlertTitle>
-              <AlertDescription>
-                {errorMessage}
-              </AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
 
             <div className="flex gap-2 w-full">

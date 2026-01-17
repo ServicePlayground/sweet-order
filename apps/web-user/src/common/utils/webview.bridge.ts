@@ -47,4 +47,3 @@ export function isWebViewEnvironment(): boolean {
 
   return typeof window.Loginpage !== "undefined";
 }
-
