@@ -49,7 +49,7 @@ function resolveFailedMigrations(projectRoot: string): string | null {
       // 주의: 이는 마이그레이션이 실제로 롤백되었다고 가정합니다
       // 만약 마이그레이션이 이미 적용되었다면 --applied 옵션을 사용해야 합니다
       execSync(
-        `yarn prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
+        `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
         {
           stdio: "inherit",
           cwd: projectRoot,
