@@ -3,20 +3,14 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/apps/web-seller/common/lib/utils";
 
-const Tabs = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Root>,
-  any
->(({ children, ...props }, ref) => (
+const Tabs = React.forwardRef<any, any>(({ children, ...props }, ref) => (
   <TabsPrimitive.Root ref={ref} {...props}>
     {children}
   </TabsPrimitive.Root>
 ));
 Tabs.displayName = TabsPrimitive.Root.displayName;
 
-const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  any
->(({ className, children, ...props }, ref) => (
+const TabsList = React.forwardRef<any, any>(({ className, children, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
@@ -30,10 +24,7 @@ const TabsList = React.forwardRef<
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
-const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  any
->(({ className, children, ...props }, ref) => (
+const TabsTrigger = React.forwardRef<any, any>(({ className, children, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
@@ -47,10 +38,7 @@ const TabsTrigger = React.forwardRef<
 ));
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  any
->(({ className, children, ...props }, ref) => (
+const TabsContent = React.forwardRef<any, any>(({ className, children, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
