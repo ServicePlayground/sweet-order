@@ -9,7 +9,7 @@ interface ErrorBoundaryProviderProps {
 }
 
 export function ErrorBoundaryProvider({ children }: ErrorBoundaryProviderProps) {
-  const handleError = (error: Error, errorInfo: ErrorInfo) => {
+  const handleError = (error: unknown, errorInfo: ErrorInfo) => {
     // 에러 로깅 (추후 에러 모니터링 서비스 연동 가능)
     console.error("ErrorBoundary caught an error:", error, errorInfo);
   };
