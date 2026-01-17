@@ -85,9 +85,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               <div className="min-w-[160px]">
                 <Select value={storeIdFromPath || ""} onValueChange={onSelectStore}>
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="스토어 선택">
-                      {stores.find((s) => s.id === storeIdFromPath)?.name || "스토어 선택"}
-                    </SelectValue>
+                    <SelectValue placeholder="스토어 선택" />
                   </SelectTrigger>
                   <SelectContent>
                     {stores.map((s) => (

@@ -11,7 +11,7 @@ import {
 import { AlertCircle, RotateCcw, RotateCw } from "lucide-react";
 
 interface ErrorFallbackProps extends FallbackProps {
-  error: Error;
+  error: unknown;
   resetErrorBoundary: () => void;
 }
 
@@ -23,6 +23,9 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
   const handleReload = () => {
     window.location.reload();
   };
+
+  // error를 Error 타입으로 안전하게 변환
+  const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
@@ -38,7 +41,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
             <Alert variant="destructive" className="w-full">
               <AlertTitle>오류 상세</AlertTitle>
               <AlertDescription>
-                {error.message || "알 수 없는 오류가 발생했습니다."}
+                {errorMessage}
               </AlertDescription>
             </Alert>
 
