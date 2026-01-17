@@ -106,7 +106,7 @@ function resolveFailedMigrations(projectRoot: string): string | null {
           );
           
           execSync(
-            `yarn prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
+            `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
             {
               stdio: "inherit",
               cwd: projectRoot,
@@ -222,7 +222,7 @@ export async function runMigration(): Promise<void> {
           
           try {
             execSync(
-              `yarn prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
+              `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
               {
                 stdio: "inherit",
                 cwd: projectRoot,
