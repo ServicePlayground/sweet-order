@@ -114,6 +114,7 @@ export interface Product {
   hashtags: string[];
   mainImage: string;
   additionalImages: string[];
+  images: string[]; // 이미지 URL 목록 (첫 번째 요소가 대표 이미지)
   status: string;
 }
 
