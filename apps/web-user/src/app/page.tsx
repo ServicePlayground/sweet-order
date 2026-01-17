@@ -125,8 +125,12 @@ export default function Home() {
           marginBottom: "40px",
         }}
       >
-      
-          <TimePicker selectedTime={selectedTime} onTimeSelect={setSelectedTime} interval={30} disabledTimes={[new Date(2026, 1, 16, 0, 0, 0), new Date(2026, 1, 16, 0, 30, 0)]}/>
+        <TimePicker
+          selectedTime={selectedTime}
+          onTimeSelect={setSelectedTime}
+          interval={30}
+          disabledTimes={[new Date(2026, 1, 16, 0, 0, 0), new Date(2026, 1, 16, 0, 30, 0)]}
+        />
       </div>
 
       {/* 기타 콘텐츠 */}

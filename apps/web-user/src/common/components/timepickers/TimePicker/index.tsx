@@ -42,12 +42,12 @@ interface TimeSlot {
  */
 const formatTime = (hour: number, minute: number, format: "12h" | "24h" = "12h"): string => {
   const displayMinute = minute.toString().padStart(2, "0");
-  
+
   if (format === "24h") {
     const displayHour = hour.toString().padStart(2, "0");
     return `${displayHour}:${displayMinute}`;
   }
-  
+
   // 12시간 형식
   const period = hour < 12 ? "오전" : "오후";
   // 오전 12시(00시)는 "오전 00"으로 표시
@@ -60,7 +60,7 @@ const formatTime = (hour: number, minute: number, format: "12h" | "24h" = "12h")
  */
 const generateTimeSlots = (
   interval: number = 30,
-  timeFormat: "12h" | "24h" = "12h"
+  timeFormat: "12h" | "24h" = "12h",
 ): TimeSlot[] => {
   const slots: TimeSlot[] = [];
   const baseDate = new Date();
@@ -97,10 +97,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   const [isScrolling, setIsScrolling] = useState(false);
 
   // 시간 슬롯 생성
-  const timeSlots = useMemo(
-    () => generateTimeSlots(interval, timeFormat),
-    [interval, timeFormat]
-  );
+  const timeSlots = useMemo(() => generateTimeSlots(interval, timeFormat), [interval, timeFormat]);
 
   // 비활성화된 시간 목록을 정규화 (hour, minute 형태로)
   const normalizedDisabledTimes = useMemo(() => {
@@ -113,16 +110,13 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   // 선택된 시간이 슬롯과 일치하는지 확인
   const isTimeSelected = (slot: TimeSlot): boolean => {
     if (!selectedTime) return false;
-    return (
-      selectedTime.getHours() === slot.hour &&
-      selectedTime.getMinutes() === slot.minute
-    );
+    return selectedTime.getHours() === slot.hour && selectedTime.getMinutes() === slot.minute;
   };
 
   // 시간이 비활성화되어 있는지 확인
   const isTimeDisabled = (slot: TimeSlot): boolean => {
     return normalizedDisabledTimes.some(
-      (disabled) => disabled.hour === slot.hour && disabled.minute === slot.minute
+      (disabled) => disabled.hour === slot.hour && disabled.minute === slot.minute,
     );
   };
 
@@ -138,14 +132,11 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     if (selectedTime && scrollContainerRef.current) {
       const selectedIndex = timeSlots.findIndex(
         (slot) =>
-          slot.hour === selectedTime.getHours() &&
-          slot.minute === selectedTime.getMinutes()
+          slot.hour === selectedTime.getHours() && slot.minute === selectedTime.getMinutes(),
       );
 
       if (selectedIndex !== -1) {
-        const buttonElement = scrollContainerRef.current.children[
-          selectedIndex
-        ] as HTMLElement;
+        const buttonElement = scrollContainerRef.current.children[selectedIndex] as HTMLElement;
         if (buttonElement) {
           const container = scrollContainerRef.current;
           const buttonLeft = buttonElement.offsetLeft;
@@ -175,12 +166,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
   };
 
   return (
-    <div
-      className={cn(
-        "w-full",
-        className
-      )}
-    >
+    <div className={cn("w-full", className)}>
       <div className="relative">
         {/* 가로 스크롤 컨테이너 */}
         <div
@@ -194,7 +180,7 @@ export const TimePicker: React.FC<TimePickerProps> = ({
             "flex gap-[10px] overflow-x-auto scrollbar-hide",
             "scroll-smooth",
             isScrolling && "cursor-grabbing",
-            !isScrolling && "cursor-grab"
+            !isScrolling && "cursor-grab",
           )}
           style={{
             WebkitOverflowScrolling: "touch",
@@ -220,13 +206,9 @@ export const TimePicker: React.FC<TimePickerProps> = ({
                   isDisabled &&
                     "bg-[#F6F6F6] text-[#BDBFC0] border border-[#ECEDED] cursor-not-allowed",
                   // 선택되지 않은 활성화된 시간 스타일 (일반 상태)
-                  !isSelected &&
-                    !isDisabled &&
-                    "bg-white text-[#21272C] border border-[#ECEDED]",
+                  !isSelected && !isDisabled && "bg-white text-[#21272C] border border-[#ECEDED]",
                   // 선택된 시간 스타일
-                  isSelected &&
-                    !isDisabled &&
-                    "bg-[#FF653E] text-white border-0"
+                  isSelected && !isDisabled && "bg-[#FF653E] text-white border-0",
                 )}
               >
                 {slot.displayText}
@@ -238,4 +220,3 @@ export const TimePicker: React.FC<TimePickerProps> = ({
     </div>
   );
 };
-

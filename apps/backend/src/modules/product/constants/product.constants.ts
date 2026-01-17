@@ -18,6 +18,7 @@ export const PRODUCT_ERROR_MESSAGES = {
  */
 export const PRODUCT_SUCCESS_MESSAGES = {
   PRODUCT_CREATED: "상품이 성공적으로 등록되었습니다.",
+  PRODUCT_UPDATED: "상품이 성공적으로 수정되었습니다.",
   PRODUCT_DELETED: "상품이 성공적으로 삭제되었습니다.",
   LIKE_ADDED: "상품에 좋아요를 추가했습니다.",
   LIKE_REMOVED: "상품 좋아요를 취소했습니다.",
@@ -81,6 +82,7 @@ export const SWAGGER_EXAMPLES = {
         displayName: "바닐라",
       },
     ],
+    letteringVisible: EnableStatus.ENABLE,
     letteringRequired: OptionRequired.OPTIONAL,
     letteringMaxLength: 20,
     imageUploadEnabled: EnableStatus.ENABLE,

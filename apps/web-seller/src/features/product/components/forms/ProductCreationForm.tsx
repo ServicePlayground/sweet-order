@@ -25,6 +25,9 @@ interface Props {
   onSubmit: (data: IProductForm) => void;
   initialValue?: IProductForm;
   onChange?: (data: IProductForm) => void;
+  disabled?: boolean;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
 export const defaultForm: IProductForm = {
@@ -56,7 +59,14 @@ export const defaultForm: IProductForm = {
   productNoticeCustomerService: "",
 };
 
-export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
+export const ProductCreationForm: React.FC<Props> = ({
+  onSubmit,
+  initialValue,
+  onChange,
+  disabled = false,
+  onDelete,
+  isDeleting = false,
+}) => {
   const [form, setForm] = useState<IProductForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<Partial<Record<keyof IProductForm, string>>>({});
   const [activeTab, setActiveTab] = useState("basic");
@@ -79,6 +89,7 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
 
   const handleChange =
     (key: keyof IProductForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (disabled) return;
       const value = e.target.value;
       let next: IProductForm;
 
@@ -95,12 +106,14 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
     };
 
   const handleSalesStatusChange = (value: EnableStatus) => {
+    if (disabled) return;
     const next = { ...form, salesStatus: value };
     setForm(next);
     onChange?.(next);
   };
 
   const handleVisibilityStatusChange = (value: EnableStatus) => {
+    if (disabled) return;
     const next = { ...form, visibilityStatus: value };
     setForm(next);
     onChange?.(next);
@@ -268,11 +281,24 @@ export const ProductCreationForm: React.FC<Props> = ({ onSubmit, initialValue, o
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button type="submit" size="lg">
-          상품 등록
-        </Button>
-      </div>
+      {!disabled && (
+        <div className="flex justify-end gap-2">
+          <Button type="submit" size="lg" disabled={isDeleting}>
+            {initialValue ? "수정하기" : "상품 등록"}
+          </Button>
+          {initialValue && onDelete && (
+            <Button
+              type="button"
+              size="lg"
+              variant="destructive"
+              onClick={onDelete}
+              disabled={isDeleting}
+            >
+              삭제하기
+            </Button>
+          )}
+        </div>
+      )}
     </form>
   );
 };

@@ -28,6 +28,8 @@ export const PRODUCT_ERROR_MESSAGES = {
 
 export const PRODUCT_SUCCESS_MESSAGES = {
   PRODUCT_CREATED: "상품이 등록되었습니다.",
+  PRODUCT_UPDATED: "상품이 수정되었습니다.",
+  PRODUCT_DELETED: "상품이 삭제되었습니다.",
 } as const;
 
 export const SALES_STATUS_OPTIONS = [
@@ -43,4 +45,9 @@ export const VISIBILITY_STATUS_OPTIONS = [
 export const OPTION_REQUIRED_OPTIONS = [
   { value: OptionRequired.REQUIRED, label: "필수" },
   { value: OptionRequired.OPTIONAL, label: "선택" },
+] as const;
+
+export const ENABLE_DISABLE_OPTIONS = [
+  { value: EnableStatus.ENABLE, label: "사용" },
+  { value: EnableStatus.DISABLE, label: "미사용" },
 ] as const;

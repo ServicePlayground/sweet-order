@@ -1,0 +1,142 @@
+import React from "react";
+import { useParams } from "react-router-dom";
+import { ProductCreationForm } from "@/apps/web-seller/features/product/components/forms/ProductCreationForm";
+import {
+  IProductForm,
+  IUpdateProductRequest,
+  EnableStatus,
+} from "@/apps/web-seller/features/product/types/product.type";
+import {
+  useProductDetail,
+  useUpdateProduct,
+  useDeleteProduct,
+} from "@/apps/web-seller/features/product/hooks/queries/useProduct";
+import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+
+export const StoreDetailProductDetailPage: React.FC = () => {
+  const { storeId, productId } = useParams<{ storeId: string; productId: string }>();
+
+  const { data: product, isLoading } = useProductDetail(productId || "");
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
+
+  if (!storeId || !productId) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold">스토어 또는 상품이 선택되지 않았습니다.</h2>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold">상품을 찾을 수 없습니다.</h2>
+      </div>
+    );
+  }
+
+  // IProductDetail을 IProductForm으로 변환
+  const productForm: IProductForm = {
+    images: product.images || [],
+    name: product.name,
+    salePrice: product.salePrice,
+    salesStatus: product.salesStatus,
+    visibilityStatus: product.visibilityStatus,
+    cakeSizeOptions: (product.cakeSizeOptions as any) || [],
+    cakeFlavorOptions: (product.cakeFlavorOptions as any) || [],
+    letteringVisible: product.letteringVisible || EnableStatus.ENABLE,
+    letteringRequired: product.letteringRequired as any,
+    letteringMaxLength: product.letteringMaxLength,
+    imageUploadEnabled: product.imageUploadEnabled as any,
+    detailDescription: product.detailDescription,
+    productNoticeFoodType: product.productNoticeFoodType,
+    productNoticeProducer: product.productNoticeProducer,
+    productNoticeOrigin: product.productNoticeOrigin,
+    productNoticeAddress: product.productNoticeAddress,
+    productNoticeManufactureDate: product.productNoticeManufactureDate,
+    productNoticeExpirationDate: product.productNoticeExpirationDate,
+    productNoticePackageCapacity: product.productNoticePackageCapacity,
+    productNoticePackageQuantity: product.productNoticePackageQuantity,
+    productNoticeIngredients: product.productNoticeIngredients,
+    productNoticeCalories: product.productNoticeCalories,
+    productNoticeSafetyNotice: product.productNoticeSafetyNotice,
+    productNoticeGmoNotice: product.productNoticeGmoNotice,
+    productNoticeImportNotice: product.productNoticeImportNotice,
+    productNoticeCustomerService: product.productNoticeCustomerService,
+  };
+
+  const handleUpdate = async (data: IProductForm) => {
+    // IProductForm을 IUpdateProductRequest로 변환 (변경된 필드만)
+    const request: IUpdateProductRequest = {
+      name: data.name,
+      images: data.images,
+      salePrice: data.salePrice,
+      salesStatus: data.salesStatus,
+      visibilityStatus: data.visibilityStatus,
+      cakeSizeOptions: data.cakeSizeOptions,
+      cakeFlavorOptions: data.cakeFlavorOptions,
+      letteringVisible: data.letteringVisible,
+      letteringRequired: data.letteringRequired,
+      letteringMaxLength: data.letteringMaxLength,
+      imageUploadEnabled: data.imageUploadEnabled,
+      detailDescription: data.detailDescription,
+      productNoticeFoodType: data.productNoticeFoodType,
+      productNoticeProducer: data.productNoticeProducer,
+      productNoticeOrigin: data.productNoticeOrigin,
+      productNoticeAddress: data.productNoticeAddress,
+      productNoticeManufactureDate: data.productNoticeManufactureDate,
+      productNoticeExpirationDate: data.productNoticeExpirationDate,
+      productNoticePackageCapacity: data.productNoticePackageCapacity,
+      productNoticePackageQuantity: data.productNoticePackageQuantity,
+      productNoticeIngredients: data.productNoticeIngredients,
+      productNoticeCalories: data.productNoticeCalories,
+      productNoticeSafetyNotice: data.productNoticeSafetyNotice,
+      productNoticeGmoNotice: data.productNoticeGmoNotice,
+      productNoticeImportNotice: data.productNoticeImportNotice,
+      productNoticeCustomerService: data.productNoticeCustomerService,
+    };
+
+    await updateProductMutation.mutateAsync({
+      productId,
+      request,
+      storeId,
+    });
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("정말 이 상품을 삭제하시겠습니까?")) {
+      await deleteProductMutation.mutateAsync({
+        productId,
+        storeId,
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">상품 수정</h1>
+      </div>
+      <Card>
+        <CardContent className="p-6">
+          <ProductCreationForm
+            onSubmit={handleUpdate}
+            initialValue={productForm}
+            disabled={false}
+            onDelete={handleDelete}
+            isDeleting={deleteProductMutation.isPending || updateProductMutation.isPending}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

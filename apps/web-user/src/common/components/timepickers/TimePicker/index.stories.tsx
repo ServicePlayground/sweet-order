@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useState } from "react";
 import { TimePicker } from ".";
 
 const meta: Meta<typeof TimePicker> = {
@@ -27,8 +26,7 @@ const meta: Meta<typeof TimePicker> = {
     },
     disabledTimes: {
       control: { type: "object" },
-      description:
-        `비활성화할 시간 목록 (Date 배열). Controls에서 사용 시: 타임스탬프 배열 또는 ISO 문자열 배열 형식으로 입력. 예: [1739635200000, 1739637000000] 또는 ["2026-02-16T00:00:00", "2026-02-16T00:30:00"]`,
+      description: `비활성화할 시간 목록 (Date 배열). Controls에서 사용 시: 타임스탬프 배열 또는 ISO 문자열 배열 형식으로 입력. 예: [1739635200000, 1739637000000] 또는 ["2026-02-16T00:00:00", "2026-02-16T00:30:00"]`,
     },
     timeFormat: {
       control: { type: "select" },

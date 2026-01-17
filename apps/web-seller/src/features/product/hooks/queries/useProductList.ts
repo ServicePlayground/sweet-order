@@ -4,8 +4,7 @@ import { productApi } from "@/apps/web-seller/features/product/apis/product.api"
 import { productQueryKeys } from "@/apps/web-seller/features/product/constants/productQueryKeys.constant";
 import {
   ProductListResponse,
-  GetProductsParams,
-  ProductListQueryParams,
+  IGetProductsListParams,
   SortBy,
 } from "@/apps/web-seller/features/product/types/product.type";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
@@ -16,7 +15,7 @@ export function useProductList({
   sortBy = SortBy.LATEST,
   storeId,
   search,
-}: Partial<ProductListQueryParams> & { storeId: string }) {
+}: Partial<IGetProductsListParams> & { storeId: string }) {
   const { addAlert } = useAlertStore();
 
   const query = useInfiniteQuery<ProductListResponse>({
@@ -27,7 +26,7 @@ export function useProductList({
       search,
     }),
     queryFn: ({ pageParam = 1 }) => {
-      const params: GetProductsParams = {
+      const params: IGetProductsListParams = {
         page: pageParam as number,
         limit,
         sortBy,

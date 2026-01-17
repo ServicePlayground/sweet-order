@@ -1,5 +1,6 @@
-import { ProductListQueryParams } from "@/apps/web-seller/features/product/types/product.type";
+import { IGetProductsListParams } from "@/apps/web-seller/features/product/types/product.type";
 
 export const productQueryKeys = {
-  list: (params: ProductListQueryParams) => ["product", "list", params] as const,
+  list: (params: IGetProductsListParams) => ["product", "list", params] as const,
+  detail: (productId: string) => ["product", "detail", productId] as const,
 } as const;

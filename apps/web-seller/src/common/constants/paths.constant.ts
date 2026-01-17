@@ -3,6 +3,7 @@ import { StoreCreatePage } from "@/apps/web-seller/pages/store/Create";
 import { StoreDetailHomePage } from "@/apps/web-seller/pages/store/detail/Home";
 import { StoreDetailProductListPage } from "@/apps/web-seller/pages/store/detail/products/List";
 import { StoreDetailProductCreatePage } from "@/apps/web-seller/pages/store/detail/products/Create";
+import { StoreDetailProductDetailPage } from "@/apps/web-seller/pages/store/detail/products/Detail";
 
 export const ROUTES = {
   ROOT: "/",
@@ -11,6 +12,8 @@ export const ROUTES = {
   STORE_DETAIL_PRODUCTS: (storeId: string) => `/stores/${storeId}/products`,
   STORE_DETAIL_PRODUCTS_LIST: (storeId: string) => `/stores/${storeId}/products/list`,
   STORE_DETAIL_PRODUCTS_CREATE: (storeId: string) => `/stores/${storeId}/products/create`,
+  STORE_DETAIL_PRODUCTS_DETAIL: (storeId: string, productId: string) =>
+    `/stores/${storeId}/products/${productId}`,
 } as const;
 
 export const ROUTE_CONFIG = [
@@ -21,4 +24,5 @@ export const ROUTE_CONFIG = [
   { path: "/stores/:storeId/products", element: StoreDetailProductListPage },
   { path: "/stores/:storeId/products/list", element: StoreDetailProductListPage },
   { path: "/stores/:storeId/products/create", element: StoreDetailProductCreatePage },
+  { path: "/stores/:storeId/products/:productId", element: StoreDetailProductDetailPage },
 ] as const;

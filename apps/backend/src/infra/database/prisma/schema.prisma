@@ -74,6 +74,7 @@ model Product {
   visibilityStatus  EnableStatus @map("visibility_status")
   cakeSizeOptions Json?     @map("cake_size_options")
   cakeFlavorOptions Json?     @map("cake_flavor_options")
+  letteringVisible EnableStatus @map("lettering_visible")
   letteringRequired OptionRequired @map("lettering_required")
   letteringMaxLength Int @map("lettering_max_length")
   imageUploadEnabled EnableStatus @map("image_upload_enabled")

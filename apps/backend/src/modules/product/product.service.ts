@@ -3,7 +3,9 @@ import { ProductService as ProductDataService } from "@apps/backend/modules/prod
 import { ProductLikeService } from "@apps/backend/modules/product/services/product-like.service";
 import {
   GetProductsRequestDto,
+  GetSellerProductsRequestDto,
   CreateProductRequestDto,
+  UpdateProductRequestDto,
 } from "@apps/backend/modules/product/dto/product-request.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
@@ -35,10 +37,35 @@ export class ProductService {
   }
 
   /**
+   * (판매자용) 상품 목록 조회
+   */
+  async getSellerProducts(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
+    return this.productDataService.getSellerProducts(query, user);
+  }
+
+  /**
+   * (판매자용) 상품 상세 조회
+   */
+  async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
+    return this.productDataService.getSellerProductDetail(id, user);
+  }
+
+  /**
    * (판매자용) 상품 등록
    */
   async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
     return this.productDataService.createProduct(createProductDto, user);
+  }
+
+  /**
+   * (판매자용) 상품 수정
+   */
+  async updateProduct(
+    id: string,
+    updateProductDto: UpdateProductRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
+    return this.productDataService.updateProduct(id, updateProductDto, user);
   }
 
   /**
