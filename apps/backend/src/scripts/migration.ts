@@ -25,6 +25,21 @@ export async function runMigration(): Promise<void> {
 
     console.log(`✅ Found package.json at: ${packageJsonPath}`);
 
+    // 실패한 마이그레이션이 있는지 확인하고 resolve 시도
+    try {
+      const schemaPath = path.join(projectRoot, "apps/backend/src/infra/database/prisma/schema.prisma");
+      execSync(`prisma migrate resolve --applied 20251229230348_202512300803 --schema ${schemaPath}`, {
+        stdio: "pipe",
+        cwd: projectRoot,
+      });
+      console.log("✅ Resolved failed migration: 20251229230348_202512300803");
+    } catch (resolveError: any) {
+      // 실패한 마이그레이션이 없거나 이미 resolve된 경우 무시
+      if (!resolveError.message?.includes("P3009") && !resolveError.message?.includes("not found")) {
+        console.log("ℹ️ No failed migration to resolve or already resolved");
+      }
+    }
+
     execSync("yarn run db:migrate:deploy", {
       stdio: "inherit",
       cwd: projectRoot,

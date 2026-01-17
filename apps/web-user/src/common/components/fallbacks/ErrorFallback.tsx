@@ -3,7 +3,7 @@
 import { FallbackProps } from "react-error-boundary";
 
 interface ErrorFallbackProps extends FallbackProps {
-  error: Error;
+  error: unknown;
   resetErrorBoundary: () => void;
 }
 
@@ -11,6 +11,9 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
   const handleRetry = () => {
     resetErrorBoundary();
   };
+
+  // error를 Error 타입으로 안전하게 변환
+  const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
 
   return (
     <div
@@ -64,7 +67,7 @@ export function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps)
             lineHeight: "1.5",
           }}
         >
-          {error.message || "알 수 없는 오류가 발생했습니다."}
+          {errorMessage}
         </p>
         <div
           style={{
