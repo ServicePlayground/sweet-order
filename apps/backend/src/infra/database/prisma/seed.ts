@@ -217,6 +217,7 @@ async function main() {
               displayName: "바닐라",
             },
           ],
+          letteringVisible: "ENABLE",
           letteringRequired: "OPTIONAL",
           letteringMaxLength: 20,
           imageUploadEnabled: "ENABLE",

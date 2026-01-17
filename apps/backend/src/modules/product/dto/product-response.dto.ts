@@ -111,6 +111,13 @@ export class ProductResponseDto {
   cakeFlavorOptions?: CakeFlavorOptionResponseDto[] | null;
 
   @ApiProperty({
+    description: "레터링 문구 사용 여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  letteringVisible: EnableStatus;
+
+  @ApiProperty({
     description: "레터링 문구 사용 (필수/선택)",
     enum: OptionRequired,
     example: OptionRequired.OPTIONAL,

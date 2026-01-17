@@ -5,8 +5,8 @@ import {
   OptionRequired,
 } from "@/apps/web-seller/features/product/types/product.type";
 import {
-  SALES_STATUS_OPTIONS,
   OPTION_REQUIRED_OPTIONS,
+  ENABLE_DISABLE_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
@@ -45,7 +45,7 @@ export const ProductCreationLetteringPolicySection: React.FC<
               label="레터링 문구 사용 여부"
               value={form.letteringVisible}
               onChange={(value) => onLetteringVisibleChange(value as EnableStatus)}
-              options={SALES_STATUS_OPTIONS}
+              options={ENABLE_DISABLE_OPTIONS}
               error={errors.letteringVisible}
               required
             />
@@ -84,7 +84,7 @@ export const ProductCreationLetteringPolicySection: React.FC<
               label="이미지 등록"
               value={form.imageUploadEnabled}
               onChange={(value) => onImageUploadEnabledChange(value as EnableStatus)}
-              options={SALES_STATUS_OPTIONS}
+              options={ENABLE_DISABLE_OPTIONS}
               error={errors.imageUploadEnabled}
               required
             />

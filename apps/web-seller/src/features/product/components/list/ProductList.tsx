@@ -1,15 +1,19 @@
+import { useNavigate, useParams } from "react-router-dom";
 import { IProductItem } from "@/apps/web-seller/features/product/types/product.type";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 
 interface ProductListProps {
   products: IProductItem[];
 }
 
 export function ProductList({ products }: ProductListProps) {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { storeId } = useParams<{ storeId: string }>();
 
-  const handleProductClick = (/* productId: string */) => {
-    // 상품 상세 페이지로 이동 (필요시 구현)
-    // navigate(ROUTES.PRODUCT_DETAIL(productId));
+  const handleProductClick = (productId: string) => {
+    if (storeId) {
+      navigate(ROUTES.STORE_DETAIL_PRODUCTS_DETAIL(storeId, productId));
+    }
   };
 
   if (products.length === 0) {
@@ -28,7 +32,7 @@ export function ProductList({ products }: ProductListProps) {
         return (
           <div
             key={product.id}
-            onClick={() => handleProductClick(/* product.id */)}
+            onClick={() => handleProductClick(product.id)}
             className="group flex cursor-pointer items-center gap-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md"
           >
             {/* 상품 이미지 - 작게 */}

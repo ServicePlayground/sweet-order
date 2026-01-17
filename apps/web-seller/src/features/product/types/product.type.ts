@@ -80,6 +80,21 @@ export enum SortBy {
 }
 
 /**
+ * 상품 조회 파라미터 (목록 조회용)
+ */
+export interface IGetProductsListParams {
+  page?: number;
+  limit: number;
+  sortBy: SortBy;
+  storeId?: string;
+  search?: string;
+  salesStatus?: EnableStatus;
+  visibilityStatus?: EnableStatus;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+/**
  * 상품 정보 (목록 조회용)
  */
 export interface IProductItem extends ICreateProductRequest {
@@ -110,18 +125,40 @@ export interface ProductListResponse {
 }
 
 /**
- * 상품 목록 조회 쿼리 키용 파라미터 (page 제외)
+ * 상품 수정 요청 (모든 필드 optional)
  */
-export interface ProductListQueryParams {
-  limit: number;
-  sortBy: SortBy;
-  search?: string;
-  storeId: string; // seller는 storeId 필수
+export interface IUpdateProductRequest {
+  name?: string;
+  images?: string[];
+  salePrice?: number;
+  salesStatus?: EnableStatus;
+  visibilityStatus?: EnableStatus;
+  cakeSizeOptions?: CakeSizeOption[];
+  cakeFlavorOptions?: CakeFlavorOption[];
+  letteringVisible?: EnableStatus;
+  letteringRequired?: OptionRequired;
+  letteringMaxLength?: number;
+  imageUploadEnabled?: EnableStatus;
+  detailDescription?: string;
+  productNoticeFoodType?: string;
+  productNoticeProducer?: string;
+  productNoticeOrigin?: string;
+  productNoticeAddress?: string;
+  productNoticeManufactureDate?: string;
+  productNoticeExpirationDate?: string;
+  productNoticePackageCapacity?: string;
+  productNoticePackageQuantity?: string;
+  productNoticeIngredients?: string;
+  productNoticeCalories?: string;
+  productNoticeSafetyNotice?: string;
+  productNoticeGmoNotice?: string;
+  productNoticeImportNotice?: string;
+  productNoticeCustomerService?: string;
 }
 
 /**
- * 상품 목록 조회 요청 파라미터
+ * 상품 상세 정보 (조회용)
  */
-export interface GetProductsParams extends ProductListQueryParams {
-  page: number;
+export interface IProductDetail extends IProductItem {
+  productNumber: string;
 }

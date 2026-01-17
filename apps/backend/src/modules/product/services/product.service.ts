@@ -2,10 +2,13 @@ import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/co
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   GetProductsRequestDto,
+  GetSellerProductsRequestDto,
   CreateProductRequestDto,
+  UpdateProductRequestDto,
 } from "@apps/backend/modules/product/dto/product-request.dto";
 import {
   SortBy,
+  EnableStatus,
   PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
@@ -27,6 +30,7 @@ export class ProductService {
 
     // 필터 조건 구성
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
+      visibilityStatus: EnableStatus.ENABLE, // 노출된 상품만 조회
       // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
     };
 
@@ -115,10 +119,11 @@ export class ProductService {
    * 상품 상세 조회
    */
   async getProductDetail(id: string) {
-    // 상품 상세 정보 조회
+    // 상품 상세 정보 조회 (노출된 상품만 조회)
     const product = await this.prisma.product.findFirst({
       where: {
         id,
+        visibilityStatus: EnableStatus.ENABLE, // 노출된 상품만 조회
         // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
       },
     });
@@ -126,6 +131,179 @@ export class ProductService {
     // 상품이 존재하지 않으면 404 에러
     if (!product) {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    return product;
+  }
+
+  /**
+   * 판매자용 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 자신이 소유한 스토어의 상품만 조회합니다.
+   */
+  async getSellerProducts(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
+    const {
+      search,
+      page,
+      limit,
+      sortBy,
+      minPrice,
+      maxPrice,
+      storeId,
+      salesStatus,
+      visibilityStatus,
+    } = query;
+
+    // 자신이 소유한 스토어 목록 조회
+    const userStores = await this.prisma.store.findMany({
+      where: {
+        userId: user.sub,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const userStoreIds = userStores.map((store) => store.id);
+
+    // 자신의 스토어가 없으면 빈 결과 반환
+    if (userStoreIds.length === 0) {
+      return {
+        data: [],
+        meta: {
+          currentPage: page,
+          limit,
+          totalItems: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        },
+      };
+    }
+
+    // 필터 조건 구성
+    const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
+      storeId: {
+        in: userStoreIds, // 자신이 소유한 스토어의 상품만 조회
+      },
+    };
+
+    // 특정 스토어 필터 (자신의 스토어인지 확인)
+    if (storeId) {
+      if (!userStoreIds.includes(storeId)) {
+        throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
+      }
+      where.storeId = storeId;
+    }
+
+    // 판매 상태 필터
+    if (salesStatus !== undefined) {
+      where.salesStatus = salesStatus;
+    }
+
+    // 노출 상태 필터
+    if (visibilityStatus !== undefined) {
+      where.visibilityStatus = visibilityStatus;
+    }
+
+    // 검색어 조건 (상품명에서만 검색)
+    const searchConditions: Prisma.ProductWhereInput[] = [];
+    if (search) {
+      searchConditions.push(
+        { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
+      );
+    }
+
+    // 가격 필터 처리
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.salePrice = {};
+      if (minPrice !== undefined) where.salePrice.gte = minPrice;
+      if (maxPrice !== undefined) where.salePrice.lte = maxPrice;
+    }
+
+    // 검색어 조건을 최종 where에 추가
+    if (searchConditions.length > 0) {
+      // 검색어 조건을 OR로 묶어서 AND 조건에 추가
+      where.AND = where.AND || [];
+      where.AND.push({ OR: searchConditions });
+    }
+
+    // 정렬 조건 구성
+    let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
+
+    switch (sortBy) {
+      case SortBy.LATEST:
+        orderBy = [{ createdAt: "desc" }];
+        break;
+      case SortBy.PRICE_ASC:
+        orderBy = [{ salePrice: "asc" }, { createdAt: "desc" }];
+        break;
+      case SortBy.PRICE_DESC:
+        orderBy = [{ salePrice: "desc" }, { createdAt: "desc" }];
+        break;
+      case SortBy.POPULAR: // 좋아요 수 내림차순
+      default:
+        orderBy = [{ likeCount: "desc" }, { createdAt: "desc" }];
+        break;
+    }
+
+    // 전체 개수 조회
+    const totalItems = await this.prisma.product.count({ where });
+
+    // 무한스크롤 계산
+    const totalPages = Math.ceil(totalItems / limit);
+    const skip = (page - 1) * limit;
+
+    // 상품 목록 조회
+    const products = await this.prisma.product.findMany({
+      where, // 필터 조건 (검색어, 카테고리, 가격대 등)
+      orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
+      skip, // 무한스크롤을 위한 건너뛸 항목 수
+      take: limit, // 가져올 항목 수 (페이지당 상품 개수)
+    });
+
+    // 무한스크롤 메타 정보 계산
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
+
+    // 응답 데이터 변환
+    const data = products;
+
+    // 무한스크롤 메타 정보
+    const meta = {
+      currentPage: page,
+      limit,
+      totalItems,
+      totalPages,
+      hasNext,
+      hasPrev,
+    };
+
+    return { data, meta };
+  }
+
+  /**
+   * 판매자용 상품 상세 조회
+   * 자신이 소유한 스토어의 상품만 조회 가능합니다.
+   */
+  async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
+    // 상품 존재 여부 및 소유권 확인 (Store 정보 포함)
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        store: true, // Store 정보를 포함하여 sellerId 확인
+      },
+    });
+
+    // 상품이 존재하지 않으면 404 에러
+    if (!product || !product.store) {
+      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    // 권한 확인: 상품의 Store 소유자인지 확인
+    if (product.store.userId !== user.sub) {
+      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
     return product;
@@ -196,6 +374,7 @@ export class ProductService {
         cakeFlavorOptions: createProductDto.cakeFlavorOptions
           ? (createProductDto.cakeFlavorOptions as unknown as Prisma.InputJsonValue)
           : [],
+        letteringVisible: createProductDto.letteringVisible,
         letteringRequired: createProductDto.letteringRequired,
         letteringMaxLength: createProductDto.letteringMaxLength,
         imageUploadEnabled: createProductDto.imageUploadEnabled,
@@ -226,6 +405,131 @@ export class ProductService {
         id: product.id,
       };
     });
+  }
+
+  /**
+   * 상품 수정 (판매자용)
+   */
+  async updateProduct(
+    id: string,
+    updateProductDto: UpdateProductRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
+    // 상품 존재 여부 및 소유권 확인 (Store 정보 포함)
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        store: true, // Store 정보를 포함하여 sellerId 확인
+      },
+    });
+
+    // 상품이 존재하지 않으면 404 에러
+    if (!product || !product.store) {
+      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    // 권한 확인: 상품의 Store 소유자인지 확인
+    if (product.store.userId !== user.sub) {
+      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
+    }
+
+    // 업데이트할 데이터 준비
+    const updateData: Prisma.ProductUpdateInput = {};
+
+    if (updateProductDto.name !== undefined) {
+      updateData.name = updateProductDto.name;
+    }
+    if (updateProductDto.images !== undefined) {
+      updateData.images = updateProductDto.images;
+    }
+    if (updateProductDto.salePrice !== undefined) {
+      updateData.salePrice = updateProductDto.salePrice;
+    }
+    if (updateProductDto.salesStatus !== undefined) {
+      updateData.salesStatus = updateProductDto.salesStatus;
+    }
+    if (updateProductDto.visibilityStatus !== undefined) {
+      updateData.visibilityStatus = updateProductDto.visibilityStatus;
+    }
+    if (updateProductDto.cakeSizeOptions !== undefined) {
+      updateData.cakeSizeOptions =
+        updateProductDto.cakeSizeOptions as unknown as Prisma.InputJsonValue;
+    }
+    if (updateProductDto.cakeFlavorOptions !== undefined) {
+      updateData.cakeFlavorOptions =
+        updateProductDto.cakeFlavorOptions as unknown as Prisma.InputJsonValue;
+    }
+    if (updateProductDto.letteringVisible !== undefined) {
+      updateData.letteringVisible = updateProductDto.letteringVisible;
+    }
+    if (updateProductDto.letteringRequired !== undefined) {
+      updateData.letteringRequired = updateProductDto.letteringRequired;
+    }
+    if (updateProductDto.letteringMaxLength !== undefined) {
+      updateData.letteringMaxLength = updateProductDto.letteringMaxLength;
+    }
+    if (updateProductDto.imageUploadEnabled !== undefined) {
+      updateData.imageUploadEnabled = updateProductDto.imageUploadEnabled;
+    }
+    if (updateProductDto.detailDescription !== undefined) {
+      updateData.detailDescription = updateProductDto.detailDescription;
+    }
+    if (updateProductDto.productNoticeFoodType !== undefined) {
+      updateData.productNoticeFoodType = updateProductDto.productNoticeFoodType;
+    }
+    if (updateProductDto.productNoticeProducer !== undefined) {
+      updateData.productNoticeProducer = updateProductDto.productNoticeProducer;
+    }
+    if (updateProductDto.productNoticeOrigin !== undefined) {
+      updateData.productNoticeOrigin = updateProductDto.productNoticeOrigin;
+    }
+    if (updateProductDto.productNoticeAddress !== undefined) {
+      updateData.productNoticeAddress = updateProductDto.productNoticeAddress;
+    }
+    if (updateProductDto.productNoticeManufactureDate !== undefined) {
+      updateData.productNoticeManufactureDate = updateProductDto.productNoticeManufactureDate;
+    }
+    if (updateProductDto.productNoticeExpirationDate !== undefined) {
+      updateData.productNoticeExpirationDate = updateProductDto.productNoticeExpirationDate;
+    }
+    if (updateProductDto.productNoticePackageCapacity !== undefined) {
+      updateData.productNoticePackageCapacity = updateProductDto.productNoticePackageCapacity;
+    }
+    if (updateProductDto.productNoticePackageQuantity !== undefined) {
+      updateData.productNoticePackageQuantity = updateProductDto.productNoticePackageQuantity;
+    }
+    if (updateProductDto.productNoticeIngredients !== undefined) {
+      updateData.productNoticeIngredients = updateProductDto.productNoticeIngredients;
+    }
+    if (updateProductDto.productNoticeCalories !== undefined) {
+      updateData.productNoticeCalories = updateProductDto.productNoticeCalories;
+    }
+    if (updateProductDto.productNoticeSafetyNotice !== undefined) {
+      updateData.productNoticeSafetyNotice = updateProductDto.productNoticeSafetyNotice;
+    }
+    if (updateProductDto.productNoticeGmoNotice !== undefined) {
+      updateData.productNoticeGmoNotice = updateProductDto.productNoticeGmoNotice;
+    }
+    if (updateProductDto.productNoticeImportNotice !== undefined) {
+      updateData.productNoticeImportNotice = updateProductDto.productNoticeImportNotice;
+    }
+    if (updateProductDto.productNoticeCustomerService !== undefined) {
+      updateData.productNoticeCustomerService = updateProductDto.productNoticeCustomerService;
+    }
+
+    // 상품 수정
+    const updatedProduct = await this.prisma.product.update({
+      where: {
+        id,
+      },
+      data: updateData,
+    });
+
+    return {
+      id: updatedProduct.id,
+    };
   }
 
   /**
