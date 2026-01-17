@@ -6,7 +6,7 @@ import * as fs from "fs";
  * 실패한 마이그레이션 해결
  * P3009 오류 발생 시 실패한 마이그레이션을 자동으로 해결
  */
-function resolveFailedMigrations(projectRoot: string): string | null {
+function resolveFailedMigrations(projectRoot: string, schemaPath: string): string | null {
   try {
     console.log("🔍 Checking for failed migrations...");
     
@@ -49,7 +49,7 @@ function resolveFailedMigrations(projectRoot: string): string | null {
       // 주의: 이는 마이그레이션이 실제로 롤백되었다고 가정합니다
       // 만약 마이그레이션이 이미 적용되었다면 --applied 옵션을 사용해야 합니다
       execSync(
-        `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
+        `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ${schemaPath}`,
         {
           stdio: "inherit",
           cwd: projectRoot,
@@ -106,7 +106,7 @@ function resolveFailedMigrations(projectRoot: string): string | null {
           );
           
           execSync(
-            `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
+            `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ${schemaPath}`,
             {
               stdio: "inherit",
               cwd: projectRoot,
@@ -138,6 +138,8 @@ function resolveFailedMigrations(projectRoot: string): string | null {
 export async function runMigration(): Promise<void> {
   // 배포 환경에서는 Docker 컨테이너의 /app 디렉토리에서 실행
   const projectRoot = "/app";
+  // Prisma 스키마 파일 경로 (projectRoot 기준)
+  const schemaPath = "./apps/backend/src/infra/database/prisma/schema.prisma";
 
   try {
     console.log(`📁 Running migration from: ${projectRoot}`);
@@ -149,8 +151,15 @@ export async function runMigration(): Promise<void> {
       throw new Error(`package.json not found at ${projectRoot}`);
     }
 
+    // Prisma 스키마 파일이 존재하는지 확인
+    const schemaFullPath = path.join(projectRoot, schemaPath.replace("./", ""));
+    if (!fs.existsSync(schemaFullPath)) {
+      console.error(`❌ Prisma schema not found at: ${schemaFullPath}`);
+      throw new Error(`Prisma schema not found at ${schemaFullPath}`);
+    }
+
     // 먼저 실패한 마이그레이션이 있는지 확인하고 해결
-    const resolvedMigration = resolveFailedMigrations(projectRoot);
+    const resolvedMigration = resolveFailedMigrations(projectRoot, schemaPath);
 
     console.log("🚀 Deploying migrations...");
     
@@ -209,7 +218,7 @@ export async function runMigration(): Promise<void> {
         
         // 마이그레이션 이름을 찾지 못한 경우 다시 확인 시도
         if (!failedMigrationName) {
-          const retryResolved = resolveFailedMigrations(projectRoot);
+          const retryResolved = resolveFailedMigrations(projectRoot, schemaPath);
           if (retryResolved) {
             failedMigrationName = retryResolved;
           }
@@ -222,7 +231,7 @@ export async function runMigration(): Promise<void> {
           
           try {
             execSync(
-              `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ./src/infra/database/prisma/schema.prisma`,
+              `npx prisma migrate resolve --rolled-back ${failedMigrationName} --schema ${schemaPath}`,
               {
                 stdio: "inherit",
                 cwd: projectRoot,
