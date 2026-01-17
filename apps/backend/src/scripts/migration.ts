@@ -18,11 +18,16 @@ function resolveFailedMigrations(projectRoot: string): void {
     });
 
     // 실패한 마이그레이션 찾기 (여러 패턴으로 확인)
+    // 백틱(`)으로 감싸진 마이그레이션 이름도 매칭
     const patterns = [
+      /The\s+`(\d+_\d+)`\s+migration.*failed/i,
+      /The\s+`(\d+_\w+)`\s+migration.*failed/i,
       /The\s+(\d+_\d+)\s+migration.*failed/i,
       /The\s+(\d+_\w+)\s+migration.*failed/i,
       /Failed migrations:\s*\n\s*(\d+_\d+)/i,
       /Failed migrations:\s*\n\s*(\d+_\w+)/i,
+      /(\d{14}_\d+).*failed/i,
+      /(\d{14}_\w+).*failed/i,
     ];
     
     let failedMigrationMatch: RegExpMatchArray | null = null;
@@ -71,7 +76,10 @@ function resolveFailedMigrations(projectRoot: string): void {
       );
       
       // 오류 메시지에서 직접 실패한 마이그레이션 이름 추출 시도
+      // 백틱(`)으로 감싸진 마이그레이션 이름도 매칭
       const errorPatterns = [
+        /The\s+`(\d+_\d+)`\s+migration.*failed/i,
+        /The\s+`(\d+_\w+)`\s+migration.*failed/i,
         /The\s+(\d+_\d+)\s+migration.*failed/i,
         /The\s+(\d+_\w+)\s+migration.*failed/i,
         /(\d{14}_\d+).*failed/i,
@@ -97,7 +105,10 @@ function resolveFailedMigrations(projectRoot: string): void {
           });
           
           // 여러 패턴으로 실패한 마이그레이션 이름 찾기
+          // 백틱(`)으로 감싸진 마이그레이션 이름도 매칭
           const statusPatterns = [
+            /The\s+`(\d+_\d+)`\s+migration.*failed/i,
+            /The\s+`(\d+_\w+)`\s+migration.*failed/i,
             /The\s+(\d+_\d+)\s+migration.*failed/i,
             /The\s+(\d+_\w+)\s+migration.*failed/i,
             /Failed migrations:\s*\n\s*(\d+_\d+)/i,
@@ -183,7 +194,8 @@ export async function runMigration(): Promise<void> {
     console.log("✅ Database migration completed successfully");
   } catch (error: any) {
     const errorMessage = error?.message || String(error);
-    const errorOutput = error?.output?.[2] || error?.stderr || "";
+    // stdout과 stderr 모두 확인 (Prisma 오류는 stdout에 출력될 수 있음)
+    const errorOutput = error?.output?.[1] || error?.output?.[2] || error?.stderr || error?.stdout || "";
     const fullErrorText = `${errorMessage} ${errorOutput}`;
     
     // P3009 오류가 발생하면 실패한 마이그레이션 해결 시도
@@ -197,7 +209,10 @@ export async function runMigration(): Promise<void> {
       
       try {
         // 오류 메시지에서 실패한 마이그레이션 이름 추출하여 해결
+        // 백틱(`)으로 감싸진 마이그레이션 이름도 매칭
         const errorPatterns = [
+          /The\s+`(\d+_\d+)`\s+migration.*failed/i,
+          /The\s+`(\d+_\w+)`\s+migration.*failed/i,
           /The\s+(\d+_\d+)\s+migration.*failed/i,
           /The\s+(\d+_\w+)\s+migration.*failed/i,
           /(\d{14}_\d+).*failed/i,
