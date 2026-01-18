@@ -176,16 +176,10 @@ export class GoogleService {
 
     // 3. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
     return await this.prisma.$transaction(async (tx) => {
-      // JWT 토큰 생성
-      const jwtPayload: JwtPayload = {
+      // JWT 토큰 생성 (최소 정보만 포함: sub만)
+      const tokenPair = await this.jwtUtil.generateTokenPair({
         sub: user.id,
-        phone: user.phone,
-        loginType: "google",
-        loginId: user.googleId ?? "",
-        role: user.role,
-      };
-
-      const tokenPair = await this.jwtUtil.generateTokenPair(jwtPayload);
+      });
 
       // 마지막 로그인 시간 업데이트
       await tx.user.update({
@@ -251,13 +245,9 @@ export class GoogleService {
             },
           });
 
-          // JWT 토큰 생성
+          // JWT 토큰 생성 (최소 정보만 포함: sub만)
           const tokenPair = await this.jwtUtil.generateTokenPair({
             sub: user.id,
-            phone: user.phone,
-            loginType: "google",
-            loginId: user.googleId ?? "",
-            role: user.role,
           });
 
           // 응답에 토큰만 반환 (사용자 정보는 제외)
@@ -281,13 +271,9 @@ export class GoogleService {
         },
       });
 
-      // JWT 토큰 생성
+      // JWT 토큰 생성 (최소 정보만 포함: sub만)
       const tokenPair = await this.jwtUtil.generateTokenPair({
         sub: user.id,
-        phone: user.phone,
-        loginType: "google",
-        loginId: user.googleId ?? "",
-        role: user.role,
       });
 
       // 응답에 토큰만 반환 (사용자 정보는 제외)

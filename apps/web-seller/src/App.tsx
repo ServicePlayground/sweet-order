@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AdminLayout } from "@/apps/web-seller/common/components/layouts/AdminLayout";
-import { ROUTES, ROUTE_CONFIG } from "@/apps/web-seller/common/constants/paths.constant";
+import { ROUTES, AUTH_ROUTE_CONFIG, ADMIN_ROUTE_CONFIG } from "@/apps/web-seller/common/constants/paths.constant";
 import { AuthInitializerProvider } from "@/apps/web-seller/features/auth/components/providers/AuthInitializer";
 import { ErrorBoundaryProvider } from "./common/components/providers/ErrorBoundaryProvider";
 import { QueryProvider } from "./common/components/providers/QueryProvider";
@@ -13,20 +13,34 @@ const App: React.FC = () => {
     <ErrorBoundaryProvider>
       <QueryProvider>
         <Router>
-          <AuthInitializerProvider>
+          
             <Alert />
             <Suspense fallback={<LoadingFallback />}>
-              <AdminLayout>
-                <Routes>
-                  {ROUTE_CONFIG.map((route) => {
-                    const Element = route.element;
-                    return <Route key={route.path} path={route.path} element={<Element />} />;
-                  })}
-                  <Route path="*" element={<Navigate to={ROUTES.ROOT} replace />} />
-                </Routes>
-              </AdminLayout>
+              <Routes>
+                {/* 인증 관련 경로 (AdminLayout 밖) */}
+                {AUTH_ROUTE_CONFIG.map((route) => {
+                  const Element = route.element;
+                  return <Route key={route.path} path={route.path} element={<Element />} />;
+                })}
+                {/* 관리자 관련 경로 (AdminLayout 안) */}
+                <Route
+                  path="/*"
+                  element={
+                  <AuthInitializerProvider>
+                    <AdminLayout>
+                      <Routes>
+                        {ADMIN_ROUTE_CONFIG.map((route) => {
+                          const Element = route.element;
+                          return <Route key={route.path} path={route.path} element={<Element />} />;
+                        })}
+                        <Route path="*" element={<Navigate to={ROUTES.ROOT} replace />} />
+                      </Routes>
+                    </AdminLayout>
+                  </AuthInitializerProvider>
+                  }
+                />
+              </Routes>
             </Suspense>
-          </AuthInitializerProvider>
         </Router>
       </QueryProvider>
     </ErrorBoundaryProvider>

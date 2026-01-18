@@ -5,7 +5,7 @@ import { Menu, User, LogOut } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
-import { useLogout } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useLogout, useMe } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
 
 const drawerWidth = 300;
 
@@ -20,7 +20,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(!isMobile);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
-  const { user, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const logoutMutation = useLogout();
 
   useEffect(() => {
@@ -78,7 +78,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           >
             스토어 만들기
           </Button>
-          {isAuthenticated && user && (
+          {isAuthenticated && (
             <div className="relative">
               <Button
                 variant="ghost"
@@ -93,7 +93,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   <button
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-accent flex items-center gap-2 rounded-md"
+                    className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-accent flex items-center gap-2 rounded-md disabled:opacity-50"
                   >
                     <LogOut className="h-4 w-4" />
                     로그아웃

@@ -1,10 +1,8 @@
-"use client";
-
 import { useState } from "react";
-import { Input } from "@/apps/web-user/common/components/inputs/Input";
-import { Button } from "@/apps/web-user/common/components/buttons/Button";
-import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
-import { isValidUserId, isValidPassword } from "@/apps/web-user/common/utils/validator.util";
+import { Input } from "@/apps/web-seller/common/components/inputs/Input";
+import { Button } from "@/apps/web-seller/common/components/buttons/Button";
+import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
+import { isValidUserId, isValidPassword } from "@/apps/web-seller/common/utils/validator.util";
 import { ResetPasswordFormData } from "../../types/auth.type";
 
 interface PasswordResetFormProps {
@@ -121,3 +119,4 @@ export default function PasswordResetForm({
     </div>
   );
 }
+

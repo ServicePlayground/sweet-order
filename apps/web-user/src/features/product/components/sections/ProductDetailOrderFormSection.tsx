@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { Product, DeliveryMethod } from "@/apps/web-user/features/product/types/product.type";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { useAddCartItem } from "@/apps/web-user/features/cart/hooks/mutations/useAddCartItem";
-import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
-import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { getDeliveryMethodLabel } from "@/apps/web-user/features/product/utils/deliveryMethod.util";
 import { calculateTotalPrice } from "@/apps/web-user/features/product/utils/price.util";
 import {
@@ -21,8 +18,6 @@ interface ProductDetailOrderFormSectionProps {
 }
 
 export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFormSectionProps) {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
   const { showAlert } = useAlertStore();
   const addCartItemMutation = useAddCartItem();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -97,12 +92,6 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
 
   // 장바구니 추가 핸들러
   const handleAddToCart = async () => {
-    // 로그인 체크
-    if (!isAuthenticated) {
-      router.push(PATHS.AUTH.LOGIN);
-      return;
-    }
-
     // deliveryMethod 필수 체크 (백엔드에서도 검증하지만, UI에서 미리 체크)
     if (product.deliveryMethod && product.deliveryMethod.length > 0 && !selectedDeliveryMethod) {
       showAlert({

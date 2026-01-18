@@ -16,6 +16,7 @@ export const AUTH_ERROR_MESSAGES = {
   VERIFICATION_CODE_INVALID_FORMAT: "인증번호는 6자리 숫자여야 합니다.",
   ACCOUNT_NOT_FOUND: "해당 아이디로 등록된 계정이 없습니다.",
   ACCOUNT_NOT_FOUND_BY_PHONE: "해당 휴대폰 번호로 등록된 계정이 없습니다.",
+  ACCOUNT_INACTIVE: "비활성화된 계정입니다.",
   GOOGLE_REGISTER_FAILED: "구글 로그인 회원가입에 실패했습니다.",
   /* --------------------------------- 토큰 관련 에러 메시지 --------------------------------- */
   REFRESH_TOKEN_EXPIRED:
