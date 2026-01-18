@@ -1,19 +1,29 @@
+"use client";
+
 /**
  * 웹뷰(Flutter)와 통신하는 브릿지 유틸리티
  * 모든 웹뷰 통신 관련 코드는 이 파일에 위치합니다.
  */
 
-// Flutter 웹뷰에서 제공하는 Loginpage 인터페이스 타입 정의
-interface LoginpageInterface {
-  postMessage: (message: string) => void;
-}
+import { useEffect } from "react";
+import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 
-// window 객체에 Loginpage 속성 추가
+// 타입 정의
 declare global {
   interface Window {
-    Loginpage?: LoginpageInterface;
+    Loginpage?: {
+      postMessage: (message: string) => void;
+    };
+    Auth: {
+      login: (accessToken: string) => void;
+      logout: () => void;
+    };
   }
 }
+
+// ============================================================================
+// 유틸리티 함수
+// ============================================================================
 
 /**
  * 로그인 페이지로 이동하는 웹뷰 통신 함수
@@ -46,4 +56,39 @@ export function isWebViewEnvironment(): boolean {
   }
 
   return typeof window.Loginpage !== "undefined";
+}
+
+// ============================================================================
+// React 훅
+// ============================================================================
+
+/**
+ * 웹뷰 브릿지 초기화 훅
+ * Flutter 앱에서 window.Auth.login, window.Auth.logout을 호출할 수 있도록 등록합니다.
+ * 이 훅은 앱 초기화 시 한 번 호출되어야 합니다.
+ */
+export function useWebViewBridge() {
+  const { setAccessToken, clearAccessToken } = useAuthStore();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    // Flutter 앱에서 호출할 수 있도록 window.Auth 객체 초기화
+    window.Auth = {
+      login: (accessToken: string) => {
+        if (!accessToken || typeof accessToken !== "string") {
+          console.warn("유효하지 않은 토큰이 전달되었습니다.");
+          return;
+        }
+        // 전역 상태(Zustand store)에 토큰 저장
+        setAccessToken(accessToken);
+      },
+      logout: () => {
+        // 전역 상태(Zustand store)에서 토큰 제거
+        clearAccessToken();
+      },
+    };
+  }, [setAccessToken, clearAccessToken]);
 }
