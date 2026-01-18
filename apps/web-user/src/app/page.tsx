@@ -41,7 +41,7 @@ import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 
 export default function Home() {
   const { isAuthenticated, accessToken } = useAuthStore();
-  
+
   // 달력 테스트용 상태 선언
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   // 시간 선택 테스트용 상태 선언
@@ -106,11 +106,9 @@ export default function Home() {
       </div>
 
       {/* 로그인 상태 표시 (임시) */}
-      {isAuthenticated ? (
-        `✅ 로그인됨 토큰: ${accessToken ? `${accessToken.substring(0, 20)}...` : "없음"}`
-      ) : (
-        "⚠️ 로그인 필요"
-      )}
+      {isAuthenticated
+        ? `✅ 로그인됨 토큰: ${accessToken ? `${accessToken.substring(0, 20)}...` : "없음"}`
+        : "⚠️ 로그인 필요"}
     </div>
   );
 }
