@@ -6,7 +6,10 @@ import {
   useVerifyPhoneCode,
 } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
-import { isValidPhone, isValidVerificationCode } from "@/apps/web-seller/common/utils/validator.util";
+import {
+  isValidPhone,
+  isValidVerificationCode,
+} from "@/apps/web-seller/common/utils/validator.util";
 import { PhoneVerificationPurpose } from "@/apps/web-seller/features/auth/types/auth.type";
 
 interface PhoneVerificationFormProps {
@@ -136,4 +139,3 @@ export default function PhoneVerificationForm({
     </form>
   );
 }
-

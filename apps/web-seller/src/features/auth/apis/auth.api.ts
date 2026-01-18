@@ -2,7 +2,6 @@ import {
   LoginFormData,
   RegisterFormData,
   PhoneVerificationData,
-  UserInfo,
   GoogleRegisterFormData,
   FindAccountFormData,
   ResetPasswordFormData,

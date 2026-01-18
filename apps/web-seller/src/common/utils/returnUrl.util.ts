@@ -22,8 +22,6 @@ export const redirectToLoginWithCurrentUrl = (loginPath: string = "/auth/login")
   window.location.href = `${loginPath}?returnUrl=${returnUrl}`;
 };
 
-
-
 /**
  * returnUrl을 유지한채로 새로운 URL을 생성합니다.
  * @param basePath - 기본 경로 (예: 'auth/login/basic')

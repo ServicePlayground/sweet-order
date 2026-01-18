@@ -1,4 +1,3 @@
-import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import RegisterForm from "@/apps/web-seller/features/auth/components/forms/RegisterForm";
 
 export function BasicRegisterPage() {
@@ -34,4 +33,3 @@ export function BasicRegisterPage() {
     </div>
   );
 }
-

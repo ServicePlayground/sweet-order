@@ -43,7 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: (req: Request) => {
         // Authorization 헤더에서 Bearer 토큰 추출
         const authHeader = req.headers.authorization;
-        
+
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING);
         }

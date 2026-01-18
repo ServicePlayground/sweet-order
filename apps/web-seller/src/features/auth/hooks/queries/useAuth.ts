@@ -9,7 +9,6 @@ import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
 import { PhoneVerificationPurpose } from "@/apps/web-seller/features/auth/types/auth.type";
-import { getAccessToken, setAccessToken as setTokenToStorage, removeAccessToken } from "@/apps/web-seller/common/utils/token.util";
 
 // 로그인 뮤테이션
 export function useLogin() {
@@ -20,7 +19,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      login({navigate, accessToken: data.accessToken});
+      login({ navigate, accessToken: data.accessToken });
     },
     onError: (error) => {
       addAlert({
@@ -41,7 +40,7 @@ export function useRegister() {
   return useMutation({
     mutationFn: authApi.register,
     onSuccess: (data) => {
-      login({navigate, accessToken: data.accessToken});
+      login({ navigate, accessToken: data.accessToken });
     },
     onError: (error) => {
       addAlert({
@@ -170,7 +169,7 @@ export function useGoogleLogin() {
   return useMutation({
     mutationFn: authApi.googleLogin,
     onSuccess: (data) => {
-      login({navigate, accessToken: data.accessToken});
+      login({ navigate, accessToken: data.accessToken });
     },
     onError: (error) => {
       // 에러를 다시 throw하여 mutateAsync에서 catch할 수 있도록 함
@@ -188,7 +187,7 @@ export function useGoogleRegister() {
   return useMutation({
     mutationFn: authApi.googleRegister,
     onSuccess: (data) => {
-      login({navigate, accessToken: data.accessToken});
+      login({ navigate, accessToken: data.accessToken });
     },
     onError: (error) => {
       addAlert({

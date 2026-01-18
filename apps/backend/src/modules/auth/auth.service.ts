@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Request as ExpressRequest, Response } from "express";
+import { Request as ExpressRequest } from "express";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
 import { UserService } from "@apps/backend/modules/auth/services/user.service";
 import { GoogleService } from "@apps/backend/modules/auth/services/google.service";
@@ -34,8 +34,8 @@ export class AuthService {
   /**
    * 일반 - 회원가입
    */
-  async register(registerDto: RegisterRequestDto, res: Response) {
-    return await this.userService.register(registerDto, res);
+  async register(registerDto: RegisterRequestDto) {
+    return await this.userService.register(registerDto);
   }
 
   /**
@@ -48,8 +48,8 @@ export class AuthService {
   /**
    * 일반 - 로그인
    */
-  async login(loginDto: LoginRequestDto, res: Response) {
-    return await this.userService.login(loginDto, res);
+  async login(loginDto: LoginRequestDto) {
+    return await this.userService.login(loginDto);
   }
 
   /**
@@ -72,15 +72,15 @@ export class AuthService {
   /**
    * 구글 - Authorization Code로 구글 로그인 처리
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
-    return await this.googleService.googleLoginWithCode(codeDto, res);
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
+    return await this.googleService.googleLoginWithCode(codeDto);
   }
 
   /**
    * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
    */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto, res: Response) {
-    return await this.googleService.googleRegisterWithPhone(googleRegisterDto, res);
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
+    return await this.googleService.googleRegisterWithPhone(googleRegisterDto);
   }
 
   /**

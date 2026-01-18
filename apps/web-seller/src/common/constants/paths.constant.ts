@@ -51,5 +51,8 @@ export const ADMIN_ROUTE_CONFIG = [
   { path: ROUTES.STORE_DETAIL_PRODUCTS(":storeId"), element: StoreDetailProductListPage },
   { path: ROUTES.STORE_DETAIL_PRODUCTS_LIST(":storeId"), element: StoreDetailProductListPage },
   { path: ROUTES.STORE_DETAIL_PRODUCTS_CREATE(":storeId"), element: StoreDetailProductCreatePage },
-  { path: ROUTES.STORE_DETAIL_PRODUCTS_DETAIL(":storeId", ":productId"), element: StoreDetailProductDetailPage },
+  {
+    path: ROUTES.STORE_DETAIL_PRODUCTS_DETAIL(":storeId", ":productId"),
+    element: StoreDetailProductDetailPage,
+  },
 ] as const;

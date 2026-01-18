@@ -126,12 +126,15 @@ export const SWAGGER_EXAMPLES = {
 export const SWAGGER_RESPONSE_EXAMPLES = {
   // 로그인/회원가입 응답: 토큰만 반환
   TOKEN_RESPONSE: {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiQUNDRVNTIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MDQ2NzIwMDB9.example",
-    refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiUkVGUkVTSCIsImlhdCI6MTcwNDA2NzIwMCwiZXhwIjoxNzA2OTY3MjAwfQ.example",
+    accessToken:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiQUNDRVNTIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MDQ2NzIwMDB9.example",
+    refreshToken:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiUkVGUkVTSCIsImlhdCI6MTcwNDA2NzIwMCwiZXhwIjoxNzA2OTY3MjAwfQ.example",
   },
   // /me 엔드포인트 응답: 토큰과 사용자 정보 함께 반환
   USER_DATA_RESPONSE: {
-    accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiQUNDRVNTIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MDQ2NzIwMDB9.example",
+    accessToken:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiQUNDRVNTIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MDQ2NzIwMDB9.example",
     user: SWAGGER_EXAMPLES.USER_DATA,
   },
 } as const;

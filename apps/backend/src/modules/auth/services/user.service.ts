@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from "@nestjs/common";
-import { Request as ExpressRequest, Response } from "express";
+import { Request as ExpressRequest } from "express";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PasswordUtil } from "@apps/backend/modules/auth/utils/password.util";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
@@ -20,7 +20,6 @@ import {
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
 import {
   AUTH_ERROR_MESSAGES,
-  TOKEN_TYPES,
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
@@ -50,7 +49,7 @@ export class UserService {
   /**
    * 일반 회원가입
    */
-  async register(registerDto: RegisterRequestDto, res: Response) {
+  async register(registerDto: RegisterRequestDto) {
     const { userId, password, phone } = registerDto;
 
     // 1. 사용자 ID 중복 검증 (필수)
@@ -170,7 +169,7 @@ export class UserService {
   /**
    * 일반 회원가입 - 일반 로그인
    */
-  async login(loginDto: LoginRequestDto, res: Response) {
+  async login(loginDto: LoginRequestDto) {
     const { userId, password } = loginDto;
 
     // 1. 사용자 조회
@@ -373,5 +372,4 @@ export class UserService {
       user: UserMapperUtil.mapToUserInfo(userInfo),
     };
   }
-
 }

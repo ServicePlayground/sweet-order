@@ -20,4 +20,3 @@ export const Button: React.FC<ButtonProps> = ({ children, style, disabled, ...pr
     </button>
   );
 };
-

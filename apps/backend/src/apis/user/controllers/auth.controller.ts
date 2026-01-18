@@ -1,15 +1,5 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Query,
-  HttpCode,
-  HttpStatus,
-  Request,
-  Res,
-} from "@nestjs/common";
-import { Request as ExpressRequest, Response } from "express";
+import { Controller, Post, Body, Get, Query, HttpCode, HttpStatus, Request } from "@nestjs/common";
+import { Request as ExpressRequest } from "express";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { AuthService } from "@apps/backend/modules/auth/auth.service";
@@ -83,11 +73,8 @@ export class UserAuthController {
   @SwaggerResponse(429, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
   }) // 전역 Rate Limiting Guard 적용
-  async register(
-    @Body() registerDto: RegisterRequestDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    return await this.authService.register(registerDto, res);
+  async register(@Body() registerDto: RegisterRequestDto) {
+    return await this.authService.register(registerDto);
   }
 
   /**
@@ -144,8 +131,8 @@ export class UserAuthController {
   @SwaggerResponse(429, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
   })
-  async login(@Body() loginDto: LoginRequestDto, @Res({ passthrough: true }) res: Response) {
-    return await this.authService.login(loginDto, res);
+  async login(@Body() loginDto: LoginRequestDto) {
+    return await this.authService.login(loginDto);
   }
 
   /**
@@ -242,11 +229,8 @@ export class UserAuthController {
   @SwaggerResponse(429, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
   })
-  async googleAuth(
-    @Body() authDto: GoogleLoginRequestDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    return await this.authService.googleLoginWithCode(authDto, res);
+  async googleAuth(@Body() authDto: GoogleLoginRequestDto) {
+    return await this.authService.googleLoginWithCode(authDto);
   }
 
   /**
@@ -282,11 +266,8 @@ export class UserAuthController {
   @SwaggerResponse(429, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.THROTTLE_LIMIT_EXCEEDED),
   })
-  async googleRegisterWithPhone(
-    @Body() registerDto: GoogleRegisterRequestDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    return await this.authService.googleRegisterWithPhone(registerDto, res);
+  async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
+    return await this.authService.googleRegisterWithPhone(registerDto);
   }
 
   /**

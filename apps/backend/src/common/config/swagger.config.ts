@@ -25,7 +25,8 @@ const commonSwaggerConfig = (title: string) => {
         scheme: "bearer",
         bearerFormat: "JWT",
         name: "JWT",
-        description: "JWT 토큰만 입력하세요 (Bearer 접두사 제외). 예: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        description:
+          "JWT 토큰만 입력하세요 (Bearer 접두사 제외). 예: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
         in: "header",
       },
       "JWT-auth", // This name here is important for matching up with @ApiBearerAuth() in your controller!

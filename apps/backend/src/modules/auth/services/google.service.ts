@@ -1,5 +1,4 @@
 import { Injectable, ConflictException, BadRequestException, Logger } from "@nestjs/common";
-import { Response } from "express";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
 import { ConfigService } from "@nestjs/config";
@@ -8,8 +7,7 @@ import {
   AUTH_ERROR_MESSAGES,
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
-import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
-import { GoogleUserInfo, JwtPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { GoogleUserInfo } from "@apps/backend/modules/auth/types/auth.types";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
 import {
@@ -67,16 +65,15 @@ export class GoogleService {
   /**
    * Authorization Code로 구글 로그인 처리
    * @param codeDto - 구글에서 받은 Authorization Code
-   * @param res - Express Response 객체
-   * @returns 사용자 정보 (토큰은 쿠키에 설정)
+   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
     const { code } = codeDto;
 
     // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
     const googleUserInfo = await this.exchangeCodeForToken(code);
 
-    return await this.googleLogin(googleUserInfo, res);
+    return await this.googleLogin(googleUserInfo);
   }
 
   /**
@@ -143,10 +140,9 @@ export class GoogleService {
   /**
    * 구글 로그인 처리 (내부 메서드)
    * @param googleUserInfo - 구글 사용자 정보
-   * @param res - Express Response 객체
-   * @returns 사용자 정보 (토큰은 쿠키에 설정)
+   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
    */
-  async googleLogin(googleUserInfo: GoogleUserInfo, res: Response) {
+  async googleLogin(googleUserInfo: GoogleUserInfo) {
     const {
       userInfo: { googleId, googleEmail },
     } = googleUserInfo;
@@ -198,10 +194,9 @@ export class GoogleService {
   /**
    * 구글 로그인 회원가입 (휴대폰 인증 완료 후)
    * @param googleRegisterDto - 구글 회원가입 정보
-   * @param res - Express Response 객체
-   * @returns 사용자 정보 (토큰은 쿠키에 설정)
+   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
    */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto, res: Response) {
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
     const { googleId, googleEmail, phone } = googleRegisterDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 

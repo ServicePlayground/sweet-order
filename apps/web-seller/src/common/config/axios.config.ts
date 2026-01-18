@@ -29,27 +29,21 @@ const requestInterceptor = (config: InternalAxiosRequestConfig) => {
 const responseErrorHandler = async (error: AxiosError<any>) => {
   const status = error.response?.status;
   const message = error.response?.data?.data?.message;
-  
+
   // 401 && ACCESS_TOKEN_INVALID 오류 처리
   if (status === 401 && message?.includes("ACCESS_TOKEN_INVALID")) {
     removeAccessToken();
     redirectToLoginWithCurrentUrl();
     return Promise.resolve();
   }
-  
+
   return Promise.reject(error);
 };
 
 // seller API 인터셉터 설정
 sellerClient.interceptors.request.use(requestInterceptor, (error) => Promise.reject(error));
-sellerClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  responseErrorHandler
-);
+sellerClient.interceptors.response.use((response: AxiosResponse) => response, responseErrorHandler);
 
 // user API 인터셉터 설정
 userClient.interceptors.request.use(requestInterceptor, (error) => Promise.reject(error));
-userClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  responseErrorHandler
-);
+userClient.interceptors.response.use((response: AxiosResponse) => response, responseErrorHandler);
