@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
-import { navigateToLoginPage, isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+import { navigateToLoginPage } from "@/apps/web-user/common/utils/webview.bridge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 
@@ -43,7 +43,7 @@ userClient.interceptors.response.use(
       useAuthStore.getState().clearAccessToken();
 
       // Flutter 앱의 로그인 페이지로 이동
-        navigateToLoginPage();
+      navigateToLoginPage();
     }
 
     return Promise.reject(error);
