@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Header from "@/apps/web-user/common/components/headers/Header";
 import { Alert } from "@/apps/web-user/common/components/alerts/Alert";
 import { ConfirmAlert } from "@/apps/web-user/common/components/alerts/ConfirmAlert";
+import { AuthProvider } from "@/apps/web-user/common/components/providers/AuthProvider";
 
 interface RootWrapperLayoutProps {
   children: ReactNode;
@@ -20,11 +21,13 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
   };
 
   return (
-    <div className="w-[375px] h-screen mx-auto border-x border-gray-200 overflow-y-auto">
-      <Header variant={getHeaderVariant()} />
-      <div>{children}</div>
-      <Alert />
-      <ConfirmAlert />
-    </div>
+    <AuthProvider>
+      <div className="w-[375px] h-screen mx-auto border-x border-gray-200 overflow-y-auto">
+        <Header variant={getHeaderVariant()} />
+        <div>{children}</div>
+        <Alert />
+        <ConfirmAlert />
+      </div>
+    </AuthProvider>
   );
 }
