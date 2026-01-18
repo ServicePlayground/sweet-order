@@ -1,4 +1,5 @@
 import { applyDecorators, UseGuards, SetMetadata } from "@nestjs/common";
+import { ApiBearerAuth } from "@nestjs/swagger";
 import {
   AuthGuard,
   AUTH_METADATA_KEY,
@@ -47,8 +48,8 @@ export function Auth(options: { isPublic: boolean; roles?: UserRole[] }) {
   if (!isPublic) {
     // 사용자 요청 → Controller → @Auth 데코레이터 → AuthGuard → Passport → JwtStrategy → validate() → req.user
     decorators.push(UseGuards(AuthGuard));
-    // Swagger UI는 쿠키 인증을 제대로 지원하지 않으므로 주석 처리
-    // decorators.push(ApiCookieAuth("Cookie-auth"));
+    // Swagger UI에서 Bearer 토큰 인증 지원
+    decorators.push(ApiBearerAuth("JWT-auth"));
   }
 
   return applyDecorators(...decorators);

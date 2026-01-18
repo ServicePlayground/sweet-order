@@ -7,7 +7,6 @@ import { UserService } from "@apps/backend/modules/auth/services/user.service";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
 import { GoogleService } from "@apps/backend/modules/auth/services/google.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
-import { CookieUtil } from "@apps/backend/modules/auth/utils/cookie.util";
 import { JwtStrategy } from "@apps/backend/modules/auth/strategies/jwt.strategy";
 import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
 
@@ -35,11 +34,10 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
     PhoneService,
     GoogleService,
     JwtUtil,
-    CookieUtil,
     JwtStrategy,
     AuthGuard,
   ],
   // 다른 모듈에서 사용할 수 있도록 export하는 서비스들
-  exports: [AuthService, AuthGuard, CookieUtil],
+  exports: [AuthService, AuthGuard],
 })
 export class AuthModule {}

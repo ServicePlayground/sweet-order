@@ -16,7 +16,7 @@ import {
  * 사용자 요청 → Controller → @Auth 데코레이터 → AuthGuard → Passport → JwtStrategy → validate() → req.user
  *
  * 이 전략은 다음과 같은 검증을 수행합니다:
- * 1. 쿠키에서 access_token 추출 (서브도메인 통합 로그인)
+ * 1. Authorization 헤더에서 Bearer 토큰 추출
  * 2. JWT 시크릿 키로 토큰 서명 검증
  * 3. 토큰 만료 시간 확인 (Passport가 자동 처리)
  * 4. 토큰 타입이 ACCESS 토큰인지 확인
@@ -33,10 +33,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     super({
-      // JWT 토큰 추출: 쿠키에서 추출
+      // JWT 토큰 추출: Authorization 헤더에서 Bearer 토큰 추출
       jwtFromRequest: (req: Request) => {
-        // 쿠키에서 access_token 추출
-        const accessToken = req.cookies?.access_token;
+        // Authorization 헤더에서 Bearer 토큰 추출
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING);
+        }
+
+        const accessToken = authHeader.substring(7); // "Bearer " 제거
 
         // 토큰이 없는 경우 명시적으로 에러 발생
         if (!accessToken) {

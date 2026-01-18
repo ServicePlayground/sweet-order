@@ -2,12 +2,10 @@ import { Injectable, ConflictException, BadRequestException, Logger } from "@nes
 import { Response } from "express";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
-import { CookieUtil } from "@apps/backend/modules/auth/utils/cookie.util";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import {
   AUTH_ERROR_MESSAGES,
-  COOKIE_CONFIG,
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
@@ -35,7 +33,6 @@ export class GoogleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtUtil: JwtUtil,
-    private readonly cookieUtil: CookieUtil,
     private readonly configService: ConfigService,
     private readonly phoneService: PhoneService,
   ) {
@@ -196,23 +193,10 @@ export class GoogleService {
         data: { lastLoginAt: new Date() },
       });
 
-      // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
-      if (res) {
-        this.cookieUtil.setAccessTokenCookie(
-          res,
-          tokenPair.accessToken,
-          COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
-        );
-        this.cookieUtil.setRefreshTokenCookie(
-          res,
-          tokenPair.refreshToken,
-          COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
-        );
-      }
-
-      // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
+      // 응답에 토큰만 반환 (사용자 정보는 제외)
       return {
-        user: UserMapperUtil.mapToUserInfo(user, new Date()),
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
       };
     });
   }
@@ -276,23 +260,10 @@ export class GoogleService {
             role: user.role,
           });
 
-          // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
-          if (res) {
-            this.cookieUtil.setAccessTokenCookie(
-              res,
-              tokenPair.accessToken,
-              COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
-            );
-            this.cookieUtil.setRefreshTokenCookie(
-              res,
-              tokenPair.refreshToken,
-              COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
-            );
-          }
-
-          // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
+          // 응답에 토큰만 반환 (사용자 정보는 제외)
           return {
-            user: UserMapperUtil.mapToUserInfo(user),
+            accessToken: tokenPair.accessToken,
+            refreshToken: tokenPair.refreshToken,
           };
         });
       }
@@ -319,23 +290,10 @@ export class GoogleService {
         role: user.role,
       });
 
-      // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
-      if (res) {
-        this.cookieUtil.setAccessTokenCookie(
-          res,
-          tokenPair.accessToken,
-          COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
-        );
-        this.cookieUtil.setRefreshTokenCookie(
-          res,
-          tokenPair.refreshToken,
-          COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
-        );
-      }
-
-      // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
+      // 응답에 토큰만 반환 (사용자 정보는 제외)
       return {
-        user: UserMapperUtil.mapToUserInfo(user),
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
       };
     });
   }

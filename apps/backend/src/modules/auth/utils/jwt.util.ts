@@ -7,14 +7,11 @@ import {
   JwtVerifiedPayload,
   TokenPair,
 } from "@apps/backend/modules/auth/types/auth.types";
-import { CookieUtil } from "@apps/backend/modules/auth/utils/cookie.util";
-
 @Injectable()
 export class JwtUtil {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly cookieUtil: CookieUtil,
   ) {}
 
   /**
