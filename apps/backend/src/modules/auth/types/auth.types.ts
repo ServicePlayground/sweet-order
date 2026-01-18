@@ -29,13 +29,10 @@ export interface UserInfo {
 /**
  * JWT 페이로드 인터페이스
  * JWT 토큰의 페이로드 구조를 정의합니다.
+ * 최소한의 정보만 포함하여 토큰 크기를 줄이고, 변경 가능한 정보(role 등)는 DB에서 조회합니다.
  */
 export interface JwtPayload {
-  sub: string; // 사용자 고유 ID (user.id)
-  phone: string; // 휴대폰 번호
-  loginType: "general" | "google"; // 로그인 타입
-  loginId: string; // 해당 로그인 타입의 ID
-  role: UserRole;
+  sub: string; // 사용자 고유 ID (user.id) - 유일하게 필요한 정보
 }
 
 /**
@@ -46,6 +43,18 @@ export interface JwtVerifiedPayload extends JwtPayload {
   type?: string; // 토큰 타입 (access | refresh)
   iat?: number; // 토큰 발급 시간
   exp?: number; // 토큰 만료 시간
+}
+
+/**
+ * JWT 검증 후 DB에서 조회한 최신 사용자 정보
+ * JWT Strategy의 validate 메서드에서 반환하는 최종 사용자 정보
+ */
+export interface AuthenticatedUser extends JwtVerifiedPayload {
+  id: string; // 사용자 고유 ID (user.id)
+  role: UserRole;
+  phone: string;
+  loginType: "general" | "google";
+  loginId: string;
 }
 
 /**

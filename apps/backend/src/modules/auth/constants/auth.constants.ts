@@ -16,6 +16,7 @@ export const AUTH_ERROR_MESSAGES = {
   VERIFICATION_CODE_INVALID_FORMAT: "인증번호는 6자리 숫자여야 합니다.",
   ACCOUNT_NOT_FOUND: "해당 아이디로 등록된 계정이 없습니다.",
   ACCOUNT_NOT_FOUND_BY_PHONE: "해당 휴대폰 번호로 등록된 계정이 없습니다.",
+  ACCOUNT_INACTIVE: "비활성화된 계정입니다.",
   GOOGLE_REGISTER_FAILED: "구글 로그인 회원가입에 실패했습니다.",
   /* --------------------------------- 토큰 관련 에러 메시지 --------------------------------- */
   REFRESH_TOKEN_EXPIRED:
@@ -88,22 +89,8 @@ export const TOKEN_TYPES = {
  * JWT 토큰 만료 시간 상수
  */
 export const JWT_EXPIRATION = {
-  ACCESS_TOKEN: "7d",
-  REFRESH_TOKEN: "30d",
-} as const;
-
-/**
- * 쿠키 설정 상수
- */
-export const COOKIE_CONFIG = {
-  ACCESS_TOKEN_NAME: "access_token",
-  REFRESH_TOKEN_NAME: "refresh_token",
-  DOMAIN: ".sweetorders.com", // 서브도메인 통합을 위한 도메인 // 개발환경 localhost는 도메인 제한이 없어서 배포 환경만 도메인 제한
-  HTTP_ONLY: true, // JavaScript 접근 차단 (XSS 공격 방지)
-  // SECURE는 configService를 통해 동적으로 설정
-  SAME_SITE: "lax" as const, // CSRF 공격 방지 (lax: 서브도메인 간 쿠키 전송 허용)(strict: 서브도메인 간 쿠키 전송 불가)
-  ACCESS_TOKEN_MAX_AGE: 604800, // 7일(JWT Access Token과 동일)
-  REFRESH_TOKEN_MAX_AGE: 2592000, // 30일(JWT Refresh Token과 동일)
+  ACCESS_TOKEN: "90d",
+  REFRESH_TOKEN: "90d",
 } as const;
 
 /**
@@ -137,7 +124,17 @@ export const SWAGGER_EXAMPLES = {
  * 복합 응답 구조를 위한 예시 데이터를 제공합니다.
  */
 export const SWAGGER_RESPONSE_EXAMPLES = {
+  // 로그인/회원가입 응답: 토큰만 반환
+  TOKEN_RESPONSE: {
+    accessToken:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiQUNDRVNTIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MDQ2NzIwMDB9.example",
+    refreshToken:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiUkVGUkVTSCIsImlhdCI6MTcwNDA2NzIwMCwiZXhwIjoxNzA2OTY3MjAwfQ.example",
+  },
+  // /me 엔드포인트 응답: 토큰과 사용자 정보 함께 반환
   USER_DATA_RESPONSE: {
+    accessToken:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicGhvbmUiOiIwMTAtMTIzNC01Njc4IiwibG9naW5UeXBlIjoiZ2VuZXJhbCIsImxvZ2luSWQiOiJ1c2VyMTIzIiwicm9sZSI6IlVTRVIiLCJ0eXBlIjoiQUNDRVNTIiwiaWF0IjoxNzA0MDY3MjAwLCJleHAiOjE3MDQ2NzIwMDB9.example",
     user: SWAGGER_EXAMPLES.USER_DATA,
   },
 } as const;

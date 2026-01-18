@@ -1,8 +1,6 @@
-"use client";
-
-import Link from "next/link";
-import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import { FindAccountFormData } from "@/apps/web-user/features/auth/types/auth.type";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { FindAccountFormData } from "@/apps/web-seller/features/auth/types/auth.type";
 
 interface FindAccountResultFormProps {
   accountInfo: FindAccountFormData;
@@ -88,7 +86,7 @@ export default function FindAccountResultForm({ accountInfo }: FindAccountResult
 
         <div style={{ display: "flex", gap: "12px", width: "100%" }}>
           <Link
-            href={PATHS.AUTH.LOGIN}
+            to={ROUTES.AUTH.LOGIN}
             style={{
               flex: 1,
               height: "48px",
@@ -102,6 +100,7 @@ export default function FindAccountResultForm({ accountInfo }: FindAccountResult
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              textDecoration: "none",
             }}
           >
             로그인 페이지로 이동
@@ -109,7 +108,7 @@ export default function FindAccountResultForm({ accountInfo }: FindAccountResult
 
           {accountInfo.userId && (
             <Link
-              href={PATHS.AUTH.RESET_PASSWORD}
+              to={ROUTES.AUTH.RESET_PASSWORD}
               style={{
                 flex: 1,
                 height: "48px",
@@ -131,7 +130,7 @@ export default function FindAccountResultForm({ accountInfo }: FindAccountResult
         </div>
 
         <Link
-          href={PATHS.AUTH.LOGIN}
+          to={ROUTES.AUTH.LOGIN}
           style={{
             color: "#666",
             fontSize: "14px",

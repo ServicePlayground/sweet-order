@@ -8,16 +8,6 @@ export const PATHS = {
   // 메인 페이지
   HOME: "/",
 
-  // 인증 관련 경로
-  AUTH: {
-    LOGIN: "/auth/login",
-    LOGIN_BASIC: "/auth/login/basic",
-    GOOGLE_REDIRECT_URI: "/auth/login/google",
-    REGISTER_BASIC: "/auth/register/basic",
-    FIND_ACCOUNT: "/auth/find-account",
-    RESET_PASSWORD: "/auth/reset-password",
-  },
-
   // 스토어 관련 경로
   STORE: {
     DETAIL: (storeId: string) => `/store/${storeId}`,
@@ -34,6 +24,3 @@ export const PATHS = {
   // 장바구니 관련 경로
   CART: "/cart",
 } as const;
-
-// 타입 안전성을 위한 경로 타입
-export type AuthPath = (typeof PATHS.AUTH)[keyof typeof PATHS.AUTH];

@@ -1,17 +1,15 @@
-"use client";
-
 import { useState } from "react";
-import Link from "next/link";
-import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import { useResetPassword } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
-import PhoneVerificationForm from "@/apps/web-user/features/auth/components/forms/PhoneVerificationForm";
-import PasswordResetForm from "@/apps/web-user/features/auth/components/forms/PasswordResetForm";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { useResetPassword } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
+import PasswordResetForm from "@/apps/web-seller/features/auth/components/forms/PasswordResetForm";
 import {
   ResetPasswordFormData,
   PHONE_VERIFICATION_PURPOSE,
-} from "@/apps/web-user/features/auth/types/auth.type";
+} from "@/apps/web-seller/features/auth/types/auth.type";
 
-export default function ResetPasswordPage() {
+export function ResetPasswordPage() {
   const resetPasswordMutation = useResetPassword();
 
   const [currentStep, setCurrentStep] = useState<"phoneVerification" | "passwordReset">(
@@ -86,7 +84,7 @@ export default function ResetPasswordPage() {
           />
 
           <Link
-            href={PATHS.AUTH.LOGIN}
+            to={ROUTES.AUTH.LOGIN}
             style={{
               color: "#666",
               fontSize: "14px",
@@ -149,7 +147,7 @@ export default function ResetPasswordPage() {
         />
 
         <Link
-          href={PATHS.AUTH.LOGIN}
+          to={ROUTES.AUTH.LOGIN}
           style={{
             color: "#666",
             fontSize: "14px",

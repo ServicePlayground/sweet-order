@@ -1,14 +1,12 @@
-"use client";
-
 import { useState } from "react";
-import { Input } from "@/apps/web-user/common/components/inputs/Input";
-import { Button } from "@/apps/web-user/common/components/buttons/Button";
-import { useRegister } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
-import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
-import { isValidPassword } from "@/apps/web-user/common/utils/validator.util";
-import PhoneVerificationForm from "@/apps/web-user/features/auth/components/forms/PhoneVerificationForm";
-import UserIdCheckForm from "@/apps/web-user/features/auth/components/forms/UserIdCheckForm";
-import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-user/features/auth/types/auth.type";
+import { Input } from "@/apps/web-seller/common/components/inputs/Input";
+import { Button } from "@/apps/web-seller/common/components/buttons/Button";
+import { useRegister } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
+import { isValidPassword } from "@/apps/web-seller/common/utils/validator.util";
+import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
+import UserIdCheckForm from "@/apps/web-seller/features/auth/components/forms/UserIdCheckForm";
+import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.type";
 
 export default function RegisterForm() {
   const registerMutation = useRegister();

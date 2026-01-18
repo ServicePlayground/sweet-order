@@ -1,22 +1,8 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import LoginForm from "@/apps/web-user/features/auth/components/forms/LoginForm";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import LoginForm from "@/apps/web-seller/features/auth/components/forms/LoginForm";
 
-// 로그인 페이지 전용 SEO 메타데이터(TODO: 추후 수정필요)
-export const metadata: Metadata = {
-  title: "일반 로그인",
-  description: "아이디와 비밀번호로 로그인합니다.",
-  robots: { index: false, follow: false },
-  openGraph: {
-    title: "일반 로그인",
-    description: "아이디와 비밀번호로 로그인합니다.",
-    type: "website",
-    url: `https://sweetorders.com${PATHS.AUTH.LOGIN_BASIC}`,
-  },
-};
-
-export default function BasicLoginPage() {
+export function BasicLoginPage() {
   return (
     <div
       style={{
@@ -50,14 +36,14 @@ export default function BasicLoginPage() {
           style={{ display: "flex", gap: "16px", alignItems: "center", justifyContent: "center" }}
         >
           <Link
-            href={PATHS.AUTH.REGISTER_BASIC}
+            to={ROUTES.AUTH.REGISTER_BASIC}
             style={{ color: "#666", textDecoration: "none", fontSize: "14px" }}
           >
             회원가입
           </Link>
           <span style={{ color: "#ddd" }}>|</span>
           <Link
-            href={PATHS.AUTH.RESET_PASSWORD}
+            to={ROUTES.AUTH.RESET_PASSWORD}
             style={{ color: "#666", textDecoration: "none", fontSize: "14px" }}
           >
             비밀번호 찾기

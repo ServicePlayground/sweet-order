@@ -3,8 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/apps/web-user/features/auth/store/auth.store";
-import { useLogout } from "@/apps/web-user/features/auth/hooks/queries/useAuth";
 import { useGetCartItems } from "@/apps/web-user/features/cart/hooks/queries/useGetCartItems";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { Icon } from "@/apps/web-user/common/components/icons";
@@ -15,15 +13,7 @@ interface HeaderProps {
 
 export default function Header({ variant = "main" }: HeaderProps) {
   const router = useRouter();
-  const { isAuthenticated, user, isInitialized } = useAuthStore();
-  const logoutMutation = useLogout();
   const { data: cartData } = useGetCartItems();
-
-  const handleLogout = () => {
-    if (confirm("정말 로그아웃 하시겠습니까?")) {
-      logoutMutation.mutate();
-    }
-  };
 
   const cartItemCount = cartData?.data
     ? cartData.data.reduce((sum, item) => sum + item.quantity, 0)
@@ -59,7 +49,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
         </button>
 
         {/* 장바구니 버튼 */}
-        {isInitialized && isAuthenticated && user && <CartButton />}
+        <CartButton />
       </header>
     );
   }
@@ -69,7 +59,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
     return null;
   }
 
-  // Main 헤더 (기본): 로고 + 장바구니 + 로그인/로그아웃
+  // Main 헤더 (기본): 로고 + 장바구니
   return (
     <header className="px-10 flex justify-between items-center h-[160px] bg-white">
       {/* 로고 */}
@@ -85,35 +75,8 @@ export default function Header({ variant = "main" }: HeaderProps) {
 
       {/* 우측 메뉴 */}
       <div className="flex items-center gap-4">
-        {/* 장바구니 아이콘 (로그인한 사용자만 표시) */}
-        {isInitialized && isAuthenticated && user && <CartButton />}
-
-        {/* 로그인/로그아웃 버튼 */}
-        <div>
-          {!isInitialized ? null : isAuthenticated && user ? (
-            <button
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-              aria-label="로그아웃"
-              className={`px-5 py-2.5 rounded-lg font-medium text-sm leading-6 border transition-all inline-block
-                ${
-                  logoutMutation.isPending
-                    ? "cursor-not-allowed opacity-60 text-gray-500 bg-white border-gray-200"
-                    : "cursor-pointer text-gray-500 bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-                }`}
-            >
-              {logoutMutation.isPending ? "로그아웃 중..." : "로그아웃"}
-            </button>
-          ) : (
-            <Link
-              href={PATHS.AUTH.LOGIN}
-              aria-label="로그인"
-              className="px-5 py-2.5 rounded-lg font-medium text-sm leading-6 cursor-pointer text-white bg-gray-900 border border-gray-900 no-underline inline-block transition-all hover:bg-gray-800 hover:border-gray-800"
-            >
-              로그인
-            </Link>
-          )}
-        </div>
+        {/* 장바구니 아이콘 */}
+        <CartButton />
       </div>
     </header>
   );

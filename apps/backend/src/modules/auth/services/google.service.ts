@@ -1,17 +1,13 @@
 import { Injectable, ConflictException, BadRequestException, Logger } from "@nestjs/common";
-import { Response } from "express";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
-import { CookieUtil } from "@apps/backend/modules/auth/utils/cookie.util";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import {
   AUTH_ERROR_MESSAGES,
-  COOKIE_CONFIG,
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
-import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
-import { GoogleUserInfo, JwtPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { GoogleUserInfo } from "@apps/backend/modules/auth/types/auth.types";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
 import {
@@ -35,7 +31,6 @@ export class GoogleService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtUtil: JwtUtil,
-    private readonly cookieUtil: CookieUtil,
     private readonly configService: ConfigService,
     private readonly phoneService: PhoneService,
   ) {
@@ -70,16 +65,15 @@ export class GoogleService {
   /**
    * Authorization Code로 구글 로그인 처리
    * @param codeDto - 구글에서 받은 Authorization Code
-   * @param res - Express Response 객체
-   * @returns 사용자 정보 (토큰은 쿠키에 설정)
+   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
     const { code } = codeDto;
 
     // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
     const googleUserInfo = await this.exchangeCodeForToken(code);
 
-    return await this.googleLogin(googleUserInfo, res);
+    return await this.googleLogin(googleUserInfo);
   }
 
   /**
@@ -146,10 +140,9 @@ export class GoogleService {
   /**
    * 구글 로그인 처리 (내부 메서드)
    * @param googleUserInfo - 구글 사용자 정보
-   * @param res - Express Response 객체
-   * @returns 사용자 정보 (토큰은 쿠키에 설정)
+   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
    */
-  async googleLogin(googleUserInfo: GoogleUserInfo, res: Response) {
+  async googleLogin(googleUserInfo: GoogleUserInfo) {
     const {
       userInfo: { googleId, googleEmail },
     } = googleUserInfo;
@@ -179,16 +172,10 @@ export class GoogleService {
 
     // 3. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
     return await this.prisma.$transaction(async (tx) => {
-      // JWT 토큰 생성
-      const jwtPayload: JwtPayload = {
+      // JWT 토큰 생성 (최소 정보만 포함: sub만)
+      const tokenPair = await this.jwtUtil.generateTokenPair({
         sub: user.id,
-        phone: user.phone,
-        loginType: "google",
-        loginId: user.googleId ?? "",
-        role: user.role,
-      };
-
-      const tokenPair = await this.jwtUtil.generateTokenPair(jwtPayload);
+      });
 
       // 마지막 로그인 시간 업데이트
       await tx.user.update({
@@ -196,23 +183,10 @@ export class GoogleService {
         data: { lastLoginAt: new Date() },
       });
 
-      // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
-      if (res) {
-        this.cookieUtil.setAccessTokenCookie(
-          res,
-          tokenPair.accessToken,
-          COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
-        );
-        this.cookieUtil.setRefreshTokenCookie(
-          res,
-          tokenPair.refreshToken,
-          COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
-        );
-      }
-
-      // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
+      // 응답에 토큰만 반환 (사용자 정보는 제외)
       return {
-        user: UserMapperUtil.mapToUserInfo(user, new Date()),
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
       };
     });
   }
@@ -220,10 +194,9 @@ export class GoogleService {
   /**
    * 구글 로그인 회원가입 (휴대폰 인증 완료 후)
    * @param googleRegisterDto - 구글 회원가입 정보
-   * @param res - Express Response 객체
-   * @returns 사용자 정보 (토큰은 쿠키에 설정)
+   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
    */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto, res: Response) {
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
     const { googleId, googleEmail, phone } = googleRegisterDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
 
@@ -267,32 +240,15 @@ export class GoogleService {
             },
           });
 
-          // JWT 토큰 생성
+          // JWT 토큰 생성 (최소 정보만 포함: sub만)
           const tokenPair = await this.jwtUtil.generateTokenPair({
             sub: user.id,
-            phone: user.phone,
-            loginType: "google",
-            loginId: user.googleId ?? "",
-            role: user.role,
           });
 
-          // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
-          if (res) {
-            this.cookieUtil.setAccessTokenCookie(
-              res,
-              tokenPair.accessToken,
-              COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
-            );
-            this.cookieUtil.setRefreshTokenCookie(
-              res,
-              tokenPair.refreshToken,
-              COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
-            );
-          }
-
-          // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
+          // 응답에 토큰만 반환 (사용자 정보는 제외)
           return {
-            user: UserMapperUtil.mapToUserInfo(user),
+            accessToken: tokenPair.accessToken,
+            refreshToken: tokenPair.refreshToken,
           };
         });
       }
@@ -310,32 +266,15 @@ export class GoogleService {
         },
       });
 
-      // JWT 토큰 생성
+      // JWT 토큰 생성 (최소 정보만 포함: sub만)
       const tokenPair = await this.jwtUtil.generateTokenPair({
         sub: user.id,
-        phone: user.phone,
-        loginType: "google",
-        loginId: user.googleId ?? "",
-        role: user.role,
       });
 
-      // 쿠키에 토큰 설정 (서브도메인 통합 로그인)
-      if (res) {
-        this.cookieUtil.setAccessTokenCookie(
-          res,
-          tokenPair.accessToken,
-          COOKIE_CONFIG.ACCESS_TOKEN_MAX_AGE,
-        );
-        this.cookieUtil.setRefreshTokenCookie(
-          res,
-          tokenPair.refreshToken,
-          COOKIE_CONFIG.REFRESH_TOKEN_MAX_AGE,
-        );
-      }
-
-      // 보안상 응답에서는 토큰을 제외하고 사용자 정보만 반환
+      // 응답에 토큰만 반환 (사용자 정보는 제외)
       return {
-        user: UserMapperUtil.mapToUserInfo(user),
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
       };
     });
   }

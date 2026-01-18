@@ -3,19 +3,12 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "@/apps/web-user/common/config/query-client";
-import { setQueryClient } from "@/apps/web-user/common/config/axios.config";
-import { useEffect } from "react";
 
 interface QueryProviderProps {
   children: any; // vercel 빌드 오류 방지를 위해 any 타입 사용 // Type 'bigint' is not assignable to type 'ReactNode'.
 }
 
 export function QueryProvider({ children }: QueryProviderProps) {
-  // QueryClient를 query hook을 사용하지 않고, axios 직접 호출하여 query와 연동하여 사용하기 위해 설정
-  useEffect(() => {
-    setQueryClient(queryClient);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       {children}

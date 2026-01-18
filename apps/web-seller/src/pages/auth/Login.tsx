@@ -1,17 +1,13 @@
-"use client";
-
-import Link from "next/link";
-import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import { useSearchParams } from "next/navigation";
+import { Link, useSearchParams } from "react-router-dom";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import {
   createUrlWithReturnUrl,
   createGoogleOAuthUrlWithReturnUrl,
-} from "@/apps/web-user/common/utils/returnUrl.util";
+} from "@/apps/web-seller/common/utils/returnUrl.util";
 
-// 사용자페이지, 판매자페이지 모두 인증이 필요할 때 여기 페이지 경로(/auth/login 경로로 리다이렉트됨)
-// 리다이렉트는 /auth/login 경로에서 "일반 로그인", "구글 로그인" 버튼 클릭 시에만 이루어짐
-export default function LoginPage() {
-  const searchParams = useSearchParams();
+// 모두 인증이 필요할 때 여기 페이지 경로(/auth/login 경로로 리다이렉트됨, 이후 reutnUrl 유지한채로 리다이렉트됨)
+export function LoginPage() {
+  const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get("returnUrl");
   return (
     <div
@@ -61,7 +57,7 @@ export default function LoginPage() {
         </div>
 
         <Link
-          href={createUrlWithReturnUrl(PATHS.AUTH.LOGIN_BASIC, returnUrl || undefined)}
+          to={createUrlWithReturnUrl(ROUTES.AUTH.LOGIN_BASIC, returnUrl || undefined)}
           style={{
             width: "100%",
             height: "52px",
@@ -82,9 +78,9 @@ export default function LoginPage() {
           일반 로그인
         </Link>
 
-        <Link
+        <a
           href={createGoogleOAuthUrlWithReturnUrl(
-            `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_USER_DOMAIN}${PATHS.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`,
+            `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}${ROUTES.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`,
             returnUrl || undefined,
           )}
           style={{
@@ -105,7 +101,7 @@ export default function LoginPage() {
           }}
         >
           구글 로그인
-        </Link>
+        </a>
 
         <div
           style={{
@@ -116,7 +112,7 @@ export default function LoginPage() {
         />
 
         <Link
-          href={PATHS.AUTH.FIND_ACCOUNT}
+          to={ROUTES.AUTH.FIND_ACCOUNT}
           style={{
             width: "100%",
             height: "44px",

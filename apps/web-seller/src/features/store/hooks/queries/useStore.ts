@@ -9,6 +9,7 @@ import { STORE_SUCCESS_MESSAGES } from "@/apps/web-seller/features/store/constan
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { storeQueryKeys } from "../../constants/storeQueryKeys.constant";
 import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store";
+import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 
 // 스토어 생성 뮤테이션
 export function useCreateStore() {
@@ -37,11 +38,12 @@ export function useCreateStore() {
 export function useStoreList() {
   const { setStores } = useStoreStore();
   const { addAlert } = useAlertStore();
+  const { isAuthenticated } = useAuthStore();
 
   const query = useQuery({
     queryKey: storeQueryKeys.list,
     queryFn: storeApi.getStoreList,
-    enabled: false, // 기본적으로 비활성화 (로그인 후 활성화)
+    enabled: isAuthenticated, // 인증된 경우에만 자동으로 호출
   });
 
   useEffect(() => {

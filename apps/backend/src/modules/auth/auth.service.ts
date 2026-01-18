@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Response } from "express";
+import { Request as ExpressRequest } from "express";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
 import { UserService } from "@apps/backend/modules/auth/services/user.service";
 import { GoogleService } from "@apps/backend/modules/auth/services/google.service";
@@ -34,8 +34,8 @@ export class AuthService {
   /**
    * 일반 - 회원가입
    */
-  async register(registerDto: RegisterRequestDto, res: Response) {
-    return await this.userService.register(registerDto, res);
+  async register(registerDto: RegisterRequestDto) {
+    return await this.userService.register(registerDto);
   }
 
   /**
@@ -48,8 +48,8 @@ export class AuthService {
   /**
    * 일반 - 로그인
    */
-  async login(loginDto: LoginRequestDto, res: Response) {
-    return await this.userService.login(loginDto, res);
+  async login(loginDto: LoginRequestDto) {
+    return await this.userService.login(loginDto);
   }
 
   /**
@@ -72,15 +72,15 @@ export class AuthService {
   /**
    * 구글 - Authorization Code로 구글 로그인 처리
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto, res: Response) {
-    return await this.googleService.googleLoginWithCode(codeDto, res);
+  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
+    return await this.googleService.googleLoginWithCode(codeDto);
   }
 
   /**
    * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
    */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto, res: Response) {
-    return await this.googleService.googleRegisterWithPhone(googleRegisterDto, res);
+  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
+    return await this.googleService.googleRegisterWithPhone(googleRegisterDto);
   }
 
   /**
@@ -105,23 +105,17 @@ export class AuthService {
   }
 
   /**
-   * Refresh Token을 사용하여 Access Token을 갱신합니다.
-   */
-  async refreshToken(res: Response) {
-    await this.userService.refreshAccessTokenFromCookie(res);
-  }
-
-  /**
    * 현재 로그인한 사용자 정보 조회
    */
-  async getCurrentUser(user: JwtVerifiedPayload) {
-    return await this.userService.getCurrentUser(user);
+  async getCurrentUser(user: JwtVerifiedPayload, req: ExpressRequest) {
+    return await this.userService.getCurrentUser(user, req);
   }
 
   /**
    * 로그아웃 처리
+   * 헤더 기반 인증에서는 클라이언트에서 토큰을 삭제하면 되므로 서버에서는 별도 처리 불필요
    */
-  async logout(res: Response) {
-    await this.userService.logout(res);
+  async logout() {
+    // 헤더 기반 인증에서는 클라이언트에서 토큰을 삭제하면 되므로 서버에서는 별도 처리 불필요
   }
 }
