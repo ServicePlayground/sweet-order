@@ -1,18 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import {
-  IsOptional,
-  IsString,
-  IsEnum,
-  IsNumber,
-  Min,
-  Max,
-  IsArray,
-  IsNotEmpty,
-} from "class-validator";
-import {
-  StringToNumber,
-  OptionalStringToNumber,
-} from "@apps/backend/common/decorators/transform.decorator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEnum, IsNumber, Min, Max, IsNotEmpty } from "class-validator";
+import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
 import { ReviewSortBy } from "@apps/backend/modules/product/constants/product.constants";
 
 /**
@@ -49,4 +37,3 @@ export class GetProductReviewsRequestDto {
   @IsEnum(ReviewSortBy)
   sortBy: ReviewSortBy;
 }
-
