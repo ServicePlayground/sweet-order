@@ -38,6 +38,7 @@ model User {
   // Relations
   productLikes   ProductLike[]
   stores        Store[]
+  reviews       ProductReview[]
 
   @@index([phone])
   @@index([userId])
@@ -105,6 +106,7 @@ model Product {
   // Seller는 store.seller를 통해 참조 가능
   store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
   likes             ProductLike[]
+  reviews           ProductReview[]
   
   @@index([storeId])
   @@index([salesStatus])
@@ -187,6 +189,28 @@ model Store {
   @@index([userId])
   @@index([businessNo])
   @@map("stores")
+}
+
+// Product review model
+model ProductReview {
+  id          String   @id @default(cuid())
+  productId   String   @map("product_id")
+  userId      String   @map("user_id")
+  rating      Float                                                 // 별점 (0.0 ~ 5.0)
+  content     String                                                // 후기 내용
+  imageUrls   String[] @default([]) @map("image_urls")             // 후기 이미지 URL 목록
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([createdAt])
+  @@map("product_reviews")
 }
 
 

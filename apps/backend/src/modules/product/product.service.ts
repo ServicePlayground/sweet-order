@@ -1,12 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { ProductService as ProductDataService } from "@apps/backend/modules/product/services/product.service";
 import { ProductLikeService } from "@apps/backend/modules/product/services/product-like.service";
+import { ProductReviewService } from "@apps/backend/modules/product/services/product-review.service";
 import {
   GetProductsRequestDto,
   GetSellerProductsRequestDto,
   CreateProductRequestDto,
   UpdateProductRequestDto,
 } from "@apps/backend/modules/product/dto/product-request.dto";
+import { GetProductReviewsRequestDto } from "@apps/backend/modules/product/dto/product-review-request.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -20,6 +22,7 @@ export class ProductService {
   constructor(
     private readonly productDataService: ProductDataService,
     private readonly productLikeService: ProductLikeService,
+    private readonly productReviewService: ProductReviewService,
   ) {}
 
   /**
@@ -94,5 +97,19 @@ export class ProductService {
    */
   async isLiked(userId: string, productId: string): Promise<boolean> {
     return this.productLikeService.isLiked(userId, productId);
+  }
+
+  /**
+   * 상품 후기 목록 조회
+   */
+  async getProductReviews(productId: string, query: GetProductReviewsRequestDto) {
+    return this.productReviewService.getProductReviews(productId, query);
+  }
+
+  /**
+   * 상품 후기 단일 조회
+   */
+  async getProductReview(productId: string, reviewId: string) {
+    return this.productReviewService.getProductReview(productId, reviewId);
   }
 }

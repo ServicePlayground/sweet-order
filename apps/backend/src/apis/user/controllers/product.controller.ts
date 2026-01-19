@@ -26,6 +26,11 @@ import {
   CakeSizeOptionResponseDto,
   CakeFlavorOptionResponseDto,
 } from "@apps/backend/modules/product/dto/product-response.dto";
+import { GetProductReviewsRequestDto } from "@apps/backend/modules/product/dto/product-review-request.dto";
+import {
+  ProductReviewListResponseDto,
+  ProductReviewResponseDto,
+} from "@apps/backend/modules/product/dto/product-review-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,
@@ -47,6 +52,8 @@ import {
   PaginationMetaResponseDto,
   CakeSizeOptionResponseDto,
   CakeFlavorOptionResponseDto,
+  ProductReviewListResponseDto,
+  ProductReviewResponseDto,
 )
 @Controller(`${USER_ROLES.USER}/products`)
 @Auth({ isPublic: true }) // 기본적으로 모든 엔드포인트에 통합 인증 가드 적용
@@ -184,5 +191,46 @@ export class UserProductController {
   ) {
     await this.productService.removeProductLike(req.user.sub, productId);
     return { message: PRODUCT_SUCCESS_MESSAGES.LIKE_REMOVED };
+  }
+
+  /**
+   * 상품 후기 목록 조회 API
+   * 특정 상품의 후기 목록을 조회합니다.
+   */
+  @Get(":id/reviews")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "상품 후기 목록 조회",
+    description: "특정 상품의 후기 목록을 조회합니다. 최신순, 별점순 정렬을 지원합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ProductReviewListResponseDto })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
+  async getProductReviews(
+    @Param("id") productId: string,
+    @Query() query: GetProductReviewsRequestDto,
+  ) {
+    return await this.productService.getProductReviews(productId, query);
+  }
+
+  /**
+   * 상품 후기 단일 조회 API
+   * 특정 상품의 특정 후기를 조회합니다.
+   */
+  @Get(":id/reviews/:reviewId")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "상품 후기 단일 조회",
+    description: "특정 상품의 특정 후기를 조회합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ProductReviewResponseDto })
+  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.REVIEW_NOT_FOUND),
+  })
+  async getProductReview(
+    @Param("id") productId: string,
+    @Param("reviewId") reviewId: string,
+  ) {
+    return await this.productService.getProductReview(productId, reviewId);
   }
 }
