@@ -77,6 +77,8 @@ export enum SortBy {
   PRICE_ASC = "price_asc", // 가격 오름차순
   PRICE_DESC = "price_desc", // 가격 내림차순
   POPULAR = "popular", // 인기순(좋아요 수 내림차순)
+  REVIEW_COUNT = "review_count", // 후기 많은 순(후기 수 내림차순)
+  RATING_AVG = "rating_avg", // 별점 높은 순(평균 별점 내림차순)
 }
 
 /**
