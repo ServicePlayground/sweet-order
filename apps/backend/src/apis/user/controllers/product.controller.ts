@@ -227,10 +227,7 @@ export class UserProductController {
   @SwaggerResponse(404, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.REVIEW_NOT_FOUND),
   })
-  async getProductReview(
-    @Param("id") productId: string,
-    @Param("reviewId") reviewId: string,
-  ) {
+  async getProductReview(@Param("id") productId: string, @Param("reviewId") reviewId: string) {
     return await this.productService.getProductReview(productId, reviewId);
   }
 }

@@ -65,8 +65,7 @@ export class ProductService {
     const totalItems = await this.prisma.product.count({ where });
 
     // 후기 수나 평균 별점으로 정렬하는 경우, reviews를 포함하여 조회
-    const needsReviewData =
-      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
+    const needsReviewData = sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
 
     // 정렬 조건 구성
     let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
@@ -119,7 +118,7 @@ export class ProductService {
       }
 
       // reviews 필드 제거 (원래 구조로 복원)
-      products = productsWithStats.map(({ reviews, reviewCount, avgRating, ...product }) => product);
+      products = productsWithStats.map(({ ...product }) => product);
 
       // 페이지네이션 적용
       const skip = (page - 1) * limit;
@@ -291,8 +290,7 @@ export class ProductService {
     const totalItems = await this.prisma.product.count({ where });
 
     // 후기 수나 평균 별점으로 정렬하는 경우, reviews를 포함하여 조회
-    const needsReviewData =
-      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
+    const needsReviewData = sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
 
     // 정렬 조건 구성
     let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
@@ -345,7 +343,7 @@ export class ProductService {
       }
 
       // reviews 필드 제거 (원래 구조로 복원)
-      products = productsWithStats.map(({ reviews, reviewCount, avgRating, ...product }) => product);
+      products = productsWithStats.map(({ ...product }) => product);
 
       // 페이지네이션 적용
       const skip = (page - 1) * limit;

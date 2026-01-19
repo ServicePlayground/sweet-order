@@ -24,7 +24,8 @@ async function main() {
         name: "김철수",
         nickname: "철수킹",
         email: "kimcs@example.com",
-        profileImageUrl: "https://static-staging.sweetorders.com/uploads/2__1768857931118_ee8b306b.jpeg",
+        profileImageUrl:
+          "https://static-staging.sweetorders.com/uploads/2__1768857931118_ee8b306b.jpeg",
         isPhoneVerified: true,
         isActive: true,
         createdAt: new Date("2024-01-15T10:30:00Z"),
@@ -274,8 +275,9 @@ async function main() {
       ];
       const content = reviewContents[Math.floor(Math.random() * reviewContents.length)];
       const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
-      const imageUrls = Array.from({ length: imageCount }, (_) => 
-        `https://static-staging.sweetorders.com/uploads/.jpeg_1768858024759_46405d13`
+      const imageUrls = Array.from(
+        { length: imageCount },
+        () => `https://static-staging.sweetorders.com/uploads/.jpeg_1768858024759_46405d13`,
       );
 
       reviews.push(
@@ -288,10 +290,10 @@ async function main() {
             imageUrls,
             createdAt: new Date(
               new Date("2024-01-01T00:00:00Z").getTime() +
-                Math.random() * (new Date().getTime() - new Date("2024-01-01T00:00:00Z").getTime())
+                Math.random() * (new Date().getTime() - new Date("2024-01-01T00:00:00Z").getTime()),
             ),
           },
-        })
+        }),
       );
     }
   }

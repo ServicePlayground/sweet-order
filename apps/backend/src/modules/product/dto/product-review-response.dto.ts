@@ -40,10 +40,7 @@ export class ProductReviewResponseDto {
   @ApiProperty({
     description: "후기 이미지 URL 목록",
     type: [String],
-    example: [
-      "https://example.com/review-image1.jpg",
-      "https://example.com/review-image2.jpg",
-    ],
+    example: ["https://example.com/review-image1.jpg", "https://example.com/review-image2.jpg"],
   })
   imageUrls: string[];
 
@@ -130,4 +127,3 @@ export class ProductReviewListResponseDto {
   })
   meta: ReviewPaginationMetaResponseDto;
 }
-
