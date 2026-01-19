@@ -61,41 +61,101 @@ export class ProductService {
       where.AND.push({ OR: searchConditions });
     }
 
-    // 정렬 조건 구성
-    let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
-
-    switch (sortBy) {
-      case SortBy.LATEST:
-        orderBy = [{ createdAt: "desc" }];
-        break;
-      case SortBy.PRICE_ASC:
-        orderBy = [{ salePrice: "asc" }, { createdAt: "desc" }];
-        break;
-      case SortBy.PRICE_DESC:
-        orderBy = [{ salePrice: "desc" }, { createdAt: "desc" }];
-        break;
-      case SortBy.POPULAR: // 좋아요 수 내림차순
-      default:
-        orderBy = [{ likeCount: "desc" }, { createdAt: "desc" }];
-        break;
-    }
-
     // 전체 개수 조회
     const totalItems = await this.prisma.product.count({ where });
 
-    // 무한스크롤 계산
-    const totalPages = Math.ceil(totalItems / limit);
-    const skip = (page - 1) * limit;
+    // 후기 수나 평균 별점으로 정렬하는 경우, reviews를 포함하여 조회
+    const needsReviewData =
+      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
 
-    // 상품 목록 조회
-    const products = await this.prisma.product.findMany({
-      where, // 필터 조건 (검색어, 카테고리, 가격대 등)
-      orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
-      skip, // 무한스크롤을 위한 건너뛸 항목 수
-      take: limit, // 가져올 항목 수 (페이지당 상품 개수)
-    });
+    // 정렬 조건 구성
+    let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
+    let products;
+
+    if (needsReviewData) {
+      // 후기 수나 평균 별점으로 정렬하는 경우
+      // 모든 필터링된 상품을 조회 (reviews 포함)
+      const allProducts = await this.prisma.product.findMany({
+        where,
+        include: {
+          reviews: {
+            select: {
+              rating: true,
+            },
+          },
+        },
+      });
+
+      // 후기 수와 평균 별점 계산 및 정렬
+      const productsWithStats = allProducts.map((product) => {
+        const reviewCount = product.reviews.length;
+        const avgRating =
+          reviewCount > 0
+            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
+            : 0;
+
+        return {
+          ...product,
+          reviewCount,
+          avgRating,
+        };
+      });
+
+      // 정렬
+      if (sortBy === SortBy.REVIEW_COUNT) {
+        productsWithStats.sort((a, b) => {
+          if (b.reviewCount !== a.reviewCount) {
+            return b.reviewCount - a.reviewCount;
+          }
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+      } else if (sortBy === SortBy.RATING_AVG) {
+        productsWithStats.sort((a, b) => {
+          if (b.avgRating !== a.avgRating) {
+            return b.avgRating - a.avgRating;
+          }
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+      }
+
+      // reviews 필드 제거 (원래 구조로 복원)
+      products = productsWithStats.map(({ reviews, reviewCount, avgRating, ...product }) => product);
+
+      // 페이지네이션 적용
+      const skip = (page - 1) * limit;
+      products = products.slice(skip, skip + limit);
+    } else {
+      // 일반 정렬 (Prisma orderBy 사용)
+      switch (sortBy) {
+        case SortBy.LATEST:
+          orderBy = [{ createdAt: "desc" }];
+          break;
+        case SortBy.PRICE_ASC:
+          orderBy = [{ salePrice: "asc" }, { createdAt: "desc" }];
+          break;
+        case SortBy.PRICE_DESC:
+          orderBy = [{ salePrice: "desc" }, { createdAt: "desc" }];
+          break;
+        case SortBy.POPULAR: // 좋아요 수 내림차순
+        default:
+          orderBy = [{ likeCount: "desc" }, { createdAt: "desc" }];
+          break;
+      }
+
+      // 무한스크롤 계산
+      const skip = (page - 1) * limit;
+
+      // 상품 목록 조회
+      products = await this.prisma.product.findMany({
+        where, // 필터 조건 (검색어, 카테고리, 가격대 등)
+        orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
+        skip, // 무한스크롤을 위한 건너뛸 항목 수
+        take: limit, // 가져올 항목 수 (페이지당 상품 개수)
+      });
+    }
 
     // 무한스크롤 메타 정보 계산
+    const totalPages = Math.ceil(totalItems / limit);
     const hasNext = page < totalPages;
     const hasPrev = page > 1;
 
@@ -227,41 +287,101 @@ export class ProductService {
       where.AND.push({ OR: searchConditions });
     }
 
-    // 정렬 조건 구성
-    let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
-
-    switch (sortBy) {
-      case SortBy.LATEST:
-        orderBy = [{ createdAt: "desc" }];
-        break;
-      case SortBy.PRICE_ASC:
-        orderBy = [{ salePrice: "asc" }, { createdAt: "desc" }];
-        break;
-      case SortBy.PRICE_DESC:
-        orderBy = [{ salePrice: "desc" }, { createdAt: "desc" }];
-        break;
-      case SortBy.POPULAR: // 좋아요 수 내림차순
-      default:
-        orderBy = [{ likeCount: "desc" }, { createdAt: "desc" }];
-        break;
-    }
-
     // 전체 개수 조회
     const totalItems = await this.prisma.product.count({ where });
 
-    // 무한스크롤 계산
-    const totalPages = Math.ceil(totalItems / limit);
-    const skip = (page - 1) * limit;
+    // 후기 수나 평균 별점으로 정렬하는 경우, reviews를 포함하여 조회
+    const needsReviewData =
+      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
 
-    // 상품 목록 조회
-    const products = await this.prisma.product.findMany({
-      where, // 필터 조건 (검색어, 카테고리, 가격대 등)
-      orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
-      skip, // 무한스크롤을 위한 건너뛸 항목 수
-      take: limit, // 가져올 항목 수 (페이지당 상품 개수)
-    });
+    // 정렬 조건 구성
+    let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
+    let products;
+
+    if (needsReviewData) {
+      // 후기 수나 평균 별점으로 정렬하는 경우
+      // 모든 필터링된 상품을 조회 (reviews 포함)
+      const allProducts = await this.prisma.product.findMany({
+        where,
+        include: {
+          reviews: {
+            select: {
+              rating: true,
+            },
+          },
+        },
+      });
+
+      // 후기 수와 평균 별점 계산 및 정렬
+      const productsWithStats = allProducts.map((product) => {
+        const reviewCount = product.reviews.length;
+        const avgRating =
+          reviewCount > 0
+            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
+            : 0;
+
+        return {
+          ...product,
+          reviewCount,
+          avgRating,
+        };
+      });
+
+      // 정렬
+      if (sortBy === SortBy.REVIEW_COUNT) {
+        productsWithStats.sort((a, b) => {
+          if (b.reviewCount !== a.reviewCount) {
+            return b.reviewCount - a.reviewCount;
+          }
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+      } else if (sortBy === SortBy.RATING_AVG) {
+        productsWithStats.sort((a, b) => {
+          if (b.avgRating !== a.avgRating) {
+            return b.avgRating - a.avgRating;
+          }
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+      }
+
+      // reviews 필드 제거 (원래 구조로 복원)
+      products = productsWithStats.map(({ reviews, reviewCount, avgRating, ...product }) => product);
+
+      // 페이지네이션 적용
+      const skip = (page - 1) * limit;
+      products = products.slice(skip, skip + limit);
+    } else {
+      // 일반 정렬 (Prisma orderBy 사용)
+      switch (sortBy) {
+        case SortBy.LATEST:
+          orderBy = [{ createdAt: "desc" }];
+          break;
+        case SortBy.PRICE_ASC:
+          orderBy = [{ salePrice: "asc" }, { createdAt: "desc" }];
+          break;
+        case SortBy.PRICE_DESC:
+          orderBy = [{ salePrice: "desc" }, { createdAt: "desc" }];
+          break;
+        case SortBy.POPULAR: // 좋아요 수 내림차순
+        default:
+          orderBy = [{ likeCount: "desc" }, { createdAt: "desc" }];
+          break;
+      }
+
+      // 무한스크롤 계산
+      const skip = (page - 1) * limit;
+
+      // 상품 목록 조회
+      products = await this.prisma.product.findMany({
+        where, // 필터 조건 (검색어, 카테고리, 가격대 등)
+        orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
+        skip, // 무한스크롤을 위한 건너뛸 항목 수
+        take: limit, // 가져올 항목 수 (페이지당 상품 개수)
+      });
+    }
 
     // 무한스크롤 메타 정보 계산
+    const totalPages = Math.ceil(totalItems / limit);
     const hasNext = page < totalPages;
     const hasPrev = page > 1;
 

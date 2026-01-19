@@ -11,6 +11,7 @@ export const PRODUCT_ERROR_MESSAGES = {
   PRODUCT_INACTIVE: "판매중지된 상품입니다.",
   PRODUCT_OUT_OF_STOCK: "품절된 상품입니다.",
   PRODUCT_NOT_AVAILABLE: "구매할 수 없는 상품입니다.",
+  REVIEW_NOT_FOUND: "후기를 찾을 수 없습니다.",
 } as const;
 
 /**
@@ -32,6 +33,17 @@ export enum SortBy {
   PRICE_ASC = "price_asc", // 가격 오름차순
   PRICE_DESC = "price_desc", // 가격 내림차순
   POPULAR = "popular", // 인기순(좋아요 수 내림차순)
+  REVIEW_COUNT = "review_count", // 후기 많은 순(후기 수 내림차순)
+  RATING_AVG = "rating_avg", // 별점 높은 순(평균 별점 내림차순)
+}
+
+/**
+ * 후기 정렬 enum
+ */
+export enum ReviewSortBy {
+  LATEST = "latest", // 최신순(생성일 내림차순)
+  RATING_DESC = "rating_desc", // 별점 내림차순
+  RATING_ASC = "rating_asc", // 별점 오름차순
 }
 
 /**
