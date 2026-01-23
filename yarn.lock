@@ -5267,6 +5267,7 @@ __metadata:
     react-dom: "npm:19.1.2"
     react-error-boundary: "npm:^6.0.0"
     storybook: "npm:^10.1.2"
+    swiper: "npm:^12.0.3"
     tailwind-merge: "npm:^3.4.0"
     tailwindcss: "npm:^3"
     tailwindcss-animate: "npm:^1.0.7"
@@ -13349,6 +13350,13 @@ __metadata:
     typescript: "npm:5.5.4"
   languageName: unknown
   linkType: soft
+
+"swiper@npm:^12.0.3":
+  version: 12.0.3
+  resolution: "swiper@npm:12.0.3"
+  checksum: 10c0/a854531791ba45cb0f6086904a99878fd207b42024820df68fbf64e01c20d542438c023ec4765b223f4dbffabf6858d311ec749bdca4ea4b4a7b74150a010162
+  languageName: node
+  linkType: hard
 
 "symbol-observable@npm:4.0.0":
   version: 4.0.0

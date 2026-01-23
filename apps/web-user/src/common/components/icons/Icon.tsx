@@ -3,6 +3,10 @@ import clsx from "clsx";
 
 import Cart from "./icons/cart.svg";
 import ChevronLeft from "./icons/chevron-left.svg";
+import Arrow from "./icons/arrow.svg";
+import Favorite from "./icons/favorite.svg";
+import FavoriteFilled from "./icons/favorite-filled.svg";
+import Close from "./icons/close.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -15,6 +19,10 @@ interface IconProps {
 export const iconTypes = {
   cart: Cart,
   chevronLeft: ChevronLeft,
+  arrow: Arrow,
+  favorite: Favorite,
+  favoriteFilled: FavoriteFilled,
+  close: Close,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

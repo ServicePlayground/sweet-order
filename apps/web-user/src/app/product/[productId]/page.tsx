@@ -2,22 +2,45 @@
 
 import { use, useState } from "react";
 import { useProductDetail } from "@/apps/web-user/features/product/hooks/queries/useProductDetail";
+import { useProductIsLiked } from "@/apps/web-user/features/product/hooks/queries/useProductIsLiked";
+import { useAddProductLike } from "@/apps/web-user/features/product/hooks/mutations/useAddProductLike";
+import { useRemoveProductLike } from "@/apps/web-user/features/product/hooks/mutations/useRemoveProductLike";
 import { ProductDetailImageGallerySection } from "@/apps/web-user/features/product/components/sections/ProductDetailImageGallerySection";
 import { ProductDetailInfoSection } from "@/apps/web-user/features/product/components/sections/ProductDetailInfoSection";
 import { ProductDetailDescriptionSection } from "@/apps/web-user/features/product/components/sections/ProductDetailDescriptionSection";
 import { ProductDetailInformationNoticeSection } from "@/apps/web-user/features/product/components/sections/ProductDetailInformationNoticeSection";
 import { ProductDetailReviewSection } from "@/apps/web-user/features/product/components/sections/ProductDetailReviewSection";
+import { Tabs } from "@/apps/web-user/common/components/tabs/Tabs";
+import { ProductDetailSizeFlavorSection } from "@/apps/web-user/features/product/components/sections/ProductDetailSizeFlavorSection";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import { BottomSheet } from "@/apps/web-user/common/components/bottom-sheets/BottomSheet";
+import { Button } from "@/apps/web-user/common/components/buttons/Button";
 
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
 }
 
-type TabType = "detail" | "review" | "notice";
-
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { productId } = use(params);
   const { data, isLoading } = useProductDetail(productId);
-  const [activeTab, setActiveTab] = useState<TabType>("detail");
+  const { data: likeData } = useProductIsLiked(productId);
+  const { mutate: addLike, isPending: isAddingLike } = useAddProductLike();
+  const { mutate: removeLike, isPending: isRemovingLike } = useRemoveProductLike();
+
+  const isLiked = likeData?.isLiked ?? false;
+  const isLikeLoading = isAddingLike || isRemovingLike;
+
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+
+  const handleLikeToggle = () => {
+    if (isLikeLoading) return;
+
+    if (isLiked) {
+      removeLike(productId);
+    } else {
+      addLike(productId);
+    }
+  };
 
   if (isLoading) {
     return <></>;
@@ -25,124 +48,111 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
   if (!data) {
     return (
-      <div
-        style={{
-          width: "100%",
-          margin: "0 auto",
-          padding: "24px 20px",
-          textAlign: "center",
-          color: "#6b7280",
-        }}
-      >
+      <div className="w-full mx-auto px-5 py-6 text-center text-gray-500">
         상품 정보를 불러오지 못했습니다.
       </div>
     );
   }
 
   return (
-    <div>
-      {/* 상품 이미지 및 정보 */}
-      <div>
-        {/* 이미지 갤러리 */}
-        <div>
-          <ProductDetailImageGallerySection images={data.mainImage} productName={data.name} />
-        </div>
-
-        {/* 상품 정보 */}
-        <div>
-          <ProductDetailInfoSection product={data} />
-        </div>
-      </div>
+    <div className="pb-[100px]">
+      {/* 이미지 갤러리 */}
+      <ProductDetailImageGallerySection images={data.images} productName={data.name} />
+      {/* 상품 정보 */}
+      <ProductDetailInfoSection product={data} />
 
       {/* 탭 영역 */}
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-          marginTop: "32px",
-        }}
-      >
-        {/* 탭 헤더 */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            borderBottom: "1px solid #e5e7eb",
-            padding: "0",
-          }}
-        >
-          <button
-            onClick={() => setActiveTab("detail")}
-            style={{
-              flex: 1,
-              padding: "16px 24px",
-              fontSize: "16px",
-              fontWeight: activeTab === "detail" ? 700 : 500,
-              color: activeTab === "detail" ? "#111827" : "#6b7280",
-              border: "none",
-              borderBottom: activeTab === "detail" ? "2px solid #111827" : "2px solid transparent",
-              backgroundColor: "transparent",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            주문정보
-          </button>
-          <button
-            onClick={() => setActiveTab("review")}
-            style={{
-              flex: 1,
-              padding: "16px 24px",
-              fontSize: "16px",
-              fontWeight: activeTab === "review" ? 700 : 500,
-              color: activeTab === "review" ? "#111827" : "#6b7280",
-              border: "none",
-              borderBottom: activeTab === "review" ? "2px solid #111827" : "2px solid transparent",
-              backgroundColor: "transparent",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            후기
-          </button>
-          <button
-            onClick={() => setActiveTab("notice")}
-            style={{
-              flex: 1,
-              padding: "16px 24px",
-              fontSize: "16px",
-              fontWeight: activeTab === "notice" ? 700 : 500,
-              color: activeTab === "notice" ? "#111827" : "#6b7280",
-              border: "none",
-              borderBottom: activeTab === "notice" ? "2px solid #111827" : "2px solid transparent",
-              backgroundColor: "transparent",
-              cursor: "pointer",
-              transition: "all 0.2s",
-            }}
-          >
-            상세정보
-          </button>
-        </div>
+      <Tabs
+        defaultTab="detail"
+        tabs={[
+          {
+            id: "detail",
+            label: "상세정보",
+            content: <ProductDetailDescriptionSection detailDescription={data.detailDescription} />,
+          },
+          {
+            id: "size-flavor",
+            label: "사이즈·맛",
+            content: (
+              <ProductDetailSizeFlavorSection
+                cakeSizeOptions={data.cakeSizeOptions}
+                cakeFlavorOptions={data.cakeFlavorOptions}
+              />
+            ),
+          },
+          {
+            id: "review",
+            label: "후기",
+            content: <ProductDetailReviewSection />,
+          },
+          {
+            id: "notice",
+            label: "이용안내",
+            content: (
+              <ProductDetailInformationNoticeSection
+                product={data}
+                cancellationRefundDetailDescription="취소 및 환불규정의 내용이 들어갑니다."
+              />
+            ),
+          },
+        ]}
+      />
 
-        {/* 탭 컨텐츠 */}
-        <div style={{ padding: "32px" }}>
-          {activeTab === "detail" && (
-            <ProductDetailDescriptionSection
-              detailDescription={data.detailDescription}
-              variant="tab"
+      {/* 예약하기, 좋아요 - 하단 고정 */}
+      <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-[638px] bg-white border-gray-200 flex flex-col shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.16)]">
+        <div className="flex items-center gap-[16px] px-[20px] py-[10px]">
+          <button
+            type="button"
+            onClick={handleLikeToggle}
+            disabled={isLikeLoading}
+            className={`flex flex-col items-center justify-center w-[40px] h-[40px] ${isLikeLoading ? "opacity-50" : ""}`}
+          >
+            <Icon
+              name={isLiked ? "favoriteFilled" : "favorite"}
+              width={24}
+              height={24}
+              className={isLiked ? "text-primary" : "text-gray-500"}
             />
-          )}
-          {activeTab === "review" && <ProductDetailReviewSection variant="tab" />}
-          {activeTab === "notice" && (
-            <ProductDetailInformationNoticeSection
-              product={data}
-              variant="tab"
-              cancellationRefundDetailDescription={data.cancellationRefundDetailDescription}
-            />
-          )}
+            <span className="text-xs text-gray-900 font-bold">{data.likeCount}</span>
+          </button>
+          <Button
+            onClick={() => setIsBottomSheetOpen(true)}
+            flex
+          >
+            예약하기
+          </Button>
         </div>
       </div>
+
+      {/* 예약 바텀시트 */}
+      <BottomSheet
+        isOpen={isBottomSheetOpen}
+        onClose={() => setIsBottomSheetOpen(false)}
+        title="상품 옵션 선택"
+        footer={
+          <div className="px-[20px]">
+            <div className="flex items-center justify-between pt-[14px]">
+              <span className="text-sm text-gray-700">총 금액</span>
+              <span className="text-xl font-bold text-gray-900">
+                {data.salePrice.toLocaleString()}원
+              </span>
+            </div>
+            <div className="py-[12px] flex gap-[8px]">
+              <Button variant="outline" width={100}>
+                취소
+              </Button>
+              <Button flex>
+                선택완료
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <div className="px-[20px] py-[16px]">
+          {/* 바텀시트 컨텐츠 영역 */}
+          <p className="text-gray-500">예약 옵션을 선택해주세요.</p>
+        </div>
+      </BottomSheet>
     </div>
   );
 }

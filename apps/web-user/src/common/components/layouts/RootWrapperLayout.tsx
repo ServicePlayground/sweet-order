@@ -22,7 +22,7 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
 
   return (
     <AuthProvider>
-      <div className="w-[375px] h-screen mx-auto border-x border-gray-200 overflow-y-auto">
+      <div className="w-full sm:w-[640px] h-screen mx-auto sm:border-x border-gray-200 overflow-y-auto overflow-x-hidden">
         <Header variant={getHeaderVariant()} />
         <div>{children}</div>
         <Alert />

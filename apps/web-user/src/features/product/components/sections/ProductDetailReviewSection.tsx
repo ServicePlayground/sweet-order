@@ -1,13 +1,9 @@
-interface ProductDetailReviewSectionProps {
-  variant?: "default" | "tab";
-}
+import { ProductDetailSubTitle } from "../common/ProductDetailSubTitle";
 
-export function ProductDetailReviewSection({
-  variant = "default",
-}: ProductDetailReviewSectionProps) {
+export function ProductDetailReviewSection() {
   return (
-    <div className={variant === "tab" ? "tab-variant" : "default-variant"}>
-      <div>후기 컴포넌트</div>
+    <div>
+      <ProductDetailSubTitle>후기 컴포넌트</ProductDetailSubTitle>
     </div>
   );
 }
