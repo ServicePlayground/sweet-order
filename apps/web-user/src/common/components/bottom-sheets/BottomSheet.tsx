@@ -59,7 +59,9 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
       >
         {/* Header */}
         <div className="relative h-[64px] border-b border-gray-100">
-          <h2 className="flex items-center justify-center h-[64px] text-base font-bold text-center text-gray-900">{title}</h2>
+          <h2 className="flex items-center justify-center h-[64px] text-base font-bold text-center text-gray-900">
+            {title}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -70,9 +72,7 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
         </div>
 
         {/* Content - 스크롤 가능 영역 */}
-        <div className="flex-1 overflow-y-auto">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto">{children}</div>
 
         {/* Footer - 고정 영역 */}
         {footer && (

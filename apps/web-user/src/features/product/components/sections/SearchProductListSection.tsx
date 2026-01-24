@@ -6,22 +6,18 @@ import { SortBy, Product } from "@/apps/web-user/features/product/types/product.
 import { ProductList } from "@/apps/web-user/features/product/components/list/ProductList";
 import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
-import { ProductFilters } from "@/apps/web-user/features/product/components/modals/ProductFilterModal";
 
 interface SearchProductListSectionProps {
   search?: string;
-  filters?: ProductFilters;
 }
 
-export function SearchProductListSection({ search, filters = {} }: SearchProductListSectionProps) {
+export function SearchProductListSection({ search }: SearchProductListSectionProps) {
   const [sortBy, setSortBy] = useState<SortBy>(SortBy.POPULAR);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     search: search?.trim() || undefined,
     sortBy,
-    minPrice: filters.minPrice,
-    maxPrice: filters.maxPrice,
   });
 
   // 무한 스크롤 훅 사용
@@ -62,10 +58,10 @@ export function SearchProductListSection({ search, filters = {} }: SearchProduct
           value={sortBy}
           onChange={(value) => setSortBy(value as SortBy)}
           options={[
-            { value: SortBy.POPULAR, label: "인기순" },
             { value: SortBy.LATEST, label: "최신순" },
             { value: SortBy.PRICE_ASC, label: "가격 낮은순" },
             { value: SortBy.PRICE_DESC, label: "가격 높은순" },
+            { value: SortBy.POPULAR, label: "인기순" },
           ]}
           style={{ width: "auto", minWidth: "150px" }}
         />

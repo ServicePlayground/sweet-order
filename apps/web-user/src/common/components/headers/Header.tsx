@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useGetCartItems } from "@/apps/web-user/features/cart/hooks/queries/useGetCartItems";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
@@ -13,26 +12,15 @@ interface HeaderProps {
 
 export default function Header({ variant = "main" }: HeaderProps) {
   const router = useRouter();
-  const { data: cartData } = useGetCartItems();
 
-  const cartItemCount = cartData?.data
-    ? cartData.data.reduce((sum, item) => sum + item.quantity, 0)
-    : 0;
-
-  // 장바구니 버튼 컴포넌트 (공통)
+  // 장바구니 버튼 컴포넌트 (공통) - UI만 표시
   const CartButton = () => (
-    <Link
-      href={PATHS.CART}
-      className="relative flex items-center justify-center rounded-lg text-gray-900 no-underline transition-all hover:bg-gray-100"
+    <div
+      className="relative flex items-center justify-center rounded-lg text-gray-900 transition-all hover:bg-gray-100"
       aria-label="장바구니"
     >
       <Icon name="cart" width={24} height={24} />
-      {cartItemCount > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">
-          {cartItemCount > 99 ? "99+" : cartItemCount}
-        </span>
-      )}
-    </Link>
+    </div>
   );
 
   // Product 헤더: 뒤로가기 + 장바구니

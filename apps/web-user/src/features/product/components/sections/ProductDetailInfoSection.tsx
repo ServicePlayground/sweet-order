@@ -1,14 +1,12 @@
 "use client";
 
 import { Product } from "@/apps/web-user/features/product/types/product.type";
-import { useEffect } from "react";
 
 interface ProductDetailInfoSectionProps {
   product: Product;
 }
 
 export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionProps) {
-
   return (
     <div className="flex flex-col gap-6 px-[20px] pt-[16px] pb-[34px]">
       <div>
@@ -26,9 +24,6 @@ export function ProductDetailInfoSection({ product }: ProductDetailInfoSectionPr
           </p>
         </div>
       </div>
-
-      {/* 주문 폼 */}
-      {/* <ProductDetailOrderFormSection product={product} /> */}
     </div>
   );
 }
