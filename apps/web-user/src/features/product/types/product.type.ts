@@ -149,6 +149,7 @@ export interface Product {
   mainImage: string;
   additionalImages: string[];
   status: string;
+  orderFormSchema?: OrderFormSchema; // vercel 배포 오류 때문에 임시 삽입 // TODO: 추후 삭제 필요
 }
 
 export interface ProductIsLiked {
