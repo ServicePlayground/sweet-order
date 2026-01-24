@@ -1,12 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  MainCategory,
-  SizeRange,
-  DeliveryMethod,
-} from "@/apps/web-user/features/product/types/product.type";
-
 interface ProductFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,31 +9,9 @@ interface ProductFilterModalProps {
 }
 
 export interface ProductFilters {
-  mainCategory?: MainCategory;
-  sizeRange?: SizeRange[];
-  deliveryMethod?: DeliveryMethod[];
   minPrice?: number;
   maxPrice?: number;
 }
-
-const mainCategoryLabels: Record<MainCategory, string> = {
-  [MainCategory.CAKE]: "케이크",
-  [MainCategory.SUPPLY]: "용품",
-  [MainCategory.OTHER]: "기타",
-};
-
-const sizeRangeLabels: Record<SizeRange, string> = {
-  [SizeRange.ONE_TO_TWO]: "1~2인",
-  [SizeRange.TWO_TO_THREE]: "2~3인",
-  [SizeRange.THREE_TO_FOUR]: "3~4인",
-  [SizeRange.FOUR_TO_FIVE]: "4~5인",
-  [SizeRange.FIVE_OR_MORE]: "5인 이상",
-};
-
-const deliveryMethodLabels: Record<DeliveryMethod, string> = {
-  [DeliveryMethod.PICKUP]: "픽업",
-  [DeliveryMethod.DELIVERY]: "배달",
-};
 
 export function ProductFilterModal({
   isOpen,
@@ -62,39 +34,6 @@ export function ProductFilterModal({
       setMaxPriceInput(initialFilters.maxPrice?.toString() || "");
     }
   }, [isOpen, initialFilters]);
-
-  const handleMainCategoryChange = (category: MainCategory | undefined) => {
-    setFilters((prev) => ({
-      ...prev,
-      mainCategory: category === prev.mainCategory ? undefined : category,
-    }));
-  };
-
-  const handleSizeRangeToggle = (sizeRange: SizeRange) => {
-    setFilters((prev) => {
-      const current = prev.sizeRange || [];
-      const newSizeRange = current.includes(sizeRange)
-        ? current.filter((s) => s !== sizeRange)
-        : [...current, sizeRange];
-      return {
-        ...prev,
-        sizeRange: newSizeRange.length > 0 ? newSizeRange : undefined,
-      };
-    });
-  };
-
-  const handleDeliveryMethodToggle = (method: DeliveryMethod) => {
-    setFilters((prev) => {
-      const current = prev.deliveryMethod || [];
-      const newMethod = current.includes(method)
-        ? current.filter((m) => m !== method)
-        : [...current, method];
-      return {
-        ...prev,
-        deliveryMethod: newMethod.length > 0 ? newMethod : undefined,
-      };
-    });
-  };
 
   const handleApply = () => {
     const finalFilters: ProductFilters = {
@@ -158,115 +97,6 @@ export function ProductFilterModal({
         >
           필터
         </h2>
-
-        {/* 메인 카테고리 */}
-        <div style={{ marginBottom: "32px" }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: 600,
-              color: "#374151",
-              marginBottom: "12px",
-            }}
-          >
-            메인 카테고리
-          </h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {Object.values(MainCategory).map((category) => (
-              <button
-                key={category}
-                onClick={() => handleMainCategoryChange(category)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: filters.mainCategory === category ? "#000000" : "#ffffff",
-                  color: filters.mainCategory === category ? "#ffffff" : "#374151",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {mainCategoryLabels[category]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 인원수 */}
-        <div style={{ marginBottom: "32px" }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: 600,
-              color: "#374151",
-              marginBottom: "12px",
-            }}
-          >
-            인원수
-          </h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {Object.values(SizeRange).map((sizeRange) => (
-              <button
-                key={sizeRange}
-                onClick={() => handleSizeRangeToggle(sizeRange)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: (filters.sizeRange || []).includes(sizeRange)
-                    ? "#000000"
-                    : "#ffffff",
-                  color: (filters.sizeRange || []).includes(sizeRange) ? "#ffffff" : "#374151",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {sizeRangeLabels[sizeRange]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 수령 방식 */}
-        <div style={{ marginBottom: "32px" }}>
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: 600,
-              color: "#374151",
-              marginBottom: "12px",
-            }}
-          >
-            수령 방식
-          </h3>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            {Object.values(DeliveryMethod).map((method) => (
-              <button
-                key={method}
-                onClick={() => handleDeliveryMethodToggle(method)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  border: "1px solid #e5e7eb",
-                  backgroundColor: (filters.deliveryMethod || []).includes(method)
-                    ? "#000000"
-                    : "#ffffff",
-                  color: (filters.deliveryMethod || []).includes(method) ? "#ffffff" : "#374151",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {deliveryMethodLabels[method]}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* 가격 범위 */}
         <div style={{ marginBottom: "32px" }}>

@@ -16,9 +16,6 @@ export function useProductList({
   sortBy = SortBy.POPULAR,
   storeId,
   search,
-  mainCategory,
-  sizeRange,
-  deliveryMethod,
   minPrice,
   maxPrice,
 }: Partial<ProductListQueryParams> = {}) {
@@ -30,9 +27,6 @@ export function useProductList({
       sortBy,
       storeId,
       search,
-      mainCategory,
-      sizeRange,
-      deliveryMethod,
       minPrice,
       maxPrice,
     }),
@@ -47,15 +41,6 @@ export function useProductList({
       }
       if (search) {
         params.search = search;
-      }
-      if (mainCategory) {
-        params.mainCategory = mainCategory;
-      }
-      if (sizeRange && sizeRange.length > 0) {
-        params.sizeRange = sizeRange;
-      }
-      if (deliveryMethod && deliveryMethod.length > 0) {
-        params.deliveryMethod = deliveryMethod;
       }
       if (minPrice !== undefined) {
         params.minPrice = minPrice;

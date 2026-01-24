@@ -10,29 +10,9 @@ export enum SortBy {
   RATING_AVG = "rating_avg", // 별점 높은 순(평균 별점 내림차순)
 }
 
-export enum MainCategory {
-  CAKE = "CAKE",
-  SUPPLY = "SUPPLY",
-  OTHER = "OTHER",
-}
-
-export enum SizeRange {
-  ONE_TO_TWO = "ONE_TO_TWO",
-  TWO_TO_THREE = "TWO_TO_THREE",
-  THREE_TO_FOUR = "THREE_TO_FOUR",
-  FOUR_TO_FIVE = "FOUR_TO_FIVE",
-  FIVE_OR_MORE = "FIVE_OR_MORE",
-}
-
 export enum DeliveryMethod {
   PICKUP = "PICKUP",
   DELIVERY = "DELIVERY",
-}
-
-export enum ProductStatus {
-  ACTIVE = "ACTIVE", // 판매중
-  INACTIVE = "INACTIVE", // 판매중지(비공개)
-  OUT_OF_STOCK = "OUT_OF_STOCK", // 품절
 }
 
 export enum SalesStatus {
@@ -142,14 +122,6 @@ export interface Product {
   productNoticeGmoNotice: string;
   productNoticeImportNotice: string;
   productNoticeCustomerService: string;
-  mainCategory: string;
-  sizeRange: string[];
-  deliveryMethod: string[];
-  hashtags: string[];
-  mainImage: string;
-  additionalImages: string[];
-  status: string;
-  orderFormSchema?: OrderFormSchema; // vercel 배포 오류 때문에 임시 삽입 // TODO: 추후 삭제 필요
 }
 
 export interface ProductIsLiked {
@@ -183,9 +155,6 @@ export interface ProductListQueryParams {
   limit: number;
   sortBy: SortBy;
   search?: string;
-  mainCategory?: MainCategory;
-  sizeRange?: SizeRange[];
-  deliveryMethod?: DeliveryMethod[];
   minPrice?: number;
   maxPrice?: number;
   storeId?: string;
