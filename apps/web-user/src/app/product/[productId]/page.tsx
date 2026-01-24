@@ -115,10 +115,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             />
             <span className="text-xs text-gray-900 font-bold">{data.likeCount}</span>
           </button>
-          <Button
-            onClick={() => setIsBottomSheetOpen(true)}
-            flex
-          >
+          <Button onClick={() => setIsBottomSheetOpen(true)} flex>
             예약하기
           </Button>
         </div>
@@ -141,9 +138,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               <Button variant="outline" width={100}>
                 취소
               </Button>
-              <Button flex>
-                선택완료
-              </Button>
+              <Button flex>선택완료</Button>
             </div>
           </div>
         }

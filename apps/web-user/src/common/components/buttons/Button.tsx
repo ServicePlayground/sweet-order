@@ -56,7 +56,9 @@ export const Button: React.FC<ButtonProps> = ({
         ${flex ? "flex-1" : ""}
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         ${className}
-      `.trim().replace(/\s+/g, " ")}
+      `
+        .trim()
+        .replace(/\s+/g, " ")}
     >
       {children}
     </button>
