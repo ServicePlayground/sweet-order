@@ -5,13 +5,8 @@ import { Product, DeliveryMethod } from "@/apps/web-user/features/product/types/
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { useAddCartItem } from "@/apps/web-user/features/cart/hooks/mutations/useAddCartItem";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
-import { getDeliveryMethodLabel } from "@/apps/web-user/features/product/utils/deliveryMethod.util";
 import { calculateTotalPrice } from "@/apps/web-user/features/product/utils/price.util";
-import {
-  buildOrderFormData,
-  isProductActive,
-  isStockAvailable,
-} from "@/apps/web-user/features/product/utils/orderForm-validator.util";
+import { isProductActive } from "@/apps/web-user/features/product/utils/orderForm-validator.util";
 
 interface ProductDetailOrderFormSectionProps {
   product: Product;
@@ -22,95 +17,20 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
   const addCartItemMutation = useAddCartItem();
   const [isExpanded, setIsExpanded] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState<string | null>(
-    product.deliveryMethod && product.deliveryMethod.length > 0 ? product.deliveryMethod[0] : null,
-  );
-
-  // 주문 폼 옵션 선택 상태 관리
-  const orderFormSchema = product.orderFormSchema;
-  const initialOptionValues = useMemo(() => {
-    if (!orderFormSchema?.fields) return {};
-    const values: Record<string, string | string[]> = {};
-    orderFormSchema.fields.forEach((field) => {
-      if (field.type === "selectbox") {
-        if (field.required && field.options && field.options.length > 0) {
-          if (field.allowMultiple) {
-            values[field.id] = [field.options[0].value];
-          } else {
-            values[field.id] = field.options[0].value;
-          }
-        } else if (field.allowMultiple) {
-          values[field.id] = [];
-        }
-      } else if (field.type === "textbox") {
-        if (field.required) {
-          values[field.id] = "";
-        }
-      }
-    });
-    return values;
-  }, [orderFormSchema]);
-
-  const [selectedOptions, setSelectedOptions] =
-    useState<Record<string, string | string[]>>(initialOptionValues);
 
   // 총 가격 계산
   const totalPrice = useMemo(() => {
-    return calculateTotalPrice(product.salePrice, orderFormSchema, selectedOptions);
-  }, [product.salePrice, selectedOptions, orderFormSchema]);
-
-  const handleOptionChange = (fieldId: string, value: string) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [fieldId]: value,
-    }));
-  };
-
-  const handleMultipleOptionChange = (fieldId: string, value: string, checked: boolean) => {
-    setSelectedOptions((prev) => {
-      const currentValues = (prev[fieldId] as string[]) || [];
-      if (checked) {
-        return {
-          ...prev,
-          [fieldId]: [...currentValues, value],
-        };
-      } else {
-        return {
-          ...prev,
-          [fieldId]: currentValues.filter((v) => v !== value),
-        };
-      }
-    });
-  };
-
-  const handleTextboxChange = (fieldId: string, value: string) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [fieldId]: value,
-    }));
-  };
+    return product.salePrice;
+  }, [product.salePrice]);
 
   // 장바구니 추가 핸들러
   const handleAddToCart = async () => {
-    // deliveryMethod 필수 체크 (백엔드에서도 검증하지만, UI에서 미리 체크)
-    if (product.deliveryMethod && product.deliveryMethod.length > 0 && !selectedDeliveryMethod) {
-      showAlert({
-        type: "error",
-        title: "오류",
-        message: "수령 방식을 선택해주세요.",
-      });
-      return;
-    }
-
-    // orderFormData 구성 (빈 값 제외)
-    const orderFormData = buildOrderFormData(orderFormSchema, selectedOptions);
-
-    // 장바구니 추가
+    // 장바구니 추가 (deliveryMethod는 기본값 사용)
     await addCartItemMutation.mutateAsync({
       productId: product.id,
       quantity,
-      orderFormData: Object.keys(orderFormData).length > 0 ? orderFormData : undefined,
-      deliveryMethod: selectedDeliveryMethod as DeliveryMethod,
+      orderFormData: undefined,
+      deliveryMethod: DeliveryMethod.PICKUP, // 기본값으로 PICKUP 사용
     });
   };
 
@@ -150,217 +70,6 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
           ▼
         </span>
       </div>
-
-      {/* 옵션 선택 */}
-      {isExpanded && orderFormSchema?.fields && orderFormSchema.fields.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          {orderFormSchema.fields.map((field) => (
-            <div key={field.id} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <label
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#374151",
-                }}
-              >
-                {field.label}
-                {field.required && <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>}
-              </label>
-              {field.type === "selectbox" && field.options && (
-                <>
-                  {field.allowMultiple ? (
-                    // 다중 선택 (체크박스)
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {field.options.map((option) => {
-                        const currentValues = (selectedOptions[field.id] as string[]) || [];
-                        const isChecked = currentValues.includes(option.value);
-                        return (
-                          <label
-                            key={option.value}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              padding: "12px",
-                              borderRadius: "8px",
-                              border: `1px solid ${isChecked ? "#3b82f6" : "#e5e7eb"}`,
-                              backgroundColor: isChecked ? "#eff6ff" : "#ffffff",
-                              cursor: "pointer",
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={(e) =>
-                                handleMultipleOptionChange(field.id, option.value, e.target.checked)
-                              }
-                              style={{
-                                width: "18px",
-                                height: "18px",
-                                cursor: "pointer",
-                                accentColor: "#3b82f6",
-                              }}
-                            />
-                            <span
-                              style={{
-                                fontSize: "14px",
-                                color: "#374151",
-                                fontWeight: isChecked ? 600 : 400,
-                                flex: 1,
-                              }}
-                            >
-                              {option.label}
-                              {option.price !== undefined && option.price > 0 && (
-                                <span style={{ color: "#6b7280", marginLeft: "4px" }}>
-                                  (+{option.price.toLocaleString()}원)
-                                </span>
-                              )}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    // 단일 선택 (드롭다운)
-                    <select
-                      value={
-                        typeof selectedOptions[field.id] === "string" &&
-                        selectedOptions[field.id] !== undefined
-                          ? (selectedOptions[field.id] as string)
-                          : ""
-                      }
-                      onChange={(e) => handleOptionChange(field.id, e.target.value)}
-                      required={field.required}
-                      style={{
-                        padding: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        backgroundColor: "#ffffff",
-                        fontSize: "14px",
-                        color: "#374151",
-                        cursor: "pointer",
-                        outline: "none",
-                      }}
-                      onFocus={(e) => {
-                        e.currentTarget.style.borderColor = "#3b82f6";
-                      }}
-                      onBlur={(e) => {
-                        e.currentTarget.style.borderColor = "#e5e7eb";
-                      }}
-                    >
-                      {!field.required && <option value="">선택해주세요</option>}
-                      {field.options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                          {option.price !== undefined && option.price > 0
-                            ? ` (+${option.price.toLocaleString()}원)`
-                            : ""}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </>
-              )}
-              {field.type === "textbox" && (
-                <input
-                  type="text"
-                  value={
-                    typeof selectedOptions[field.id] === "string" &&
-                    selectedOptions[field.id] !== undefined
-                      ? (selectedOptions[field.id] as string)
-                      : ""
-                  }
-                  onChange={(e) => handleTextboxChange(field.id, e.target.value)}
-                  placeholder={field.placeholder || ""}
-                  required={field.required}
-                  style={{
-                    padding: "12px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                    backgroundColor: "#ffffff",
-                    fontSize: "14px",
-                    color: "#374151",
-                    outline: "none",
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "#3b82f6";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "#e5e7eb";
-                  }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 수령 방법 선택 */}
-      {isExpanded && product.deliveryMethod && product.deliveryMethod.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            marginTop: "16px",
-            paddingTop: "16px",
-            borderTop: "1px solid #e5e7eb",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#374151",
-              marginBottom: "8px",
-            }}
-          >
-            수령 방법
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {product.deliveryMethod.map((method) => (
-              <label
-                key={method}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: `1px solid ${selectedDeliveryMethod === method ? "#3b82f6" : "#e5e7eb"}`,
-                  backgroundColor: selectedDeliveryMethod === method ? "#eff6ff" : "#ffffff",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <input
-                  type="radio"
-                  name="deliveryMethod"
-                  value={method}
-                  checked={selectedDeliveryMethod === method}
-                  onChange={(e) => setSelectedDeliveryMethod(e.target.value)}
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    cursor: "pointer",
-                    accentColor: "#3b82f6",
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#374151",
-                    fontWeight: selectedDeliveryMethod === method ? 600 : 400,
-                  }}
-                >
-                  {getDeliveryMethodLabel(method)}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* 수량 선택 */}
       {isExpanded && (
@@ -434,7 +143,6 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = "#e5e7eb";
                 if (quantity < 1) setQuantity(1);
-                if (quantity > product.stock) setQuantity(product.stock);
               }}
             />
             <button
@@ -512,11 +220,7 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
               color: "#111827",
               border: "1px solid #e5e7eb",
             }}
-            disabled={
-              !isProductActive(product.status) ||
-              !isStockAvailable(product.stock, quantity) ||
-              addCartItemMutation.isPending
-            }
+            disabled={!isProductActive(product.salesStatus) || addCartItemMutation.isPending}
             onClick={handleAddToCart}
           >
             {addCartItemMutation.isPending ? "처리 중..." : "장바구니 담기"}
@@ -531,15 +235,9 @@ export function ProductDetailOrderFormSection({ product }: ProductDetailOrderFor
               backgroundColor: "#000000",
               color: "#ffffff",
             }}
-            disabled={
-              !isProductActive(product.status) || !isStockAvailable(product.stock, quantity)
-            }
+            disabled={!isProductActive(product.salesStatus)}
           >
-            {!isStockAvailable(product.stock, quantity)
-              ? "품절"
-              : !isProductActive(product.status)
-                ? "판매 중지"
-                : "주문하기"}
+            {!isProductActive(product.salesStatus) ? "판매 중지" : "주문하기"}
           </Button>
         </div>
       )}

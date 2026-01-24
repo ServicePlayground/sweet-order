@@ -20,9 +20,6 @@ export function SearchProductListSection({ search, filters = {} }: SearchProduct
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     search: search?.trim() || undefined,
     sortBy,
-    mainCategory: filters.mainCategory,
-    sizeRange: filters.sizeRange,
-    deliveryMethod: filters.deliveryMethod,
     minPrice: filters.minPrice,
     maxPrice: filters.maxPrice,
   });

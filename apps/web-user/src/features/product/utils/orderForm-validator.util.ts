@@ -1,7 +1,7 @@
 import {
   OrderFormSchema,
   OrderFormData,
-  ProductStatus,
+  SalesStatus,
   OrderFormDisplayItem,
 } from "@/apps/web-user/features/product/types/product.type";
 
@@ -11,11 +11,11 @@ import {
 
 /**
  * 상품이 활성 상태(판매중)인지 확인하는 함수
- * @param status - 상품 상태
+ * @param salesStatus - 상품 판매 상태
  * @returns 활성 상태 여부 (true: 활성, false: 비활성)
  */
-export const isProductActive = (status: string): boolean => {
-  return status === ProductStatus.ACTIVE;
+export const isProductActive = (salesStatus: SalesStatus): boolean => {
+  return salesStatus === SalesStatus.ENABLE;
 };
 
 /**
