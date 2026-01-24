@@ -35,6 +35,43 @@ export enum ProductStatus {
   OUT_OF_STOCK = "OUT_OF_STOCK", // 품절
 }
 
+export enum SalesStatus {
+  ENABLE = "ENABLE",
+  DISABLE = "DISABLE",
+}
+
+export enum VisibilityStatus {
+  ENABLE = "ENABLE",
+  DISABLE = "DISABLE",
+}
+
+export enum LetteringRequired {
+  REQUIRED = "REQUIRED",
+  OPTIONAL = "OPTIONAL",
+  DISABLED = "DISABLED",
+}
+
+export enum ImageUploadEnabled {
+  ENABLE = "ENABLE",
+  DISABLE = "DISABLE",
+}
+
+export enum VisibleStatus {
+  ENABLE = "ENABLE",
+  DISABLE = "DISABLE",
+}
+
+export interface CakeSizeOption {
+  visible: VisibleStatus;
+  description: string;
+  displayName: string;
+}
+
+export interface CakeFlavorOption {
+  visible: VisibleStatus;
+  displayName: string;
+}
+
 // 커스텀 주문양식 필드 타입
 export type OrderFormFieldType = "selectbox" | "textbox";
 
@@ -80,21 +117,17 @@ export interface Product {
   id: string;
   storeId: string;
   name: string;
-  description?: string;
-  originalPrice: number;
+  images: string[];
   salePrice: number;
-  stock: number;
-  notice?: string;
-  caution?: string;
-  basicIncluded?: string;
-  location?: string;
   likeCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  orderFormSchema?: OrderFormSchema;
+  salesStatus: SalesStatus;
+  visibilityStatus: VisibilityStatus;
+  cakeSizeOptions: CakeSizeOption[];
+  cakeFlavorOptions: CakeFlavorOption[];
+  letteringRequired: LetteringRequired;
+  letteringMaxLength: number;
+  imageUploadEnabled: ImageUploadEnabled;
   detailDescription?: string;
-  cancellationRefundDetailDescription?: string;
-  productNumber: string;
   productNoticeFoodType: string;
   productNoticeProducer: string;
   productNoticeOrigin: string;
@@ -109,14 +142,12 @@ export interface Product {
   productNoticeGmoNotice: string;
   productNoticeImportNotice: string;
   productNoticeCustomerService: string;
-  letteringRequired: string;
   mainCategory: string;
   sizeRange: string[];
   deliveryMethod: string[];
   hashtags: string[];
   mainImage: string;
   additionalImages: string[];
-  images: string[]; // 이미지 URL 목록 (첫 번째 요소가 대표 이미지)
   status: string;
 }
 
