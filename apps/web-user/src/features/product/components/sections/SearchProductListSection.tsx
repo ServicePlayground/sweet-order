@@ -62,6 +62,8 @@ export function SearchProductListSection({ search }: SearchProductListSectionPro
             { value: SortBy.PRICE_ASC, label: "가격 낮은순" },
             { value: SortBy.PRICE_DESC, label: "가격 높은순" },
             { value: SortBy.POPULAR, label: "인기순" },
+            { value: SortBy.REVIEW_COUNT, label: "후기 많은순" },
+            { value: SortBy.RATING_AVG, label: "별점 높은순" },
           ]}
           style={{ width: "auto", minWidth: "150px" }}
         />
