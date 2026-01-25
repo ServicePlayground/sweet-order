@@ -7,6 +7,7 @@ async function main() {
   await prisma.phoneVerification.deleteMany();
   await prisma.productReview.deleteMany();
   await prisma.productLike.deleteMany();
+  await prisma.storeLike.deleteMany();
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.user.deleteMany();
@@ -178,22 +179,67 @@ async function main() {
         businessType: "전자상거래 소매 중개업",
         // 통신판매사업자 정보 (2단계)
         permissionManagementNumber: "2021-서울강동-0422",
+        likeCount: 15,
         createdAt: new Date("2024-01-15T10:30:00Z"),
         updatedAt: new Date("2024-01-15T10:30:00Z"),
       },
     }),
+    prisma.store.create({
+      data: {
+        userId: users[0].id, // 같은 판매자의 두 번째 스토어
+        name: "디저트 파라다이스",
+        description: "다양한 디저트를 판매하는 스토어입니다.",
+        logoImageUrl:
+          "https://static-staging.sweetorders.com/uploads/1__1762274005545_4bfc55b7.jpeg",
+        // 사업자 정보 (1단계)
+        businessNo: "1198288947",
+        representativeName: "홍길동",
+        openingDate: "20230201",
+        businessName: "디저트 파라다이스",
+        businessSector: "도매 및 소매업",
+        businessType: "전자상거래 소매 중개업",
+        // 통신판매사업자 정보 (2단계)
+        permissionManagementNumber: "2021-서울강동-0423",
+        likeCount: 8,
+        createdAt: new Date("2024-01-16T10:30:00Z"),
+        updatedAt: new Date("2024-01-16T10:30:00Z"),
+      },
+    }),
   ]);
 
-  // 100개의 상품 생성
+  const storeLikes = await Promise.all([
+    prisma.storeLike.create({
+      data: {
+        userId: users[1].id, // 두 번째 사용자가 첫 번째 스토어에 좋아요
+        storeId: stores[0].id,
+      },
+    }),
+    prisma.storeLike.create({
+      data: {
+        userId: users[2].id, // 세 번째 사용자가 첫 번째 스토어에 좋아요
+        storeId: stores[0].id,
+      },
+    }),
+    prisma.storeLike.create({
+      data: {
+        userId: users[3].id, // 네 번째 사용자가 첫 번째 스토어에 좋아요
+        storeId: stores[0].id,
+      },
+    }),
+  ]);
+
+  // 100개의 상품 생성 (첫 번째 스토어에 70개, 두 번째 스토어에 30개)
   const products = await Promise.all(
     Array.from({ length: 100 }, (_, index) => {
       // 일부 상품은 BASIC_CAKE, 나머지는 CUSTOM_CAKE로 설정 (테스트 다양성을 위해)
       const imageUploadEnabled = index % 3 === 0 ? "DISABLE" : "ENABLE"; // 33%는 BASIC_CAKE, 67%는 CUSTOM_CAKE
       const productType = imageUploadEnabled === "ENABLE" ? "CUSTOM_CAKE" : "BASIC_CAKE";
+      // 첫 번째 스토어에 70개, 두 번째 스토어에 30개 배분
+      const storeIndex = index < 70 ? 0 : 1;
 
       return prisma.product.create({
         data: {
-          storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
+          storeId: stores[storeIndex].id, // 스토어 ID (첫 번째 또는 두 번째 스토어)
           name: "프리미엄 초콜릿 케이크",
           images: ["https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg"],
           salePrice: 45000,
@@ -261,8 +307,51 @@ async function main() {
   ]);
 
   // 상품 후기 생성 (각 상품당 3~5개의 후기)
+  // 첫 번째 스토어의 상품 10개와 두 번째 스토어의 상품 5개에 후기 추가
   const reviews = [];
-  for (let i = 0; i < Math.min(products.length, 10); i++) {
+  // 첫 번째 스토어의 상품 10개에 후기 추가
+  for (let i = 0; i < Math.min(70, 10); i++) {
+    // 각 상품당 3~5개의 후기 생성
+    const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
+    for (let j = 0; j < reviewCount; j++) {
+      const userIndex = Math.floor(Math.random() * users.length);
+      const rating = Math.round((Math.random() * 4.5 + 0.5) * 10) / 10; // 0.5 ~ 5.0 (0.5 단위)
+      const reviewContents = [
+        "정말 맛있었어요! 다음에도 주문할게요.",
+        "배송도 빠르고 상품도 좋아요. 추천합니다!",
+        "생각보다 작았지만 맛은 좋았어요.",
+        "가격 대비 만족도가 높아요.",
+        "케이크가 너무 예뻐서 생일 파티에 완벽했어요!",
+        "친구들이 다 맛있다고 했어요.",
+        "다음에 또 주문할 예정입니다.",
+        "포장도 깔끔하고 상품 상태도 좋았어요.",
+      ];
+      const content = reviewContents[Math.floor(Math.random() * reviewContents.length)];
+      const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
+      const imageUrls = Array.from(
+        { length: imageCount },
+        () => `https://static-staging.sweetorders.com/uploads/.jpeg_1768858024759_46405d13`,
+      );
+
+      reviews.push(
+        prisma.productReview.create({
+          data: {
+            productId: products[i].id,
+            userId: users[userIndex].id,
+            rating,
+            content,
+            imageUrls,
+            createdAt: new Date(
+              new Date("2024-01-01T00:00:00Z").getTime() +
+                Math.random() * (new Date().getTime() - new Date("2024-01-01T00:00:00Z").getTime()),
+            ),
+          },
+        }),
+      );
+    }
+  }
+  // 두 번째 스토어의 상품 5개에 후기 추가
+  for (let i = 70; i < Math.min(products.length, 75); i++) {
     // 각 상품당 3~5개의 후기 생성
     const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
     for (let j = 0; j < reviewCount; j++) {
@@ -310,6 +399,7 @@ async function main() {
   console.log(`✅ Created ${productLikes.length} product likes`);
   console.log(`✅ Created ${createdReviews.length} product reviews`);
   console.log(`✅ Created ${stores.length} stores`);
+  console.log(`✅ Created ${storeLikes.length} store likes`);
   console.log("🎉 Database seeding completed!");
 }
 

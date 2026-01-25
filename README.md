@@ -86,8 +86,6 @@ yarn web-seller:storybook       # 판매자 스토리북 실행
 2. GitHub Actions 워크플로우 자동 실행
 3. 프로젝트별 배포 플랫폼으로 자동 배포
 
-
-
 ## 👥 협업 규칙
 
 이 문서는 Sweet Order 프로젝트의 협업 규칙을 정의합니다. 모든 팀원은 이 규칙을 준수해야 합니다.

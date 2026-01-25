@@ -24,7 +24,9 @@ export class StoreListService {
     });
 
     return {
-      stores: stores.map((store) => StoreMapperUtil.mapToStoreResponse(store)),
+      stores: await Promise.all(
+        stores.map((store) => StoreMapperUtil.mapToStoreResponse(store, this.prisma)),
+      ),
     };
   }
 
@@ -42,6 +44,6 @@ export class StoreListService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return StoreMapperUtil.mapToStoreResponse(store);
+    return StoreMapperUtil.mapToStoreResponse(store, this.prisma);
   }
 }

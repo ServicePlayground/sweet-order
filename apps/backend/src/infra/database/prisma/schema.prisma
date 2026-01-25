@@ -37,6 +37,7 @@ model User {
 
   // Relations
   productLikes   ProductLike[]
+  storeLikes     StoreLike[]
   stores        Store[]
   reviews       ProductReview[]
 
@@ -183,6 +184,9 @@ model Store {
   // 주의: 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
   // 필요시 외부 API를 호출하여 최신 상태 조회
   
+  // 시스템 필드
+  likeCount         Int      @default(0) @map("like_count")
+  
   // 계정 생성/수정 정보
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
@@ -190,11 +194,30 @@ model Store {
   // Relations
   seller            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   products          Product[]
+  likes             StoreLike[]
   
   @@unique([userId, businessNo, permissionManagementNumber])
   @@index([userId])
   @@index([businessNo])
+  @@index([likeCount])
   @@map("stores")
+}
+
+// Store like model
+model StoreLike {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  storeId   String   @map("store_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storeId])
+  @@index([userId])
+  @@index([storeId])
+  @@map("store_likes")
 }
 
 // Product review model
