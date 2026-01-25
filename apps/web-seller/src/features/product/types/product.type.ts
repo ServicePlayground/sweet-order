@@ -8,6 +8,11 @@ export enum OptionRequired {
   OPTIONAL = "OPTIONAL", // 선택
 }
 
+export enum ProductType {
+  BASIC_CAKE = "BASIC_CAKE", // 기본 케이크
+  CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
+}
+
 // 케이크 사이즈 옵션
 export interface CakeSizeOption {
   visible: EnableStatus;
@@ -38,6 +43,7 @@ export interface IProductForm {
   letteringRequired: OptionRequired;
   letteringMaxLength: number;
   imageUploadEnabled: EnableStatus;
+  productType: ProductType;
 
   // 상세정보
   detailDescription?: string;
@@ -141,6 +147,7 @@ export interface IUpdateProductRequest {
   letteringRequired?: OptionRequired;
   letteringMaxLength?: number;
   imageUploadEnabled?: EnableStatus;
+  productType?: ProductType;
   detailDescription?: string;
   productNoticeFoodType?: string;
   productNoticeProducer?: string;

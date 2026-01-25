@@ -59,6 +59,11 @@ export enum EnableStatus {
   DISABLE = "DISABLE", // 미사용
 }
 
+export enum ProductType {
+  BASIC_CAKE = "BASIC_CAKE", // 기본 케이크
+  CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
+}
+
 /**
  * Swagger 예시 데이터
  * 실제 API 응답과 일치하는 예시 데이터를 제공합니다.
@@ -98,6 +103,7 @@ export const SWAGGER_EXAMPLES = {
     letteringRequired: OptionRequired.OPTIONAL,
     letteringMaxLength: 20,
     imageUploadEnabled: EnableStatus.ENABLE,
+    productType: "CUSTOM_CAKE",
     // 상세 정보
     detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
     // 고시정보 (식품 판매 시 법적 필수 항목)

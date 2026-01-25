@@ -17,6 +17,7 @@ import {
   SortBy,
   OptionRequired,
   EnableStatus,
+  ProductType,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
@@ -86,6 +87,15 @@ export class GetProductsRequestDto {
   @IsOptional()
   @IsString()
   storeId?: string;
+
+  @ApiPropertyOptional({
+    description: "(필터) 상품 타입 - BASIC_CAKE 또는 CUSTOM_CAKE",
+    enum: ProductType,
+    example: ProductType.CUSTOM_CAKE,
+  })
+  @IsOptional()
+  @IsEnum(ProductType)
+  productType?: ProductType;
 }
 
 /**
@@ -169,6 +179,15 @@ export class GetSellerProductsRequestDto {
   @IsNumber()
   @Min(0)
   maxPrice?: number;
+
+  @ApiPropertyOptional({
+    description: "(필터) 상품 타입 - BASIC_CAKE 또는 CUSTOM_CAKE",
+    enum: ProductType,
+    example: ProductType.CUSTOM_CAKE,
+  })
+  @IsOptional()
+  @IsEnum(ProductType)
+  productType?: ProductType;
 }
 
 /**

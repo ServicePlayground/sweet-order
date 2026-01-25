@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   OptionRequired,
   EnableStatus,
+  ProductType,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
 
@@ -136,6 +137,13 @@ export class ProductResponseDto {
     example: EnableStatus.ENABLE,
   })
   imageUploadEnabled: EnableStatus;
+
+  @ApiProperty({
+    description: "상품 타입",
+    enum: ProductType,
+    example: ProductType.CUSTOM_CAKE,
+  })
+  productType: ProductType;
 
   @ApiPropertyOptional({
     description: "상세 설명 (HTML)",

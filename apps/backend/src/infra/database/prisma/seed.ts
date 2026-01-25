@@ -186,8 +186,12 @@ async function main() {
 
   // 100개의 상품 생성
   const products = await Promise.all(
-    Array.from({ length: 100 }, (_, index) =>
-      prisma.product.create({
+    Array.from({ length: 100 }, (_, index) => {
+      // 일부 상품은 BASIC_CAKE, 나머지는 CUSTOM_CAKE로 설정 (테스트 다양성을 위해)
+      const imageUploadEnabled = index % 3 === 0 ? "DISABLE" : "ENABLE"; // 33%는 BASIC_CAKE, 67%는 CUSTOM_CAKE
+      const productType = imageUploadEnabled === "ENABLE" ? "CUSTOM_CAKE" : "BASIC_CAKE";
+
+      return prisma.product.create({
         data: {
           storeId: stores[0].id, // 첫 번째 스토어 ID (Store를 통해 User(Seller) 참조)
           name: "프리미엄 초콜릿 케이크",
@@ -222,7 +226,8 @@ async function main() {
           letteringVisible: "ENABLE",
           letteringRequired: "OPTIONAL",
           letteringMaxLength: 20,
-          imageUploadEnabled: "ENABLE",
+          imageUploadEnabled,
+          productType,
           detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
           productNumber: `20240101-${String(index + 1).padStart(3, "0")}`, // 20240101-001, 20240101-002, ... 20240101-100
           productNoticeFoodType: "케이크류",
@@ -242,8 +247,8 @@ async function main() {
           createdAt: new Date("2024-01-01T00:00:00Z"),
           updatedAt: new Date("2024-01-01T00:00:00Z"),
         },
-      }),
-    ),
+      });
+    }),
   );
 
   const productLikes = await Promise.all([
