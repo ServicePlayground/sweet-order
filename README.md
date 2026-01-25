@@ -52,6 +52,10 @@ yarn common:lint              # ESLint 검사
 yarn common:lint:fix          # ESLint 자동 수정
 yarn common:format            # Prettier 포맷팅
 yarn common:format:check       # Prettier 포맷팅 검사
+
+# 스토리북 실행
+yarn web-user:storybook         # 사용자 스토리북 실행
+yarn web-seller:storybook       # 판매자 스토리북 실행
 ```
 
 ## 🚀 배포 방법
@@ -81,10 +85,6 @@ yarn common:format:check       # Prettier 포맷팅 검사
 1. 태그 생성 및 푸시
 2. GitHub Actions 워크플로우 자동 실행
 3. 프로젝트별 배포 플랫폼으로 자동 배포
-
-자세한 배포 설정 및 가이드는 다음 문서를 참고하세요:
-
-- **[Vercel 배포 가이드](./docs/infra/vercel/Vercel%20배포%20-%20가이드.md)**: 웹 애플리케이션 배포
 
 ## 👥 협업 규칙
 
@@ -194,24 +194,19 @@ hotfix/xxx (긴급 수정 브랜치)
 
 #### 기능 관련
 
-- **[통합 인증 가이드](./docs/common/feature/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 사용법
-- **[통합 플랫폼 인증 가이드](<./docs/common/feature/통합%20플랫폼%20인증(쿠키%20기반)%20-%20가이드.md>)**: 통합 플랫폼 인증 시스템 사용법
+- **[사용자 - 웹뷰 인증 가이드](./docs/common/feature/사용자%20-%20웹뷰%20인증.md)**: Flutter WebView 환경에서의 사용자 인증 시스템 가이드
+- **[판매자 인증 가이드](./docs/common/feature/판매자%20인증.md)**: 웹 애플리케이션 환경에서의 판매자 인증 시스템 가이드
 - **[스토어 등록(3단계) 가이드](<./docs/common/feature/스토어%20등록(3단계)%20-%20가이드.md>)**: 스토어 등록(3단계) 가이드
-
-#### 플로우 차트 관련
-
-- **[통합 인증 플로우 차트](./docs/common/flow-chart/통합%20인증%20-%20가이드.md)**: 통합 인증 시스템 플로우 차트
 
 #### 취약점 관련
 
-- **[AWS 인프라 운영 단계 문제점 분석](./docs/common/vulnerability/AWS%20인프라%20운영%20단계%20문제점%20분석%20-%20가이드.md)**: AWS 인프라 운영 단계에서 발생할 수 있는 문제점 분석
-- **[백엔드 운영 단계 문제점 분석](./docs/common/vulnerability/백엔드%20운영%20단계%20문제점%20분석%20-%20가이드.md)**: 백엔드 운영 단계에서 발생할 수 있는 문제점 분석
+- **[AWS 인프라 운영 단계 문제점 분석](./docs/common/취약점/AWS%20인프라%20운영%20단계%20문제점%20분석%20-%20가이드.md)**: AWS 인프라 운영 단계에서 발생할 수 있는 문제점 분석
+- **[백엔드 운영 단계 문제점 분석](./docs/common/취약점/백엔드%20운영%20단계%20문제점%20분석%20-%20가이드.md)**: 백엔드 운영 단계에서 발생할 수 있는 문제점 분석
 
 ### 백엔드 문서
 
 - **[Backend README](./docs/backend/README.md)**: 백엔드 서비스 개요 및 사용법
-- **[Backend 기술 스택 가이드](./docs/backend/기술%20스택%20-%20가이드.md)**: 백엔드 기술 스택 및 아키텍처
-- **[Backend 환경변수 가이드](./docs/backend/환경변수%20-%20가이드.md)**: 환경변수 관리 및 보안 정책
+- **[Backend 기술 스택 가이드](./docs/backend/기술%20스택%20-%20가이드.md)**: 백엔드 기술 스택 및 아키텍처 (로컬 데이터베이스 설정 포함)
 
 ### 프론트엔드 문서
 
@@ -224,9 +219,14 @@ hotfix/xxx (긴급 수정 브랜치)
 
 ### 인프라 문서
 
+#### AWS 인프라
+
 - **[AWS RDS 가이드](<./docs/infra/aws/AWS%20RDS(데이터베이스)%20-%20가이드.md>)**: AWS RDS PostgreSQL 설정 및 관리
 - **[AWS App Runner 가이드](<./docs/infra/aws/AWS%20App%20Runner(backend)%20-%20가이드.md>)**: AWS App Runner 백엔드 배포 가이드
 - **[AWS Region 가이드](./docs/infra/aws/AWS%20Region%20-%20가이드.md)**: AWS 리전 선택 가이드
 - **[AWS Route53 가이드](<./docs/infra/aws/AWS%20Route53(도메인)%20-%20가이드.md>)**: AWS Route53 도메인 설정 가이드
 - **[AWS S3(정적), CloudFront(CDN) 가이드](<./docs/infra/aws/AWS%20S3(정적),%20CloudFront(CDN)%20-%20가이드.md>)**: AWS S3(정적), CloudFront(CDN) 설정 가이드
-- **[Vercel 배포 가이드](./docs/infra/vercel/Vercel%20배포%20-%20가이드.md)**: Vercel 배포 가이드
+
+#### 배포 플랫폼
+
+- **[Vercel 배포 가이드](./docs/infra/vercel/Vercel%20배포%20-%20가이드.md)**: Vercel 웹 애플리케이션 배포 가이드

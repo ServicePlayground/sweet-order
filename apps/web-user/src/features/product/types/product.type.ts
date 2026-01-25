@@ -31,6 +31,11 @@ export enum ImageUploadEnabled {
   DISABLE = "DISABLE",
 }
 
+export enum ProductType {
+  BASIC_CAKE = "BASIC_CAKE", // 기본 케이크
+  CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
+}
+
 export enum VisibleStatus {
   ENABLE = "ENABLE",
   DISABLE = "DISABLE",
@@ -65,6 +70,7 @@ export interface Product {
   letteringRequired: LetteringRequired;
   letteringMaxLength: number;
   imageUploadEnabled: ImageUploadEnabled;
+  productType: ProductType;
   detailDescription?: string;
   productNoticeFoodType: string;
   productNoticeProducer: string;

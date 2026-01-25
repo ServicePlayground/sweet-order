@@ -9,6 +9,7 @@ import {
 import {
   SortBy,
   EnableStatus,
+  ProductType,
   PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
@@ -26,7 +27,7 @@ export class ProductService {
    * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
    */
   async getProducts(query: GetProductsRequestDto) {
-    const { search, page, limit, sortBy, minPrice, maxPrice, storeId } = query;
+    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType } = query;
 
     // 필터 조건 구성
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
@@ -52,6 +53,11 @@ export class ProductService {
     // 스토어 ID 필터 처리
     if (storeId) {
       where.storeId = storeId;
+    }
+
+    // 상품 타입 필터 처리
+    if (productType) {
+      where.productType = productType;
     }
 
     // 검색어 조건을 최종 where에 추가
@@ -210,6 +216,7 @@ export class ProductService {
       storeId,
       salesStatus,
       visibilityStatus,
+      productType,
     } = query;
 
     // 자신이 소유한 스토어 목록 조회
@@ -277,6 +284,11 @@ export class ProductService {
       where.salePrice = {};
       if (minPrice !== undefined) where.salePrice.gte = minPrice;
       if (maxPrice !== undefined) where.salePrice.lte = maxPrice;
+    }
+
+    // 상품 타입 필터 처리
+    if (productType) {
+      where.productType = productType;
     }
 
     // 검색어 조건을 최종 where에 추가
@@ -473,6 +485,12 @@ export class ProductService {
       const sequence = String(todayProductCount + 1).padStart(3, "0");
       const productNumber = `${dateStr}-${sequence}`;
 
+      // productType 자동 계산: imageUploadEnabled가 ENABLE이면 CUSTOM_CAKE, 아니면 BASIC_CAKE
+      const productType =
+        createProductDto.imageUploadEnabled === EnableStatus.ENABLE
+          ? ProductType.CUSTOM_CAKE
+          : ProductType.BASIC_CAKE;
+
       // 상품 데이터 준비
       const productData: Prisma.ProductCreateInput = {
         store: {
@@ -496,6 +514,7 @@ export class ProductService {
         letteringRequired: createProductDto.letteringRequired,
         letteringMaxLength: createProductDto.letteringMaxLength,
         imageUploadEnabled: createProductDto.imageUploadEnabled,
+        productType,
         detailDescription: createProductDto.detailDescription,
         productNumber,
         productNoticeFoodType: createProductDto.productNoticeFoodType,
@@ -590,6 +609,11 @@ export class ProductService {
     }
     if (updateProductDto.imageUploadEnabled !== undefined) {
       updateData.imageUploadEnabled = updateProductDto.imageUploadEnabled;
+      // imageUploadEnabled가 변경되면 productType도 자동으로 업데이트
+      updateData.productType =
+        updateProductDto.imageUploadEnabled === EnableStatus.ENABLE
+          ? ProductType.CUSTOM_CAKE
+          : ProductType.BASIC_CAKE;
     }
     if (updateProductDto.detailDescription !== undefined) {
       updateData.detailDescription = updateProductDto.detailDescription;

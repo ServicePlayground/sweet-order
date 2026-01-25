@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
-import { navigateToLoginPage } from "@/apps/web-user/common/utils/webview.bridge";
+import { logoutFromWebView } from "@/apps/web-user/common/utils/webview.bridge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 
@@ -42,8 +42,8 @@ userClient.interceptors.response.use(
       // Zustand store에서 토큰 제거
       useAuthStore.getState().clearAccessToken();
 
-      // Flutter 앱의 로그인 페이지로 이동
-      navigateToLoginPage();
+      // Flutter 앱의 로그아웃 메시지를 전송합니다. Flutter 내에서 토큰을 제거합니다.
+      logoutFromWebView();
     }
 
     return Promise.reject(error);
