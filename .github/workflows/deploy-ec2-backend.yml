@@ -41,11 +41,45 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
         run: |
           mkdir -p ~/.ssh
+          
           # EC2 SSH 키 파일 생성
+          # 주의: GitHub Secrets에 복사할 때 앞뒤 공백이나 줄바꿈이 없어야 함
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
+          
+          # SSH 키 파일 검증
+          if [ ! -s ~/.ssh/ec2_key.pem ]; then
+            echo "❌ Error: EC2_SSH_KEY is empty"
+            exit 1
+          fi
+          
+          if ! grep -q "BEGIN.*PRIVATE KEY" ~/.ssh/ec2_key.pem; then
+            echo "❌ Error: EC2_SSH_KEY does not appear to be a valid private key"
+            echo "Expected format: -----BEGIN RSA PRIVATE KEY----- or -----BEGIN OPENSSH PRIVATE KEY-----"
+            exit 1
+          fi
+          
+          echo "✅ SSH key file created and validated"
+          
+          # EC2_HOST 검증
+          if [ -z "$EC2_HOST" ]; then
+            echo "❌ Error: EC2_HOST is not set"
+            exit 1
+          fi
+          
           # EC2 호스트를 known_hosts에 추가 (SSH 접속 시 호스트 확인 스킵)
-          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+          # ssh-keyscan이 실패해도 계속 진행 (StrictHostKeyChecking=no로 대체)
+          echo "🔑 Adding EC2 host to known_hosts..."
+          if ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts 2>&1; then
+            echo "✅ EC2 host added to known_hosts"
+          else
+            echo "⚠️ Warning: ssh-keyscan failed, using StrictHostKeyChecking=no"
+            echo "Host *" >> ~/.ssh/config
+            echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+            echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
+          fi
+          
+          echo "✅ SSH setup completed"
 
       # 3. 코드를 EC2로 전송 (rsync 사용)
       - name: Transfer code to EC2
