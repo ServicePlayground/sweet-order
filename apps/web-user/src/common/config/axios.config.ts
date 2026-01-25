@@ -44,7 +44,6 @@ userClient.interceptors.response.use(
 
       // Flutter 앱의 로그아웃 메시지를 전송합니다. Flutter 내에서 토큰을 제거합니다.
       logoutFromWebView();
-      
     }
 
     return Promise.reject(error);
