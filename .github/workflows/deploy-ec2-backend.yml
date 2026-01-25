@@ -90,7 +90,31 @@ jobs:
           # EC2에 프로젝트 디렉토리 생성
           ssh -i ~/.ssh/ec2_key.pem $EC2_USER@$EC2_HOST "mkdir -p ~/sweet-order"
           # 로컬 코드를 EC2로 동기화 (--delete: EC2에 있지만 로컬에 없는 파일 삭제)
-          rsync -avz --delete -e "ssh -i ~/.ssh/ec2_key.pem" ./ $EC2_USER@$EC2_HOST:~/sweet-order/
+          # 불필요한 파일 제외: node_modules, 빌드 결과물, 캐시, 로그, IDE 설정 등
+          rsync -avz --delete \
+            --exclude='node_modules/' \
+            --exclude='dist/' \
+            --exclude='build/' \
+            --exclude='.next/' \
+            --exclude='out/' \
+            --exclude='storybook-static/' \
+            --exclude='.git/' \
+            --exclude='.env.*' \
+            --exclude='!.env.example' \
+            --exclude='*.log' \
+            --exclude='*.tsbuildinfo' \
+            --exclude='.turbo/' \
+            --exclude='.yarn/' \
+            --exclude='.cache/' \
+            --exclude='coverage/' \
+            --exclude='.nyc_output/' \
+            --exclude='.vscode/' \
+            --exclude='.idea/' \
+            --exclude='.DS_Store' \
+            --exclude='*.swp' \
+            --exclude='*.swo' \
+            -e "ssh -i ~/.ssh/ec2_key.pem" \
+            ./ $EC2_USER@$EC2_HOST:~/sweet-order/
 
       # 4. EC2에서 Docker 이미지 빌드 및 컨테이너 배포
       - name: Build and deploy on EC2
