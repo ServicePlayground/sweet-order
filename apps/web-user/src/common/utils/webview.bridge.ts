@@ -14,6 +14,9 @@ declare global {
     Loginpage?: {
       postMessage: (message: string) => void;
     };
+    Logout?: {
+      postMessage: (message: string) => void;
+    };
     Auth: {
       login: (accessToken: string) => void;
       logout: () => void;
@@ -44,6 +47,28 @@ export function navigateToLoginPage(): void {
     window.Loginpage.postMessage("true");
   } catch (error) {
     console.error("로그인 페이지 이동 중 오류가 발생했습니다:", error);
+  }
+}
+
+/**
+ * 로그아웃을 수행하는 웹뷰 통신 함수
+ * Flutter 앱에 로그아웃 메시지를 전송합니다. Flutter 내에서 토큰을 제거합니다.
+ */
+export function logoutFromWebView(): void {
+  if (typeof window === "undefined") {
+    console.warn("웹뷰 브릿지는 브라우저 환경에서만 동작합니다.");
+    return;
+  }
+
+  if (!window.Logout) {
+    console.warn("logout 브릿지가 초기화되지 않았습니다. Flutter 웹뷰 환경인지 확인해주세요.");
+    return;
+  }
+
+  try {
+    window.Logout.postMessage("true");
+  } catch (error) {
+    console.error("로그아웃 중 오류가 발생했습니다:", error);
   }
 }
 
