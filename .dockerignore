@@ -1,3 +1,8 @@
+# backend 제외 모든 애플리케이션 제외
+apps/web-seller/
+apps/web-user/
+apps/web-admin/
+
 .pnp.cjs
 .pnp.loader.mjs
 .yarn/
