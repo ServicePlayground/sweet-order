@@ -24,6 +24,11 @@ on:
 jobs:
   deploy-ec2:
     runs-on: ubuntu-latest
+    
+    # 최소 권한 설정 (보안 모범 사례)
+    # 코드 체크아웃만 필요하므로 contents: read 권한만 부여
+    permissions:
+      contents: read
 
     steps:
       # 1. 코드 체크아웃
