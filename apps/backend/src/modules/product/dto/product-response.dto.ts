@@ -3,6 +3,7 @@ import {
   OptionRequired,
   EnableStatus,
   ProductType,
+  CakeSizeDisplayName,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
 
@@ -19,15 +20,28 @@ export class CakeSizeOptionResponseDto {
 
   @ApiProperty({
     description: "표시명",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].displayName,
+    enum: CakeSizeDisplayName,
+    example: CakeSizeDisplayName.MINI,
   })
-  displayName: string;
+  displayName: CakeSizeDisplayName;
+
+  @ApiProperty({
+    description: "케이크 지름/길이 (cm 단위)",
+    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].lengthCm,
+  })
+  lengthCm: number;
 
   @ApiProperty({
     description: "설명",
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].description,
   })
   description: string;
+
+  @ApiProperty({
+    description: "해당 사이즈의 가격",
+    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].price,
+  })
+  price: number;
 }
 
 /**
@@ -46,6 +60,12 @@ export class CakeFlavorOptionResponseDto {
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].displayName,
   })
   displayName: string;
+
+  @ApiProperty({
+    description: "해당 맛 옵션의 추가 가격",
+    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].price,
+  })
+  price: number;
 }
 
 /**

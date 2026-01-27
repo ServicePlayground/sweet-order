@@ -93,10 +93,11 @@ export const ProductCreationForm: React.FC<Props> = ({
       const value = e.target.value;
       let next: IProductForm;
 
-      // 판매가는 숫자로 변환
+      // 판매가는 숫자만 입력 가능하도록 처리
       if (key === "salePrice") {
-        const numValue = value === "" ? 0 : parseInt(value, 10);
-        next = { ...form, [key]: isNaN(numValue) ? 0 : numValue };
+        const onlyDigits = value.replace(/[^0-9]/g, "");
+        const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
+        next = { ...form, [key]: isNaN(num) ? 0 : num };
       } else {
         next = { ...form, [key]: value };
       }
@@ -163,8 +164,10 @@ export const ProductCreationForm: React.FC<Props> = ({
 
   const handleLetteringMaxLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    const numValue = value === "" ? 0 : parseInt(value, 10);
-    const next = { ...form, letteringMaxLength: isNaN(numValue) ? 0 : numValue };
+    // 숫자만 입력 가능하도록 처리
+    const onlyDigits = value.replace(/[^0-9]/g, "");
+    const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
+    const next = { ...form, letteringMaxLength: isNaN(num) ? 0 : num };
     setForm(next);
     onChange?.(next);
   };

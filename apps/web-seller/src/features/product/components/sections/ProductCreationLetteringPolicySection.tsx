@@ -67,12 +67,13 @@ export const ProductCreationLetteringPolicySection: React.FC<
               최대 글자 수
             </Label>
             <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder=""
-              type="number"
-              value={form.letteringMaxLength || 0}
+              value={form.letteringMaxLength === 0 ? "" : form.letteringMaxLength.toString()}
               onChange={onLetteringMaxLengthChange}
               className={errors.letteringMaxLength ? "border-destructive" : ""}
-              min={0}
             />
             {errors.letteringMaxLength && (
               <p className="text-sm text-destructive mt-1">{errors.letteringMaxLength}</p>

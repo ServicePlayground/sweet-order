@@ -72,12 +72,13 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       <div>
         <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">판매가</Label>
         <Input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           placeholder=""
-          type="number"
-          value={form.salePrice || 0}
+          value={form.salePrice === 0 ? "" : form.salePrice.toString()}
           onChange={onChange("salePrice")}
           className={errors.salePrice ? "border-destructive" : ""}
-          min={0}
         />
         {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
       </div>

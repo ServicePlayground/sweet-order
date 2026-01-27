@@ -13,10 +13,26 @@ export enum ProductType {
   CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
 }
 
+/**
+ * 케이크 사이즈 표시명 enum
+ */
+export enum CakeSizeDisplayName {
+  MINI = "미니",
+  SIZE_1 = "1호",
+  SIZE_2 = "2호",
+  SIZE_3 = "3호",
+  SIZE_4 = "4호",
+  SIZE_5 = "5호",
+  SIZE_6 = "6호",
+  SIZE_7 = "7호",
+}
+
 // 케이크 사이즈 옵션
 export interface CakeSizeOption {
   visible: EnableStatus;
-  displayName: string;
+  displayName: CakeSizeDisplayName;
+  lengthCm: number;
+  price: number;
   description: string;
 }
 
@@ -24,6 +40,7 @@ export interface CakeSizeOption {
 export interface CakeFlavorOption {
   visible: EnableStatus;
   displayName: string;
+  price: number;
 }
 
 export interface IProductForm {
@@ -43,7 +60,7 @@ export interface IProductForm {
   letteringRequired: OptionRequired;
   letteringMaxLength: number;
   imageUploadEnabled: EnableStatus;
-  productType: ProductType;
+  productType?: ProductType;
 
   // 상세정보
   detailDescription?: string;

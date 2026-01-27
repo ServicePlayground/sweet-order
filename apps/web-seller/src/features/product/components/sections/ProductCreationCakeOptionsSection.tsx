@@ -4,8 +4,9 @@ import {
   EnableStatus,
   CakeSizeOption,
   CakeFlavorOption,
+  CakeSizeDisplayName,
 } from "@/apps/web-seller/features/product/types/product.type";
-import { VISIBILITY_STATUS_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
+import { CAKE_SIZE_DISPLAY_NAME_OPTIONS, VISIBILITY_STATUS_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import {
   Select,
@@ -45,7 +46,9 @@ export const ProductCreationCakeOptionsSection: React.FC<
   const handleAddSizeOption = () => {
     const newOption: CakeSizeOption = {
       visible: EnableStatus.ENABLE,
-      displayName: "",
+      displayName: CakeSizeDisplayName.MINI,
+      lengthCm: 0,
+      price: 0,
       description: "",
     };
     const updated = [...sizeOptions, newOption];
@@ -64,7 +67,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
   const handleSizeOptionChange = (
     index: number,
     field: keyof CakeSizeOption,
-    value: string | EnableStatus,
+    value: string | EnableStatus | number | CakeSizeDisplayName,
   ) => {
     const updated = sizeOptions.map((option, i) =>
       i === index ? { ...option, [field]: value } : option,
@@ -78,6 +81,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
     const newOption: CakeFlavorOption = {
       visible: EnableStatus.ENABLE,
       displayName: "",
+      price: 0,
     };
     const updated = [...flavorOptions, newOption];
     setFlavorOptions(updated);
@@ -95,7 +99,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
   const handleFlavorOptionChange = (
     index: number,
     field: keyof CakeFlavorOption,
-    value: string | EnableStatus,
+    value: string | EnableStatus | number,
   ) => {
     const updated = flavorOptions.map((option, i) =>
       i === index ? { ...option, [field]: value } : option,
@@ -134,6 +138,12 @@ export const ProductCreationCakeOptionsSection: React.FC<
                       <th className="px-4 py-3 text-left text-sm font-medium">
                         표시명 <span className="text-destructive">*</span>
                       </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium">
+                        길이 (cm) <span className="text-destructive">*</span>
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium">
+                        가격 <span className="text-destructive">*</span>
+                      </th>
                       <th className="px-4 py-3 text-left text-sm font-medium">설명</th>
                       <th className="px-4 py-3 text-center text-sm font-medium w-20">삭제</th>
                     </tr>
@@ -161,12 +171,54 @@ export const ProductCreationCakeOptionsSection: React.FC<
                           </Select>
                         </td>
                         <td className="px-4 py-3">
-                          <Input
-                            placeholder="예: 미니(10cm)"
+                          <Select
                             value={option.displayName}
-                            onChange={(e) =>
-                              handleSizeOptionChange(index, "displayName", e.target.value)
+                            onValueChange={(value) =>
+                              handleSizeOptionChange(index, "displayName", value)
                             }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="사이즈를 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CAKE_SIZE_DISPLAY_NAME_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              placeholder="예: 10"
+                              value={option.lengthCm === 0 ? "" : option.lengthCm}
+                              onChange={(e) => {
+                                const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
+                                const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
+                                handleSizeOptionChange(index, "lengthCm", num);
+                              }}
+                              className="w-full"
+                            />
+                            <span className="text-sm text-muted-foreground">cm</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="예: 30000"
+                            value={option.price === 0 ? "" : option.price}
+                            onChange={(e) => {
+                              const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
+                              const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
+                              handleSizeOptionChange(index, "price", num);
+                            }}
                             className="w-full"
                           />
                         </td>
@@ -222,6 +274,9 @@ export const ProductCreationCakeOptionsSection: React.FC<
                       <th className="px-4 py-3 text-left text-sm font-medium">
                         표시명 <span className="text-destructive">*</span>
                       </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium">
+                        가격 <span className="text-destructive">*</span>
+                      </th>
                       <th className="px-4 py-3 text-center text-sm font-medium w-20">삭제</th>
                     </tr>
                   </thead>
@@ -254,6 +309,21 @@ export const ProductCreationCakeOptionsSection: React.FC<
                             onChange={(e) =>
                               handleFlavorOptionChange(index, "displayName", e.target.value)
                             }
+                            className="w-full"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="예: 0"
+                            value={option.price === 0 ? "" : option.price}
+                            onChange={(e) => {
+                              const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
+                              const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
+                              handleFlavorOptionChange(index, "price", num);
+                            }}
                             className="w-full"
                           />
                         </td>
