@@ -65,7 +65,6 @@ export function SearchProductListSection({ search }: SearchProductListSectionPro
             { value: SortBy.REVIEW_COUNT, label: "후기 많은순" },
             { value: SortBy.RATING_AVG, label: "별점 높은순" },
           ]}
-          style={{ width: "auto", minWidth: "150px" }}
         />
       </div>
 
