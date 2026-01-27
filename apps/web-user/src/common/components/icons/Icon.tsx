@@ -7,6 +7,14 @@ import Arrow from "./icons/arrow.svg";
 import Favorite from "./icons/favorite.svg";
 import FavoriteFilled from "./icons/favorite-filled.svg";
 import Close from "./icons/close.svg";
+import Calendar from "./icons/calendar.svg";
+import SelectArrow from "./icons/select-arrow.svg";
+import AddPhoto from "./icons/add-photo.svg";
+import RemovePhoto from "./icons/remove-photo.svg";
+import Takeout from "./icons/takeout.svg";
+import Trash from "./icons/trash.svg";
+import Minus from "./icons/minus.svg";
+import Plus from "./icons/plus.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -23,6 +31,14 @@ export const iconTypes = {
   favorite: Favorite,
   favoriteFilled: FavoriteFilled,
   close: Close,
+  calendar: Calendar,
+  selectArrow: SelectArrow,
+  addPhoto: AddPhoto,
+  removePhoto: RemovePhoto,
+  takeout: Takeout,
+  trash: Trash,
+  minus: Minus,
+  plus: Plus,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

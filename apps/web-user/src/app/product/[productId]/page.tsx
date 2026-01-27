@@ -13,8 +13,11 @@ import { ProductDetailReviewSection } from "@/apps/web-user/features/product/com
 import { Tabs } from "@/apps/web-user/common/components/tabs/Tabs";
 import { ProductDetailSizeFlavorSection } from "@/apps/web-user/features/product/components/sections/ProductDetailSizeFlavorSection";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { BottomSheet } from "@/apps/web-user/common/components/bottom-sheets/BottomSheet";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
+import {
+  ReservationBottomSheet,
+  ReservationSelection,
+} from "@/apps/web-user/features/product/components/sections/reservation-bottom-sheet";
 
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
@@ -40,6 +43,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     } else {
       addLike(productId);
     }
+  };
+
+  const handleReservationConfirm = (selection: ReservationSelection) => {
+    // TODO: 예약 처리 로직
+    console.log(selection);
+    setIsBottomSheetOpen(false);
   };
 
   if (isLoading) {
@@ -115,39 +124,25 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             />
             <span className="text-xs text-gray-900 font-bold">{data.likeCount}</span>
           </button>
-          <Button onClick={() => setIsBottomSheetOpen(true)} flex>
-            예약하기
-          </Button>
+          <span className="flex-1">
+            <Button onClick={() => setIsBottomSheetOpen(true)}>
+              예약하기
+            </Button>
+          </span>
         </div>
       </div>
 
       {/* 예약 바텀시트 */}
-      <BottomSheet
+      <ReservationBottomSheet
         isOpen={isBottomSheetOpen}
+        price={data.salePrice}
+        cakeTitle={data.name}
+        cakeImageUrl={data.images[0] ?? ""}
+        cakeSizeOptions={data.cakeSizeOptions}
+        cakeFlavorOptions={data.cakeFlavorOptions}
         onClose={() => setIsBottomSheetOpen(false)}
-        title="상품 옵션 선택"
-        footer={
-          <div className="px-[20px]">
-            <div className="flex items-center justify-between pt-[14px]">
-              <span className="text-sm text-gray-700">총 금액</span>
-              <span className="text-xl font-bold text-gray-900">
-                {data.salePrice.toLocaleString()}원
-              </span>
-            </div>
-            <div className="py-[12px] flex gap-[8px]">
-              <Button variant="outline" width={100}>
-                취소
-              </Button>
-              <Button flex>선택완료</Button>
-            </div>
-          </div>
-        }
-      >
-        <div className="px-[20px] py-[16px]">
-          {/* 바텀시트 컨텐츠 영역 */}
-          <p className="text-gray-500">예약 옵션을 선택해주세요.</p>
-        </div>
-      </BottomSheet>
+        onConfirm={handleReservationConfirm}
+      />
     </div>
   );
 }

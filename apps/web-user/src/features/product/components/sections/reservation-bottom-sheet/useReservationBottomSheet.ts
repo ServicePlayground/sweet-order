@@ -1,0 +1,349 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { OrderItem, ReservationSelection, ViewType } from "./types";
+
+interface UseReservationBottomSheetProps {
+  isOpen: boolean;
+  price: number;
+  onClose: () => void;
+  onConfirm: (selection: ReservationSelection) => void;
+}
+
+/**
+ * 예약 바텀시트 로직을 관리하는 커스텀 훅
+ *
+ * 플로우: options(옵션선택) -> calendar(날짜선택) -> confirm(주문확인)
+ * - options: 픽업날짜, 사이즈, 맛, 레터링, 요청사항, 참고사진 선택
+ * - calendar: 날짜와 시간 선택 (TimePicker 포함)
+ * - confirm: 선택한 상품 목록 확인, 수량 조절, 상품 추가/삭제
+ */
+export function useReservationBottomSheet({
+  isOpen,
+  price,
+  onClose,
+  onConfirm,
+}: UseReservationBottomSheetProps) {
+  // ========================================
+  // 뷰 상태 관리
+  // ========================================
+  const [view, setView] = useState<ViewType>("options");
+
+  // ========================================
+  // 날짜/시간 선택 상태
+  // - selectedDate: 최종 선택된 날짜+시간
+  // - tempSelectedDate/Time: 캘린더에서 임시 선택 중인 값
+  // ========================================
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null);
+  const [tempSelectedTime, setTempSelectedTime] = useState<Date | null>(null);
+
+  // ========================================
+  // 주문 상품 목록 관리
+  // - orderItems: 확정된 주문 상품 배열
+  // - editingIndex: 수정 중인 상품의 인덱스 (null이면 새 상품 추가 모드)
+  // - isAddingFromConfirm: confirm 화면에서 추가/수정으로 진입했는지
+  // ========================================
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [isAddingFromConfirm, setIsAddingFromConfirm] = useState(false);
+
+  // ========================================
+  // 현재 편집 중인 상품 옵션
+  // (options 뷰에서 사용자가 선택하는 값들)
+  // ========================================
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedFlavor, setSelectedFlavor] = useState("");
+  const [selectedCream, setSelectedCream] = useState("");
+  const [letteringMessage, setLetteringMessage] = useState("");
+  const [requestMessage, setRequestMessage] = useState("");
+  const [attachedImages, setAttachedImages] = useState<File[]>([]);
+
+  // ========================================
+  // 모달 상태 관리
+  // - isCancelModalOpen: 작성 취소 확인 모달
+  // - isDeleteModalOpen: 상품 삭제 확인 모달
+  // ========================================
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
+
+  // 파일 업로드 input ref
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const imageUrls = useMemo(
+    () => attachedImages.map((file) => URL.createObjectURL(file)),
+    [attachedImages]
+  );
+
+  // 바텀시트가 닫힐 때 모든 상태 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      setView("options");
+      setSelectedDate(null);
+      setTempSelectedDate(null);
+      setTempSelectedTime(null);
+      setOrderItems([]);
+      setEditingIndex(null);
+      setSelectedSize("");
+      setSelectedFlavor("");
+      setSelectedCream("");
+      setLetteringMessage("");
+      setRequestMessage("");
+      setAttachedImages([]);
+      setIsAddingFromConfirm(false);
+    }
+  }, [isOpen]);
+
+  // 이미지 URL 정리
+  useEffect(() => {
+    return () => {
+      imageUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [imageUrls]);
+
+  // 현재 편집 중인 옵션 상태 초기화
+  const resetCurrentOptions = () => {
+    setSelectedDate(null);
+    setSelectedSize("");
+    setSelectedFlavor("");
+    setSelectedCream("");
+    setLetteringMessage("");
+    setRequestMessage("");
+    setAttachedImages([]);
+    setEditingIndex(null);
+  };
+
+  // 캘린더 뷰로 전환하고 임시 날짜/시간 세팅
+  const handleOpenCalendar = () => {
+    setTempSelectedDate(selectedDate);
+    if (selectedDate) {
+      const time = new Date();
+      time.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
+      setTempSelectedTime(time);
+    } else {
+      setTempSelectedTime(null);
+    }
+    setView("calendar");
+  };
+
+  // 캘린더에서 선택한 날짜/시간 확정
+  const handleCalendarConfirm = () => {
+    if (tempSelectedDate && tempSelectedTime) {
+      const combined = new Date(tempSelectedDate);
+      combined.setHours(tempSelectedTime.getHours(), tempSelectedTime.getMinutes(), 0, 0);
+      setSelectedDate(combined);
+    } else {
+      setSelectedDate(tempSelectedDate);
+    }
+    setView("options");
+  };
+
+  // 작성 취소 확인 모달 오픈
+  const handleCancelClick = () => {
+    setIsCancelModalOpen(true);
+  };
+
+  // 작성 취소 확정 처리
+  const handleConfirmCancel = () => {
+    setIsCancelModalOpen(false);
+    if (isAddingFromConfirm) {
+      setView("confirm");
+      setIsAddingFromConfirm(false);
+      return;
+    }
+    setView("options");
+    onClose();
+  };
+
+  // 바텀시트 닫기
+  const handleClose = () => {
+    setView("options");
+    onClose();
+  };
+
+  // 현재 옵션을 주문 목록에 추가하고 확인 뷰로 이동
+  const handleGoToConfirm = () => {
+    const newItem: OrderItem = {
+      date: selectedDate,
+      size: selectedSize,
+      flavor: selectedFlavor,
+      cream: selectedCream,
+      letteringMessage,
+      requestMessage,
+      quantity: 1,
+    };
+
+    if (editingIndex !== null) {
+      setOrderItems((prev) =>
+        prev.map((item, i) =>
+          i === editingIndex ? { ...newItem, quantity: item.quantity } : item
+        )
+      );
+    } else {
+      setOrderItems((prev) => [...prev, newItem]);
+    }
+
+    resetCurrentOptions();
+    setIsAddingFromConfirm(false);
+    setView("confirm");
+  };
+
+  // 최종 확정 처리 (부모로 데이터 전달)
+  const handleFinalConfirm = () => {
+    onConfirm({ items: orderItems });
+    setView("options");
+    setOrderItems([]);
+  };
+
+  // 주문 수량 증감 처리
+  const handleQuantityChange = (index: number, delta: number) => {
+    setOrderItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+      )
+    );
+  };
+
+  // 삭제 확인 모달 오픈
+  const handleDeleteClick = (index: number) => {
+    setDeleteTargetIndex(index);
+    setIsDeleteModalOpen(true);
+  };
+
+  // 삭제 확정 처리
+  const handleConfirmDelete = () => {
+    if (deleteTargetIndex !== null) {
+      setOrderItems((prev) => prev.filter((_, i) => i !== deleteTargetIndex));
+    }
+    setIsDeleteModalOpen(false);
+    setDeleteTargetIndex(null);
+  };
+
+  // 특정 상품 편집 모드로 전환
+  const handleEditItem = (index: number) => {
+    const item = orderItems[index];
+    setSelectedDate(item.date);
+    setSelectedSize(item.size);
+    setSelectedFlavor(item.flavor);
+    setSelectedCream(item.cream);
+    setLetteringMessage(item.letteringMessage);
+    setRequestMessage(item.requestMessage);
+    setEditingIndex(index);
+    setIsAddingFromConfirm(true);
+    setView("options");
+  };
+
+  // 새 상품 추가 모드로 전환
+  const handleAddNewItem = () => {
+    resetCurrentOptions();
+    setIsAddingFromConfirm(true);
+    setView("options");
+  };
+
+  // 파일 업로드 input 클릭 트리거
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // 파일 선택 시 이미지 목록 업데이트
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    setAttachedImages((prev) => {
+      const remaining = 5 - prev.length;
+      if (remaining <= 0) return prev;
+      return [...prev, ...files.slice(0, remaining)];
+    });
+    event.target.value = "";
+  };
+
+  // 첨부 이미지 삭제
+  const handleRemoveImage = (index: number) => {
+    setAttachedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 날짜/시간 표시용 포맷팅
+  const formatDateTime = (date: Date | null) => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+    const dayOfWeek = dayNames[date.getDay()];
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const period = hours >= 12 ? "오후" : "오전";
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+    return `${year}.${month}.${day}(${dayOfWeek}) · ${period} ${displayHours}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = orderItems.reduce((sum, item) => sum + price * item.quantity, 0);
+
+  const isOptionsValid = selectedDate && selectedSize && selectedFlavor && letteringMessage;
+  const isCalendarValid = tempSelectedDate && tempSelectedTime;
+
+  return {
+    // View
+    view,
+    setView,
+
+    // Date & Time
+    selectedDate,
+    tempSelectedDate,
+    setTempSelectedDate,
+    tempSelectedTime,
+    setTempSelectedTime,
+
+    // Options
+    selectedSize,
+    setSelectedSize,
+    selectedFlavor,
+    setSelectedFlavor,
+    letteringMessage,
+    setLetteringMessage,
+    requestMessage,
+    setRequestMessage,
+
+    // Images
+    attachedImages,
+    imageUrls,
+    fileInputRef,
+
+    // Order Items
+    orderItems,
+
+    // Modals
+    isCancelModalOpen,
+    setIsCancelModalOpen,
+    isDeleteModalOpen,
+    setIsDeleteModalOpen,
+
+    // Computed
+    totalQuantity,
+    totalPrice,
+    isOptionsValid,
+    isCalendarValid,
+    isAddingFromConfirm,
+    formatDateTime,
+
+    // Handlers
+    handleOpenCalendar,
+    handleCalendarConfirm,
+    handleCancelClick,
+    handleConfirmCancel,
+    handleClose,
+    handleGoToConfirm,
+    handleFinalConfirm,
+    handleQuantityChange,
+    handleDeleteClick,
+    handleConfirmDelete,
+    handleEditItem,
+    handleAddNewItem,
+    handleUploadClick,
+    handleFileChange,
+    handleRemoveImage,
+  };
+}

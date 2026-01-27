@@ -3,6 +3,13 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: ["class"],
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  safelist: [
+    "rounded-t-lg",
+    "rounded-b-lg",
+    "rounded-lg",
+    "border-b-0",
+    "border-t-0",
+  ],
   theme: {
     fontSize: {
       xs: ["12px", "16px"],
@@ -14,6 +21,17 @@ const config: Config = {
       "3xl": ["30px", "36px"],
     },
     extend: {
+      borderRadius: {
+        none: "0px",
+        sm: "2px",
+        DEFAULT: "4px",
+        md: "6px",
+        lg: "8px",
+        xl: "12px",
+        "2xl": "16px",
+        "3xl": "24px",
+        full: "9999px",
+      },
       colors: {
         white: {
           DEFAULT: "#FFFFFF",
@@ -31,6 +49,10 @@ const config: Config = {
         },
         primary: {
           DEFAULT: "#FF653E",
+        },
+        blue: {
+          DEFAULT: "#E7F2FF",
+          dark: "#1773DF",
         },
       },
       keyframes: {

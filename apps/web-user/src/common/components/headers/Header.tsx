@@ -33,7 +33,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
           className="flex items-center justify-center rounded-lg border-none bg-transparent text-gray-900 cursor-pointer transition-all hover:bg-gray-100"
           aria-label="뒤로가기"
         >
-          <Icon name="chevronLeft" width={24} height={24} />
+          <Icon name="chevronLeft" width={24} height={24} className="text-gray-900" />
         </button>
 
         {/* 장바구니 버튼 */}
