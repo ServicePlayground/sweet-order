@@ -1,19 +1,46 @@
-import React from "react";
+"use client";
 
+import React, { useState, useRef, useEffect } from "react";
+import { Icon } from "@/apps/web-user/common/components/icons";
+
+/**
+ * Select 옵션 타입
+ */
 export interface SelectOption<T = string> {
   value: T;
   label: string;
 }
 
-interface SelectProps<T = string> extends Omit<
-  React.SelectHTMLAttributes<HTMLSelectElement>,
-  "onChange" | "value"
-> {
+/**
+ * 커스텀 Select 컴포넌트 (div/ul/li 기반)
+ *
+ * @example
+ * <Select
+ *   value={selectedSize}
+ *   onChange={setSelectedSize}
+ *   label="사이즈 선택"
+ *   options={[
+ *     { value: "", label: "사이즈를 선택해주세요" },
+ *     { value: "1호", label: "1호 (2~3인)" },
+ *     { value: "2호", label: "2호 (4~5인)" },
+ *   ]}
+ * />
+ */
+interface SelectProps<T = string> {
+  /** 선택된 값 */
   value: T;
+  /** 값 변경 핸들러 */
   onChange: (value: T) => void;
+  /** 옵션 목록 */
   options: SelectOption<T>[];
+  /** 라벨 텍스트 */
   label?: string;
+  /** 에러 메시지 */
   error?: string;
+  /** 비활성화 여부 */
+  disabled?: boolean;
+  /** 추가 클래스명 */
+  className?: string;
 }
 
 export const Select = <T extends string | number = string>({
@@ -22,72 +49,98 @@ export const Select = <T extends string | number = string>({
   options,
   label,
   error,
-  style,
-  ...props
+  disabled = false,
+  className = "",
 }: SelectProps<T>) => {
-  // style에서 width를 추출하여 최상위 div와 select에 적용
-  const containerWidth = style?.width || (label ? "100%" : "auto");
-  const selectWidth = style?.width || "100%";
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 선택된 옵션의 라벨 찾기
+  const selectedOption = options.find((opt) => opt.value === value);
+  const displayLabel = selectedOption?.label || "";
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleToggle = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+    }
+  };
+
+  const handleSelect = (option: SelectOption<T>) => {
+    onChange(option.value);
+    setIsOpen(false);
+  };
 
   return (
-    <div style={{ width: containerWidth }}>
+    <div className="w-full" ref={containerRef}>
       {label && (
-        <label
-          style={{
-            display: "block",
-            marginBottom: "8px",
-            fontSize: "14px",
-            fontWeight: "600",
-            color: "#374151",
-          }}
-        >
+        <label className="block mb-[10px] text-sm font-bold text-gray-900">
           {label}
         </label>
       )}
-      <select
-        {...props}
-        value={value}
-        onChange={(e) => {
-          const selectedValue = e.target.value as T;
-          onChange(selectedValue);
-        }}
-        style={{
-          width: selectWidth,
-          padding: "8px 12px",
-          fontSize: "14px",
-          border: `1px solid ${error ? "#e74c3c" : "#e5e7eb"}`,
-          borderRadius: "8px",
-          backgroundColor: "#ffffff",
-          color: "#374151",
-          cursor: "pointer",
-          outline: "none",
-          transition: "border-color 0.2s ease",
-          ...style,
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = error ? "#e74c3c" : "#007bff";
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = error ? "#e74c3c" : "#e5e7eb";
-        }}
-      >
-        {options.map((option) => (
-          <option key={String(option.value)} value={String(option.value)}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {error && (
-        <p
-          style={{
-            marginTop: "6px",
-            fontSize: "12px",
-            color: "#e74c3c",
-            marginBottom: 0,
-          }}
+      <div className="relative">
+        {/* 트리거 버튼 */}
+        <button
+          type="button"
+          onClick={handleToggle}
+          disabled={disabled}
+          aria-label={label || "Select"}
+          className={`
+            w-full h-[42px] pl-[12px] pr-[42px] text-left text-sm
+            border border-gray-100 transition-colors outline-none
+            ${isOpen ? "rounded-t-lg border-b-0" : "rounded-lg"}
+            ${isOpen && !value ? "bg-gray-50 text-gray-500" : value ? "bg-white text-gray-900" : "bg-white text-gray-500"}
+            ${className}
+          `.trim().replace(/\s+/g, " ")}
         >
-          {error}
-        </p>
+          {displayLabel}
+        </button>
+        <Icon
+          name="selectArrow"
+          width={20}
+          height={20}
+          className={`
+            absolute right-[12px] top-[11px] text-gray-400 pointer-events-none
+            transition-transform duration-200
+            ${isOpen ? "rotate-0" : "rotate-180"}
+          `.trim().replace(/\s+/g, " ")}
+        />
+
+        {/* 드롭다운 메뉴 */}
+        {isOpen && (
+          <ul className="w-full bg-white border border-gray-100 border-t-0 rounded-b-lg max-h-[200px] overflow-y-auto">
+            {options
+              .filter((option) => option.value !== "")
+              .map((option) => (
+                <li
+                  key={String(option.value)}
+                  onClick={() => handleSelect(option)}
+                  className="flex items-center px-[12px] h-[42px] text-sm cursor-pointer transition-colors text-gray-900"
+                >
+                  {option.label}
+                </li>
+              ))}
+          </ul>
+        )}
+      </div>
+      {error && (
+        <p className="mt-[6px] text-xs text-red-500">{error}</p>
       )}
     </div>
   );
