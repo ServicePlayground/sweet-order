@@ -193,8 +193,8 @@ export function ReservationBottomSheet({
       <Modal
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
-        title="작성을 취소하시겠습니까?"
-        description="작성 중인 내용이 저장되지 않습니다."
+        title="예약 진행 취소"
+        description="예약 진행을 취소하시겠습니까?"
         confirmText="계속 진행하기"
         cancelText="취소"
         onCancel={handleConfirmCancel}

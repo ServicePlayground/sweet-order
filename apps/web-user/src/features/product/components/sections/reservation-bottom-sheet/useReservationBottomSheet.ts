@@ -154,10 +154,9 @@ export function useReservationBottomSheet({
     onClose();
   };
 
-  // 바텀시트 닫기
+  // 바텀시트 닫기 (X버튼, 배경 클릭, ESC) → 취소 모달 표시
   const handleClose = () => {
-    setView("options");
-    onClose();
+    setIsCancelModalOpen(true);
   };
 
   // 현재 옵션을 주문 목록에 추가하고 확인 뷰로 이동
