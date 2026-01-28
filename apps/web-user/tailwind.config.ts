@@ -12,13 +12,14 @@ const config: Config = {
   ],
   theme: {
     fontSize: {
+      "2xs": ["11px", "14px"],
       xs: ["12px", "16px"],
+      "2sm": ["13px", "18px"],
       sm: ["14px", "20px"],
       base: ["16px", "24px"],
       lg: ["18px", "28px"],
       xl: ["20px", "28px"],
       "2xl": ["24px", "32px"],
-      "3xl": ["30px", "36px"],
     },
     extend: {
       borderRadius: {
@@ -44,16 +45,38 @@ const config: Config = {
           100: "#ECEDED",
           200: "#D9DADB",
           300: "#BDBFC0",
+          400: "#9B9B97",
           500: "#808386",
+          600: "#686864",
+          700: "#4E4E4B",
+          800: "#343432",
           900: "#21272C",
         },
         primary: {
           DEFAULT: "#FF653E",
+          50: "#FFEFEB",
+          100: "#FFD2C7",
+          200: "#FFAD99",
+          300: "#FF896B",
         },
         blue: {
           DEFAULT: "#E7F2FF",
           dark: "#1773DF",
         },
+        green: {
+          DEFAULT: "#5FBF87",
+          50: "#F0F9F4",
+          100: "#CCEBD9",
+          200: "#ABDEC0",
+          300: "#8AD0A8",
+        },
+        red: {
+          DEFAULT: "#F23A3E",
+          50: "#FEECEC",
+          100: "#FCCACB",
+          200: "#F99FA1",
+          300: "#F67476",
+        }
       },
       keyframes: {
         "accordion-down": {
