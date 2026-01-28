@@ -29,6 +29,7 @@ export enum CakeSizeDisplayName {
 
 // 케이크 사이즈 옵션
 export interface CakeSizeOption {
+  id?: string;
   visible: EnableStatus;
   displayName: CakeSizeDisplayName;
   lengthCm: number;
@@ -38,6 +39,7 @@ export interface CakeSizeOption {
 
 // 케이크 맛 옵션
 export interface CakeFlavorOption {
+  id?: string;
   visible: EnableStatus;
   displayName: string;
   price: number;

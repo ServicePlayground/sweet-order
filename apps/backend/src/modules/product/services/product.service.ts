@@ -24,6 +24,15 @@ export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * 케이크 옵션용 랜덤 ID 생성
+   * - 생성 시 한 번만 부여되고 이후에는 변경되지 않도록 사용
+   */
+  private generateOptionId(prefix: "size" | "flavor"): string {
+    const random = Math.random().toString(36).substring(2, 10);
+    return `${prefix}_${random}`;
+  }
+
+  /**
    * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
    */
   async getProducts(query: GetProductsRequestDto) {
@@ -491,6 +500,21 @@ export class ProductService {
           ? ProductType.CUSTOM_CAKE
           : ProductType.BASIC_CAKE;
 
+      // 케이크 옵션에 랜덤 ID 부여 (등록 시에만 생성, 이후에는 변경되지 않음)
+      const cakeSizeOptionsWithId = createProductDto.cakeSizeOptions
+        ? createProductDto.cakeSizeOptions.map((option) => ({
+            ...option,
+            id: option.id ?? this.generateOptionId("size"),
+          }))
+        : [];
+
+      const cakeFlavorOptionsWithId = createProductDto.cakeFlavorOptions
+        ? createProductDto.cakeFlavorOptions.map((option) => ({
+            ...option,
+            id: option.id ?? this.generateOptionId("flavor"),
+          }))
+        : [];
+
       // 상품 데이터 준비
       const productData: Prisma.ProductCreateInput = {
         store: {
@@ -504,12 +528,8 @@ export class ProductService {
         salesStatus: createProductDto.salesStatus,
         visibilityStatus: createProductDto.visibilityStatus,
         // 케이크 옵션을 각각 JSON 배열로 저장
-        cakeSizeOptions: createProductDto.cakeSizeOptions
-          ? (createProductDto.cakeSizeOptions as unknown as Prisma.InputJsonValue)
-          : [],
-        cakeFlavorOptions: createProductDto.cakeFlavorOptions
-          ? (createProductDto.cakeFlavorOptions as unknown as Prisma.InputJsonValue)
-          : [],
+        cakeSizeOptions: cakeSizeOptionsWithId as unknown as Prisma.InputJsonValue,
+        cakeFlavorOptions: cakeFlavorOptionsWithId as unknown as Prisma.InputJsonValue,
         letteringVisible: createProductDto.letteringVisible,
         letteringRequired: createProductDto.letteringRequired,
         letteringMaxLength: createProductDto.letteringMaxLength,
@@ -591,12 +611,62 @@ export class ProductService {
       updateData.visibilityStatus = updateProductDto.visibilityStatus;
     }
     if (updateProductDto.cakeSizeOptions !== undefined) {
-      updateData.cakeSizeOptions =
-        updateProductDto.cakeSizeOptions as unknown as Prisma.InputJsonValue;
+      // 기존 옵션을 조회하여 ID를 유지하고, 새로 추가된 옵션에는 새로운 ID를 부여
+      const existingSizeOptions: any[] = (product.cakeSizeOptions as any[]) ?? [];
+      const existingSizeOptionsById = new Map<string, any>();
+
+      for (const option of existingSizeOptions) {
+        if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
+          existingSizeOptionsById.set(option.id, option);
+        }
+      }
+
+      const nextSizeOptions = (updateProductDto.cakeSizeOptions ?? []).map((option) => {
+        const existing =
+          option.id && existingSizeOptionsById.has(option.id)
+            ? existingSizeOptionsById.get(option.id)
+            : undefined;
+
+        const id = existing?.id ?? option.id ?? this.generateOptionId("size");
+
+        // ID는 한 번 정해지면 그대로 유지하고, 나머지 필드는 요청 값으로 덮어씀
+        return {
+          ...existing,
+          ...option,
+          id,
+        };
+      });
+
+      // 요청 목록에 없는 기존 옵션은 제거되므로, ID도 함께 제거되는 효과
+      updateData.cakeSizeOptions = nextSizeOptions as unknown as Prisma.InputJsonValue;
     }
+
     if (updateProductDto.cakeFlavorOptions !== undefined) {
-      updateData.cakeFlavorOptions =
-        updateProductDto.cakeFlavorOptions as unknown as Prisma.InputJsonValue;
+      const existingFlavorOptions: any[] = (product.cakeFlavorOptions as any[]) ?? [];
+      const existingFlavorOptionsById = new Map<string, any>();
+
+      for (const option of existingFlavorOptions) {
+        if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
+          existingFlavorOptionsById.set(option.id, option);
+        }
+      }
+
+      const nextFlavorOptions = (updateProductDto.cakeFlavorOptions ?? []).map((option) => {
+        const existing =
+          option.id && existingFlavorOptionsById.has(option.id)
+            ? existingFlavorOptionsById.get(option.id)
+            : undefined;
+
+        const id = existing?.id ?? option.id ?? this.generateOptionId("flavor");
+
+        return {
+          ...existing,
+          ...option,
+          id,
+        };
+      });
+
+      updateData.cakeFlavorOptions = nextFlavorOptions as unknown as Prisma.InputJsonValue;
     }
     if (updateProductDto.letteringVisible !== undefined) {
       updateData.letteringVisible = updateProductDto.letteringVisible;

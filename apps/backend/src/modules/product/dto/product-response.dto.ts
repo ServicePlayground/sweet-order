@@ -12,6 +12,12 @@ import {
  */
 export class CakeSizeOptionResponseDto {
   @ApiProperty({
+    description: "옵션 고유 ID",
+    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].id,
+  })
+  id: string;
+
+  @ApiProperty({
     description: "노출 여부",
     enum: EnableStatus,
     example: EnableStatus.ENABLE,
@@ -48,6 +54,12 @@ export class CakeSizeOptionResponseDto {
  * 케이크 맛 옵션 응답 DTO
  */
 export class CakeFlavorOptionResponseDto {
+  @ApiProperty({
+    description: "옵션 고유 ID",
+    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].id,
+  })
+  id: string;
+
   @ApiProperty({
     description: "노출 여부",
     enum: EnableStatus,
