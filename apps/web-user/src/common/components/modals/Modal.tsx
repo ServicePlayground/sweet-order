@@ -102,7 +102,7 @@ export const Modal: React.FC<ModalProps> = ({
             </Button>
           </span>
           <span className="flex-1">
-            <Button onClick={handleCancel}>
+            <Button onClick={handleCancel} variant="red">
               {cancelText}
             </Button>
           </span>

@@ -30,7 +30,7 @@ userClient.interceptors.request.use(
 
 // TODO: 개발용 임시 토큰 (나중에 삭제)
 const DEV_ACCESS_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWtxd295OXIwMDAxN2lqdWl4cDdjMGxwIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2OTE3NDM0MiwiZXhwIjoxNzc2OTUwMzQyfQ.qGLquvsksZ5YmIX4KocXLTl227jxKR9xxGhIFOMjabY";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWt3anAyZWwwMDAzN2lhdjY1ZXcxeTlzIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2OTUxNTMwMCwiZXhwIjoxNzc3MjkxMzAwfQ.4tB8pQJmThFXDucWNlS4ZFVOHRtIhPh5TsKviQtgC8Y";
 
 // 요청 인터셉터 - Authorization 헤더 추가 (나중에 삭제)
 userClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
