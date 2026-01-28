@@ -65,6 +65,20 @@ export enum ProductType {
 }
 
 /**
+ * 케이크 사이즈 표시명 enum
+ */
+export enum CakeSizeDisplayName {
+  MINI = "미니",
+  SIZE_1 = "1호",
+  SIZE_2 = "2호",
+  SIZE_3 = "3호",
+  SIZE_4 = "4호",
+  SIZE_5 = "5호",
+  SIZE_6 = "6호",
+  SIZE_7 = "7호",
+}
+
+/**
  * Swagger 예시 데이터
  * 실제 API 응답과 일치하는 예시 데이터를 제공합니다.
  */
@@ -79,24 +93,34 @@ export const SWAGGER_EXAMPLES = {
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
     cakeSizeOptions: [
       {
+        id: "size_abcd1234",
         visible: EnableStatus.ENABLE,
-        displayName: "미니(10cm)",
+        displayName: CakeSizeDisplayName.MINI,
+        lengthCm: 10,
+        price: 30000,
         description: "1~2인용",
       },
       {
+        id: "size_efgh5678",
         visible: EnableStatus.ENABLE,
-        displayName: "1호 (15cm)",
+        displayName: CakeSizeDisplayName.SIZE_1,
+        lengthCm: 15,
+        price: 35000,
         description: "2~3인용",
       },
     ],
     cakeFlavorOptions: [
       {
+        id: "flavor_ijkl9012",
         visible: EnableStatus.ENABLE,
         displayName: "초콜릿",
+        price: 10000,
       },
       {
+        id: "flavor_mnop3456",
         visible: EnableStatus.ENABLE,
         displayName: "바닐라",
+        price: 20000,
       },
     ],
     letteringVisible: EnableStatus.ENABLE,

@@ -249,24 +249,34 @@ async function main() {
           // 케이크 옵션을 각각 JSON 배열로 저장
           cakeSizeOptions: [
             {
+              id: "size_seed_mini",
               visible: "ENABLE",
-              displayName: "미니(10cm)",
+              displayName: "미니",
+              lengthCm: 10,
+              price: 30000,
               description: "1~2인용",
             },
             {
+              id: "size_seed_1ho",
               visible: "ENABLE",
-              displayName: "1호 (15cm)",
+              displayName: "1호",
+              lengthCm: 15,
+              price: 35000,
               description: "2~3인용",
             },
           ],
           cakeFlavorOptions: [
             {
+              id: "flavor_seed_choco",
               visible: "ENABLE",
               displayName: "초콜릿",
+              price: 2000,
             },
             {
+              id: "flavor_seed_vanilla",
               visible: "ENABLE",
               displayName: "바닐라",
+              price: 3000,
             },
           ],
           letteringVisible: "ENABLE",

@@ -18,6 +18,7 @@ import {
   OptionRequired,
   EnableStatus,
   ProductType,
+  CakeSizeDisplayName,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
@@ -194,6 +195,14 @@ export class GetSellerProductsRequestDto {
  * 케이크 사이즈 옵션 DTO
  */
 export class CakeSizeOptionDto {
+  @ApiPropertyOptional({
+    description: "옵션 고유 ID (수정 시 그대로 전달)",
+    example: "size_abcd1234",
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
   @ApiProperty({
     description: "노출 여부",
     enum: EnableStatus,
@@ -205,25 +214,52 @@ export class CakeSizeOptionDto {
 
   @ApiProperty({
     description: "표시명",
-    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].displayName,
+    enum: CakeSizeDisplayName,
+    example: CakeSizeDisplayName.MINI,
   })
   @IsNotEmpty()
-  @IsString()
-  displayName: string;
+  @IsEnum(CakeSizeDisplayName)
+  displayName: CakeSizeDisplayName;
+
+  @ApiProperty({
+    description: "케이크 지름/길이 (cm 단위, 숫자만)",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].lengthCm,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  lengthCm: number;
+
+  @ApiProperty({
+    description: "해당 사이즈의 가격",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].price,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  price: number;
 
   @ApiProperty({
     description: "설명",
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].description,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 }
 
 /**
  * 케이크 맛 옵션 DTO
  */
 export class CakeFlavorOptionDto {
+  @ApiPropertyOptional({
+    description: "옵션 고유 ID (수정 시 그대로 전달)",
+    example: "flavor_efgh5678",
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
   @ApiProperty({
     description: "노출 여부",
     enum: EnableStatus,
@@ -240,6 +276,15 @@ export class CakeFlavorOptionDto {
   @IsNotEmpty()
   @IsString()
   displayName: string;
+
+  @ApiProperty({
+    description: "해당 맛 옵션의 추가 가격",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].price,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  price: number;
 }
 
 /**

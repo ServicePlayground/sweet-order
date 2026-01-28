@@ -1,6 +1,7 @@
 import {
   EnableStatus,
   OptionRequired,
+  CakeSizeDisplayName,
 } from "@/apps/web-seller/features/product/types/product.type";
 
 export const PRODUCT_ERROR_MESSAGES = {
@@ -24,6 +25,12 @@ export const PRODUCT_ERROR_MESSAGES = {
   PRODUCT_NOTICE_GMO_NOTICE_REQUIRED: "유전자변형식품에 해당하는 경우의 표시를 입력해주세요.",
   PRODUCT_NOTICE_IMPORT_NOTICE_REQUIRED: "수입식품의 경우를 입력해주세요.",
   PRODUCT_NOTICE_CUSTOMER_SERVICE_REQUIRED: "고객센터를 입력해주세요.",
+  CAKE_SIZE_LENGTH_CM_REQUIRED: "케이크 사이즈의 길이(cm)를 입력해주세요.",
+  CAKE_SIZE_LENGTH_CM_INVALID: "케이크 사이즈의 길이(cm)는 0보다 큰 숫자여야 합니다.",
+  CAKE_SIZE_PRICE_REQUIRED: "케이크 사이즈의 가격을 입력해주세요.",
+  CAKE_SIZE_PRICE_INVALID: "케이크 사이즈의 가격은 0 이상의 숫자여야 합니다.",
+  CAKE_FLAVOR_PRICE_REQUIRED: "케이크 맛의 가격을 입력해주세요.",
+  CAKE_FLAVOR_PRICE_INVALID: "케이크 맛의 가격은 0 이상의 숫자여야 합니다.",
 } as const;
 
 export const PRODUCT_SUCCESS_MESSAGES = {
@@ -50,4 +57,16 @@ export const OPTION_REQUIRED_OPTIONS = [
 export const ENABLE_DISABLE_OPTIONS = [
   { value: EnableStatus.ENABLE, label: "사용" },
   { value: EnableStatus.DISABLE, label: "미사용" },
+] as const;
+
+// 케이크 사이즈 표시명 드롭다운 옵션
+export const CAKE_SIZE_DISPLAY_NAME_OPTIONS = [
+  { value: CakeSizeDisplayName.MINI, label: "미니" },
+  { value: CakeSizeDisplayName.SIZE_1, label: "1호" },
+  { value: CakeSizeDisplayName.SIZE_2, label: "2호" },
+  { value: CakeSizeDisplayName.SIZE_3, label: "3호" },
+  { value: CakeSizeDisplayName.SIZE_4, label: "4호" },
+  { value: CakeSizeDisplayName.SIZE_5, label: "5호" },
+  { value: CakeSizeDisplayName.SIZE_6, label: "6호" },
+  { value: CakeSizeDisplayName.SIZE_7, label: "7호" },
 ] as const;
