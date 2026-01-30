@@ -45,6 +45,8 @@ export function useReservationBottomSheet({
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isAddingFromConfirm, setIsAddingFromConfirm] = useState(false);
+  const [isEditingFromConfirm, setIsEditingFromConfirm] = useState(false);
+  const [dateSelectionSignal, setDateSelectionSignal] = useState(0);
 
   // ========================================
   // 현재 편집 중인 상품 옵션
@@ -90,6 +92,8 @@ export function useReservationBottomSheet({
       setRequestMessage("");
       setAttachedImages([]);
       setIsAddingFromConfirm(false);
+      setIsEditingFromConfirm(false);
+      setDateSelectionSignal(0);
     }
   }, [isOpen]);
 
@@ -127,13 +131,24 @@ export function useReservationBottomSheet({
 
   // 캘린더에서 선택한 날짜/시간 확정
   const handleCalendarConfirm = () => {
+    let nextSelectedDate: Date | null = tempSelectedDate;
+
     if (tempSelectedDate && tempSelectedTime) {
       const combined = new Date(tempSelectedDate);
       combined.setHours(tempSelectedTime.getHours(), tempSelectedTime.getMinutes(), 0, 0);
-      setSelectedDate(combined);
-    } else {
-      setSelectedDate(tempSelectedDate);
+      nextSelectedDate = combined;
     }
+    const prevTime = selectedDate?.getTime();
+    const nextTime = nextSelectedDate?.getTime();
+    const hasChanged = prevTime !== nextTime;
+
+    if (hasChanged) {
+      setSelectedDate(nextSelectedDate);
+      setDateSelectionSignal((prev) => prev + 1);
+    } else {
+      setSelectedDate(nextSelectedDate);
+    }
+
     setView("options");
   };
 
@@ -145,9 +160,10 @@ export function useReservationBottomSheet({
   // 작성 취소 확정 처리
   const handleConfirmCancel = () => {
     setIsCancelModalOpen(false);
-    if (isAddingFromConfirm) {
+    if (isAddingFromConfirm || isEditingFromConfirm) {
       setView("confirm");
       setIsAddingFromConfirm(false);
+      setIsEditingFromConfirm(false);
       return;
     }
     setView("options");
@@ -183,6 +199,7 @@ export function useReservationBottomSheet({
 
     resetCurrentOptions();
     setIsAddingFromConfirm(false);
+    setIsEditingFromConfirm(false);
     setView("confirm");
   };
 
@@ -227,7 +244,8 @@ export function useReservationBottomSheet({
     setLetteringMessage(item.letteringMessage);
     setRequestMessage(item.requestMessage);
     setEditingIndex(index);
-    setIsAddingFromConfirm(true);
+    setIsAddingFromConfirm(false);
+    setIsEditingFromConfirm(true);
     setView("options");
   };
 
@@ -235,7 +253,9 @@ export function useReservationBottomSheet({
   const handleAddNewItem = () => {
     resetCurrentOptions();
     setIsAddingFromConfirm(true);
+    setIsEditingFromConfirm(false);
     setView("options");
+    setDateSelectionSignal(0);
   };
 
   // 파일 업로드 input 클릭 트리거
@@ -313,6 +333,7 @@ export function useReservationBottomSheet({
 
     // Order Items
     orderItems,
+    editingIndex,
 
     // Modals
     isCancelModalOpen,
@@ -326,6 +347,7 @@ export function useReservationBottomSheet({
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
+    dateSelectionSignal,
     formatDateTime,
 
     // Handlers

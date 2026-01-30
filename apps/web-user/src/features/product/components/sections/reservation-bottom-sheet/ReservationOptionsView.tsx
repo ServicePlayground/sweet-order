@@ -1,6 +1,6 @@
 "use client";
 
-import { RefObject } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { DatePickerInput } from "@/apps/web-user/common/components/datepickers/DatePicker";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
@@ -28,6 +28,7 @@ interface ReservationOptionsViewProps {
   handleUploadClick: () => void;
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
+  dateSelectionSignal: number;
 }
 
 export function ReservationOptionsView({
@@ -48,7 +49,46 @@ export function ReservationOptionsView({
   handleUploadClick,
   handleFileChange,
   handleRemoveImage,
+  dateSelectionSignal,
 }: ReservationOptionsViewProps) {
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const flavorRef = useRef<HTMLDivElement>(null);
+  const letteringRef = useRef<HTMLDivElement>(null);
+  const [sizeOpenSignal, setSizeOpenSignal] = useState(0);
+  const [flavorOpenSignal, setFlavorOpenSignal] = useState(0);
+  const prevSelectedDateRef = useRef<Date | null>(selectedDate);
+  const prevSelectedSizeRef = useRef(selectedSize);
+  const prevSelectedFlavorRef = useRef(selectedFlavor);
+
+  const scrollToRef = (ref: RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  useEffect(() => {
+    if (dateSelectionSignal > 0 && !selectedSize) {
+      scrollToRef(sizeRef);
+      setSizeOpenSignal((prev) => prev + 1);
+    }
+    prevSelectedDateRef.current = selectedDate;
+  }, [dateSelectionSignal, selectedDate, selectedSize]);
+
+  useEffect(() => {
+    if (selectedSize && !prevSelectedSizeRef.current && !selectedFlavor) {
+      scrollToRef(flavorRef);
+      setFlavorOpenSignal((prev) => prev + 1);
+    }
+    prevSelectedSizeRef.current = selectedSize;
+  }, [selectedSize, selectedFlavor]);
+
+  useEffect(() => {
+    if (selectedFlavor && !prevSelectedFlavorRef.current && !letteringMessage) {
+      scrollToRef(letteringRef);
+      const textarea = letteringRef.current?.querySelector("textarea");
+      textarea?.focus();
+    }
+    prevSelectedFlavorRef.current = selectedFlavor;
+  }, [selectedFlavor, letteringMessage]);
+
   return (
     <div className="px-[20px] py-[24px] flex flex-col gap-[24px]">
       <DatePickerInput
@@ -57,38 +97,46 @@ export function ReservationOptionsView({
         placeholder="픽업할 날짜와 시간을 선택해주세요"
         onOpen={handleOpenCalendar}
       />
-      <Select
-        label="사이즈 선택"
-        value={selectedSize}
-        onChange={setSelectedSize}
-        options={[
-          { value: "", label: "사이즈를 선택해주세요" },
-          ...(cakeSizeOptions?.map((size) => ({
-            value: size.displayName,
-            label: `${size.displayName} ${size.description}`,
-          })) ?? []),
-        ]}
-      />
-      <Select
-        label="맛 선택"
-        value={selectedFlavor}
-        onChange={setSelectedFlavor}
-        options={[
-          { value: "", label: "시트를 선택해주세요" },
-          ...(cakeFlavorOptions?.map((flavor) => ({
-            value: flavor.displayName,
-            label: flavor.displayName,
-          })) ?? []),
-        ]}
-      />
-      <TextArea
-        label="레터링 문구"
-        value={letteringMessage}
-        onChange={setLetteringMessage}
-        placeholder="가능한 10자 이내로 적어주세요."
-        maxLength={200}
-        showCount
-      />
+      <div ref={sizeRef}>
+        <Select
+          label="사이즈 선택"
+          value={selectedSize}
+          onChange={setSelectedSize}
+          openSignal={sizeOpenSignal}
+          options={[
+            { value: "", label: "사이즈를 선택해주세요" },
+            ...(cakeSizeOptions?.map((size) => ({
+              value: size.displayName,
+              label: `${size.displayName} ${size.description}`,
+            })) ?? []),
+          ]}
+        />
+      </div>
+      <div ref={flavorRef}>
+        <Select
+          label="맛 선택"
+          value={selectedFlavor}
+          onChange={setSelectedFlavor}
+          openSignal={flavorOpenSignal}
+          options={[
+            { value: "", label: "시트를 선택해주세요" },
+            ...(cakeFlavorOptions?.map((flavor) => ({
+              value: flavor.displayName,
+              label: flavor.displayName,
+            })) ?? []),
+          ]}
+        />
+      </div>
+      <div ref={letteringRef}>
+        <TextArea
+          label="레터링 문구"
+          value={letteringMessage}
+          onChange={setLetteringMessage}
+          placeholder="가능한 10자 이내로 적어주세요."
+          maxLength={200}
+          showCount
+        />
+      </div>
       <div className="flex flex-col gap-[6px]">
         <div className="block mb-[10px] text-sm font-bold text-gray-900">
           참고사진 <span className="font-normal text-gray-300">(선택)</span>

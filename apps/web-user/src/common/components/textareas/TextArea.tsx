@@ -28,8 +28,6 @@ interface TextAreaProps
   onChange: (value: string) => void;
   /** 라벨 텍스트 또는 ReactNode */
   label?: React.ReactNode;
-  /** 에러 메시지 */
-  error?: string;
   /** 글자 수 표시 여부 */
   showCount?: boolean;
 }
@@ -38,8 +36,6 @@ export const TextArea: React.FC<TextAreaProps> = ({
   value,
   onChange,
   label,
-  error,
-  showCount = false,
   maxLength,
   placeholder,
   disabled,

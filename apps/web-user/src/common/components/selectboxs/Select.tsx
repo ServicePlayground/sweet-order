@@ -41,6 +41,8 @@ interface SelectProps<T = string> {
   disabled?: boolean;
   /** 추가 클래스명 */
   className?: string;
+  /** 외부에서 드롭다운을 열기 위한 신호 */
+  openSignal?: number;
 }
 
 export const Select = <T extends string | number = string>({
@@ -51,9 +53,12 @@ export const Select = <T extends string | number = string>({
   error,
   disabled = false,
   className = "",
+  openSignal,
 }: SelectProps<T>) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const lastOpenSignalRef = useRef(openSignal);
 
   // 선택된 옵션의 라벨 찾기
   const selectedOption = options.find((opt) => opt.value === value);
@@ -75,6 +80,16 @@ export const Select = <T extends string | number = string>({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (openSignal === undefined) return;
+    if (lastOpenSignalRef.current === openSignal) return;
+    lastOpenSignalRef.current = openSignal;
+    if (!disabled) {
+      setIsOpen(true);
+      triggerRef.current?.focus();
+    }
+  }, [openSignal, disabled]);
 
   const handleToggle = () => {
     if (!disabled) {
@@ -101,6 +116,7 @@ export const Select = <T extends string | number = string>({
           onClick={handleToggle}
           disabled={disabled}
           aria-label={label || "Select"}
+          ref={triggerRef}
           className={`
             w-full h-[42px] pl-[12px] pr-[42px] text-left text-sm
             border border-gray-100 transition-colors outline-none
