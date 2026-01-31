@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import helmet from "helmet";
 import morgan from "morgan";
 import * as express from "express";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 import { AppModule } from "@apps/backend/app.module";
 import { API_PREFIX } from "@apps/backend/common/constants/app.constants";
 import { SellerApiModule } from "@apps/backend/apis/seller/seller-api.module";
@@ -35,6 +36,10 @@ async function bootstrap(): Promise<void> {
   // NestJS 애플리케이션 메인 인스턴스 생성 (AppModule을 사용하여 모든 모듈을 포함하고 있음)
   const app = await NestFactory.create(AppModule);
 
+  // Socket.IO 어댑터 설정 (WebSocket 연결을 위해 필수)
+  // 전역 prefix가 Socket.IO 경로에 영향을 주지 않도록 설정
+  app.useWebSocketAdapter(new IoAdapter(app));
+
   // 로깅 인스턴스 생성
   const logger = new Logger("서버시작");
 
@@ -60,8 +65,24 @@ async function bootstrap(): Promise<void> {
     maxAge: 86400,
   });
 
-  // 보안 헤더 설정
-  app.use(helmet());
+  // 보안 헤더 설정 (WebSocket 연결을 위해 Content-Security-Policy 조정)
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          connectSrc: [
+            "'self'",
+            ...configService
+              .get("CORS_ORIGIN")
+              .split(",")
+              .map((origin: string) => origin.trim()),
+          ], // WebSocket 연결 허용
+        },
+      },
+      crossOriginEmbedderPolicy: false, // WebSocket 연결을 위해 비활성화
+    }),
+  );
 
   // HTTP 요청 로깅 - 상용 환경에서는 비활성화
   if (nodeEnv !== "production") {
@@ -133,6 +154,9 @@ async function bootstrap(): Promise<void> {
 
   logger.log(`server is running on port ${port}`);
   logger.log(`Environment: ${nodeEnv}`);
+  logger.log(`CORS origins: ${configService.get("CORS_ORIGIN")}`);
+  logger.log(`WebSocket Gateway namespace: /chat`);
+  logger.log(`API prefix: ${API_PREFIX}`);
 }
 
 bootstrap();

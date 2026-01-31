@@ -163,10 +163,14 @@ export const ThreeButtons: Story = {
   render: () => (
     <div style={{ display: "flex", gap: "8px", width: "400px" }}>
       <span style={{ flex: 1 }}>
-        <Button variant="outline" size="sm">1</Button>
+        <Button variant="outline" size="sm">
+          1
+        </Button>
       </span>
       <span style={{ flex: 1 }}>
-        <Button variant="secondary" size="sm">2</Button>
+        <Button variant="secondary" size="sm">
+          2
+        </Button>
       </span>
       <span style={{ flex: 1 }}>
         <Button size="sm">3</Button>
@@ -188,13 +192,19 @@ export const AllVariantsDisabled: Story = {
   render: () => (
     <div style={{ display: "flex", gap: "8px", width: "400px" }}>
       <span style={{ flex: 1 }}>
-        <Button variant="primary" disabled>Primary</Button>
+        <Button variant="primary" disabled>
+          Primary
+        </Button>
       </span>
       <span style={{ flex: 1 }}>
-        <Button variant="secondary" disabled>Secondary</Button>
+        <Button variant="secondary" disabled>
+          Secondary
+        </Button>
       </span>
       <span style={{ flex: 1 }}>
-        <Button variant="outline" disabled>Outline</Button>
+        <Button variant="outline" disabled>
+          Outline
+        </Button>
       </span>
     </div>
   ),

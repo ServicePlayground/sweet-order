@@ -78,9 +78,7 @@ export function ReservationBottomSheet({
         <div className="px-[20px]">
           <div className="flex items-center justify-between pt-[14px]">
             <span className="text-sm text-gray-700">총 금액</span>
-            <span className="text-xl font-bold text-gray-900">
-              {price.toLocaleString()}원
-            </span>
+            <span className="text-xl font-bold text-gray-900">{price.toLocaleString()}원</span>
           </div>
           <div className="py-[12px] flex gap-[8px]">
             <span className="w-[100px]">
@@ -119,9 +117,7 @@ export function ReservationBottomSheet({
       <div className="px-[20px]">
         <div className="flex items-center justify-between pt-[14px]">
           <span className="text-sm text-gray-700">총 금액 ({totalQuantity}개)</span>
-          <span className="text-xl font-bold text-gray-900">
-            {totalPrice.toLocaleString()}원
-          </span>
+          <span className="text-xl font-bold text-gray-900">{totalPrice.toLocaleString()}원</span>
         </div>
         <div className="py-[12px]">
           <Button onClick={handleFinalConfirm} disabled={orderItems.length === 0}>
@@ -179,12 +175,7 @@ export function ReservationBottomSheet({
 
   return (
     <>
-      <BottomSheet
-        isOpen={isOpen}
-        onClose={handleClose}
-        title={getTitle()}
-        footer={renderFooter()}
-      >
+      <BottomSheet isOpen={isOpen} onClose={handleClose} title={getTitle()} footer={renderFooter()}>
         {view === "options" && renderOptionsView()}
         {view === "calendar" && renderCalendarView()}
         {view === "confirm" && renderConfirmView()}

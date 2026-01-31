@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Package } from "lucide-react";
+import { Home, Package, MessageSquare } from "lucide-react";
 import { ROUTES } from "./paths.constant";
 
 export interface MenuChildItem {
@@ -39,6 +39,11 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
         { text: "상품 목록", path: ROUTES.STORE_DETAIL_PRODUCTS_LIST(storeId) },
         { text: "상품 등록", path: ROUTES.STORE_DETAIL_PRODUCTS_CREATE(storeId) },
       ],
+    },
+    {
+      text: "채팅",
+      icon: React.createElement(MessageSquare, { className: "w-5 h-5" }),
+      path: ROUTES.STORE_DETAIL_CHAT_LIST(storeId),
     },
   ];
 }

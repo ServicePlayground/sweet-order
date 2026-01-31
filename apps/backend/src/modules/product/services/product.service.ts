@@ -616,7 +616,12 @@ export class ProductService {
       const existingSizeOptionsById = new Map<string, any>();
 
       for (const option of existingSizeOptions) {
-        if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
+        if (
+          option &&
+          typeof option === "object" &&
+          "id" in option &&
+          typeof option.id === "string"
+        ) {
           existingSizeOptionsById.set(option.id, option);
         }
       }
@@ -646,7 +651,12 @@ export class ProductService {
       const existingFlavorOptionsById = new Map<string, any>();
 
       for (const option of existingFlavorOptions) {
-        if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
+        if (
+          option &&
+          typeof option === "object" &&
+          "id" in option &&
+          typeof option.id === "string"
+        ) {
           existingFlavorOptionsById.set(option.id, option);
         }
       }

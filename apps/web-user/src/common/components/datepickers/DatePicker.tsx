@@ -54,20 +54,15 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
 
   return (
     <div className="w-full">
-      {label && (
-        <label className="block mb-[10px] text-sm font-bold text-gray-900">
-          {label}
-        </label>
-      )}
+      {label && <label className="block mb-[10px] text-sm font-bold text-gray-900">{label}</label>}
       <button
         type="button"
         onClick={onOpen}
         disabled={disabled}
         aria-label={label || placeholder}
-        className=" relative pl-[12px] pr-[42px] w-full h-[42px] text-left text-sm border border-gray-100 rounded-lg bg-white transition-colors">
-        <span className={value ? "text-gray-900" : "text-gray-400"}>
-          {formatDate(value)}
-        </span>
+        className=" relative pl-[12px] pr-[42px] w-full h-[42px] text-left text-sm border border-gray-100 rounded-lg bg-white transition-colors"
+      >
+        <span className={value ? "text-gray-900" : "text-gray-400"}>{formatDate(value)}</span>
         <Icon
           name="calendar"
           width={20}
@@ -78,4 +73,3 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
     </div>
   );
 };
-

@@ -89,11 +89,7 @@ export const Select = <T extends string | number = string>({
 
   return (
     <div className="w-full" ref={containerRef}>
-      {label && (
-        <label className="block mb-[10px] text-sm font-bold text-gray-900">
-          {label}
-        </label>
-      )}
+      {label && <label className="block mb-[10px] text-sm font-bold text-gray-900">{label}</label>}
       <div className="relative">
         {/* 트리거 버튼 */}
         <button
@@ -107,7 +103,9 @@ export const Select = <T extends string | number = string>({
             ${isOpen ? "rounded-t-lg border-b-0" : "rounded-lg"}
             ${isOpen && !value ? "bg-gray-50 text-gray-500" : value ? "bg-white text-gray-900" : "bg-white text-gray-500"}
             ${className}
-          `.trim().replace(/\s+/g, " ")}
+          `
+            .trim()
+            .replace(/\s+/g, " ")}
         >
           {displayLabel}
         </button>
@@ -119,7 +117,9 @@ export const Select = <T extends string | number = string>({
             absolute right-[12px] top-[11px] text-gray-400 pointer-events-none
             transition-transform duration-200
             ${isOpen ? "rotate-0" : "rotate-180"}
-          `.trim().replace(/\s+/g, " ")}
+          `
+            .trim()
+            .replace(/\s+/g, " ")}
         />
 
         {/* 드롭다운 메뉴 */}
@@ -139,9 +139,7 @@ export const Select = <T extends string | number = string>({
           </ul>
         )}
       </div>
-      {error && (
-        <p className="mt-[6px] text-xs text-red-500">{error}</p>
-      )}
+      {error && <p className="mt-[6px] text-xs text-red-500">{error}</p>}
     </div>
   );
 };
