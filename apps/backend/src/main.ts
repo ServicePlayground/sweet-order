@@ -73,7 +73,10 @@ async function bootstrap(): Promise<void> {
           defaultSrc: ["'self'"],
           connectSrc: [
             "'self'",
-            ...configService.get("CORS_ORIGIN").split(",").map((origin: string) => origin.trim()),
+            ...configService
+              .get("CORS_ORIGIN")
+              .split(",")
+              .map((origin: string) => origin.trim()),
           ], // WebSocket 연결 허용
         },
       },

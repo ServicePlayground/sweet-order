@@ -38,11 +38,7 @@ import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/message-r
  * 채팅방과 메시지 관리를 통합적으로 처리합니다.
  */
 @ApiTags("채팅")
-@ApiExtraModels(
-  ChatRoomListResponseDto,
-  ChatRoomResponseDto,
-  MessageListResponseDto,
-)
+@ApiExtraModels(ChatRoomListResponseDto, ChatRoomResponseDto, MessageListResponseDto)
 @Controller(`${USER_ROLES.USER}/chat-room`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // 인증 필수
 export class UserChatController {

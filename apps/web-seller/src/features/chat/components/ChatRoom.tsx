@@ -190,11 +190,7 @@ export const ChatRoom: React.FC = () => {
             className="min-h-[60px] resize-none"
             maxLength={1000}
           />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
-            className="shrink-0"
-          >
+          <Button onClick={handleSendMessage} disabled={!newMessage.trim()} className="shrink-0">
             <Send className="h-4 w-4" />
           </Button>
         </div>

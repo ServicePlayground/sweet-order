@@ -51,7 +51,7 @@ export class ChatSocketService {
           if (this.socket) {
             this.socket.off("connect", onConnect);
             this.socket.off("connect_error", onError);
-            console.log("Chat socket connected:", this.socket.id);            
+            console.log("Chat socket connected:", this.socket.id);
             resolve();
           }
         };
@@ -99,7 +99,7 @@ export class ChatSocketService {
         // 배포 환경에서 연결 타임아웃 설정
         timeout: 30000,
         // 기존 연결 재사용
-        forceNew: false, 
+        forceNew: false,
         // 자동 연결 활성화
         autoConnect: true,
       });
@@ -225,7 +225,7 @@ export class ChatSocketService {
     await this.connect();
 
     // WebSocket으로 메시지 전송
-    if (this.socket && this.socket.connected) {      
+    if (this.socket && this.socket.connected) {
       this.socket.emit("send-message", { roomId, text });
     }
   }

@@ -110,7 +110,7 @@ export class ChatSocketService {
         // 배포 환경에서 연결 타임아웃 설정
         timeout: 30000,
         // 기존 연결 재사용
-        forceNew: false, 
+        forceNew: false,
         // 자동 연결 활성화
         autoConnect: true,
       });
@@ -196,7 +196,6 @@ export class ChatSocketService {
     }
   }
 
-
   /**
    * 채팅방 나가기
    *
@@ -213,7 +212,6 @@ export class ChatSocketService {
       this.socket.emit("leave-room", { roomId });
     }
   }
-
 
   /**
    * 새 메시지 수신 리스너 등록
@@ -267,11 +265,11 @@ export class ChatSocketService {
     await this.connect();
 
     // WebSocket으로 메시지 전송
-    if (this.socket && this.socket.connected) {      
+    if (this.socket && this.socket.connected) {
       this.socket.emit("send-message", { roomId, text });
     }
   }
-  
+
   /**
    * 연결 상태 확인
    *

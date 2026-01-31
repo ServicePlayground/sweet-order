@@ -31,13 +31,13 @@ model ChatRoom {
   id              String   @id @default(cuid())
   userId          String   @map("user_id")
   storeId         String   @map("store_id")
-  
+
   lastMessage     String?  @map("last_message") @db.VarChar(1000) // 마지막 메시지 미리보기용 (최대 1000자)
   lastMessageAt   DateTime? @map("last_message_at")
-  
+
   userUnread      Int      @default(0) @map("user_unread")
   storeUnread     Int      @default(0) @map("store_unread")
-  
+
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -65,7 +65,7 @@ model Message {
   text            String      @db.Text // 긴 메시지를 위해 Text 타입 사용
   senderId        String      @map("sender_id")
   senderType      MessageSenderType @map("sender_type")
-  
+
   createdAt       DateTime    @default(now()) @map("created_at")
 
   // Relations
@@ -86,6 +86,7 @@ enum MessageSenderType {
 ### 주요 필드 설명
 
 #### ChatRoom
+
 - `id`: 채팅방 고유 ID
 - `userId`: 사용자 ID (채팅을 시작한 사용자)
 - `storeId`: 스토어 ID (채팅 상대방인 스토어)
@@ -95,6 +96,7 @@ enum MessageSenderType {
 - `storeUnread`: 판매자가 읽지 않은 메시지 수
 
 #### Message
+
 - `id`: 메시지 고유 ID
 - `roomId`: 채팅방 ID
 - `text`: 메시지 내용 (최대 1000자)
@@ -122,6 +124,7 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token)
 
 **요청 본문**:
+
 ```json
 {
   "storeId": "QXZw02vBqVXNQ29c4w9n9ZdG"
@@ -129,6 +132,7 @@ enum MessageSenderType {
 ```
 
 **응답** (201 Created):
+
 ```json
 {
   "id": "QXZw02vBqVXNQ29c4w9n9ZdG"
@@ -136,6 +140,7 @@ enum MessageSenderType {
 ```
 
 **에러 응답**:
+
 - `404`: 스토어를 찾을 수 없습니다.
 
 #### 2. 채팅방 목록 조회
@@ -147,6 +152,7 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token)
 
 **응답** (200 OK):
+
 ```json
 {
   "chatRooms": [
@@ -178,9 +184,11 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token)
 
 **경로 파라미터**:
+
 - `roomId`: 채팅방 ID
 
 **응답** (200 OK):
+
 ```json
 {
   "success": true
@@ -188,6 +196,7 @@ enum MessageSenderType {
 ```
 
 **에러 응답**:
+
 - `401`: 인증 토큰이 유효하지 않습니다.
 - `404`: 채팅방을 찾을 수 없습니다.
 
@@ -202,9 +211,11 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token, SELLER 또는 ADMIN 역할)
 
 **경로 파라미터**:
+
 - `storeId`: 스토어 ID
 
 **응답** (200 OK):
+
 ```json
 {
   "chatRooms": [
@@ -229,6 +240,7 @@ enum MessageSenderType {
 ```
 
 **에러 응답**:
+
 - `401`: 인증 토큰이 유효하지 않습니다.
 - `403`: 해당 스토어에 대한 권한이 없습니다.
 - `404`: 스토어를 찾을 수 없습니다.
@@ -242,9 +254,11 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token, SELLER 또는 ADMIN 역할)
 
 **경로 파라미터**:
+
 - `roomId`: 채팅방 ID
 
 **응답** (200 OK):
+
 ```json
 {
   "success": true
@@ -252,6 +266,7 @@ enum MessageSenderType {
 ```
 
 **에러 응답**:
+
 - `401`: 인증 토큰이 유효하지 않습니다.
 - `404`: 채팅방을 찾을 수 없습니다.
 
@@ -266,9 +281,11 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token)
 
 **경로 파라미터**:
+
 - `roomId`: 채팅방 ID
 
 **요청 본문**:
+
 ```json
 {
   "text": "안녕하세요, 케이크 주문하고 싶어요."
@@ -276,14 +293,17 @@ enum MessageSenderType {
 ```
 
 **요청 검증**:
+
 - `text`: 필수, 문자열, 최소 1자, 최대 1000자
 
 **에러 응답**:
+
 - `400`: 메시지 내용이 비어있습니다. / 메시지는 1000자를 초과할 수 없습니다.
 - `401`: 인증 토큰이 유효하지 않습니다.
 - `404`: 채팅방을 찾을 수 없습니다.
 
 **응답** (201 Created):
+
 ```json
 {
   "id": "message123",
@@ -304,16 +324,20 @@ enum MessageSenderType {
 **인증**: 필수 (Bearer Token)
 
 **경로 파라미터**:
+
 - `roomId`: 채팅방 ID
 
 **쿼리 파라미터**:
+
 - `limit`: 조회할 메시지 수 (기본값: 50, 최소: 1, 최대: 100)
 - `cursor`: 커서 (다음 페이지 조회용, 선택사항)
 
 **요청 검증**:
+
 - `limit`: 1~100 사이의 정수값이어야 합니다. 범위를 벗어나면 400 에러가 반환됩니다.
 
 **응답** (200 OK):
+
 ```json
 {
   "messages": [
@@ -331,6 +355,7 @@ enum MessageSenderType {
 ```
 
 **에러 응답**:
+
 - `400`: limit은 1~100 사이의 값이어야 합니다.
 - `401`: 인증 토큰이 유효하지 않습니다.
 - `404`: 채팅방을 찾을 수 없습니다.
