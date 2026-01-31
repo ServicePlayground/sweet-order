@@ -43,6 +43,47 @@ export class MessageResponseDto {
 }
 
 /**
+ * 페이지네이션 메타 정보 응답 DTO
+ */
+export class MessagePaginationMetaResponseDto {
+  @ApiProperty({
+    description: "현재 페이지 번호",
+    example: 1,
+  })
+  currentPage: number;
+
+  @ApiProperty({
+    description: "페이지당 항목 수",
+    example: 50,
+  })
+  limit: number;
+
+  @ApiProperty({
+    description: "전체 항목 수",
+    example: 150,
+  })
+  totalItems: number;
+
+  @ApiProperty({
+    description: "전체 페이지 수",
+    example: 3,
+  })
+  totalPages: number;
+
+  @ApiProperty({
+    description: "다음 페이지 존재 여부",
+    example: true,
+  })
+  hasNext: boolean;
+
+  @ApiProperty({
+    description: "이전 페이지 존재 여부",
+    example: false,
+  })
+  hasPrev: boolean;
+}
+
+/**
  * 메시지 목록 응답 DTO
  */
 export class MessageListResponseDto {
@@ -53,10 +94,8 @@ export class MessageListResponseDto {
   messages: MessageResponseDto[];
 
   @ApiProperty({
-    description: "다음 페이지 커서 (페이지네이션용)",
-    example: "cm1234567890",
-    required: false,
+    description: "페이지네이션 메타 정보",
+    type: MessagePaginationMetaResponseDto,
   })
-  nextCursor?: string;
+  meta: MessagePaginationMetaResponseDto;
 }
-

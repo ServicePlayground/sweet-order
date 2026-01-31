@@ -47,4 +47,3 @@ export const SWAGGER_RESPONSE_EXAMPLES = {
     chatRooms: [CHAT_ROOM_RESPONSE_EXAMPLE],
   },
 };
-

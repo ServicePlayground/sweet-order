@@ -5268,6 +5268,7 @@ __metadata:
     react-error-boundary: "npm:^6.0.0"
     react-quill: "npm:^2.0.0"
     react-router-dom: "npm:^7.9.4"
+    socket.io-client: "npm:^4.8.3"
     storybook: "npm:^10.1.2"
     tailwindcss: "npm:^3.4.18"
     typescript: "npm:5.5.4"
@@ -5310,6 +5311,7 @@ __metadata:
     react: "npm:19.1.2"
     react-dom: "npm:19.1.2"
     react-error-boundary: "npm:^6.0.0"
+    socket.io-client: "npm:^4.8.3"
     storybook: "npm:^10.1.2"
     swiper: "npm:^12.0.3"
     tailwind-merge: "npm:^3.4.0"
@@ -8249,6 +8251,19 @@ __metadata:
   dependencies:
     iconv-lite: "npm:^0.6.2"
   checksum: 10c0/36d938712ff00fe1f4bac88b43bcffb5930c1efa57bbcdca9d67e1d9d6c57cfb1200fb01efe0f3109b2ce99b231f90779532814a81370a1bd3274a0f58585039
+  languageName: node
+  linkType: hard
+
+"engine.io-client@npm:~6.6.1":
+  version: 6.6.4
+  resolution: "engine.io-client@npm:6.6.4"
+  dependencies:
+    "@socket.io/component-emitter": "npm:~3.1.0"
+    debug: "npm:~4.4.1"
+    engine.io-parser: "npm:~5.2.1"
+    ws: "npm:~8.18.3"
+    xmlhttprequest-ssl: "npm:~2.1.1"
+  checksum: 10c0/d90bc32d614f67db9c198d1c26a787529f3038a7429c75e677f5495938cc45f9e89d435e8860bcfcc01db410e21d2f245b914f2fcbdb03ffd50d30f2aeec5143
   languageName: node
   linkType: hard
 
@@ -13100,6 +13115,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"socket.io-client@npm:^4.8.3":
+  version: 4.8.3
+  resolution: "socket.io-client@npm:4.8.3"
+  dependencies:
+    "@socket.io/component-emitter": "npm:~3.1.0"
+    debug: "npm:~4.4.1"
+    engine.io-client: "npm:~6.6.1"
+    socket.io-parser: "npm:~4.2.4"
+  checksum: 10c0/76c0d86de0b636d0bf5011cf3425212c900f43dac632db6eb493816920cd035af7ddd92fea9a106b45eb347405953c0414eb3a5d465b180215e46fc8b61420b3
+  languageName: node
+  linkType: hard
+
 "socket.io-parser@npm:~4.2.4":
   version: 4.2.5
   resolution: "socket.io-parser@npm:4.2.5"
@@ -14780,6 +14807,13 @@ __metadata:
   version: 2.2.0
   resolution: "xmlchars@npm:2.2.0"
   checksum: 10c0/b64b535861a6f310c5d9bfa10834cf49127c71922c297da9d4d1b45eeaae40bf9b4363275876088fbe2667e5db028d2cd4f8ee72eed9bede840a67d57dab7593
+  languageName: node
+  linkType: hard
+
+"xmlhttprequest-ssl@npm:~2.1.1":
+  version: 2.1.2
+  resolution: "xmlhttprequest-ssl@npm:2.1.2"
+  checksum: 10c0/70d60869323e823f473a238f78fd108437edbc3690ecd5859c39c83217080090a18899b272e515769c0d1f518cc64cbed6b6995b23fdd7ba13b297d530b6e631
   languageName: node
   linkType: hard
 

@@ -4,7 +4,10 @@ import {
   ChatRoomResponseDto,
   ChatRoomForSellerResponseDto,
 } from "@apps/backend/modules/chat/dto/chat-response.dto";
-import { MessageResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+import {
+  MessageResponseDto,
+  MessageListResponseDto,
+} from "@apps/backend/modules/chat/dto/message-response.dto";
 import { ChatRoomService } from "./chat-room.service";
 import { ChatMessageService } from "./chat-message.service";
 
@@ -48,11 +51,7 @@ export class ChatService {
   /**
    * 채팅방 읽음 처리
    */
-  async markChatRoomAsRead(
-    roomId: string,
-    readerId: string,
-    readerType: "user" | "store",
-  ) {
+  async markChatRoomAsRead(roomId: string, readerId: string, readerType: "user" | "store") {
     return await this.chatRoomService.markChatRoomAsRead(roomId, readerId, readerType);
   }
 
@@ -69,16 +68,15 @@ export class ChatService {
   }
 
   /**
-   * 채팅방 메시지 목록 조회
+   * 채팅방 메시지 목록 조회 (페이지 기반 페이지네이션)
    */
   async getMessages(
     roomId: string,
     userId: string,
     userType: "user" | "store",
+    page: number = 1,
     limit: number = 50,
-    cursor?: string,
-  ): Promise<{ messages: MessageResponseDto[]; nextCursor?: string }> {
-    return await this.chatMessageService.getMessages(roomId, userId, userType, limit, cursor);
+  ): Promise<MessageListResponseDto> {
+    return await this.chatMessageService.getMessages(roomId, userId, userType, page, limit);
   }
 }
-

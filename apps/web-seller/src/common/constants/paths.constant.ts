@@ -4,6 +4,8 @@ import { StoreDetailHomePage } from "@/apps/web-seller/pages/store/detail/Home";
 import { StoreDetailProductListPage } from "@/apps/web-seller/pages/store/detail/products/List";
 import { StoreDetailProductCreatePage } from "@/apps/web-seller/pages/store/detail/products/Create";
 import { StoreDetailProductDetailPage } from "@/apps/web-seller/pages/store/detail/products/Detail";
+import { StoreDetailChatListPage } from "@/apps/web-seller/pages/store/detail/chat/List";
+import { StoreDetailChatRoomPage } from "@/apps/web-seller/pages/store/detail/chat/Room";
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
 import { BasicLoginPage } from "@/apps/web-seller/pages/auth/BasicLogin";
 import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
@@ -21,6 +23,8 @@ export const ROUTES = {
   STORE_DETAIL_PRODUCTS_CREATE: (storeId: string) => `/stores/${storeId}/products/create`,
   STORE_DETAIL_PRODUCTS_DETAIL: (storeId: string, productId: string) =>
     `/stores/${storeId}/products/${productId}`,
+  STORE_DETAIL_CHAT_LIST: (storeId: string) => `/stores/${storeId}/chat`,
+  STORE_DETAIL_CHAT_ROOM: (storeId: string, roomId: string) => `/stores/${storeId}/chat/${roomId}`,
   // 인증 관련 경로
   AUTH: {
     LOGIN: "/auth/login",
@@ -54,5 +58,10 @@ export const ADMIN_ROUTE_CONFIG = [
   {
     path: ROUTES.STORE_DETAIL_PRODUCTS_DETAIL(":storeId", ":productId"),
     element: StoreDetailProductDetailPage,
+  },
+  { path: ROUTES.STORE_DETAIL_CHAT_LIST(":storeId"), element: StoreDetailChatListPage },
+  {
+    path: ROUTES.STORE_DETAIL_CHAT_ROOM(":storeId", ":roomId"),
+    element: StoreDetailChatRoomPage,
   },
 ] as const;

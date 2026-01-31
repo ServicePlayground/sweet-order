@@ -192,4 +192,3 @@ export class ChatRoomListForSellerResponseDto {
   })
   chatRooms: ChatRoomForSellerResponseDto[];
 }
-

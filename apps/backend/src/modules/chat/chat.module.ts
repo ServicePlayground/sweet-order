@@ -17,13 +17,8 @@ import { DatabaseModule } from "@apps/backend/infra/database/database.module";
  * - ChatGateway: WebSocket 실시간 통신
  */
 @Module({
-  imports: [
-    DatabaseModule,
-    JwtModule,
-    ConfigModule,
-  ],
+  imports: [DatabaseModule, JwtModule, ConfigModule],
   providers: [ChatService, ChatRoomService, ChatMessageService, ChatGateway],
   exports: [ChatService, ChatGateway],
 })
 export class ChatModule {}
-

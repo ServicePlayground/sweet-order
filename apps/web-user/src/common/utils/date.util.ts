@@ -1,0 +1,44 @@
+/**
+ * 날짜를 상대 시간 문자열로 포맷팅
+ *
+ * @param date - 포맷팅할 날짜 (Date 객체 또는 null)
+ * @returns 상대 시간 문자열 (예: "방금 전", "5분 전", "2시간 전", "3일 전", 또는 날짜 문자열)
+ *
+ * @example
+ * formatRelativeTime(new Date()) // "방금 전"
+ * formatRelativeTime(new Date(Date.now() - 5 * 60000)) // "5분 전"
+ * formatRelativeTime(new Date(Date.now() - 2 * 3600000)) // "2시간 전"
+ */
+export const formatRelativeTime = (date: Date | null): string => {
+  if (!date) return "";
+  const now = new Date();
+  const messageDate = new Date(date);
+  const diffMs = now.getTime() - messageDate.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "방금 전";
+  if (diffMins < 60) return `${diffMins}분 전`;
+  if (diffHours < 24) return `${diffHours}시간 전`;
+  if (diffDays < 7) return `${diffDays}일 전`;
+  return messageDate.toLocaleDateString("ko-KR");
+};
+
+/**
+ * 날짜를 시간 문자열로 포맷팅 (HH:mm 형식)
+ *
+ * @param date - 포맷팅할 날짜 (Date 객체 또는 string)
+ * @returns 시간 문자열 (예: "14:30", "09:05")
+ *
+ * @example
+ * formatTime(new Date()) // "14:30"
+ * formatTime("2024-01-01T14:30:00.000Z") // "14:30"
+ */
+export const formatTime = (date: Date | string): string => {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return dateObj.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};

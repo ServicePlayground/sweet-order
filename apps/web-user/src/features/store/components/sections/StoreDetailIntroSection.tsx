@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { MessageSquare } from "lucide-react";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import { useCreateOrGetChatRoom } from "@/apps/web-user/features/chat/hooks/queries/useChat";
+import { Button } from "@/apps/web-user/common/components/@shadcn-ui/button";
 
 interface StoreDetailIntroSectionProps {
   store: StoreInfo;
@@ -10,6 +13,11 @@ interface StoreDetailIntroSectionProps {
 
 export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps) {
   const [imageError, setImageError] = useState(false);
+  const createOrGetChatRoomMutation = useCreateOrGetChatRoom();
+
+  const handleChatClick = () => {
+    createOrGetChatRoomMutation.mutate({ storeId: store.id });
+  };
 
   return (
     <div
@@ -82,6 +90,17 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
           }}
         >
           {store.description || "소개가 없습니다."}
+        </div>
+        <div style={{ marginTop: "8px" }}>
+          <Button
+            onClick={handleChatClick}
+            disabled={createOrGetChatRoomMutation.isPending}
+            className="w-full sm:w-auto"
+            size="lg"
+          >
+            <MessageSquare className="h-4 w-4" />
+            {createOrGetChatRoomMutation.isPending ? "연결 중..." : "채팅하기"}
+          </Button>
         </div>
       </div>
     </div>

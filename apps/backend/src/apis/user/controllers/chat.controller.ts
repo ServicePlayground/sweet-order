@@ -8,7 +8,6 @@ import {
   Query,
   HttpCode,
   HttpStatus,
-  BadRequestException,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ChatService } from "@apps/backend/modules/chat/services/chat.service";
@@ -24,7 +23,10 @@ import {
   CHAT_ERROR_MESSAGES,
   SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/chat/constants/chat.constants";
-import { CreateChatRoomRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
+import {
+  CreateChatRoomRequestDto,
+  GetMessagesRequestDto,
+} from "@apps/backend/modules/chat/dto/chat-request.dto";
 import { SendMessageRequestDto } from "@apps/backend/modules/chat/dto/message-request.dto";
 import {
   ChatRoomListResponseDto,
@@ -59,7 +61,8 @@ export class UserChatController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: "(로그인 필요) 채팅방 생성 또는 조회",
-    description: "스토어와의 채팅방을 생성하거나 기존 채팅방을 조회합니다. 기존 채팅방이 있으면 해당 채팅방 ID를 반환합니다.",
+    description:
+      "스토어와의 채팅방을 생성하거나 기존 채팅방을 조회합니다. 기존 채팅방이 있으면 해당 채팅방 ID를 반환합니다.",
   })
   @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.CHAT_ROOM_CREATED_RESPONSE })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
@@ -123,11 +126,10 @@ export class UserChatController {
   })
   @SwaggerResponse(200, { dataExample: { success: true } })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(404, { dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND) })
-  async markAsRead(
-    @Param("roomId") roomId: string,
-    @Request() req: { user: JwtVerifiedPayload },
-  ) {
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
+  })
+  async markAsRead(@Param("roomId") roomId: string, @Request() req: { user: JwtVerifiedPayload }) {
     return await this.chatService.markChatRoomAsRead(roomId, req.user.sub, "user");
   }
 
@@ -142,7 +144,9 @@ export class UserChatController {
   })
   @SwaggerResponse(201, { dataDto: MessageResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(404, { dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND) })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
+  })
   async sendMessage(
     @Param("roomId") roomId: string,
     @Body() dto: SendMessageRequestDto,
@@ -159,26 +163,22 @@ export class UserChatController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 메시지 목록 조회",
-    description: "채팅방의 메시지 목록을 조회합니다. 커서 기반 페이지네이션을 지원합니다.",
+    description: "채팅방의 메시지 목록을 조회합니다. 페이지 기반 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: MessageListResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(404, { dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND) })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
+  })
   async getMessages(
     @Param("roomId") roomId: string,
+    @Query() query: GetMessagesRequestDto,
     @Request() req: { user: AuthenticatedUser },
-    @Query("limit") limit?: string,
-    @Query("cursor") cursor?: string,
   ) {
     const userType = req.user.role === "SELLER" ? "store" : "user";
-    const limitNum = limit ? parseInt(limit, 10) : 50;
-    
-    // limit 검증
-    if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
-      throw new BadRequestException("limit은 1~100 사이의 값이어야 합니다.");
-    }
-    
-    return await this.chatService.getMessages(roomId, req.user.sub, userType, limitNum, cursor);
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 50;
+
+    return await this.chatService.getMessages(roomId, req.user.sub, userType, page, limit);
   }
 }
-

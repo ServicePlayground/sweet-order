@@ -1,9 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException, Inject, forwardRef } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
-import { MessageResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+import {
+  MessageResponseDto,
+  MessageListResponseDto,
+  MessagePaginationMetaResponseDto,
+} from "@apps/backend/modules/chat/dto/message-response.dto";
 import { ChatRoomService } from "./chat-room.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
+import { ChatGateway } from "../gateways/chat.gateway";
 
 /**
  * 채팅 메시지 서비스
@@ -20,6 +24,8 @@ export class ChatMessageService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly chatRoomService: ChatRoomService,
+    @Inject(forwardRef(() => ChatGateway)) // forwardRef: ChatGateway가 ChatMessageService에서 사용되므로 순환 의존성 방지
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   /**
@@ -59,43 +65,68 @@ export class ChatMessageService {
       return createdMessage;
     });
 
-    return this.mapToMessageResponseDto(message);
+    const messageDto = this.mapToMessageResponseDto(message);
+
+    // WebSocket으로 메시지 브로드캐스트 (REST API로 전송된 메시지도 실시간으로 전달)
+    this.chatGateway.broadcastMessage(roomId, messageDto);
+
+    return messageDto;
   }
 
   /**
-   * 채팅방 메시지 목록 조회
+   * 채팅방 메시지 목록 조회 (페이지 기반 페이지네이션)
    */
   async getMessages(
     roomId: string,
     userId: string,
     userType: "user" | "store",
+    page: number = 1,
     limit: number = ChatMessageService.DEFAULT_LIMIT,
-    cursor?: string,
-  ): Promise<{ messages: MessageResponseDto[]; nextCursor?: string }> {
+  ): Promise<MessageListResponseDto> {
     // 채팅방 조회 및 권한 확인
     const chatRoom = await this.chatRoomService.findChatRoomById(roomId);
     await ChatPermissionUtil.verifyChatRoomAccess(chatRoom, userId, userType, this.prisma);
 
     // limit 검증 및 정규화
     const validatedLimit = this.validateLimit(limit);
+    const validatedPage = Math.max(1, page);
 
-    // 메시지 조회
-    const where = cursor ? { roomId, id: { lt: cursor } } : { roomId };
-
-    const messages = await this.prisma.message.findMany({
-      where,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: validatedLimit + 1, // 다음 페이지 존재 여부 확인을 위해 +1
+    // 전체 메시지 수 조회
+    const totalItems = await this.prisma.message.count({
+      where: { roomId },
     });
 
-    // 페이지네이션 처리
-    const hasNextPage = messages.length > validatedLimit;
-    const messagesToReturn = hasNextPage ? messages.slice(0, validatedLimit) : messages;
-    const nextCursor = hasNextPage ? messagesToReturn[messagesToReturn.length - 1].id : undefined;
+    // 페이지네이션 계산
+    const skip = (validatedPage - 1) * validatedLimit;
+
+    // 메시지 조회 (최신 메시지가 먼저 오도록 desc 정렬)
+    const messages = await this.prisma.message.findMany({
+      where: { roomId },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      skip,
+      take: validatedLimit,
+    });
+
+    // 메시지 순서를 reverse하여 오래된 메시지 -> 최신 메시지 순서로 변환
+    const reversedMessages = messages.reverse().map((msg) => this.mapToMessageResponseDto(msg));
+
+    // 페이지네이션 메타 정보 계산
+    const totalPages = Math.ceil(totalItems / validatedLimit);
+    const hasNext = validatedPage < totalPages;
+    const hasPrev = validatedPage > 1;
+
+    const meta: MessagePaginationMetaResponseDto = {
+      currentPage: validatedPage,
+      limit: validatedLimit,
+      totalItems,
+      totalPages,
+      hasNext,
+      hasPrev,
+    };
 
     return {
-      messages: messagesToReturn.reverse().map((msg) => this.mapToMessageResponseDto(msg)),
-      nextCursor,
+      messages: reversedMessages,
+      meta,
     };
   }
 
@@ -155,10 +186,7 @@ export class ChatMessageService {
    * limit 검증 및 정규화
    */
   private validateLimit(limit: number): number {
-    return Math.min(
-      Math.max(ChatMessageService.MIN_LIMIT, limit),
-      ChatMessageService.MAX_LIMIT,
-    );
+    return Math.min(Math.max(ChatMessageService.MIN_LIMIT, limit), ChatMessageService.MAX_LIMIT);
   }
 
   /**
@@ -170,9 +198,8 @@ export class ChatMessageService {
       roomId: message.roomId,
       text: message.text,
       senderId: message.senderId,
-      senderType: (message.senderType.toLowerCase() as "user" | "store"),
+      senderType: message.senderType.toLowerCase() as "user" | "store",
       createdAt: message.createdAt,
     };
   }
 }
-

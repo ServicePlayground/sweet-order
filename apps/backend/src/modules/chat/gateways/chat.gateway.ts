@@ -8,12 +8,13 @@ import {
   ConnectedSocket,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { Logger } from "@nestjs/common";
+import { Logger, Inject, forwardRef } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ChatService } from "../services/chat.service";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { MessageResponseDto } from "../dto/message-response.dto";
 
 /**
  * WebSocket 게이트웨이
@@ -35,6 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly connectedUsers = new Map<string, Set<string>>(); // userId -> Set<socketId>
 
   constructor(
+    @Inject(forwardRef(() => ChatService)) // forwardRef: ChatService가 ChatGateway에서 사용되므로 순환 의존성 방지
     private readonly chatService: ChatService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -145,36 +147,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
-   * 메시지 전송
+   * 채팅방에 메시지 브로드캐스트 (서버에서 클라이언트로 WebSocket으로 메시지 전송)
    */
-  @SubscribeMessage("send-message")
-  async handleSendMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { roomId: string; text: string },
-  ) {
-    const userId = client.data.userId;
-    const userType = client.data.userType;
-    const { roomId, text } = data;
-
-    if (!userId || !userType || !roomId || !text?.trim()) {
-      return { error: "Invalid request" };
-    }
-
-    try {
-      // 메시지 저장
-      const message = await this.chatService.sendMessage(roomId, text, userId, userType);
-
-      // 채팅방의 모든 클라이언트에게 메시지 브로드캐스트
-      this.server.to(`room:${roomId}`).emit("new-message", message);
-
-      return { success: true, message };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Error sending message: ${errorMessage}`);
-      return { error: errorMessage };
-    }
+  broadcastMessage(roomId: string, message: MessageResponseDto) {
+    this.server.to(`room:${roomId}`).emit("new-message", message);
+    this.logger.log(`Message broadcasted to room ${roomId}: ${message.id}`);
   }
-
 
   /**
    * Socket에서 JWT 토큰 추출
@@ -207,4 +185,3 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 }
-
