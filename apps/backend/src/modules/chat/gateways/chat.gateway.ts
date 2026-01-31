@@ -23,7 +23,16 @@ import { MessageResponseDto } from "../dto/message-response.dto";
  */
 @WebSocketGateway({
   cors: {
-    origin: true, // main.ts의 CORS 설정과 동일하게 처리
+    origin: (origin, callback) => {
+      // CORS_ORIGIN 환경변수에서 허용된 origin 목록 가져오기
+      const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
+      // origin이 없거나 허용된 목록에 있으면 허용
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   },
   namespace: "/chat",

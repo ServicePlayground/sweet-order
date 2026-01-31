@@ -97,11 +97,36 @@ export class ChatSocketService {
 
     // 연결 오류 이벤트 핸들러
     this.socket.on("connect_error", (error) => {
-      console.error("Chat socket connection error:", error);
+      const errorMessage = error.message || String(error);
+      const attemptedUrl = `${API_BASE_URL}/chat`;
+      
+      console.error("Chat socket connection error:", {
+        error,
+        errorMessage,
+        attemptedUrl,
+        API_BASE_URL,
+        hasToken: !!token,
+        errorName: error.name,
+        errorStack: error.stack,
+      });
+      
+      // 에러 메시지에 따른 상세 메시지 생성
+      let detailMessage = "채팅 서버에 연결할 수 없습니다.";
+      if (errorMessage.includes("CORS") || errorMessage.includes("cors")) {
+        detailMessage += " (CORS 오류 가능성 - 백엔드 CORS_ORIGIN 설정 확인 필요)";
+      } else if (errorMessage.includes("timeout") || errorMessage.includes("ECONNREFUSED")) {
+        detailMessage += " (서버 연결 실패 - 서버가 실행 중인지 확인 필요)";
+      } else if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+        detailMessage += " (인증 오류 - 토큰이 유효한지 확인 필요)";
+      } else if (errorMessage.includes("404") || errorMessage.includes("Not Found")) {
+        detailMessage += " (경로를 찾을 수 없음 - WebSocket Gateway 설정 확인 필요)";
+      }
+      detailMessage += ` [연결 시도 URL: ${attemptedUrl}]`;
+      
       useAlertStore.getState().showAlert({
         type: "error",
         title: "채팅 연결 실패",
-        message: "채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+        message: detailMessage,
       });
     });
 
