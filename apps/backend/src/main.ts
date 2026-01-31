@@ -60,8 +60,21 @@ async function bootstrap(): Promise<void> {
     maxAge: 86400,
   });
 
-  // 보안 헤더 설정
-  app.use(helmet());
+  // 보안 헤더 설정 (WebSocket 연결을 위해 Content-Security-Policy 조정)
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          connectSrc: [
+            "'self'",
+            ...configService.get("CORS_ORIGIN").split(",").map((origin: string) => origin.trim()),
+          ], // WebSocket 연결 허용
+        },
+      },
+      crossOriginEmbedderPolicy: false, // WebSocket 연결을 위해 비활성화
+    }),
+  );
 
   // HTTP 요청 로깅 - 상용 환경에서는 비활성화
   if (nodeEnv !== "production") {
@@ -133,6 +146,9 @@ async function bootstrap(): Promise<void> {
 
   logger.log(`server is running on port ${port}`);
   logger.log(`Environment: ${nodeEnv}`);
+  logger.log(`CORS origins: ${configService.get("CORS_ORIGIN")}`);
+  logger.log(`WebSocket Gateway namespace: /chat`);
+  logger.log(`API prefix: ${API_PREFIX}`);
 }
 
 bootstrap();

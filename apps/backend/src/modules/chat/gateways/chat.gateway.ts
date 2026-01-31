@@ -25,11 +25,17 @@ import { MessageResponseDto } from "../dto/message-response.dto";
   cors: {
     origin: (origin, callback) => {
       // CORS_ORIGIN 환경변수에서 허용된 origin 목록 가져오기
-      const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
+      const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o: string) => o.trim()) || [];
+      
       // origin이 없거나 허용된 목록에 있으면 허용
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Socket.IO는 때때로 origin 없이 연결을 시도할 수 있음
+      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        console.log(`[ChatGateway] WebSocket CORS allowed for origin: ${origin || "none"}`);
         callback(null, true);
       } else {
+        console.warn(
+          `[ChatGateway] WebSocket CORS rejected for origin: ${origin}. Allowed: ${allowedOrigins.join(", ")}`,
+        );
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -50,18 +56,41 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) {
+    // 서버 초기화 후 Socket.IO 서버가 준비되었는지 확인
+    setTimeout(() => {
+      if (this.server) {
+        this.logger.log(
+          `Socket.IO server initialized on namespace: /chat, CORS origins: ${process.env.CORS_ORIGIN || "not set"}`,
+        );
+        // Socket.IO 서버 이벤트 리스너 등록 (디버깅용)
+        this.server.on("connection", (socket) => {
+          this.logger.log(`Socket.IO connection event received (before handleConnection): ${socket.id}`);
+        });
+      } else {
+        this.logger.error("Socket.IO server is not initialized!");
+      }
+    }, 1000);
+  }
 
   /**
    * 클라이언트 연결 시 호출
    * JWT 토큰을 검증하고 사용자 정보를 설정합니다.
    */
   async handleConnection(client: Socket) {
+    const origin = client.handshake.headers.origin || "unknown";
+    const userAgent = client.handshake.headers["user-agent"] || "unknown";
+    this.logger.log(
+      `WebSocket connection attempt from origin: ${origin}, socketId: ${client.id}, userAgent: ${userAgent}`,
+    );
+
     try {
       // JWT 토큰 추출 및 검증
       const token = this.extractTokenFromSocket(client);
       if (!token) {
-        this.logger.warn(`Connection rejected: No token provided (socketId: ${client.id})`);
+        this.logger.warn(
+          `Connection rejected: No token provided (socketId: ${client.id}, origin: ${origin})`,
+        );
         client.disconnect();
         return;
       }
