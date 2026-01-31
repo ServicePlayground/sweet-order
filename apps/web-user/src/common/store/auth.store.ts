@@ -16,7 +16,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set, get) => ({
   // 초기 상태
   isAuthenticated: true,
-  accessToken: "",
+  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWwxczA0M2EwMDAxNWswMTZ4eXF1b2x2IiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2OTg0OTIzMiwiZXhwIjoxNzc3NjI1MjMyfQ.4zOEF2T5eExYvtPPW_jyxHz8kxqpBADEHCSt7WYpht4",
 
   // 토큰 설정 (Zustand 상태만 업데이트)
   setAccessToken: (token: string) => {
