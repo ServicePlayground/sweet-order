@@ -60,11 +60,7 @@ export function ReservationConfirmView({
                 </div>
 
                 <div className="w-[64px] h-[64px] overflow-hidden shrink-0 rounded-md">
-                  <img
-                    src={cakeImageUrl}
-                    alt={cakeTitle}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={cakeImageUrl} alt={cakeTitle} className="w-full h-full object-cover" />
                 </div>
               </div>
 
@@ -129,4 +125,3 @@ export function ReservationConfirmView({
     </div>
   );
 }
-

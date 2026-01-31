@@ -18,6 +18,7 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
   const getHeaderVariant = (): "main" | "product" | "minimal" => {
     if (pathname === "/") return "minimal"; // 홈화면에서는 헤더 숨김
     if (pathname === "/search") return "minimal"; // 검색 페이지에서는 헤더 숨김
+    if (pathname?.startsWith("/chat")) return "minimal"; // 채팅 페이지에서는 헤더 숨김
     if (pathname?.startsWith("/product/")) return "product";
     return "main";
   };

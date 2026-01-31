@@ -125,9 +125,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             <span className="text-xs text-gray-900 font-bold">{data.likeCount}</span>
           </button>
           <span className="flex-1">
-            <Button onClick={() => setIsBottomSheetOpen(true)}>
-              예약하기
-            </Button>
+            <Button onClick={() => setIsBottomSheetOpen(true)}>예약하기</Button>
           </span>
         </div>
       </div>
