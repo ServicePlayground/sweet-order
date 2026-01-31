@@ -20,16 +20,12 @@ import {
   USER_ROLES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
-import { SendMessageRequestDto } from "@apps/backend/modules/chat/dto/message-request.dto";
 import { GetMessagesRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
 import {
   ChatRoomListForSellerResponseDto,
   ChatRoomForSellerResponseDto,
 } from "@apps/backend/modules/chat/dto/chat-response.dto";
-import {
-  MessageResponseDto,
-  MessageListResponseDto,
-} from "@apps/backend/modules/chat/dto/message-response.dto";
+import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
 
 /**
  * 채팅 관련 컨트롤러 (판매자용)
@@ -39,7 +35,6 @@ import {
 @ApiExtraModels(
   ChatRoomListForSellerResponseDto,
   ChatRoomForSellerResponseDto,
-  MessageResponseDto,
   MessageListResponseDto,
 )
 @Controller(`${USER_ROLES.SELLER}/chat-room`)
@@ -100,28 +95,6 @@ export class SellerChatController {
   })
   async markAsRead(@Param("roomId") roomId: string, @Request() req: { user: AuthenticatedUser }) {
     return await this.chatService.markChatRoomAsRead(roomId, req.user.sub, "store");
-  }
-
-  /**
-   * 메시지 전송 API
-   */
-  @Post(":roomId/messages")
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({
-    summary: "(로그인 필요) 메시지 전송",
-    description: "채팅방에 메시지를 전송합니다.",
-  })
-  @SwaggerResponse(201, { dataDto: MessageResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(404, {
-    dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
-  })
-  async sendMessage(
-    @Param("roomId") roomId: string,
-    @Body() dto: SendMessageRequestDto,
-    @Request() req: { user: AuthenticatedUser },
-  ) {
-    return await this.chatService.sendMessage(roomId, dto.text, req.user.sub, "store");
   }
 
   /**

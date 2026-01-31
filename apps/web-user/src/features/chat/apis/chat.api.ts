@@ -4,8 +4,6 @@ import {
   CreateChatRoomRequest,
   CreateChatRoomResponse,
   MessageListResponse,
-  Message,
-  SendMessageRequest,
   GetMessagesRequest,
 } from "@/apps/web-user/features/chat/types/chat.type";
 
@@ -31,12 +29,6 @@ export const chatApi = {
   // 채팅방 읽음 처리
   markChatRoomAsRead: async (roomId: string): Promise<{ success: boolean }> => {
     const response = await userClient.post(`/chat-room/${roomId}/read`);
-    return response.data.data;
-  },
-
-  // 메시지 전송
-  sendMessage: async (roomId: string, request: SendMessageRequest): Promise<Message> => {
-    const response = await userClient.post(`/chat-room/${roomId}/messages`, request);
     return response.data.data;
   },
 };

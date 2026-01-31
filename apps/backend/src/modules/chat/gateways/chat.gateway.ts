@@ -185,6 +185,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /**
+   * 메시지 전송
+   */
+  @SubscribeMessage("send-message")
+  async handleSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string; text: string },
+  ) {
+    const userId = client.data.userId;
+    const userType = client.data.userType;
+    const { roomId, text } = data;
+
+    if (!userId || !userType || !roomId || !text) {
+      return { error: "Invalid request" };
+    }
+
+    try {
+      // ChatService를 통해 메시지 저장 및 브로드캐스트
+      const message = await this.chatService.sendMessage(roomId, text, userId, userType);
+      this.logger.log(`Message sent by user ${userId} in room ${roomId}: ${message.id}`);
+      return { success: true, message };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to send message: ${errorMessage} (userId: ${userId}, roomId: ${roomId})`);
+      return { error: errorMessage };
+    }
+  }
+
+  /**
    * 채팅방에 메시지 브로드캐스트 (서버에서 클라이언트로 WebSocket으로 메시지 전송)
    */
   broadcastMessage(roomId: string, message: MessageResponseDto) {

@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   useMessages,
-  useSendMessage,
   useMarkChatRoomAsRead,
 } from "@/apps/web-user/features/chat/hooks/queries/useChat";
 import { chatSocketService } from "@/apps/web-user/features/chat/services/chat-socket.service";
@@ -30,7 +29,6 @@ export const ChatRoom: React.FC = () => {
     [initialAllMessages, newAllMessages],
   );
   const [newMessage, setNewMessage] = useState(""); // 새로운 메시지 입력
-  const sendMessageMutation = useSendMessage();
   const markAsReadMutation = useMarkChatRoomAsRead();
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -69,40 +67,57 @@ export const ChatRoom: React.FC = () => {
   useEffect(() => {
     if (!roomId) return;
 
-    chatSocketService.connect();
-    chatSocketService.joinRoom(roomId);
+    let unsubscribe: (() => void) | null = null;
+    // 비동기로 연결 및 조인 처리
+    const setupChat = async () => {
+      try {
+        await chatSocketService.connect();
+        await chatSocketService.joinRoom(roomId);
+        // 새 메시지 수신 리스너 (상대방이 WebSocket으로 메시지 전송 후 서버에서 자동으로 WebSocket 브로드캐스트하여 여기로 전달됨.)
+        unsubscribe = await chatSocketService.onNewMessage((message: Message) => {
+          // createdAt이 문자열인 경우 Date 객체로 변환
+          const normalizedMessage: Message = {
+            ...message,
+            createdAt:
+              message.createdAt instanceof Date ? message.createdAt : new Date(message.createdAt),
+          };
 
-    // 새 메시지 수신 리스너 (메시지 전송 REST API로 메시지 전송 후 서버에서 자동으로 WebSocket 브로드캐스트하여 여기로 전달됨.)
-    const unsubscribe = chatSocketService.onNewMessage((message: Message) => {
-      // createdAt이 문자열인 경우 Date 객체로 변환
-      const normalizedMessage: Message = {
-        ...message,
-        createdAt:
-          message.createdAt instanceof Date ? message.createdAt : new Date(message.createdAt),
-      };
+          // 중복 메시지 제거: 같은 id를 가진 메시지가 이미 있으면 추가하지 않음
+          setNewAllMessages((prev) => {
+            const isDuplicate = prev.some((msg) => msg.id === normalizedMessage.id);
+            if (isDuplicate) {
+              return prev;
+            }
+            return [...prev, normalizedMessage];
+          });
+        });
+      } catch (error) {
+        console.error("Failed to setup chat:", error);
+      }
+    };
 
-      setNewAllMessages((prev) => [...prev, normalizedMessage]);
-    });
+    setupChat();
 
     return () => {
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
       chatSocketService.leaveRoom(roomId);
     };
   }, [roomId]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim() || !roomId) return;
 
-    // 실제 메시지 전송
-    sendMessageMutation.mutate(
-      { roomId, request: { text: newMessage } },
-      {
-        onSuccess: () => {
-          setNewMessage("");
-          // 메시지 전송 REST API로 메시지 전송 후 서버에서 자동으로 WebSocket 브로드캐스트하므로 클라이언트에서 추가로 WebSocket 전송할 필요 없음
-        },
-      },
-    );
+    try {
+      // WebSocket으로 메시지 전송
+      await chatSocketService.sendMessage(roomId, newMessage);
+      setNewMessage("");
+      // 서버에서 메시지를 저장하고 WebSocket으로 브로드캐스트하므로 onNewMessage 리스너를 통해 자동으로 수신됨
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // 에러 처리는 필요시 추가
+    }
   };
 
   if (!roomId) {
@@ -177,7 +192,7 @@ export const ChatRoom: React.FC = () => {
           />
           <button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim() || sendMessageMutation.isPending}
+            disabled={!newMessage.trim()}
             className="shrink-0 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-4 w-4" />

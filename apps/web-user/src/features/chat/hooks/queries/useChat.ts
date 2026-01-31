@@ -4,7 +4,6 @@ import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { chatQueryKeys } from "@/apps/web-user/features/chat/constants/chatQueryKeys.constant";
 import {
   CreateChatRoomRequest,
-  SendMessageRequest,
   MessageListResponse,
   GetMessagesRequest,
 } from "@/apps/web-user/features/chat/types/chat.type";
@@ -102,23 +101,6 @@ export function useMarkChatRoomAsRead() {
 
   return useMutation({
     mutationFn: (roomId: string) => chatApi.markChatRoomAsRead(roomId),
-    onError: (error) => {
-      showAlert({
-        type: "error",
-        title: "오류",
-        message: getApiMessage.error(error),
-      });
-    },
-  });
-}
-
-// 메시지 전송
-export function useSendMessage() {
-  const { showAlert } = useAlertStore();
-
-  return useMutation({
-    mutationFn: ({ roomId, request }: { roomId: string; request: SendMessageRequest }) =>
-      chatApi.sendMessage(roomId, request),
     onError: (error) => {
       showAlert({
         type: "error",
