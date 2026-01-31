@@ -42,6 +42,8 @@ import { MessageResponseDto } from "../dto/message-response.dto";
     credentials: true,
   },
   namespace: "/chat",
+  // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
+  path: "/socket.io/",
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

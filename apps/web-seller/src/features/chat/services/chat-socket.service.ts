@@ -82,10 +82,16 @@ export class ChatSocketService {
         query: {
           token,
         },
+        // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
+        path: "/socket.io/",
         transports: ["websocket", "polling"],
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionAttempts: 5,
+        // 배포 환경에서 연결 타임아웃 설정
+        timeout: 20000,
+        // WebSocket 업그레이드 시도 전 polling 연결 유지
+        upgrade: true,
       });
 
       // 연결 성공 이벤트 핸들러
