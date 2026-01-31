@@ -4,6 +4,7 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   MessageBody,
   ConnectedSocket,
 } from "@nestjs/websockets";
@@ -34,7 +35,7 @@ import { MessageResponseDto } from "../dto/message-response.dto";
   pingTimeout: 60000, // 연결 타임아웃 (60초)
   pingInterval: 25000, // 핑 간격 (25초)
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -49,40 +50,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly prisma: PrismaService,
   ) {
     this.logger.log("ChatGateway constructor called - Gateway instance created");
+  }
+
+  /**
+   * Gateway 초기화 완료 후 호출되는 라이프사이클 훅
+   * 이 시점에 Socket.IO 서버가 완전히 초기화되어 있습니다.
+   */
+  afterInit() {
+    this.logger.log(
+      `[✅ 정상] Socket.IO server initialized successfully`,
+    );
+    this.logger.log(
+      `[✅ 정상] Socket.IO server path: /socket.io/`,
+    );
+    this.logger.log(
+      `[✅ 정상] Socket.IO server transports: polling`,
+    );
+    this.logger.log(
+      `[✅ 정상] CORS origins: ${process.env.CORS_ORIGIN || "not set"}`,
+    );
     
-    // 서버 초기화 후 Socket.IO 서버가 준비되었는지 확인
-    setTimeout(() => {
-      if (this.server) {
-        this.logger.log(
-          `[✅ 정상] Socket.IO server initialized successfully`,
-        );
-        this.logger.log(
-          `[✅ 정상] Socket.IO server path: /socket.io/`,
-        );
-        this.logger.log(
-          `[✅ 정상] Socket.IO server transports: polling`,
-        );
-        this.logger.log(
-          `[✅ 정상] CORS origins: ${process.env.CORS_ORIGIN || "not set"}`,
-        );
-        
-        // Socket.IO 서버에 연결 이벤트 리스너 등록 (디버깅용)
-        this.server.on("connection", (socket) => {
-          this.logger.log(
-            `[🔌 연결 시도] Socket.IO connection event received - socketId: ${socket.id}, transport: ${socket.conn.transport.name}`,
-          );
-        });
-        
-        this.server.on("connection_error", (error) => {
-          this.logger.error(
-            `[❌ 연결 오류] Socket.IO connection_error event: ${error.message}`,
-            error.stack,
-          );
-        });
-      } else {
-        this.logger.error("[❌ 오류] Socket.IO server is not initialized!");
-      }
-    }, 1000);
+    // Socket.IO 서버에 연결 이벤트 리스너 등록 (디버깅용)
+    this.server.on("connection", (socket) => {
+      this.logger.log(
+        `[🔌 연결 시도] Socket.IO connection event received - socketId: ${socket.id}, transport: ${socket.conn.transport.name}`,
+      );
+    });
+    
+    this.server.on("connection_error", (error) => {
+      this.logger.error(
+        `[❌ 연결 오류] Socket.IO connection_error event: ${error.message}`,
+        error.stack,
+      );
+    });
   }
 
   /**
