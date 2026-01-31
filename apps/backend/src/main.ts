@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import helmet from "helmet";
 import morgan from "morgan";
 import * as express from "express";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 import { AppModule } from "@apps/backend/app.module";
 import { API_PREFIX } from "@apps/backend/common/constants/app.constants";
 import { SellerApiModule } from "@apps/backend/apis/seller/seller-api.module";
@@ -34,6 +35,10 @@ async function bootstrap(): Promise<void> {
 
   // NestJS 애플리케이션 메인 인스턴스 생성 (AppModule을 사용하여 모든 모듈을 포함하고 있음)
   const app = await NestFactory.create(AppModule);
+
+  // Socket.IO 어댑터 설정 (WebSocket 연결을 위해 필수)
+  // 전역 prefix가 Socket.IO 경로에 영향을 주지 않도록 설정
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // 로깅 인스턴스 생성
   const logger = new Logger("서버시작");

@@ -108,9 +108,13 @@ export class ChatSocketService {
         // 최대 재연결 시도 횟수
         reconnectionAttempts: 5,
         // 배포 환경에서 연결 타임아웃 설정
-        timeout: 20000,
+        timeout: 30000,
         // WebSocket 업그레이드 시도 전 polling 연결 유지
         upgrade: true,
+        // 기존 연결 재사용
+        forceNew: false, 
+        // WebSocket 연결 실패 시 자동으로 polling으로 폴백
+        autoConnect: true,
       });
 
       // 연결 성공 이벤트 핸들러

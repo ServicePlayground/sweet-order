@@ -75,23 +75,35 @@ export class ChatSocketService {
         return;
       }
 
+      // Socket.IO 클라이언트 인스턴스 생성 및 연결
+      // Socket.IO v4에서는 path 옵션을 명시적으로 설정해야 배포 환경에서 정상 작동합니다
       this.socket = io(`${API_BASE_URL}/chat`, {
+        // 인증 정보를 헤더에 포함
         auth: {
           token,
         },
+        // 쿼리 파라미터로도 토큰 전달 (서버 측 호환성)
         query: {
           token,
         },
         // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
         path: "/socket.io/",
+        // 전송 방식: WebSocket 우선, 실패 시 HTTP polling으로 폴백
         transports: ["websocket", "polling"],
+        // 자동 재연결 활성화
         reconnection: true,
+        // 재연결 시도 간격 (밀리초)
         reconnectionDelay: 1000,
+        // 최대 재연결 시도 횟수
         reconnectionAttempts: 5,
         // 배포 환경에서 연결 타임아웃 설정
-        timeout: 20000,
+        timeout: 30000,
         // WebSocket 업그레이드 시도 전 polling 연결 유지
         upgrade: true,
+        // 기존 연결 재사용
+        forceNew: false, 
+        // WebSocket 연결 실패 시 자동으로 polling으로 폴백
+        autoConnect: true,
       });
 
       // 연결 성공 이벤트 핸들러

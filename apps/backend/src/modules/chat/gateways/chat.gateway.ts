@@ -23,27 +23,17 @@ import { MessageResponseDto } from "../dto/message-response.dto";
  */
 @WebSocketGateway({
   cors: {
-    origin: (origin, callback) => {
-      // CORS_ORIGIN 환경변수에서 허용된 origin 목록 가져오기
-      const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o: string) => o.trim()) || [];
-      
-      // origin이 없거나 허용된 목록에 있으면 허용
-      // Socket.IO는 때때로 origin 없이 연결을 시도할 수 있음
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-        console.log(`[ChatGateway] WebSocket CORS allowed for origin: ${origin || "none"}`);
-        callback(null, true);
-      } else {
-        console.warn(
-          `[ChatGateway] WebSocket CORS rejected for origin: ${origin}. Allowed: ${allowedOrigins.join(", ")}`,
-        );
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
   },
   namespace: "/chat",
   // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
   path: "/socket.io/",
+  // 배포 환경에서 WebSocket 연결 안정성을 위한 추가 옵션
+  transports: ["websocket", "polling"], // WebSocket 우선, 실패 시 polling으로 폴백
+  allowEIO3: true, // Socket.IO v3 클라이언트와의 호환성
+  pingTimeout: 60000, // 연결 타임아웃 (60초)
+  pingInterval: 25000, // 핑 간격 (25초)
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -65,10 +55,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.logger.log(
           `Socket.IO server initialized on namespace: /chat, CORS origins: ${process.env.CORS_ORIGIN || "not set"}`,
         );
-        // Socket.IO 서버 이벤트 리스너 등록 (디버깅용)
-        this.server.on("connection", (socket) => {
-          this.logger.log(`Socket.IO connection event received (before handleConnection): ${socket.id}`);
-        });
       } else {
         this.logger.error("Socket.IO server is not initialized!");
       }
@@ -90,10 +76,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // JWT 토큰 추출 및 검증
       const token = this.extractTokenFromSocket(client);
       if (!token) {
+        const errorMessage = "No token provided";
         this.logger.warn(
-          `Connection rejected: No token provided (socketId: ${client.id}, origin: ${origin})`,
+          `Connection rejected: ${errorMessage} (socketId: ${client.id}, origin: ${origin})`,
         );
-        client.disconnect();
+        // 에러 메시지를 클라이언트에 전달한 후 연결 종료
+        client.emit("error", { message: errorMessage, code: "NO_TOKEN" });
+        client.disconnect(true);
         return;
       }
 
@@ -110,8 +99,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
 
       if (!user) {
-        this.logger.warn(`User not found: ${userId} (socketId: ${client.id})`);
-        client.disconnect();
+        const errorMessage = `User not found: ${userId}`;
+        this.logger.warn(`${errorMessage} (socketId: ${client.id})`);
+        // 에러 메시지를 클라이언트에 전달한 후 연결 종료
+        client.emit("error", { message: errorMessage, code: "USER_NOT_FOUND" });
+        client.disconnect(true);
         return;
       }
 
@@ -131,7 +123,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Connection error: ${errorMessage} (socketId: ${client.id})`);
-      client.disconnect();
+      // 에러 메시지를 클라이언트에 전달한 후 연결 종료
+      client.emit("error", { 
+        message: errorMessage, 
+        code: error instanceof Error && error.name === "TokenExpiredError" ? "TOKEN_EXPIRED" : "AUTH_ERROR" 
+      });
+      client.disconnect(true);
     }
   }
 
@@ -224,17 +221,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /**
    * Socket에서 JWT 토큰 추출
+   * 
+   * 우선순위:
+   * 1. auth.token (Socket.IO v4 권장 방식)
+   * 2. query.token (하위 호환성, 타입 안전성 처리)
+   * 3. Authorization 헤더 (표준 HTTP 방식)
    */
   private extractTokenFromSocket(client: Socket): string | null {
-    // 쿼리 파라미터에서 토큰 추출
-    const token = client.handshake.query.token as string;
-    if (token) {
-      return token;
+    // 1. auth.token 우선 사용 (Socket.IO v4 권장 방식)
+    const authToken = client.handshake.auth?.token;
+    if (typeof authToken === "string" && authToken.trim().length > 0) {
+      return authToken;
     }
 
-    // Authorization 헤더에서 토큰 추출
+    // 2. query.token 처리 (타입 안전성 고려)
+    // Socket.IO v4에서 query.token은 string | string[] | undefined 가능
+    const queryToken = client.handshake.query.token;
+    if (typeof queryToken === "string" && queryToken.trim().length > 0) {
+      return queryToken;
+    }
+    // 배열인 경우 첫 번째 요소 사용 (일반적으로 발생하지 않지만 방어적 코딩)
+    if (Array.isArray(queryToken) && queryToken.length > 0 && typeof queryToken[0] === "string") {
+      return queryToken[0];
+    }
+
+    // 3. Authorization 헤더에서 토큰 추출 (표준 HTTP 방식)
     const authHeader = client.handshake.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
+    if (authHeader && typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
       return authHeader.substring(7);
     }
 
