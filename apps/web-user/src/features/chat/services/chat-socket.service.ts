@@ -99,8 +99,8 @@ export class ChatSocketService {
         },
         // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
         path: "/socket.io/",
-        // 전송 방식: WebSocket 우선, 실패 시 HTTP polling으로 폴백
-        transports: ["websocket", "polling"],
+        // 전송 방식: HTTP polling만 사용
+        transports: ["polling"],
         // 자동 재연결 활성화
         reconnection: true,
         // 재연결 시도 간격 (밀리초)
@@ -109,11 +109,9 @@ export class ChatSocketService {
         reconnectionAttempts: 5,
         // 배포 환경에서 연결 타임아웃 설정
         timeout: 30000,
-        // WebSocket 업그레이드 시도 전 polling 연결 유지
-        upgrade: true,
         // 기존 연결 재사용
         forceNew: false, 
-        // WebSocket 연결 실패 시 자동으로 polling으로 폴백
+        // 자동 연결 활성화
         autoConnect: true,
       });
 

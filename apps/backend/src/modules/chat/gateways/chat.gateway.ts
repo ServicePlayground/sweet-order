@@ -29,7 +29,7 @@ import { MessageResponseDto } from "../dto/message-response.dto";
   // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
   path: "/socket.io/",
   // 배포 환경에서 WebSocket 연결 안정성을 위한 추가 옵션
-  transports: ["websocket", "polling"], // WebSocket 우선, 실패 시 polling으로 폴백
+  transports: ["polling"], // HTTP polling만 사용
   allowEIO3: true, // Socket.IO v3 클라이언트와의 호환성
   pingTimeout: 60000, // 연결 타임아웃 (60초)
   pingInterval: 25000, // 핑 간격 (25초)
@@ -48,14 +48,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
+    this.logger.log("ChatGateway constructor called - Gateway instance created");
+    
     // 서버 초기화 후 Socket.IO 서버가 준비되었는지 확인
     setTimeout(() => {
       if (this.server) {
         this.logger.log(
-          `Socket.IO server initialized, CORS origins: ${process.env.CORS_ORIGIN || "not set"}`,
+          `[✅ 정상] Socket.IO server initialized successfully`,
         );
+        this.logger.log(
+          `[✅ 정상] Socket.IO server path: /socket.io/`,
+        );
+        this.logger.log(
+          `[✅ 정상] Socket.IO server transports: polling`,
+        );
+        this.logger.log(
+          `[✅ 정상] CORS origins: ${process.env.CORS_ORIGIN || "not set"}`,
+        );
+        
+        // Socket.IO 서버에 연결 이벤트 리스너 등록 (디버깅용)
+        this.server.on("connection", (socket) => {
+          this.logger.log(
+            `[🔌 연결 시도] Socket.IO connection event received - socketId: ${socket.id}, transport: ${socket.conn.transport.name}`,
+          );
+        });
+        
+        this.server.on("connection_error", (error) => {
+          this.logger.error(
+            `[❌ 연결 오류] Socket.IO connection_error event: ${error.message}`,
+            error.stack,
+          );
+        });
       } else {
-        this.logger.error("Socket.IO server is not initialized!");
+        this.logger.error("[❌ 오류] Socket.IO server is not initialized!");
       }
     }, 1000);
   }
@@ -67,31 +92,59 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(client: Socket) {
     const origin = client.handshake.headers.origin || "unknown";
     const userAgent = client.handshake.headers["user-agent"] || "unknown";
+    const transport = client.conn.transport.name;
+    const remoteAddress = client.handshake.address || "unknown";
+    
     this.logger.log(
-      `WebSocket connection attempt from origin: ${origin}, socketId: ${client.id}, userAgent: ${userAgent}`,
+      `[🔌 연결 시도] handleConnection called - socketId: ${client.id}, origin: ${origin}, transport: ${transport}, remoteAddress: ${remoteAddress}`,
+    );
+    this.logger.log(
+      `[🔌 연결 시도] userAgent: ${userAgent}`,
+    );
+    this.logger.log(
+      `[🔌 연결 시도] handshake query: ${JSON.stringify(client.handshake.query)}`,
+    );
+    this.logger.log(
+      `[🔌 연결 시도] handshake auth: ${JSON.stringify(client.handshake.auth)}`,
     );
 
     try {
       // JWT 토큰 추출 및 검증
+      this.logger.log(`[1단계] 토큰 추출 시작 - socketId: ${client.id}`);
       const token = this.extractTokenFromSocket(client);
+      
       if (!token) {
         const errorMessage = "No token provided";
         this.logger.warn(
-          `Connection rejected: ${errorMessage} (socketId: ${client.id}, origin: ${origin})`,
+          `[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}, origin: ${origin}`,
+        );
+        this.logger.warn(
+          `[❌ 연결 거부] auth.token: ${client.handshake.auth?.token ? "있음" : "없음"}`,
+        );
+        this.logger.warn(
+          `[❌ 연결 거부] query.token: ${client.handshake.query.token ? "있음" : "없음"}`,
+        );
+        this.logger.warn(
+          `[❌ 연결 거부] Authorization header: ${client.handshake.headers.authorization ? "있음" : "없음"}`,
         );
         // 에러 메시지를 클라이언트에 전달한 후 연결 종료
         client.emit("error", { message: errorMessage, code: "NO_TOKEN" });
         client.disconnect(true);
         return;
       }
+      
+      this.logger.log(`[✅ 1단계 완료] 토큰 추출 성공 - socketId: ${client.id}, token length: ${token.length}`);
 
+      this.logger.log(`[2단계] JWT 토큰 검증 시작 - socketId: ${client.id}`);
       const payload = await this.jwtService.verifyAsync<JwtVerifiedPayload>(token, {
         secret: this.configService.get<string>("JWT_SECRET"),
       });
 
       const userId = payload.sub;
+      this.logger.log(`[✅ 2단계 완료] JWT 토큰 검증 성공 - socketId: ${client.id}, userId: ${userId}`);
 
       // DB에서 사용자 정보 조회 (role 확인용)
+      this.logger.log(`[3단계] 사용자 정보 조회 시작 - socketId: ${client.id}, userId: ${userId}`);
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { role: true },
@@ -99,7 +152,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (!user) {
         const errorMessage = `User not found: ${userId}`;
-        this.logger.warn(`${errorMessage} (socketId: ${client.id})`);
+        this.logger.warn(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}`);
         // 에러 메시지를 클라이언트에 전달한 후 연결 종료
         client.emit("error", { message: errorMessage, code: "USER_NOT_FOUND" });
         client.disconnect(true);
@@ -107,6 +160,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       const userType = user.role === "SELLER" ? "store" : "user";
+      this.logger.log(`[✅ 3단계 완료] 사용자 정보 조회 성공 - socketId: ${client.id}, userId: ${userId}, role: ${user.role}, userType: ${userType}`);
 
       // 소켓에 사용자 정보 저장
       client.data.userId = userId;
@@ -118,10 +172,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
       this.connectedUsers.get(userId)!.add(client.id);
 
-      this.logger.log(`User connected: ${userId} (socketId: ${client.id}, type: ${userType})`);
+      this.logger.log(`[✅ 연결 완료] User connected successfully - userId: ${userId}, socketId: ${client.id}, type: ${userType}, total connections for user: ${this.connectedUsers.get(userId)!.size}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Connection error: ${errorMessage} (socketId: ${client.id})`);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`[❌ 연결 오류] Connection error - socketId: ${client.id}, error: ${errorMessage}`);
+      if (errorStack) {
+        this.logger.error(`[❌ 연결 오류] Stack trace: ${errorStack}`);
+      }
       // 에러 메시지를 클라이언트에 전달한 후 연결 종료
       client.emit("error", { 
         message: errorMessage, 
@@ -144,7 +202,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.connectedUsers.delete(userId);
         }
       }
-      this.logger.log(`User disconnected: ${userId} (socketId: ${client.id})`);
+      this.logger.log(`[🔌 연결 해제] User disconnected - userId: ${userId}, socketId: ${client.id}, remaining connections: ${userSockets?.size || 0}`);
+    } else {
+      this.logger.log(`[🔌 연결 해제] User disconnected (no userId) - socketId: ${client.id}`);
     }
   }
 
@@ -156,12 +216,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = client.data.userId;
     const { roomId } = data;
 
+    this.logger.log(`[📥 이벤트 수신] join-room - socketId: ${client.id}, userId: ${userId || "없음"}, roomId: ${roomId || "없음"}`);
+
     if (!userId || !roomId) {
+      this.logger.warn(`[❌ 잘못된 요청] join-room - userId: ${userId || "없음"}, roomId: ${roomId || "없음"}`);
       return { error: "Invalid request" };
     }
 
     client.join(`room:${roomId}`);
-    this.logger.log(`User ${userId} joined room ${roomId}`);
+    this.logger.log(`[✅ 채팅방 조인] User ${userId} joined room ${roomId} - socketId: ${client.id}`);
     return { success: true, roomId };
   }
 
