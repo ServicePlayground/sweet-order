@@ -93,6 +93,7 @@ export const SWAGGER_EXAMPLES = {
     updatedAt: new Date("2024-01-01T00:00:00.000Z"),
     cakeSizeOptions: [
       {
+        id: "size_abcd1234",
         visible: EnableStatus.ENABLE,
         displayName: CakeSizeDisplayName.MINI,
         lengthCm: 10,
@@ -100,6 +101,7 @@ export const SWAGGER_EXAMPLES = {
         description: "1~2인용",
       },
       {
+        id: "size_efgh5678",
         visible: EnableStatus.ENABLE,
         displayName: CakeSizeDisplayName.SIZE_1,
         lengthCm: 15,
@@ -109,11 +111,13 @@ export const SWAGGER_EXAMPLES = {
     ],
     cakeFlavorOptions: [
       {
+        id: "flavor_ijkl9012",
         visible: EnableStatus.ENABLE,
         displayName: "초콜릿",
         price: 10000,
       },
       {
+        id: "flavor_mnop3456",
         visible: EnableStatus.ENABLE,
         displayName: "바닐라",
         price: 20000,

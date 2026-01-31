@@ -80,19 +80,13 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* 배경 오버레이 */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
 
       {/* 모달 컨텐츠 */}
       <div className="relative z-10 w-[calc(100%-40px)] max-w-[320px] bg-white rounded-2xl px-[20px] pt-[36px]">
         <div className="text-center py-[12px]">
           <h2 className="text-base font-bold text-gray-900 mb-[8px]">{title}</h2>
-          {description && (
-            <p className="text-sm text-gray-700">{description}</p>
-          )}
+          {description && <p className="text-sm text-gray-700">{description}</p>}
         </div>
 
         <div className="flex gap-[8px] py-[20px]">

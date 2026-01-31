@@ -15,8 +15,8 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
   // 초기 상태
-  isAuthenticated: false,
-  accessToken: null,
+  isAuthenticated: true,
+  accessToken: "",
 
   // 토큰 설정 (Zustand 상태만 업데이트)
   setAccessToken: (token: string) => {

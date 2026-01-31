@@ -3,13 +3,7 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: ["class"],
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  safelist: [
-    "rounded-t-lg",
-    "rounded-b-lg",
-    "rounded-lg",
-    "border-b-0",
-    "border-t-0",
-  ],
+  safelist: ["rounded-t-lg", "rounded-b-lg", "rounded-lg", "border-b-0", "border-t-0"],
   theme: {
     fontSize: {
       "2xs": ["11px", "14px"],

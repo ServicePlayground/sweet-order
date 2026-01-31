@@ -20,8 +20,10 @@ import React from "react";
  * <TextArea value={value} onChange={setValue} maxLength={200} showCount />
  */
 
-interface TextAreaProps
-  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "onChange"> {
+interface TextAreaProps extends Omit<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  "onChange"
+> {
   /** 텍스트 값 */
   value: string;
   /** 값 변경 핸들러 */
@@ -44,11 +46,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
 }) => {
   return (
     <div className="w-full">
-      {label && (
-        <label className="block mb-[10px] text-sm font-bold text-gray-900">
-          {label}
-        </label>
-      )}
+      {label && <label className="block mb-[10px] text-sm font-bold text-gray-900">{label}</label>}
       <textarea
         {...props}
         value={value}

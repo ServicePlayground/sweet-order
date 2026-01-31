@@ -6,7 +6,10 @@ import {
   CakeFlavorOption,
   CakeSizeDisplayName,
 } from "@/apps/web-seller/features/product/types/product.type";
-import { CAKE_SIZE_DISPLAY_NAME_OPTIONS, VISIBILITY_STATUS_OPTIONS } from "@/apps/web-seller/features/product/constants/product.constant";
+import {
+  CAKE_SIZE_DISPLAY_NAME_OPTIONS,
+  VISIBILITY_STATUS_OPTIONS,
+} from "@/apps/web-seller/features/product/constants/product.constant";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import {
   Select,

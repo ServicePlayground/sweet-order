@@ -73,7 +73,7 @@ export function useReservationBottomSheet({
 
   const imageUrls = useMemo(
     () => attachedImages.map((file) => URL.createObjectURL(file)),
-    [attachedImages]
+    [attachedImages],
   );
 
   // 바텀시트가 닫힐 때 모든 상태 초기화
@@ -190,8 +190,8 @@ export function useReservationBottomSheet({
     if (editingIndex !== null) {
       setOrderItems((prev) =>
         prev.map((item, i) =>
-          i === editingIndex ? { ...newItem, quantity: item.quantity } : item
-        )
+          i === editingIndex ? { ...newItem, quantity: item.quantity } : item,
+        ),
       );
     } else {
       setOrderItems((prev) => [...prev, newItem]);
@@ -214,8 +214,8 @@ export function useReservationBottomSheet({
   const handleQuantityChange = (index: number, delta: number) => {
     setOrderItems((prev) =>
       prev.map((item, i) =>
-        i === index ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
-      )
+        i === index ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item,
+      ),
     );
   };
 

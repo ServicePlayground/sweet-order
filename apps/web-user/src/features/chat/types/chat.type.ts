@@ -1,0 +1,79 @@
+// 채팅방 스토어 정보 (사용자용)
+export interface ChatRoomStore {
+  id: string;
+  name: string;
+  logoImageUrl: string | null;
+}
+
+// 채팅방 정보 (사용자용)
+export interface ChatRoom {
+  id: string;
+  storeId: string;
+  store: ChatRoomStore;
+  lastMessage: string | null;
+  lastMessageAt: Date | null;
+  userUnread: number;
+  storeUnread: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 채팅방 목록 응답 (사용자용)
+export interface ChatRoomListResponse {
+  chatRooms: ChatRoom[];
+}
+
+// 채팅방 생성/ 조회 요청
+export interface CreateChatRoomRequest {
+  storeId: string;
+}
+
+// 채팅방 생성/ 조회 응답
+export interface CreateChatRoomResponse {
+  id: string;
+}
+
+/**
+ * 메시지 목록 조회 쿼리 키용 파라미터 (page 제외)
+ */
+export interface GetMessagesParams {
+  limit: number;
+}
+
+/**
+ * 메시지 목록 조회 요청 파라미터
+ */
+export interface GetMessagesRequest extends GetMessagesParams {
+  page: number;
+}
+
+// 메시지 정보
+export interface Message {
+  id: string;
+  roomId: string;
+  text: string;
+  senderId: string;
+  senderType: "user" | "store";
+  createdAt: Date;
+}
+
+// 페이지네이션 메타 정보
+export interface MessagePaginationMeta {
+  currentPage: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+// 메시지 목록 응답
+export interface MessageListResponse {
+  messages: Message[];
+  meta: MessagePaginationMeta;
+}
+
+// 메시지 전송 요청
+export interface SendMessageRequest {
+  text: string;
+}

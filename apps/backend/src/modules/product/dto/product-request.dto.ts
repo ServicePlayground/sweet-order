@@ -195,6 +195,14 @@ export class GetSellerProductsRequestDto {
  * 케이크 사이즈 옵션 DTO
  */
 export class CakeSizeOptionDto {
+  @ApiPropertyOptional({
+    description: "옵션 고유 ID (수정 시 그대로 전달)",
+    example: "size_abcd1234",
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
   @ApiProperty({
     description: "노출 여부",
     enum: EnableStatus,
@@ -244,6 +252,14 @@ export class CakeSizeOptionDto {
  * 케이크 맛 옵션 DTO
  */
 export class CakeFlavorOptionDto {
+  @ApiPropertyOptional({
+    description: "옵션 고유 ID (수정 시 그대로 전달)",
+    example: "flavor_efgh5678",
+  })
+  @IsNotEmpty()
+  @IsString()
+  id: string;
+
   @ApiProperty({
     description: "노출 여부",
     enum: EnableStatus,
