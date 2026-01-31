@@ -77,7 +77,7 @@ export class ChatSocketService {
 
       // Socket.IO 클라이언트 인스턴스 생성 및 연결
       // Socket.IO v4에서는 path 옵션을 명시적으로 설정해야 배포 환경에서 정상 작동합니다
-      this.socket = io(`${API_BASE_URL}/chat`, {
+      this.socket = io(API_BASE_URL, {
         // 인증 정보를 헤더에 포함
         auth: {
           token,
