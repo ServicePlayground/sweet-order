@@ -62,7 +62,7 @@ export function ProductDetailImageGallerySection({
           watchSlidesProgress
           slidesPerView="auto"
           spaceBetween={6}
-          className="mt-[8px] !px-[8px] thumbnail-swiper"
+          className="mt-[8px] !px-[8px] thumbnail-swiper [&_.swiper-slide-thumb-active>div]:border-2 [&_.swiper-slide-thumb-active>div]:border-primary [&_.swiper-slide-thumb-active>div]:outline-none"
         >
           {images.map((image, index) => (
             <SwiperSlide key={index} className="!w-[60px] cursor-pointer">

@@ -3,6 +3,7 @@
 import { BottomSheet } from "@/apps/web-user/common/components/bottom-sheets/BottomSheet";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
+import { useRouter } from "next/navigation";
 import { ReservationBottomSheetProps } from "./types";
 import { useReservationBottomSheet } from "./useReservationBottomSheet";
 import { ReservationOptionsView } from "./ReservationOptionsView";
@@ -19,6 +20,7 @@ export function ReservationBottomSheet({
   onClose,
   onConfirm,
 }: ReservationBottomSheetProps) {
+  const router = useRouter();
   const {
     view,
     setView,
@@ -47,6 +49,7 @@ export function ReservationBottomSheet({
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
+    dateSelectionSignal,
     formatDateTime,
     handleOpenCalendar,
     handleCalendarConfirm,
@@ -120,7 +123,25 @@ export function ReservationBottomSheet({
           <span className="text-xl font-bold text-gray-900">{totalPrice.toLocaleString()}원</span>
         </div>
         <div className="py-[12px]">
-          <Button onClick={handleFinalConfirm} disabled={orderItems.length === 0}>
+          <Button
+            onClick={() => {
+              const payload = {
+                items: orderItems.map((item) => ({
+                  ...item,
+                  date: item.date ? item.date.toISOString() : null,
+                })),
+                totalQuantity,
+                totalPrice,
+                cakeTitle,
+                cakeImageUrl,
+                price,
+              };
+              sessionStorage.setItem("reservationComplete", JSON.stringify(payload));
+              handleFinalConfirm();
+              router.push("/reservation/complete");
+            }}
+            disabled={orderItems.length === 0}
+          >
             주문하기
           </Button>
         </div>
@@ -147,6 +168,7 @@ export function ReservationBottomSheet({
       handleUploadClick={handleUploadClick}
       handleFileChange={handleFileChange}
       handleRemoveImage={handleRemoveImage}
+      dateSelectionSignal={dateSelectionSignal}
     />
   );
 
@@ -184,8 +206,8 @@ export function ReservationBottomSheet({
       <Modal
         isOpen={isCancelModalOpen}
         onClose={() => setIsCancelModalOpen(false)}
-        title="작성을 취소하시겠습니까?"
-        description="작성 중인 내용이 저장되지 않습니다."
+        title="예약 진행 취소"
+        description="예약 진행을 취소하시겠습니까?"
         confirmText="계속 진행하기"
         cancelText="취소"
         onCancel={handleConfirmCancel}
@@ -194,9 +216,9 @@ export function ReservationBottomSheet({
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        title="상품을 삭제하시겠습니까?"
-        description="선택한 옵션이 모두 삭제됩니다."
-        confirmText="계속 진행하기"
+        title="상품 삭제"
+        description="해당 상품을 삭제하시겠습니까?"
+        confirmText="취소"
         cancelText="삭제"
         onCancel={handleConfirmDelete}
       />
