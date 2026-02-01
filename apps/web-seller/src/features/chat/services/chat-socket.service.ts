@@ -16,6 +16,12 @@ export class ChatSocketService {
   private socket: Socket | null = null;
   // 현재 조인된 채팅방 목록 (재연결 시 자동으로 다시 조인하기 위해 추적)
   private joinedRooms: Set<string> = new Set();
+  // 메시지 리스너 관리 (재연결 시 자동으로 재바인딩하기 위해 추적)
+  private messageListeners = new Set<(msg: Message) => void>();
+  // 초기 연결 여부 추적 (재연결인지 구분하기 위해)
+  private isInitialConnection = true;
+  // 상태 복원용 connect 핸들러 등록 여부 추적 (hasListeners 대신 사용)
+  private isConnectHandlerBound = false;
 
   /**
    * WebSocket 연결
@@ -48,31 +54,33 @@ export class ChatSocketService {
 
       // 소켓이 이미 생성되어 있지만 연결되지 않은 경우
       if (this.socket && !this.socket.connected) {
-        // 연결 완료를 기다림
-        const onConnect = () => {
+        // 🔥 상태 복원용 connect 핸들러는 한 번만 등록
+        this.setupConnectHandler();
+
+        // Promise resolve용 핸들러 (이번 connect() 호출에만 사용)
+        const onConnectOnce = () => {
           if (this.socket) {
-            this.socket.off("connect", onConnect);
+            this.socket.off("connect", onConnectOnce);
             this.socket.off("connect_error", onError);
-            console.log("Chat socket connected:", this.socket.id);
             resolve();
           }
         };
 
         const onError = (error: Error) => {
           if (this.socket) {
-            this.socket.off("connect", onConnect);
+            this.socket.off("connect", onConnectOnce);
             this.socket.off("connect_error", onError);
           }
           console.error("Chat socket connection error:", error);
           useAlertStore.getState().addAlert({
             severity: "error",
             title: "채팅 연결 실패",
-            message: "채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+            message: "[100] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
           });
           reject(error);
         };
 
-        this.socket.once("connect", onConnect);
+        this.socket.once("connect", onConnectOnce);
         this.socket.once("connect_error", onError);
         return;
       }
@@ -106,32 +114,34 @@ export class ChatSocketService {
         autoConnect: true,
       });
 
-      // 연결 성공 이벤트 핸들러
-      const onConnect = () => {
+      // 🔥 상태 복원용 connect 핸들러는 한 번만 등록
+      this.setupConnectHandler();
+
+      // Promise resolve용 핸들러 (이번 connect() 호출에만 사용)
+      const onConnectOnce = () => {
         if (this.socket) {
-          this.socket.off("connect", onConnect);
+          this.socket.off("connect", onConnectOnce);
           this.socket.off("connect_error", onError);
-          console.log("Chat socket connected:", this.socket.id);
           resolve();
         }
       };
 
-      // 연결 오류 이벤트 핸들러
+      // 연결 오류 이벤트 핸들러 (첫 연결 시에만 사용)
       const onError = (error: Error) => {
         if (this.socket) {
-          this.socket.off("connect", onConnect);
+          this.socket.off("connect", onConnectOnce);
           this.socket.off("connect_error", onError);
         }
         console.error("Chat socket connection error:", error);
         useAlertStore.getState().addAlert({
           severity: "error",
           title: "채팅 연결 실패",
-          message: "채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+          message: "[101] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
         });
         reject(error);
       };
 
-      this.socket.once("connect", onConnect);
+      this.socket.once("connect", onConnectOnce);
       this.socket.once("connect_error", onError);
 
       // 연결 해제 이벤트 핸들러 (재사용을 위해 한 번만 등록)
@@ -150,12 +160,36 @@ export class ChatSocketService {
         });
       }
 
-      // 재연결 성공 시 자동으로 채팅방을 다시 조인하는 핸들러
+      // 재연결 시도 중 이벤트 핸들러
+      if (!this.socket.hasListeners("reconnect_attempt")) {
+        this.socket.on("reconnect_attempt", (attemptNumber) => {
+          console.log(`Chat socket reconnection attempt ${attemptNumber}`);
+        });
+      }
+
+      // 재연결 시도 중 이벤트 핸들러 (보조용, connect 이벤트에서 주로 처리)
       if (!this.socket.hasListeners("reconnect")) {
-        this.socket.on("reconnect", () => {
-          console.log("Chat socket reconnected:", this.socket?.id);
-          // 재연결 시 이전에 조인했던 채팅방들을 자동으로 다시 조인
-          this.rejoinRooms();
+        this.socket.on("reconnect", (attemptNumber) => {
+          console.log(`Chat socket reconnected after ${attemptNumber} attempts:`, this.socket?.id);
+        });
+      }
+
+      // 재연결 실패 시 이벤트 핸들러
+      if (!this.socket.hasListeners("reconnect_error")) {
+        this.socket.on("reconnect_error", (error) => {
+          console.error("Chat socket reconnection error:", error);
+        });
+      }
+
+      // 재연결 시도 횟수 초과 시 이벤트 핸들러
+      if (!this.socket.hasListeners("reconnect_failed")) {
+        this.socket.on("reconnect_failed", () => {
+          console.error("Chat socket reconnection failed after all attempts");
+          useAlertStore.getState().addAlert({
+            severity: "error",
+            title: "채팅 연결 실패",
+            message: "[102] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+          });
         });
       }
     });
@@ -163,12 +197,22 @@ export class ChatSocketService {
 
   /**
    * WebSocket 연결 해제
+   *
+   * Socket.IO 연결을 종료하고 모든 리스너를 제거합니다.
+   * 컴포넌트 언마운트 시 또는 로그아웃 시 호출해야 합니다.
    */
   disconnect(): void {
     if (this.socket) {
+      // Socket.IO 연결 종료
       this.socket.disconnect();
-      this.socket = null;
     }
+
+    // 🔥 모든 상태 초기화
+    this.socket = null;
+    this.joinedRooms.clear();
+    this.messageListeners.clear();
+    this.isInitialConnection = true;
+    this.isConnectHandlerBound = false;
   }
 
   /**
@@ -185,38 +229,83 @@ export class ChatSocketService {
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    // 연결이 완료된 후 채팅방 조인
-    if (this.socket && this.socket.connected) {
-      this.socket.emit("join-room", { roomId });
-      // 조인한 채팅방을 목록에 추가 (재연결 시 자동으로 다시 조인하기 위해)
-      this.joinedRooms.add(roomId);
+    // 연결 상태 확인
+    if (!this.socket || !this.socket.connected) {
+      return;
     }
+
+    // 🔥 이미 조인된 방인 경우 중복 emit 방지
+    if (this.joinedRooms.has(roomId)) {
+      return;
+    }
+
+    // 연결이 완료된 후 채팅방 조인
+    this.socket.emit("join-room", { roomId });
+    // 조인한 채팅방을 목록에 추가 (재연결 시 자동으로 다시 조인하기 위해)
+    this.joinedRooms.add(roomId);
   }
 
   /**
    * 채팅방 나가기
+   *
+   * 조인한 채팅방이 하나도 없으면 연결을 끊어 불필요한 polling 요청을 방지합니다.
    */
   async leaveRoom(roomId: string): Promise<void> {
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    if (this.socket && this.socket.connected) {
-      this.socket.emit("leave-room", { roomId });
+    // 연결 상태 확인
+    if (!this.socket || !this.socket.connected) {
+      return;
     }
-    
+
+    this.socket.emit("leave-room", { roomId });
+
     // 조인 목록에서 제거 (재연결 시 다시 조인하지 않도록)
     this.joinedRooms.delete(roomId);
+
+    // 조인한 채팅방이 하나도 없으면 연결을 끊어 불필요한 polling 요청 방지
+    if (this.joinedRooms.size === 0) {
+      this.disconnect();
+    }
   }
 
+  /**
+   * 새 메시지 수신 리스너 등록
+   *
+   * 서버로부터 새로운 메시지를 수신할 때 호출될 콜백 함수를 등록합니다.
+   * 리스너는 Set으로 관리되어 재연결 시 자동으로 재바인딩됩니다.
+   *
+   * @param callback - 새 메시지를 수신했을 때 호출될 콜백 함수
+   *                   매개변수로 Message 객체를 받습니다.
+   *
+   * @returns 리스너를 제거하는 함수를 반환합니다.
+   *          컴포넌트 언마운트 시 호출하여 메모리 누수를 방지해야 합니다.
+   *
+   * @example
+   * const removeListener = await chatSocketService.onNewMessage((message) => {
+   *   console.log("새 메시지:", message);
+   * });
+   *
+   * // 컴포넌트 언마운트 시
+   * removeListener();
+   */
   async onNewMessage(callback: (message: Message) => void): Promise<() => void> {
+    // 🔥 리스너를 Set에 추가
+    this.messageListeners.add(callback);
+
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    // 소켓이 존재하면 연결 여부와 관계없이 리스너 등록 (재연결 시에도 자동으로 리스너가 유지됨)
+    // 소켓이 존재하면 리스너 등록
     if (this.socket) {
       this.socket.on("new-message", callback);
     }
+
+    // 리스너 제거 함수 반환
     return () => {
+      // 🔥 Set에서 제거
+      this.messageListeners.delete(callback);
       if (this.socket) {
         this.socket.off("new-message", callback);
       }
@@ -240,10 +329,19 @@ export class ChatSocketService {
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    // WebSocket으로 메시지 전송
-    if (this.socket && this.socket.connected) {
-      this.socket.emit("send-message", { roomId, text });
+    // 연결 상태 확인
+    if (!this.socket || !this.socket.connected) {
+      return;
     }
+
+    // 채팅방에 조인되어 있는지 확인
+    if (!this.joinedRooms.has(roomId)) {
+      // 조인되어 있지 않으면 다시 조인 시도
+      await this.joinRoom(roomId);
+    }
+
+    // WebSocket으로 메시지 전송
+    this.socket.emit("send-message", { roomId, text });
   }
 
   /**
@@ -265,9 +363,75 @@ export class ChatSocketService {
     }
 
     // 조인했던 모든 채팅방을 다시 조인
-    this.joinedRooms.forEach((roomId) => {
-      console.log(`Rejoining room: ${roomId}`);
-      this.socket?.emit("join-room", { roomId });
+    const roomIds = Array.from(this.joinedRooms);
+    if (roomIds.length === 0) {
+      console.log("No rooms to rejoin");
+      return;
+    }
+
+    console.log(`Rejoining ${roomIds.length} room(s):`, roomIds);
+    roomIds.forEach((roomId) => {
+      if (this.socket && this.socket.connected) {
+        this.socket.emit("join-room", { roomId });
+        console.log(`Rejoined room: ${roomId}`);
+      }
+    });
+  }
+
+  /**
+   * 재연결 시 메시지 리스너를 재바인딩
+   *
+   * Socket.IO가 재연결되면, 이전에 등록했던 모든 메시지 리스너를
+   * 자동으로 재바인딩하여 메시지 수신이 정상적으로 동작하도록 합니다.
+   */
+  private rebindMessageListeners(): void {
+    if (!this.socket) return;
+
+    this.messageListeners.forEach((callback) => {
+      // 기존 리스너 제거 (중복 방지)
+      this.socket!.off("new-message", callback);
+      // 리스너 재등록
+      this.socket!.on("new-message", callback);
+    });
+
+    console.log(`Rebound ${this.messageListeners.size} message listener(s)`);
+  }
+
+  /**
+   * connect 이벤트 핸들러 설정 (상태 복원용, 한 번만 등록)
+   *
+   * 재연결 시에도 자동으로 상태를 복원하기 위해 connect 이벤트 핸들러를
+   * 영구적으로 등록합니다. 한 번만 등록되도록 플래그로 체크합니다.
+   *
+   * hasListeners("connect")를 사용하지 않는 이유:
+   * - Promise resolve용 once("connect")와 상태 복원용 on("connect")를 구분하지 못함
+   * - once("connect")가 먼저 등록되면 상태 복원 핸들러가 등록되지 않을 수 있음
+   */
+  private setupConnectHandler(): void {
+    if (!this.socket || this.isConnectHandlerBound) {
+      return;
+    }
+
+    this.isConnectHandlerBound = true;
+
+    this.socket.on("connect", () => {
+      if (this.socket) {
+        console.log("Chat socket connected:", this.socket.id);
+
+        // 🔥 상태 복원
+        this.rejoinRooms();
+        this.rebindMessageListeners();
+
+        // 🔥 재연결인 경우에만 복구 팝업 표시
+        if (!this.isInitialConnection) {
+          useAlertStore.getState().addAlert({
+            severity: "success",
+            title: "채팅 연결 복구",
+            message: "채팅 연결이 복구되었습니다.",
+          });
+        }
+        this.isInitialConnection = false;
+      }
     });
   }
 }
