@@ -28,17 +28,28 @@ userClient.interceptors.request.use(
   },
 );
 
-// TODO: 개발용 임시 토큰 (나중에 삭제)
+// ============================================================================
+// TODO: 개발용 임시 토큰 삭제하기
+// - 삭제 예정 (DEV_ACCESS_TOKEN, isWebViewEnvironment() 함께 삭제) 
+// - 웹 브라우저 환경에서만 사용, 웹뷰 환경에서는 사용 안 함
 const DEV_ACCESS_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWt3anAyZWwwMDAzN2lhdjY1ZXcxeTlzIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2OTUxNTMwMCwiZXhwIjoxNzc3MjkxMzAwfQ.4tB8pQJmThFXDucWNlS4ZFVOHRtIhPh5TsKviQtgC8Y";
+function isWebViewEnvironment(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return userAgent.includes("wv") || userAgent.includes("webview");
+}
 
-// 요청 인터셉터 - Authorization 헤더 추가 (나중에 삭제)
 userClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  if (DEV_ACCESS_TOKEN) {
+  // TODO: 개발용 임시 토큰 삭제하기
+  if (DEV_ACCESS_TOKEN && !isWebViewEnvironment()) {
     config.headers.Authorization = `Bearer ${DEV_ACCESS_TOKEN}`;
   }
   return config;
 });
+// ============================================================================
 
 // 응답 인터셉터
 userClient.interceptors.response.use(
