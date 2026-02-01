@@ -14,6 +14,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 export class ChatSocketService {
   // Socket.IO 클라이언트 인스턴스 - null일 경우 연결되지 않은 상태
   private socket: Socket | null = null;
+  // 현재 조인된 채팅방 목록 (재연결 시 자동으로 다시 조인하기 위해 추적)
+  private joinedRooms: Set<string> = new Set();
 
   /**
    * WebSocket 연결
@@ -158,6 +160,15 @@ export class ChatSocketService {
           }
         });
       }
+
+      // 재연결 성공 시 자동으로 채팅방을 다시 조인하는 핸들러
+      if (!this.socket.hasListeners("reconnect")) {
+        this.socket.on("reconnect", () => {
+          console.log("Chat socket reconnected:", this.socket?.id);
+          // 재연결 시 이전에 조인했던 채팅방들을 자동으로 다시 조인
+          this.rejoinRooms();
+        });
+      }
     });
   }
 
@@ -193,6 +204,8 @@ export class ChatSocketService {
     // 연결이 완료된 후 채팅방 조인
     if (this.socket && this.socket.connected) {
       this.socket.emit("join-room", { roomId });
+      // 조인한 채팅방을 목록에 추가 (재연결 시 자동으로 다시 조인하기 위해)
+      this.joinedRooms.add(roomId);
     }
   }
 
@@ -211,6 +224,9 @@ export class ChatSocketService {
     if (this.socket && this.socket.connected) {
       this.socket.emit("leave-room", { roomId });
     }
+    
+    // 조인 목록에서 제거 (재연결 시 다시 조인하지 않도록)
+    this.joinedRooms.delete(roomId);
   }
 
   /**
@@ -279,6 +295,24 @@ export class ChatSocketService {
    */
   isConnected(): boolean {
     return this.socket?.connected ?? false;
+  }
+
+  /**
+   * 재연결 시 이전에 조인했던 채팅방들을 자동으로 다시 조인
+   *
+   * Socket.IO가 자동으로 재연결되면, 이전에 조인했던 채팅방들을
+   * 자동으로 다시 조인하여 채팅 기능이 정상적으로 동작하도록 합니다.
+   */
+  private rejoinRooms(): void {
+    if (!this.socket || !this.socket.connected) {
+      return;
+    }
+
+    // 조인했던 모든 채팅방을 다시 조인
+    this.joinedRooms.forEach((roomId) => {
+      console.log(`Rejoining room: ${roomId}`);
+      this.socket?.emit("join-room", { roomId });
+    });
   }
 }
 

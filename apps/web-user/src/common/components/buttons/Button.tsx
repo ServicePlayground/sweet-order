@@ -6,7 +6,7 @@ import React from "react";
  * - secondary: 보조 버튼 (배경: 회색, 텍스트: 검정)
  * - outline: 테두리 버튼 (배경: 흰색, 테두리: 회색)
  */
-type ButtonVariant = "primary" | "secondary" | "outline";
+type ButtonVariant = "primary" | "secondary" | "outline" | "red";
 
 /**
  * 버튼 크기
@@ -24,7 +24,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-white",
+  "primary": "bg-primary text-white",
+  "red": "bg-red text-white",
   secondary: "bg-gray-200 text-gray-900",
   outline: "bg-white text-gray-900 border border-gray-100",
 };

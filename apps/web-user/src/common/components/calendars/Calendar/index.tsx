@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/apps/web-user/common/lib/utils";
 
@@ -132,6 +132,12 @@ export const Calendar: React.FC<CalendarProps> = ({
     selectedDateOnly.setHours(0, 0, 0, 0);
     return dateOnly.getTime() === selectedDateOnly.getTime();
   };
+
+  useEffect(() => {
+    if (!selectedDate && onDateSelect && !isDateDisabled(today)) {
+      onDateSelect(new Date(today));
+    }
+  }, [selectedDate, onDateSelect, minDate, maxDate, today]);
 
   // 이전 달로 이동
   const goToPreviousMonth = () => {
