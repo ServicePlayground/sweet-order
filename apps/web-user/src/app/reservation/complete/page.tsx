@@ -77,9 +77,7 @@ export default function ReservationCompletePage() {
           <div className="flex flex-col gap-[12px]">
             {snapshot.items.map((item, index) => (
               <div key={index} className="p-[14px] border border-gray-100 rounded-lg">
-                <div className="text-sm text-gray-700 mb-[8px]">
-                  {formatDateTime(item.date)}
-                </div>
+                <div className="text-sm text-gray-700 mb-[8px]">{formatDateTime(item.date)}</div>
                 <div className="text-sm text-gray-900 mb-[6px]">
                   사이즈: {item.size} / 맛: {item.flavor}
                 </div>
@@ -109,4 +107,3 @@ export default function ReservationCompletePage() {
     </div>
   );
 }
-

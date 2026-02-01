@@ -67,7 +67,7 @@ export class ChatSocketService {
           useAlertStore.getState().addAlert({
             severity: "error",
             title: "채팅 연결 실패",
-            message: "채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+            message: "[100] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
           });
           reject(error);
         };
@@ -126,7 +126,7 @@ export class ChatSocketService {
         useAlertStore.getState().addAlert({
           severity: "error",
           title: "채팅 연결 실패",
-          message: "채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+          message: "[101] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
         });
         reject(error);
       };
@@ -141,21 +141,58 @@ export class ChatSocketService {
           // 비정상적인 연결 끊김인 경우 사용자에게 알림
           // "io client disconnect"는 정상적인 클라이언트 종료이므로 알림 불필요
           if (reason !== "io client disconnect") {
-            useAlertStore.getState().addAlert({
-              severity: "warning",
-              title: "채팅 연결 끊김",
-              message: "채팅 연결이 끊어졌습니다. 자동으로 재연결을 시도합니다.",
-            });
+            // 재연결 가능한 경우에만 알림 표시
+            // "transport close"는 네트워크 오류로 인한 끊김으로 재연결 가능
+            // "ping timeout"은 서버가 응답하지 않아서 끊김으로 재연결 가능
+            if (reason === "transport close" || reason === "ping timeout") {
+              useAlertStore.getState().addAlert({
+                severity: "warning",
+                title: "채팅 연결 끊김",
+                message: "채팅 연결이 끊어졌습니다. 자동으로 재연결을 시도합니다.",
+              });
+            }
           }
+        });
+      }
+
+      // 재연결 시도 중 이벤트 핸들러
+      if (!this.socket.hasListeners("reconnect_attempt")) {
+        this.socket.on("reconnect_attempt", (attemptNumber) => {
+          console.log(`Chat socket reconnection attempt ${attemptNumber}`);
         });
       }
 
       // 재연결 성공 시 자동으로 채팅방을 다시 조인하는 핸들러
       if (!this.socket.hasListeners("reconnect")) {
-        this.socket.on("reconnect", () => {
-          console.log("Chat socket reconnected:", this.socket?.id);
+        this.socket.on("reconnect", (attemptNumber) => {
+          console.log(`Chat socket reconnected after ${attemptNumber} attempts:`, this.socket?.id);
+          // 재연결 성공 알림
+          useAlertStore.getState().addAlert({
+            severity: "success",
+            title: "채팅 연결 복구",
+            message: "채팅 연결이 복구되었습니다.",
+          });
           // 재연결 시 이전에 조인했던 채팅방들을 자동으로 다시 조인
           this.rejoinRooms();
+        });
+      }
+
+      // 재연결 실패 시 이벤트 핸들러
+      if (!this.socket.hasListeners("reconnect_error")) {
+        this.socket.on("reconnect_error", (error) => {
+          console.error("Chat socket reconnection error:", error);
+        });
+      }
+
+      // 재연결 시도 횟수 초과 시 이벤트 핸들러
+      if (!this.socket.hasListeners("reconnect_failed")) {
+        this.socket.on("reconnect_failed", () => {
+          console.error("Chat socket reconnection failed after all attempts");
+          useAlertStore.getState().addAlert({
+            severity: "error",
+            title: "채팅 연결 실패",
+            message: "[102] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+          });
         });
       }
     });
@@ -185,27 +222,50 @@ export class ChatSocketService {
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    // 연결이 완료된 후 채팅방 조인
-    if (this.socket && this.socket.connected) {
-      this.socket.emit("join-room", { roomId });
-      // 조인한 채팅방을 목록에 추가 (재연결 시 자동으로 다시 조인하기 위해)
-      this.joinedRooms.add(roomId);
+    // 연결 상태 확인
+    if (!this.socket || !this.socket.connected) {
+      useAlertStore.getState().addAlert({
+        severity: "error",
+        title: "채팅 연결 실패",
+        message: "[106] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+      });
+      return;
     }
+
+    // 연결이 완료된 후 채팅방 조인
+    this.socket.emit("join-room", { roomId });
+    // 조인한 채팅방을 목록에 추가 (재연결 시 자동으로 다시 조인하기 위해)
+    this.joinedRooms.add(roomId);
   }
 
   /**
    * 채팅방 나가기
+   *
+   * 조인한 채팅방이 하나도 없으면 연결을 끊어 불필요한 polling 요청을 방지합니다.
    */
   async leaveRoom(roomId: string): Promise<void> {
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    if (this.socket && this.socket.connected) {
-      this.socket.emit("leave-room", { roomId });
+    // 연결 상태 확인
+    if (!this.socket || !this.socket.connected) {
+      useAlertStore.getState().addAlert({
+        severity: "error",
+        title: "채팅 연결 실패",
+        message: "[105] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+      });
+      return;
     }
-    
+
+    this.socket.emit("leave-room", { roomId });
+
     // 조인 목록에서 제거 (재연결 시 다시 조인하지 않도록)
     this.joinedRooms.delete(roomId);
+
+    // 조인한 채팅방이 하나도 없으면 연결을 끊어 불필요한 polling 요청 방지
+    if (this.joinedRooms.size === 0) {
+      this.disconnect();
+    }
   }
 
   async onNewMessage(callback: (message: Message) => void): Promise<() => void> {
@@ -240,10 +300,24 @@ export class ChatSocketService {
     // 먼저 연결이 완료될 때까지 대기
     await this.connect();
 
-    // WebSocket으로 메시지 전송
-    if (this.socket && this.socket.connected) {
-      this.socket.emit("send-message", { roomId, text });
+    // 연결 상태 확인
+    if (!this.socket || !this.socket.connected) {
+      useAlertStore.getState().addAlert({
+        severity: "error",
+        title: "채팅 연결 실패",
+        message: "[103] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+      });
+      return;
     }
+
+    // 채팅방에 조인되어 있는지 확인
+    if (!this.joinedRooms.has(roomId)) {
+      // 조인되어 있지 않으면 다시 조인 시도
+      await this.joinRoom(roomId);
+    }
+
+    // WebSocket으로 메시지 전송
+    this.socket.emit("send-message", { roomId, text });
   }
 
   /**
@@ -261,13 +335,27 @@ export class ChatSocketService {
    */
   private rejoinRooms(): void {
     if (!this.socket || !this.socket.connected) {
+      useAlertStore.getState().addAlert({
+        severity: "error",
+        title: "채팅 연결 실패",
+        message: "[104] 채팅 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+      });
       return;
     }
 
     // 조인했던 모든 채팅방을 다시 조인
-    this.joinedRooms.forEach((roomId) => {
-      console.log(`Rejoining room: ${roomId}`);
-      this.socket?.emit("join-room", { roomId });
+    const roomIds = Array.from(this.joinedRooms);
+    if (roomIds.length === 0) {
+      console.log("No rooms to rejoin");
+      return;
+    }
+
+    console.log(`Rejoining ${roomIds.length} room(s):`, roomIds);
+    roomIds.forEach((roomId) => {
+      if (this.socket && this.socket.connected) {
+        this.socket.emit("join-room", { roomId });
+        console.log(`Rejoined room: ${roomId}`);
+      }
     });
   }
 }
