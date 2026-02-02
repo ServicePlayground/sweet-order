@@ -1,13 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
+import { ProductType } from "@/apps/web-user/features/product/types/product.type";
+import { Icon } from "@/apps/web-user/common/components/icons";
 
 interface ReservationItemSnapshot {
   date: string | null;
   size: string;
+  sizePrice: number;
   flavor: string;
+  flavorPrice: number;
   cream: string;
   letteringMessage: string;
   requestMessage: string;
@@ -15,12 +20,16 @@ interface ReservationItemSnapshot {
 }
 
 interface ReservationSnapshot {
+  productType: ProductType;
   items: ReservationItemSnapshot[];
   totalQuantity: number;
   totalPrice: number;
   cakeTitle: string;
   cakeImageUrl: string;
+  cakeSize: string;
   price: number;
+  productNoticeProducer: string;
+  productNoticeAddress: string;
 }
 
 const formatDateTime = (dateString: string | null) => {
@@ -42,6 +51,7 @@ const formatDateTime = (dateString: string | null) => {
 
 export default function ReservationCompletePage() {
   const [snapshot, setSnapshot] = useState<ReservationSnapshot | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("reservationComplete");
@@ -54,58 +64,116 @@ export default function ReservationCompletePage() {
   }, []);
 
   return (
-    <div className="min-h-screen px-[20px] py-[32px]">
-      <div className="text-2xl font-bold text-gray-900 mb-[8px]">예약이 완료됐어요</div>
-      <div className="text-sm text-gray-600 mb-[24px]">
-        예약 내역은 마이페이지에서 확인할 수 있어요.
-      </div>
+    <div className="relative h-screen">
+      {snapshot?.cakeImageUrl && (
+        <div className="h-[30%] relative overflow-hidden">
+          <Image
+            src={snapshot.cakeImageUrl}
+            alt={snapshot.cakeTitle}
+            fill
+            className="object-cover blur-sm scale-110"
+          />
+        </div>
+      )}
 
       {!snapshot ? (
         <div className="text-sm text-gray-500 mb-[24px]">예약 정보가 없습니다.</div>
       ) : (
-        <div className="flex flex-col gap-[16px] mb-[28px]">
-          <div className="flex items-center justify-between p-[16px] border border-gray-100 rounded-lg">
-            <div>
-              <div className="text-sm text-gray-600">상품</div>
-              <div className="text-base font-bold text-gray-900">{snapshot.cakeTitle}</div>
+        <div className="absolute bottom-[76px] left-0 right-0 h-[calc(70%-48px)] px-[20px] pt-[56px] bg-white rounded-t-4xl">
+          <div className="h-full overflow-y-auto">
+            <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
+              <Image
+                src={snapshot.cakeImageUrl}
+                alt={snapshot.cakeTitle}
+                fill
+                className="object-cover"
+              />
             </div>
-            <div className="text-base font-bold text-gray-900">
-              {snapshot.totalPrice.toLocaleString()}원
+            <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
+              {snapshot.productType === ProductType.BASIC_CAKE ? "예약완료" : "예약신청완료"} 🎉
+            </p>
+            <p className="flex items-center gap-[8px] mb-[20px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-light rounded-xl">
+              <Icon name="warning" width={16} height={16} className="text-blue-sky" />
+              예약 확정까지 1-2일 소요될 수 있어요.
+            </p>
+            <div className="mb-[20px]">
+              <p className="flex items-center justify-between mb-[8px] px-[16px] text-sm">
+                <span className="text-gray-500">픽업날짜</span>
+                <span className="text-gray-900">{formatDateTime(snapshot.items[0].date)}</span>
+              </p>
+              <p className="flex items-center justify-between px-[16px] text-sm">
+                <span className="text-gray-500">픽업장소</span>
+                <span className="text-gray-900">{snapshot.productNoticeProducer} ({snapshot.productNoticeAddress})</span>
+              </p>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-[12px]">
-            {snapshot.items.map((item, index) => (
-              <div key={index} className="p-[14px] border border-gray-100 rounded-lg">
-                <div className="text-sm text-gray-700 mb-[8px]">
-                  {formatDateTime(item.date)}
+            <div className="border border-gray-100 rounded-lg">
+              <div className="flex items-center justify-between px-[16px] py-[12px] border-b border-gray-100">
+                <div className="flex flex-col gap-[4px]">
+                  <span className="text-xs text-gray-500">예약상품</span>
+                  <span className="text-sm text-gray-900">{snapshot.cakeTitle}</span>
                 </div>
-                <div className="text-sm text-gray-900 mb-[6px]">
-                  사이즈: {item.size} / 맛: {item.flavor}
+                <div className="flex flex-col gap-[4px] items-end">
+                  <span className="text-xs text-gray-500">총 금액</span>
+                  <span className="text-sm text-gray-900">{snapshot.totalPrice.toLocaleString()}원</span>
                 </div>
-                <div className="text-sm text-gray-900 mb-[6px]">
-                  레터링: {item.letteringMessage}
-                </div>
-                {item.requestMessage && (
-                  <div className="text-sm text-gray-900 mb-[6px]">
-                    요청사항: {item.requestMessage}
-                  </div>
-                )}
-                <div className="text-sm text-gray-700">수량: {item.quantity}</div>
               </div>
-            ))}
+              {isDetailOpen && (
+                <div className="flex flex-col gap-[12px] bg-gray-50 border-b border-gray-100">
+                  {snapshot.items.map((item, index) => (
+                    <div key={index} className="flex flex-col gap-[8px] py-[12px] px-[16px]">
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-500">상품명</span>
+                        <p className="flex items-center justify-between text-2sm text-gray-900">
+                          <span>{snapshot.cakeTitle}</span>
+                          <span>{snapshot.price.toLocaleString()}원</span>
+                        </p>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-500">사이즈</span>
+                        <p className="flex items-center justify-between text-2sm text-gray-900">
+                          <span>{item.size}</span>
+                          {item.sizePrice > 0 && <span>+{item.sizePrice.toLocaleString()}원</span>}
+                        </p>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-500">맛</span>
+                        <p className="flex items-center justify-between text-2sm text-gray-900">
+                          <span>{item.flavor}</span>
+                          {item.flavorPrice > 0 && <span>+{item.flavorPrice.toLocaleString()}원</span>}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => setIsDetailOpen(!isDetailOpen)}
+                className="flex items-center justify-center gap-[4px] w-full h-[42px] text-2sm text-gray-900 bg-gray-50"
+              >
+                {isDetailOpen ? "간략히 보기" : "상세보기"}
+                <Icon
+                  name="arrow"
+                  width={16}
+                  height={16}
+                  className={`text-[#D9D9D9] transition-transform ${isDetailOpen ? "" : "rotate-180"}`}
+                />
+              </button>
+            </div>
+            <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] bg-white">
+              <div className="flex gap-[8px]">
+                <Link href="/store" className="flex-1">
+                  <Button variant="outline">예약 상세보기</Button>
+                </Link>
+                <Link href="/" className="flex-1">
+                  <Button variant="outline">홈으로 가기</Button>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      <div className="flex gap-[8px]">
-        <Link href="/" className="flex-1">
-          <Button>홈으로 돌아가기</Button>
-        </Link>
-        <Link href="/store" className="flex-1">
-          <Button variant="outline">스토어 둘러보기</Button>
-        </Link>
-      </div>
+      
     </div>
   );
 }
