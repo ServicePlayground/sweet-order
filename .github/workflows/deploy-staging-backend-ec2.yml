@@ -123,8 +123,8 @@ jobs:
             
             # Prisma CLI는 2단계에서 이미 전역 설치되어 있음
             
-            # 마이그레이션 실행
-            # 개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리
+            # 마이그레이션 실행 (개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리)
+            # Prisma Client 생성 (EC2 환경에 맞는 바이너리 생성)
             cd apps/backend
             prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
             cd ~/sweet-order
@@ -143,3 +143,9 @@ jobs:
             
             # 상태 확인
             pm2 status
+
+            # 목록 확인
+            pm2 list
+
+            # 로그 확인
+            pm2 logs sweet-order-backend --lines 100
