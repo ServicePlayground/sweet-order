@@ -73,7 +73,7 @@ const config: Config = {
           100: "#FCCACB",
           200: "#F99FA1",
           300: "#F67476",
-        }
+        },
       },
       keyframes: {
         "accordion-down": {
