@@ -126,7 +126,8 @@ jobs:
             # 마이그레이션 실행 (개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리)
             # Prisma Client 생성 (EC2 환경에 맞는 바이너리 생성)
             cd apps/backend
-            prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
+            npx prisma generate --schema ./src/infra/database/prisma/schema.prisma
+            npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
             cd ~/sweet-order
             
             # PM2로 애플리케이션 재시작

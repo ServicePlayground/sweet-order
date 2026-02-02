@@ -63,7 +63,7 @@ sudo dnf install -y nodejs
 # PM2 설치 (프로세스 매니저)
 sudo npm install -g pm2
 
-# Prisma CLI 설치 (마이그레이션 실행용)
+# Prisma CLI 설치 (마이그레이션 실행용) (v6)
 sudo npm install -g prisma
 
 # OpenSSL 설치 (Prisma 바이너리 런타임에 필요)
