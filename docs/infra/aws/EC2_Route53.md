@@ -139,8 +139,6 @@ GitHub Actions를 사용하여 자동 배포를 구성합니다. 코드를 EC2�
 
 - 프로젝트 루트에 `.github/workflows/deploy-staging-backend-ec2.yml` 파일을 생성합니다.
 - GitHub 저장소 → Settings → Secrets and variables → Actions에서 다음 Secrets를 설정합니다.
-  - `EC2_HOST`: EC2 퍼블릭 IP 또는 도메인
-  - `EC2_SSH_KEY`: EC2 키 페어의 프라이빗 키 내용 (전체 내용, `-----BEGIN RSA PRIVATE KEY-----` 부터 `-----END RSA PRIVATE KEY-----` 까지)
 
 ## 📝 5단계: Nginx 리버스 프록시 설정 (권장)
 
