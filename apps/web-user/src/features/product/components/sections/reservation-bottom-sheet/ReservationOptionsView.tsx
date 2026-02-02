@@ -8,6 +8,7 @@ import { TextArea } from "@/apps/web-user/common/components/textareas/TextArea";
 import {
   CakeFlavorOption,
   CakeSizeOption,
+  ProductType,
 } from "@/apps/web-user/features/product/types/product.type";
 
 interface ReservationOptionsViewProps {
@@ -29,6 +30,7 @@ interface ReservationOptionsViewProps {
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveImage: (index: number) => void;
   dateSelectionSignal: number;
+  productType: ProductType;
 }
 
 export function ReservationOptionsView({
@@ -50,6 +52,7 @@ export function ReservationOptionsView({
   handleFileChange,
   handleRemoveImage,
   dateSelectionSignal,
+  productType,
 }: ReservationOptionsViewProps) {
   const sizeRef = useRef<HTMLDivElement>(null);
   const flavorRef = useRef<HTMLDivElement>(null);
@@ -108,6 +111,7 @@ export function ReservationOptionsView({
             ...(cakeSizeOptions?.map((size) => ({
               value: size.displayName,
               label: `${size.displayName} ${size.description}`,
+              subLabel: size.price > 0 ? `+${size.price.toLocaleString()}원` : undefined,
             })) ?? []),
           ]}
         />
@@ -123,6 +127,7 @@ export function ReservationOptionsView({
             ...(cakeFlavorOptions?.map((flavor) => ({
               value: flavor.displayName,
               label: flavor.displayName,
+              subLabel: flavor.price > 0 ? `+${flavor.price.toLocaleString()}원` : undefined,
             })) ?? []),
           ]}
         />
@@ -139,7 +144,10 @@ export function ReservationOptionsView({
       </div>
       <div className="flex flex-col gap-[6px]">
         <div className="block mb-[10px] text-sm font-bold text-gray-900">
-          참고사진 <span className="font-normal text-gray-300">(선택)</span>
+          참고사진{" "}
+          {productType === "BASIC_CAKE" && (
+            <span className="font-normal text-gray-300">(선택)</span>
+          )}
         </div>
         <div className="flex gap-[6px] overflow-auto w-full">
           <button

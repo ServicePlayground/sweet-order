@@ -45,11 +45,13 @@ export interface CakeSizeOption {
   visible: VisibleStatus;
   description: string;
   displayName: string;
+  price: number;
 }
 
 export interface CakeFlavorOption {
   visible: VisibleStatus;
   displayName: string;
+  price: number;
 }
 
 /**

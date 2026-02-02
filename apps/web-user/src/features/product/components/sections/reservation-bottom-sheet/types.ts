@@ -1,12 +1,15 @@
 import {
   CakeFlavorOption,
   CakeSizeOption,
+  ProductType,
 } from "@/apps/web-user/features/product/types/product.type";
 
 export interface OrderItem {
   date: Date | null;
   size: string;
+  sizePrice: number;
   flavor: string;
+  flavorPrice: number;
   cream: string;
   letteringMessage: string;
   requestMessage: string;
@@ -24,6 +27,10 @@ export interface ReservationBottomSheetProps {
   cakeImageUrl: string;
   cakeSizeOptions?: CakeSizeOption[];
   cakeFlavorOptions?: CakeFlavorOption[];
+  cakeSize?: string;
+  productType: ProductType;
+  productNoticeProducer?: string;
+  productNoticeAddress?: string;
   onClose: () => void;
   onConfirm: (selection: ReservationSelection) => void;
 }
