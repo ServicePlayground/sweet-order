@@ -17,21 +17,11 @@ import {
   userSwaggerConfig,
 } from "@apps/backend/common/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
-import { loadSecretsFromEnv } from "@apps/backend/common/utils/loadSecretsFromEnv";
-import { runMigration } from "@apps/backend/scripts/migration";
 
 /**
  * NestJS 애플리케이션의 진입점
  */
 async function bootstrap(): Promise<void> {
-  if (process.env.NODE_ENV !== "development") {
-    // 배포 환경(staging, production)에서는 AWS App Runner(AWS Secrets Manager)에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
-    loadSecretsFromEnv();
-
-    // 배포 환경(staging, production)에서만 런타임 초기에 마이그레이션(yarn run db:migrate:deploy) 실행(환경변수가 필요하기 때문에 런타임시 실행)
-    // 개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리
-    await runMigration();
-  }
 
   // NestJS 애플리케이션 메인 인스턴스 생성 (AppModule을 사용하여 모든 모듈을 포함하고 있음)
   const app = await NestFactory.create(AppModule);

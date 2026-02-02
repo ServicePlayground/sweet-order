@@ -1,0 +1,141 @@
+name: Deploy Backend to EC2 (Staging)
+
+on:
+  push:
+    tags:
+      - "backend/staging-*"
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@4.9.4 --activate
+
+      - name: Install dependencies and build
+        run: |
+          # 의존성 설치 (postinstall 자동 실행)
+          # 현재 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
+          yarn install
+          
+          # 백엔드 빌드
+          yarn run backend:build:staging
+
+      - name: Prepare deployment package
+        run: |
+          # 배포에 필요한 파일만 직접 압축
+          # - apps/backend/dist: 빌드 결과물
+          tar -czf deploy.tar.gz \
+            apps/backend/dist \
+            apps/backend/src/infra/database/prisma
+
+      - name: Copy deployment package to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.STAGING_EC2_SSH_KEY }}
+          source: "deploy.tar.gz"
+          target: "~/"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.STAGING_EC2_SSH_KEY }}
+          script: |
+            # 작업 디렉토리 생성
+            mkdir -p ~/sweet-order
+            cd ~/sweet-order
+            
+            # 기존 파일 백업 (선택사항)
+            if [ -d apps/backend/dist ]; then
+              mv apps/backend/dist apps/backend/dist.backup.$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
+            fi
+            
+            # 배포 패키지 압축 해제
+            tar -xzf ~/deploy.tar.gz
+            rm ~/deploy.tar.gz
+            
+            # .env.staging 파일 생성 (GitHub Secrets 사용)
+            cat > apps/backend/.env.staging << EOF
+            # Environment
+            NODE_ENV=staging
+            
+            # PORT
+            PORT=8080
+            
+            # DOMAIN
+            PUBLIC_USER_DOMAIN=${{ secrets.STAGING_PUBLIC_USER_DOMAIN }}
+            PUBLIC_SELLER_DOMAIN=${{ secrets.STAGING_PUBLIC_SELLER_DOMAIN }}
+            PUBLIC_ADMIN_DOMAIN=${{ secrets.STAGING_PUBLIC_ADMIN_DOMAIN }}
+            
+            # CORS Configuration
+            CORS_ORIGIN=${{ secrets.STAGING_CORS_ORIGIN }}
+            
+            # JWT
+            JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+            
+            # DATABASE
+            # 옵션 1: EC2 PostgreSQL 사용 (비용 절감)
+            DATABASE_URL="postgresql://sweetorder_admin:${{ secrets.STAGING_DATABASE_PASSWORD }}@localhost:5432/sweetorder_staging_db?schema=public"
+            
+            # GOOGLE OAuth
+            GOOGLE_CLIENT_ID=${{ secrets.STAGING_GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=/auth/login/google
+            
+            # SWAGGER
+            SWAGGER_USERNAME=${{ secrets.STAGING_SWAGGER_USERNAME }}
+            SWAGGER_PASSWORD=${{ secrets.STAGING_SWAGGER_PASSWORD }}
+            
+            # NTS API
+            NTS_API_URL=https://api.odcloud.kr/api
+            KFTC_API_URL=https://apis.data.go.kr
+            DATA_GO_KR_API_KEY=${{ secrets.STAGING_DATA_GO_KR_API_KEY }}
+            
+            # AWS S3
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=ap-northeast-2
+            S3_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
+            CLOUDFRONT_DOMAIN=${{ secrets.STAGING_CLOUDFRONT_DOMAIN }}
+            EOF
+            
+            # 환경 변수 파일 권한 설정
+            chmod 600 apps/backend/.env.staging
+            
+            # Prisma CLI는 2단계에서 이미 전역 설치되어 있음
+            
+            # 마이그레이션 실행
+            # 개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리
+            cd apps/backend
+            prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
+            cd ~/sweet-order
+            
+            # PM2로 애플리케이션 재시작
+            # NestJS ConfigModule이 apps/backend/.env.staging 파일을 자동으로 읽음
+            pm2 delete sweet-order-backend 2>/dev/null || true
+            cd apps/backend
+            NODE_ENV=staging pm2 start dist/main.js \
+              --name sweet-order-backend \
+              --update-env
+            cd ~/sweet-order
+            
+            # PM2 자동 시작 설정 저장
+            pm2 save
+            
+            # 상태 확인
+            pm2 status
