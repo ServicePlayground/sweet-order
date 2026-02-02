@@ -49,14 +49,14 @@ export default function Header({ variant = "main" }: HeaderProps) {
 
   // Main 헤더 (기본): 로고 + 장바구니
   return (
-    <header className="px-10 flex justify-between items-center h-[160px] bg-white">
+    <header className="px-5 flex justify-between items-center h-[52px]">
       {/* 로고 */}
       <Link href={PATHS.HOME} className="flex items-center no-underline" aria-label="홈으로 이동">
         <Image
           src="/images/logo/logo1.png"
           alt="로고"
-          width={160}
-          height={160}
+          width={52}
+          height={52}
           className="object-contain cursor-pointer"
         />
       </Link>

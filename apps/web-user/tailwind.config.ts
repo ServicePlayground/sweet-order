@@ -25,6 +25,7 @@ const config: Config = {
         xl: "12px",
         "2xl": "16px",
         "3xl": "24px",
+        "4xl": "32px",
         full: "9999px",
       },
       colors: {
@@ -56,6 +57,8 @@ const config: Config = {
         blue: {
           DEFAULT: "#E7F2FF",
           dark: "#1773DF",
+          sky: "#6BAFFF",
+          light: "#EFF6FF",
         },
         green: {
           DEFAULT: "#5FBF87",
