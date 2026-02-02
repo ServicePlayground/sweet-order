@@ -94,7 +94,7 @@ jobs:
             
             # DATABASE
             # 옵션 1: EC2 PostgreSQL 사용 (비용 절감)
-            DATABASE_URL="postgresql://sweetorder_admin:${{ secrets.STAGING_DATABASE_PASSWORD }}@localhost:5432/sweetorder_staging_db?schema=public"
+            DATABASE_URL=postgresql://sweetorder_admin:${{ secrets.STAGING_DATABASE_PASSWORD }}@localhost:5432/sweetorder_staging_db?schema=public
             
             # GOOGLE OAuth
             GOOGLE_CLIENT_ID=${{ secrets.STAGING_GOOGLE_CLIENT_ID }}
