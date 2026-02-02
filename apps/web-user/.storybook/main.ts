@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
+import svgr from "vite-plugin-svgr";
 
 import { dirname } from "path";
 
@@ -22,5 +23,18 @@ const config: StorybookConfig = {
   ],
   framework: getAbsolutePath("@storybook/nextjs-vite"),
   staticDirs: ["../public"],
+  viteFinal: async (config) => {
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      svgr({
+        include: "**/*.svg",
+        svgrOptions: {
+          exportType: "default",
+          icon: true,
+        },
+      })
+    );
+    return config;
+  },
 };
 export default config;
