@@ -70,7 +70,7 @@ yarn web-seller:storybook       # 판매자 스토리북 실행
 
 | 프로젝트     | 태그 형식              | 배포 플랫폼    | 예시                        |
 | ------------ | ---------------------- | -------------- | --------------------------- |
-| `backend`    | `backend/staging-*`    | AWS App Runner | `backend/staging-v1.0.0`    |
+| `backend`    | `backend/staging-*`    | AWS EC2        | `backend/staging-v1.0.0`    |
 | `web-user`   | `web-user/staging-*`   | Vercel         | `web-user/staging-v1.0.0`   |
 | `web-seller` | `web-seller/staging-*` | Vercel         | `web-seller/staging-v1.0.0` |
 
@@ -221,8 +221,7 @@ hotfix/xxx (긴급 수정 브랜치)
 
 #### AWS 인프라
 
-- **[AWS RDS 가이드](<./docs/infra/aws/AWS%20RDS(데이터베이스)%20-%20가이드.md>)**: AWS RDS PostgreSQL 설정 및 관리
-- **[AWS App Runner 가이드](<./docs/infra/aws/AWS%20App%20Runner(backend)%20-%20가이드.md>)**: AWS App Runner 백엔드 배포 가이드
+- **[EC2 배포 가이드](<./docs/infra/aws/EC2_Route53_S3_CloudFront.md>)**: AWS EC2 백엔드 배포 가이드 (PostgreSQL, Nginx, PM2 포함)
 - **[AWS Region 가이드](./docs/infra/aws/AWS%20Region%20-%20가이드.md)**: AWS 리전 선택 가이드
 - **[AWS Route53 가이드](<./docs/infra/aws/AWS%20Route53(도메인)%20-%20가이드.md>)**: AWS Route53 도메인 설정 가이드
 - **[AWS S3(정적), CloudFront(CDN) 가이드](<./docs/infra/aws/AWS%20S3(정적),%20CloudFront(CDN)%20-%20가이드.md>)**: AWS S3(정적), CloudFront(CDN) 설정 가이드
