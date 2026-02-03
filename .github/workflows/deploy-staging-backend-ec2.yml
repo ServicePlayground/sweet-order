@@ -140,6 +140,8 @@ jobs:
             cd apps/backend
             NODE_ENV=staging pm2 start dist/main.js \
               --name sweet-order-backend \
-              --update-env
+              --update-env \
+              --cwd $(pwd)
             pm2 save
-            pm2 status
+            echo "✅ 배포 완료!"
+            pm2 list
