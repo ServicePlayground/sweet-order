@@ -537,3 +537,87 @@ https://api-staging.sweetorders.com/health
 
 6. (커스텀 도메인이 CloudFront Distribution을 가리키도록 설정)
    - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > 대체 도메인 이름 아래 "Route domains to CloudFront" 버튼 클릭 > Set up routing automatically 클릭
+
+---
+
+## 📊 전체 아키텍처 다이어그램
+
+```mermaid
+graph TB
+    subgraph "클라이언트"
+        User[사용자/프론트엔드]
+        GitHub[GitHub Repository]
+    end
+
+    subgraph "AWS Route53"
+        Route53[Route53 DNS<br/>sweetorders.com]
+    end
+
+    subgraph "AWS EC2 인스턴스"
+        subgraph "Nginx 리버스 프록시"
+            Nginx[Nginx<br/>포트: 80/443<br/>SSL: Let's Encrypt]
+        end
+        
+        subgraph "백엔드 애플리케이션"
+            Backend[NestJS Backend<br/>포트: 8080<br/>PM2로 실행]
+        end
+        
+        subgraph "데이터베이스"
+            PostgreSQL[PostgreSQL 16<br/>포트: 5432<br/>로컬 설치]
+        end
+    end
+
+    subgraph "AWS S3"
+        S3[S3 버킷<br/>sweetorder-uploads-staging-apne2<br/>정적 파일 저장]
+    end
+
+    subgraph "AWS CloudFront"
+        CloudFront[CloudFront CDN<br/>static-staging.sweetorders.com<br/>SSL: ACM 인증서]
+    end
+
+    subgraph "CI/CD"
+        GitHubActions[GitHub Actions<br/>자동 배포]
+    end
+
+    subgraph "SSL 인증서"
+        LetsEncrypt[Let's Encrypt<br/>api-staging.sweetorders.com]
+        ACM[ACM Certificate<br/>static-staging.sweetorders.com]
+    end
+
+    %% 클라이언트 → Route53
+    User -->|HTTPS 요청| Route53
+    Route53 -->|DNS 조회| Nginx
+
+    %% Nginx → Backend
+    Nginx -->|프록시<br/>포트 8080| Backend
+    Nginx -.->|SSL 인증서| LetsEncrypt
+
+    %% Backend → PostgreSQL
+    Backend -->|데이터베이스 연결| PostgreSQL
+
+    %% Backend → S3
+    Backend -->|파일 업로드| S3
+
+    %% S3 → CloudFront
+    S3 -->|원본| CloudFront
+    CloudFront -->|CDN 배포| User
+    CloudFront -.->|SSL 인증서| ACM
+
+    %% GitHub Actions → EC2
+    GitHub -->|코드 푸시| GitHubActions
+    GitHubActions -->|SSH 배포<br/>빌드 및 실행| Backend
+
+    %% Route53 → CloudFront
+    Route53 -.->|CNAME 레코드| CloudFront
+
+    style User fill:#e1f5ff
+    style Route53 fill:#ffd700
+    style Nginx fill:#90ee90
+    style Backend fill:#87ceeb
+    style PostgreSQL fill:#ffb6c1
+    style S3 fill:#ffa500
+    style CloudFront fill:#ff6347
+    style GitHubActions fill:#9370db
+    style LetsEncrypt fill:#98fb98
+    style ACM fill:#98fb98
+```
