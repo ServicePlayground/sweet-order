@@ -36,6 +36,31 @@ Sweet Order 프로젝트를 AWS EC2로 배포하는 가이드입니다. 비용 �
      - 8 GiB → 30 GiB 확장 시 추가 비용: 약 $2-3/월 (리전별 차이)
 8. 인스턴스 시작
 
+### 1.2 Elastic IP 할당
+
+EC2 인스턴스를 중지했다가 재시작하면 퍼블릭 IP 주소가 변경됩니다. Elastic IP를 할당하면 IP 주소가 고정되어 Route53과 GitHub Secrets를 매번 업데이트할 필요가 없습니다.
+
+#### 1.2.1 Elastic IP 할당
+
+1. AWS 콘솔 → EC2 → **Elastic IPs** (왼쪽 메뉴)
+2. **Elastic IP 주소 할당** 클릭
+3. 설정:
+   - **네트워크 경계 그룹**: 기본값 (ap-northeast-2)
+   - **퍼블릭 IPv4 주소 풀**: Amazon의 IPv4 주소 풀
+4. **할당** 클릭
+5. 할당된 Elastic IP 선택 → **작업** → **Elastic IP 주소 연결**
+6. 연결 설정:
+   - **인스턴스**: `sweet-order-backend-staging` 선택
+   - **프라이빗 IP 주소**: 자동 선택
+7. **연결** 클릭
+
+#### 1.2.2 Elastic IP 확인
+
+```bash
+AWS 콘솔에서 확인
+# EC2 → 인스턴스 → sweet-order-backend-staging → 퍼블릭 IPv4 주소
+```
+
 ## 📝 2단계: EC2 인스턴스 설정
 
 ### 2.1 EC2 인스턴스 접속
@@ -131,6 +156,89 @@ SELECT version();
 
 # 종료
 \q
+```
+
+### 3.3 PostgreSQL 인증 설정 (필수)
+
+Prisma migrate 및 애플리케이션에서 데이터베이스에 접근하려면 PostgreSQL 인증 방식을 변경해야 합니다.
+
+#### 3.3.1 pg_hba.conf 파일 위치 확인
+
+```bash
+# pg_hba.conf 파일 경로 확인
+sudo -u postgres psql -c "SHOW hba_file;"
+```
+
+예상 출력:
+```
+/var/lib/pgsql/16/data/pg_hba.conf
+```
+
+#### 3.3.2 pg_hba.conf 파일 수정
+
+```bash
+# pg_hba.conf 파일 편집
+sudo vi /var/lib/pgsql/16/data/pg_hba.conf
+```
+
+다음 줄을 찾아 수정합니다:
+
+**기존 (❌)**:
+```
+# IPv4 local connections:
+host    all     all     127.0.0.1/32    ident
+```
+
+**변경 (✅)**:
+```
+# IPv4 local connections:
+host    all     all     127.0.0.1/32    md5
+```
+
+**또는 PostgreSQL 14+ 권장 방식**:
+```
+# IPv4 local connections:
+host    all     all     127.0.0.1/32    scram-sha-256
+```
+
+💡 **참고**: 이미 비밀번호가 설정되어 있으므로 `md5` 방식으로도 충분합니다.
+
+#### 3.3.3 PostgreSQL 재시작
+
+```bash
+# PostgreSQL 재시작 (필수)
+sudo systemctl restart postgresql
+
+# 또는 PostgreSQL 16인 경우
+sudo systemctl restart postgresql-16
+
+# 상태 확인
+sudo systemctl status postgresql
+```
+
+#### 3.3.4 접속 테스트
+
+```bash
+# 비밀번호로 접속 테스트 (your_password를 실제 비밀번호로 변경)
+PGPASSWORD='your_password' \
+psql -h localhost -p 5432 -U sweetorder_admin sweetorder_staging_db
+```
+
+성공 시 다음과 같은 프롬프트가 표시됩니다:
+```
+sweetorder_staging_db=>
+```
+
+#### 3.3.5 최종 검증
+
+```sql
+-- 테이블 생성 권한 확인
+CREATE TABLE test_permission(id int);
+
+-- 테이블 삭제
+DROP TABLE test_permission;
+
+-- 성공하면 Prisma migrate가 정상적으로 작동합니다
 ```
 
 ## 📝 4단계: GitHub Actions 자동 CI/CD 설정
@@ -347,3 +455,85 @@ curl https://api-staging.sweetorders.com/health
 # 또는 브라우저에서 접속
 https://api-staging.sweetorders.com/health
 ```
+
+
+## 8. AWS S3(정적), CloudFront(CDN) 설정
+일반 파일 저장(이미지/파일 업로드·배포) 목적
+
+### 1. AWS S3 버킷 생성
+
+1. AWS > S3 > 버킷 생성
+
+- 버킷 유형: 범용
+- 버킷 이름: sweetorder-uploads-staging-apne2
+- 객체 소유권: ACL 비활성화됨
+- 모든 퍼블릭 액세스 차단
+- 버전 관리 OFF
+- 기본 암호화 유형: SSE-S3
+- 버킷 키: 비활성화
+
+2. 프론트엔드 CORS 설정
+
+2-1. AWS > S3 > 생성한 버킷 클릭 > 권한 탭 > CORS부분 아래 코드 삽입
+
+```json
+[
+  {
+    "AllowedOrigins": [
+      "http://localhost:3001",
+      "http://localhost:3002",
+      "http://localhost:3003",
+      "https://staging.sweetorders.com",
+      "https://seller-staging.sweetorders.com",
+      "https://admin-staging.sweetorders.com"
+    ],
+    "AllowedMethods": ["GET", "HEAD", "PUT", "POST"],
+    "AllowedHeaders": ["*"], // 전체 허용
+    "ExposeHeaders": ["ETag"], // 업로드 후 파일 확인용
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+3. S3_BUCKET, CLOUDFRONT_DOMAIN 등 환경 변수 저장
+
+4. 백엔드에서 @aws-sdk/client-s3 설치 후 파일 업로드 API 구현
+
+### 2. CloudFront 생성
+
+1. AWS > CloudFront > 배포 생성
+
+- 1단계
+  - Distribution name: sweetorder-static-staging
+  - Distribution type: Single website or app
+  - Domain: (생략)
+- 2단계
+  - Origin type: Amazon S3
+  - Origin: browse S3 버튼 클릭 > 해당 버킷 선택(sweetorder-uploads-{환경}-apne2)
+  - Origin path: (생략)
+  - Settings: 선택되어 있는 상태 유지
+- 3단계
+  - Web Application Firewall: 보안 보호 비활성화
+
+2. 정책 복사 및 저장
+   - 2-1. 생성한 배포 클릭 > origin(원본) 탭 > 해당 origin 선택 후 편집 > 정책 복사 버튼 클릭
+   - 2-2. AWS > S3 > sweetorder-uploads-{환경}-apne2 버킷 클릭 > 권한 탭 > 버킷 정책 편집 > CloudFront에서 복사한 정책을 JSON 편집기에 붙여넣기 > 저장
+
+3. (SSL 인증서 요청) AWS > Certificate Manager > 인증서 요청 (4단계까지 완료후 발급될때까지 기다려야함)
+
+- (us-east-1)
+- 인증서 유형: 퍼블릭 인증서 요청
+- 도메인 이름: static-staging.sweetorders.com
+- 내보내기: 내보내기 비활성화
+- 검증 방법: DNS 검증
+- 키 알고리즘: RSA 2048
+
+4. (DNS 레코드 생성) AWS > Route53 > 호스팅 영역 > sweetorders.com > 레코드 생성 > Type: CNAME, 위 3번에서 발급된 값 입력 > 생성
+
+5. (CloudFront에 SSL 인증서 연결) AWS > CloudFront > 생성한 배포 클릭 > 편집
+
+- Alternate domain names (CNAMEs): (항목 추가) static-staging.sweetorders.com
+- Custom SSL certificate: 드롭다운에서 발급된 인증서 선택
+
+6. (커스텀 도메인이 CloudFront Distribution을 가리키도록 설정)
+   - 6-2. AWS > CloudFront > 생성한 배포 클릭 > General 탭 > 대체 도메인 이름 아래 "Route domains to CloudFront" 버튼 클릭 > Set up routing automatically 클릭
