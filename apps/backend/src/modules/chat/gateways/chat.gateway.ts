@@ -30,7 +30,7 @@ import { MessageResponseDto } from "../dto/message-response.dto";
   // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
   path: "/socket.io/",
   // 배포 환경에서 WebSocket 연결 안정성을 위한 추가 옵션
-  transports: ["polling"], // HTTP polling만 사용
+  transports: ["websocket", "polling"], // WebSocket 우선, 실패 시 polling으로 폴백
   allowEIO3: true, // Socket.IO v3 클라이언트와의 호환성
   pingTimeout: 60000, // 연결 타임아웃 (60초)
   pingInterval: 25000, // 핑 간격 (25초)
@@ -59,7 +59,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   afterInit() {
     this.logger.log(`[✅ 정상] Socket.IO server initialized successfully`);
     this.logger.log(`[✅ 정상] Socket.IO server path: /socket.io/`);
-    this.logger.log(`[✅ 정상] Socket.IO server transports: polling`);
+    this.logger.log(`[✅ 정상] Socket.IO server transports: websocket, polling`);
     this.logger.log(`[✅ 정상] CORS origins: ${process.env.CORS_ORIGIN || "not set"}`);
 
     // Socket.IO 서버에 연결 이벤트 리스너 등록 (디버깅용)

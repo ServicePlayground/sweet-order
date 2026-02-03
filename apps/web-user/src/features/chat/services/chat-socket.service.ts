@@ -32,7 +32,7 @@ export class ChatSocketService {
    * 연결 옵션:
    * - auth: 인증 토큰을 헤더에 포함
    * - query: 인증 토큰을 쿼리 파라미터로도 전달 (서버 호환성을 위해)
-   * - transports: WebSocket 우선, 실패 시 polling으로 폴백
+   * - transports: WebSocket 우선 시도, 실패 시 polling으로 폴백
    * - reconnection: 자동 재연결 활성화
    * - reconnectionDelay: 재연결 시도 간격 (1초)
    * - reconnectionAttempts: 최대 재연결 시도 횟수 (5회)
@@ -109,8 +109,8 @@ export class ChatSocketService {
         },
         // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
         path: "/socket.io/",
-        // 전송 방식: HTTP polling만 사용
-        transports: ["polling"],
+        // 전송 방식: WebSocket 우선, 실패 시 polling으로 폴백
+        transports: ["websocket", "polling"],
         // 자동 재연결 활성화
         reconnection: true,
         // 재연결 시도 간격 (밀리초)
