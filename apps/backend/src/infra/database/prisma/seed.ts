@@ -26,7 +26,7 @@ async function main() {
         nickname: "철수킹",
         email: "kimcs@example.com",
         profileImageUrl:
-          "https://static-staging.sweetorders.com/uploads/2__1768857931118_ee8b306b.jpeg",
+          "https://static-staging.sweetorders.com/uploads/2__1770124158308_b45059e5.jpeg",
         isPhoneVerified: true,
         isActive: true,
         createdAt: new Date("2024-01-15T10:30:00Z"),
@@ -169,7 +169,7 @@ async function main() {
         name: "스위트오더 스토어",
         description: "맛있는 케이크를 판매하는 스토어입니다.",
         logoImageUrl:
-          "https://static-staging.sweetorders.com/uploads/1__1762274005545_4bfc55b7.jpeg",
+          "https://static-staging.sweetorders.com/uploads/NYenL1720090515_1770124331535_5b9aa552.png",
         // 사업자 정보 (1단계)
         businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
         representativeName: "홍길동",
@@ -190,7 +190,7 @@ async function main() {
         name: "디저트 파라다이스",
         description: "다양한 디저트를 판매하는 스토어입니다.",
         logoImageUrl:
-          "https://static-staging.sweetorders.com/uploads/1__1762274005545_4bfc55b7.jpeg",
+          "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
         // 사업자 정보 (1단계)
         businessNo: "1198288947",
         representativeName: "홍길동",
@@ -241,7 +241,7 @@ async function main() {
         data: {
           storeId: stores[storeIndex].id, // 스토어 ID (첫 번째 또는 두 번째 스토어)
           name: "프리미엄 초콜릿 케이크",
-          images: ["https://static-staging.sweetorders.com/uploads/1__1762512563333_036e4556.jpeg"],
+          images: ["https://static-staging.sweetorders.com/uploads/1__1770124383061_4d54e9eb.jpeg", "https://static-staging.sweetorders.com/uploads/2__1770124399509_6f9e0688.jpeg"],
           salePrice: 45000,
           salesStatus: "ENABLE",
           visibilityStatus: "ENABLE",
@@ -340,7 +340,7 @@ async function main() {
       const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
       const imageUrls = Array.from(
         { length: imageCount },
-        () => `https://static-staging.sweetorders.com/uploads/.jpeg_1768858024759_46405d13`,
+        () => `https://static-staging.sweetorders.com/uploads/2__1770124399509_6f9e0688.jpeg`,
       );
 
       reviews.push(
@@ -381,7 +381,7 @@ async function main() {
       const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
       const imageUrls = Array.from(
         { length: imageCount },
-        () => `https://static-staging.sweetorders.com/uploads/.jpeg_1768858024759_46405d13`,
+        () => `https://static-staging.sweetorders.com/uploads/3__1770124435469_83ac03cc.jpeg`,
       );
 
       reviews.push(
