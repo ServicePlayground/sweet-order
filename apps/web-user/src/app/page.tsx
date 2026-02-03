@@ -8,6 +8,7 @@ import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { navigateToLoginPage, logoutFromWebView } from "@/apps/web-user/common/utils/webview.bridge";
 
 export default function Home() {
   const { isAuthenticated, accessToken } = useAuthStore();
@@ -366,6 +367,68 @@ export default function Home() {
         {isAuthenticated
           ? `✅ 로그인됨 토큰: ${accessToken ? `${accessToken.substring(0, 20)}...` : "없음"}`
           : "⚠️ 로그인 필요"}
+      </div>
+
+      {/* 로그인/로그아웃 버튼 */}
+      <div
+        style={{
+          marginTop: "40px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {!isAuthenticated ? (
+          <button
+            onClick={navigateToLoginPage}
+            style={{
+              padding: "16px 32px",
+              fontSize: "16px",
+              fontWeight: 600,
+              color: "#ffffff",
+              backgroundColor: "#111827",
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              transition: "background-color 0.2s, transform 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#374151";
+              e.currentTarget.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#111827";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
+          >
+            로그인하기
+          </button>
+        ) : (
+          <button
+            onClick={logoutFromWebView}
+            style={{
+              padding: "16px 32px",
+              fontSize: "16px",
+              fontWeight: 600,
+              color: "#ffffff",
+              backgroundColor: "#dc2626",
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              transition: "background-color 0.2s, transform 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#b91c1c";
+              e.currentTarget.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#dc2626";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
+          >
+            로그아웃하기
+          </button>
+        )}
       </div>
     </div>
   );
