@@ -76,7 +76,7 @@ jobs:
             corepack prepare yarn@4.9.4 --activate
 
             echo "📦 의존성 설치"
-            yarn install --immutable
+            yarn install
 
             echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
