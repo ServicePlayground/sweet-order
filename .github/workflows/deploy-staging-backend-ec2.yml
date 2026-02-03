@@ -88,12 +88,19 @@ jobs:
               fi
             fi
 
-            # 🔥 이전 백업 제거 (1개만 유지)
-            rm -rf ~/sweet-order.backup.*
+            # 🔥 이전 백업 제거 (타임스탬프가 붙은 백업만 제거)
+            rm -rf ~/sweet-order.backup.* 2>/dev/null || true
+            # 타임스탬프 없는 기존 백업 디렉토리도 제거
+            rm -rf ~/sweet-order.backup 2>/dev/null || true
 
-            # 기존 프로젝트 백업
+            # 기존 프로젝트 백업 (타임스탬프 포함)
             if [ -d ~/sweet-order ]; then
-              mv ~/sweet-order ~/sweet-order.backup
+              BACKUP_NAME=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
+              echo "📦 기존 프로젝트 백업 중: $BACKUP_NAME"
+              mv ~/sweet-order "$BACKUP_NAME" || {
+                echo "⚠️ 백업 실패, 기존 디렉토리 삭제 후 진행"
+                rm -rf ~/sweet-order
+              }
             fi
 
             mkdir -p ~/sweet-order
