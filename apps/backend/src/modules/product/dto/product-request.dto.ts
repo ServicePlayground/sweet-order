@@ -192,11 +192,107 @@ export class GetSellerProductsRequestDto {
 }
 
 /**
- * 케이크 사이즈 옵션 DTO
+ * 케이크 사이즈 옵션 DTO (생성용 - id 선택적)
  */
-export class CakeSizeOptionDto {
+export class CreateCakeSizeOptionDto {
   @ApiPropertyOptional({
-    description: "옵션 고유 ID (수정 시 그대로 전달)",
+    description: "옵션 고유 ID (신규 생성 시 생략 가능, 백엔드에서 자동 생성)",
+    example: "size_abcd1234",
+  })
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @ApiProperty({
+    description: "노출 여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  visible: EnableStatus;
+
+  @ApiProperty({
+    description: "표시명",
+    enum: CakeSizeDisplayName,
+    example: CakeSizeDisplayName.MINI,
+  })
+  @IsNotEmpty()
+  @IsEnum(CakeSizeDisplayName)
+  displayName: CakeSizeDisplayName;
+
+  @ApiProperty({
+    description: "케이크 지름/길이 (cm 단위, 숫자만)",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].lengthCm,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  lengthCm: number;
+
+  @ApiProperty({
+    description: "해당 사이즈의 가격",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].price,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  price: number;
+
+  @ApiProperty({
+    description: "설명",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].description,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
+/**
+ * 케이크 맛 옵션 DTO (생성용 - id 선택적)
+ */
+export class CreateCakeFlavorOptionDto {
+  @ApiPropertyOptional({
+    description: "옵션 고유 ID (신규 생성 시 생략 가능, 백엔드에서 자동 생성)",
+    example: "flavor_efgh5678",
+  })
+  @IsOptional()
+  @IsString()
+  id?: string;
+
+  @ApiProperty({
+    description: "노출 여부",
+    enum: EnableStatus,
+    example: EnableStatus.ENABLE,
+  })
+  @IsNotEmpty()
+  @IsEnum(EnableStatus)
+  visible: EnableStatus;
+
+  @ApiProperty({
+    description: "표시명",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].displayName,
+  })
+  @IsNotEmpty()
+  @IsString()
+  displayName: string;
+
+  @ApiProperty({
+    description: "해당 맛 옵션의 추가 가격",
+    example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].price,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  price: number;
+}
+
+/**
+ * 케이크 사이즈 옵션 DTO (수정용 - id 필수)
+ */
+export class UpdateCakeSizeOptionDto {
+  @ApiProperty({
+    description: "옵션 고유 ID (수정 시 필수, 기존 ID 그대로 전달)",
     example: "size_abcd1234",
   })
   @IsNotEmpty()
@@ -249,11 +345,11 @@ export class CakeSizeOptionDto {
 }
 
 /**
- * 케이크 맛 옵션 DTO
+ * 케이크 맛 옵션 DTO (수정용 - id 필수)
  */
-export class CakeFlavorOptionDto {
-  @ApiPropertyOptional({
-    description: "옵션 고유 ID (수정 시 그대로 전달)",
+export class UpdateCakeFlavorOptionDto {
+  @ApiProperty({
+    description: "옵션 고유 ID (수정 시 필수, 기존 ID 그대로 전달)",
     example: "flavor_efgh5678",
   })
   @IsNotEmpty()
@@ -346,25 +442,25 @@ export class CreateProductRequestDto {
 
   @ApiPropertyOptional({
     description: "케이크 옵션 - 사이즈 목록",
-    type: [CakeSizeOptionDto],
+    type: [CreateCakeSizeOptionDto],
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions,
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CakeSizeOptionDto)
-  cakeSizeOptions?: CakeSizeOptionDto[];
+  @Type(() => CreateCakeSizeOptionDto)
+  cakeSizeOptions?: CreateCakeSizeOptionDto[];
 
   @ApiPropertyOptional({
     description: "케이크 옵션 - 맛 목록",
-    type: [CakeFlavorOptionDto],
+    type: [CreateCakeFlavorOptionDto],
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions,
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CakeFlavorOptionDto)
-  cakeFlavorOptions?: CakeFlavorOptionDto[];
+  @Type(() => CreateCakeFlavorOptionDto)
+  cakeFlavorOptions?: CreateCakeFlavorOptionDto[];
 
   @ApiPropertyOptional({
     description: "레터링 문구 사용 여부",
@@ -575,25 +671,25 @@ export class UpdateProductRequestDto {
 
   @ApiPropertyOptional({
     description: "케이크 옵션 - 사이즈 목록",
-    type: [CakeSizeOptionDto],
+    type: [UpdateCakeSizeOptionDto],
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions,
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CakeSizeOptionDto)
-  cakeSizeOptions?: CakeSizeOptionDto[];
+  @Type(() => UpdateCakeSizeOptionDto)
+  cakeSizeOptions?: UpdateCakeSizeOptionDto[];
 
   @ApiPropertyOptional({
     description: "케이크 옵션 - 맛 목록",
-    type: [CakeFlavorOptionDto],
+    type: [UpdateCakeFlavorOptionDto],
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions,
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CakeFlavorOptionDto)
-  cakeFlavorOptions?: CakeFlavorOptionDto[];
+  @Type(() => UpdateCakeFlavorOptionDto)
+  cakeFlavorOptions?: UpdateCakeFlavorOptionDto[];
 
   @ApiPropertyOptional({
     description: "레터링 문구 사용 여부",
