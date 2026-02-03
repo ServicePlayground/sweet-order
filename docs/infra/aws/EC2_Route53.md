@@ -115,8 +115,10 @@ q
 sudo -u postgres psql
 
 # 데이터베이스 및 사용자 생성
+-- .env.staging의 DATABASE_URL에서 사용하는 데이터베이스 이름 확인
 CREATE DATABASE sweetorder_staging_db;
-CREATE USER sweetorder_admin WITH PASSWORD 'your_secure_password';
+# .env.staging의 DATABASE_URL에서 사용하는 사용자 이름, 비밀번호 확인
+CREATE USER sweetorder_admin WITH PASSWORD 'your_password';
 -- 데이터베이스 생성 권한 부여 (Prisma 마이그레이션을 위한 shadow database 생성에 필요)
 ALTER USER sweetorder_admin CREATEDB;
 -- 권한 부여
