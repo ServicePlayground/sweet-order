@@ -169,8 +169,31 @@ jobs:
 
             echo "🗄️ Prisma migrate"
             cd apps/backend
-            export DATABASE_URL=$(grep DATABASE_URL .env.staging | cut -d '=' -f2-)
-            npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
+            # DATABASE_URL을 안전하게 읽어서 export (주석 제외, 첫 번째 매칭만)
+            DATABASE_URL=$(grep '^DATABASE_URL=' .env.staging | head -1 | cut -d '=' -f2- | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            export DATABASE_URL
+            echo "DATABASE_URL 설정 완료"
+            
+            # Prisma migrate 실행
+            if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
+              echo "✅ Prisma migrate 성공"
+            else
+              echo "❌ Prisma migrate 실패"
+              echo ""
+              echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
+              echo "📖 EC2 서버에 SSH 접속하여 다음을 확인하세요:"
+              echo ""
+              echo "1. pg_hba.conf 파일 수정:"
+              echo "   sudo vi /var/lib/pgsql/16/data/pg_hba.conf"
+              echo "   'host all all 127.0.0.1/32 ident' → 'host all all 127.0.0.1/32 md5'로 변경"
+              echo ""
+              echo "2. PostgreSQL 재시작:"
+              echo "   sudo systemctl restart postgresql"
+              echo ""
+              echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
+              echo ""
+              exit 1
+            fi
             cd ~/sweet-order
 
             echo "🔨 Backend build"
