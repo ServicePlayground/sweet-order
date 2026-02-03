@@ -49,9 +49,43 @@ jobs:
 
             echo "📊 디스크 사용량 체크"
             USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            echo "현재 디스크 사용량: ${USE_PERCENT}%"
+            
+            # 디스크 사용량이 80% 이상이면 정리 작업 수행
             if [ "$USE_PERCENT" -gt 80 ]; then
-              echo "❌ 디스크 사용량 ${USE_PERCENT}% — 배포 중단"
-              exit 1
+              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
+              
+              # 이전 백업 모두 제거
+              echo "🗑️ 이전 백업 파일 제거 중..."
+              rm -rf ~/sweet-order.backup.*
+              
+              # Yarn 캐시 정리
+              echo "🗑️ Yarn 캐시 정리 중..."
+              yarn cache clean --all 2>/dev/null || true
+              rm -rf ~/.cache ~/.yarn/cache
+              
+              # PM2 로그 정리 (최근 100줄만 유지)
+              echo "🗑️ PM2 로그 정리 중..."
+              pm2 flush || true
+              
+              # 시스템 패키지 캐시 정리
+              echo "🗑️ 시스템 패키지 캐시 정리 중..."
+              sudo dnf clean all 2>/dev/null || true
+              
+              # 임시 파일 정리
+              echo "🗑️ 임시 파일 정리 중..."
+              sudo rm -rf /tmp/* 2>/dev/null || true
+              rm -rf ~/tmp/* 2>/dev/null || true
+              
+              # 정리 후 디스크 사용량 재확인
+              USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+              echo "정리 후 디스크 사용량: ${USE_PERCENT}%"
+              
+              # 여전히 95% 이상이면 배포 중단
+              if [ "$USE_PERCENT" -gt 95 ]; then
+                echo "❌ 디스크 사용량 ${USE_PERCENT}% — 정리 후에도 공간 부족. 배포 중단"
+                exit 1
+              fi
             fi
 
             # 🔥 이전 백업 제거 (1개만 유지)
