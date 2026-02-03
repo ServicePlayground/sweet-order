@@ -50,6 +50,56 @@ jobs:
           script: |
             set -e
 
+            # 롤백 함수 정의
+            rollback_deployment() {
+              echo ""
+              echo "🔄 배포 실패로 인한 롤백 시작..."
+              
+              # PM2 프로세스 중지 (이미 실패한 새 버전이 실행 중일 수 있음)
+              pm2 delete sweet-order-backend 2>/dev/null || true
+              
+              # 가장 최근 백업 찾기
+              LATEST_BACKUP=$(ls -td ~/sweet-order.backup.* 2>/dev/null | head -1)
+              
+              if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ]; then
+                echo "📦 백업 복원 중: $LATEST_BACKUP"
+                rm -rf ~/sweet-order
+                mv "$LATEST_BACKUP" ~/sweet-order
+                
+                # 이전 버전으로 PM2 재시작
+                if [ -f ~/sweet-order/apps/backend/dist/main.js ]; then
+                  cd ~/sweet-order/apps/backend
+                  NODE_ENV=staging pm2 start dist/main.js \
+                    --name sweet-order-backend \
+                    --update-env \
+                    --cwd $(pwd)
+                  pm2 save
+                  echo "✅ 롤백 완료 - 이전 버전으로 복구되었습니다"
+                else
+                  echo "⚠️ 롤백 실패 - 백업에 빌드 파일이 없습니다"
+                fi
+              else
+                echo "❌ 롤백 실패 - 백업을 찾을 수 없습니다"
+              fi
+              
+              exit 1
+            }
+
+            # 백업 파일 개수 제한 함수 (최근 5개만 유지)
+            cleanup_old_backups() {
+              local BACKUP_TYPE=$1
+              local BACKUP_PATTERN=$2
+              local KEEP_COUNT=5
+              
+              echo "🧹 오래된 ${BACKUP_TYPE} 백업 정리 중 (최근 ${KEEP_COUNT}개만 유지)..."
+              
+              # 타임스탬프 기준으로 정렬하여 오래된 것부터 삭제
+              ls -t ${BACKUP_PATTERN} 2>/dev/null | tail -n +$((KEEP_COUNT + 1)) | while read -r old_backup; do
+                echo "  삭제: $old_backup"
+                rm -rf "$old_backup"
+              done || true
+            }
+
             echo "📊 디스크 사용량 체크"
             USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             echo "현재 디스크 사용량: ${USE_PERCENT}%"
@@ -58,16 +108,17 @@ jobs:
             if [ "$USE_PERCENT" -gt 80 ]; then
               echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
               
-              # 이전 백업 모두 제거
-              echo "🗑️ 이전 백업 파일 제거 중..."
-              rm -rf ~/sweet-order.backup.*
+              # 오래된 백업 파일 정리 (최근 3개만 유지)
+              echo "🗑️ 오래된 백업 파일 정리 중..."
+              cleanup_old_backups "서버" "~/sweet-order.backup.*"
+              cleanup_old_backups "DB" "~/db-backup.*.sql.gz"
               
               # Yarn 캐시 정리
               echo "🗑️ Yarn 캐시 정리 중..."
               yarn cache clean --all 2>/dev/null || true
               rm -rf ~/.cache ~/.yarn/cache
               
-              # PM2 로그 정리 (최근 100줄만 유지)
+              # PM2 로그 정리
               echo "🗑️ PM2 로그 정리 중..."
               pm2 flush || true
               
@@ -91,20 +142,40 @@ jobs:
               fi
             fi
 
-            # 🔥 이전 백업 제거 (타임스탬프가 붙은 백업만 제거)
-            rm -rf ~/sweet-order.backup.* 2>/dev/null || true
-            # 타임스탬프 없는 기존 백업 디렉토리도 제거
-            rm -rf ~/sweet-order.backup 2>/dev/null || true
+            # 오래된 백업 파일 정리 (최근 5개만 유지)
+            cleanup_old_backups "서버" "~/sweet-order.backup.*"
+            cleanup_old_backups "DB" "~/db-backup.*.sql.gz"
+
+            # 🗄️ DB 백업 생성 (배포 전)
+            echo "🗄️ 데이터베이스 백업 생성 중..."
+            DB_BACKUP_NAME=~/db-backup.$(date +%Y%m%d_%H%M%S).sql.gz
+            PGPASSWORD='${{ secrets.STAGING_DATABASE_PASSWORD }}' \
+              pg_dump -h localhost -p 5432 -U sweetorder_admin \
+              -d sweetorder_staging_db \
+              -F c -f "${DB_BACKUP_NAME%.gz}" 2>/dev/null || {
+              echo "⚠️ DB 백업 실패 (계속 진행합니다)"
+              rm -f "${DB_BACKUP_NAME%.gz}"
+            }
+            
+            # 압축 (백업이 성공한 경우만)
+            if [ -f "${DB_BACKUP_NAME%.gz}" ]; then
+              gzip "${DB_BACKUP_NAME%.gz}"
+              echo "✅ DB 백업 완료: $DB_BACKUP_NAME"
+            fi
 
             # 기존 프로젝트 백업 (타임스탬프 포함)
+            CURRENT_BACKUP_NAME=""
             if [ -d ~/sweet-order ]; then
-              BACKUP_NAME=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
-              echo "📦 기존 프로젝트 백업 중: $BACKUP_NAME"
-              mv ~/sweet-order "$BACKUP_NAME" || {
+              CURRENT_BACKUP_NAME=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
+              echo "📦 기존 프로젝트 백업 중: $CURRENT_BACKUP_NAME"
+              mv ~/sweet-order "$CURRENT_BACKUP_NAME" || {
                 echo "⚠️ 백업 실패, 기존 디렉토리 삭제 후 진행"
                 rm -rf ~/sweet-order
               }
             fi
+
+            # 배포 실패 시 롤백을 위한 trap 설정
+            trap rollback_deployment ERR
 
             mkdir -p ~/sweet-order
             cd ~/sweet-order
@@ -120,7 +191,10 @@ jobs:
             corepack prepare yarn@4.9.4 --activate
 
             echo "📦 의존성 설치"
-            yarn install
+            yarn install || {
+              echo "❌ 의존성 설치 실패"
+              rollback_deployment
+            }
 
             echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
@@ -178,9 +252,7 @@ jobs:
             echo "DATABASE_URL 설정 완료"
             
             # Prisma migrate 실행
-            if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
-              echo "✅ Prisma migrate 성공"
-            else
+            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
               echo "❌ Prisma migrate 실패"
               echo ""
               echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
@@ -195,12 +267,16 @@ jobs:
               echo ""
               echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
               echo ""
-              exit 1
+              rollback_deployment
             fi
+            echo "✅ Prisma migrate 성공"
             cd ~/sweet-order
 
             echo "🔨 Backend build"
-            yarn run backend:build:staging
+            yarn run backend:build:staging || {
+              echo "❌ 빌드 실패"
+              rollback_deployment
+            }
 
             echo "🚀 PM2 restart"
             pm2 delete sweet-order-backend || true
@@ -208,7 +284,18 @@ jobs:
             NODE_ENV=staging pm2 start dist/main.js \
               --name sweet-order-backend \
               --update-env \
-              --cwd $(pwd)
+              --cwd $(pwd) || {
+              echo "❌ PM2 시작 실패"
+              rollback_deployment
+            }
             pm2 save
+            
+            # 배포 성공 시 trap 해제
+            trap - ERR
+            
             echo "✅ 배포 완료!"
             pm2 list
+            
+            # 배포 성공 후 오래된 백업 정리 (최근 5개만 유지)
+            cleanup_old_backups "서버" "~/sweet-order.backup.*"
+            cleanup_old_backups "DB" "~/db-backup.*.sql.gz"
