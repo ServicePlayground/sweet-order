@@ -17,16 +17,15 @@ jobs:
         run: |
           # ⚠️ 불필요한 파일 제외하고 압축
           tar -czf deploy.tar.gz \
-            --exclude='.git' \
-            --exclude='**/node_modules' \
-            --exclude='**/.yarn/cache' \
-            --exclude='**/.next' \
-            --exclude='**/dist' \
-            --exclude='**/web-user' \
-            --exclude='**/web-seller' \
-            --exclude='**/web-admin' \
-            --exclude='deploy.tar.gz' \
-            --warning=no-file-changed \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=.yarn/cache \
+            --exclude=.next \
+            --exclude=dist \
+            --exclude=apps/web-user \
+            --exclude=apps/web-seller \
+            --exclude=apps/web-admin \
+            --exclude=deploy.tar.gz \
             .
 
       - name: Copy deployment package to EC2
