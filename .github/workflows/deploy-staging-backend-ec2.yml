@@ -16,7 +16,8 @@ jobs:
       - name: Prepare source code package
         run: |
           # ⚠️ 불필요한 파일 제외하고 압축
-          tar -czf deploy.tar.gz \
+          mkdir -p /tmp/deploy
+          tar -czf /tmp/deploy/deploy.tar.gz \
             --exclude=.git \
             --exclude=node_modules \
             --exclude=.yarn/cache \
@@ -25,8 +26,8 @@ jobs:
             --exclude=apps/web-user \
             --exclude=apps/web-seller \
             --exclude=apps/web-admin \
-            --exclude=deploy.tar.gz \
             .
+          mv /tmp/deploy/deploy.tar.gz .
 
       - name: Copy deployment package to EC2
         uses: appleboy/scp-action@master
