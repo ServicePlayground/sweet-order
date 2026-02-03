@@ -25,6 +25,8 @@ jobs:
             --exclude='**/web-user' \
             --exclude='**/web-seller' \
             --exclude='**/web-admin' \
+            --exclude='deploy.tar.gz' \
+            --warning=no-file-changed \
             .
 
       - name: Copy deployment package to EC2
