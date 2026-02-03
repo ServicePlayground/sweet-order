@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OrderItem, ReservationSelection, ViewType } from "./types";
+import { CakeFlavorOption, CakeSizeOption, ProductType } from "@/apps/web-user/features/product/types/product.type";
 
 interface UseReservationBottomSheetProps {
   isOpen: boolean;
   price: number;
+  productType: ProductType;
+  cakeSizeOptions?: CakeSizeOption[];
+  cakeFlavorOptions?: CakeFlavorOption[];
   onClose: () => void;
   onConfirm: (selection: ReservationSelection) => void;
 }
@@ -19,6 +23,9 @@ interface UseReservationBottomSheetProps {
 export function useReservationBottomSheet({
   isOpen,
   price,
+  productType,
+  cakeSizeOptions,
+  cakeFlavorOptions,
   onClose,
   onConfirm,
 }: UseReservationBottomSheetProps) {
@@ -177,10 +184,15 @@ export function useReservationBottomSheet({
 
   // 현재 옵션을 주문 목록에 추가하고 확인 뷰로 이동
   const handleGoToConfirm = () => {
+    const sizePrice = cakeSizeOptions?.find((s) => s.displayName === selectedSize)?.price ?? 0;
+    const flavorPrice = cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
+
     const newItem: OrderItem = {
       date: selectedDate,
       size: selectedSize,
+      sizePrice,
       flavor: selectedFlavor,
+      flavorPrice,
       cream: selectedCream,
       letteringMessage,
       requestMessage,
@@ -299,9 +311,17 @@ export function useReservationBottomSheet({
   };
 
   const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = orderItems.reduce((sum, item) => sum + price * item.quantity, 0);
+  const totalPrice = orderItems.reduce(
+    (sum, item) => sum + (price + item.sizePrice + item.flavorPrice) * item.quantity,
+    0,
+  );
 
-  const isOptionsValid = selectedDate && selectedSize && selectedFlavor && letteringMessage;
+  const isOptionsValid =
+    selectedDate &&
+    selectedSize &&
+    selectedFlavor &&
+    letteringMessage &&
+    (productType === "BASIC_CAKE" || attachedImages.length > 0);
   const isCalendarValid = tempSelectedDate && tempSelectedTime;
 
   return {

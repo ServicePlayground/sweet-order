@@ -9,6 +9,7 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 export interface SelectOption<T = string> {
   value: T;
   label: string;
+  subLabel?: string;
 }
 
 /**
@@ -147,9 +148,10 @@ export const Select = <T extends string | number = string>({
                 <li
                   key={String(option.value)}
                   onClick={() => handleSelect(option)}
-                  className="flex items-center px-[12px] h-[42px] text-sm cursor-pointer transition-colors text-gray-900"
+                  className="flex items-center justify-between px-[12px] h-[42px] text-sm cursor-pointer transition-colors text-gray-900"
                 >
-                  {option.label}
+                  <span>{option.label}</span>
+                  {option.subLabel && <span className="text-gray-500">{option.subLabel}</span>}
                 </li>
               ))}
           </ul>

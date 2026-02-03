@@ -141,6 +141,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         cakeImageUrl={data.images[0] ?? ""}
         cakeSizeOptions={data.cakeSizeOptions}
         cakeFlavorOptions={data.cakeFlavorOptions}
+        productType={data.productType}
+        productNoticeProducer={data.productNoticeProducer}
+        productNoticeAddress={data.productNoticeAddress}
         onClose={() => setIsBottomSheetOpen(false)}
         onConfirm={handleReservationConfirm}
       />

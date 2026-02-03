@@ -17,6 +17,10 @@ export function ReservationBottomSheet({
   cakeImageUrl,
   cakeSizeOptions,
   cakeFlavorOptions,
+  cakeSize,
+  productType,
+  productNoticeProducer,
+  productNoticeAddress,
   onClose,
   onConfirm,
 }: ReservationBottomSheetProps) {
@@ -66,7 +70,7 @@ export function ReservationBottomSheet({
     handleUploadClick,
     handleFileChange,
     handleRemoveImage,
-  } = useReservationBottomSheet({ isOpen, price, onClose, onConfirm });
+  } = useReservationBottomSheet({ isOpen, price, productType, cakeSizeOptions, cakeFlavorOptions, onClose, onConfirm });
 
   const getTitle = () => {
     if (view === "options") return "상품 옵션 선택";
@@ -133,8 +137,12 @@ export function ReservationBottomSheet({
                 totalQuantity,
                 totalPrice,
                 cakeTitle,
+                cakeSize,
                 cakeImageUrl,
                 price,
+                productType,
+                productNoticeProducer,
+                productNoticeAddress
               };
               sessionStorage.setItem("reservationComplete", JSON.stringify(payload));
               handleFinalConfirm();
@@ -142,7 +150,7 @@ export function ReservationBottomSheet({
             }}
             disabled={orderItems.length === 0}
           >
-            주문하기
+            {productType === "BASIC_CAKE" ? "예약하기" : "예약신청"}
           </Button>
         </div>
       </div>
@@ -169,6 +177,7 @@ export function ReservationBottomSheet({
       handleFileChange={handleFileChange}
       handleRemoveImage={handleRemoveImage}
       dateSelectionSignal={dateSelectionSignal}
+      productType={productType}
     />
   );
 

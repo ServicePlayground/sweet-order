@@ -98,8 +98,8 @@ export class ChatSocketService {
         },
         // Socket.IO 엔드포인트 경로 명시 (배포 환경에서 WebSocket 연결 문제 해결)
         path: "/socket.io/",
-        // 전송 방식: HTTP polling만 사용
-        transports: ["polling"],
+        // 전송 방식: WebSocket 우선, 실패 시 polling으로 폴백
+        transports: ["websocket", "polling"],
         // 자동 재연결 활성화
         reconnection: true,
         // 재연결 시도 간격 (밀리초)

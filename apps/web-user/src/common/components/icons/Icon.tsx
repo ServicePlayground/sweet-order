@@ -15,6 +15,7 @@ import Takeout from "./icons/takeout.svg";
 import Trash from "./icons/trash.svg";
 import Minus from "./icons/minus.svg";
 import Plus from "./icons/plus.svg";
+import Warning from "./icons/warning.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -39,6 +40,7 @@ export const iconTypes = {
   trash: Trash,
   minus: Minus,
   plus: Plus,
+  warning: Warning,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {
