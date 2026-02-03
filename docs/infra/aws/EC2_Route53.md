@@ -11,7 +11,7 @@ Sweet Order 프로젝트를 AWS EC2로 배포하는 가이드입니다. 비용 �
 1. AWS 콘솔 → EC2 → 인스턴스 시작
 2. **이름**: `sweet-order-backend-staging`
 3. **AMI**: Amazon Linux 2023 kernel 6.1 (x86_64)
-4. **인스턴스 타입**: t2.micro
+4. **인스턴스 타입**: t3.small
 5. **키 페어**: 새 키 페어 생성
    - 키 페어 이름: `sweet-order-backend-key`
    - 키 페어 타입: RSA
