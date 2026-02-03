@@ -343,5 +343,5 @@ sudo systemctl status certbot.timer
 curl https://api-staging.sweetorders.com/health
 
 # 또는 브라우저에서 접속
-# https://api-staging.sweetorders.com/health
+https://api-staging.sweetorders.com/health
 ```

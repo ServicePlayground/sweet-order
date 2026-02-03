@@ -27,8 +27,7 @@ jobs:
         run: |
           # 의존성 설치 (postinstall 자동 실행)
           # 현재 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
-          # --ignore-scripts: postinstall 스크립트 실행 무시 (EC2 환경에서 Prisma 마이그레이션 실행시 DB 환경변수 오류 발생)
-          yarn install --ignore-scripts
+          yarn install
           
           # 백엔드 빌드
           yarn run backend:build:staging
@@ -127,6 +126,8 @@ jobs:
             # 마이그레이션 실행 (개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리)
             # Prisma Client 생성 (EC2 환경에 맞는 바이너리 생성)
             cd apps/backend
+            # .env.staging 파일에서 DATABASE_URL 환경 변수 로드하여 Prisma 명령어에 전달
+            export DATABASE_URL=$(grep -v '^#' .env.staging | grep DATABASE_URL | cut -d '=' -f2- | tr -d ' ')
             npx prisma generate --schema ./src/infra/database/prisma/schema.prisma
             npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
             cd ~/sweet-order
