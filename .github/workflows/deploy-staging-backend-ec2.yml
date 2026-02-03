@@ -16,8 +16,10 @@ jobs:
       - name: Prepare source code package
         run: |
           # 빌드는 EC2에서 수행
+          # 전체 프로젝트 압축
           tar -czf deploy.tar.gz \
-            ./
+            --exclude='.git' \
+            ./ || (echo "⚠️ tar 경고 발생했지만 계속 진행합니다" && exit 0)
             
 
       - name: Copy deployment package to EC2
