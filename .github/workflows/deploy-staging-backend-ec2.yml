@@ -27,7 +27,8 @@ jobs:
         run: |
           # 의존성 설치 (postinstall 자동 실행)
           # 현재 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
-          yarn install
+          # --ignore-scripts: postinstall 스크립트 실행 무시 (EC2 환경에서 Prisma 마이그레이션 실행시 DB 환경변수 오류 발생)
+          yarn install --ignore-scripts
           
           # 백엔드 빌드
           yarn run backend:build:staging
