@@ -7,17 +7,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   constructor(private readonly configService: ConfigService) {
-    const secretArn = configService.get<string>("SECRETS_ARN");
     const databaseUrl = configService.get<string>("DATABASE_URL");
     const nodeEnv = configService.get<string>("NODE_ENV");
 
-    // 배포 환경(staging, production)에서는 secretArn 값이 존재해야 함(자세한 사항은 환경변수 - 가이드.md 참고)
-    if (nodeEnv !== "development" && !secretArn) {
-      throw new Error(`secretArn값이 존재하지 않습니다.`);
-    }
     if (!databaseUrl) {
       throw new Error(
-        `DATABASE_URL이 설정되어 있지 않습니다. .env.${nodeEnv} 또는 런타임 ENV/Secrets를 확인하세요.`,
+        `DATABASE_URL이 설정되어 있지 않습니다. .env.${nodeEnv} 파일 또는 환경 변수를 확인하세요.`,
       );
     }
 

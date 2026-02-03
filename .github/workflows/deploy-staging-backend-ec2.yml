@@ -1,0 +1,211 @@
+name: Deploy Backend to EC2 (Staging)
+
+on:
+  push:
+    tags:
+      - "backend/staging-*"
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare source code package
+        run: |
+          # ⚠️ 불필요한 파일 제외하고 압축
+          mkdir -p /tmp/deploy
+          tar -czf /tmp/deploy/deploy.tar.gz \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=.yarn/cache \
+            --exclude=.next \
+            --exclude=dist \
+            --exclude=apps/web-user \
+            --exclude=apps/web-seller \
+            --exclude=apps/web-admin \
+            .
+          mv /tmp/deploy/deploy.tar.gz .
+
+      - name: Copy deployment package to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.STAGING_EC2_SSH_KEY }}
+          source: "deploy.tar.gz"
+          target: "~/"
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.STAGING_EC2_SSH_KEY }}
+          script: |
+            set -e
+
+            echo "📊 디스크 사용량 체크"
+            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            echo "현재 디스크 사용량: ${USE_PERCENT}%"
+            
+            # 디스크 사용량이 80% 이상이면 정리 작업 수행
+            if [ "$USE_PERCENT" -gt 80 ]; then
+              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
+              
+              # 이전 백업 모두 제거
+              echo "🗑️ 이전 백업 파일 제거 중..."
+              rm -rf ~/sweet-order.backup.*
+              
+              # Yarn 캐시 정리
+              echo "🗑️ Yarn 캐시 정리 중..."
+              yarn cache clean --all 2>/dev/null || true
+              rm -rf ~/.cache ~/.yarn/cache
+              
+              # PM2 로그 정리 (최근 100줄만 유지)
+              echo "🗑️ PM2 로그 정리 중..."
+              pm2 flush || true
+              
+              # 시스템 패키지 캐시 정리
+              echo "🗑️ 시스템 패키지 캐시 정리 중..."
+              sudo dnf clean all 2>/dev/null || true
+              
+              # 임시 파일 정리
+              echo "🗑️ 임시 파일 정리 중..."
+              sudo rm -rf /tmp/* 2>/dev/null || true
+              rm -rf ~/tmp/* 2>/dev/null || true
+              
+              # 정리 후 디스크 사용량 재확인
+              USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+              echo "정리 후 디스크 사용량: ${USE_PERCENT}%"
+              
+              # 여전히 95% 이상이면 배포 중단
+              if [ "$USE_PERCENT" -gt 95 ]; then
+                echo "❌ 디스크 사용량 ${USE_PERCENT}% — 정리 후에도 공간 부족. 배포 중단"
+                exit 1
+              fi
+            fi
+
+            # 🔥 이전 백업 제거 (타임스탬프가 붙은 백업만 제거)
+            rm -rf ~/sweet-order.backup.* 2>/dev/null || true
+            # 타임스탬프 없는 기존 백업 디렉토리도 제거
+            rm -rf ~/sweet-order.backup 2>/dev/null || true
+
+            # 기존 프로젝트 백업 (타임스탬프 포함)
+            if [ -d ~/sweet-order ]; then
+              BACKUP_NAME=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
+              echo "📦 기존 프로젝트 백업 중: $BACKUP_NAME"
+              mv ~/sweet-order "$BACKUP_NAME" || {
+                echo "⚠️ 백업 실패, 기존 디렉토리 삭제 후 진행"
+                rm -rf ~/sweet-order
+              }
+            fi
+
+            mkdir -p ~/sweet-order
+            cd ~/sweet-order
+
+            echo "📂 압축 해제"
+            tar -xzf ~/deploy.tar.gz
+            rm ~/deploy.tar.gz
+
+            # 캐시 정리 (중요)
+            rm -rf ~/.cache ~/.yarn
+
+            corepack enable
+            corepack prepare yarn@4.9.4 --activate
+
+            echo "📦 의존성 설치"
+            yarn install
+
+            echo "⚙️ 환경 변수 파일 생성 중..."
+            cat > apps/backend/.env.staging << EOF
+            # Environment
+            NODE_ENV=staging
+            
+            # PORT
+            PORT=8080
+            
+            # DOMAIN
+            PUBLIC_USER_DOMAIN=${{ secrets.STAGING_PUBLIC_USER_DOMAIN }}
+            PUBLIC_SELLER_DOMAIN=${{ secrets.STAGING_PUBLIC_SELLER_DOMAIN }}
+            PUBLIC_ADMIN_DOMAIN=${{ secrets.STAGING_PUBLIC_ADMIN_DOMAIN }}
+            
+            # CORS Configuration
+            CORS_ORIGIN=${{ secrets.STAGING_CORS_ORIGIN }}
+            
+            # JWT
+            JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
+            
+            # DATABASE
+            # 옵션 1: EC2 PostgreSQL 사용 (비용 절감)
+            DATABASE_URL=postgresql://sweetorder_admin:${{ secrets.STAGING_DATABASE_PASSWORD }}@localhost:5432/sweetorder_staging_db?schema=public
+            
+            # GOOGLE OAuth
+            GOOGLE_CLIENT_ID=${{ secrets.STAGING_GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=/auth/login/google
+            
+            # SWAGGER
+            SWAGGER_USERNAME=${{ secrets.STAGING_SWAGGER_USERNAME }}
+            SWAGGER_PASSWORD=${{ secrets.STAGING_SWAGGER_PASSWORD }}
+            
+            # NTS API
+            NTS_API_URL=https://api.odcloud.kr/api
+            KFTC_API_URL=https://apis.data.go.kr
+            DATA_GO_KR_API_KEY=${{ secrets.STAGING_DATA_GO_KR_API_KEY }}
+            
+            # AWS S3
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=ap-northeast-2
+            S3_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
+            CLOUDFRONT_DOMAIN=${{ secrets.STAGING_CLOUDFRONT_DOMAIN }}
+            EOF
+            
+            # 환경 변수 파일 권한 설정
+            chmod 600 apps/backend/.env.staging
+
+            echo "🗄️ Prisma migrate"
+            cd apps/backend
+            # DATABASE_URL을 안전하게 읽어서 export (주석 제외, 첫 번째 매칭만)
+            DATABASE_URL=$(grep '^DATABASE_URL=' .env.staging | head -1 | cut -d '=' -f2- | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            export DATABASE_URL
+            echo "DATABASE_URL 설정 완료"
+            
+            # Prisma migrate 실행
+            if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
+              echo "✅ Prisma migrate 성공"
+            else
+              echo "❌ Prisma migrate 실패"
+              echo ""
+              echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
+              echo "📖 EC2 서버에 SSH 접속하여 다음을 확인하세요:"
+              echo ""
+              echo "1. pg_hba.conf 파일 수정:"
+              echo "   sudo vi /var/lib/pgsql/16/data/pg_hba.conf"
+              echo "   'host all all 127.0.0.1/32 ident' → 'host all all 127.0.0.1/32 md5'로 변경"
+              echo ""
+              echo "2. PostgreSQL 재시작:"
+              echo "   sudo systemctl restart postgresql"
+              echo ""
+              echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
+              echo ""
+              exit 1
+            fi
+            cd ~/sweet-order
+
+            echo "🔨 Backend build"
+            yarn run backend:build:staging
+
+            echo "🚀 PM2 restart"
+            pm2 delete sweet-order-backend || true
+            cd apps/backend
+            NODE_ENV=staging pm2 start dist/main.js \
+              --name sweet-order-backend \
+              --update-env \
+              --cwd $(pwd)
+            pm2 save
+            echo "✅ 배포 완료!"
+            pm2 list

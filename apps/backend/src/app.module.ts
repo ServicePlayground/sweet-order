@@ -19,14 +19,12 @@ import { ErrorResponseInterceptor } from "@apps/backend/common/interceptors/erro
     ConfigModule.forRoot({
       isGlobal: true, // 전역에서 사용 가능하도록 설정
 
-      // yarn run dev 시 .env.development만 사용
+      // 환경별 .env 파일 자동 로드
+      // - development: .env.development
+      // - staging: .env.staging (github workflow)
+      // - production: .env.production (github workflow)
       envFilePath: [`.env.${process.env.NODE_ENV}`],
-
-      // yarn run build:staging 또는 yarn run build:production 시 .env 파일 무시
-      // .env파일로 사용시 로그에 노출될 수 있어서 보안 위험성이 있음!!
-      // 따라서, App Runner에서 환경변수 추가하여, 런타임시 주입하도록 함(자세한 사항은 환경변수 - 가이드.md 참고)
-      // ignoreEnvFile: true일 때 → .env 파일을 읽지 않고 시스템 환경변수만 사용
-      ignoreEnvFile: process.env.NODE_ENV === "staging" || process.env.NODE_ENV === "production",
+      ignoreEnvFile: false, // 모든 환경에서 .env 파일 사용
     }),
 
     // Rate Limiting 모듈
