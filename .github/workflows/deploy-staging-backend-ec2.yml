@@ -13,33 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Setup Yarn
+      - name: Prepare source code package
         run: |
-          corepack enable
-          corepack prepare yarn@4.9.4 --activate
-
-      - name: Install dependencies and build
-        run: |
-          # 의존성 설치 (postinstall 자동 실행)
-          # 현재 동일경로 package.json에 "postinstall" 자동으로 스크립트 실행됨(db:postinstall로 수정시 자동실행 안됨)
-          yarn install
-          
-          # 백엔드 빌드
-          yarn run backend:build:staging
-
-      - name: Prepare deployment package
-        run: |
-          # 배포에 필요한 파일만 직접 압축
-          # - apps/backend/dist: 빌드 결과물
+          # 빌드는 EC2에서 수행
           tar -czf deploy.tar.gz \
-            apps/backend/dist \
-            apps/backend/src/infra/database/prisma \
-            node_modules
+            ./
             
 
       - name: Copy deployment package to EC2
@@ -60,20 +38,31 @@ jobs:
           username: ec2-user
           key: ${{ secrets.STAGING_EC2_SSH_KEY }}
           script: |
+            # 기존 프로젝트 백업 (존재하는 경우)
+            if [ -d ~/sweet-order ]; then
+              BACKUP_DIR=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
+              echo "📦 기존 프로젝트 백업 중: $BACKUP_DIR"
+              mv ~/sweet-order "$BACKUP_DIR" 2>/dev/null || true
+            fi
+            
             # 작업 디렉토리 생성
             mkdir -p ~/sweet-order
             cd ~/sweet-order
             
-            # 기존 파일 백업 (선택사항)
-            if [ -d apps/backend/dist ]; then
-              mv apps/backend/dist apps/backend/dist.backup.$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
-            fi
-            
             # 배포 패키지 압축 해제
+            echo "📂 배포 패키지 압축 해제 중..."
             tar -xzf ~/deploy.tar.gz
             rm ~/deploy.tar.gz
             
+            # Yarn Berry 활성화
+            corepack enable
+            corepack prepare yarn@4.9.4 --activate
+            
+            # 의존성 설치 (postinstall 자동 실행으로 Prisma Client 생성)
+            yarn install
+            
             # .env.staging 파일 생성 (GitHub Secrets 사용)
+            echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
             # Environment
             NODE_ENV=staging
@@ -121,23 +110,31 @@ jobs:
             # 환경 변수 파일 권한 설정
             chmod 600 apps/backend/.env.staging
             
-            # Prisma CLI는 2단계에서 이미 전역 설치되어 있음
-            
-            # 마이그레이션 실행 (개발 환경(development)에서는 개발자가 직접 마이그레이션(yarn db:migrate:dev) 관리)
-            # Prisma Client 생성 (EC2 환경에 맞는 바이너리 생성)
+            # Prisma 마이그레이션 실행
+            echo "🗄️ Prisma 마이그레이션 실행 중..."
             cd apps/backend
-            # .env.staging 파일에서 DATABASE_URL 환경 변수 로드하여 Prisma 명령어에 전달
+            # .env.staging 파일에서 DATABASE_URL 로드
             export DATABASE_URL=$(grep -v '^#' .env.staging | grep DATABASE_URL | cut -d '=' -f2- | tr -d ' ')
-            npx prisma generate --schema ./src/infra/database/prisma/schema.prisma
-            npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
+            if [ -z "$DATABASE_URL" ]; then
+              echo "❌ DATABASE_URL이 설정되지 않았습니다."
+              exit 1
+            fi
+            # 마이그레이션 배포
+            DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma
             cd ~/sweet-order
             
+            # 백엔드 빌드 (EC2 환경에서 빌드하여 플랫폼별 바이너리 문제 해결)
+            echo "🔨 백엔드 빌드 중..."
+            yarn run backend:build:staging
+            
             # PM2로 애플리케이션 재시작
-            # NestJS ConfigModule이 apps/backend/.env.staging 파일을 자동으로 읽음
+            # NestJS ConfigModule이 apps/backend/.env.staging 파일을 읽음
+            echo "🚀 PM2로 애플리케이션 시작 중..."
             pm2 delete sweet-order-backend 2>/dev/null || true
-            cd apps/backend
+            cd ~/sweet-order/apps/backend
             NODE_ENV=staging pm2 start dist/main.js \
               --name sweet-order-backend \
+              --cwd ~/sweet-order/apps/backend \
               --update-env
             cd ~/sweet-order
             
@@ -145,10 +142,9 @@ jobs:
             pm2 save
             
             # 상태 확인
+            echo "✅ 배포 완료!"
             pm2 status
-
-            # 목록 확인
             pm2 list
 
             # 로그 확인
-            pm2 logs sweet-order-backend --lines 100
+            pm2 logs sweet-order-backend --lines 50
