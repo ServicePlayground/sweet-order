@@ -57,7 +57,7 @@ export function ProductDetailInformationNoticeSection({
   return (
     <div>
       <Accordion type="single" collapsible onValueChange={handleValueChange}>
-        <AccordionItem ref={noticeInfoRef} value="notice-info" style={{ border: "none" }}>
+        <AccordionItem ref={noticeInfoRef} value="notice-info" style={{ border: "none", scrollMarginTop: "52px" }}>
           <AccordionTrigger className="py-[16px]">상품정보제공고시</AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-[12px] py-[12px] px-[16px] text-[13px] bg-gray-50 rounded-lg">
@@ -70,7 +70,7 @@ export function ProductDetailInformationNoticeSection({
             </div>
           </AccordionContent>
         </AccordionItem>
-        <AccordionItem ref={cancellationRef} value="cancellation-refund" style={{ border: "none" }}>
+        <AccordionItem ref={cancellationRef} value="cancellation-refund" style={{ border: "none", scrollMarginTop: "52px" }}>
           <AccordionTrigger className="py-[16px]">취소 및 환불</AccordionTrigger>
           <AccordionContent>
             <div>
