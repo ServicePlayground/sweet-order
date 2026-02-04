@@ -224,7 +224,7 @@ jobs:
             # 디스크 공간 확인 후 의존성 설치
             USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             echo "의존성 설치 전 디스크 사용량: ${USE_PERCENT}%"
-            
+
             if [ "$USE_PERCENT" -gt 90 ]; then
               echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 추가 정리 중..."
               cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
@@ -297,7 +297,7 @@ jobs:
             # 실패한 마이그레이션 사전 확인 및 해결
             echo "🔍 마이그레이션 상태 확인 중..."
             MIGRATE_STATUS=$(npx prisma migrate status --schema ./src/infra/database/prisma/schema.prisma 2>&1 || true)
-            
+
             if echo "$MIGRATE_STATUS" | grep -q "failed\|P3009"; then
               echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 중..."
               # 실패한 마이그레이션 이름 추출 (일반적으로 가장 최근 실패한 것)
@@ -359,7 +359,7 @@ jobs:
               echo "✅ Prisma migrate 성공"
               MIGRATE_SUCCESS=true
             fi
-            
+
             # Prisma Client 재생성 (마이그레이션 성공 시에만)
             if [ "$MIGRATE_SUCCESS" = true ]; then
               echo "🔄 Prisma Client 재생성 중..."
@@ -367,7 +367,7 @@ jobs:
                 echo "⚠️ Prisma Client 재생성 실패 (계속 진행합니다)"
               }
             fi
-            
+
             cd ~/sweet-order
 
             echo "🔨 Backend build"

@@ -164,17 +164,3 @@ export const SWAGGER_EXAMPLES = {
     hasPrev: false,
   },
 } as const;
-
-/**
- * Swagger 응답 예시 데이터
- * 복합 응답 구조를 위한 예시 데이터를 제공합니다.
- */
-export const SWAGGER_RESPONSE_EXAMPLES = {
-  PRODUCT_LIST_RESPONSE: {
-    data: [SWAGGER_EXAMPLES.PRODUCT_DATA],
-    meta: SWAGGER_EXAMPLES.PAGINATION_META,
-  },
-  PRODUCT_DETAIL_RESPONSE: {
-    ...SWAGGER_EXAMPLES.PRODUCT_DATA,
-  },
-} as const;

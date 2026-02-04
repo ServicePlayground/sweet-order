@@ -24,9 +24,7 @@ import {
   STORE_SUCCESS_MESSAGES,
 } from "@apps/backend/modules/store/constants/store.constants";
 import { GetStoreReviewsRequestDto } from "@apps/backend/modules/store/dto/store-review-request.dto";
-import {
-  StoreResponseDto,
-} from "@apps/backend/modules/store/dto/store-response.dto";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
 import {
   ProductReviewListResponseDto,
   ProductReviewResponseDto,
