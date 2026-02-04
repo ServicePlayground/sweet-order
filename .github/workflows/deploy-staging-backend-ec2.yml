@@ -251,25 +251,68 @@ jobs:
             export DATABASE_URL
             echo "DATABASE_URL 설정 완료"
 
-            # Prisma migrate 실행
-            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
-              echo "❌ Prisma migrate 실패"
-              echo ""
-              echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
-              echo "📖 EC2 서버에 SSH 접속하여 다음을 확인하세요:"
-              echo ""
-              echo "1. pg_hba.conf 파일 수정:"
-              echo "   sudo vi /var/lib/pgsql/16/data/pg_hba.conf"
-              echo "   'host all all 127.0.0.1/32 ident' → 'host all all 127.0.0.1/32 md5'로 변경"
-              echo ""
-              echo "2. PostgreSQL 재시작:"
-              echo "   sudo systemctl restart postgresql"
-              echo ""
-              echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
-              echo ""
-              rollback_deployment
+            # 실패한 마이그레이션 사전 확인 및 해결
+            echo "🔍 마이그레이션 상태 확인 중..."
+            MIGRATE_STATUS=$(npx prisma migrate status --schema ./src/infra/database/prisma/schema.prisma 2>&1 || true)
+            
+            if echo "$MIGRATE_STATUS" | grep -q "failed\|P3009"; then
+              echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 중..."
+              # 실패한 마이그레이션 이름 추출 (일반적으로 가장 최근 실패한 것)
+              FAILED_MIGRATION=$(echo "$MIGRATE_STATUS" | grep -oP '^\s*\K[0-9_]+' | head -1 || echo "20260204214916_202602050649")
+              
+              if [ -n "$FAILED_MIGRATION" ]; then
+                echo "🔧 마이그레이션 '$FAILED_MIGRATION'을 롤백 상태로 표시 중..."
+                npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" --schema ./src/infra/database/prisma/schema.prisma 2>/dev/null || true
+                echo "✅ 실패한 마이그레이션 해결 완료"
+              fi
             fi
-            echo "✅ Prisma migrate 성공"
+
+            # Prisma migrate 실행
+            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma 2>&1 | tee /tmp/migrate_output.log; then
+              MIGRATE_OUTPUT=$(cat /tmp/migrate_output.log)
+              
+              # P3009 오류: 실패한 마이그레이션이 있는 경우
+              if echo "$MIGRATE_OUTPUT" | grep -q "P3009\|failed migrations"; then
+                echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 후 재시도..."
+                
+                # 실패한 마이그레이션 이름 추출
+                FAILED_MIGRATION=$(echo "$MIGRATE_OUTPUT" | grep -oP 'The `\K[^`]+' | head -1 || echo "20260204214916_202602050649")
+                
+                if [ -n "$FAILED_MIGRATION" ]; then
+                  echo "🔧 마이그레이션 '$FAILED_MIGRATION'을 롤백 상태로 표시 중..."
+                  npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" --schema ./src/infra/database/prisma/schema.prisma 2>/dev/null || true
+                  
+                  echo "🔄 마이그레이션 재시도 중..."
+                  if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
+                    echo "✅ Prisma migrate 성공 (재시도 후)"
+                  else
+                    echo "❌ Prisma migrate 재시도 실패"
+                    rollback_deployment
+                  fi
+                else
+                  echo "❌ 실패한 마이그레이션 이름을 찾을 수 없습니다"
+                  rollback_deployment
+                fi
+              else
+                echo "❌ Prisma migrate 실패"
+                echo ""
+                echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
+                echo "📖 EC2 서버에 SSH 접속하여 다음을 확인하세요:"
+                echo ""
+                echo "1. pg_hba.conf 파일 수정:"
+                echo "   sudo vi /var/lib/pgsql/16/data/pg_hba.conf"
+                echo "   'host all all 127.0.0.1/32 ident' → 'host all all 127.0.0.1/32 md5'로 변경"
+                echo ""
+                echo "2. PostgreSQL 재시작:"
+                echo "   sudo systemctl restart postgresql"
+                echo ""
+                echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
+                echo ""
+                rollback_deployment
+              fi
+            else
+              echo "✅ Prisma migrate 성공"
+            fi
             cd ~/sweet-order
 
             echo "🔨 Backend build"
