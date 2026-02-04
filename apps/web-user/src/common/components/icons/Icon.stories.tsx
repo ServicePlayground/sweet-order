@@ -16,6 +16,8 @@ const iconNames = [
   "minus",
   "plus",
   "warning",
+  "star",
+  "quantity",
 ] as const;
 
 const iconFiles: Record<string, string> = {
@@ -34,6 +36,8 @@ const iconFiles: Record<string, string> = {
   minus: "minus.svg",
   plus: "plus.svg",
   warning: "warning.svg",
+  star: "star.svg",
+  quantity: "quantity.svg",
 };
 
 // 스토리북용 간단한 Icon 표시 컴포넌트
