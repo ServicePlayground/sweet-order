@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, HttpCode, HttpStatus, Request } from "@nestjs/common";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { StoreService } from "@apps/backend/modules/store/store.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
@@ -18,11 +18,15 @@ import {
   STORE_ERROR_MESSAGES,
   SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/store/constants/store.constants";
+import {
+  StoreListResponseDto,
+} from "@apps/backend/modules/store/dto/store-response.dto";
 
 /**
  * 스토어 관련 컨트롤러
  */
 @ApiTags("스토어")
+@ApiExtraModels(StoreListResponseDto)
 @Controller(`${USER_ROLES.SELLER}/store`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // USER, SELLER, ADMIN 모두 접근 가능
 export class SellerStoreController {
@@ -123,7 +127,7 @@ export class SellerStoreController {
     summary: "(로그인 필요) 내 스토어 목록 조회",
     description: "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다.",
   })
-  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.STORE_LIST_RESPONSE })
+  @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   // 인증 오류 응답
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
   @SwaggerResponse(401, {

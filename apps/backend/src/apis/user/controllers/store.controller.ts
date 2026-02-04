@@ -22,9 +22,11 @@ import {
 import {
   STORE_ERROR_MESSAGES,
   STORE_SUCCESS_MESSAGES,
-  SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/store/constants/store.constants";
 import { GetStoreReviewsRequestDto } from "@apps/backend/modules/store/dto/store-review-request.dto";
+import {
+  StoreResponseDto,
+} from "@apps/backend/modules/store/dto/store-response.dto";
 import {
   ProductReviewListResponseDto,
   ProductReviewResponseDto,
@@ -37,6 +39,7 @@ import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/
  */
 @ApiTags("스토어")
 @ApiExtraModels(
+  StoreResponseDto,
   ProductReviewListResponseDto,
   ProductReviewResponseDto,
   ReviewPaginationMetaResponseDto,
@@ -56,7 +59,7 @@ export class UserStoreController {
     summary: "스토어 상세 조회",
     description: "특정 스토어의 상세 정보를 조회합니다.",
   })
-  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.STORE_DETAIL_RESPONSE })
+  @SwaggerResponse(200, { dataDto: StoreResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreDetail(@Param("id") id: string) {
     return await this.storeService.getStoreById(id);
