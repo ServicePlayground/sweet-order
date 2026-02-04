@@ -68,6 +68,12 @@ export class StoreCreationService {
           logoImageUrl: createStoreDto.logoImageUrl,
           name: createStoreDto.name,
           description: createStoreDto.description,
+          // 주소/위치 정보
+          address: createStoreDto.address,
+          roadAddress: createStoreDto.roadAddress,
+          zonecode: createStoreDto.zonecode,
+          latitude: createStoreDto.latitude,
+          longitude: createStoreDto.longitude,
           // 사업자 정보 (1단계 - 사용자 입력값만 저장, 사업자등록번호는 정규화하여 저장)
           businessNo: normalizedBusinessNo,
           representativeName: createStoreDto.businessValidation.p_nm,

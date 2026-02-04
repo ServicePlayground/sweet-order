@@ -172,6 +172,13 @@ model Store {
   name              String
   description       String?
   
+  // 주소/위치 정보 (카카오지도 활용용) - 필수
+  address           String   // 지번 주소 (예: "서울특별시 강남구 역삼동 456-789")
+  roadAddress       String   // 도로명 주소 (예: "서울특별시 강남구 테헤란로 123")
+  zonecode          String   // 우편번호
+  latitude          Float    // 위도 (카카오지도 마커 표시 및 거리 계산용)
+  longitude         Float    // 경도 (카카오지도 마커 표시 및 거리 계산용)
+  
   // 사업자 정보 (1단계 - 사용자 입력값만 저장)
   businessNo        String   @map("business_no")
   representativeName String  @map("representative_name")
@@ -203,6 +210,7 @@ model Store {
   @@index([userId])
   @@index([businessNo])
   @@index([likeCount])
+  @@index([latitude, longitude]) // 위치 기반 검색을 위한 인덱스
   @@map("stores")
 }
 

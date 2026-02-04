@@ -108,6 +108,11 @@ export const StoreCreatePage: React.FC = () => {
       name: data.name,
       description: data.description,
       logoImageUrl: data.logoImageUrl,
+      address: data.address,
+      roadAddress: data.roadAddress,
+      zonecode: data.zonecode,
+      latitude: data.latitude,
+      longitude: data.longitude,
     });
   };
 

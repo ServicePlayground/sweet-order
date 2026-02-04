@@ -5,6 +5,7 @@ import { ImageUpload } from "@/apps/web-seller/common/components/images/ImageUpl
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { AddressInput } from "@/apps/web-seller/common/components/address/AddressInput";
 
 interface Props {
   onSubmit: (data: IStoreForm) => void;
@@ -17,6 +18,11 @@ export const defaultForm: IStoreForm = {
   name: "",
   description: "",
   logoImageUrl: "",
+  address: "",
+  roadAddress: "",
+  zonecode: "",
+  latitude: 0,
+  longitude: 0,
 };
 
 export const StoreCreationForm: React.FC<Props> = ({
@@ -109,6 +115,30 @@ export const StoreCreationForm: React.FC<Props> = ({
           {errors.description && (
             <p className="text-sm text-destructive mt-1">{errors.description}</p>
           )}
+        </div>
+        <div>
+          <AddressInput
+            value={{
+              address: form.address,
+              roadAddress: form.roadAddress,
+              zonecode: form.zonecode,
+              latitude: form.latitude,
+              longitude: form.longitude,
+            }}
+            onChange={(addressData) => {
+              const next = {
+                ...form,
+                address: addressData.address,
+                roadAddress: addressData.roadAddress,
+                zonecode: addressData.zonecode,
+                latitude: addressData.latitude,
+                longitude: addressData.longitude,
+              };
+              setForm(next);
+              onChange?.(next);
+            }}
+            error={errors.address}
+          />
         </div>
       </div>
 
