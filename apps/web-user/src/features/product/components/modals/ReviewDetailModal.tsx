@@ -45,7 +45,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
       review.imageUrls.map((url) => ({
         url,
         review,
-      }))
+      })),
     );
   }, [reviews]);
 
@@ -214,7 +214,11 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               type="button"
               onClick={() => swiper?.slideNext()}
               className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-[40px] h-[56px] rounded-l-[8px] bg-black/30 flex items-center justify-center text-white transition-opacity duration-300 ${
-                !isSliding ? "opacity-0" : currentIndex === allImages.length - 1 ? "opacity-30" : "opacity-100"
+                !isSliding
+                  ? "opacity-0"
+                  : currentIndex === allImages.length - 1
+                    ? "opacity-30"
+                    : "opacity-100"
               } ${currentIndex === allImages.length - 1 ? "md:opacity-30" : "md:opacity-100"}`}
               disabled={currentIndex === allImages.length - 1}
             >
@@ -232,12 +236,15 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
         className={`absolute bottom-0 left-0 right-0 z-30 transition-all duration-300 ease-out overflow-y-auto ${isTruncated ? "cursor-pointer" : ""}`}
         style={{
           height: isExpanded && isTruncated && expandedHeight ? `${expandedHeight}px` : "25vh",
-          background: isExpanded && isTruncated
-            ? "rgba(31, 31, 30, 0.95)"
-            : "linear-gradient(to bottom, rgba(31, 31, 30, 0) 100%, rgba(31, 31, 30, 1) 0%)"
+          background:
+            isExpanded && isTruncated
+              ? "rgba(31, 31, 30, 0.95)"
+              : "linear-gradient(to bottom, rgba(31, 31, 30, 0) 100%, rgba(31, 31, 30, 1) 0%)",
         }}
       >
-        <div className={`flex flex-col px-5 pt-5 pb-8 h-full ${isExpanded ? "justify-start" : "justify-end"}`}>
+        <div
+          className={`flex flex-col px-5 pt-5 pb-8 h-full ${isExpanded ? "justify-start" : "justify-end"}`}
+        >
           {/* 별점, 날짜, 닉네임 */}
           <div className="flex items-center justify-between gap-3 mb-3">
             <span className="flex items-center gap-[2px]">
@@ -245,10 +252,10 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
               <span className="font-bold text-white">{roundedRating}</span>
             </span>
             <div className="flex items-center gap-[24px] text-sm text-gray-300">
-              <span className="relative before:content-[''] before:absolute before:right-[-12px] before:top-1/2 before:-translate-y-1/2 before:w-[1px] before:h-[8px] before:bg-gray-300">{formatDate(currentReview.createdAt)}</span>
-              <span className="font-bold">
-                {currentReview.userNickname || "익명"}
+              <span className="relative before:content-[''] before:absolute before:right-[-12px] before:top-1/2 before:-translate-y-1/2 before:w-[1px] before:h-[8px] before:bg-gray-300">
+                {formatDate(currentReview.createdAt)}
               </span>
+              <span className="font-bold">{currentReview.userNickname || "익명"}</span>
             </div>
           </div>
 

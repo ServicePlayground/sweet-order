@@ -41,19 +41,8 @@ const iconFiles: Record<string, string> = {
 };
 
 // 스토리북용 간단한 Icon 표시 컴포넌트
-const IconDisplay = ({
-  name,
-  size = 24,
-}: {
-  name: string;
-  size?: number;
-}) => (
-  <img
-    src={`/icons/${iconFiles[name]}`}
-    alt={name}
-    width={size}
-    height={size}
-  />
+const IconDisplay = ({ name, size = 24 }: { name: string; size?: number }) => (
+  <img src={`/icons/${iconFiles[name]}`} alt={name} width={size} height={size} />
 );
 
 const meta: Meta = {

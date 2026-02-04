@@ -1,4 +1,7 @@
-import { ProductListQueryParams, ReviewSortBy } from "@/apps/web-user/features/product/types/product.type";
+import {
+  ProductListQueryParams,
+  ReviewSortBy,
+} from "@/apps/web-user/features/product/types/product.type";
 
 export const productQueryKeys = {
   list: (params: ProductListQueryParams) => ["product", "list", params] as const,

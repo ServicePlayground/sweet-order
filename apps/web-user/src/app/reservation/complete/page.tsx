@@ -100,7 +100,9 @@ export default function ReservationCompletePage() {
             <div className="mb-[20px]">
               <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
                 <span className="text-gray-500">픽업장소</span>
-                <span className="text-gray-900">{snapshot.productNoticeProducer} ({snapshot.productNoticeAddress})</span>
+                <span className="text-gray-900">
+                  {snapshot.productNoticeProducer} ({snapshot.productNoticeAddress})
+                </span>
               </p>
               <p className="flex items-center justify-between px-[16px] text-sm">
                 <span className="text-gray-500">결제방식</span>
@@ -114,25 +116,34 @@ export default function ReservationCompletePage() {
                 return (
                   <div
                     key={index}
-                    ref={(el) => { cardRefs.current[index] = el; }}
+                    ref={(el) => {
+                      cardRefs.current[index] = el;
+                    }}
                     className="pt-[12px] border border-gray-100 rounded-lg"
                   >
                     <span className="inline-flex items-center ml-[12px] px-[6px] py-[4px] text-xs text-gray-700 font-bold bg-gray-50 rounded-lg">
-                      <Icon name="takeout" width={16} height={16} className="mr-[2px] text-gray-700" />
+                      <Icon
+                        name="takeout"
+                        width={16}
+                        height={16}
+                        className="mr-[2px] text-gray-700"
+                      />
                       픽업 {formatDateTime(item.date)}
                     </span>
                     <div className="flex items-center justify-between px-[16px] py-[12px] border-b border-gray-100">
                       <div className="flex flex-col gap-[4px]">
                         <span className="text-xs text-gray-500">예약상품</span>
                         <span className="flex items-center gap-[2px] text-sm text-gray-900">
-                          {snapshot.cakeTitle} 
-                          <Icon name="quantity" width="8px" height="8px" /> 
+                          {snapshot.cakeTitle}
+                          <Icon name="quantity" width="8px" height="8px" />
                           {item.quantity}
                         </span>
                       </div>
                       <div className="flex flex-col gap-[4px] items-end">
                         <span className="text-xs text-gray-500">금액</span>
-                        <span className="text-sm text-gray-900">{itemPrice.toLocaleString()}원</span>
+                        <span className="text-sm text-gray-900">
+                          {itemPrice.toLocaleString()}원
+                        </span>
                       </div>
                     </div>
                     {isOpen && (
@@ -148,14 +159,18 @@ export default function ReservationCompletePage() {
                           <span className="text-xs text-gray-500">사이즈</span>
                           <p className="flex items-center justify-between text-2sm text-gray-900">
                             <span>{item.size}</span>
-                            {item.sizePrice > 0 && <span>+{item.sizePrice.toLocaleString()}원</span>}
+                            {item.sizePrice > 0 && (
+                              <span>+{item.sizePrice.toLocaleString()}원</span>
+                            )}
                           </p>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-xs text-gray-500">맛</span>
                           <p className="flex items-center justify-between text-2sm text-gray-900">
                             <span>{item.flavor}</span>
-                            {item.flavorPrice > 0 && <span>+{item.flavorPrice.toLocaleString()}원</span>}
+                            {item.flavorPrice > 0 && (
+                              <span>+{item.flavorPrice.toLocaleString()}원</span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -168,7 +183,10 @@ export default function ReservationCompletePage() {
                         } else {
                           newSet.add(index);
                           setTimeout(() => {
-                            cardRefs.current[index]?.scrollIntoView({ behavior: "smooth", block: "start" });
+                            cardRefs.current[index]?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
                           }, 100);
                         }
                         setOpenIndexes(newSet);
@@ -200,9 +218,6 @@ export default function ReservationCompletePage() {
           </div>
         </div>
       )}
-
-      
     </div>
   );
 }
-

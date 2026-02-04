@@ -8,7 +8,10 @@ import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import { navigateToLoginPage, logoutFromWebView } from "@/apps/web-user/common/utils/webview.bridge";
+import {
+  navigateToLoginPage,
+  logoutFromWebView,
+} from "@/apps/web-user/common/utils/webview.bridge";
 
 export default function Home() {
   const { isAuthenticated, accessToken } = useAuthStore();

@@ -32,7 +32,7 @@ const config: StorybookConfig = {
           exportType: "default",
           icon: true,
         },
-      })
+      }),
     );
     return config;
   },

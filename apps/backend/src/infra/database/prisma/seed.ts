@@ -189,8 +189,7 @@ async function main() {
         userId: users[0].id, // 같은 판매자의 두 번째 스토어
         name: "디저트 파라다이스",
         description: "다양한 디저트를 판매하는 스토어입니다.",
-        logoImageUrl:
-          "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
+        logoImageUrl: "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
         // 사업자 정보 (1단계)
         businessNo: "1198288947",
         representativeName: "홍길동",
@@ -241,7 +240,10 @@ async function main() {
         data: {
           storeId: stores[storeIndex].id, // 스토어 ID (첫 번째 또는 두 번째 스토어)
           name: "프리미엄 초콜릿 케이크",
-          images: ["https://static-staging.sweetorders.com/uploads/1__1770124383061_4d54e9eb.jpeg", "https://static-staging.sweetorders.com/uploads/2__1770124399509_6f9e0688.jpeg"],
+          images: [
+            "https://static-staging.sweetorders.com/uploads/1__1770124383061_4d54e9eb.jpeg",
+            "https://static-staging.sweetorders.com/uploads/2__1770124399509_6f9e0688.jpeg",
+          ],
           salePrice: 45000,
           salesStatus: "ENABLE",
           visibilityStatus: "ENABLE",

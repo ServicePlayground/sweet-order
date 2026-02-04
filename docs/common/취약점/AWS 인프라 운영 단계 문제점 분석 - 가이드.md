@@ -55,7 +55,7 @@
 
 **해결 방안**:
 
-1. **Production 환경**: 
+1. **Production 환경**:
    - EC2 Auto Scaling Group 구성 (최소 2개 인스턴스)
    - 또는 RDS Multi-AZ로 데이터베이스 분리 (비용 증가)
    - Application Load Balancer를 통한 로드 밸런싱

@@ -65,12 +65,7 @@ export const PhotoReviewListModal: React.FC<PhotoReviewListModalProps> = ({
               onClick={() => onImageClick(image.reviewId)}
               className="relative w-full aspect-square rounded-lg overflow-hidden"
             >
-              <Image
-                src={image.url}
-                alt={`사진 후기 ${index + 1}`}
-                fill
-                className="object-cover"
-              />
+              <Image src={image.url} alt={`사진 후기 ${index + 1}`} fill className="object-cover" />
             </button>
           ))}
         </div>

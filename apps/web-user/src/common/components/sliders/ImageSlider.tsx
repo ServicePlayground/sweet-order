@@ -47,10 +47,7 @@ export const ImageSlider: React.FC<ImageSliderProps> = ({
   }
 
   return (
-    <div
-      className={`flex overflow-x-auto scrollbar-hide ${className}`}
-      style={{ gap: `${gap}px` }}
-    >
+    <div className={`flex overflow-x-auto scrollbar-hide ${className}`} style={{ gap: `${gap}px` }}>
       {images.map((image, index) => (
         <button
           key={image.id}

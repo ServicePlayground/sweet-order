@@ -35,7 +35,10 @@ export const productApi = {
     return response.data.data;
   },
   // 상품 후기 목록 조회
-  getProductReviews: async ({ productId, ...params }: GetReviewsParams): Promise<ReviewListResponse> => {
+  getProductReviews: async ({
+    productId,
+    ...params
+  }: GetReviewsParams): Promise<ReviewListResponse> => {
     const response = await userClient.get(`/products/${productId}/reviews`, { params });
     return response.data.data;
   },

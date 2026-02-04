@@ -94,12 +94,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
           {images.map((image, idx) => (
             <SwiperSlide key={image.id} className="flex items-center justify-center">
               <div className="relative w-full h-full flex items-center justify-center p-4">
-                <Image
-                  src={image.url}
-                  alt={`이미지 ${idx + 1}`}
-                  fill
-                  className="object-contain"
-                />
+                <Image src={image.url} alt={`이미지 ${idx + 1}`} fill className="object-contain" />
               </div>
             </SwiperSlide>
           ))}

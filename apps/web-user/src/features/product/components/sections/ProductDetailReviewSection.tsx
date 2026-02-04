@@ -53,11 +53,11 @@ function ReviewItem({ review, onImageClick }: ReviewItemProps) {
   return (
     <div className="py-4 border-b border-gray-100 last:border-b-0">
       <div className="flex items-center justify-between mb-[12px]">
-        <span className="text-sm font-medium text-gray-900">
-          {renderRating(review.rating)}
-        </span>
+        <span className="text-sm font-medium text-gray-900">{renderRating(review.rating)}</span>
         <div className="flex items-center gap-[24px]">
-          <span className="relative text-sm text-gray-500 before:content-[''] before:absolute before:right-[-12px] before:top-1/2 before:-translate-y-1/2 before:w-[1px] before:h-[8px] before:bg-gray-300">{formatDate(review.createdAt)}</span>
+          <span className="relative text-sm text-gray-500 before:content-[''] before:absolute before:right-[-12px] before:top-1/2 before:-translate-y-1/2 before:w-[1px] before:h-[8px] before:bg-gray-300">
+            {formatDate(review.createdAt)}
+          </span>
           <span className="font-bold text-sm text-gray-900">{review.userNickname || "익명"}</span>
         </div>
       </div>
@@ -133,7 +133,7 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
         id: `${review.id}-${idx}`,
         url,
         reviewId: review.id,
-      }))
+      })),
     );
   }, [photoReviewData]);
 
@@ -165,7 +165,7 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
   return (
     <div>
       {/* 사진 후기 */}
-      {allPhotoImages.length >= 10 && 
+      {allPhotoImages.length >= 10 && (
         <>
           <ProductDetailSubTitle>사진 후기</ProductDetailSubTitle>
           <div
@@ -201,9 +201,9 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
                 </button>
               );
             })}
-          </div>  
+          </div>
         </>
-      }
+      )}
 
       {/* 후기 목록 */}
       <div className="flex items-center justify-between">
@@ -230,11 +230,7 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
       <div className="mt-3">
         {reviewData?.data && reviewData.data.length > 0 ? (
           reviewData.data.map((review) => (
-            <ReviewItem
-              key={review.id}
-              review={review}
-              onImageClick={handleReviewImageClick}
-            />
+            <ReviewItem key={review.id} review={review} onImageClick={handleReviewImageClick} />
           ))
         ) : (
           <p className="text-sm text-gray-500 py-4">등록된 후기가 없습니다.</p>

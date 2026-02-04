@@ -70,7 +70,15 @@ export function ReservationBottomSheet({
     handleUploadClick,
     handleFileChange,
     handleRemoveImage,
-  } = useReservationBottomSheet({ isOpen, price, productType, cakeSizeOptions, cakeFlavorOptions, onClose, onConfirm });
+  } = useReservationBottomSheet({
+    isOpen,
+    price,
+    productType,
+    cakeSizeOptions,
+    cakeFlavorOptions,
+    onClose,
+    onConfirm,
+  });
 
   const getTitle = () => {
     if (view === "options") return "상품 옵션 선택";
@@ -142,7 +150,7 @@ export function ReservationBottomSheet({
                 price,
                 productType,
                 productNoticeProducer,
-                productNoticeAddress
+                productNoticeAddress,
               };
               sessionStorage.setItem("reservationComplete", JSON.stringify(payload));
               handleFinalConfirm();
