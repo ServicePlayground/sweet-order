@@ -268,6 +268,7 @@ jobs:
             fi
 
             # Prisma migrate 실행
+            MIGRATE_SUCCESS=false
             if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma 2>&1 | tee /tmp/migrate_output.log; then
               MIGRATE_OUTPUT=$(cat /tmp/migrate_output.log)
               
@@ -285,6 +286,7 @@ jobs:
                   echo "🔄 마이그레이션 재시도 중..."
                   if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
                     echo "✅ Prisma migrate 성공 (재시도 후)"
+                    MIGRATE_SUCCESS=true
                   else
                     echo "❌ Prisma migrate 재시도 실패"
                     rollback_deployment
@@ -312,7 +314,17 @@ jobs:
               fi
             else
               echo "✅ Prisma migrate 성공"
+              MIGRATE_SUCCESS=true
             fi
+            
+            # Prisma Client 재생성 (마이그레이션 성공 시에만)
+            if [ "$MIGRATE_SUCCESS" = true ]; then
+              echo "🔄 Prisma Client 재생성 중..."
+              npx prisma generate --schema ./src/infra/database/prisma/schema.prisma || {
+                echo "⚠️ Prisma Client 재생성 실패 (계속 진행합니다)"
+              }
+            fi
+            
             cd ~/sweet-order
 
             echo "🔨 Backend build"
