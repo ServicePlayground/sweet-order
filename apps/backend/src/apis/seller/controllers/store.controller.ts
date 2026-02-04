@@ -18,9 +18,7 @@ import {
   STORE_ERROR_MESSAGES,
   SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/store/constants/store.constants";
-import {
-  StoreListResponseDto,
-} from "@apps/backend/modules/store/dto/store-response.dto";
+import { StoreListResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
 
 /**
  * 스토어 관련 컨트롤러

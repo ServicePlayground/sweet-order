@@ -151,4 +151,3 @@ export class StoreListResponseDto {
   })
   stores: StoreResponseDto[];
 }
-
