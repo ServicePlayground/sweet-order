@@ -17,22 +17,24 @@ Sweet Order 프로젝트를 AWS EC2로 배포하는 가이드입니다. 비용 �
    - 키 페어 타입: RSA
    - 프라이빗 키 파일 형식: `.pem`
    - **중요**: `.pem` 파일을 안전하게 보관 (다운로드)
-6. **네트워크 설정**: 
+6. **네트워크 설정**:
    - VPC: 기본 VPC 선택
    - 서브넷: 기존 서브넷 중 하나 선택 (새 서브넷 생성 불필요)
-     - 기본 VPC에는 보통 여러 가용 영역에 서브넷이 존재함 (예: ap-northeast-2a, ap-northeast-2b, ap-northeast-2c 등)     
+     - 기본 VPC에는 보통 여러 가용 영역에 서브넷이 존재함 (예: ap-northeast-2a, ap-northeast-2b, ap-northeast-2c 등)
    - 퍼블릭 IP 자동 할당: **활성화** (필수)
-  - 보안 그룹: 새 보안 그룹 생성
-    - 이름: `sweet-order-backend-sg`
-    - 인바운드 규칙:
-      - SSH (22): 0.0.0.0/0 (모두허용, github IP 때문)
-      - HTTP (80): 0.0.0.0/0 (또는 특정 IP만) - Nginx 사용 시 필수
-      - HTTPS (443): 0.0.0.0/0 (또는 특정 IP만) - Nginx 사용 시 필수
-7. **스토리지**: 
+
+- 보안 그룹: 새 보안 그룹 생성
+  - 이름: `sweet-order-backend-sg`
+  - 인바운드 규칙:
+    - SSH (22): 0.0.0.0/0 (모두허용, github IP 때문)
+    - HTTP (80): 0.0.0.0/0 (또는 특정 IP만) - Nginx 사용 시 필수
+    - HTTPS (443): 0.0.0.0/0 (또는 특정 IP만) - Nginx 사용 시 필수
+
+7. **스토리지**:
    - 기본값: 8 GiB (초기 테스트용으로 충분)
    - 권장: 20-30 GiB (프로덕션 환경, 데이터베이스 데이터 증가 대비)
    - 스토리지 타입: gp3 (gp2보다 저렴하고 성능 좋음)
-   - **참고**: 
+   - **참고**:
      - 8 GiB → 30 GiB 확장 시 추가 비용: 약 $2-3/월 (리전별 차이)
 8. 인스턴스 시작
 
@@ -170,6 +172,7 @@ sudo -u postgres psql -c "SHOW hba_file;"
 ```
 
 예상 출력:
+
 ```
 /var/lib/pgsql/16/data/pg_hba.conf
 ```
@@ -184,18 +187,21 @@ sudo vi /var/lib/pgsql/16/data/pg_hba.conf
 다음 줄을 찾아 수정합니다:
 
 **기존 (❌)**:
+
 ```
 # IPv4 local connections:
 host    all     all     127.0.0.1/32    ident
 ```
 
 **변경 (✅)**:
+
 ```
 # IPv4 local connections:
 host    all     all     127.0.0.1/32    md5
 ```
 
 **또는 PostgreSQL 14+ 권장 방식**:
+
 ```
 # IPv4 local connections:
 host    all     all     127.0.0.1/32    scram-sha-256
@@ -225,6 +231,7 @@ psql -h localhost -p 5432 -U sweetorder_admin sweetorder_staging_db
 ```
 
 성공 시 다음과 같은 프롬프트가 표시됩니다:
+
 ```
 sweetorder_staging_db=>
 ```
@@ -255,6 +262,7 @@ GitHub Actions를 사용하여 자동 배포를 구성합니다. 코드를 EC2�
 Nginx를 사용하여 80/443 포트로 요청을 받고 백엔드(8080 포트)로 프록시합니다.
 
 **Nginx 사용의 장점**:
+
 - 8080 포트를 외부에 노출하지 않아 보안 강화
 - SSL/TLS 인증서 설정 용이 (Let's Encrypt)
 - 로드 밸런싱 및 정적 파일 서빙 가능
@@ -319,7 +327,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # WebSocket 타임아웃 설정 (Socket.IO 장시간 연결 유지)
         proxy_read_timeout 86400s;
         proxy_send_timeout 86400s;
@@ -340,7 +348,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # WebSocket 업그레이드 지원 (일반 HTTP 요청에서도 WebSocket으로 업그레이드 가능)
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
@@ -424,12 +432,14 @@ sudo dnf install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d api-staging.sweetorders.com
 ```
 
-**중요**: 
+**중요**:
+
 - 도메인이 EC2를 가리키고 있어야 합니다 (6단계 완료 필수)
 - 보안 그룹에서 80, 443 포트가 열려 있어야 합니다
 - Nginx가 실행 중이어야 합니다
 
 **프롬프트 안내**:
+
 - 이메일 주소 입력: 인증서 갱신 알림용
 - Terms of Service 동의: `A` 또는 `Y`
 - 이메일 공유 동의: 선택사항 (`Y` 또는 `N`)
@@ -456,8 +466,8 @@ curl https://api-staging.sweetorders.com/health
 https://api-staging.sweetorders.com/health
 ```
 
-
 ## 8. AWS S3(정적), CloudFront(CDN) 설정
+
 일반 파일 저장(이미지/파일 업로드·배포) 목적
 
 ### 1. AWS S3 버킷 생성
@@ -557,11 +567,11 @@ graph TB
         subgraph "Nginx 리버스 프록시"
             Nginx[Nginx<br/>포트: 80/443<br/>SSL: Let's Encrypt]
         end
-        
+
         subgraph "백엔드 애플리케이션"
             Backend[NestJS Backend<br/>포트: 8080<br/>PM2로 실행]
         end
-        
+
         subgraph "데이터베이스"
             PostgreSQL[PostgreSQL 16<br/>포트: 5432<br/>로컬 설치]
         end

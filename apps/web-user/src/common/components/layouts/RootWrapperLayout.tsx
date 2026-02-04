@@ -24,11 +24,14 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
     return "main";
   };
 
+  const headerVariant = getHeaderVariant();
+  const hasHeader = headerVariant !== "minimal";
+
   return (
     <AuthProvider>
       <div className="w-full sm:w-[640px] h-screen mx-auto sm:border-x border-gray-200 overflow-y-auto overflow-x-hidden">
-        <Header variant={getHeaderVariant()} />
-        <div>{children}</div>
+        <Header variant={headerVariant} />
+        <div className={hasHeader ? "pt-[52px]" : ""}>{children}</div>
         <Alert />
         <ConfirmAlert />
       </div>

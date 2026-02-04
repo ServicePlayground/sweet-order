@@ -23,6 +23,12 @@ export const SWAGGER_EXAMPLES = {
   NAME: "스위트오더 스토어",
   DESCRIPTION: "맛있는 케이크를 판매하는 스토어입니다.",
   CREATED_AT: new Date("2024-01-01T00:00:00.000Z"),
+  // 주소/위치 정보
+  ADDRESS: "서울특별시 강남구 역삼동 456-789",
+  ROAD_ADDRESS: "서울특별시 강남구 테헤란로 123",
+  ZONECODE: "06234",
+  LATITUDE: 37.5665,
+  LONGITUDE: 126.978,
 };
 
 const STORE_DETAIL_RESPONSE_EXAMPLE = {
@@ -38,6 +44,11 @@ const STORE_DETAIL_RESPONSE_EXAMPLE = {
   businessSector: BUSINESS_SWAGGER_EXAMPLES.B_SECTOR,
   businessType: BUSINESS_SWAGGER_EXAMPLES.B_TYPE,
   permissionManagementNumber: BUSINESS_SWAGGER_EXAMPLES.PRMMI_MNNO,
+  address: SWAGGER_EXAMPLES.ADDRESS,
+  roadAddress: SWAGGER_EXAMPLES.ROAD_ADDRESS,
+  zonecode: SWAGGER_EXAMPLES.ZONECODE,
+  latitude: SWAGGER_EXAMPLES.LATITUDE,
+  longitude: SWAGGER_EXAMPLES.LONGITUDE,
   likeCount: 25,
   averageRating: 4.5,
   totalReviewCount: 42,

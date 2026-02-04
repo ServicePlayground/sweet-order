@@ -170,6 +170,12 @@ async function main() {
         description: "맛있는 케이크를 판매하는 스토어입니다.",
         logoImageUrl:
           "https://static-staging.sweetorders.com/uploads/NYenL1720090515_1770124331535_5b9aa552.png",
+        // 주소/위치 정보
+        address: "서울특별시 강동구 천호동 123-45",
+        roadAddress: "서울특별시 강동구 천호대로 100",
+        zonecode: "05278",
+        latitude: 37.5386,
+        longitude: 127.1259,
         // 사업자 정보 (1단계)
         businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
         representativeName: "홍길동",
@@ -189,8 +195,13 @@ async function main() {
         userId: users[0].id, // 같은 판매자의 두 번째 스토어
         name: "디저트 파라다이스",
         description: "다양한 디저트를 판매하는 스토어입니다.",
-        logoImageUrl:
-          "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
+        logoImageUrl: "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
+        // 주소/위치 정보
+        address: "서울특별시 강남구 역삼동 456-78",
+        roadAddress: "서울특별시 강남구 테헤란로 200",
+        zonecode: "06234",
+        latitude: 37.4981,
+        longitude: 127.0276,
         // 사업자 정보 (1단계)
         businessNo: "1198288947",
         representativeName: "홍길동",
@@ -241,7 +252,10 @@ async function main() {
         data: {
           storeId: stores[storeIndex].id, // 스토어 ID (첫 번째 또는 두 번째 스토어)
           name: "프리미엄 초콜릿 케이크",
-          images: ["https://static-staging.sweetorders.com/uploads/1__1770124383061_4d54e9eb.jpeg", "https://static-staging.sweetorders.com/uploads/2__1770124399509_6f9e0688.jpeg"],
+          images: [
+            "https://static-staging.sweetorders.com/uploads/1__1770124383061_4d54e9eb.jpeg",
+            "https://static-staging.sweetorders.com/uploads/2__1770124399509_6f9e0688.jpeg",
+          ],
           salePrice: 45000,
           salesStatus: "ENABLE",
           visibilityStatus: "ENABLE",

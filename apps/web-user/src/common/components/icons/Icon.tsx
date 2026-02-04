@@ -16,6 +16,8 @@ import Trash from "./icons/trash.svg";
 import Minus from "./icons/minus.svg";
 import Plus from "./icons/plus.svg";
 import Warning from "./icons/warning.svg";
+import Star from "./icons/star.svg";
+import Quantity from "./icons/quantity.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -41,6 +43,8 @@ export const iconTypes = {
   minus: Minus,
   plus: Plus,
   warning: Warning,
+  star: Star,
+  quantity: Quantity,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

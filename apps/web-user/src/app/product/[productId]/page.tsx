@@ -3,6 +3,7 @@
 import { use, useState } from "react";
 import { useProductDetail } from "@/apps/web-user/features/product/hooks/queries/useProductDetail";
 import { useProductIsLiked } from "@/apps/web-user/features/product/hooks/queries/useProductIsLiked";
+import { useProductReviews } from "@/apps/web-user/features/product/hooks/queries/useProductReviews";
 import { useAddProductLike } from "@/apps/web-user/features/product/hooks/mutations/useAddProductLike";
 import { useRemoveProductLike } from "@/apps/web-user/features/product/hooks/mutations/useRemoveProductLike";
 import { ProductDetailImageGallerySection } from "@/apps/web-user/features/product/components/sections/ProductDetailImageGallerySection";
@@ -24,10 +25,13 @@ interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
 }
 
+// 안녕
+
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { productId } = use(params);
   const { data, isLoading } = useProductDetail(productId);
   const { data: likeData } = useProductIsLiked(productId);
+  const { data: reviewData } = useProductReviews({ productId });
   const { mutate: addLike, isPending: isAddingLike } = useAddProductLike();
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveProductLike();
 
@@ -92,8 +96,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           },
           {
             id: "review",
-            label: "후기",
-            content: <ProductDetailReviewSection />,
+            label: `후기 ${reviewData?.meta.totalItems ?? 0}`,
+            content: <ProductDetailReviewSection productId={productId} />,
           },
           {
             id: "notice",

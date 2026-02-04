@@ -3,8 +3,17 @@ import {
   IOnlineTradingCompanyDetailRequest,
 } from "@/apps/web-seller/features/business/types/business.type";
 
+// 주소 정보
+export interface IStoreAddress {
+  address: string; // 지번 주소
+  roadAddress: string; // 도로명 주소
+  zonecode: string; // 우편번호
+  latitude: number; // 위도
+  longitude: number; // 경도
+}
+
 // 스토어 정보 폼
-export interface IStoreForm {
+export interface IStoreForm extends IStoreAddress {
   name: string;
   description?: string;
   logoImageUrl?: string;
@@ -22,7 +31,7 @@ export interface ICreateStoreResponse {
 }
 
 // 스토어 목록 아이템
-export interface IStoreListItem {
+export interface IStoreListItem extends IStoreAddress {
   id: string;
   userId: string;
   logoImageUrl?: string;

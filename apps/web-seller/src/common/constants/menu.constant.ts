@@ -43,7 +43,7 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
     {
       text: "채팅",
       icon: React.createElement(MessageSquare, { className: "w-5 h-5" }),
-      path: ROUTES.STORE_DETAIL_CHAT_LIST(storeId),
+      children: [{ text: "채팅 목록", path: ROUTES.STORE_DETAIL_CHAT_LIST(storeId) }],
     },
   ];
 }

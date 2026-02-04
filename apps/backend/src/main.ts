@@ -22,7 +22,6 @@ import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants"
  * NestJS 애플리케이션의 진입점
  */
 async function bootstrap(): Promise<void> {
-
   // NestJS 애플리케이션 메인 인스턴스 생성 (AppModule을 사용하여 모든 모듈을 포함하고 있음)
   const app = await NestFactory.create(AppModule);
 

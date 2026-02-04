@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OrderItem, ReservationSelection, ViewType } from "./types";
-import { CakeFlavorOption, CakeSizeOption, ProductType } from "@/apps/web-user/features/product/types/product.type";
+import {
+  CakeFlavorOption,
+  CakeSizeOption,
+  ProductType,
+} from "@/apps/web-user/features/product/types/product.type";
 
 interface UseReservationBottomSheetProps {
   isOpen: boolean;
@@ -185,7 +189,8 @@ export function useReservationBottomSheet({
   // 현재 옵션을 주문 목록에 추가하고 확인 뷰로 이동
   const handleGoToConfirm = () => {
     const sizePrice = cakeSizeOptions?.find((s) => s.displayName === selectedSize)?.price ?? 0;
-    const flavorPrice = cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
+    const flavorPrice =
+      cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
 
     const newItem: OrderItem = {
       date: selectedDate,

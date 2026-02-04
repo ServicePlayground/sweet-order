@@ -103,7 +103,7 @@ jobs:
             echo "📊 디스크 사용량 체크"
             USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             echo "현재 디스크 사용량: ${USE_PERCENT}%"
-            
+
             # 디스크 사용량이 80% 이상이면 정리 작업 수행
             if [ "$USE_PERCENT" -gt 80 ]; then
               echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
@@ -156,7 +156,7 @@ jobs:
               echo "⚠️ DB 백업 실패 (계속 진행합니다)"
               rm -f "${DB_BACKUP_NAME%.gz}"
             }
-            
+
             # 압축 (백업이 성공한 경우만)
             if [ -f "${DB_BACKUP_NAME%.gz}" ]; then
               gzip "${DB_BACKUP_NAME%.gz}"
@@ -200,39 +200,39 @@ jobs:
             cat > apps/backend/.env.staging << EOF
             # Environment
             NODE_ENV=staging
-            
+
             # PORT
             PORT=8080
-            
+
             # DOMAIN
             PUBLIC_USER_DOMAIN=${{ secrets.STAGING_PUBLIC_USER_DOMAIN }}
             PUBLIC_SELLER_DOMAIN=${{ secrets.STAGING_PUBLIC_SELLER_DOMAIN }}
             PUBLIC_ADMIN_DOMAIN=${{ secrets.STAGING_PUBLIC_ADMIN_DOMAIN }}
-            
+
             # CORS Configuration
             CORS_ORIGIN=${{ secrets.STAGING_CORS_ORIGIN }}
-            
+
             # JWT
             JWT_SECRET=${{ secrets.STAGING_JWT_SECRET }}
-            
+
             # DATABASE
             # 옵션 1: EC2 PostgreSQL 사용 (비용 절감)
             DATABASE_URL=postgresql://sweetorder_admin:${{ secrets.STAGING_DATABASE_PASSWORD }}@localhost:5432/sweetorder_staging_db?schema=public
-            
+
             # GOOGLE OAuth
             GOOGLE_CLIENT_ID=${{ secrets.STAGING_GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
             GOOGLE_REDIRECT_URI=/auth/login/google
-            
+
             # SWAGGER
             SWAGGER_USERNAME=${{ secrets.STAGING_SWAGGER_USERNAME }}
             SWAGGER_PASSWORD=${{ secrets.STAGING_SWAGGER_PASSWORD }}
-            
+
             # NTS API
             NTS_API_URL=https://api.odcloud.kr/api
             KFTC_API_URL=https://apis.data.go.kr
             DATA_GO_KR_API_KEY=${{ secrets.STAGING_DATA_GO_KR_API_KEY }}
-            
+
             # AWS S3
             AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -240,7 +240,7 @@ jobs:
             S3_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
             CLOUDFRONT_DOMAIN=${{ secrets.STAGING_CLOUDFRONT_DOMAIN }}
             EOF
-            
+
             # 환경 변수 파일 권한 설정
             chmod 600 apps/backend/.env.staging
 
@@ -250,7 +250,7 @@ jobs:
             DATABASE_URL=$(grep '^DATABASE_URL=' .env.staging | head -1 | cut -d '=' -f2- | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             export DATABASE_URL
             echo "DATABASE_URL 설정 완료"
-            
+
             # Prisma migrate 실행
             if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
               echo "❌ Prisma migrate 실패"
@@ -289,13 +289,13 @@ jobs:
               rollback_deployment
             }
             pm2 save
-            
+
             # 배포 성공 시 trap 해제
             trap - ERR
-            
+
             echo "✅ 배포 완료!"
             pm2 list
-            
+
             # 배포 성공 후 오래된 백업 정리 (최근 5개만 유지)
             cleanup_old_backups "서버" "~/sweet-order.backup.*"
             cleanup_old_backups "DB" "~/db-backup.*.sql.gz"
