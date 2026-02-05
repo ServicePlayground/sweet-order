@@ -366,6 +366,13 @@ jobs:
               npx prisma generate --schema ./src/infra/database/prisma/schema.prisma || {
                 echo "⚠️ Prisma Client 재생성 실패 (계속 진행합니다)"
               }
+
+              echo "🌱 Staging 데이터베이스 시드 실행 (idempotent)"
+              # .env.staging 기반으로 DATABASE_URL이 이미 export 되어 있으므로 그대로 사용
+              yarn db:seed:staging || {
+                echo "❌ Staging 시드 실행 실패"
+                rollback_deployment
+              }
             fi
 
             cd ~/sweet-order
