@@ -46,6 +46,7 @@ export interface CakeSizeOption {
   description: string;
   displayName: string;
   price: number;
+  lengthCm: number;
 }
 
 export interface CakeFlavorOption {

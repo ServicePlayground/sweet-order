@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
+import { TransformWrapper, TransformComponent, ReactZoomPanPinchContentRef } from "react-zoom-pan-pinch";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { SliderImage } from "./ImageSlider";
 
@@ -33,6 +34,7 @@ export const ImageModal: React.FC<ImageModalProps> = ({
 }) => {
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const transformRefs = useRef<(ReactZoomPanPinchContentRef | null)[]>([]);
 
   useEffect(() => {
     if (isOpen && swiper) {
@@ -86,16 +88,55 @@ export const ImageModal: React.FC<ImageModalProps> = ({
         <Swiper
           modules={[Navigation]}
           onSwiper={setSwiper}
-          onSlideChange={(s) => setCurrentIndex(s.activeIndex)}
+          onSlideChange={(s) => {
+            // 이전 슬라이드 줌 리셋
+            transformRefs.current.forEach((ref) => {
+              ref?.resetTransform();
+            });
+            // 스와이프 다시 활성화
+            s.allowTouchMove = true;
+            setCurrentIndex(s.activeIndex);
+          }}
           slidesPerView={1}
           initialSlide={initialIndex}
           className="w-full h-full"
         >
           {images.map((image, idx) => (
             <SwiperSlide key={image.id} className="flex items-center justify-center">
-              <div className="relative w-full h-full flex items-center justify-center p-4">
-                <Image src={image.url} alt={`이미지 ${idx + 1}`} fill className="object-contain" />
-              </div>
+              <TransformWrapper
+                ref={(ref) => {
+                  transformRefs.current[idx] = ref;
+                }}
+                initialScale={1}
+                minScale={1}
+                maxScale={4}
+                centerOnInit
+                doubleClick={{ mode: "reset" }}
+                panning={{ disabled: false }}
+                onPanningStart={(ref) => {
+                  // 줌 상태가 아닐 때는 스와이프 허용
+                  if (ref.state.scale === 1) {
+                    swiper && (swiper.allowTouchMove = true);
+                  }
+                }}
+                onZoom={(ref) => {
+                  // 줌 중일 때는 스와이프 비활성화
+                  if (ref.state.scale > 1) {
+                    swiper && (swiper.allowTouchMove = false);
+                  } else {
+                    swiper && (swiper.allowTouchMove = true);
+                  }
+                }}
+              >
+                <TransformComponent
+                  wrapperStyle={{ width: "100%", height: "100%" }}
+                  contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}
+                >
+                  <div className="relative w-full h-full flex items-center justify-center p-4">
+                    <Image src={image.url} alt={`이미지 ${idx + 1}`} fill className="object-contain" />
+                  </div>
+                </TransformComponent>
+              </TransformWrapper>
             </SwiperSlide>
           ))}
         </Swiper>

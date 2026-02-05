@@ -5311,6 +5311,7 @@ __metadata:
     react: "npm:19.1.2"
     react-dom: "npm:19.1.2"
     react-error-boundary: "npm:^6.0.0"
+    react-zoom-pan-pinch: "npm:^3.7.0"
     socket.io-client: "npm:^4.8.3"
     storybook: "npm:^10.1.2"
     swiper: "npm:^12.0.3"
@@ -12293,6 +12294,16 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/841938ff16d16a6b76895f4cb2e1fea957e5fe3b30febbf03a54892dae1c9153f2383e231dea0b3ba41192ad2f2849448fa859caccd288943bce32639e971bee
+  languageName: node
+  linkType: hard
+
+"react-zoom-pan-pinch@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "react-zoom-pan-pinch@npm:3.7.0"
+  peerDependencies:
+    react: "*"
+    react-dom: "*"
+  checksum: 10c0/96889849800a953128fe7f9e42bed0d5cbc48d03024995b136f5e972146236688efb24d7381d8e6f09598f5512b4897d2420f62d828a665fdf24b745b7d55911
   languageName: node
   linkType: hard
 
