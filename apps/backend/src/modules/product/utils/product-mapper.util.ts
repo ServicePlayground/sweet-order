@@ -1,0 +1,89 @@
+import { Product } from "@apps/backend/infra/database/prisma/generated/client";
+import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-response.dto";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+
+/**
+ * 상품 매핑 유틸리티
+ * 상품 응답 DTO 변환 시 공통 로직을 제공합니다.
+ */
+
+/**
+ * Store 위치 정보 타입
+ */
+type StoreLocationInfo = {
+  address?: string | null;
+  roadAddress?: string | null;
+  zonecode?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+};
+
+/**
+ * Store와 Reviews가 include된 Product 타입
+ * (reviews는 선택적이며, store만 있는 경우도 이 타입으로 표현 가능)
+ */
+type ProductWithStoreAndReviews = Product & {
+  store?: StoreLocationInfo | null;
+  reviews?: Array<{ rating: number }>;
+};
+
+/**
+ * 상품 매핑 유틸리티 클래스
+ */
+export class ProductMapperUtil {
+  /**
+   * Store 위치 정보 select 필드
+   * 상품 조회 시 store의 위치 정보만 가져오기 위한 공통 select 필드
+   */
+  static readonly STORE_LOCATION_SELECT = {
+    address: true,
+    roadAddress: true,
+    zonecode: true,
+    latitude: true,
+    longitude: true,
+  } as const satisfies Prisma.StoreSelect;
+
+  /**
+   * Store 위치 정보 및 userId select 필드
+   * 권한 확인이 필요한 경우 사용
+   */
+  static readonly STORE_LOCATION_WITH_USER_ID_SELECT = {
+    userId: true,
+    address: true,
+    roadAddress: true,
+    zonecode: true,
+    latitude: true,
+    longitude: true,
+  } as const satisfies Prisma.StoreSelect;
+
+  /**
+   * Reviews rating select 필드
+   * 후기 통계 계산 시 사용
+   */
+  static readonly REVIEWS_RATING_SELECT = {
+    reviews: {
+      select: {
+        rating: true,
+      },
+    },
+  } as const;
+
+  /**
+   * Prisma Product 엔티티를 ProductResponseDto로 변환
+   * @param product - Prisma Product 엔티티 (store 포함 가능, reviews 포함 가능)
+   * @returns ProductResponseDto 객체
+   */
+  static mapToProductResponse(product: ProductWithStoreAndReviews): ProductResponseDto {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { store, reviews: _reviews, ...productData } = product;
+
+    return {
+      ...productData,
+      pickupAddress: store?.address || "",
+      pickupRoadAddress: store?.roadAddress || "",
+      pickupZonecode: store?.zonecode || "",
+      pickupLatitude: store?.latitude || 0,
+      pickupLongitude: store?.longitude || 0,
+    } as ProductResponseDto;
+  }
+}

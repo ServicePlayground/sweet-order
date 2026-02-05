@@ -7,6 +7,7 @@ import {
   ChatRoomForSellerResponseDto,
 } from "@apps/backend/modules/chat/dto/chat-response.dto";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
+import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
 
 /**
  * 채팅방 서비스
@@ -75,21 +76,7 @@ export class ChatRoomService {
     });
 
     return {
-      chatRooms: chatRooms.map((chatRoom) => ({
-        id: chatRoom.id,
-        storeId: chatRoom.storeId,
-        store: {
-          id: chatRoom.store.id,
-          name: chatRoom.store.name,
-          logoImageUrl: chatRoom.store.logoImageUrl,
-        },
-        lastMessage: chatRoom.lastMessage,
-        lastMessageAt: chatRoom.lastMessageAt,
-        userUnread: chatRoom.userUnread,
-        storeUnread: chatRoom.storeUnread,
-        createdAt: chatRoom.createdAt,
-        updatedAt: chatRoom.updatedAt,
-      })),
+      chatRooms: chatRooms.map((chatRoom) => ChatMapperUtil.mapToChatRoomResponseDto(chatRoom)),
     };
   }
 
@@ -133,22 +120,9 @@ export class ChatRoomService {
     });
 
     return {
-      chatRooms: chatRooms.map((chatRoom) => ({
-        id: chatRoom.id,
-        userId: chatRoom.userId,
-        storeId: chatRoom.storeId,
-        user: {
-          id: chatRoom.user.id,
-          nickname: chatRoom.user.nickname,
-          profileImageUrl: chatRoom.user.profileImageUrl,
-        },
-        lastMessage: chatRoom.lastMessage,
-        lastMessageAt: chatRoom.lastMessageAt,
-        userUnread: chatRoom.userUnread,
-        storeUnread: chatRoom.storeUnread,
-        createdAt: chatRoom.createdAt,
-        updatedAt: chatRoom.updatedAt,
-      })),
+      chatRooms: chatRooms.map((chatRoom) =>
+        ChatMapperUtil.mapToChatRoomForSellerResponseDto(chatRoom),
+      ),
     };
   }
 
