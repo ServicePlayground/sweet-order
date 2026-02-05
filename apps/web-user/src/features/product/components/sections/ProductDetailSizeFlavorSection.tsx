@@ -43,7 +43,9 @@ export function ProductDetailSizeFlavorSection({
                     style={{ width: size, height: size }}
                   />
                 </div>
-                <span className="text-sm text-gray-700">{option.displayName} <br /> {option.lengthCm}cm</span>
+                <span className="text-sm text-gray-700">
+                  {option.displayName} <br /> {option.lengthCm}cm
+                </span>
               </div>
             );
           })}

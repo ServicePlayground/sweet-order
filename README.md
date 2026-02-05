@@ -36,16 +36,18 @@ yarn web-user:dev         # 사용자 웹 개발 서버 (포트: 3001)
 yarn web-seller:dev       # 판매자 웹 개발 서버 (포트: 3002)
 
 # 데이터베이스 관리
-yarn db:migrate:dev         # 백엔드 개발 데이터베이스 마이그레이션
+yarn db:seed:dev           # 백엔드 개발 데이터베이스 시드 (development)
+yarn db:seed:staging       # 백엔드 스테이징 데이터베이스 시드 (staging)
+yarn db:migrate:dev        # 백엔드 개발 데이터베이스 마이그레이션
 yarn db:studio:dev         # 백엔드 개발 데이터베이스 스튜디오
-yarn db:seed:dev         # 백엔드 개발 데이터베이스 시드
-yarn db:reset:dev         # 백엔드 개발 데이터베이스 리셋
+yarn db:reset:dev          # 백엔드 개발 데이터베이스 리셋
 
 # 빌드 및 배포
 yarn backend:build:staging     # 백엔드 스테이징 빌드
 yarn backend:build:production  # 백엔드 프로덕션 빌드
 yarn web-user:build            # 사용자 웹 빌드
 yarn web-seller:build            # 판매자 웹 빌드
+
 
 # 코드 품질 검사
 yarn common:lint              # ESLint 검사
