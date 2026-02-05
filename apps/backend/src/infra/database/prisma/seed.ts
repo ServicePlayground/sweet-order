@@ -483,8 +483,8 @@ async function upsertProducts(stores: Awaited<ReturnType<typeof upsertStores>>) 
  * - 하나도 없을 때만: 리뷰 생성
  *
  * 특징:
- * - 첫 번째 스토어의 상품 10개에 각각 3~5개의 리뷰 생성
- * - 두 번째 스토어의 상품 5개에 각각 3~5개의 리뷰 생성
+ * - 첫 번째 스토어의 상품 70개 모두에 각각 3~5개의 리뷰 생성
+ * - 두 번째 스토어의 상품 30개 모두에 각각 3~5개의 리뷰 생성
  * - rating은 0.5 ~ 5.0 사이의 랜덤 값 (0.5 단위)
  * - createdAt은 2024-01-01부터 현재까지의 랜덤 시간
  * - 같은 사용자가 여러 리뷰를 작성할 수 있음
@@ -515,12 +515,12 @@ async function seedProductReviews(
   const reviews = [];
 
   /**
-   * 첫 번째 스토어의 상품 10개에 후기 추가
+   * 첫 번째 스토어의 상품 70개 모두에 후기 추가
    * - 각 상품당 3~5개의 랜덤 리뷰 생성
    * - 사용자는 랜덤 선택 (같은 사용자가 여러 리뷰 작성 가능)
    * - 이미지는 0~2개 랜덤
    */
-  const firstStoreProducts = products.slice(0, Math.min(products.length, 10));
+  const firstStoreProducts = products.slice(0, Math.min(products.length, 70));
   for (const product of firstStoreProducts) {
     const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
     for (let j = 0; j < reviewCount; j++) {
@@ -552,15 +552,15 @@ async function seedProductReviews(
   }
 
   /**
-   * 두 번째 스토어의 상품 5개에 후기 추가
+   * 두 번째 스토어의 상품 30개 모두에 후기 추가
    * - 각 상품당 3~5개의 랜덤 리뷰 생성
    * - 사용자는 랜덤 선택
    * - 이미지는 두 번째 스토어 전용 이미지 사용
    * - products.length가 70보다 작으면 빈 배열이 되어 리뷰 생성하지 않음
    */
-  const secondStoreSamples =
-    products.length >= 70 ? products.slice(70, Math.min(products.length, 75)) : [];
-  for (const product of secondStoreSamples) {
+  const secondStoreProducts =
+    products.length >= 70 ? products.slice(70, Math.min(products.length, 100)) : [];
+  for (const product of secondStoreProducts) {
     const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
     for (let j = 0; j < reviewCount; j++) {
       const userIndex = Math.floor(Math.random() * users.length);
