@@ -13,6 +13,7 @@
     "db:migrate:deploy": "prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma",
     "db:migrate:deploy:status": "prisma migrate status --schema ./src/infra/database/prisma/schema.prisma",
     "db:seed:dev": "dotenv -e ./.env.development -- ts-node -O '{\"module\":\"CommonJS\"}' src/infra/database/prisma/seed.ts",
+    "db:seed:staging": "dotenv -e ./.env.staging -- ts-node -O '{\"module\":\"CommonJS\"}' src/infra/database/prisma/seed.ts",
     "db:studio:dev": "dotenv -e ./.env.development -- prisma studio --schema ./src/infra/database/prisma/schema.prisma"
   },
   "dependencies": {

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import localFont from "next/font/local";
 import "@/apps/web-user/common/styles/globals.css";
@@ -91,6 +91,13 @@ export const metadata: Metadata = {
     "msapplication-TileColor": "#ff6b6b",
     "theme-color": "#ff6b6b",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

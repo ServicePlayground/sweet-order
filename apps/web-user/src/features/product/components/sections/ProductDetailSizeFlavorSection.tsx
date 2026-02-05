@@ -31,19 +31,21 @@ export function ProductDetailSizeFlavorSection({
     <div>
       {/* 사이즈 옵션 */}
       <div className="mt-[4px] mb-[36px]">
-        <ProductDetailSubTitle>사이즈·맛</ProductDetailSubTitle>
+        <ProductDetailSubTitle>사이즈</ProductDetailSubTitle>
         <div className="flex items-end gap-[6px] mb-[24px] px-[18px] overflow-x-auto">
           {visibleSizeOptions.map((option, index) => {
             const size = getSizePixel(index);
             return (
-              <div key={index} className="flex flex-col items-center gap-[9px]">
+              <div key={index} className="flex flex-col items-center text-center gap-[9px]">
                 <div className="flex items-center justify-center" style={{ height: maxSize }}>
                   <div
                     className="relative overflow-hidden rounded-full border-2 border-gray-300 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-0 before:w-full before:border-b-2 before:border-dashed before:border-gray-300"
                     style={{ width: size, height: size }}
                   />
                 </div>
-                <span className="text-sm text-gray-700">{option.displayName}</span>
+                <span className="text-sm text-gray-700">
+                  {option.displayName} <br /> {option.lengthCm}cm
+                </span>
               </div>
             );
           })}
