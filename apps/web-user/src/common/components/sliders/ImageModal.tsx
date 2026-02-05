@@ -5,7 +5,11 @@ import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
-import { TransformWrapper, TransformComponent, ReactZoomPanPinchContentRef } from "react-zoom-pan-pinch";
+import {
+  TransformWrapper,
+  TransformComponent,
+  ReactZoomPanPinchContentRef,
+} from "react-zoom-pan-pinch";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { SliderImage } from "./ImageSlider";
 
@@ -130,10 +134,21 @@ export const ImageModal: React.FC<ImageModalProps> = ({
               >
                 <TransformComponent
                   wrapperStyle={{ width: "100%", height: "100%" }}
-                  contentStyle={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  contentStyle={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
                   <div className="relative w-full h-full flex items-center justify-center p-4">
-                    <Image src={image.url} alt={`이미지 ${idx + 1}`} fill className="object-contain" />
+                    <Image
+                      src={image.url}
+                      alt={`이미지 ${idx + 1}`}
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                 </TransformComponent>
               </TransformWrapper>
