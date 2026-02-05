@@ -1,7 +1,3 @@
-import { SWAGGER_EXAMPLES as BUSINESS_SWAGGER_EXAMPLES } from "@apps/backend/modules/business/constants/business.contants";
-import { SWAGGER_EXAMPLES as USER_SWAGGER_EXAMPLES } from "@apps/backend/modules/auth/constants/auth.constants";
-import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
-
 export const STORE_ERROR_MESSAGES = {
   BUSINESS_REGISTRATION_NUMBER_MISMATCH:
     "1단계(사업자등록번호 진위확인)와 2단계(통신판매사업자 등록상세 조회)의 사업자등록번호가 일치하지 않습니다.",
@@ -23,34 +19,16 @@ export const SWAGGER_EXAMPLES = {
   NAME: "스위트오더 스토어",
   DESCRIPTION: "맛있는 케이크를 판매하는 스토어입니다.",
   CREATED_AT: new Date("2024-01-01T00:00:00.000Z"),
-};
-
-const STORE_DETAIL_RESPONSE_EXAMPLE = {
-  id: SWAGGER_EXAMPLES.ID,
-  userId: USER_SWAGGER_EXAMPLES.USER_DATA.id,
-  logoImageUrl: UPLOAD_SWAGGER_EXAMPLES.FILE_URL,
-  name: SWAGGER_EXAMPLES.NAME,
-  description: SWAGGER_EXAMPLES.DESCRIPTION,
-  businessNo: BUSINESS_SWAGGER_EXAMPLES.B_NO,
-  representativeName: BUSINESS_SWAGGER_EXAMPLES.P_NM,
-  openingDate: BUSINESS_SWAGGER_EXAMPLES.START_DT,
-  businessName: BUSINESS_SWAGGER_EXAMPLES.B_NM,
-  businessSector: BUSINESS_SWAGGER_EXAMPLES.B_SECTOR,
-  businessType: BUSINESS_SWAGGER_EXAMPLES.B_TYPE,
-  permissionManagementNumber: BUSINESS_SWAGGER_EXAMPLES.PRMMI_MNNO,
-  likeCount: 25,
-  averageRating: 4.5,
-  totalReviewCount: 42,
-  createdAt: new Date("2024-01-01T00:00:00.000Z"),
-  updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+  // 주소/위치 정보
+  ADDRESS: "서울특별시 강남구 역삼동 456-789",
+  ROAD_ADDRESS: "서울특별시 강남구 테헤란로 123",
+  ZONECODE: "06234",
+  LATITUDE: 37.5665,
+  LONGITUDE: 126.978,
 };
 
 export const SWAGGER_RESPONSE_EXAMPLES = {
   STORE_CREATED_RESPONSE: {
     id: SWAGGER_EXAMPLES.ID,
   },
-  STORE_LIST_RESPONSE: {
-    stores: [STORE_DETAIL_RESPONSE_EXAMPLE],
-  },
-  STORE_DETAIL_RESPONSE: STORE_DETAIL_RESPONSE_EXAMPLE,
 };

@@ -1,6 +1,6 @@
 import { Store } from "@apps/backend/infra/database/prisma/generated/client";
-import { StoreInfo } from "@apps/backend/modules/store/types/store.types";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
 
 /**
  * 스토어 매핑 유틸리티
@@ -8,12 +8,12 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
  */
 export class StoreMapperUtil {
   /**
-   * Prisma Store 엔티티를 StoreInfo 인터페이스로 변환
+   * Prisma Store 엔티티를 StoreResponseDto로 변환
    * @param store - Prisma Store 엔티티
    * @param prisma - PrismaService 인스턴스 (후기 통계 계산용)
-   * @returns StoreInfo 객체
+   * @returns StoreResponseDto 객체
    */
-  static async mapToStoreResponse(store: Store, prisma: PrismaService): Promise<StoreInfo> {
+  static async mapToStoreResponse(store: Store, prisma: PrismaService): Promise<StoreResponseDto> {
     // 해당 스토어의 모든 상품 ID 조회
     const products = await prisma.product.findMany({
       where: { storeId: store.id },
@@ -61,6 +61,11 @@ export class StoreMapperUtil {
       businessSector: store.businessSector,
       businessType: store.businessType,
       permissionManagementNumber: store.permissionManagementNumber,
+      address: store.address,
+      roadAddress: store.roadAddress,
+      zonecode: store.zonecode,
+      latitude: store.latitude,
+      longitude: store.longitude,
       likeCount: store.likeCount,
       averageRating,
       totalReviewCount,

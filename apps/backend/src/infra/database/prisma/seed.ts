@@ -170,6 +170,12 @@ async function main() {
         description: "맛있는 케이크를 판매하는 스토어입니다.",
         logoImageUrl:
           "https://static-staging.sweetorders.com/uploads/NYenL1720090515_1770124331535_5b9aa552.png",
+        // 주소/위치 정보
+        address: "서울특별시 강동구 천호동 123-45",
+        roadAddress: "서울특별시 강동구 천호대로 100",
+        zonecode: "05278",
+        latitude: 37.5386,
+        longitude: 127.1259,
         // 사업자 정보 (1단계)
         businessNo: "1198288946", // 정규화된 사업자등록번호 (하이픈 제거)
         representativeName: "홍길동",
@@ -190,6 +196,12 @@ async function main() {
         name: "디저트 파라다이스",
         description: "다양한 디저트를 판매하는 스토어입니다.",
         logoImageUrl: "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
+        // 주소/위치 정보
+        address: "서울특별시 강남구 역삼동 456-78",
+        roadAddress: "서울특별시 강남구 테헤란로 200",
+        zonecode: "06234",
+        latitude: 37.4981,
+        longitude: 127.0276,
         // 사업자 정보 (1단계)
         businessNo: "1198288947",
         representativeName: "홍길동",
