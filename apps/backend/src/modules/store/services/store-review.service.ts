@@ -7,6 +7,7 @@ import {
 } from "@apps/backend/modules/product/constants/product.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 
 /**
  * 스토어 후기 서비스
@@ -46,14 +47,7 @@ export class StoreReviewService {
     if (productIds.length === 0) {
       return {
         data: [],
-        meta: {
-          currentPage: page,
-          limit,
-          totalItems: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false,
-        },
+        meta: calculatePaginationMeta(page, limit, 0),
       };
     }
 
@@ -84,7 +78,6 @@ export class StoreReviewService {
     const totalItems = await this.prisma.productReview.count({ where });
 
     // 무한스크롤 계산
-    const totalPages = Math.ceil(totalItems / limit);
     const skip = (page - 1) * limit;
 
     // 후기 목록 조회 (사용자 정보 포함)
@@ -117,19 +110,8 @@ export class StoreReviewService {
       updatedAt: review.updatedAt,
     }));
 
-    // 무한스크롤 메타 정보 계산
-    const hasNext = page < totalPages;
-    const hasPrev = page > 1;
-
     // 무한스크롤 메타 정보
-    const meta = {
-      currentPage: page,
-      limit,
-      totalItems,
-      totalPages,
-      hasNext,
-      hasPrev,
-    };
+    const meta = calculatePaginationMeta(page, limit, totalItems);
 
     return { data, meta };
   }

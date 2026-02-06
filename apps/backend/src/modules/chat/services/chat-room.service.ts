@@ -60,11 +60,7 @@ export class ChatRoomService {
       where: { userId },
       include: {
         store: {
-          select: {
-            id: true,
-            name: true,
-            logoImageUrl: true,
-          },
+          select: ChatMapperUtil.STORE_INFO_SELECT,
         },
       },
       orderBy: {
@@ -90,6 +86,9 @@ export class ChatRoomService {
     // 스토어 존재 여부 및 소유권 확인
     const store = await this.prisma.store.findUnique({
       where: { id: storeId },
+      select: {
+        userId: true,
+      },
     });
 
     if (!store) {
@@ -104,11 +103,7 @@ export class ChatRoomService {
       where: { storeId },
       include: {
         user: {
-          select: {
-            id: true,
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ChatMapperUtil.USER_INFO_SELECT,
         },
       },
       orderBy: {

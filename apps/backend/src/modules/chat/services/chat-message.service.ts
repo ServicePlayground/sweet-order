@@ -9,6 +9,7 @@ import { ChatRoomService } from "./chat-room.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatGateway } from "../gateways/chat.gateway";
 import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
+import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 
 /**
  * 채팅 메시지 서비스
@@ -114,18 +115,11 @@ export class ChatMessageService {
       .map((msg) => ChatMapperUtil.mapToMessageResponseDto(msg));
 
     // 페이지네이션 메타 정보 계산
-    const totalPages = Math.ceil(totalItems / validatedLimit);
-    const hasNext = validatedPage < totalPages;
-    const hasPrev = validatedPage > 1;
-
-    const meta: MessagePaginationMetaResponseDto = {
-      currentPage: validatedPage,
-      limit: validatedLimit,
+    const meta: MessagePaginationMetaResponseDto = calculatePaginationMeta(
+      validatedPage,
+      validatedLimit,
       totalItems,
-      totalPages,
-      hasNext,
-      hasPrev,
-    };
+    ) as MessagePaginationMetaResponseDto;
 
     return {
       messages: reversedMessages,

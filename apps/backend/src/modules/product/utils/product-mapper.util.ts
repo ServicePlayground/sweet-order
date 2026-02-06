@@ -1,4 +1,3 @@
-import { Product } from "@apps/backend/infra/database/prisma/generated/client";
 import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-response.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
@@ -8,24 +7,22 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
  */
 
 /**
- * Store 위치 정보 타입
+ * Store만 include된 Product 타입
+ * store만 있는 경우 사용
  */
-type StoreLocationInfo = {
-  address?: string | null;
-  roadAddress?: string | null;
-  zonecode?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-};
-
-/**
- * Store와 Reviews가 include된 Product 타입
- * (reviews는 선택적이며, store만 있는 경우도 이 타입으로 표현 가능)
- */
-type ProductWithStoreAndReviews = Product & {
-  store?: StoreLocationInfo | null;
-  reviews?: Array<{ rating: number }>;
-};
+type ProductWithStore = Prisma.ProductGetPayload<{
+  include: {
+    store: {
+      select: {
+        address: true;
+        roadAddress: true;
+        zonecode: true;
+        latitude: true;
+        longitude: true;
+      };
+    };
+  };
+}>;
 
 /**
  * 상품 매핑 유틸리티 클래스
@@ -57,28 +54,31 @@ export class ProductMapperUtil {
   } as const satisfies Prisma.StoreSelect;
 
   /**
-   * Reviews rating select 필드
-   * 후기 통계 계산 시 사용
+   * Reviews rating만 select하는 필드
+   * include 내부에서 사용
    */
-  static readonly REVIEWS_RATING_SELECT = {
-    reviews: {
-      select: {
-        rating: true,
-      },
-    },
-  } as const;
+  static readonly REVIEWS_RATING_SELECT_ONLY = {
+    rating: true,
+  } as const satisfies Prisma.ProductReviewSelect;
 
   /**
    * Prisma Product 엔티티를 ProductResponseDto로 변환
    * @param product - Prisma Product 엔티티 (store 포함 가능, reviews 포함 가능)
    * @returns ProductResponseDto 객체
    */
-  static mapToProductResponse(product: ProductWithStoreAndReviews): ProductResponseDto {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { store, reviews: _reviews, ...productData } = product;
+  static mapToProductResponse(product: ProductWithStore | ProductWithReviewsAndStore): ProductResponseDto {
+    const { store, ...productData } = product;
+    // reviews가 있는 경우 제거 (사용하지 않음)
+    const rest = "reviews" in productData 
+      ? (() => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { reviews: _reviews, ...restData } = productData as ProductWithReviewsAndStore;
+          return restData;
+        })()
+      : productData;
 
     return {
-      ...productData,
+      ...rest,
       pickupAddress: store?.address || "",
       pickupRoadAddress: store?.roadAddress || "",
       pickupZonecode: store?.zonecode || "",
@@ -87,3 +87,26 @@ export class ProductMapperUtil {
     } as ProductResponseDto;
   }
 }
+
+/**
+ * Prisma ProductGetPayload를 기반으로 한 Product 타입
+ * reviews와 store가 include된 경우 사용
+ */
+export type ProductWithReviewsAndStore = Prisma.ProductGetPayload<{
+  include: {
+    reviews: {
+      select: {
+        rating: true;
+      };
+    };
+    store: {
+      select: {
+        address: true;
+        roadAddress: true;
+        zonecode: true;
+        latitude: true;
+        longitude: true;
+      };
+    };
+  };
+}>;

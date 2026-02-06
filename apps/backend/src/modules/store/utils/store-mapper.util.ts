@@ -1,12 +1,47 @@
 import { Store } from "@apps/backend/infra/database/prisma/generated/client";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
  * 스토어 매핑 유틸리티
  * Prisma Store 엔티티를 응답 DTO로 변환하는 공통 로직을 제공합니다.
  */
 export class StoreMapperUtil {
+  /**
+   * Product ID select 필드
+   * 상품 ID만 조회할 때 사용
+   */
+  static readonly PRODUCT_ID_SELECT = {
+    id: true,
+  } as const satisfies Prisma.ProductSelect;
+
+  /**
+   * Product ID와 StoreId select 필드
+   * 배치 처리 시 상품 ID와 스토어 ID를 함께 조회할 때 사용
+   */
+  static readonly PRODUCT_ID_WITH_STORE_ID_SELECT = {
+    id: true,
+    storeId: true,
+  } as const satisfies Prisma.ProductSelect;
+
+  /**
+   * Review rating select 필드
+   * 후기 통계 계산 시 사용
+   */
+  static readonly REVIEW_RATING_SELECT = {
+    rating: true,
+  } as const satisfies Prisma.ProductReviewSelect;
+
+  /**
+   * Review rating과 productId select 필드
+   * 배치 처리 시 후기 rating과 productId를 함께 조회할 때 사용
+   */
+  static readonly REVIEW_RATING_WITH_PRODUCT_ID_SELECT = {
+    productId: true,
+    rating: true,
+  } as const satisfies Prisma.ProductReviewSelect;
+
   /**
    * Prisma Store 엔티티를 StoreResponseDto로 변환 (단일 스토어)
    * @param store - Prisma Store 엔티티
@@ -17,7 +52,7 @@ export class StoreMapperUtil {
     // 해당 스토어의 모든 상품 ID 조회
     const products = await prisma.product.findMany({
       where: { storeId: store.id },
-      select: { id: true },
+      select: StoreMapperUtil.PRODUCT_ID_SELECT,
     });
 
     const productIds = products.map((product) => product.id);
@@ -34,9 +69,7 @@ export class StoreMapperUtil {
             in: productIds,
           },
         },
-        select: {
-          rating: true,
-        },
+        select: StoreMapperUtil.REVIEW_RATING_SELECT,
       });
 
       totalReviewCount = reviews.length;
@@ -98,10 +131,7 @@ export class StoreMapperUtil {
           in: storeIds,
         },
       },
-      select: {
-        id: true,
-        storeId: true,
-      },
+      select: StoreMapperUtil.PRODUCT_ID_WITH_STORE_ID_SELECT,
     });
 
     // 스토어별 상품 ID 그룹화
@@ -123,10 +153,7 @@ export class StoreMapperUtil {
           in: allProductIds,
         },
       },
-      select: {
-        productId: true,
-        rating: true,
-      },
+      select: StoreMapperUtil.REVIEW_RATING_WITH_PRODUCT_ID_SELECT,
     });
 
     // 상품별 후기 그룹화
