@@ -1,12 +1,7 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
-
-interface ChatRoom {
-  id: string;
-  userId: string;
-  storeId: string;
-}
+import { ChatRoom } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
  * 채팅방 권한 확인 유틸리티

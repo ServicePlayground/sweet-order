@@ -30,6 +30,8 @@ interface ReservationSnapshot {
   price: number;
   productNoticeProducer: string;
   productNoticeAddress: string;
+  pickupAddress: string;
+  pickupRoadAddress: string;
 }
 
 const formatDateTime = (dateString: string | null) => {
@@ -101,7 +103,7 @@ export default function ReservationCompletePage() {
               <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
                 <span className="text-gray-500">픽업장소</span>
                 <span className="text-gray-900">
-                  {snapshot.productNoticeProducer} ({snapshot.productNoticeAddress})
+                  {snapshot.pickupRoadAddress || snapshot.pickupAddress}
                 </span>
               </p>
               <p className="flex items-center justify-between px-[16px] text-sm">

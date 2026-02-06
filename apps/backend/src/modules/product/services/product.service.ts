@@ -14,6 +14,11 @@ import {
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import {
+  ProductMapperUtil,
+  ProductWithReviewsAndStore,
+} from "@apps/backend/modules/product/utils/product-mapper.util";
+import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 
 /**
  * 상품 서비스
@@ -33,17 +38,98 @@ export class ProductService {
   }
 
   /**
-   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 후기 통계 계산 (후기 수와 평균 별점)
    */
-  async getProducts(query: GetProductsRequestDto) {
-    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType } = query;
+  private calculateReviewStats<T extends { reviews: Array<{ rating: number }> }>(
+    products: T[],
+  ): (T & { reviewCount: number; avgRating: number })[] {
+    return products.map((product) => {
+      const reviewCount =product.reviews.length;
+      const avgRating =
+        reviewCount > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
+          : 0;
 
-    // 필터 조건 구성
-    const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
-      visibilityStatus: EnableStatus.ENABLE, // 노출된 상품만 조회
-      // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
-    };
+      return {
+        ...product,
+        reviewCount,
+        avgRating,
+      };
+    });
+  }
 
+  /**
+   * 후기 통계 기반 정렬 (후기 수 또는 평균 별점)
+   */
+  private sortProductsByReviewStats<T extends { reviewCount: number; avgRating: number; createdAt: Date }>(
+    products: T[],
+    sortBy: SortBy,
+  ): void {
+    if (sortBy === SortBy.REVIEW_COUNT) {
+      products.sort((a, b) => {
+        if (b.reviewCount !== a.reviewCount) {
+          return b.reviewCount - a.reviewCount;
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+    } else if (sortBy === SortBy.RATING_AVG) {
+      products.sort((a, b) => {
+        if (b.avgRating !== a.avgRating) {
+          return b.avgRating - a.avgRating;
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+    }
+  }
+
+  /**
+   * 케이크 옵션에 ID 부여 (기존 ID 유지, 새 옵션에는 새 ID 생성)
+   */
+  private processCakeOptionsWithIds(
+    existingOptions: any[],
+    newOptions: Array<{ id?: string }>,
+    prefix: "size" | "flavor",
+  ): Array<{ id: string }> {
+    const existingOptionsById = new Map<string, any>();
+
+    for (const option of existingOptions) {
+      if (
+        option &&
+        typeof option === "object" &&
+        "id" in option &&
+        typeof option.id === "string"
+      ) {
+        existingOptionsById.set(option.id, option);
+      }
+    }
+
+    return newOptions.map((option) => {
+      const existing =
+        option.id && existingOptionsById.has(option.id)
+          ? existingOptionsById.get(option.id)
+          : undefined;
+
+      const id = existing?.id ?? option.id ?? this.generateOptionId(prefix);
+
+      // ID는 한 번 정해지면 그대로 유지하고, 나머지 필드는 요청 값으로 덮어씀
+      return {
+        ...existing,
+        ...option,
+        id,
+      };
+    });
+  }
+
+  /**
+   * 공통 필터 조건 추가 (검색어, 가격, 상품 타입)
+   */
+  private addCommonFilters(
+    where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] },
+    search?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    productType?: ProductType,
+  ): void {
     // 검색어 조건 (상품명에서만 검색)
     const searchConditions: Prisma.ProductWhereInput[] = [];
     if (search) {
@@ -59,11 +145,6 @@ export class ProductService {
       if (maxPrice !== undefined) where.salePrice.lte = maxPrice;
     }
 
-    // 스토어 ID 필터 처리
-    if (storeId) {
-      where.storeId = storeId;
-    }
-
     // 상품 타입 필터 처리
     if (productType) {
       where.productType = productType;
@@ -75,6 +156,27 @@ export class ProductService {
       where.AND = where.AND || [];
       where.AND.push({ OR: searchConditions });
     }
+  }
+
+  /**
+   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   */
+  async getProducts(query: GetProductsRequestDto) {
+    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType } = query;
+
+    // 필터 조건 구성
+    const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
+      visibilityStatus: EnableStatus.ENABLE, // 노출된 상품만 조회
+      // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
+    };
+
+    // 스토어 ID 필터 처리
+    if (storeId) {
+      where.storeId = storeId;
+    }
+
+    // 공통 필터 조건 추가 (검색어, 가격, 상품 타입)
+    this.addCommonFilters(where, search, minPrice, maxPrice, productType);
 
     // 전체 개수 조회
     const totalItems = await this.prisma.product.count({ where });
@@ -88,52 +190,27 @@ export class ProductService {
 
     if (needsReviewData) {
       // 후기 수나 평균 별점으로 정렬하는 경우
-      // 모든 필터링된 상품을 조회 (reviews 포함)
-      const allProducts = await this.prisma.product.findMany({
+      // 모든 필터링된 상품을 조회 (reviews 및 store 포함)
+      const allProducts: ProductWithReviewsAndStore[] = await this.prisma.product.findMany({
         where,
         include: {
           reviews: {
-            select: {
-              rating: true,
-            },
+            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+          },
+          store: {
+            select: ProductMapperUtil.STORE_LOCATION_SELECT,
           },
         },
       });
 
       // 후기 수와 평균 별점 계산 및 정렬
-      const productsWithStats = allProducts.map((product) => {
-        const reviewCount = product.reviews.length;
-        const avgRating =
-          reviewCount > 0
-            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
-            : 0;
+      const productsWithStats = this.calculateReviewStats(allProducts);
+      this.sortProductsByReviewStats(productsWithStats, sortBy);
 
-        return {
-          ...product,
-          reviewCount,
-          avgRating,
-        };
-      });
-
-      // 정렬
-      if (sortBy === SortBy.REVIEW_COUNT) {
-        productsWithStats.sort((a, b) => {
-          if (b.reviewCount !== a.reviewCount) {
-            return b.reviewCount - a.reviewCount;
-          }
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        });
-      } else if (sortBy === SortBy.RATING_AVG) {
-        productsWithStats.sort((a, b) => {
-          if (b.avgRating !== a.avgRating) {
-            return b.avgRating - a.avgRating;
-          }
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        });
-      }
-
-      // reviews 필드 제거 (원래 구조로 복원)
-      products = productsWithStats.map(({ ...product }) => product);
+      // reviews 필드 제거하고 픽업장소 정보 매핑 (원래 구조로 복원)
+      products = productsWithStats.map((product) =>
+        ProductMapperUtil.mapToProductResponse(product),
+      );
 
       // 페이지네이션 적용
       const skip = (page - 1) * limit;
@@ -159,32 +236,30 @@ export class ProductService {
       // 무한스크롤 계산
       const skip = (page - 1) * limit;
 
-      // 상품 목록 조회
-      products = await this.prisma.product.findMany({
+      // 상품 목록 조회 (store 포함)
+      const productsWithStore = await this.prisma.product.findMany({
         where, // 필터 조건 (검색어, 카테고리, 가격대 등)
         orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
         skip, // 무한스크롤을 위한 건너뛸 항목 수
         take: limit, // 가져올 항목 수 (페이지당 상품 개수)
+        include: {
+          store: {
+            select: ProductMapperUtil.STORE_LOCATION_SELECT,
+          },
+        },
       });
-    }
 
-    // 무한스크롤 메타 정보 계산
-    const totalPages = Math.ceil(totalItems / limit);
-    const hasNext = page < totalPages;
-    const hasPrev = page > 1;
+      // 픽업장소 정보 매핑
+      products = productsWithStore.map((product) =>
+        ProductMapperUtil.mapToProductResponse(product),
+      );
+    }
 
     // 응답 데이터 변환
     const data = products;
 
     // 무한스크롤 메타 정보
-    const meta = {
-      currentPage: page,
-      limit,
-      totalItems,
-      totalPages,
-      hasNext,
-      hasPrev,
-    };
+    const meta = calculatePaginationMeta(page, limit, totalItems);
 
     return { data, meta };
   }
@@ -193,12 +268,17 @@ export class ProductService {
    * 상품 상세 조회
    */
   async getProductDetail(id: string) {
-    // 상품 상세 정보 조회 (노출된 상품만 조회)
+    // 상품 상세 정보 조회 (노출된 상품만 조회, store 포함)
     const product = await this.prisma.product.findFirst({
       where: {
         id,
         visibilityStatus: EnableStatus.ENABLE, // 노출된 상품만 조회
         // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
+      },
+      include: {
+        store: {
+          select: ProductMapperUtil.STORE_LOCATION_SELECT,
+        },
       },
     });
 
@@ -207,7 +287,8 @@ export class ProductService {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return product;
+    // 픽업장소 정보 매핑
+    return ProductMapperUtil.mapToProductResponse(product);
   }
 
   /**
@@ -244,14 +325,7 @@ export class ProductService {
     if (userStoreIds.length === 0) {
       return {
         data: [],
-        meta: {
-          currentPage: page,
-          limit,
-          totalItems: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false,
-        },
+        meta: calculatePaginationMeta(page, limit, 0),
       };
     }
 
@@ -280,32 +354,8 @@ export class ProductService {
       where.visibilityStatus = visibilityStatus;
     }
 
-    // 검색어 조건 (상품명에서만 검색)
-    const searchConditions: Prisma.ProductWhereInput[] = [];
-    if (search) {
-      searchConditions.push(
-        { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
-      );
-    }
-
-    // 가격 필터 처리
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.salePrice = {};
-      if (minPrice !== undefined) where.salePrice.gte = minPrice;
-      if (maxPrice !== undefined) where.salePrice.lte = maxPrice;
-    }
-
-    // 상품 타입 필터 처리
-    if (productType) {
-      where.productType = productType;
-    }
-
-    // 검색어 조건을 최종 where에 추가
-    if (searchConditions.length > 0) {
-      // 검색어 조건을 OR로 묶어서 AND 조건에 추가
-      where.AND = where.AND || [];
-      where.AND.push({ OR: searchConditions });
-    }
+    // 공통 필터 조건 추가 (검색어, 가격, 상품 타입)
+    this.addCommonFilters(where, search, minPrice, maxPrice, productType);
 
     // 전체 개수 조회
     const totalItems = await this.prisma.product.count({ where });
@@ -319,52 +369,27 @@ export class ProductService {
 
     if (needsReviewData) {
       // 후기 수나 평균 별점으로 정렬하는 경우
-      // 모든 필터링된 상품을 조회 (reviews 포함)
-      const allProducts = await this.prisma.product.findMany({
+      // 모든 필터링된 상품을 조회 (reviews 및 store 포함)
+      const allProducts: ProductWithReviewsAndStore[] = await this.prisma.product.findMany({
         where,
         include: {
           reviews: {
-            select: {
-              rating: true,
-            },
+            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+          },
+          store: {
+            select: ProductMapperUtil.STORE_LOCATION_SELECT,
           },
         },
       });
 
       // 후기 수와 평균 별점 계산 및 정렬
-      const productsWithStats = allProducts.map((product) => {
-        const reviewCount = product.reviews.length;
-        const avgRating =
-          reviewCount > 0
-            ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
-            : 0;
+      const productsWithStats = this.calculateReviewStats(allProducts);
+      this.sortProductsByReviewStats(productsWithStats, sortBy);
 
-        return {
-          ...product,
-          reviewCount,
-          avgRating,
-        };
-      });
-
-      // 정렬
-      if (sortBy === SortBy.REVIEW_COUNT) {
-        productsWithStats.sort((a, b) => {
-          if (b.reviewCount !== a.reviewCount) {
-            return b.reviewCount - a.reviewCount;
-          }
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        });
-      } else if (sortBy === SortBy.RATING_AVG) {
-        productsWithStats.sort((a, b) => {
-          if (b.avgRating !== a.avgRating) {
-            return b.avgRating - a.avgRating;
-          }
-          return b.createdAt.getTime() - a.createdAt.getTime();
-        });
-      }
-
-      // reviews 필드 제거 (원래 구조로 복원)
-      products = productsWithStats.map(({ ...product }) => product);
+      // reviews 필드 제거하고 픽업장소 정보 매핑 (원래 구조로 복원)
+      products = productsWithStats.map((product) =>
+        ProductMapperUtil.mapToProductResponse(product),
+      );
 
       // 페이지네이션 적용
       const skip = (page - 1) * limit;
@@ -390,32 +415,30 @@ export class ProductService {
       // 무한스크롤 계산
       const skip = (page - 1) * limit;
 
-      // 상품 목록 조회
-      products = await this.prisma.product.findMany({
+      // 상품 목록 조회 (store 포함)
+      const productsWithStore = await this.prisma.product.findMany({
         where, // 필터 조건 (검색어, 카테고리, 가격대 등)
         orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
         skip, // 무한스크롤을 위한 건너뛸 항목 수
         take: limit, // 가져올 항목 수 (페이지당 상품 개수)
+        include: {
+          store: {
+            select: ProductMapperUtil.STORE_LOCATION_SELECT,
+          },
+        },
       });
-    }
 
-    // 무한스크롤 메타 정보 계산
-    const totalPages = Math.ceil(totalItems / limit);
-    const hasNext = page < totalPages;
-    const hasPrev = page > 1;
+      // 픽업장소 정보 매핑
+      products = productsWithStore.map((product) =>
+        ProductMapperUtil.mapToProductResponse(product),
+      );
+    }
 
     // 응답 데이터 변환
     const data = products;
 
     // 무한스크롤 메타 정보
-    const meta = {
-      currentPage: page,
-      limit,
-      totalItems,
-      totalPages,
-      hasNext,
-      hasPrev,
-    };
+    const meta = calculatePaginationMeta(page, limit, totalItems);
 
     return { data, meta };
   }
@@ -431,7 +454,9 @@ export class ProductService {
         id,
       },
       include: {
-        store: true, // Store 정보를 포함하여 sellerId 확인
+        store: {
+          select: ProductMapperUtil.STORE_LOCATION_WITH_USER_ID_SELECT,
+        },
       },
     });
 
@@ -445,7 +470,8 @@ export class ProductService {
       throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
-    return product;
+    // 픽업장소 정보 매핑
+    return ProductMapperUtil.mapToProductResponse(product);
   }
 
   /**
@@ -578,7 +604,11 @@ export class ProductService {
         id,
       },
       include: {
-        store: true, // Store 정보를 포함하여 sellerId 확인
+        store: {
+          select: {
+            userId: true,
+          },
+        },
       },
     });
 
@@ -613,34 +643,11 @@ export class ProductService {
     if (updateProductDto.cakeSizeOptions !== undefined) {
       // 기존 옵션을 조회하여 ID를 유지하고, 새로 추가된 옵션에는 새로운 ID를 부여
       const existingSizeOptions: any[] = (product.cakeSizeOptions as any[]) ?? [];
-      const existingSizeOptionsById = new Map<string, any>();
-
-      for (const option of existingSizeOptions) {
-        if (
-          option &&
-          typeof option === "object" &&
-          "id" in option &&
-          typeof option.id === "string"
-        ) {
-          existingSizeOptionsById.set(option.id, option);
-        }
-      }
-
-      const nextSizeOptions = (updateProductDto.cakeSizeOptions ?? []).map((option) => {
-        const existing =
-          option.id && existingSizeOptionsById.has(option.id)
-            ? existingSizeOptionsById.get(option.id)
-            : undefined;
-
-        const id = existing?.id ?? option.id ?? this.generateOptionId("size");
-
-        // ID는 한 번 정해지면 그대로 유지하고, 나머지 필드는 요청 값으로 덮어씀
-        return {
-          ...existing,
-          ...option,
-          id,
-        };
-      });
+      const nextSizeOptions = this.processCakeOptionsWithIds(
+        existingSizeOptions,
+        updateProductDto.cakeSizeOptions ?? [],
+        "size",
+      );
 
       // 요청 목록에 없는 기존 옵션은 제거되므로, ID도 함께 제거되는 효과
       updateData.cakeSizeOptions = nextSizeOptions as unknown as Prisma.InputJsonValue;
@@ -648,33 +655,11 @@ export class ProductService {
 
     if (updateProductDto.cakeFlavorOptions !== undefined) {
       const existingFlavorOptions: any[] = (product.cakeFlavorOptions as any[]) ?? [];
-      const existingFlavorOptionsById = new Map<string, any>();
-
-      for (const option of existingFlavorOptions) {
-        if (
-          option &&
-          typeof option === "object" &&
-          "id" in option &&
-          typeof option.id === "string"
-        ) {
-          existingFlavorOptionsById.set(option.id, option);
-        }
-      }
-
-      const nextFlavorOptions = (updateProductDto.cakeFlavorOptions ?? []).map((option) => {
-        const existing =
-          option.id && existingFlavorOptionsById.has(option.id)
-            ? existingFlavorOptionsById.get(option.id)
-            : undefined;
-
-        const id = existing?.id ?? option.id ?? this.generateOptionId("flavor");
-
-        return {
-          ...existing,
-          ...option,
-          id,
-        };
-      });
+      const nextFlavorOptions = this.processCakeOptionsWithIds(
+        existingFlavorOptions,
+        updateProductDto.cakeFlavorOptions ?? [],
+        "flavor",
+      );
 
       updateData.cakeFlavorOptions = nextFlavorOptions as unknown as Prisma.InputJsonValue;
     }
@@ -764,7 +749,11 @@ export class ProductService {
         id,
       },
       include: {
-        store: true, // Store 정보를 포함하여 sellerId 확인
+        store: {
+          select: {
+            userId: true,
+          },
+        },
       },
     });
 

@@ -24,9 +24,7 @@ export class StoreListService {
     });
 
     return {
-      stores: await Promise.all(
-        stores.map((store) => StoreMapperUtil.mapToStoreResponse(store, this.prisma)),
-      ),
+      stores: await StoreMapperUtil.mapToStoreResponseBatch(stores, this.prisma),
     };
   }
 

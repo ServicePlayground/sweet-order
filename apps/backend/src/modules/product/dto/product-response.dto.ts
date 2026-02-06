@@ -6,6 +6,7 @@ import {
   CakeSizeDisplayName,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
+import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 
 /**
  * 케이크 사이즈 옵션 응답 DTO
@@ -290,6 +291,37 @@ export class ProductResponseDto {
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.updatedAt,
   })
   updatedAt: Date;
+
+  // 픽업장소 정보 (스토어 위치 정보)
+  @ApiProperty({
+    description: "픽업장소 - 지번 주소",
+    example: STORE_SWAGGER_EXAMPLES.ADDRESS,
+  })
+  pickupAddress: string;
+
+  @ApiProperty({
+    description: "픽업장소 - 도로명 주소",
+    example: STORE_SWAGGER_EXAMPLES.ROAD_ADDRESS,
+  })
+  pickupRoadAddress: string;
+
+  @ApiProperty({
+    description: "픽업장소 - 우편번호",
+    example: STORE_SWAGGER_EXAMPLES.ZONECODE,
+  })
+  pickupZonecode: string;
+
+  @ApiProperty({
+    description: "픽업장소 - 위도",
+    example: STORE_SWAGGER_EXAMPLES.LATITUDE,
+  })
+  pickupLatitude: number;
+
+  @ApiProperty({
+    description: "픽업장소 - 경도",
+    example: STORE_SWAGGER_EXAMPLES.LONGITUDE,
+  })
+  pickupLongitude: number;
 }
 
 /**

@@ -8,6 +8,8 @@ import {
 import { ChatRoomService } from "./chat-room.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatGateway } from "../gateways/chat.gateway";
+import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
+import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 
 /**
  * 채팅 메시지 서비스
@@ -65,7 +67,7 @@ export class ChatMessageService {
       return createdMessage;
     });
 
-    const messageDto = this.mapToMessageResponseDto(message);
+    const messageDto = ChatMapperUtil.mapToMessageResponseDto(message);
 
     // WebSocket으로 메시지 브로드캐스트 (REST API로 전송된 메시지도 실시간으로 전달)
     this.chatGateway.broadcastMessage(roomId, messageDto);
@@ -108,21 +110,16 @@ export class ChatMessageService {
     });
 
     // 메시지 순서를 reverse하여 오래된 메시지 -> 최신 메시지 순서로 변환
-    const reversedMessages = messages.reverse().map((msg) => this.mapToMessageResponseDto(msg));
+    const reversedMessages = messages
+      .reverse()
+      .map((msg) => ChatMapperUtil.mapToMessageResponseDto(msg));
 
     // 페이지네이션 메타 정보 계산
-    const totalPages = Math.ceil(totalItems / validatedLimit);
-    const hasNext = validatedPage < totalPages;
-    const hasPrev = validatedPage > 1;
-
-    const meta: MessagePaginationMetaResponseDto = {
-      currentPage: validatedPage,
-      limit: validatedLimit,
+    const meta: MessagePaginationMetaResponseDto = calculatePaginationMeta(
+      validatedPage,
+      validatedLimit,
       totalItems,
-      totalPages,
-      hasNext,
-      hasPrev,
-    };
+    ) as MessagePaginationMetaResponseDto;
 
     return {
       messages: reversedMessages,
@@ -187,19 +184,5 @@ export class ChatMessageService {
    */
   private validateLimit(limit: number): number {
     return Math.min(Math.max(ChatMessageService.MIN_LIMIT, limit), ChatMessageService.MAX_LIMIT);
-  }
-
-  /**
-   * Prisma Message를 MessageResponseDto로 변환
-   */
-  private mapToMessageResponseDto(message: any): MessageResponseDto {
-    return {
-      id: message.id,
-      roomId: message.roomId,
-      text: message.text,
-      senderId: message.senderId,
-      senderType: message.senderType.toLowerCase() as "user" | "store",
-      createdAt: message.createdAt,
-    };
   }
 }

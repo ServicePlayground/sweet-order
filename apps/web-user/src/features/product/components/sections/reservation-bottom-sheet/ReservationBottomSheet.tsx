@@ -21,6 +21,8 @@ export function ReservationBottomSheet({
   productType,
   productNoticeProducer,
   productNoticeAddress,
+  pickupAddress,
+  pickupRoadAddress,
   onClose,
   onConfirm,
 }: ReservationBottomSheetProps) {
@@ -151,6 +153,8 @@ export function ReservationBottomSheet({
                 productType,
                 productNoticeProducer,
                 productNoticeAddress,
+                pickupAddress,
+                pickupRoadAddress,
               };
               sessionStorage.setItem("reservationComplete", JSON.stringify(payload));
               handleFinalConfirm();
