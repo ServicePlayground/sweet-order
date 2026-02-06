@@ -148,6 +148,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         productType={data.productType}
         productNoticeProducer={data.productNoticeProducer}
         productNoticeAddress={data.productNoticeAddress}
+        pickupAddress={data.pickupAddress}
+        pickupRoadAddress={data.pickupRoadAddress}
         onClose={() => setIsBottomSheetOpen(false)}
         onConfirm={handleReservationConfirm}
       />

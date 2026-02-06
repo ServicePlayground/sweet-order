@@ -31,6 +31,8 @@ export interface ReservationBottomSheetProps {
   productType: ProductType;
   productNoticeProducer?: string;
   productNoticeAddress?: string;
+  pickupAddress: string;
+  pickupRoadAddress: string;
   onClose: () => void;
   onConfirm: (selection: ReservationSelection) => void;
 }
