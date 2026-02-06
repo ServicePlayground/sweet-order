@@ -92,6 +92,12 @@ export interface Product {
   productNumber: string;
   createdAt: Date;
   updatedAt: Date;
+  // 픽업장소 정보 (스토어 위치 정보)
+  pickupAddress: string;
+  pickupRoadAddress: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
 }
 
 export interface ProductIsLiked {

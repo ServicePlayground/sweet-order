@@ -7,6 +7,7 @@ import {
   ChatRoomForSellerResponseDto,
 } from "@apps/backend/modules/chat/dto/chat-response.dto";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
+import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
 
 /**
  * 채팅방 서비스
@@ -59,11 +60,7 @@ export class ChatRoomService {
       where: { userId },
       include: {
         store: {
-          select: {
-            id: true,
-            name: true,
-            logoImageUrl: true,
-          },
+          select: ChatMapperUtil.STORE_INFO_SELECT,
         },
       },
       orderBy: {
@@ -75,21 +72,7 @@ export class ChatRoomService {
     });
 
     return {
-      chatRooms: chatRooms.map((chatRoom) => ({
-        id: chatRoom.id,
-        storeId: chatRoom.storeId,
-        store: {
-          id: chatRoom.store.id,
-          name: chatRoom.store.name,
-          logoImageUrl: chatRoom.store.logoImageUrl,
-        },
-        lastMessage: chatRoom.lastMessage,
-        lastMessageAt: chatRoom.lastMessageAt,
-        userUnread: chatRoom.userUnread,
-        storeUnread: chatRoom.storeUnread,
-        createdAt: chatRoom.createdAt,
-        updatedAt: chatRoom.updatedAt,
-      })),
+      chatRooms: chatRooms.map((chatRoom) => ChatMapperUtil.mapToChatRoomResponseDto(chatRoom)),
     };
   }
 
@@ -103,6 +86,9 @@ export class ChatRoomService {
     // 스토어 존재 여부 및 소유권 확인
     const store = await this.prisma.store.findUnique({
       where: { id: storeId },
+      select: {
+        userId: true,
+      },
     });
 
     if (!store) {
@@ -117,11 +103,7 @@ export class ChatRoomService {
       where: { storeId },
       include: {
         user: {
-          select: {
-            id: true,
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ChatMapperUtil.USER_INFO_SELECT,
         },
       },
       orderBy: {
@@ -133,22 +115,9 @@ export class ChatRoomService {
     });
 
     return {
-      chatRooms: chatRooms.map((chatRoom) => ({
-        id: chatRoom.id,
-        userId: chatRoom.userId,
-        storeId: chatRoom.storeId,
-        user: {
-          id: chatRoom.user.id,
-          nickname: chatRoom.user.nickname,
-          profileImageUrl: chatRoom.user.profileImageUrl,
-        },
-        lastMessage: chatRoom.lastMessage,
-        lastMessageAt: chatRoom.lastMessageAt,
-        userUnread: chatRoom.userUnread,
-        storeUnread: chatRoom.storeUnread,
-        createdAt: chatRoom.createdAt,
-        updatedAt: chatRoom.updatedAt,
-      })),
+      chatRooms: chatRooms.map((chatRoom) =>
+        ChatMapperUtil.mapToChatRoomForSellerResponseDto(chatRoom),
+      ),
     };
   }
 
