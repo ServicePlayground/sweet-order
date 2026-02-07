@@ -3,4 +3,5 @@
  */
 export const storeQueryKeys = {
   list: ["store", "list"] as const,
+  detail: (storeId: string) => ["store", "detail", storeId] as const,
 } as const;

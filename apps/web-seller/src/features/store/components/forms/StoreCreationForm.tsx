@@ -12,6 +12,7 @@ interface Props {
   onPrevious?: () => void;
   initialValue?: IStoreForm;
   onChange?: (data: IStoreForm) => void;
+  submitButtonText?: string;
 }
 
 export const defaultForm: IStoreForm = {
@@ -30,6 +31,7 @@ export const StoreCreationForm: React.FC<Props> = ({
   onPrevious,
   initialValue,
   onChange,
+  submitButtonText,
 }) => {
   const [form, setForm] = useState<IStoreForm>(initialValue || defaultForm);
   const [errors, setErrors] = useState<Partial<Record<keyof IStoreForm, string>>>({});
@@ -149,7 +151,7 @@ export const StoreCreationForm: React.FC<Props> = ({
           </Button>
         )}
         <Button type="submit" className={onPrevious ? "ml-auto" : ""}>
-          스토어 생성
+          {submitButtonText || "스토어 생성"}
         </Button>
       </div>
     </form>

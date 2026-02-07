@@ -7,6 +7,7 @@ const STORE_ERROR_MESSAGES = {
 
 const STORE_SUCCESS_MESSAGES = {
   STORE_CREATED: "스토어가 생성되었습니다.",
+  STORE_UPDATED: "스토어가 수정되었습니다.",
 } as const;
 
 export { STORE_ERROR_MESSAGES, STORE_SUCCESS_MESSAGES };
