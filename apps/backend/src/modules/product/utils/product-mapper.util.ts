@@ -14,6 +14,33 @@ type ProductWithStore = Prisma.ProductGetPayload<{
   include: {
     store: {
       select: {
+        name: true;
+        logoImageUrl: true;
+        address: true;
+        roadAddress: true;
+        zonecode: true;
+        latitude: true;
+        longitude: true;
+      };
+    };
+  };
+}>;
+
+/**
+ * Prisma ProductGetPayload를 기반으로 한 Product 타입
+ * reviews와 store가 include된 경우 사용
+ */
+export type ProductWithReviewsAndStore = Prisma.ProductGetPayload<{
+  include: {
+    reviews: {
+      select: {
+        rating: true;
+      };
+    };
+    store: {
+      select: {
+        name: true;
+        logoImageUrl: true;
         address: true;
         roadAddress: true;
         zonecode: true;
@@ -29,10 +56,12 @@ type ProductWithStore = Prisma.ProductGetPayload<{
  */
 export class ProductMapperUtil {
   /**
-   * Store 위치 정보 select 필드
-   * 상품 조회 시 store의 위치 정보만 가져오기 위한 공통 select 필드
+   * Store 기본 정보 및 위치 정보 select 필드
+   * 상품 조회 시 store의 이름, 이미지, 위치 정보를 가져오기 위한 공통 select 필드
    */
-  static readonly STORE_LOCATION_SELECT = {
+  static readonly STORE_INFO_SELECT = {
+    name: true,
+    logoImageUrl: true,
     address: true,
     roadAddress: true,
     zonecode: true,
@@ -41,16 +70,12 @@ export class ProductMapperUtil {
   } as const satisfies Prisma.StoreSelect;
 
   /**
-   * Store 위치 정보 및 userId select 필드
+   * Store 기본 정보, 위치 정보 및 userId select 필드
    * 권한 확인이 필요한 경우 사용
    */
-  static readonly STORE_LOCATION_WITH_USER_ID_SELECT = {
+  static readonly STORE_INFO_WITH_USER_ID_SELECT = {
+    ...ProductMapperUtil.STORE_INFO_SELECT,
     userId: true,
-    address: true,
-    roadAddress: true,
-    zonecode: true,
-    latitude: true,
-    longitude: true,
   } as const satisfies Prisma.StoreSelect;
 
   /**
@@ -70,7 +95,22 @@ export class ProductMapperUtil {
     product: ProductWithStore | ProductWithReviewsAndStore,
   ): ProductResponseDto {
     const { store, ...productData } = product;
-    // reviews가 있는 경우 제거 (사용하지 않음)
+
+    // 후기 통계 계산
+    let averageRating = 0;
+    let totalReviewCount = 0;
+
+    if ("reviews" in productData) {
+      const reviews = (productData as ProductWithReviewsAndStore).reviews;
+      totalReviewCount = reviews.length;
+
+      if (totalReviewCount > 0) {
+        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+        averageRating = Math.round((totalRating / totalReviewCount) * 10) / 10; // 소수점 첫째자리까지
+      }
+    }
+
+    // reviews가 있는 경우 제거
     const rest =
       "reviews" in productData
         ? (() => {
@@ -82,6 +122,10 @@ export class ProductMapperUtil {
 
     return {
       ...rest,
+      averageRating,
+      totalReviewCount,
+      storeName: store?.name || "",
+      storeLogoImageUrl: store?.logoImageUrl || undefined,
       pickupAddress: store?.address || "",
       pickupRoadAddress: store?.roadAddress || "",
       pickupZonecode: store?.zonecode || "",
@@ -90,26 +134,3 @@ export class ProductMapperUtil {
     } as ProductResponseDto;
   }
 }
-
-/**
- * Prisma ProductGetPayload를 기반으로 한 Product 타입
- * reviews와 store가 include된 경우 사용
- */
-export type ProductWithReviewsAndStore = Prisma.ProductGetPayload<{
-  include: {
-    reviews: {
-      select: {
-        rating: true;
-      };
-    };
-    store: {
-      select: {
-        address: true;
-        roadAddress: true;
-        zonecode: true;
-        latitude: true;
-        longitude: true;
-      };
-    };
-  };
-}>;

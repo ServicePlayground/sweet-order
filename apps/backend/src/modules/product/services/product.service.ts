@@ -192,7 +192,7 @@ export class ProductService {
             select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
           },
           store: {
-            select: ProductMapperUtil.STORE_LOCATION_SELECT,
+            select: ProductMapperUtil.STORE_INFO_SELECT,
           },
         },
       });
@@ -230,15 +230,18 @@ export class ProductService {
       // 무한스크롤 계산
       const skip = (page - 1) * limit;
 
-      // 상품 목록 조회 (store 포함)
+      // 상품 목록 조회 (store 및 reviews 포함)
       const productsWithStore = await this.prisma.product.findMany({
         where, // 필터 조건 (검색어, 카테고리, 가격대 등)
         orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
         skip, // 무한스크롤을 위한 건너뛸 항목 수
         take: limit, // 가져올 항목 수 (페이지당 상품 개수)
         include: {
+          reviews: {
+            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+          },
           store: {
-            select: ProductMapperUtil.STORE_LOCATION_SELECT,
+            select: ProductMapperUtil.STORE_INFO_SELECT,
           },
         },
       });
@@ -262,7 +265,7 @@ export class ProductService {
    * 상품 상세 조회
    */
   async getProductDetail(id: string) {
-    // 상품 상세 정보 조회 (노출된 상품만 조회, store 포함)
+    // 상품 상세 정보 조회 (노출된 상품만 조회, store 및 reviews 포함)
     const product = await this.prisma.product.findFirst({
       where: {
         id,
@@ -270,8 +273,11 @@ export class ProductService {
         // status: ProductStatus.ACTIVE, // 판매중인 상품만 조회 // 프론트엔드에서 처리
       },
       include: {
+        reviews: {
+          select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+        },
         store: {
-          select: ProductMapperUtil.STORE_LOCATION_SELECT,
+          select: ProductMapperUtil.STORE_INFO_SELECT,
         },
       },
     });
@@ -371,7 +377,7 @@ export class ProductService {
             select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
           },
           store: {
-            select: ProductMapperUtil.STORE_LOCATION_SELECT,
+            select: ProductMapperUtil.STORE_INFO_SELECT,
           },
         },
       });
@@ -409,15 +415,18 @@ export class ProductService {
       // 무한스크롤 계산
       const skip = (page - 1) * limit;
 
-      // 상품 목록 조회 (store 포함)
+      // 상품 목록 조회 (store 및 reviews 포함)
       const productsWithStore = await this.prisma.product.findMany({
         where, // 필터 조건 (검색어, 카테고리, 가격대 등)
         orderBy, // 정렬 조건 (최신순, 가격순, 인기순 등)
         skip, // 무한스크롤을 위한 건너뛸 항목 수
         take: limit, // 가져올 항목 수 (페이지당 상품 개수)
         include: {
+          reviews: {
+            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+          },
           store: {
-            select: ProductMapperUtil.STORE_LOCATION_SELECT,
+            select: ProductMapperUtil.STORE_INFO_SELECT,
           },
         },
       });
@@ -442,14 +451,17 @@ export class ProductService {
    * 자신이 소유한 스토어의 상품만 조회 가능합니다.
    */
   async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
-    // 상품 존재 여부 및 소유권 확인 (Store 정보 포함)
+    // 상품 존재 여부 및 소유권 확인 (Store 및 reviews 정보 포함)
     const product = await this.prisma.product.findFirst({
       where: {
         id,
       },
       include: {
+        reviews: {
+          select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+        },
         store: {
-          select: ProductMapperUtil.STORE_LOCATION_WITH_USER_ID_SELECT,
+          select: ProductMapperUtil.STORE_INFO_WITH_USER_ID_SELECT,
         },
       },
     });

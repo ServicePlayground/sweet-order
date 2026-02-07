@@ -127,8 +127,13 @@ export interface IGetProductsListParams {
 export interface IProductItem extends ICreateProductRequest {
   id: string;
   likeCount: number;
+  averageRating: number; // 해당 상품의 모든 후기들의 평균 별점
+  totalReviewCount: number; // 해당 상품의 모든 후기 개수
   createdAt: Date;
   updatedAt: Date;
+  // 스토어 정보
+  storeName: string;
+  storeLogoImageUrl?: string | null;
   // 픽업장소 정보 (스토어 위치 정보)
   pickupAddress: string;
   pickupRoadAddress: string;

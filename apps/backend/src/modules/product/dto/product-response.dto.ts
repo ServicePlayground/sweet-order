@@ -7,6 +7,7 @@ import {
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
+import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
 
 /**
  * 케이크 사이즈 옵션 응답 DTO
@@ -281,6 +282,18 @@ export class ProductResponseDto {
   likeCount: number;
 
   @ApiProperty({
+    description: "평균 별점 (해당 상품의 모든 후기들의 평균 별점)",
+    example: 4.5,
+  })
+  averageRating: number;
+
+  @ApiProperty({
+    description: "전체 후기 개수 (해당 상품의 모든 후기 개수)",
+    example: 42,
+  })
+  totalReviewCount: number;
+
+  @ApiProperty({
     description: "생성일시",
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.createdAt,
   })
@@ -291,6 +304,19 @@ export class ProductResponseDto {
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.updatedAt,
   })
   updatedAt: Date;
+
+  // 스토어 정보
+  @ApiProperty({
+    description: "스토어 이름",
+    example: STORE_SWAGGER_EXAMPLES.NAME,
+  })
+  storeName: string;
+
+  @ApiPropertyOptional({
+    description: "스토어 로고 이미지 URL",
+    example: UPLOAD_SWAGGER_EXAMPLES.FILE_URL,
+  })
+  storeLogoImageUrl?: string | null;
 
   // 픽업장소 정보 (스토어 위치 정보)
   @ApiProperty({
