@@ -44,7 +44,7 @@ export class ProductService {
     products: T[],
   ): (T & { reviewCount: number; avgRating: number })[] {
     return products.map((product) => {
-      const reviewCount =product.reviews.length;
+      const reviewCount = product.reviews.length;
       const avgRating =
         reviewCount > 0
           ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
@@ -61,10 +61,9 @@ export class ProductService {
   /**
    * 후기 통계 기반 정렬 (후기 수 또는 평균 별점)
    */
-  private sortProductsByReviewStats<T extends { reviewCount: number; avgRating: number; createdAt: Date }>(
-    products: T[],
-    sortBy: SortBy,
-  ): void {
+  private sortProductsByReviewStats<
+    T extends { reviewCount: number; avgRating: number; createdAt: Date },
+  >(products: T[], sortBy: SortBy): void {
     if (sortBy === SortBy.REVIEW_COUNT) {
       products.sort((a, b) => {
         if (b.reviewCount !== a.reviewCount) {
@@ -93,12 +92,7 @@ export class ProductService {
     const existingOptionsById = new Map<string, any>();
 
     for (const option of existingOptions) {
-      if (
-        option &&
-        typeof option === "object" &&
-        "id" in option &&
-        typeof option.id === "string"
-      ) {
+      if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
         existingOptionsById.set(option.id, option);
       }
     }

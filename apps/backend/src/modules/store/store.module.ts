@@ -4,6 +4,7 @@ import { StoreCreationService } from "@apps/backend/modules/store/services/store
 import { StoreListService } from "@apps/backend/modules/store/services/store-list.service";
 import { StoreLikeService } from "@apps/backend/modules/store/services/store-like.service";
 import { StoreReviewService } from "@apps/backend/modules/store/services/store-review.service";
+import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
 import { BusinessModule } from "@apps/backend/modules/business/business.module";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
 
@@ -18,10 +19,12 @@ import { DatabaseModule } from "@apps/backend/infra/database/database.module";
     StoreListService,
     StoreLikeService,
     StoreReviewService,
+    StoreUpdateService,
   ],
   exports: [
     StoreService,
     StoreCreationService,
+    StoreUpdateService,
     StoreListService,
     StoreLikeService,
     StoreReviewService,

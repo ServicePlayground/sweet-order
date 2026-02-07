@@ -3,8 +3,13 @@ import { StoreCreationService } from "@apps/backend/modules/store/services/store
 import { StoreListService } from "@apps/backend/modules/store/services/store-list.service";
 import { StoreLikeService } from "@apps/backend/modules/store/services/store-like.service";
 import { StoreReviewService } from "@apps/backend/modules/store/services/store-review.service";
-import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
+import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
+import {
+  CreateStoreRequestDto,
+  UpdateStoreRequestDto,
+} from "@apps/backend/modules/store/dto/store.request.dto";
 import { GetStoreReviewsRequestDto } from "@apps/backend/modules/store/dto/store-review-request.dto";
+import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
  * 스토어 서비스
@@ -19,6 +24,7 @@ export class StoreService {
     private readonly storeListService: StoreListService,
     private readonly storeLikeService: StoreLikeService,
     private readonly storeReviewService: StoreReviewService,
+    private readonly storeUpdateService: StoreUpdateService,
   ) {}
 
   /**
@@ -27,15 +33,6 @@ export class StoreService {
    */
   async createStore(userId: string, createStoreDto: CreateStoreRequestDto) {
     return await this.storeCreationService.createStore(userId, createStoreDto);
-  }
-
-  /**
-   * 사용자의 스토어 목록 조회
-   * @param userId 사용자 ID
-   * @returns 스토어 목록
-   */
-  async getStoresByUserId(userId: string) {
-    return await this.storeListService.getStoresByUserId(userId);
   }
 
   /**
@@ -95,5 +92,39 @@ export class StoreService {
    */
   async getStoreReview(storeId: string, reviewId: string) {
     return this.storeReviewService.getStoreReview(storeId, reviewId);
+  }
+
+  /**
+   * 사용자의 스토어 목록 조회 (판매자용)
+   * @param userId 사용자 ID
+   * @returns 스토어 목록
+   */
+  async getStoresByUserId(userId: string) {
+    return await this.storeListService.getStoresByUserId(userId);
+  }
+
+  /**
+   * 스토어 상세 조회 (판매자용)
+   * @param storeId 스토어 ID
+   * @param user 인증된 사용자 정보
+   * @returns 스토어 상세 정보
+   */
+  async getStoreByIdForSeller(storeId: string, user: JwtVerifiedPayload) {
+    return await this.storeListService.getStoreByIdForSeller(storeId, user);
+  }
+
+  /**
+   * 스토어 수정 (판매자용)
+   * @param storeId 스토어 ID
+   * @param updateStoreDto 수정할 스토어 정보
+   * @param user 인증된 사용자 정보
+   * @returns 수정된 스토어 ID
+   */
+  async updateStore(
+    storeId: string,
+    updateStoreDto: UpdateStoreRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
+    return await this.storeUpdateService.updateStore(storeId, updateStoreDto, user);
   }
 }

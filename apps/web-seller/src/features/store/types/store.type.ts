@@ -30,6 +30,9 @@ export interface ICreateStoreResponse {
   id: string;
 }
 
+// 스토어 수정 요청
+export interface IUpdateStoreRequest extends IStoreForm {}
+
 // 스토어 목록 아이템
 export interface IStoreListItem extends IStoreAddress {
   id: string;
@@ -51,6 +54,31 @@ export interface IStoreListItem extends IStoreAddress {
   // 후기 통계
   averageRating: number; // 해당 스토어의 모든 상품 후기들의 평균 별점
   totalReviewCount: number; // 해당 스토어의 모든 상품 후기 개수
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 스토어 상세 정보 (조회용)
+export interface IStoreDetail extends IStoreAddress {
+  id: string;
+  userId: string;
+  logoImageUrl?: string;
+  name: string;
+  description?: string;
+  // 사업자 정보
+  businessNo: string;
+  representativeName: string;
+  openingDate: string;
+  businessName: string;
+  businessSector: string;
+  businessType: string;
+  // 통신판매사업자 정보
+  permissionManagementNumber: string;
+  // 시스템 필드
+  likeCount: number;
+  // 후기 통계
+  averageRating: number;
+  totalReviewCount: number;
   createdAt: Date;
   updatedAt: Date;
 }

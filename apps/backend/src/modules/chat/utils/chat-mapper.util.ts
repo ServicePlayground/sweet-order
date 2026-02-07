@@ -107,7 +107,9 @@ export class ChatMapperUtil {
    * @param chatRoom - Prisma ChatRoom 엔티티 (user 포함)
    * @returns ChatRoomForSellerResponseDto 객체
    */
-  static mapToChatRoomForSellerResponseDto(chatRoom: ChatRoomWithUser): ChatRoomForSellerResponseDto {
+  static mapToChatRoomForSellerResponseDto(
+    chatRoom: ChatRoomWithUser,
+  ): ChatRoomForSellerResponseDto {
     return {
       id: chatRoom.id,
       userId: chatRoom.userId,

@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Package, MessageSquare } from "lucide-react";
+import { Home, Package, MessageSquare, Store } from "lucide-react";
 import { ROUTES } from "./paths.constant";
 
 export interface MenuChildItem {
@@ -31,6 +31,11 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
       text: "홈",
       icon: React.createElement(Home, { className: "w-5 h-5" }),
       path: ROUTES.STORE_DETAIL_HOME(storeId),
+    },
+    {
+      text: "스토어",
+      icon: React.createElement(Store, { className: "w-5 h-5" }),
+      children: [{ text: "스토어 수정", path: ROUTES.STORE_DETAIL_EDIT(storeId) }],
     },
     {
       text: "상품",

@@ -6,6 +6,7 @@ import { StoreDetailProductCreatePage } from "@/apps/web-seller/pages/store/deta
 import { StoreDetailProductDetailPage } from "@/apps/web-seller/pages/store/detail/products/Detail";
 import { StoreDetailChatListPage } from "@/apps/web-seller/pages/store/detail/chat/List";
 import { StoreDetailChatRoomPage } from "@/apps/web-seller/pages/store/detail/chat/Room";
+import { StoreDetailEditPage } from "@/apps/web-seller/pages/store/detail/Edit";
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
 import { BasicLoginPage } from "@/apps/web-seller/pages/auth/BasicLogin";
 import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
@@ -25,6 +26,7 @@ export const ROUTES = {
     `/stores/${storeId}/products/${productId}`,
   STORE_DETAIL_CHAT_LIST: (storeId: string) => `/stores/${storeId}/chat`,
   STORE_DETAIL_CHAT_ROOM: (storeId: string, roomId: string) => `/stores/${storeId}/chat/${roomId}`,
+  STORE_DETAIL_EDIT: (storeId: string) => `/stores/${storeId}/edit`,
   // 인증 관련 경로
   AUTH: {
     LOGIN: "/auth/login",
@@ -64,4 +66,5 @@ export const ADMIN_ROUTE_CONFIG = [
     path: ROUTES.STORE_DETAIL_CHAT_ROOM(":storeId", ":roomId"),
     element: StoreDetailChatRoomPage,
   },
+  { path: ROUTES.STORE_DETAIL_EDIT(":storeId"), element: StoreDetailEditPage },
 ] as const;

@@ -66,16 +66,19 @@ export class ProductMapperUtil {
    * @param product - Prisma Product 엔티티 (store 포함 가능, reviews 포함 가능)
    * @returns ProductResponseDto 객체
    */
-  static mapToProductResponse(product: ProductWithStore | ProductWithReviewsAndStore): ProductResponseDto {
+  static mapToProductResponse(
+    product: ProductWithStore | ProductWithReviewsAndStore,
+  ): ProductResponseDto {
     const { store, ...productData } = product;
     // reviews가 있는 경우 제거 (사용하지 않음)
-    const rest = "reviews" in productData 
-      ? (() => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { reviews: _reviews, ...restData } = productData as ProductWithReviewsAndStore;
-          return restData;
-        })()
-      : productData;
+    const rest =
+      "reviews" in productData
+        ? (() => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { reviews: _reviews, ...restData } = productData as ProductWithReviewsAndStore;
+            return restData;
+          })()
+        : productData;
 
     return {
       ...rest,
