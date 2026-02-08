@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import DOMPurify from "isomorphic-dompurify";
 import { IFeed } from "@/apps/web-seller/features/feed/types/feed.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { formatRelativeTime } from "@/apps/web-seller/common/utils/date.util";
@@ -44,12 +45,25 @@ export const FeedList: React.FC<FeedListProps> = ({ feeds }) => {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold mb-2">{feed.title}</h3>
-                  <div
-                    className="text-sm text-muted-foreground line-clamp-2 mb-3"
-                    dangerouslySetInnerHTML={{
-                      __html: feed.content.replace(/<[^>]*>/g, "").substring(0, 100),
-                    }}
-                  />
+                  <div className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                    {(() => {
+                      // DOMPurify로 안전하게 정제한 후 텍스트만 추출
+                      const sanitized = DOMPurify.sanitize(feed.content, {
+                        ALLOWED_TAGS: [],
+                        ALLOWED_ATTR: [],
+                      });
+                      // HTML 엔티티 디코딩 및 공백 정리
+                      const textContent = sanitized
+                        .replace(/&nbsp;/g, " ")
+                        .replace(/&amp;/g, "&")
+                        .replace(/&lt;/g, "<")
+                        .replace(/&gt;/g, ">")
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#39;/g, "'")
+                        .trim();
+                      return textContent.substring(0, 100);
+                    })()}
+                  </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>{formatRelativeTime(createdAt)}</span>
                   </div>
