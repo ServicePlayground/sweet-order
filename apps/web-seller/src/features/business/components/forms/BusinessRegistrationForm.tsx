@@ -145,7 +145,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
         </div>
       </div>
 
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-center pt-6">
         <Button type="submit">다음 단계</Button>
       </div>
     </form>

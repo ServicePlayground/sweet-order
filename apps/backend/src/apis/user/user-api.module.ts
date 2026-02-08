@@ -9,6 +9,12 @@ import { ProductModule } from "@apps/backend/modules/product/product.module";
 import { UploadModule } from "@apps/backend/modules/upload/upload.module";
 import { StoreModule } from "@apps/backend/modules/store/store.module";
 import { ChatModule } from "@apps/backend/modules/chat/chat.module";
+import { FeedModule } from "@apps/backend/modules/feed/feed.module";
+import { UserFeedController } from "@apps/backend/apis/user/controllers/feed.controller";
+import { ReviewModule } from "@apps/backend/modules/review/review.module";
+import { UserReviewController } from "@apps/backend/apis/user/controllers/review.controller";
+import { LikeModule } from "@apps/backend/modules/like/like.module";
+import { UserLikeController } from "@apps/backend/apis/user/controllers/like.controller";
 
 /**
  * User API 모듈
@@ -17,13 +23,25 @@ import { ChatModule } from "@apps/backend/modules/chat/chat.module";
  */
 
 @Module({
-  imports: [UploadModule, AuthModule, ProductModule, StoreModule, ChatModule],
+  imports: [
+    UploadModule,
+    AuthModule,
+    ProductModule,
+    StoreModule,
+    ChatModule,
+    FeedModule,
+    ReviewModule,
+    LikeModule,
+  ],
   controllers: [
     UserUploadController,
     UserAuthController,
     UserProductController,
     UserStoreController,
     UserChatController,
+    UserFeedController,
+    UserReviewController,
+    UserLikeController,
   ],
 })
 export class UserApiModule {}

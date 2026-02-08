@@ -15,6 +15,7 @@ import {
 } from "@apps/backend/modules/business/dto/business-request.dto";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
+import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
 
 /**
  * 스토어 생성 요청 DTO (3단계)
@@ -186,4 +187,30 @@ export class UpdateStoreRequestDto {
   @Max(180)
   @IsNotEmpty()
   longitude: number;
+}
+
+/**
+ * 스토어 목록 조회 요청 DTO (무한 스크롤)
+ */
+export class GetStoresRequestDto {
+  @ApiProperty({
+    description: "(무한 스크롤 필수) 페이지 번호 (1부터 시작)",
+    example: 1,
+  })
+  @StringToNumber()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(1)
+  page: number;
+
+  @ApiProperty({
+    description: "(무한 스크롤 필수) 조회할 항목 수",
+    example: 20,
+  })
+  @StringToNumber()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit: number;
 }

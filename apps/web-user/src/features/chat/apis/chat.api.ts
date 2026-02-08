@@ -5,12 +5,13 @@ import {
   CreateChatRoomResponse,
   MessageListResponse,
   GetMessagesRequest,
+  GetChatRoomsRequest,
 } from "@/apps/web-user/features/chat/types/chat.type";
 
 export const chatApi = {
-  // 채팅방 목록 조회
-  getChatRooms: async (): Promise<ChatRoomListResponse> => {
-    const response = await userClient.get("/chat-room");
+  // 채팅방 목록 조회 (무한 스크롤)
+  getChatRooms: async (params: GetChatRoomsRequest): Promise<ChatRoomListResponse> => {
+    const response = await userClient.get("/chat-room", { params });
     return response.data.data;
   },
 

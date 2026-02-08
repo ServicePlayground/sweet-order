@@ -38,15 +38,6 @@ export enum SortBy {
 }
 
 /**
- * 후기 정렬 enum
- */
-export enum ReviewSortBy {
-  LATEST = "latest", // 최신순(생성일 내림차순)
-  RATING_DESC = "rating_desc", // 별점 내림차순
-  RATING_ASC = "rating_asc", // 별점 오름차순
-}
-
-/**
  * 옵션 필수/선택 enum
  */
 export enum OptionRequired {

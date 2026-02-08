@@ -9,16 +9,8 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
  */
 export class StoreMapperUtil {
   /**
-   * Product ID select 필드
-   * 상품 ID만 조회할 때 사용
-   */
-  static readonly PRODUCT_ID_SELECT = {
-    id: true,
-  } as const satisfies Prisma.ProductSelect;
-
-  /**
    * Product ID와 StoreId select 필드
-   * 배치 처리 시 상품 ID와 스토어 ID를 함께 조회할 때 사용
+   * 상품 ID와 스토어 ID를 함께 조회할 때 사용
    */
   static readonly PRODUCT_ID_WITH_STORE_ID_SELECT = {
     id: true,
@@ -26,16 +18,8 @@ export class StoreMapperUtil {
   } as const satisfies Prisma.ProductSelect;
 
   /**
-   * Review rating select 필드
-   * 후기 통계 계산 시 사용
-   */
-  static readonly REVIEW_RATING_SELECT = {
-    rating: true,
-  } as const satisfies Prisma.ProductReviewSelect;
-
-  /**
    * Review rating과 productId select 필드
-   * 배치 처리 시 후기 rating과 productId를 함께 조회할 때 사용
+   * 후기 rating과 productId를 함께 조회할 때 사용
    */
   static readonly REVIEW_RATING_WITH_PRODUCT_ID_SELECT = {
     productId: true,
@@ -43,86 +27,24 @@ export class StoreMapperUtil {
   } as const satisfies Prisma.ProductReviewSelect;
 
   /**
-   * Prisma Store 엔티티를 StoreResponseDto로 변환 (단일 스토어)
-   * @param store - Prisma Store 엔티티
+   * Prisma Store 엔티티를 StoreResponseDto로 변환
+   * 단일 스토어 또는 여러 스토어를 처리합니다. N+1 쿼리 문제를 방지하기 위해 배치로 처리합니다.
+   * @param stores - Prisma Store 엔티티 또는 배열
    * @param prisma - PrismaService 인스턴스 (후기 통계 계산용)
-   * @returns StoreResponseDto 객체
+   * @returns StoreResponseDto 또는 배열
    */
-  static async mapToStoreResponse(store: Store, prisma: PrismaService): Promise<StoreResponseDto> {
-    // 해당 스토어의 모든 상품 ID 조회
-    const products = await prisma.product.findMany({
-      where: { storeId: store.id },
-      select: StoreMapperUtil.PRODUCT_ID_SELECT,
-    });
-
-    const productIds = products.map((product) => product.id);
-
-    // 후기 통계 계산
-    let averageRating = 0;
-    let totalReviewCount = 0;
-
-    if (productIds.length > 0) {
-      // 해당 스토어의 모든 상품에 대한 후기 조회
-      const reviews = await prisma.productReview.findMany({
-        where: {
-          productId: {
-            in: productIds,
-          },
-        },
-        select: StoreMapperUtil.REVIEW_RATING_SELECT,
-      });
-
-      totalReviewCount = reviews.length;
-
-      if (totalReviewCount > 0) {
-        // 평균 별점 계산
-        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-        averageRating = Math.round((totalRating / totalReviewCount) * 10) / 10; // 소수점 첫째자리까지
-      }
-    }
-
-    return {
-      id: store.id,
-      userId: store.userId,
-      logoImageUrl: store.logoImageUrl ?? undefined,
-      name: store.name,
-      description: store.description ?? undefined,
-      businessNo: store.businessNo,
-      representativeName: store.representativeName,
-      openingDate: store.openingDate,
-      businessName: store.businessName,
-      businessSector: store.businessSector,
-      businessType: store.businessType,
-      permissionManagementNumber: store.permissionManagementNumber,
-      address: store.address,
-      roadAddress: store.roadAddress,
-      zonecode: store.zonecode,
-      latitude: store.latitude,
-      longitude: store.longitude,
-      likeCount: store.likeCount,
-      averageRating,
-      totalReviewCount,
-      createdAt: store.createdAt,
-      updatedAt: store.updatedAt,
-    };
-  }
-
-  /**
-   * 여러 Prisma Store 엔티티를 StoreResponseDto 배열로 변환 (배치 처리)
-   * N+1 쿼리 문제를 방지하기 위해 배치로 처리합니다.
-   * @param stores - Prisma Store 엔티티 배열
-   * @param prisma - PrismaService 인스턴스 (후기 통계 계산용)
-   * @returns StoreResponseDto 배열
-   */
-  static async mapToStoreResponseBatch(
-    stores: Store[],
+  static async mapToStoreResponse(
+    stores: Store | Store[],
     prisma: PrismaService,
-  ): Promise<StoreResponseDto[]> {
-    if (stores.length === 0) {
-      return [];
+  ): Promise<StoreResponseDto | StoreResponseDto[]> {
+    const storesArray = Array.isArray(stores) ? stores : [stores];
+    const isSingle = !Array.isArray(stores);
+
+    if (storesArray.length === 0) {
+      return isSingle ? ({} as StoreResponseDto) : [];
     }
 
-    const storeIds = stores.map((store) => store.id);
+    const storeIds = storesArray.map((store) => store.id);
 
     // 모든 스토어의 상품들을 한 번에 조회
     const allProducts = await prisma.product.findMany({
@@ -166,7 +88,7 @@ export class StoreMapperUtil {
     }
 
     // 스토어별 후기 통계 계산
-    return stores.map((store) => {
+    const results = storesArray.map((store) => {
       const productIds = productsByStoreId.get(store.id) || [];
       const reviews: Array<{ rating: number }> = [];
 
@@ -209,5 +131,7 @@ export class StoreMapperUtil {
         updatedAt: store.updatedAt,
       };
     });
+
+    return isSingle ? results[0] : results;
   }
 }

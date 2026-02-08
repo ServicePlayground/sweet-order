@@ -162,6 +162,25 @@ const SEED_PRODUCT_IMAGES = {
     "https://static-staging.sweetorders.com/uploads/3__1770124435469_83ac03cc.jpeg",
 };
 
+const SEED_STORE_FEEDS = {
+  FEED1: {
+    TITLE: "신제품 출시 안내",
+    CONTENT:
+      "<p>안녕하세요! 새로운 케이크가 출시되었습니다.</p><p>맛있고 예쁜 케이크로 여러분을 찾아뵙겠습니다.</p>",
+    CREATED_AT: new Date("2024-01-20T10:00:00Z"),
+  },
+  FEED2: {
+    TITLE: "이벤트 안내",
+    CONTENT: "<p>특별 이벤트를 진행합니다!</p><p>지금 주문하시면 10% 할인 혜택을 드립니다.</p>",
+    CREATED_AT: new Date("2024-01-21T14:30:00Z"),
+  },
+  FEED3: {
+    TITLE: "배송 안내",
+    CONTENT: "<p>배송 관련 안내드립니다.</p><p>주문 후 2-3일 내 배송됩니다.</p>",
+    CREATED_AT: new Date("2024-01-22T09:15:00Z"),
+  },
+};
+
 /**
  * 시드 사용자들을 생성합니다.
  *
@@ -492,14 +511,8 @@ async function upsertProducts(stores: Awaited<ReturnType<typeof upsertStores>>) 
 async function seedProductReviews(
   users: Awaited<ReturnType<typeof upsertSeedUsers>>,
   products: Awaited<ReturnType<typeof upsertProducts>>,
+  stores: Awaited<ReturnType<typeof upsertStores>>,
 ) {
-  // 전체 리뷰 개수 확인
-  const existingReviewCount = await prisma.productReview.count();
-  if (existingReviewCount > 0) {
-    // 리뷰가 1개 이상 존재하면 업데이트하지 않고 그대로 유지
-    return 0;
-  }
-
   // 상품이 없으면 리뷰 생성 불가
   if (!products || products.length === 0) {
     console.warn("⚠️ 상품이 없어 리뷰를 생성할 수 없습니다.");
@@ -512,65 +525,48 @@ async function seedProductReviews(
     return 0;
   }
 
+  // 스토어가 없으면 리뷰 생성 불가
+  if (!stores || stores.length < 2) {
+    console.warn("⚠️ 스토어가 없어 리뷰를 생성할 수 없습니다.");
+    return 0;
+  }
+
+  const [store1] = stores;
   const reviews = [];
 
   /**
-   * 첫 번째 스토어의 상품 70개 모두에 후기 추가
-   * - 각 상품당 3~5개의 랜덤 리뷰 생성
-   * - 사용자는 랜덤 선택 (같은 사용자가 여러 리뷰 작성 가능)
-   * - 이미지는 0~2개 랜덤
+   * 첫 번째 스토어와 두 번째 스토어의 모든 상품에 대해 리뷰 생성
+   * - 각 상품의 리뷰 개수를 확인
+   * - 리뷰가 1개 이상이면 건너뛰기
+   * - 리뷰가 0개인 상품에만 3~5개의 랜덤 리뷰 생성
+   * - 첫 번째 스토어 상품: 첫 번째 스토어 이미지 사용
+   * - 두 번째 스토어 상품: 두 번째 스토어 이미지 사용
    */
-  const firstStoreProducts = products.slice(0, Math.min(products.length, 70));
-  for (const product of firstStoreProducts) {
-    const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
-    for (let j = 0; j < reviewCount; j++) {
-      const userIndex = Math.floor(Math.random() * users.length);
-      const rating = Math.round((Math.random() * 4.5 + 0.5) * 10) / 10;
-      const content = SEED_REVIEW_CONTENTS[Math.floor(Math.random() * SEED_REVIEW_CONTENTS.length)];
-      const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
-      const imageUrls = Array.from(
-        { length: imageCount },
-        () => SEED_PRODUCT_IMAGES.FIRST_STORE_REVIEW_IMAGE,
-      );
+  for (const product of products) {
+    // 해당 상품의 리뷰 개수 확인
+    const productReviewCount = await prisma.productReview.count({
+      where: { productId: product.id },
+    });
 
-      reviews.push(
-        prisma.productReview.create({
-          data: {
-            productId: product.id,
-            userId: users[userIndex].id,
-            rating,
-            content,
-            imageUrls,
-            createdAt: new Date(
-              new Date("2024-01-01T00:00:00Z").getTime() +
-                Math.random() * (new Date().getTime() - new Date("2024-01-01T00:00:00Z").getTime()),
-            ),
-          },
-        }),
-      );
+    // 리뷰가 1개 이상이면 건너뛰기
+    if (productReviewCount >= 1) {
+      continue;
     }
-  }
 
-  /**
-   * 두 번째 스토어의 상품 30개 모두에 후기 추가
-   * - 각 상품당 3~5개의 랜덤 리뷰 생성
-   * - 사용자는 랜덤 선택
-   * - 이미지는 두 번째 스토어 전용 이미지 사용
-   * - products.length가 70보다 작으면 빈 배열이 되어 리뷰 생성하지 않음
-   */
-  const secondStoreProducts =
-    products.length >= 70 ? products.slice(70, Math.min(products.length, 100)) : [];
-  for (const product of secondStoreProducts) {
+    // 첫 번째 스토어인지 두 번째 스토어인지 판단 (storeId 기준)
+    const isFirstStore = product.storeId === store1.id;
+    const reviewImage = isFirstStore
+      ? SEED_PRODUCT_IMAGES.FIRST_STORE_REVIEW_IMAGE
+      : SEED_PRODUCT_IMAGES.SECOND_STORE_REVIEW_IMAGE;
+
+    // 리뷰가 없는 상품에 3~5개의 랜덤 리뷰 생성
     const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
     for (let j = 0; j < reviewCount; j++) {
       const userIndex = Math.floor(Math.random() * users.length);
       const rating = Math.round((Math.random() * 4.5 + 0.5) * 10) / 10;
       const content = SEED_REVIEW_CONTENTS[Math.floor(Math.random() * SEED_REVIEW_CONTENTS.length)];
       const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
-      const imageUrls = Array.from(
-        { length: imageCount },
-        () => SEED_PRODUCT_IMAGES.SECOND_STORE_REVIEW_IMAGE,
-      );
+      const imageUrls = Array.from({ length: imageCount }, () => reviewImage);
 
       reviews.push(
         prisma.productReview.create({
@@ -595,6 +591,85 @@ async function seedProductReviews(
 }
 
 /**
+ * 스토어 피드를 생성합니다.
+ *
+ * 동작 방식:
+ * - 각 스토어별로 피드 개수 확인
+ * - 피드가 1개 이상이면 건너뛰기
+ * - 피드가 0개인 스토어에만 피드 생성
+ *
+ * 특징:
+ * - 첫 번째 스토어에 피드가 0개면 2개의 피드 생성
+ * - 두 번째 스토어에 피드가 0개면 1개의 피드 생성
+ * - 각 스토어별로 독립적으로 확인하여 생성
+ */
+async function seedStoreFeeds(stores: Awaited<ReturnType<typeof upsertStores>>) {
+  // 스토어가 없으면 피드 생성 불가
+  if (!stores || stores.length === 0) {
+    console.warn("⚠️ 스토어가 없어 피드를 생성할 수 없습니다.");
+    return 0;
+  }
+
+  const [store1, store2] = stores;
+  const feeds = [];
+
+  // 첫 번째 스토어의 피드 개수 확인
+  if (store1) {
+    const store1FeedCount = await prisma.storeFeed.count({
+      where: { storeId: store1.id },
+    });
+
+    // 피드가 0개인 경우에만 생성
+    if (store1FeedCount === 0) {
+      feeds.push(
+        prisma.storeFeed.create({
+          data: {
+            storeId: store1.id,
+            title: SEED_STORE_FEEDS.FEED1.TITLE,
+            content: SEED_STORE_FEEDS.FEED1.CONTENT,
+            createdAt: SEED_STORE_FEEDS.FEED1.CREATED_AT,
+          },
+        }),
+      );
+      feeds.push(
+        prisma.storeFeed.create({
+          data: {
+            storeId: store1.id,
+            title: SEED_STORE_FEEDS.FEED2.TITLE,
+            content: SEED_STORE_FEEDS.FEED2.CONTENT,
+            createdAt: SEED_STORE_FEEDS.FEED2.CREATED_AT,
+          },
+        }),
+      );
+    }
+  }
+
+  // 두 번째 스토어의 피드 개수 확인
+  if (store2) {
+    const store2FeedCount = await prisma.storeFeed.count({
+      where: { storeId: store2.id },
+    });
+
+    // 피드가 0개인 경우에만 생성
+    if (store2FeedCount === 0) {
+      feeds.push(
+        prisma.storeFeed.create({
+          data: {
+            storeId: store2.id,
+            title: SEED_STORE_FEEDS.FEED3.TITLE,
+            content: SEED_STORE_FEEDS.FEED3.CONTENT,
+            createdAt: SEED_STORE_FEEDS.FEED3.CREATED_AT,
+          },
+        }),
+      );
+    }
+  }
+
+  const createdFeeds = await Promise.all(feeds);
+  return createdFeeds.length;
+}
+
+/**
  * 메인 시드 함수
  *
  * 중요!!: ** 스키마가 수정되더라도 ** 기존 데이터 유지되면서 새로운 데이터가 추가/수정되는 방식으로 해야, 실제 배포환경에서 오류가 발생하지 않습니다.
@@ -604,6 +679,7 @@ async function seedProductReviews(
  * 2. 스토어 생성 (2개, 기존 스토어는 업데이트하지 않음)
  * 3. 상품 생성 (100개, 상품이 하나도 없을 때만 생성)
  * 4. 상품 리뷰 생성 (리뷰가 하나도 없을 때만 생성)
+ * 5. 스토어 피드 생성 (피드가 하나도 없을 때만 생성)
  *
  * 특징:
  * - idempotent: 여러 번 실행해도 안전함
@@ -611,17 +687,20 @@ async function seedProductReviews(
  * - 스토어는 name 기준으로 존재하면 업데이트하지 않음 (보존)
  * - 상품은 1개 이상 존재하면 업데이트하지 않음, 하나도 없을 때만 생성
  * - 리뷰는 1개 이상 존재하면 업데이트하지 않음, 하나도 없을 때만 생성
+ * - 피드는 1개 이상 존재하면 업데이트하지 않음, 하나도 없을 때만 생성
  */
 async function main() {
   const users = await upsertSeedUsers();
   const stores = await upsertStores(users);
   const products = await upsertProducts(stores);
-  const reviewCreatedCount = await seedProductReviews(users, products);
+  const reviewCreatedCount = await seedProductReviews(users, products, stores);
+  const feedCreatedCount = await seedStoreFeeds(stores);
 
   console.log(`✅ Seed users created/retrieved: ${users.length}`);
   console.log(`✅ Stores created/retrieved: ${stores.length}`);
   console.log(`✅ Products created/retrieved: ${products.length}`);
   console.log(`✅ Product reviews created (if none existed): ${reviewCreatedCount}`);
+  console.log(`✅ Store feeds created (if none existed): ${feedCreatedCount}`);
   console.log("🎉 Database seeding (idempotent) completed!");
 }
 

@@ -1,3 +1,5 @@
+import { PaginationMeta } from "@/apps/web-seller/common/types/api.type";
+
 // 채팅방 사용자 정보 (판매자용)
 export interface ChatRoomUser {
   id: string;
@@ -21,7 +23,22 @@ export interface ChatRoomForSeller {
 
 // 채팅방 목록 응답 (판매자용)
 export interface ChatRoomListForSellerResponse {
-  chatRooms: ChatRoomForSeller[];
+  data: ChatRoomForSeller[];
+  meta: PaginationMeta;
+}
+
+/**
+ * 채팅방 목록 조회 쿼리 키용 파라미터 (page 제외)
+ */
+export interface GetChatRoomsParams {
+  limit: number;
+}
+
+/**
+ * 채팅방 목록 조회 요청 파라미터
+ */
+export interface GetChatRoomsRequest extends GetChatRoomsParams {
+  page: number;
 }
 
 /**

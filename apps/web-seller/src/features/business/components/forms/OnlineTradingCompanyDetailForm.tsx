@@ -76,15 +76,13 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-center gap-4 pt-6">
         {onPrevious && (
           <Button type="button" variant="outline" onClick={onPrevious}>
             이전
           </Button>
         )}
-        <Button type="submit" className={onPrevious ? "ml-auto" : ""}>
-          다음 단계
-        </Button>
+        <Button type="submit">다음 단계</Button>
       </div>
     </form>
   );

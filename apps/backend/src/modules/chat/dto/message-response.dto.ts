@@ -91,7 +91,7 @@ export class MessageListResponseDto {
     description: "메시지 목록",
     type: [MessageResponseDto],
   })
-  messages: MessageResponseDto[];
+  data: MessageResponseDto[];
 
   @ApiProperty({
     description: "페이지네이션 메타 정보",

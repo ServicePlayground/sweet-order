@@ -144,14 +144,14 @@ export const StoreCreationForm: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-center gap-4 pt-6">
         {onPrevious && (
           <Button type="button" variant="outline" onClick={onPrevious}>
             이전
           </Button>
         )}
-        <Button type="submit" className={onPrevious ? "ml-auto" : ""}>
-          {submitButtonText || "스토어 생성"}
+        <Button type="submit">
+          {submitButtonText || (initialValue ? "수정하기" : "등록하기")}
         </Button>
       </div>
     </form>

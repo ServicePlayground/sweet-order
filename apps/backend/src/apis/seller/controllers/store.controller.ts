@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Request,
   Param,
+  Query,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { StoreService } from "@apps/backend/modules/store/store.service";
@@ -29,13 +30,13 @@ import {
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   STORE_ERROR_MESSAGES,
-  SWAGGER_RESPONSE_EXAMPLES,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/store/constants/store.constants";
 import {
   StoreListResponseDto,
   StoreResponseDto,
 } from "@apps/backend/modules/store/dto/store-response.dto";
+import { GetStoresRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
 
 /**
  * 스토어 관련 컨트롤러
@@ -58,7 +59,7 @@ export class SellerStoreController {
     description:
       "1단계(사업자등록번호 진위확인)와 2단계(통신판매사업자 등록상세 조회)의 요청 파라미터를 재검증하고 스토어를 생성합니다. \n1단계 사업자등록번호는 2단계 사업자등록번호와 같아야 합니다. \n같은 사업자등록번호와 인허가관리번호(통신판매사업자 신고번호) 조합으로 이미 스토어가 존재하면 오류가 발생합니다.",
   })
-  @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.STORE_CREATED_RESPONSE })
+  @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
   // 사업자등록번호 진위확인 API 오류 응답
   @SwaggerResponse(400, {
     dataExample: createMessageObject(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE),
@@ -140,7 +141,8 @@ export class SellerStoreController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 내 스토어 목록 조회",
-    description: "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다.",
+    description:
+      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   // 인증 오류 응답
@@ -157,8 +159,11 @@ export class SellerStoreController {
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
   })
-  async getMyStores(@Request() req: { user: JwtVerifiedPayload }) {
-    return await this.storeService.getStoresByUserId(req.user.sub);
+  async getMyStores(
+    @Request() req: { user: JwtVerifiedPayload },
+    @Query() query: GetStoresRequestDto,
+  ) {
+    return await this.storeService.getStoresByUserId(req.user.sub, query);
   }
 
   /**

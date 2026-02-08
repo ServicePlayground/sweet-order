@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/chat/constants/chat.constants";
+import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 
 /**
  * 채팅방 스토어 정보 응답 DTO
@@ -179,7 +180,13 @@ export class ChatRoomListResponseDto {
     description: "채팅방 목록",
     type: [ChatRoomResponseDto],
   })
-  chatRooms: ChatRoomResponseDto[];
+  data: ChatRoomResponseDto[];
+
+  @ApiProperty({
+    description: "페이지네이션 메타 정보",
+    type: PaginationMetaResponseDto,
+  })
+  meta: PaginationMetaResponseDto;
 }
 
 /**
@@ -190,5 +197,11 @@ export class ChatRoomListForSellerResponseDto {
     description: "채팅방 목록",
     type: [ChatRoomForSellerResponseDto],
   })
-  chatRooms: ChatRoomForSellerResponseDto[];
+  data: ChatRoomForSellerResponseDto[];
+
+  @ApiProperty({
+    description: "페이지네이션 메타 정보",
+    type: PaginationMetaResponseDto,
+  })
+  meta: PaginationMetaResponseDto;
 }
