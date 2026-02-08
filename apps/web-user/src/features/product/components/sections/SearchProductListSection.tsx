@@ -6,6 +6,7 @@ import { SortBy, Product } from "@/apps/web-user/features/product/types/product.
 import { ProductList } from "@/apps/web-user/features/product/components/list/ProductList";
 import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
+import { flattenAndDeduplicateInfiniteData } from "@/apps/web-user/common/utils/pagination.util";
 
 interface SearchProductListSectionProps {
   search?: string;
@@ -29,10 +30,7 @@ export function SearchProductListSection({ search }: SearchProductListSectionPro
   });
 
   // 상품 목록 평탄화 및 중복 제거
-  const products: Product[] =
-    data?.pages
-      ?.flatMap((page) => page.data)
-      .filter((product, index, self) => self.findIndex((p) => p.id === product.id) === index) || [];
+  const products = flattenAndDeduplicateInfiniteData<Product>(data);
 
   if (isLoading) {
     return <></>;

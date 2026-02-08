@@ -2,10 +2,10 @@
 
 import { use, useState } from "react";
 import { useProductDetail } from "@/apps/web-user/features/product/hooks/queries/useProductDetail";
-import { useProductIsLiked } from "@/apps/web-user/features/product/hooks/queries/useProductIsLiked";
-import { useProductReviews } from "@/apps/web-user/features/product/hooks/queries/useProductReviews";
-import { useAddProductLike } from "@/apps/web-user/features/product/hooks/mutations/useAddProductLike";
-import { useRemoveProductLike } from "@/apps/web-user/features/product/hooks/mutations/useRemoveProductLike";
+import { useProductIsLiked } from "@/apps/web-user/features/like/hooks/queries/useProductIsLiked";
+import { useProductReviews } from "@/apps/web-user/features/review/hooks/queries/useProductReviews";
+import { useAddProductLike } from "@/apps/web-user/features/like/hooks/mutations/useAddProductLike";
+import { useRemoveProductLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveProductLike";
 import { ProductDetailImageGallerySection } from "@/apps/web-user/features/product/components/sections/ProductDetailImageGallerySection";
 import { ProductDetailInfoSection } from "@/apps/web-user/features/product/components/sections/ProductDetailInfoSection";
 import { ProductDetailDescriptionSection } from "@/apps/web-user/features/product/components/sections/ProductDetailDescriptionSection";

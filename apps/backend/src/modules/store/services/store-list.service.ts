@@ -2,7 +2,10 @@ import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/co
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { StoreMapperUtil } from "@apps/backend/modules/store/utils/store-mapper.util";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { GetStoresRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
+import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 
 /**
  * 스토어 목록 조회 서비스
@@ -27,22 +30,39 @@ export class StoreListService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return StoreMapperUtil.mapToStoreResponse(store, this.prisma);
+    return (await StoreMapperUtil.mapToStoreResponse(store, this.prisma)) as StoreResponseDto;
   }
 
   /**
    * 사용자의 스토어 목록 조회 (판매자용)
    * @param userId 사용자 ID
+   * @param query 페이지네이션 쿼리 파라미터
    * @returns 스토어 목록
    */
-  async getStoresByUserId(userId: string) {
+  async getStoresByUserId(userId: string, query: GetStoresRequestDto) {
+    const { page, limit } = query;
+
+    // 전체 개수 조회
+    const totalItems = await this.prisma.store.count({
+      where: { userId },
+    });
+
+    // 페이지네이션 계산
+    const skip = (page - 1) * limit;
+
     const stores = await this.prisma.store.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
     });
 
+    // 페이지네이션 메타 정보
+    const meta = calculatePaginationMeta(page, limit, totalItems);
+
     return {
-      stores: await StoreMapperUtil.mapToStoreResponseBatch(stores, this.prisma),
+      data: (await StoreMapperUtil.mapToStoreResponse(stores, this.prisma)) as StoreResponseDto[],
+      meta,
     };
   }
 
@@ -80,6 +100,6 @@ export class StoreListService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return StoreMapperUtil.mapToStoreResponse(fullStore, this.prisma);
+    return (await StoreMapperUtil.mapToStoreResponse(fullStore, this.prisma)) as StoreResponseDto;
   }
 }

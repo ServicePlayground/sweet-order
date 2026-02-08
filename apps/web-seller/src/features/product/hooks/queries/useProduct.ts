@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { productApi } from "@/apps/web-seller/features/product/apis/product.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
@@ -16,7 +16,6 @@ import { productQueryKeys } from "@/apps/web-seller/features/product/constants/p
 export function useCreateProduct() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (request: ICreateProductRequest) => productApi.createProduct(request),
@@ -25,8 +24,6 @@ export function useCreateProduct() {
         severity: "success",
         message: PRODUCT_SUCCESS_MESSAGES.PRODUCT_CREATED,
       });
-      // 상품 목록 캐시 무효화 (모든 storeId에 대해)
-      queryClient.invalidateQueries({ queryKey: ["product", "list"] });
       // 상품 목록으로 이동
       navigate(ROUTES.STORE_DETAIL_PRODUCTS_LIST(variables.storeId));
     },
@@ -65,7 +62,6 @@ export function useProductDetail(productId: string) {
 export function useUpdateProduct() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -81,10 +77,6 @@ export function useUpdateProduct() {
         severity: "success",
         message: PRODUCT_SUCCESS_MESSAGES.PRODUCT_UPDATED,
       });
-      // 상품 상세 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: productQueryKeys.detail(variables.productId) });
-      // 상품 목록 캐시 무효화 (모든 storeId에 대해)
-      queryClient.invalidateQueries({ queryKey: ["product", "list"] });
       // 상품 목록으로 이동
       navigate(ROUTES.STORE_DETAIL_PRODUCTS_LIST(variables.storeId));
     },
@@ -101,7 +93,6 @@ export function useUpdateProduct() {
 export function useDeleteProduct() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ productId }: { productId: string; storeId: string }) =>
@@ -111,10 +102,6 @@ export function useDeleteProduct() {
         severity: "success",
         message: PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED,
       });
-      // 상품 상세 캐시 무효화
-      queryClient.invalidateQueries({ queryKey: productQueryKeys.detail(variables.productId) });
-      // 상품 목록 캐시 무효화 (모든 storeId에 대해)
-      queryClient.invalidateQueries({ queryKey: ["product", "list"] });
       // 상품 목록으로 이동
       navigate(ROUTES.STORE_DETAIL_PRODUCTS_LIST(variables.storeId));
     },

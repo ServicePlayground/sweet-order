@@ -78,7 +78,7 @@ export const StoreDetailEditPage: React.FC = () => {
           <StoreCreationForm
             onSubmit={handleUpdate}
             initialValue={storeForm}
-            submitButtonText="스토어 수정"
+            submitButtonText="수정하기"
           />
         </CardContent>
       </Card>

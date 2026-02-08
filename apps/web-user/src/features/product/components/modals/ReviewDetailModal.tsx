@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
-import { Review } from "../../types/product.type";
+import { Review } from "@/apps/web-user/features/review/types/review.type";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
 import "swiper/css";

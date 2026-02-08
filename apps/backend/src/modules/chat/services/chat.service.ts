@@ -1,5 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { CreateChatRoomRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
+import {
+  CreateChatRoomRequestDto,
+  GetChatRoomsRequestDto,
+  GetMessagesRequestDto,
+} from "@apps/backend/modules/chat/dto/chat-request.dto";
 import {
   ChatRoomResponseDto,
   ChatRoomForSellerResponseDto,
@@ -34,8 +38,11 @@ export class ChatService {
   /**
    * 사용자의 채팅방 목록 조회
    */
-  async getChatRoomsByUserId(userId: string): Promise<{ chatRooms: ChatRoomResponseDto[] }> {
-    return await this.chatRoomService.getChatRoomsByUserId(userId);
+  async getChatRoomsByUserId(
+    userId: string,
+    query: GetChatRoomsRequestDto,
+  ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
+    return await this.chatRoomService.getChatRoomsByUserId(userId, query);
   }
 
   /**
@@ -44,8 +51,9 @@ export class ChatService {
   async getChatRoomsByStoreId(
     storeId: string,
     userId: string,
-  ): Promise<{ chatRooms: ChatRoomForSellerResponseDto[] }> {
-    return await this.chatRoomService.getChatRoomsByStoreId(storeId, userId);
+    query: GetChatRoomsRequestDto,
+  ): Promise<{ data: ChatRoomForSellerResponseDto[]; meta: any }> {
+    return await this.chatRoomService.getChatRoomsByStoreId(storeId, userId, query);
   }
 
   /**
@@ -74,9 +82,8 @@ export class ChatService {
     roomId: string,
     userId: string,
     userType: "user" | "store",
-    page: number = 1,
-    limit: number = 50,
+    query: GetMessagesRequestDto,
   ): Promise<MessageListResponseDto> {
-    return await this.chatMessageService.getMessages(roomId, userId, userType, page, limit);
+    return await this.chatMessageService.getMessages(roomId, userId, userType, query);
   }
 }

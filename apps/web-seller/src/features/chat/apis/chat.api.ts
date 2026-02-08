@@ -3,12 +3,16 @@ import {
   ChatRoomListForSellerResponse,
   MessageListResponse,
   GetMessagesRequest,
+  GetChatRoomsRequest,
 } from "@/apps/web-seller/features/chat/types/chat.type";
 
 export const chatApi = {
-  // 스토어의 채팅방 목록 조회
-  getChatRoomsByStore: async (storeId: string): Promise<ChatRoomListForSellerResponse> => {
-    const response = await sellerClient.get(`/chat-room/store/${storeId}`);
+  // 스토어의 채팅방 목록 조회 (무한 스크롤)
+  getChatRoomsByStore: async (
+    storeId: string,
+    params: GetChatRoomsRequest,
+  ): Promise<ChatRoomListForSellerResponse> => {
+    const response = await sellerClient.get(`/chat-room/store/${storeId}`, { params });
     return response.data.data;
   },
 

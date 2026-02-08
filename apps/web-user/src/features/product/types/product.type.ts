@@ -1,3 +1,5 @@
+import { PaginationMeta } from "@/apps/web-user/common/types/api.type";
+
 /**
  * 정렬 enum
  */
@@ -105,22 +107,6 @@ export interface Product {
   pickupLongitude: number;
 }
 
-export interface ProductIsLiked {
-  isLiked: boolean;
-}
-
-/**
- * 페이지네이션 메타 정보
- */
-export interface PaginationMeta {
-  currentPage: number;
-  limit: number;
-  totalItems: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
 /**
  * 상품 목록 응답
  */
@@ -146,47 +132,4 @@ export interface ProductListQueryParams {
  */
 export interface GetProductsParams extends ProductListQueryParams {
   page: number;
-}
-
-/**
- * 후기 정렬 옵션
- */
-export enum ReviewSortBy {
-  LATEST = "latest", // 최신순
-  RATING_DESC = "rating_desc", // 별점 높은 순
-  RATING_ASC = "rating_asc", // 별점 낮은 순
-}
-
-/**
- * 후기 정보
- */
-export interface Review {
-  id: string;
-  productId: string;
-  userId: string;
-  rating: number;
-  content: string;
-  imageUrls: string[];
-  userNickname: string | null;
-  userProfileImageUrl: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * 후기 목록 응답
- */
-export interface ReviewListResponse {
-  data: Review[];
-  meta: PaginationMeta;
-}
-
-/**
- * 후기 목록 조회 요청 파라미터
- */
-export interface GetReviewsParams {
-  productId: string;
-  page: number;
-  limit: number;
-  sortBy: ReviewSortBy;
 }

@@ -5,6 +5,7 @@ import {
   MessageListResponseDto,
   MessagePaginationMetaResponseDto,
 } from "@apps/backend/modules/chat/dto/message-response.dto";
+import { GetMessagesRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
 import { ChatRoomService } from "./chat-room.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatGateway } from "../gateways/chat.gateway";
@@ -82,16 +83,13 @@ export class ChatMessageService {
     roomId: string,
     userId: string,
     userType: "user" | "store",
-    page: number = 1,
-    limit: number = ChatMessageService.DEFAULT_LIMIT,
+    query: GetMessagesRequestDto,
   ): Promise<MessageListResponseDto> {
     // 채팅방 조회 및 권한 확인
     const chatRoom = await this.chatRoomService.findChatRoomById(roomId);
     await ChatPermissionUtil.verifyChatRoomAccess(chatRoom, userId, userType, this.prisma);
 
-    // limit 검증 및 정규화
-    const validatedLimit = this.validateLimit(limit);
-    const validatedPage = Math.max(1, page);
+    const { page, limit } = query;
 
     // 전체 메시지 수 조회
     const totalItems = await this.prisma.message.count({
@@ -99,14 +97,14 @@ export class ChatMessageService {
     });
 
     // 페이지네이션 계산
-    const skip = (validatedPage - 1) * validatedLimit;
+    const skip = (page - 1) * limit;
 
     // 메시지 조회 (최신 메시지가 먼저 오도록 desc 정렬)
     const messages = await this.prisma.message.findMany({
       where: { roomId },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       skip,
-      take: validatedLimit,
+      take: limit,
     });
 
     // 메시지 순서를 reverse하여 오래된 메시지 -> 최신 메시지 순서로 변환
@@ -116,13 +114,13 @@ export class ChatMessageService {
 
     // 페이지네이션 메타 정보 계산
     const meta: MessagePaginationMetaResponseDto = calculatePaginationMeta(
-      validatedPage,
-      validatedLimit,
+      page,
+      limit,
       totalItems,
     ) as MessagePaginationMetaResponseDto;
 
     return {
-      messages: reversedMessages,
+      data: reversedMessages,
       meta,
     };
   }

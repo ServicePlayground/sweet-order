@@ -24,8 +24,8 @@ import {
 import {
   ProductListResponseDto,
   ProductResponseDto,
-  PaginationMetaResponseDto,
 } from "@apps/backend/modules/product/dto/product-response.dto";
+import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,

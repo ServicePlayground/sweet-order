@@ -285,10 +285,7 @@ export const ProductCreationForm: React.FC<Props> = ({
       </Card>
 
       {!disabled && (
-        <div className="flex justify-end gap-2">
-          <Button type="submit" size="lg" disabled={isDeleting}>
-            {initialValue ? "수정하기" : "상품 등록"}
-          </Button>
+        <div className="flex justify-center gap-4 pt-6">
           {initialValue && onDelete && (
             <Button
               type="button"
@@ -300,6 +297,9 @@ export const ProductCreationForm: React.FC<Props> = ({
               삭제하기
             </Button>
           )}
+          <Button type="submit" size="lg" disabled={isDeleting}>
+            {initialValue ? "수정하기" : "등록하기"}
+          </Button>
         </div>
       )}
     </form>

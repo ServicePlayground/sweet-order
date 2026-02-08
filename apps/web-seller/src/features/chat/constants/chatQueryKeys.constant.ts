@@ -1,8 +1,12 @@
+import { GetChatRoomsParams } from "@/apps/web-seller/features/chat/types/chat.type";
+import { GetMessagesParams } from "@/apps/web-seller/features/chat/types/chat.type";
+
 export const chatQueryKeys = {
   all: ["chat"] as const,
   lists: () => ["chat", "list"] as const,
-  list: (storeId: string) => ["chat", "list", storeId] as const,
+  list: (storeId: string, params: GetChatRoomsParams) => ["chat", "list", storeId, params] as const,
   details: () => ["chat", "detail"] as const,
   detail: (roomId: string) => ["chat", "detail", roomId] as const,
-  messages: (roomId: string) => ["chat", "detail", roomId, "messages"] as const,
+  messages: (roomId: string, params: GetMessagesParams) =>
+    ["chat", "detail", roomId, "messages", params] as const,
 };

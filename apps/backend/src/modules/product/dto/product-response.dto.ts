@@ -8,6 +8,7 @@ import {
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
+import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 
 /**
  * 케이크 사이즈 옵션 응답 DTO
@@ -348,47 +349,6 @@ export class ProductResponseDto {
     example: STORE_SWAGGER_EXAMPLES.LONGITUDE,
   })
   pickupLongitude: number;
-}
-
-/**
- * 페이지네이션 메타 정보 응답 DTO
- */
-export class PaginationMetaResponseDto {
-  @ApiProperty({
-    description: "현재 페이지 번호",
-    example: SWAGGER_EXAMPLES.PAGINATION_META.currentPage,
-  })
-  currentPage: number;
-
-  @ApiProperty({
-    description: "페이지당 항목 수",
-    example: SWAGGER_EXAMPLES.PAGINATION_META.limit,
-  })
-  limit: number;
-
-  @ApiProperty({
-    description: "전체 항목 수",
-    example: SWAGGER_EXAMPLES.PAGINATION_META.totalItems,
-  })
-  totalItems: number;
-
-  @ApiProperty({
-    description: "전체 페이지 수",
-    example: SWAGGER_EXAMPLES.PAGINATION_META.totalPages,
-  })
-  totalPages: number;
-
-  @ApiProperty({
-    description: "다음 페이지 존재 여부",
-    example: SWAGGER_EXAMPLES.PAGINATION_META.hasNext,
-  })
-  hasNext: boolean;
-
-  @ApiProperty({
-    description: "이전 페이지 존재 여부",
-    example: SWAGGER_EXAMPLES.PAGINATION_META.hasPrev,
-  })
-  hasPrev: boolean;
 }
 
 /**

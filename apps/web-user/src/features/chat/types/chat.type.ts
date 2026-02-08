@@ -1,3 +1,5 @@
+import { PaginationMeta } from "@/apps/web-user/common/types/api.type";
+
 // 채팅방 스토어 정보 (사용자용)
 export interface ChatRoomStore {
   id: string;
@@ -20,7 +22,8 @@ export interface ChatRoom {
 
 // 채팅방 목록 응답 (사용자용)
 export interface ChatRoomListResponse {
-  chatRooms: ChatRoom[];
+  data: ChatRoom[];
+  meta: PaginationMeta;
 }
 
 // 채팅방 생성/ 조회 요청
@@ -31,6 +34,20 @@ export interface CreateChatRoomRequest {
 // 채팅방 생성/ 조회 응답
 export interface CreateChatRoomResponse {
   id: string;
+}
+
+/**
+ * 채팅방 목록 조회 쿼리 키용 파라미터 (page 제외)
+ */
+export interface GetChatRoomsParams {
+  limit: number;
+}
+
+/**
+ * 채팅방 목록 조회 요청 파라미터
+ */
+export interface GetChatRoomsRequest extends GetChatRoomsParams {
+  page: number;
 }
 
 /**

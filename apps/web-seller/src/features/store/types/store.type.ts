@@ -33,6 +33,20 @@ export interface ICreateStoreResponse {
 // 스토어 수정 요청
 export interface IUpdateStoreRequest extends IStoreForm {}
 
+/**
+ * 스토어 목록 조회 쿼리 키용 파라미터 (page 제외)
+ */
+export interface IGetStoresParams {
+  limit: number;
+}
+
+/**
+ * 스토어 목록 조회 요청 파라미터
+ */
+export interface IGetStoresRequest extends IGetStoresParams {
+  page: number;
+}
+
 // 스토어 목록 아이템
 export interface IStoreListItem extends IStoreAddress {
   id: string;
@@ -81,4 +95,12 @@ export interface IStoreDetail extends IStoreAddress {
   totalReviewCount: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/**
+ * 스토어 목록 응답
+ */
+export interface IStoreListResponse {
+  data: IStoreListItem[];
+  meta: import("@/apps/web-seller/common/types/api.type").PaginationMeta;
 }

@@ -12,36 +12,43 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 아래 모델 정의는 기존 백엔드의 스키마를 공용 패키지로 이동한 것입니다.
+// ============================================================================
+// Models
+// ============================================================================
+
 // User model for authentication and user management
 model User {
-  id               String   @id @default(cuid())              // 고유 식별자 (UUID)
-  phone            String   @unique                           // 휴대폰 번호 (통합 정보 탐색용, 필수)
-  passwordHash     String?  @map("password_hash")             // 암호화된 비밀번호 (일반 회원가입용)
-  name             String?                                    // 사용자 실명
-  nickname         String?                                    // 닉네임
-  email            String?                                    // 이메일
-  profileImageUrl  String?  @map("profile_image_url")         // 프로필 이미지 URL
-  isPhoneVerified  Boolean  @default(false) @map("is_phone_verified") // 휴대폰 인증 여부
-  isActive         Boolean  @default(true) @map("is_active")  // 계정 활성화 상태
-  role             UserRole @default(USER)                    // 사용자 권한 (USER, SELLER, ADMIN)
-  // 일반 회원가입 관련 필드
-  userId           String?  @unique @map("user_id")           // 사용자 ID (일반 회원가입용, 소셜 로그인 시 null 가능)
-  // 소셜 로그인 관련 필드
-  googleId         String?  @unique @map("google_id")         // 구글 사용자 ID
-  googleEmail      String?  @map("google_email")              // 구글 이메일
-  // 계정 생성/수정 정보
-  createdAt        DateTime @default(now()) @map("created_at")  // 계정 생성일시
-  lastLoginAt      DateTime? @map("last_login_at")            // 마지막 로그인 시간
+  // Primary Key
+  id String @id @default(cuid())
 
-  // Stateless JWT 방식으로 변경하여 RefreshToken 관계 제거
+  // 관계 필드
+  userId String? @unique @map("user_id") // 사용자 ID (일반 회원가입용, 소셜 로그인 시 null 가능)
+
+  // 비즈니스 필드
+  phone           String  @unique // 휴대폰 번호 (통합 정보 탐색용, 필수)
+  passwordHash    String? @map("password_hash") // 암호화된 비밀번호 (일반 회원가입용)
+  name            String? // 사용자 실명
+  nickname        String? // 닉네임
+  email           String? // 이메일
+  profileImageUrl String? @map("profile_image_url") // 프로필 이미지 URL
+  isPhoneVerified Boolean @default(false) @map("is_phone_verified") // 휴대폰 인증 여부
+  isActive        Boolean @default(true) @map("is_active") // 계정 활성화 상태
+  role            UserRole @default(USER) // 사용자 권한 (USER, SELLER, ADMIN)
+
+  // 소셜 로그인 관련 필드
+  googleId    String? @unique @map("google_id") // 구글 사용자 ID
+  googleEmail String? @map("google_email") // 구글 이메일
+
+  // 시스템 필드
+  createdAt   DateTime @default(now()) @map("created_at") // 계정 생성일시
+  lastLoginAt DateTime? @map("last_login_at") // 마지막 로그인 시간
 
   // Relations
-  productLikes   ProductLike[]
-  storeLikes     StoreLike[]
-  stores        Store[]
-  reviews       ProductReview[]
-  chatRooms     ChatRoom[]
+  productLikes ProductLike[]
+  storeLikes   StoreLike[]
+  stores       Store[]
+  reviews      ProductReview[]
+  chatRooms    ChatRoom[]
 
   @@index([phone])
   @@index([userId])
@@ -51,87 +58,99 @@ model User {
 
 // Phone verification for registration and password recovery
 model PhoneVerification {
-  id               String   @id @default(cuid())
-  phone            String
-  verificationCode String   @map("verification_code")
-  expiresAt        DateTime @map("expires_at")
-  isVerified       Boolean  @default(false) @map("is_verified")
-  purpose          String   @default("registration")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 비즈니스 필드
+  phone            String // 휴대폰 번호
+  verificationCode String @map("verification_code") // 인증 코드
+  expiresAt        DateTime @map("expires_at") // 만료 시간
+  isVerified       Boolean @default(false) @map("is_verified") // 인증 여부
+  purpose          String @default("registration") // 목적 (registration 등)
+
+  // 시스템 필드
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("phone_verifications")
 }
 
 // Product model for product management
 model Product {
-  id                String   @id @default(cuid())
-  
-  // 판매자 정보
-  storeId           String   @map("store_id") // 스토어 ID
-  
-  // 1. 상품명(문자열) - 필수입력값
-  name              String
-  images            String[] @default([]) // 첫 번째 요소가 대표 이미지 (필수)
-  salePrice         Int      @map("sale_price")
-  salesStatus       EnableStatus @map("sales_status")
-  visibilityStatus  EnableStatus @map("visibility_status")
-  cakeSizeOptions Json?     @map("cake_size_options")
-  cakeFlavorOptions Json?     @map("cake_flavor_options")
-  letteringVisible EnableStatus @map("lettering_visible")
-  letteringRequired OptionRequired @map("lettering_required")
-  letteringMaxLength Int @map("lettering_max_length")
-  imageUploadEnabled EnableStatus @map("image_upload_enabled")
-  productType ProductType @default(BASIC_CAKE) @map("product_type")
-  detailDescription String?  @map("detail_description")
-  // 고시정보 (식품 판매 시 법적 필수 항목)
-  productNumber     String   @map("product_number")  // 상품번호 (백엔드 자동 생성)
-  productNoticeFoodType          String  @map("product_notice_food_type")        // 식품의 유형 (필수)
-  productNoticeProducer          String  @map("product_notice_producer")         // 제조사 (필수)
-  productNoticeOrigin            String  @map("product_notice_origin")           // 원산지 (필수)
-  productNoticeAddress           String  @map("product_notice_address")          // 소재지 (필수)
-  productNoticeManufactureDate   String  @map("product_notice_manufacture_date") // 제조연월일 (필수)
-  productNoticeExpirationDate    String  @map("product_notice_expiration_date")  // 소비기한 또는 품질유지기한 (필수)
-  productNoticePackageCapacity   String  @map("product_notice_package_capacity") // 포장단위별 용량/수량 (필수)
-  productNoticePackageQuantity   String  @map("product_notice_package_quantity") // 포장 단위별 수량 (필수)
-  productNoticeIngredients       String  @map("product_notice_ingredients")      // 원재료명 및 함량 (필수)
-  productNoticeCalories          String  @map("product_notice_calories")         // 영양성분 (필수)
-  productNoticeSafetyNotice      String  @map("product_notice_safety_notice")    // 소비자안전을 위한 주의사항 (필수)
-  productNoticeGmoNotice         String  @map("product_notice_gmo_notice")       // 유전자변형식품에 해당하는 경우의 표시 (필수)
-  productNoticeImportNotice      String  @map("product_notice_import_notice")    // 수입식품의 경우 (필수)
-  productNoticeCustomerService   String  @map("product_notice_customer_service") // 고객센터 (필수)
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  storeId String @map("store_id") // 스토어 ID
+
+  // 비즈니스 필드 - 기본 정보
+  name              String // 상품명 (필수)
+  images            String[] @default([]) // 상품 이미지 목록 (첫 번째 요소가 대표 이미지)
+  salePrice         Int @map("sale_price") // 판매 가격
+  salesStatus       EnableStatus @map("sales_status") // 판매 상태
+  visibilityStatus  EnableStatus @map("visibility_status") // 노출 상태
+  productType       ProductType @default(BASIC_CAKE) @map("product_type") // 상품 타입
+  detailDescription String? @map("detail_description") // 상세 설명
+
+  // 비즈니스 필드 - 케이크 옵션
+  cakeSizeOptions   Json? @map("cake_size_options") // 케이크 사이즈 옵션
+  cakeFlavorOptions  Json? @map("cake_flavor_options") // 케이크 맛 옵션
+  letteringVisible   EnableStatus @map("lettering_visible") // 레터링 표시 여부
+  letteringRequired OptionRequired @map("lettering_required") // 레터링 필수 여부
+  letteringMaxLength Int @map("lettering_max_length") // 레터링 최대 길이
+  imageUploadEnabled EnableStatus @map("image_upload_enabled") // 이미지 업로드 가능 여부
+
+  // 비즈니스 필드 - 고시정보 (식품 판매 시 법적 필수 항목)
+  productNumber              String @map("product_number") // 상품번호 (백엔드 자동 생성)
+  productNoticeFoodType      String @map("product_notice_food_type") // 식품의 유형
+  productNoticeProducer      String @map("product_notice_producer") // 제조사
+  productNoticeOrigin        String @map("product_notice_origin") // 원산지
+  productNoticeAddress       String @map("product_notice_address") // 소재지
+  productNoticeManufactureDate String @map("product_notice_manufacture_date") // 제조연월일
+  productNoticeExpirationDate  String @map("product_notice_expiration_date") // 소비기한 또는 품질유지기한
+  productNoticePackageCapacity String @map("product_notice_package_capacity") // 포장단위별 용량/수량
+  productNoticePackageQuantity String @map("product_notice_package_quantity") // 포장 단위별 수량
+  productNoticeIngredients     String @map("product_notice_ingredients") // 원재료명 및 함량
+  productNoticeCalories        String @map("product_notice_calories") // 영양성분
+  productNoticeSafetyNotice    String @map("product_notice_safety_notice") // 소비자안전을 위한 주의사항
+  productNoticeGmoNotice       String @map("product_notice_gmo_notice") // 유전자변형식품에 해당하는 경우의 표시
+  productNoticeImportNotice     String @map("product_notice_import_notice") // 수입식품의 경우
+  productNoticeCustomerService String @map("product_notice_customer_service") // 고객센터
 
   // 시스템 필드
-  likeCount         Int      @default(0) @map("like_count")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  likeCount Int      @default(0) @map("like_count") // 좋아요 개수
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  // Seller는 store.seller를 통해 참조 가능
-  store             Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  likes             ProductLike[]
-  reviews           ProductReview[]
-  
-  @@index([storeId])
-  @@index([salesStatus])
-  @@index([visibilityStatus])
-  @@index([createdAt])
-  @@index([salePrice])
-  @@index([likeCount])
-  @@index([name])
+  store   Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  likes   ProductLike[]
+  reviews ProductReview[]
+
+  // 인덱스 최적화
+  @@index([storeId]) // 스토어별 상품 조회
+  @@index([visibilityStatus, salesStatus, createdAt(sort: Desc)]) // 노출된 상품 목록 조회 최적화 (정렬: 최신순)
+  @@index([visibilityStatus, salesStatus, salePrice]) // 노출된 상품 목록 조회 최적화 (정렬: 가격순)
+  @@index([visibilityStatus, salesStatus, likeCount(sort: Desc)]) // 노출된 상품 목록 조회 최적화 (정렬: 인기순)
+  @@index([name]) // 상품명 검색 최적화
   @@map("products")
 }
 
 // Product like model
 model ProductLike {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  productId String   @map("product_id")
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  userId    String @map("user_id") // 사용자 ID
+  productId String @map("product_id") // 상품 ID
+
+  // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
   @@index([userId])
@@ -139,73 +158,49 @@ model ProductLike {
   @@map("product_likes")
 }
 
-// product.constants.ts 에서 사용하는 enum들
-
-enum OptionRequired {
-  REQUIRED  // 필수
-  OPTIONAL  // 선택
-}
-
-enum EnableStatus {
-  ENABLE   // 사용
-  DISABLE  // 미사용
-}
-
-enum ProductType {
-  BASIC_CAKE   // 기본 케이크
-  CUSTOM_CAKE  // 커스텀 케이크
-}
-
-enum UserRole {
-  USER
-  SELLER
-  ADMIN
-}
-
 // Store model for seller store information
 model Store {
-  id                String   @id @default(cuid())
-  userId            String   @map("user_id")
-  
-  // 스토어 정보
-  logoImageUrl      String?  @map("logo_image_url")
-  name              String
-  description       String?
-  
-  // 주소/위치 정보 (카카오지도 활용용) - 필수
-  address           String   // 지번 주소 (예: "서울특별시 강남구 역삼동 456-789")
-  roadAddress       String   // 도로명 주소 (예: "서울특별시 강남구 테헤란로 123")
-  zonecode          String   // 우편번호
-  latitude          Float    // 위도 (카카오지도 마커 표시 및 거리 계산용)
-  longitude         Float    // 경도 (카카오지도 마커 표시 및 거리 계산용)
-  
-  // 사업자 정보 (1단계 - 사용자 입력값만 저장)
-  businessNo        String   @map("business_no")
-  representativeName String  @map("representative_name")
-  openingDate       String   @map("opening_date")
-  businessName      String   @map("business_name")
-  businessSector    String   @map("business_sector")
-  businessType      String   @map("business_type")
-  
-  // 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
-  permissionManagementNumber String @map("permission_management_number")
-  
-  // 주의: 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
-  // 필요시 외부 API를 호출하여 최신 상태 조회
-  
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  userId String @map("user_id") // 판매자 사용자 ID
+
+  // 비즈니스 필드 - 스토어 정보
+  logoImageUrl String? @map("logo_image_url") // 스토어 로고 이미지 URL
+  name         String // 스토어명
+  description  String? // 스토어 설명
+
+  // 비즈니스 필드 - 주소/위치 정보 (카카오지도 활용용)
+  address     String // 지번 주소 (예: "서울특별시 강남구 역삼동 456-789")
+  roadAddress String // 도로명 주소 (예: "서울특별시 강남구 테헤란로 123")
+  zonecode    String // 우편번호
+  latitude    Float // 위도 (카카오지도 마커 표시 및 거리 계산용)
+  longitude   Float // 경도 (카카오지도 마커 표시 및 거리 계산용)
+
+  // 비즈니스 필드 - 사업자 정보 (1단계 - 사용자 입력값만 저장)
+  businessNo        String @map("business_no") // 사업자등록번호
+  representativeName String @map("representative_name") // 대표자명
+  openingDate       String @map("opening_date") // 개업일자
+  businessName      String @map("business_name") // 사업자명
+  businessSector    String @map("business_sector") // 업종
+  businessType      String @map("business_type") // 업태
+
+  // 비즈니스 필드 - 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
+  permissionManagementNumber String @map("permission_management_number") // 인허가관리번호 (통신판매사업자 신고번호)
+
   // 시스템 필드
-  likeCount         Int      @default(0) @map("like_count")
-  
-  // 계정 생성/수정 정보
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-  
+  likeCount Int      @default(0) @map("like_count") // 좋아요 개수
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   // Relations
-  seller            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  products          Product[]
-  likes             StoreLike[]
-  chatRooms         ChatRoom[]
-  
+  seller    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products  Product[]
+  likes     StoreLike[]
+  chatRooms ChatRoom[]
+  feeds     StoreFeed[]
+
   @@unique([userId, businessNo, permissionManagementNumber])
   @@index([userId])
   @@index([businessNo])
@@ -216,14 +211,19 @@ model Store {
 
 // Store like model
 model StoreLike {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  storeId   String   @map("store_id")
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  userId  String @map("user_id") // 사용자 ID
+  storeId String @map("store_id") // 스토어 ID
+
+  // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, storeId])
   @@index([userId])
@@ -233,47 +233,58 @@ model StoreLike {
 
 // Product review model
 model ProductReview {
-  id          String   @id @default(cuid())
-  productId   String   @map("product_id")
-  userId      String   @map("user_id")
-  rating      Float                                                 // 별점 (0.0 ~ 5.0)
-  content     String                                                // 후기 내용
-  imageUrls   String[] @default([]) @map("image_urls")             // 후기 이미지 URL 목록
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  productId String @map("product_id") // 상품 ID
+  userId    String @map("user_id") // 사용자 ID
+
+  // 비즈니스 필드
+  rating    Float // 별점 (0.0 ~ 5.0)
+  content   String // 후기 내용
+  imageUrls String[] @default([]) @map("image_urls") // 후기 이미지 URL 목록
+
+  // 시스템 필드
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([productId])
-  @@index([userId])
-  @@index([rating])
-  @@index([createdAt])
+  // 인덱스 최적화
+  @@index([productId, createdAt(sort: Desc)]) // 상품별 후기 목록 조회 최적화 (최신순)
+  @@index([productId, rating(sort: Desc), createdAt(sort: Desc)], map: "product_reviews_product_id_rating_desc_created_at_idx") // 상품별 후기 목록 조회 최적화 (별점 내림차순)
+  @@index([productId, rating(sort: Asc), createdAt(sort: Desc)], map: "product_reviews_product_id_rating_asc_created_at_idx") // 상품별 후기 목록 조회 최적화 (별점 오름차순)
+  @@index([userId]) // 사용자별 후기 조회
   @@map("product_reviews")
 }
 
 // ChatRoom model for user-store chat
 model ChatRoom {
-  id              String   @id @default(cuid())
-  userId          String   @map("user_id")
-  storeId         String   @map("store_id")
-  
-  lastMessage     String?  @map("last_message") @db.VarChar(1000) // 마지막 메시지 미리보기용 (최대 1000자)
-  lastMessageAt   DateTime? @map("last_message_at")
-  
-  userUnread      Int      @default(0) @map("user_unread")
-  storeUnread     Int      @default(0) @map("store_unread")
-  
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  userId  String @map("user_id") // 사용자 ID
+  storeId String @map("store_id") // 스토어 ID
+
+  // 비즈니스 필드
+  lastMessage   String? @map("last_message") @db.VarChar(1000) // 마지막 메시지 미리보기용 (최대 1000자)
+  lastMessageAt DateTime? @map("last_message_at") // 마지막 메시지 시간
+  userUnread    Int @default(0) @map("user_unread") // 사용자 읽지 않은 메시지 개수
+  storeUnread   Int @default(0) @map("store_unread") // 스토어 읽지 않은 메시지 개수
+
+  // 시스템 필드
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  store           Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  messages        Message[]
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  messages Message[]
 
-  // 인덱스 최적화
   @@unique([userId, storeId]) // 1대1 채팅방 보장
   @@index([userId, lastMessageAt(sort: Desc)]) // 사용자 채팅방 목록 조회 최적화
   @@index([storeId, lastMessageAt(sort: Desc)]) // 판매자 채팅방 목록 조회 최적화
@@ -284,27 +295,78 @@ model ChatRoom {
 
 // Message model for chat messages
 model Message {
-  id              String      @id @default(cuid())
-  roomId          String      @map("room_id")
-  text            String      @db.Text // 긴 메시지를 위해 Text 타입 사용
-  senderId        String      @map("sender_id")
-  senderType      MessageSenderType @map("sender_type")
-  
-  createdAt       DateTime    @default(now()) @map("created_at")
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  roomId String @map("room_id") // 채팅방 ID
+
+  // 비즈니스 필드
+  text       String @db.Text // 메시지 내용
+  senderId   String @map("sender_id") // 발신자 ID
+  senderType MessageSenderType @map("sender_type") // 발신자 타입 (USER, STORE)
+
+  // 시스템 필드
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  room            ChatRoom    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  // 인덱스 최적화: 메시지 조회 시 roomId와 createdAt을 함께 사용하므로 복합 인덱스 추가
   @@index([roomId, createdAt(sort: Desc)]) // 메시지 목록 조회 최적화
   @@index([roomId]) // 기존 인덱스 유지 (다른 쿼리에서 사용 가능)
   @@map("messages")
+}
+
+// Store feed model for store feed posts
+model StoreFeed {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  storeId String @map("store_id") // 스토어 ID
+
+  // 비즈니스 필드
+  title   String // 피드 제목
+  content String @db.Text // 피드 내용 (HTML 에디터 형식)
+
+  // 시스템 필드
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // 인덱스 최적화
+  @@index([storeId, createdAt(sort: Desc)]) // 스토어별 피드 목록 조회 최적화 (최신순)
+  @@map("store_feeds")
+}
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+enum OptionRequired {
+  REQUIRED // 필수
+  OPTIONAL // 선택
+}
+
+enum EnableStatus {
+  ENABLE  // 사용
+  DISABLE // 미사용
+}
+
+enum ProductType {
+  BASIC_CAKE  // 기본 케이크
+  CUSTOM_CAKE // 커스텀 케이크
+}
+
+enum UserRole {
+  USER
+  SELLER
+  ADMIN
 }
 
 enum MessageSenderType {
   USER
   STORE
 }
-
-
-

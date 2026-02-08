@@ -2,15 +2,16 @@ import { sellerClient } from "@/apps/web-seller/common/config/axios.config";
 import {
   ICreateStoreRequest,
   ICreateStoreResponse,
-  IStoreListItem,
   IStoreDetail,
   IUpdateStoreRequest,
+  IGetStoresRequest,
+  IStoreListResponse,
 } from "@/apps/web-seller/features/store/types/store.type";
 
 export const storeApi = {
   // 스토어 목록 조회
-  getStoreList: async (): Promise<{ stores: IStoreListItem[] }> => {
-    const response = await sellerClient.get("/store/list");
+  getStoreList: async (params: IGetStoresRequest): Promise<IStoreListResponse> => {
+    const response = await sellerClient.get("/store/list", { params });
     return response.data.data;
   },
 

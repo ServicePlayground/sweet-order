@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { chatApi } from "@/apps/web-seller/features/chat/apis/chat.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
@@ -7,15 +7,32 @@ import { chatQueryKeys } from "@/apps/web-seller/features/chat/constants/chatQue
 import {
   MessageListResponse,
   GetMessagesRequest,
+  ChatRoomListForSellerResponse,
+  GetChatRoomsRequest,
 } from "@/apps/web-seller/features/chat/types/chat.type";
 
-// 스토어의 채팅방 목록 조회
-export function useChatRoomsByStore(storeId: string) {
+// 스토어의 채팅방 목록 조회 (무한 스크롤)
+export function useChatRoomsByStore(storeId: string, limit: number = 20) {
   const { addAlert } = useAlertStore();
 
-  const query = useQuery({
-    queryKey: chatQueryKeys.list(storeId),
-    queryFn: () => chatApi.getChatRoomsByStore(storeId),
+  const query = useInfiniteQuery<ChatRoomListForSellerResponse>({
+    queryKey: chatQueryKeys.list(storeId, { limit }),
+    queryFn: ({ pageParam = 1 }) => {
+      const params: GetChatRoomsRequest = {
+        page: pageParam as number,
+        limit,
+      };
+      return chatApi.getChatRoomsByStore(storeId, params);
+    },
+    // 반환된 값은 다음 API 요청의 queryFn의 pageParam으로 전달됩니다.
+    // 이 값은 hasNextPage에도 영향을 줍니다.
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.hasNext) {
+        return lastPage.meta.currentPage + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: !!storeId,
   });
 
@@ -36,7 +53,7 @@ export function useMessages(roomId: string, limit: number = 50) {
   const { addAlert } = useAlertStore();
 
   const query = useInfiniteQuery<MessageListResponse>({
-    queryKey: chatQueryKeys.messages(roomId),
+    queryKey: chatQueryKeys.messages(roomId, { limit }),
     queryFn: ({ pageParam = 1 }) => {
       const params: GetMessagesRequest = {
         page: pageParam as number,

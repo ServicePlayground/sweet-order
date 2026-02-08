@@ -11,6 +11,7 @@ import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Textarea } from "@/apps/web-seller/common/components/@shadcn-ui/textarea";
 import { formatTime } from "@/apps/web-seller/common/utils/date.util";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
+import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 
 export const ChatRoom: React.FC = () => {
   const params = useParams();
@@ -46,7 +47,7 @@ export const ChatRoom: React.FC = () => {
     // 읽음 처리
     markAsReadMutation.mutate(roomId);
 
-    const allMessages = messagesData?.pages?.flatMap((page) => page.messages) || [];
+    const allMessages = flattenAndDeduplicateInfiniteData<Message>(messagesData);
 
     // REST API로 받은 메시지도 필수 필드 검증 및 정규화
     const validatedMessages = allMessages.map((msg) => ({

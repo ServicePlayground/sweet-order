@@ -26,6 +26,7 @@ import {
 import {
   CreateChatRoomRequestDto,
   GetMessagesRequestDto,
+  GetChatRoomsRequestDto,
 } from "@apps/backend/modules/chat/dto/chat-request.dto";
 import {
   ChatRoomListResponseDto,
@@ -85,7 +86,8 @@ export class UserChatController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 채팅방 목록 조회",
-    description: "사용자의 모든 채팅방 목록을 조회합니다. 마지막 메시지 시간 기준으로 정렬됩니다.",
+    description:
+      "사용자의 모든 채팅방 목록을 조회합니다. 마지막 메시지 시간 기준으로 정렬됩니다. 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: ChatRoomListResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
@@ -101,8 +103,11 @@ export class UserChatController {
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
   })
-  async getChatRooms(@Request() req: { user: JwtVerifiedPayload }) {
-    return await this.chatService.getChatRoomsByUserId(req.user.sub);
+  async getChatRooms(
+    @Request() req: { user: JwtVerifiedPayload },
+    @Query() query: GetChatRoomsRequestDto,
+  ) {
+    return await this.chatService.getChatRoomsByUserId(req.user.sub, query);
   }
 
   /**
@@ -144,9 +149,7 @@ export class UserChatController {
     @Request() req: { user: AuthenticatedUser },
   ) {
     const userType = req.user.role === "SELLER" ? "store" : "user";
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 50;
 
-    return await this.chatService.getMessages(roomId, req.user.sub, userType, page, limit);
+    return await this.chatService.getMessages(roomId, req.user.sub, userType, query);
   }
 }

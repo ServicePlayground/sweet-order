@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNumber, Min, Max, IsNotEmpty } from "class-validator";
 import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
-import { ReviewSortBy } from "@apps/backend/modules/product/constants/product.constants";
+import { ReviewSortBy } from "@apps/backend/modules/review/constants/review.constants";
 
 /**
  * 후기 목록 조회 요청 DTO (무한 스크롤)
  */
-export class GetProductReviewsRequestDto {
+export class GetReviewsRequestDto {
   @ApiProperty({
     description: "(무한 스크롤 필수) 페이지 번호 (1부터 시작)",
     example: 1,

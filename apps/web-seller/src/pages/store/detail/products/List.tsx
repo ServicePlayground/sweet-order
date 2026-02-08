@@ -11,6 +11,7 @@ import { useProductList } from "@/apps/web-seller/features/product/hooks/queries
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { ProductList } from "@/apps/web-seller/features/product/components/list/ProductList";
 import { SortBy, IProductItem } from "@/apps/web-seller/features/product/types/product.type";
+import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 
 export const StoreDetailProductListPage: React.FC = () => {
   const { storeId } = useParams();
@@ -39,10 +40,7 @@ export const StoreDetailProductListPage: React.FC = () => {
   });
 
   // 상품 목록 평탄화 및 중복 제거
-  const products: IProductItem[] =
-    data?.pages
-      ?.flatMap((page) => page.data)
-      .filter((product, index, self) => self.findIndex((p) => p.id === product.id) === index) || [];
+  const products = flattenAndDeduplicateInfiniteData<IProductItem>(data);
 
   return (
     <div className="space-y-6">

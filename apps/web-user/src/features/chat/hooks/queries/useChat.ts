@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { chatApi } from "@/apps/web-user/features/chat/apis/chat.api";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { chatQueryKeys } from "@/apps/web-user/features/chat/constants/chatQueryKeys.constant";
@@ -6,20 +6,37 @@ import {
   CreateChatRoomRequest,
   MessageListResponse,
   GetMessagesRequest,
+  ChatRoomListResponse,
+  GetChatRoomsRequest,
 } from "@/apps/web-user/features/chat/types/chat.type";
 import { useRouter } from "next/navigation";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import { useEffect } from "react";
 import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 
-// 채팅방 목록 조회
-export function useChatRooms() {
+// 채팅방 목록 조회 (무한 스크롤)
+export function useChatRooms(limit: number = 20) {
   const accessToken = useAuthStore((state) => state.accessToken);
   const { showAlert } = useAlertStore();
 
-  const query = useQuery({
-    queryKey: chatQueryKeys.list(),
-    queryFn: () => chatApi.getChatRooms(),
+  const query = useInfiniteQuery<ChatRoomListResponse>({
+    queryKey: chatQueryKeys.list({ limit }),
+    queryFn: ({ pageParam = 1 }) => {
+      const params: GetChatRoomsRequest = {
+        page: pageParam as number,
+        limit,
+      };
+      return chatApi.getChatRooms(params);
+    },
+    // 반환된 값은 다음 API 요청의 queryFn의 pageParam으로 전달됩니다.
+    // 이 값은 hasNextPage에도 영향을 줍니다.
+    getNextPageParam: (lastPage) => {
+      if (lastPage.meta.hasNext) {
+        return lastPage.meta.currentPage + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
     enabled: !!accessToken,
   });
 
@@ -62,7 +79,7 @@ export function useMessages(roomId: string, limit: number = 50) {
   const { showAlert } = useAlertStore();
 
   const query = useInfiniteQuery<MessageListResponse>({
-    queryKey: chatQueryKeys.messages(roomId),
+    queryKey: chatQueryKeys.messages(roomId, { limit }),
     queryFn: ({ pageParam = 1 }) => {
       const params: GetMessagesRequest = {
         page: pageParam as number,

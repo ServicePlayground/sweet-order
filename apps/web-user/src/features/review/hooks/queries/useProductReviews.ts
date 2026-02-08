@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { productApi } from "@/apps/web-user/features/product/apis/product.api";
-import { productQueryKeys } from "@/apps/web-user/features/product/constants/productQueryKeys.constant";
+import { reviewApi } from "@/apps/web-user/features/review/apis/review.api";
+import { reviewQueryKeys } from "@/apps/web-user/features/review/constants/reviewQueryKeys.constant";
 import {
   ReviewListResponse,
   ReviewSortBy,
-} from "@/apps/web-user/features/product/types/product.type";
+} from "@/apps/web-user/features/review/types/review.type";
 import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import { useEffect } from "react";
@@ -25,8 +25,8 @@ export function useProductReviews({
   const { showAlert } = useAlertStore();
 
   const query = useQuery<ReviewListResponse>({
-    queryKey: productQueryKeys.reviews(productId, page, limit, sortBy),
-    queryFn: () => productApi.getProductReviews({ productId, page, limit, sortBy }),
+    queryKey: reviewQueryKeys.productReviews(productId, page, limit, sortBy),
+    queryFn: () => reviewApi.getProductReviews({ productId, page, limit, sortBy }),
     enabled: !!productId,
   });
 

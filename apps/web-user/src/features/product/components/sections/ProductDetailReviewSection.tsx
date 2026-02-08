@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Review, ReviewSortBy } from "../../types/product.type";
-import { useProductReviews } from "../../hooks/queries/useProductReviews";
+import { Review, ReviewSortBy } from "@/apps/web-user/features/review/types/review.type";
+import { useProductReviews } from "@/apps/web-user/features/review/hooks/queries/useProductReviews";
 import { ProductDetailSubTitle } from "../common/ProductDetailSubTitle";
 import { ImageSlider, SliderImage } from "@/apps/web-user/common/components/sliders";
 import { Icon } from "@/apps/web-user/common/components/icons";

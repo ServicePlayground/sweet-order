@@ -4,7 +4,7 @@ import { SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/produc
 /**
  * 후기 응답 DTO
  */
-export class ProductReviewResponseDto {
+export class ReviewResponseDto {
   @ApiProperty({
     description: "후기 ID",
     example: "review_123456789",
@@ -114,12 +114,12 @@ export class ReviewPaginationMetaResponseDto {
 /**
  * 후기 목록 조회 응답 DTO
  */
-export class ProductReviewListResponseDto {
+export class ReviewListResponseDto {
   @ApiProperty({
     description: "후기 목록",
-    type: [ProductReviewResponseDto],
+    type: [ReviewResponseDto],
   })
-  data: ProductReviewResponseDto[];
+  data: ReviewResponseDto[];
 
   @ApiProperty({
     description: "페이지네이션 메타 정보",
