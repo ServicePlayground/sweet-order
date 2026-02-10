@@ -34,10 +34,11 @@ export class StoreService {
   /**
    * 스토어 상세 조회
    * @param storeId 스토어 ID
+   * @param user 로그인한 사용자 정보 (옵셔널)
    * @returns 스토어 상세 정보
    */
-  async getStoreById(storeId: string) {
-    return await this.storeListService.getStoreById(storeId);
+  async getStoreById(storeId: string, user?: JwtVerifiedPayload) {
+    return await this.storeListService.getStoreById(storeId, user);
   }
 
   /**

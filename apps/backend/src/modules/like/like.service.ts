@@ -26,13 +26,6 @@ export class LikeService {
   }
 
   /**
-   * 상품 좋아요 여부 확인
-   */
-  async isProductLiked(userId: string, productId: string): Promise<boolean> {
-    return this.likeDataService.isProductLiked(userId, productId);
-  }
-
-  /**
    * 스토어 좋아요 추가
    */
   async addStoreLike(userId: string, storeId: string) {
@@ -44,12 +37,5 @@ export class LikeService {
    */
   async removeStoreLike(userId: string, storeId: string) {
     return this.likeDataService.removeStoreLike(userId, storeId);
-  }
-
-  /**
-   * 스토어 좋아요 여부 확인
-   */
-  async isStoreLiked(userId: string, storeId: string): Promise<boolean> {
-    return this.likeDataService.isStoreLiked(userId, storeId);
   }
 }

@@ -117,6 +117,12 @@ export class StoreResponseDto {
   })
   likeCount: number;
 
+  @ApiPropertyOptional({
+    description: "좋아요 여부 (로그인한 사용자의 경우에만 제공)",
+    example: true,
+  })
+  isLiked?: boolean | null;
+
   @ApiProperty({
     description: "평균 별점 (해당 스토어의 모든 상품 후기들의 평균 별점)",
     example: 4.5,

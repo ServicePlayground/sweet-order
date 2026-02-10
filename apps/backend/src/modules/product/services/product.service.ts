@@ -19,6 +19,7 @@ import {
   ProductWithReviewsAndStore,
 } from "@apps/backend/modules/product/utils/product-mapper.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
+import { LikeDataService } from "@apps/backend/modules/like/services/like.service";
 
 /**
  * 상품 서비스
@@ -26,7 +27,10 @@ import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.u
  */
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly likeDataService: LikeDataService,
+  ) {}
 
   /**
    * 케이크 옵션용 랜덤 ID 생성
@@ -153,9 +157,40 @@ export class ProductService {
   }
 
   /**
-   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 여러 상품에 대한 좋아요 여부를 한 번에 조회 (N+1 문제 방지)
+   * @param userId - 사용자 ID
+   * @param productIds - 상품 ID 목록
+   * @returns 좋아요한 상품 ID Set
    */
-  async getProducts(query: GetProductsRequestDto) {
+  private async getLikedProductIds(
+    userId: string,
+    productIds: string[],
+  ): Promise<Set<string>> {
+    if (productIds.length === 0) {
+      return new Set<string>();
+    }
+
+    const likes = await this.prisma.productLike.findMany({
+      where: {
+        userId,
+        productId: {
+          in: productIds,
+        },
+      },
+      select: {
+        productId: true,
+      },
+    });
+
+    return new Set(likes.map((like) => like.productId));
+  }
+
+  /**
+   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * @param query - 조회 조건
+   * @param user - 로그인한 사용자 정보 (옵셔널)
+   */
+  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
     const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType } = query;
 
     // 필터 조건 구성
@@ -201,14 +236,23 @@ export class ProductService {
       const productsWithStats = this.calculateReviewStats(allProducts);
       this.sortProductsByReviewStats(productsWithStats, sortBy);
 
-      // reviews 필드 제거하고 픽업장소 정보 매핑 (원래 구조로 복원)
-      products = productsWithStats.map((product) =>
-        ProductMapperUtil.mapToProductResponse(product),
-      );
-
       // 페이지네이션 적용
       const skip = (page - 1) * limit;
-      products = products.slice(skip, skip + limit);
+      const paginatedProducts = productsWithStats.slice(skip, skip + limit);
+
+      // 좋아요 여부 확인 (로그인한 사용자의 경우)
+      const productIds = paginatedProducts.map((p) => p.id);
+      const likedProductIds = user?.sub
+        ? await this.getLikedProductIds(user.sub, productIds)
+        : new Set<string>();
+
+      // reviews 필드 제거하고 픽업장소 정보 매핑 (원래 구조로 복원)
+      products = paginatedProducts.map((product) =>
+        ProductMapperUtil.mapToProductResponse(
+          product,
+          user?.sub ? likedProductIds.has(product.id) : null,
+        ),
+      );
     } else {
       // 일반 정렬 (Prisma orderBy 사용)
       switch (sortBy) {
@@ -246,9 +290,18 @@ export class ProductService {
         },
       });
 
+      // 좋아요 여부 확인 (로그인한 사용자의 경우)
+      const productIds = productsWithStore.map((p) => p.id);
+      const likedProductIds = user?.sub
+        ? await this.getLikedProductIds(user.sub, productIds)
+        : new Set<string>();
+
       // 픽업장소 정보 매핑
       products = productsWithStore.map((product) =>
-        ProductMapperUtil.mapToProductResponse(product),
+        ProductMapperUtil.mapToProductResponse(
+          product,
+          user?.sub ? likedProductIds.has(product.id) : null,
+        ),
       );
     }
 
@@ -263,8 +316,10 @@ export class ProductService {
 
   /**
    * 상품 상세 조회
+   * @param id - 상품 ID
+   * @param user - 로그인한 사용자 정보 (옵셔널)
    */
-  async getProductDetail(id: string) {
+  async getProductDetail(id: string, user?: JwtVerifiedPayload) {
     // 상품 상세 정보 조회 (노출된 상품만 조회, store 및 reviews 포함)
     const product = await this.prisma.product.findFirst({
       where: {
@@ -287,8 +342,19 @@ export class ProductService {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
+    // 좋아요 여부 확인 (로그인한 사용자의 경우)
+    let isLiked: boolean | null = null;
+    if (user?.sub) {
+      try {
+        isLiked = await this.likeDataService.isProductLiked(user.sub, id);
+      } catch (error) {
+        // 좋아요 확인 실패 시 null로 처리 (에러 무시)
+        isLiked = null;
+      }
+    }
+
     // 픽업장소 정보 매핑
-    return ProductMapperUtil.mapToProductResponse(product);
+    return ProductMapperUtil.mapToProductResponse(product, isLiked);
   }
 
   /**
@@ -386,14 +452,21 @@ export class ProductService {
       const productsWithStats = this.calculateReviewStats(allProducts);
       this.sortProductsByReviewStats(productsWithStats, sortBy);
 
-      // reviews 필드 제거하고 픽업장소 정보 매핑 (원래 구조로 복원)
-      products = productsWithStats.map((product) =>
-        ProductMapperUtil.mapToProductResponse(product),
-      );
-
       // 페이지네이션 적용
       const skip = (page - 1) * limit;
-      products = products.slice(skip, skip + limit);
+      const paginatedProducts = productsWithStats.slice(skip, skip + limit);
+
+      // 좋아요 여부 확인 (로그인한 사용자의 경우)
+      const productIds = paginatedProducts.map((p) => p.id);
+      const likedProductIds = await this.getLikedProductIds(user.sub, productIds);
+
+      // reviews 필드 제거하고 픽업장소 정보 매핑 (원래 구조로 복원)
+      products = paginatedProducts.map((product) =>
+        ProductMapperUtil.mapToProductResponse(
+          product,
+          likedProductIds.has(product.id),
+        ),
+      );
     } else {
       // 일반 정렬 (Prisma orderBy 사용)
       switch (sortBy) {
@@ -431,9 +504,16 @@ export class ProductService {
         },
       });
 
+      // 좋아요 여부 확인 (로그인한 사용자의 경우)
+      const productIds = productsWithStore.map((p) => p.id);
+      const likedProductIds = await this.getLikedProductIds(user.sub, productIds);
+
       // 픽업장소 정보 매핑
       products = productsWithStore.map((product) =>
-        ProductMapperUtil.mapToProductResponse(product),
+        ProductMapperUtil.mapToProductResponse(
+          product,
+          likedProductIds.has(product.id),
+        ),
       );
     }
 
@@ -476,8 +556,17 @@ export class ProductService {
       throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
+    // 좋아요 여부 확인 (로그인한 사용자의 경우)
+    let isLiked: boolean | null = null;
+    try {
+      isLiked = await this.likeDataService.isProductLiked(user.sub, id);
+    } catch (error) {
+      // 좋아요 확인 실패 시 null로 처리 (에러 무시)
+      isLiked = null;
+    }
+
     // 픽업장소 정보 매핑
-    return ProductMapperUtil.mapToProductResponse(product);
+    return ProductMapperUtil.mapToProductResponse(product, isLiked);
   }
 
   /**

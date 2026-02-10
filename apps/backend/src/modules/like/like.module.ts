@@ -10,6 +10,6 @@ import { LikeDataService } from "@apps/backend/modules/like/services/like.servic
 @Module({
   imports: [DatabaseModule],
   providers: [LikeService, LikeDataService],
-  exports: [LikeService],
+  exports: [LikeService, LikeDataService],
 })
 export class LikeModule {}

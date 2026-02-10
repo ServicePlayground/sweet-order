@@ -6,6 +6,7 @@ import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { GetStoresRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
+import { LikeDataService } from "@apps/backend/modules/like/services/like.service";
 
 /**
  * 스토어 목록 조회 서비스
@@ -14,14 +15,18 @@ import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.u
  */
 @Injectable()
 export class StoreListService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly likeDataService: LikeDataService,
+  ) {}
 
   /**
    * 스토어 상세 조회
    * @param storeId 스토어 ID
+   * @param user 로그인한 사용자 정보 (옵셔널)
    * @returns 스토어 상세 정보
    */
-  async getStoreById(storeId: string) {
+  async getStoreById(storeId: string, user?: JwtVerifiedPayload) {
     const store = await this.prisma.store.findFirst({
       where: { id: storeId },
     });
@@ -30,7 +35,24 @@ export class StoreListService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return (await StoreMapperUtil.mapToStoreResponse(store, this.prisma)) as StoreResponseDto;
+    // 좋아요 여부 확인 (로그인한 사용자의 경우)
+    let isLiked: boolean | null = null;
+    if (user?.sub) {
+      try {
+        isLiked = await this.likeDataService.isStoreLiked(user.sub, storeId);
+      } catch (error) {
+        // 좋아요 확인 실패 시 null로 처리 (에러 무시)
+        isLiked = null;
+      }
+    }
+
+    const storeResponse = (await StoreMapperUtil.mapToStoreResponse(
+      store,
+      this.prisma,
+    )) as StoreResponseDto;
+    storeResponse.isLiked = isLiked;
+
+    return storeResponse;
   }
 
   /**
@@ -57,11 +79,40 @@ export class StoreListService {
       take: limit,
     });
 
+    // 좋아요 여부 확인 (로그인한 사용자의 경우, N+1 방지)
+    const storeIds = stores.map((store) => store.id);
+    const likedStoreIds = new Set<string>();
+    if (storeIds.length > 0) {
+      const likes = await this.prisma.storeLike.findMany({
+        where: {
+          userId,
+          storeId: {
+            in: storeIds,
+          },
+        },
+        select: {
+          storeId: true,
+        },
+      });
+      likes.forEach((like) => likedStoreIds.add(like.storeId));
+    }
+
+    // 스토어 응답 매핑
+    const storeResponses = (await StoreMapperUtil.mapToStoreResponse(
+      stores,
+      this.prisma,
+    )) as StoreResponseDto[];
+    
+    // 좋아요 여부 추가
+    storeResponses.forEach((store) => {
+      store.isLiked = likedStoreIds.has(store.id);
+    });
+
     // 페이지네이션 메타 정보
     const meta = calculatePaginationMeta(page, limit, totalItems);
 
     return {
-      data: (await StoreMapperUtil.mapToStoreResponse(stores, this.prisma)) as StoreResponseDto[],
+      data: storeResponses,
       meta,
     };
   }
@@ -100,6 +151,21 @@ export class StoreListService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    return (await StoreMapperUtil.mapToStoreResponse(fullStore, this.prisma)) as StoreResponseDto;
+    // 좋아요 여부 확인 (로그인한 사용자의 경우)
+    let isLiked: boolean | null = null;
+    try {
+      isLiked = await this.likeDataService.isStoreLiked(user.sub, storeId);
+    } catch (error) {
+      // 좋아요 확인 실패 시 null로 처리 (에러 무시)
+      isLiked = null;
+    }
+
+    const storeResponse = (await StoreMapperUtil.mapToStoreResponse(
+      fullStore,
+      this.prisma,
+    )) as StoreResponseDto;
+    storeResponse.isLiked = isLiked;
+
+    return storeResponse;
   }
 }

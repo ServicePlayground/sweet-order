@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Delete,
   Param,
@@ -33,27 +32,6 @@ import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/stor
 @Auth({ isPublic: true })
 export class UserLikeController {
   constructor(private readonly likeService: LikeService) {}
-
-  /**
-   * 상품 좋아요 여부 확인 API
-   */
-  @Get("products/:productId/is-liked")
-  @Auth({ isPublic: false }) // 인증 필수
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: "(로그인필요) 상품 좋아요 여부 확인",
-    description: "특정 상품에 대한 사용자의 좋아요 여부를 확인합니다.",
-  })
-  @SwaggerResponse(200, { dataExample: { isLiked: true } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
-  async isProductLiked(
-    @Param("productId") productId: string,
-    @Request() req: { user: JwtVerifiedPayload },
-  ) {
-    const isLiked = await this.likeService.isProductLiked(req.user.sub, productId);
-    return { isLiked };
-  }
 
   /**
    * 상품 좋아요 추가 API
@@ -104,27 +82,6 @@ export class UserLikeController {
   ) {
     await this.likeService.removeProductLike(req.user.sub, productId);
     return { message: LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_REMOVED };
-  }
-
-  /**
-   * 스토어 좋아요 여부 확인 API
-   */
-  @Get("store/:storeId/is-liked")
-  @Auth({ isPublic: false }) // 인증 필수
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: "(로그인필요) 스토어 좋아요 여부 확인",
-    description: "특정 스토어에 대한 사용자의 좋아요 여부를 확인합니다.",
-  })
-  @SwaggerResponse(200, { dataExample: { isLiked: true } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
-  async isStoreLiked(
-    @Param("storeId") storeId: string,
-    @Request() req: { user: JwtVerifiedPayload },
-  ) {
-    const isLiked = await this.likeService.isStoreLiked(req.user.sub, storeId);
-    return { isLiked };
   }
 
   /**

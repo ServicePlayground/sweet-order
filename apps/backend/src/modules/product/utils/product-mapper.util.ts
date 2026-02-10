@@ -89,10 +89,12 @@ export class ProductMapperUtil {
   /**
    * Prisma Product 엔티티를 ProductResponseDto로 변환
    * @param product - Prisma Product 엔티티 (store 포함 가능, reviews 포함 가능)
+   * @param isLiked - 좋아요 여부 (옵셔널, 로그인한 사용자의 경우에만 제공)
    * @returns ProductResponseDto 객체
    */
   static mapToProductResponse(
     product: ProductWithStore | ProductWithReviewsAndStore,
+    isLiked?: boolean | null,
   ): ProductResponseDto {
     const { store, ...productData } = product;
 
@@ -124,6 +126,7 @@ export class ProductMapperUtil {
       ...rest,
       averageRating,
       totalReviewCount,
+      isLiked: isLiked !== undefined ? isLiked : null,
       storeName: store?.name || "",
       storeLogoImageUrl: store?.logoImageUrl || undefined,
       pickupAddress: store?.address || "",
