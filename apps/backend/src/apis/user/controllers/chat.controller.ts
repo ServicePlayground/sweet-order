@@ -10,7 +10,7 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
-import { ChatService } from "@apps/backend/modules/chat/services/chat.service";
+import { ChatService } from "@apps/backend/modules/chat/chat.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";

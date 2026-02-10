@@ -60,10 +60,9 @@ export function Auth(options: {
   if (!finalIsPublic || isOptionalPublic) {
     // 사용자 요청 → Controller → @Auth 데코레이터 → AuthGuard → Passport → JwtStrategy → validate() → req.user
     decorators.push(UseGuards(AuthGuard));
-    // Swagger UI에서 Bearer 토큰 인증 지원 (OptionalPublic인 경우에도 토큰을 받을 수 있도록)
-    if (isOptionalPublic) {
-      decorators.push(ApiBearerAuth("JWT-auth"));
-    }
+    // Swagger UI에서 Bearer 토큰 인증 지원
+    // Public이 아닌 모든 엔드포인트(인증 필요 또는 선택적 인증)에서 토큰 입력 가능하도록
+    decorators.push(ApiBearerAuth("JWT-auth"));
   }
 
   return applyDecorators(...decorators);

@@ -8,7 +8,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiExtraModels } from "@nestjs/swagger";
 import { UploadService } from "@apps/backend/modules/upload/upload.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
@@ -17,16 +17,15 @@ import {
   USER_ROLES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  SWAGGER_RESPONSE_EXAMPLES,
-  UPLOAD_CONSTANTS,
-} from "@apps/backend/modules/upload/constants/upload.constants";
+import { UPLOAD_CONSTANTS } from "@apps/backend/modules/upload/constants/upload.constants";
+import { UploadFileResponseDto } from "@apps/backend/modules/upload/dto/upload-response.dto";
 
 /**
  * 사용자 업로드 컨트롤러
  * 파일 업로드를 제공합니다.
  */
 @ApiTags("[사용자, 판매자, 관리자] 업로드")
+@ApiExtraModels(UploadFileResponseDto)
 @Controller(`${USER_ROLES.USER}/uploads`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // 로그인 필요
 export class UserUploadController {
@@ -62,7 +61,7 @@ export class UserUploadController {
       },
     },
   })
-  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.UPLOAD_FILE_RESPONSE })
+  @SwaggerResponse(200, { dataDto: UploadFileResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),

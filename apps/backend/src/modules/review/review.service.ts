@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ReviewDataService } from "@apps/backend/modules/review/services/review.service";
+import { ReviewListService } from "@apps/backend/modules/review/services/review-list.service";
+import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
 import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-request.dto";
 
 /**
@@ -10,33 +11,36 @@ import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-re
  */
 @Injectable()
 export class ReviewService {
-  constructor(private readonly reviewDataService: ReviewDataService) {}
+  constructor(
+    private readonly reviewListService: ReviewListService,
+    private readonly reviewDetailService: ReviewDetailService,
+  ) {}
 
   /**
    * 상품 후기 목록 조회
    */
   async getProductReviews(productId: string, query: GetReviewsRequestDto) {
-    return this.reviewDataService.getProductReviews(productId, query);
+    return this.reviewListService.getProductReviews(productId, query);
   }
 
   /**
    * 상품 후기 단일 조회
    */
   async getProductReview(productId: string, reviewId: string) {
-    return this.reviewDataService.getProductReview(productId, reviewId);
+    return this.reviewDetailService.getProductReview(productId, reviewId);
   }
 
   /**
    * 스토어 후기 목록 조회
    */
   async getStoreReviews(storeId: string, query: GetReviewsRequestDto) {
-    return this.reviewDataService.getStoreReviews(storeId, query);
+    return this.reviewListService.getStoreReviews(storeId, query);
   }
 
   /**
    * 스토어 후기 단일 조회
    */
   async getStoreReview(storeId: string, reviewId: string) {
-    return this.reviewDataService.getStoreReview(storeId, reviewId);
+    return this.reviewDetailService.getStoreReview(storeId, reviewId);
   }
 }

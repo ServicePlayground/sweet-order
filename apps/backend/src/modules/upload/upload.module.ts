@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { UploadService } from "./upload.service";
-import { AwsService } from "./services/aws.service";
+import { UploadService } from "@apps/backend/modules/upload/upload.service";
+import { UploadCreateService } from "@apps/backend/modules/upload/services/upload-create.service";
 
 /**
  * 업로드 모듈
@@ -8,7 +8,7 @@ import { AwsService } from "./services/aws.service";
  */
 @Module({
   imports: [],
-  providers: [UploadService, AwsService],
+  providers: [UploadService, UploadCreateService],
   exports: [UploadService],
 })
 export class UploadModule {}

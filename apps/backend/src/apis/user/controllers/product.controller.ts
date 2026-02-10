@@ -71,10 +71,7 @@ export class UserProductController {
   })
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
-  async getProductDetail(
-    @Param("id") id: string,
-    @Request() req: { user?: JwtVerifiedPayload },
-  ) {
+  async getProductDetail(@Param("id") id: string, @Request() req: { user?: JwtVerifiedPayload }) {
     return await this.productService.getProductDetail(id, req.user);
   }
 }

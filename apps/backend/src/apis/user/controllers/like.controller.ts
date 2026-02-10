@@ -1,13 +1,5 @@
-import {
-  Controller,
-  Post,
-  Delete,
-  Param,
-  Request,
-  HttpCode,
-  HttpStatus,
-} from "@nestjs/common";
-import { ApiTags, ApiOperation } from "@nestjs/swagger";
+import { Controller, Post, Delete, Param, Request, HttpCode, HttpStatus } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { LikeService } from "@apps/backend/modules/like/like.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
@@ -23,11 +15,13 @@ import {
 } from "@apps/backend/modules/like/constants/like.constants";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
+import { LikeResponseDto } from "@apps/backend/modules/like/dto/like-response.dto";
 
 /**
  * 좋아요 관련 컨트롤러 (사용자용)
  */
 @ApiTags("좋아요")
+@ApiExtraModels(LikeResponseDto)
 @Controller(`${USER_ROLES.USER}`)
 @Auth({ isPublic: true })
 export class UserLikeController {
@@ -43,9 +37,7 @@ export class UserLikeController {
     summary: "(로그인필요) 상품 좋아요 추가",
     description: "상품에 좋아요를 추가합니다.",
   })
-  @SwaggerResponse(201, {
-    dataExample: createMessageObject(LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_ADDED),
-  })
+  @SwaggerResponse(201, { dataDto: LikeResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   @SwaggerResponse(409, {
@@ -69,9 +61,7 @@ export class UserLikeController {
     summary: "(로그인필요) 상품 좋아요 삭제",
     description: "상품의 좋아요를 취소합니다.",
   })
-  @SwaggerResponse(200, {
-    dataExample: createMessageObject(LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_REMOVED),
-  })
+  @SwaggerResponse(200, { dataDto: LikeResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_NOT_FOUND),
@@ -94,9 +84,7 @@ export class UserLikeController {
     summary: "(로그인필요) 스토어 좋아요 추가",
     description: "스토어에 좋아요를 추가합니다.",
   })
-  @SwaggerResponse(201, {
-    dataExample: createMessageObject(LIKE_SUCCESS_MESSAGES.STORE_LIKE_ADDED),
-  })
+  @SwaggerResponse(201, { dataDto: LikeResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   @SwaggerResponse(409, {
@@ -120,9 +108,7 @@ export class UserLikeController {
     summary: "(로그인필요) 스토어 좋아요 삭제",
     description: "스토어의 좋아요를 취소합니다.",
   })
-  @SwaggerResponse(200, {
-    dataExample: createMessageObject(LIKE_SUCCESS_MESSAGES.STORE_LIKE_REMOVED),
-  })
+  @SwaggerResponse(200, { dataDto: LikeResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.STORE_LIKE_NOT_FOUND),

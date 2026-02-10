@@ -33,10 +33,7 @@ export class UserStoreController {
   })
   @SwaggerResponse(200, { dataDto: StoreResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
-  async getStoreDetail(
-    @Param("id") id: string,
-    @Request() req: { user?: JwtVerifiedPayload },
-  ) {
+  async getStoreDetail(@Param("id") id: string, @Request() req: { user?: JwtVerifiedPayload }) {
     return await this.storeService.getStoreById(id, req.user);
   }
 }

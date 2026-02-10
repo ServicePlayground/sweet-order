@@ -12,27 +12,33 @@ import {
   MessageResponseDto,
   MessageListResponseDto,
 } from "@apps/backend/modules/chat/dto/message-response.dto";
-import { ChatRoomService } from "./chat-room.service";
-import { ChatMessageService } from "./chat-message.service";
+import { ChatRoomCreateService } from "@apps/backend/modules/chat/services/chat-room-create.service";
+import { ChatRoomListService } from "@apps/backend/modules/chat/services/chat-room-list.service";
+import { ChatRoomUpdateService } from "@apps/backend/modules/chat/services/chat-room-update.service";
+import { ChatMessageCreateService } from "@apps/backend/modules/chat/services/chat-message-create.service";
+import { ChatMessageListService } from "@apps/backend/modules/chat/services/chat-message-list.service";
 
 /**
  * 채팅 서비스 (Facade)
  *
  * 채팅 관련 모든 기능을 통합하여 제공하는 메인 서비스입니다.
- * ChatRoomService와 ChatMessageService를 조합하여 사용합니다.
+ * CRUD 서비스들을 조합하여 사용합니다.
  */
 @Injectable()
 export class ChatService {
   constructor(
-    private readonly chatRoomService: ChatRoomService,
-    private readonly chatMessageService: ChatMessageService,
+    private readonly chatRoomCreateService: ChatRoomCreateService,
+    private readonly chatRoomListService: ChatRoomListService,
+    private readonly chatRoomUpdateService: ChatRoomUpdateService,
+    private readonly chatMessageCreateService: ChatMessageCreateService,
+    private readonly chatMessageListService: ChatMessageListService,
   ) {}
 
   /**
    * 채팅방 생성 또는 조회
    */
   async createOrGetChatRoom(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
-    return await this.chatRoomService.createOrGetChatRoom(userId, createChatRoomDto);
+    return await this.chatRoomCreateService.createOrGetChatRoom(userId, createChatRoomDto);
   }
 
   /**
@@ -42,7 +48,7 @@ export class ChatService {
     userId: string,
     query: GetChatRoomsRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
-    return await this.chatRoomService.getChatRoomsByUserId(userId, query);
+    return await this.chatRoomListService.getChatRoomsByUserId(userId, query);
   }
 
   /**
@@ -53,14 +59,14 @@ export class ChatService {
     userId: string,
     query: GetChatRoomsRequestDto,
   ): Promise<{ data: ChatRoomForSellerResponseDto[]; meta: any }> {
-    return await this.chatRoomService.getChatRoomsByStoreId(storeId, userId, query);
+    return await this.chatRoomListService.getChatRoomsByStoreId(storeId, userId, query);
   }
 
   /**
    * 채팅방 읽음 처리
    */
   async markChatRoomAsRead(roomId: string, readerId: string, readerType: "user" | "store") {
-    return await this.chatRoomService.markChatRoomAsRead(roomId, readerId, readerType);
+    return await this.chatRoomUpdateService.markChatRoomAsRead(roomId, readerId, readerType);
   }
 
   /**
@@ -72,7 +78,7 @@ export class ChatService {
     senderId: string,
     senderType: "user" | "store",
   ): Promise<MessageResponseDto> {
-    return await this.chatMessageService.sendMessage(roomId, text, senderId, senderType);
+    return await this.chatMessageCreateService.sendMessage(roomId, text, senderId, senderType);
   }
 
   /**
@@ -84,6 +90,6 @@ export class ChatService {
     userType: "user" | "store",
     query: GetMessagesRequestDto,
   ): Promise<MessageListResponseDto> {
-    return await this.chatMessageService.getMessages(roomId, userId, userType, query);
+    return await this.chatMessageListService.getMessages(roomId, userId, userType, query);
   }
 }

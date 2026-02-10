@@ -1,6 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ProductService } from "@apps/backend/modules/product/product.service";
 import { ProductService as ProductDataService } from "@apps/backend/modules/product/services/product.service";
+import { ProductListService } from "@apps/backend/modules/product/services/product-list.service";
+import { ProductDetailService } from "@apps/backend/modules/product/services/product-detail.service";
+import { ProductCreateService } from "@apps/backend/modules/product/services/product-create.service";
+import { ProductUpdateService } from "@apps/backend/modules/product/services/product-update.service";
+import { ProductDeleteService } from "@apps/backend/modules/product/services/product-delete.service";
 import { LikeModule } from "@apps/backend/modules/like/like.module";
 
 /**
@@ -9,7 +14,15 @@ import { LikeModule } from "@apps/backend/modules/like/like.module";
  */
 @Module({
   imports: [LikeModule],
-  providers: [ProductService, ProductDataService],
+  providers: [
+    ProductService,
+    ProductDataService,
+    ProductListService,
+    ProductDetailService,
+    ProductCreateService,
+    ProductUpdateService,
+    ProductDeleteService,
+  ],
   exports: [ProductService],
 })
 export class ProductModule {}

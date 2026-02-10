@@ -6,7 +6,7 @@ import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { GetStoresRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
-import { LikeDataService } from "@apps/backend/modules/like/services/like.service";
+import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
 
 /**
  * 스토어 목록 조회 서비스
@@ -17,7 +17,7 @@ import { LikeDataService } from "@apps/backend/modules/like/services/like.servic
 export class StoreListService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly likeDataService: LikeDataService,
+    private readonly likeStoreDetailService: LikeStoreDetailService,
   ) {}
 
   /**
@@ -39,7 +39,7 @@ export class StoreListService {
     let isLiked: boolean | null = null;
     if (user?.sub) {
       try {
-        isLiked = await this.likeDataService.isStoreLiked(user.sub, storeId);
+        isLiked = await this.likeStoreDetailService.isStoreLiked(user.sub, storeId);
       } catch (error) {
         // 좋아요 확인 실패 시 null로 처리 (에러 무시)
         isLiked = null;
@@ -102,7 +102,7 @@ export class StoreListService {
       stores,
       this.prisma,
     )) as StoreResponseDto[];
-    
+
     // 좋아요 여부 추가
     storeResponses.forEach((store) => {
       store.isLiked = likedStoreIds.has(store.id);
@@ -154,7 +154,7 @@ export class StoreListService {
     // 좋아요 여부 확인 (로그인한 사용자의 경우)
     let isLiked: boolean | null = null;
     try {
-      isLiked = await this.likeDataService.isStoreLiked(user.sub, storeId);
+      isLiked = await this.likeStoreDetailService.isStoreLiked(user.sub, storeId);
     } catch (error) {
       // 좋아요 확인 실패 시 null로 처리 (에러 무시)
       isLiked = null;

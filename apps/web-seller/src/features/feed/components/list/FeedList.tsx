@@ -54,9 +54,7 @@ export const FeedList: React.FC<FeedListProps> = ({ feeds }) => {
                         ALLOWED_ATTR: [],
                       });
                       // HTML 엔티티 디코딩 및 공백 정리 (he 라이브러리로 안전하게 디코딩)
-                      const textContent = he
-                        .decode(sanitized.replace(/&nbsp;/g, " "))
-                        .trim();
+                      const textContent = he.decode(sanitized.replace(/&nbsp;/g, " ")).trim();
                       return textContent.substring(0, 100);
                     })()}
                   </div>
