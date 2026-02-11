@@ -12,11 +12,7 @@ interface UseStoreFeedsParams {
   limit?: number;
 }
 
-export function useStoreFeeds({
-  storeId,
-  page = 1,
-  limit = 20,
-}: UseStoreFeedsParams) {
+export function useStoreFeeds({ storeId, page = 1, limit = 20 }: UseStoreFeedsParams) {
   const { showAlert } = useAlertStore();
 
   const query = useQuery<FeedListResponse>({

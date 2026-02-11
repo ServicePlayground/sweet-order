@@ -86,7 +86,9 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
                 <button
                   key={image.id}
                   type="button"
-                  onClick={isLastVisible ? handleViewAllClick : () => handlePhotoClick(image.reviewId)}
+                  onClick={
+                    isLastVisible ? handleViewAllClick : () => handlePhotoClick(image.reviewId)
+                  }
                   className="relative flex-shrink-0 rounded-xl overflow-hidden"
                   style={{ width: 130, height: 130 }}
                 >

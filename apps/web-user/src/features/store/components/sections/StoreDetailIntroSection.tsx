@@ -46,14 +46,14 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
           position.coords.latitude,
           position.coords.longitude,
           store.latitude,
-          store.longitude
+          store.longitude,
         );
         setDistance(dist);
       },
       () => {
         // 위치 권한 거부 시 거리 표시 안함
         setDistance(null);
-      }
+      },
     );
   }, [store.latitude, store.longitude]);
 
@@ -78,9 +78,10 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   // 설명 텍스트 줄임 처리
   const maxLength = 60;
   const shouldTruncate = store.description && store.description.length > maxLength;
-  const displayDescription = isExpanded || !shouldTruncate
-    ? store.description
-    : `${store.description?.slice(0, maxLength)}...`;
+  const displayDescription =
+    isExpanded || !shouldTruncate
+      ? store.description
+      : `${store.description?.slice(0, maxLength)}...`;
 
   return (
     <div className="py-6">
@@ -110,7 +111,9 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
           <div className="flex items-center">
             <Icon name="star" width={16} height={16} className="text-yellow-400" />
             <span className="ml-[2px] text-xs text-gray-500 font-bold">{store.averageRating}</span>
-            <span className="relative ml-[16px] text-xs text-gray-500 font-bold after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-500 after:transform after:translate-y-[-50%]">후기 {store.totalReviewCount}개</span>
+            <span className="relative ml-[16px] text-xs text-gray-500 font-bold after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-500 after:transform after:translate-y-[-50%]">
+              후기 {store.totalReviewCount}개
+            </span>
           </div>
         </div>
 

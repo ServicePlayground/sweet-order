@@ -16,7 +16,10 @@ export function PillTabs({ tabs, activeTab, onChange }: PillTabsProps) {
   return (
     <div className="flex items-center mr-[10px]">
       {tabs.map((tab) => (
-        <div key={tab.id} className={`flex items-center gap-2 ${tab.hasDividerAfter ? "mr-[0px]" : "mr-[4px]"}`}>
+        <div
+          key={tab.id}
+          className={`flex items-center gap-2 ${tab.hasDividerAfter ? "mr-[0px]" : "mr-[4px]"}`}
+        >
           <button
             type="button"
             onClick={() => onChange(tab.id)}

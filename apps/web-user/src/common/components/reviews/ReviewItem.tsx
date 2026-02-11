@@ -81,7 +81,12 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
       <div className="relative mt-[12px] py-[12px] px-[16px] bg-gray-50 rounded-xl">
         <div className="flex items-center gap-[12px] pr-[70px]">
           <span className="w-[40px] h-[40px] relative rounded-lg overflow-hidden flex-shrink-0">
-            <Image src="/images/contents/review_test.webp" alt="test review image" width={40} height={40} />
+            <Image
+              src="/images/contents/review_test.webp"
+              alt="test review image"
+              width={40}
+              height={40}
+            />
           </span>
           <div className="flex flex-col text-sm text-gray-900">
             <p>해피퍼피 생일케이크</p>
@@ -93,10 +98,18 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
           onClick={() => setIsOptionExpanded(!isOptionExpanded)}
           className="absolute right-[16px] top-[12px] flex items-center gap-[2px] text-sm text-gray-500"
         >
-          주문옵션 <Icon name="arrow" width={16} height={16} className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-90" : "rotate-180"}`} />
+          주문옵션{" "}
+          <Icon
+            name="arrow"
+            width={16}
+            height={16}
+            className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-90" : "rotate-180"}`}
+          />
         </button>
         {isOptionExpanded && (
-          <p className="text-2sm text-gray-500 mt-[12px]">1호(+1000원) / 바닐라시트(+1000원) / 라즈베리 크림(+1000원)</p>
+          <p className="text-2sm text-gray-500 mt-[12px]">
+            1호(+1000원) / 바닐라시트(+1000원) / 라즈베리 크림(+1000원)
+          </p>
         )}
       </div>
 
