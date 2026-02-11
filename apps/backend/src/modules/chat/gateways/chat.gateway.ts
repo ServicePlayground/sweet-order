@@ -12,7 +12,7 @@ import { Server, Socket } from "socket.io";
 import { Logger, Inject, forwardRef } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
-import { ChatService } from "../services/chat.service";
+import { ChatService } from "../chat.service";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { MessageResponseDto } from "../dto/message-response.dto";

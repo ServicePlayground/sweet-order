@@ -7,25 +7,33 @@
 
 import { useEffect } from "react";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
+import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
 
 // 타입 정의
 declare global {
   interface Window {
-    Loginpage?: {
+    // 웹뷰 -> Flutter
+    Loginpage: {
       postMessage: (message: string) => void;
     };
-    Logout?: {
+    Logout: {
       postMessage: (message: string) => void;
     };
+    mylocation: {
+      postMessage: (message: string) => void;
+    };
+
+    // Flutter -> 웹뷰
     Auth: {
       login: (accessToken: string) => void;
       logout: () => void;
     };
+    receiveLocation: (latitude: string | number, longitude: string | number) => void;
   }
 }
 
 // ============================================================================
-// 유틸리티 함수
+// 웹뷰 -> Flutter
 // ============================================================================
 
 /**
@@ -33,16 +41,6 @@ declare global {
  * Flutter 앱의 로그인 페이지로 이동하도록 메시지를 전송합니다.
  */
 export function navigateToLoginPage(): void {
-  if (typeof window === "undefined") {
-    console.warn("웹뷰 브릿지는 브라우저 환경에서만 동작합니다.");
-    return;
-  }
-
-  if (!window.Loginpage) {
-    console.warn("Loginpage 브릿지가 초기화되지 않았습니다. Flutter 웹뷰 환경인지 확인해주세요.");
-    return;
-  }
-
   try {
     window.Loginpage.postMessage("true");
   } catch (error) {
@@ -55,20 +53,23 @@ export function navigateToLoginPage(): void {
  * Flutter 앱에 로그아웃 메시지를 전송합니다. Flutter 내에서 토큰을 제거합니다.
  */
 export function logoutFromWebView(): void {
-  if (typeof window === "undefined") {
-    console.warn("웹뷰 브릿지는 브라우저 환경에서만 동작합니다.");
-    return;
-  }
-
-  if (!window.Logout) {
-    console.warn("logout 브릿지가 초기화되지 않았습니다. Flutter 웹뷰 환경인지 확인해주세요.");
-    return;
-  }
-
   try {
     window.Logout.postMessage("true");
   } catch (error) {
     console.error("로그아웃 중 오류가 발생했습니다:", error);
+  }
+}
+
+/**
+ * 앱에서 위치 정보를 요청하는 웹뷰 통신 함수
+ * Flutter 앱에 위치 정보 요청 메시지를 전송합니다.
+ * 앱에서 위치 정보를 받으면 window.receiveLocation 함수가 호출됩니다.
+ */
+export function requestLocationFromWebView(): void {
+  try {
+    window.mylocation.postMessage("true");
+  } catch (error) {
+    console.error("위치 정보 요청 중 오류가 발생했습니다:", error);
   }
 }
 
@@ -84,16 +85,17 @@ export function isWebViewEnvironment(): boolean {
 }
 
 // ============================================================================
-// React 훅
+// Flutter -> 웹뷰
 // ============================================================================
 
 /**
  * 웹뷰 브릿지 초기화 훅
- * Flutter 앱에서 window.Auth.login, window.Auth.logout을 호출할 수 있도록 등록합니다.
+ * Flutter 앱에서 window.Auth.login, window.Auth.logout, window.receiveLocation을 호출할 수 있도록 등록합니다.
  * 이 훅은 앱 초기화 시 한 번 호출되어야 합니다.
  */
 export function useWebViewBridge() {
   const { setAccessToken, clearAccessToken } = useAuthStore();
+  const { setLocation } = useUserCurrentLocationStore();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -115,5 +117,15 @@ export function useWebViewBridge() {
         clearAccessToken();
       },
     };
-  }, [setAccessToken, clearAccessToken]);
+
+    // Flutter 앱에서 호출할 수 있도록 window.receiveLocation 함수 초기화
+    window.receiveLocation = (latitude: string | number, longitude: string | number) => {
+      // string이면 number로 변환
+      const latNumber = typeof latitude === "string" ? parseFloat(latitude) : latitude;
+      const lngNumber = typeof longitude === "string" ? parseFloat(longitude) : longitude;
+
+      // 전역 상태(Zustand store)에 위치 정보 저장
+      setLocation(latNumber, lngNumber);
+    };
+  }, [setAccessToken, clearAccessToken, setLocation]);
 }

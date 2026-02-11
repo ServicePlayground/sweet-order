@@ -51,13 +51,14 @@ export class SellerProductController {
   /**
    * 판매자용 상품 목록 조회 API (무한 스크롤)
    * 자신이 소유한 스토어의 상품만 조회합니다.
+   * 로그인한 사용자의 경우 각 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.
    */
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 판매자용 상품 목록 조회",
     description:
-      "자신이 소유한 스토어의 상품 목록을 조회합니다. 필터링, 정렬, 무한 스크롤을 지원합니다.",
+      "자신이 소유한 스토어의 상품 목록을 조회합니다. 필터링, 정렬, 무한 스크롤을 지원합니다. 로그인한 사용자의 경우 각 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
@@ -89,12 +90,14 @@ export class SellerProductController {
   /**
    * 판매자용 상품 상세 조회 API
    * 자신이 소유한 스토어의 상품만 조회 가능합니다.
+   * 로그인한 사용자의 경우 해당 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.
    */
   @Get(":id")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 판매자용 상품 상세 조회",
-    description: "자신이 소유한 스토어의 상품 상세 정보를 조회합니다.",
+    description:
+      "자신이 소유한 스토어의 상품 상세 정보를 조회합니다. 로그인한 사용자의 경우 해당 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
   @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })

@@ -5,12 +5,13 @@ import { StoreListService } from "@apps/backend/modules/store/services/store-lis
 import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
 import { BusinessModule } from "@apps/backend/modules/business/business.module";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
+import { LikeModule } from "@apps/backend/modules/like/like.module";
 
 /**
  * 스토어 관련 모듈
  */
 @Module({
-  imports: [BusinessModule, DatabaseModule],
+  imports: [BusinessModule, DatabaseModule, LikeModule],
   providers: [StoreService, StoreCreationService, StoreListService, StoreUpdateService],
   exports: [StoreService, StoreCreationService, StoreUpdateService, StoreListService],
 })

@@ -1,8 +1,7 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useProductDetail } from "@/apps/web-user/features/product/hooks/queries/useProductDetail";
-import { useProductIsLiked } from "@/apps/web-user/features/like/hooks/queries/useProductIsLiked";
 import { useProductReviews } from "@/apps/web-user/features/review/hooks/queries/useProductReviews";
 import { useAddProductLike } from "@/apps/web-user/features/like/hooks/mutations/useAddProductLike";
 import { useRemoveProductLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveProductLike";
@@ -25,28 +24,39 @@ interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
 }
 
-// 안녕
-
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { productId } = use(params);
   const { data, isLoading } = useProductDetail(productId);
-  const { data: likeData } = useProductIsLiked(productId);
   const { data: reviewData } = useProductReviews({ productId });
   const { mutate: addLike, isPending: isAddingLike } = useAddProductLike();
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveProductLike();
 
-  const isLiked = likeData?.isLiked ?? false;
+  const [isLiked, setIsLiked] = useState(false);
   const isLikeLoading = isAddingLike || isRemovingLike;
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
+  // 서버에서 isLiked 값이 변경되면 로컬 상태 동기화
+  useEffect(() => {
+    if (data?.isLiked !== undefined && data?.isLiked !== null) {
+      setIsLiked(data.isLiked);
+    }
+  }, [data?.isLiked]);
+
   const handleLikeToggle = () => {
     if (isLikeLoading) return;
 
+    // 낙관적 업데이트
+    setIsLiked(!isLiked);
+
     if (isLiked) {
-      removeLike(productId);
+      removeLike(productId, {
+        onError: () => setIsLiked(true),
+      });
     } else {
-      addLike(productId);
+      addLike(productId, {
+        onError: () => setIsLiked(false),
+      });
     }
   };
 

@@ -67,6 +67,7 @@ export interface Product {
   images: string[];
   salePrice: number;
   likeCount: number;
+  isLiked: boolean | null;
   averageRating: number; // 해당 상품의 모든 후기들의 평균 별점
   totalReviewCount: number; // 해당 상품의 모든 후기 개수
   salesStatus: SalesStatus;
@@ -125,6 +126,7 @@ export interface ProductListQueryParams {
   minPrice?: number;
   maxPrice?: number;
   storeId?: string;
+  productType?: ProductType;
 }
 
 /**

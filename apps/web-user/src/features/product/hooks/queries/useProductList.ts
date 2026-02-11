@@ -18,6 +18,7 @@ export function useProductList({
   search,
   minPrice,
   maxPrice,
+  productType,
 }: Partial<ProductListQueryParams> = {}) {
   const { showAlert } = useAlertStore();
 
@@ -29,6 +30,7 @@ export function useProductList({
       search,
       minPrice,
       maxPrice,
+      productType,
     }),
     queryFn: ({ pageParam = 1 }) => {
       const params: GetProductsParams = {
@@ -47,6 +49,9 @@ export function useProductList({
       }
       if (maxPrice !== undefined) {
         params.maxPrice = maxPrice;
+      }
+      if (productType) {
+        params.productType = productType;
       }
       return productApi.getProducts(params);
     },

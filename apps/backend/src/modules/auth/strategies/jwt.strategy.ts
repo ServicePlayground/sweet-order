@@ -44,15 +44,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         // Authorization 헤더에서 Bearer 토큰 추출
         const authHeader = req.headers.authorization;
 
+        // 토큰이 없으면 null 반환 (OptionalPublic 엔드포인트에서 선택적 인증 지원)
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING);
+          return null;
         }
 
         const accessToken = authHeader.substring(7); // "Bearer " 제거
 
-        // 토큰이 없는 경우 명시적으로 에러 발생
+        // 토큰이 비어있으면 null 반환
         if (!accessToken) {
-          throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING);
+          return null;
         }
 
         return accessToken;

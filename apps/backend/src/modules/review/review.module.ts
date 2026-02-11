@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ReviewService } from "@apps/backend/modules/review/review.service";
-import { ReviewDataService } from "@apps/backend/modules/review/services/review.service";
+import { ReviewListService } from "@apps/backend/modules/review/services/review-list.service";
+import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
 
 /**
@@ -8,7 +9,7 @@ import { DatabaseModule } from "@apps/backend/infra/database/database.module";
  */
 @Module({
   imports: [DatabaseModule],
-  providers: [ReviewService, ReviewDataService],
+  providers: [ReviewService, ReviewListService, ReviewDetailService],
   exports: [ReviewService],
 })
 export class ReviewModule {}

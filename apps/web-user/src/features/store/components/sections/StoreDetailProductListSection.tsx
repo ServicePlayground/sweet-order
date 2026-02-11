@@ -2,32 +2,34 @@
 
 import { useState, useRef } from "react";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
-import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
+import { Product, ProductType } from "@/apps/web-user/features/product/types/product.type";
 import { ProductList } from "@/apps/web-user/features/product/components/list/ProductList";
-import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
+import { PillTabs } from "@/apps/web-user/common/components/tabs/PillTabs";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-user/common/utils/pagination.util";
+
+type ProductTypeFilter = "ALL" | ProductType.BASIC_CAKE | ProductType.CUSTOM_CAKE;
+
+const PRODUCT_TYPE_TABS = [
+  { id: "ALL", label: "전체", hasDividerAfter: true },
+  { id: ProductType.BASIC_CAKE, label: "기본" },
+  { id: ProductType.CUSTOM_CAKE, label: "커스텀" },
+];
 
 interface StoreDetailProductListSectionProps {
   storeId: string;
 }
 
 export function StoreDetailProductListSection({ storeId }: StoreDetailProductListSectionProps) {
-  const [sortBy, setSortBy] = useState<SortBy>(SortBy.POPULAR);
+  const [productTypeFilter, setProductTypeFilter] = useState<ProductTypeFilter>("ALL");
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const {
-    data,
-    fetchNextPage, // 다음 페이지 요청
-    hasNextPage, // 다음 페이지 존재 여부
-    isFetchingNextPage, // 다음 페이지 로딩 여부
-    isLoading, // 첫 번째 페이지 로딩 여부
-  } = useProductList({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     storeId,
-    sortBy,
+    productType: productTypeFilter === "ALL" ? undefined : productTypeFilter,
+    limit: 20,
   });
 
-  // 무한 스크롤 훅 사용
   useInfiniteScroll({
     hasNextPage,
     isFetchingNextPage,
@@ -35,93 +37,41 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
     loadMoreRef,
   });
 
-  // 상품 목록 평탄화 및 중복 제거
   const products = flattenAndDeduplicateInfiniteData<Product>(data);
 
   if (isLoading) {
     return <></>;
   }
 
-  if (products.length === 0) {
-    return <div>등록된 상품이 없습니다.</div>;
-  }
-
   return (
-    <div
-      style={{
-        backgroundColor: "#ffffff",
-        borderRadius: "12px",
-        padding: "24px",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "20px",
-          fontWeight: 700,
-          color: "#111827",
-          marginBottom: "24px",
-        }}
-      >
-        상품 목록
-      </h2>
-      <div>
-        {/* 정렬 선택 */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            marginBottom: "24px",
-          }}
-        >
-          <Select
-            value={sortBy}
-            onChange={(value) => setSortBy(value as SortBy)}
-            options={[
-              { value: SortBy.POPULAR, label: "인기순" },
-              { value: SortBy.LATEST, label: "최신순" },
-              { value: SortBy.PRICE_ASC, label: "가격 낮은순" },
-              { value: SortBy.PRICE_DESC, label: "가격 높은순" },
-              { value: SortBy.REVIEW_COUNT, label: "후기 많은순" },
-              { value: SortBy.RATING_AVG, label: "별점 높은순" },
-            ]}
-          />
-        </div>
-
-        {/* 상품 그리드 */}
-        <ProductList products={products} />
-
-        {/* 무한 스크롤 트리거 */}
-        {hasNextPage && (
-          <div
-            ref={loadMoreRef}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: "32px",
-              minHeight: "100px",
-            }}
-          >
-            {isFetchingNextPage && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "12px",
-                  color: "#6b7280",
-                  fontSize: "14px",
-                }}
-              >
-                <div className="loading-spinner-small" />
-                <span>더 많은 상품을 불러오는 중...</span>
-              </div>
-            )}
-          </div>
-        )}
+    <div>
+      {/* 상품 타입 필터 탭 */}
+      <div className="mb-[20px]">
+        <PillTabs
+          tabs={PRODUCT_TYPE_TABS}
+          activeTab={productTypeFilter}
+          onChange={(tabId) => setProductTypeFilter(tabId as ProductTypeFilter)}
+        />
       </div>
+
+      {/* 상품 그리드 */}
+      {products.length === 0 ? (
+        <div className="text-center text-gray-500 py-8">등록된 상품이 없습니다.</div>
+      ) : (
+        <ProductList products={products} />
+      )}
+
+      {/* 무한 스크롤 트리거 */}
+      {hasNextPage && (
+        <div ref={loadMoreRef} className="flex justify-center items-center py-8 min-h-[100px]">
+          {isFetchingNextPage && (
+            <div className="flex flex-col items-center gap-3 text-gray-500 text-sm">
+              <div className="loading-spinner-small" />
+              <span>더 많은 상품을 불러오는 중...</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

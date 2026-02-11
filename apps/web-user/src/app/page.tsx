@@ -5,16 +5,20 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
+import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import Link from "next/link";
 import {
   navigateToLoginPage,
   logoutFromWebView,
+  requestLocationFromWebView,
 } from "@/apps/web-user/common/utils/webview.bridge";
 
 export default function Home() {
   const { isAuthenticated, accessToken } = useAuthStore();
+  const { latitude, longitude } = useUserCurrentLocationStore();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -40,6 +44,10 @@ export default function Home() {
   // 상품 목록 (첫 번째 페이지의 data만 사용, 최대 10개)
   const latestProducts: Product[] = latestData?.pages?.[0]?.data?.slice(0, 10) || [];
   const popularProducts: Product[] = popularData?.pages?.[0]?.data?.slice(0, 10) || [];
+
+  // 스토어 ID 추출 (QA용)
+  const allProducts = [...latestProducts, ...popularProducts];
+  const uniqueStoreIds = [...new Set(allProducts.map((p) => p.storeId).filter(Boolean))];
 
   // 상품 클릭 핸들러
   const handleProductClick = (productId: string) => {
@@ -355,6 +363,47 @@ export default function Home() {
         )}
       </div>
 
+      {/* 스토어 목록 (QA용) */}
+      {uniqueStoreIds.length > 0 && (
+        <div style={{ marginBottom: "60px" }}>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: 700,
+              color: "#111827",
+              marginBottom: "24px",
+            }}
+          >
+            스토어 목록 (QA용)
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            {uniqueStoreIds.map((storeId) => (
+              <Link
+                key={storeId}
+                href={`/store/${storeId}`}
+                style={{
+                  padding: "16px",
+                  backgroundColor: "#f3f4f6",
+                  borderRadius: "8px",
+                  color: "#111827",
+                  textDecoration: "none",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}
+              >
+                🏪 스토어: {storeId}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 로그인 상태 표시 (임시) */}
       <div
         style={{
@@ -431,6 +480,75 @@ export default function Home() {
           >
             로그아웃하기
           </button>
+        )}
+      </div>
+
+      {/* 현재 위치 정보 */}
+      <div
+        style={{
+          marginTop: "40px",
+          padding: "20px",
+          backgroundColor: "#f9fafb",
+          borderRadius: "12px",
+        }}
+      >
+        <button
+          onClick={requestLocationFromWebView}
+          style={{
+            width: "100%",
+            padding: "16px",
+            fontSize: "16px",
+            fontWeight: 600,
+            color: "#ffffff",
+            backgroundColor: "#3b82f6",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "background-color 0.2s",
+            marginBottom: "16px",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#2563eb";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#3b82f6";
+          }}
+        >
+          📍 현재 위치 가져오기
+        </button>
+
+        {latitude != null && longitude != null ? (
+          <div
+            style={{
+              padding: "16px",
+              backgroundColor: "#ffffff",
+              borderRadius: "8px",
+              fontSize: "14px",
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: "8px", color: "#111827" }}>현재 위치</div>
+            <div style={{ color: "#6b7280", lineHeight: "1.6" }}>
+              <div>
+                위도: <span style={{ color: "#111827", fontWeight: 500 }}>{latitude}</span>
+              </div>
+              <div>
+                경도: <span style={{ color: "#111827", fontWeight: 500 }}>{longitude}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              padding: "16px",
+              backgroundColor: "#ffffff",
+              borderRadius: "8px",
+              textAlign: "center",
+              color: "#9ca3af",
+              fontSize: "14px",
+            }}
+          >
+            위치 정보가 없습니다. 버튼을 클릭하여 위치를 가져오세요.
+          </div>
         )}
       </div>
     </div>

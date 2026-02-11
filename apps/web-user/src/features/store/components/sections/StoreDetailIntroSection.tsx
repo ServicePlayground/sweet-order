@@ -1,11 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { MessageSquare } from "lucide-react";
+import { Icon } from "@/apps/web-user/common/components/icons";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
-import { useCreateOrGetChatRoom } from "@/apps/web-user/features/chat/hooks/queries/useChat";
-import { Button } from "@/apps/web-user/common/components/@shadcn-ui/button";
+import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useAddStoreLike";
+import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
+
+// Haversine 공식으로 두 좌표 간 거리 계산 (km)
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // 지구 반지름 (km)
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 interface StoreDetailIntroSectionProps {
   store: StoreInfo;
@@ -13,96 +28,140 @@ interface StoreDetailIntroSectionProps {
 
 export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps) {
   const [imageError, setImageError] = useState(false);
-  const createOrGetChatRoomMutation = useCreateOrGetChatRoom();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [isLiked, setIsLiked] = useState(store.isLiked ?? false);
 
-  const handleChatClick = () => {
-    createOrGetChatRoomMutation.mutate({ storeId: store.id });
+  const { mutate: addLike, isPending: isAddingLike } = useAddStoreLike();
+  const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
+  const isLikeLoading = isAddingLike || isRemovingLike;
+
+  // 현재 위치 가져오기 및 거리 계산
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const dist = calculateDistance(
+          position.coords.latitude,
+          position.coords.longitude,
+          store.latitude,
+          store.longitude,
+        );
+        setDistance(dist);
+      },
+      () => {
+        // 위치 권한 거부 시 거리 표시 안함
+        setDistance(null);
+      },
+    );
+  }, [store.latitude, store.longitude]);
+
+  const handleLikeToggle = () => {
+    if (isLikeLoading) return;
+    setIsLiked(!isLiked);
+    if (isLiked) {
+      removeLike(store.id, { onError: () => setIsLiked(true) });
+    } else {
+      addLike(store.id, { onError: () => setIsLiked(false) });
+    }
   };
 
+  // 거리 포맷팅 (1km 미만이면 m 단위로 표시)
+  const formatDistance = (km: number): string => {
+    if (km < 1) {
+      return `${Math.round(km * 1000)}m`;
+    }
+    return `${km.toFixed(1)}km`;
+  };
+
+  // 설명 텍스트 줄임 처리
+  const maxLength = 60;
+  const shouldTruncate = store.description && store.description.length > maxLength;
+  const displayDescription =
+    isExpanded || !shouldTruncate
+      ? store.description
+      : `${store.description?.slice(0, maxLength)}...`;
+
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "24px",
-        padding: "32px 24px",
-        backgroundColor: "#ffffff",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-        marginBottom: "32px",
-      }}
-    >
-      {store.logoImageUrl && !imageError ? (
-        <div
-          style={{
-            width: 200,
-            height: 200,
-            position: "relative",
-            borderRadius: 16,
-            overflow: "hidden",
-            border: "1px solid #e5e7eb",
-            backgroundColor: "#f9fafb",
-            flex: "0 0 auto",
-          }}
-        >
-          <Image
-            src={store.logoImageUrl}
-            alt={`${store.name} 로고`}
-            fill
-            sizes="120px"
-            style={{ objectFit: "cover" }}
-            priority
-            onError={() => setImageError(true)}
-            unoptimized
-          />
+    <div className="py-6">
+      {/* 상단 영역: 로고 + 정보 + 좋아요 */}
+      <div className="flex items-center gap-[11px] mb-[16px]">
+        {/* 로고 이미지 */}
+        {store.logoImageUrl && !imageError ? (
+          <div className="w-12 h-12 relative rounded-full overflow-hidden flex-shrink-0">
+            <Image
+              src={store.logoImageUrl}
+              alt={`${store.name} 로고`}
+              fill
+              className="object-cover"
+              onError={() => setImageError(true)}
+              unoptimized
+            />
+          </div>
+        ) : (
+          <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs flex-shrink-0">
+            No Image
+          </div>
+        )}
+
+        {/* 스토어 정보 */}
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-bold text-gray-900">{store.name}</h1>
+          <div className="flex items-center">
+            <Icon name="star" width={16} height={16} className="text-yellow-400" />
+            <span className="ml-[2px] text-xs text-gray-500 font-bold">{store.averageRating}</span>
+            <span className="relative ml-[16px] text-xs text-gray-500 font-bold after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-500 after:transform after:translate-y-[-50%]">
+              후기 {store.totalReviewCount}개
+            </span>
+          </div>
         </div>
-      ) : (
-        <div
-          style={{
-            width: 120,
-            height: 120,
-            borderRadius: 16,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#f3f4f6",
-            color: "#9ca3af",
-            fontWeight: 600,
-            fontSize: 14,
-            border: "1px solid #e5e7eb",
-            flex: "0 0 auto",
-          }}
+
+        {/* 좋아요 버튼 */}
+        <button
+          type="button"
+          onClick={handleLikeToggle}
+          disabled={isLikeLoading}
+          className={`flex items-center gap-1 px-[8px] py-[6px] border border-gray-100 rounded-md ${isLikeLoading ? "opacity-50" : ""}`}
         >
-          No Image
+          <Icon
+            name={isLiked ? "favoriteFilled" : "favorite"}
+            width={18}
+            height={18}
+            className={isLiked ? "text-primary" : "text-gray-900"}
+          />
+          <span className="text-sm font-bold text-gray-900">{store.likeCount}</span>
+        </button>
+      </div>
+
+      {/* 위치 정보 */}
+      <div className="flex items-center gap-1 mb-[10px]">
+        <Icon name="location" width={16} height={16} className="text-primary-300" />
+        {distance !== null && (
+          <>
+            <span className="text-sm text-gray-900">{formatDistance(distance)}</span>
+            <span className="text-sm text-gray-900">·</span>
+          </>
+        )}
+        <span className="text-sm text-gray-900">{store.roadAddress}</span>
+      </div>
+
+      {/* 설명 */}
+      {store.description && (
+        <div className="px-[16px] py-[12px] bg-gray-50 rounded-lg">
+          <p className="text-2sm text-gray-900 leading-relaxed">
+            {displayDescription}
+            {shouldTruncate && !isExpanded && (
+              <button
+                onClick={() => setIsExpanded(true)}
+                className="text-gray-400 ml-1 hover:text-gray-600"
+              >
+                더보기
+              </button>
+            )}
+          </p>
         </div>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", lineHeight: 1.3 }}>
-          {store.name}
-        </div>
-        <div
-          style={{
-            fontSize: 15,
-            color: "#4b5563",
-            lineHeight: 1.6,
-            wordWrap: "break-word",
-            overflowWrap: "break-word",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {store.description || "소개가 없습니다."}
-        </div>
-        <div style={{ marginTop: "8px" }}>
-          <Button
-            onClick={handleChatClick}
-            disabled={createOrGetChatRoomMutation.isPending}
-            className="w-full sm:w-auto"
-            size="lg"
-          >
-            <MessageSquare className="h-4 w-4" />
-            {createOrGetChatRoomMutation.isPending ? "연결 중..." : "채팅하기"}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

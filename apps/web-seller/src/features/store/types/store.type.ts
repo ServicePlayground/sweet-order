@@ -65,6 +65,7 @@ export interface IStoreListItem extends IStoreAddress {
   permissionManagementNumber: string;
   // 시스템 필드
   likeCount: number;
+  isLiked?: boolean | null; // 좋아요 여부 (로그인한 사용자의 경우에만 제공)
   // 후기 통계
   averageRating: number; // 해당 스토어의 모든 상품 후기들의 평균 별점
   totalReviewCount: number; // 해당 스토어의 모든 상품 후기 개수
@@ -90,6 +91,7 @@ export interface IStoreDetail extends IStoreAddress {
   permissionManagementNumber: string;
   // 시스템 필드
   likeCount: number;
+  isLiked?: boolean | null; // 좋아요 여부 (로그인한 사용자의 경우에만 제공)
   // 후기 통계
   averageRating: number;
   totalReviewCount: number;

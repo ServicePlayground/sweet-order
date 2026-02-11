@@ -127,6 +127,7 @@ export interface IGetProductsListParams {
 export interface IProductItem extends ICreateProductRequest {
   id: string;
   likeCount: number;
+  isLiked?: boolean | null; // 좋아요 여부 (로그인한 사용자의 경우에만 제공)
   averageRating: number; // 해당 상품의 모든 후기들의 평균 별점
   totalReviewCount: number; // 해당 상품의 모든 후기 개수
   createdAt: Date;

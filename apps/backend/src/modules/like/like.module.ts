@@ -1,7 +1,12 @@
 import { Module } from "@nestjs/common";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
 import { LikeService } from "@apps/backend/modules/like/like.service";
-import { LikeDataService } from "@apps/backend/modules/like/services/like.service";
+import { LikeProductCreateService } from "@apps/backend/modules/like/services/like-product-create.service";
+import { LikeProductDeleteService } from "@apps/backend/modules/like/services/like-product-delete.service";
+import { LikeProductDetailService } from "@apps/backend/modules/like/services/like-product-detail.service";
+import { LikeStoreCreateService } from "@apps/backend/modules/like/services/like-store-create.service";
+import { LikeStoreDeleteService } from "@apps/backend/modules/like/services/like-store-delete.service";
+import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
 
 /**
  * 좋아요 모듈
@@ -9,7 +14,15 @@ import { LikeDataService } from "@apps/backend/modules/like/services/like.servic
  */
 @Module({
   imports: [DatabaseModule],
-  providers: [LikeService, LikeDataService],
-  exports: [LikeService],
+  providers: [
+    LikeService,
+    LikeProductCreateService,
+    LikeProductDeleteService,
+    LikeProductDetailService,
+    LikeStoreCreateService,
+    LikeStoreDeleteService,
+    LikeStoreDetailService,
+  ],
+  exports: [LikeService, LikeProductDetailService, LikeStoreDetailService],
 })
 export class LikeModule {}

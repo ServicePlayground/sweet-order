@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Review, ReviewSortBy } from "@/apps/web-user/features/review/types/review.type";
 import { useProductReviews } from "@/apps/web-user/features/review/hooks/queries/useProductReviews";
 import { ProductDetailSubTitle } from "../common/ProductDetailSubTitle";
-import { ImageSlider, SliderImage } from "@/apps/web-user/common/components/sliders";
-import { Icon } from "@/apps/web-user/common/components/icons";
+import { SliderImage } from "@/apps/web-user/common/components/sliders";
+import { ReviewList } from "@/apps/web-user/common/components/reviews";
 import { ReviewDetailModal } from "../modals/ReviewDetailModal";
 import { PhotoReviewListModal } from "../modals/PhotoReviewListModal";
 
@@ -16,96 +16,6 @@ interface ReviewImage extends SliderImage {
 
 interface ProductDetailReviewSectionProps {
   productId: string;
-}
-
-interface ReviewItemProps {
-  review: Review;
-  onImageClick: (review: Review) => void;
-}
-
-function ReviewItem({ review, onImageClick }: ReviewItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isTruncated, setIsTruncated] = useState(false);
-  const contentRef = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    const el = contentRef.current;
-    if (el) {
-      setIsTruncated(el.scrollHeight > el.clientHeight);
-    }
-  }, [review.content]);
-
-  const formatDate = (date: Date) => {
-    const d = new Date(date);
-    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
-  };
-
-  const renderRating = (rating: number) => {
-    const roundedRating = Math.round(rating);
-    return (
-      <span className="flex items-center gap-[2px]">
-        <Icon name="star" width={18} height={18} className="text-[#F7CE45]" />
-        <span className="font-bold text-gray-900">{roundedRating}</span>
-      </span>
-    );
-  };
-
-  return (
-    <div className="py-4 border-b border-gray-100 last:border-b-0">
-      <div className="flex items-center justify-between mb-[12px]">
-        <span className="text-sm font-medium text-gray-900">{renderRating(review.rating)}</span>
-        <div className="flex items-center gap-[24px]">
-          <span className="relative text-sm text-gray-500 before:content-[''] before:absolute before:right-[-12px] before:top-1/2 before:-translate-y-1/2 before:w-[1px] before:h-[8px] before:bg-gray-300">
-            {formatDate(review.createdAt)}
-          </span>
-          <span className="font-bold text-sm text-gray-900">{review.userNickname || "익명"}</span>
-        </div>
-      </div>
-
-      <div>
-        <p
-          ref={contentRef}
-          className={`text-sm text-gray-700 leading-[140%] ${!isExpanded ? "line-clamp-3" : ""}`}
-        >
-          {review.content}
-        </p>
-        {isTruncated && !isExpanded && (
-          <button
-            type="button"
-            onClick={() => setIsExpanded(true)}
-            className="text-sm text-gray-500 mt-[4px]"
-          >
-            더보기
-          </button>
-        )}
-        {isExpanded && (
-          <button
-            type="button"
-            onClick={() => setIsExpanded(false)}
-            className="text-sm text-gray-500 mt-[4px]"
-          >
-            접기
-          </button>
-        )}
-      </div>
-
-      {/* 리뷰 이미지 */}
-      {review.imageUrls.length > 0 && (
-        <div className="mt-[12px]">
-          <ImageSlider
-            images={review.imageUrls.map((url, idx) => ({
-              id: `${review.id}-${idx}`,
-              url,
-            }))}
-            imageWidth={160}
-            imageHeight={120}
-            gap={4}
-            onImageClick={() => onImageClick(review)}
-          />
-        </div>
-      )}
-    </div>
-  );
 }
 
 export function ProductDetailReviewSection({ productId }: ProductDetailReviewSectionProps) {
@@ -156,12 +66,6 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
     setSortBy(newSortBy);
   };
 
-  const handleReviewImageClick = (review: Review) => {
-    setSelectedReviewId(review.id);
-    setModalReviews([review]);
-    setIsReviewDetailModalOpen(true);
-  };
-
   return (
     <div>
       {/* 사진 후기 */}
@@ -176,13 +80,15 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
               scrollbarWidth: "none",
             }}
           >
-            {allPhotoImages.map((image, index) => {
-              const isLast = index === allPhotoImages.length - 1;
+            {allPhotoImages.slice(0, 4).map((image, index) => {
+              const isLastVisible = index === 3;
               return (
                 <button
                   key={image.id}
                   type="button"
-                  onClick={isLast ? handleViewAllClick : () => handlePhotoClick(image.reviewId)}
+                  onClick={
+                    isLastVisible ? handleViewAllClick : () => handlePhotoClick(image.reviewId)
+                  }
                   className="relative flex-shrink-0 rounded-xl overflow-hidden"
                   style={{ width: 130, height: 130 }}
                 >
@@ -193,7 +99,7 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
                     height={130}
                     className="w-full h-full object-cover"
                   />
-                  {isLast && (
+                  {isLastVisible && (
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <span className="text-white text-sm font-bold">모두보기</span>
                     </div>
@@ -206,36 +112,12 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
       )}
 
       {/* 후기 목록 */}
-      <div className="flex items-center justify-between">
-        <ProductDetailSubTitle>후기 {reviewData?.data?.length ?? 0}</ProductDetailSubTitle>
-        <div className="flex gap-[8px]">
-          <button
-            type="button"
-            onClick={() => handleSortChange(ReviewSortBy.LATEST)}
-            className={`px-[4px] py-[2px] text-sm ${sortBy === ReviewSortBy.LATEST ? "text-gray-900 font-bold" : "text-gray-300"}`}
-          >
-            최신순
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSortChange(ReviewSortBy.RATING_DESC)}
-            className={`px-[4px] py-[2px] text-sm ${sortBy === ReviewSortBy.RATING_DESC ? "text-gray-900 font-bold" : "text-gray-300"}`}
-          >
-            별점순
-          </button>
-        </div>
-      </div>
-
-      {/* 리뷰 리스트 */}
-      <div className="mt-3">
-        {reviewData?.data && reviewData.data.length > 0 ? (
-          reviewData.data.map((review) => (
-            <ReviewItem key={review.id} review={review} onImageClick={handleReviewImageClick} />
-          ))
-        ) : (
-          <p className="text-sm text-gray-500 py-4">등록된 후기가 없습니다.</p>
-        )}
-      </div>
+      <ReviewList
+        reviews={reviewData?.data ?? []}
+        totalCount={reviewData?.data?.length}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
+      />
 
       {/* 사진 후기 리스트 모달 */}
       <PhotoReviewListModal
@@ -245,7 +127,7 @@ export function ProductDetailReviewSection({ productId }: ProductDetailReviewSec
         onImageClick={handlePhotoClick}
       />
 
-      {/* 후기 상세 모달 */}
+      {/* 사진 후기 상세 모달 */}
       <ReviewDetailModal
         isOpen={isReviewDetailModalOpen}
         onClose={() => setIsReviewDetailModalOpen(false)}

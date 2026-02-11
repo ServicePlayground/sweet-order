@@ -4,12 +4,14 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { FileValidator } from "../utils/file-validator.util";
 
 /**
- * AWS S3 전용 서비스
+ * 업로드 생성 서비스
+ *
+ * 파일 업로드 관련 도메인 로직을 담당합니다.
  * S3 클라이언트 초기화 및 파일 업로드를 담당합니다.
  */
 @Injectable()
-export class AwsService {
-  private readonly logger = new Logger(AwsService.name);
+export class UploadCreateService {
+  private readonly logger = new Logger(UploadCreateService.name);
   private readonly s3Client: S3Client;
   private readonly bucket?: string;
   private readonly region?: string;

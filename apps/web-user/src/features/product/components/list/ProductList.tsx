@@ -1,111 +1,111 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import { useAddProductLike } from "@/apps/web-user/features/like/hooks/mutations/useAddProductLike";
+import { useRemoveProductLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveProductLike";
 
 interface ProductListProps {
   products: Product[];
 }
 
 export function ProductList({ products }: ProductListProps) {
-  const router = useRouter();
+  return (
+    <div className="grid grid-cols-2 gap-x-[8px] gap-y-[32px]">
+      {products.map((product, index) => (
+        <ProductItem key={`${product.id}-${index}`} product={product} />
+      ))}
+    </div>
+  );
+}
 
-  const handleProductClick = (productId: string) => {
-    router.push(PATHS.PRODUCT.DETAIL(productId));
+interface ProductItemProps {
+  product: Product;
+}
+
+function ProductItem({ product }: ProductItemProps) {
+  const router = useRouter();
+  const [isLiked, setIsLiked] = useState(product.isLiked ?? false);
+
+  const { mutate: addLike, isPending: isAddingLike } = useAddProductLike();
+  const { mutate: removeLike, isPending: isRemovingLike } = useRemoveProductLike();
+  const isLikeLoading = isAddingLike || isRemovingLike;
+
+  const handleProductClick = () => {
+    router.push(PATHS.PRODUCT.DETAIL(product.id));
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isLikeLoading) return;
+    setIsLiked(!isLiked);
+    if (isLiked) {
+      removeLike(product.id, { onError: () => setIsLiked(true) });
+    } else {
+      addLike(product.id, { onError: () => setIsLiked(false) });
+    }
   };
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-        gap: "24px",
-        marginBottom: "32px",
-      }}
-    >
-      {products.map((product, index) => (
-        <div
-          key={`${product.id}-${index}`}
-          onClick={() => handleProductClick(product.id)}
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            overflow: "hidden",
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-            cursor: "pointer",
-            transition: "transform 0.2s, box-shadow 0.2s",
-          }}
-        >
-          {/* 상품 이미지 */}
-          <div
-            style={{
-              width: "100%",
-              aspectRatio: "1 / 1",
-              position: "relative",
-              backgroundColor: "#f9fafb",
-              overflow: "hidden",
-            }}
-          >
-            {product.images && product.images.length > 0 ? (
-              <Image
-                src={product.images[0]}
-                alt={product.name}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                style={{ objectFit: "cover" }}
-                unoptimized
-              />
-            ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#9ca3af",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                }}
-              >
-                No Image
-              </div>
-            )}
+    <div onClick={handleProductClick} className="bg-white cursor-pointer">
+      {/* 상품 이미지 */}
+      <div className="mb-[10px] w-full relative bg-gray-50">
+        {product.images && product.images.length > 0 ? (
+          <span className="relative w-full h-full aspect-square block overflow-hidden rounded-xl">
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              sizes="50vw"
+              className="object-cover"
+              unoptimized
+            />
+          </span>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm font-semibold">
+            No Image
           </div>
+        )}
 
-          {/* 상품 정보 */}
-          <div style={{ padding: "16px" }}>
-            <div
-              style={{
-                fontSize: "16px",
-                fontWeight: 600,
-                color: "#111827",
-                marginBottom: "8px",
-                lineHeight: 1.4,
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                minHeight: "44px",
-              }}
-            >
-              {product.name}
-            </div>
-            <div
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: "#111827",
-              }}
-            >
-              {product.salePrice.toLocaleString()}원
-            </div>
-          </div>
+        {/* 좋아요 버튼 */}
+        <button
+          type="button"
+          onClick={handleLikeClick}
+          disabled={isLikeLoading}
+          className={`absolute bottom-3 right-3 h-[28px] w-[28px] ${isLikeLoading ? "opacity-50" : ""}`}
+        >
+          <Icon
+            name={isLiked ? "favoriteShadowFilled" : "favoriteShadow"}
+            width={28}
+            height={28}
+            className={isLiked ? "text-primary" : "text-white"}
+          />
+        </button>
+      </div>
+
+      {/* 상품 정보 */}
+      <div>
+        {/* 상품명 */}
+        <div className="text-sm text-gray-900 leading-tight">{product.name}</div>
+
+        {/* 가격 */}
+        <div className="mb-[2px] text-sm font-bold text-gray-900">
+          {product.salePrice.toLocaleString()}원~
         </div>
-      ))}
+
+        {/* 별점 & 후기 */}
+        <div className="flex items-center">
+          <Icon name="star" width={16} height={16} className="text-yellow-400" />
+          <span className="ml-[2px] text-xs text-gray-900 font-bold">{product.averageRating}</span>
+          <span className="relative ml-4 text-xs text-gray-500 after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]">
+            후기 {product.totalReviewCount}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
