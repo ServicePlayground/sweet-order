@@ -34,7 +34,27 @@ export interface ReviewListResponse {
 }
 
 /**
- * 후기 목록 조회 요청 파라미터
+ * 상품 후기 목록 조회 요청 파라미터
+ */
+export interface GetProductReviewsParams {
+  productId: string;
+  page?: number;
+  limit?: number;
+  sortBy?: ReviewSortBy;
+}
+
+/**
+ * 스토어 후기 목록 조회 요청 파라미터
+ */
+export interface GetStoreReviewsParams {
+  storeId: string;
+  page?: number;
+  limit?: number;
+  sortBy?: ReviewSortBy;
+}
+
+/**
+ * @deprecated Use GetProductReviewsParams instead
  */
 export interface GetReviewsParams {
   productId: string;
