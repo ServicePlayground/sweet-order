@@ -8,6 +8,7 @@ import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import Link from "next/link";
 import {
   navigateToLoginPage,
   logoutFromWebView,
@@ -40,6 +41,10 @@ export default function Home() {
   // 상품 목록 (첫 번째 페이지의 data만 사용, 최대 10개)
   const latestProducts: Product[] = latestData?.pages?.[0]?.data?.slice(0, 10) || [];
   const popularProducts: Product[] = popularData?.pages?.[0]?.data?.slice(0, 10) || [];
+
+  // 스토어 ID 추출 (QA용)
+  const allProducts = [...latestProducts, ...popularProducts];
+  const uniqueStoreIds = [...new Set(allProducts.map((p) => p.storeId).filter(Boolean))];
 
   // 상품 클릭 핸들러
   const handleProductClick = (productId: string) => {
@@ -354,6 +359,47 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* 스토어 목록 (QA용) */}
+      {uniqueStoreIds.length > 0 && (
+        <div style={{ marginBottom: "60px" }}>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: 700,
+              color: "#111827",
+              marginBottom: "24px",
+            }}
+          >
+            스토어 목록 (QA용)
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            {uniqueStoreIds.map((storeId) => (
+              <Link
+                key={storeId}
+                href={`/store/${storeId}`}
+                style={{
+                  padding: "16px",
+                  backgroundColor: "#f3f4f6",
+                  borderRadius: "8px",
+                  color: "#111827",
+                  textDecoration: "none",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}
+              >
+                🏪 스토어: {storeId}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 로그인 상태 표시 (임시) */}
       <div
