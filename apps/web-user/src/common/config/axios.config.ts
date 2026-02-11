@@ -33,7 +33,7 @@ userClient.interceptors.request.use(
 // - 삭제 예정 (DEV_ACCESS_TOKEN, isWebViewEnvironment() 함께 삭제)
 // - 웹 브라우저 환경에서만 사용, 웹뷰 환경에서는 사용 안 함
 const DEV_ACCESS_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWw3YXZ4Z3MwMDAzNWF4cW1leDl0N3ptIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3MDE2ODI2NywiZXhwIjoxNzc3OTQ0MjY3fQ.DsskkqAj_hw99PGNYhqC473r-wBjewDur0e9LCF-tfU";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWw5NWZqN2QwMDAyNWFudmh3ZXNxenB0IiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3MDcwMjIyMCwiZXhwIjoxNzc4NDc4MjIwfQ.68ZHH6pkWx2syYsr56UpB7mc8_IjJ79iP3qG0EtZ09g";
 function isWebViewEnvironment(): boolean {
   if (typeof window === "undefined") {
     return false;
