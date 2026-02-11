@@ -2,16 +2,24 @@
 
 import { use } from "react";
 import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
+import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { StoreDetailIntroSection } from "@/apps/web-user/features/store/components/sections/StoreDetailIntroSection";
 import { StoreDetailProductListSection } from "@/apps/web-user/features/store/components/sections/StoreDetailProductListSection";
+import { StoreDetailReviewSection } from "@/apps/web-user/features/store/components/sections/StoreDetailReviewSection";
+import { StoreDetailFeedSection } from "@/apps/web-user/features/store/components/sections/StoreDetailFeedSection";
+import { Tabs } from "@/apps/web-user/common/components/tabs/Tabs";
 
 interface StoreDetailPageProps {
   params: Promise<{ storeId: string }>;
 }
 
 export default function StoreDetailPage({ params }: StoreDetailPageProps) {
-  const { storeId } = use(params); // Next.js 15에서는 동적 라우트의 params가 Promise로 전달됩니다. // 클라이언트 컴포넌트에서는 async/await를 사용할 수 없어 use()로 Promise를 처리합니다.
+  const { storeId } = use(params);
   const { data, isLoading } = useStoreDetail(storeId);
+  const { data: productData } = useProductList({ storeId });
+
+  // 상품 개수 (첫 페이지 meta에서 가져옴)
+  const productCount = productData?.pages[0]?.meta.totalItems ?? 0;
 
   if (isLoading) {
     return <></>;
@@ -22,9 +30,30 @@ export default function StoreDetailPage({ params }: StoreDetailPageProps) {
   }
 
   return (
-    <div style={{ width: "100%", padding: "40px 20px" }}>
-      <StoreDetailIntroSection store={data} />
-      <StoreDetailProductListSection storeId={storeId} />
+    <div className="w-full">
+      <div className="px-[20px]">
+        <StoreDetailIntroSection store={data} />
+      </div>
+      <Tabs
+        defaultTab="product"
+        tabs={[
+          {
+            id: "product",
+            label: `상품 ${productCount}`,
+            content: <StoreDetailProductListSection storeId={storeId} />,
+          },
+          {
+            id: "review",
+            label: `후기 ${data.totalReviewCount}`,
+            content: <StoreDetailReviewSection storeId={storeId} />,
+          },
+          {
+            id: "feed",
+            label: "피드",
+            content: <StoreDetailFeedSection storeId={storeId} />,
+          },
+        ]}
+      />
     </div>
   );
 }
