@@ -4,6 +4,7 @@ export interface StoreInfo {
   logoImageUrl?: string;
   name: string;
   description?: string;
+  isLiked: boolean | null;
   // 사업자 정보
   businessNo: string;
   representativeName: string;
