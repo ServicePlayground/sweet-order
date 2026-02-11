@@ -6,6 +6,8 @@ import ChevronLeft from "./icons/chevron-left.svg";
 import Arrow from "./icons/arrow.svg";
 import Favorite from "./icons/favorite.svg";
 import FavoriteFilled from "./icons/favorite-filled.svg";
+import FavoriteShadow from "./icons/favoriteShadow.svg";
+import FavoriteShadowFilled from "./icons/favoriteShadowFilled.svg";
 import Close from "./icons/close.svg";
 import Calendar from "./icons/calendar.svg";
 import SelectArrow from "./icons/select-arrow.svg";
@@ -34,6 +36,8 @@ export const iconTypes = {
   arrow: Arrow,
   favorite: Favorite,
   favoriteFilled: FavoriteFilled,
+  favoriteShadow: FavoriteShadow,
+  favoriteShadowFilled: FavoriteShadowFilled,
   close: Close,
   calendar: Calendar,
   selectArrow: SelectArrow,

@@ -82,7 +82,7 @@ function ProductItem({ product }: ProductItemProps) {
           className={`absolute bottom-3 right-3 h-[28px] w-[28px] ${isLikeLoading ? "opacity-50" : ""}`}
         >
           <Icon
-            name={isLiked ? "favoriteFilled" : "favorite"}
+            name={isLiked ? "favoriteShadowFilled" : "favoriteShadow"}
             width={28}
             height={28}
             className={isLiked ? "text-primary" : "text-white"}
