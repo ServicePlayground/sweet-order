@@ -24,13 +24,7 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
   const [productTypeFilter, setProductTypeFilter] = useState<ProductTypeFilter>("ALL");
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useProductList({
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     storeId,
     productType: productTypeFilter === "ALL" ? undefined : productTypeFilter,
     limit: 20,
@@ -62,19 +56,14 @@ export function StoreDetailProductListSection({ storeId }: StoreDetailProductLis
 
       {/* 상품 그리드 */}
       {products.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">
-          등록된 상품이 없습니다.
-        </div>
+        <div className="text-center text-gray-500 py-8">등록된 상품이 없습니다.</div>
       ) : (
         <ProductList products={products} />
       )}
 
       {/* 무한 스크롤 트리거 */}
       {hasNextPage && (
-        <div
-          ref={loadMoreRef}
-          className="flex justify-center items-center py-8 min-h-[100px]"
-        >
+        <div ref={loadMoreRef} className="flex justify-center items-center py-8 min-h-[100px]">
           {isFetchingNextPage && (
             <div className="flex flex-col items-center gap-3 text-gray-500 text-sm">
               <div className="loading-spinner-small" />

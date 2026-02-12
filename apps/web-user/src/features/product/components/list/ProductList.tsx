@@ -51,10 +51,7 @@ function ProductItem({ product }: ProductItemProps) {
   };
 
   return (
-    <div
-      onClick={handleProductClick}
-      className="bg-white cursor-pointer"
-    >
+    <div onClick={handleProductClick} className="bg-white cursor-pointer">
       {/* 상품 이미지 */}
       <div className="mb-[10px] w-full relative bg-gray-50">
         {product.images && product.images.length > 0 ? (
@@ -93,9 +90,7 @@ function ProductItem({ product }: ProductItemProps) {
       {/* 상품 정보 */}
       <div>
         {/* 상품명 */}
-        <div className="text-sm text-gray-900 leading-tight">
-          {product.name}
-        </div>
+        <div className="text-sm text-gray-900 leading-tight">{product.name}</div>
 
         {/* 가격 */}
         <div className="mb-[2px] text-sm font-bold text-gray-900">
@@ -106,7 +101,9 @@ function ProductItem({ product }: ProductItemProps) {
         <div className="flex items-center">
           <Icon name="star" width={16} height={16} className="text-yellow-400" />
           <span className="ml-[2px] text-xs text-gray-900 font-bold">{product.averageRating}</span>
-          <span className="relative ml-4 text-xs text-gray-500 after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]">후기 {product.totalReviewCount}</span>
+          <span className="relative ml-4 text-xs text-gray-500 after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]">
+            후기 {product.totalReviewCount}
+          </span>
         </div>
       </div>
     </div>

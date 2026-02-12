@@ -15,13 +15,10 @@ export function StoreDetailReviewSection({ storeId }: StoreDetailReviewSectionPr
   const [sortBy, setSortBy] = useState<ReviewSortBy>(ReviewSortBy.LATEST);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useStoreReviews({ storeId, sortBy });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useStoreReviews({
+    storeId,
+    sortBy,
+  });
 
   useInfiniteScroll({
     hasNextPage,
@@ -52,14 +49,9 @@ export function StoreDetailReviewSection({ storeId }: StoreDetailReviewSectionPr
 
       {/* 무한 스크롤 트리거 */}
       {hasNextPage && (
-        <div
-          ref={loadMoreRef}
-          className="flex justify-center items-center py-4"
-        >
+        <div ref={loadMoreRef} className="flex justify-center items-center py-4">
           {isFetchingNextPage && (
-            <div className="text-gray-500 text-sm">
-              더 많은 후기를 불러오는 중...
-            </div>
+            <div className="text-gray-500 text-sm">더 많은 후기를 불러오는 중...</div>
           )}
         </div>
       )}
