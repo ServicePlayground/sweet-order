@@ -49,7 +49,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
   const handleAddSizeOption = () => {
     const newOption: CakeSizeOption = {
       visible: EnableStatus.ENABLE,
-      displayName: CakeSizeDisplayName.MINI,
+      displayName: CakeSizeDisplayName.DOSIRAK,
       lengthCm: 0,
       price: 0,
       description: "",

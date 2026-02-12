@@ -90,6 +90,14 @@ const SEED_PRODUCT_BASE = {
   SALE_PRICE: 45000,
   SIZE_OPTIONS: [
     {
+      id: "size_seed_dosirak",
+      visible: "ENABLE",
+      displayName: "도시락",
+      lengthCm: 8,
+      price: 25000,
+      description: "1인용",
+    },
+    {
       id: "size_seed_mini",
       visible: "ENABLE",
       displayName: "미니",
@@ -104,6 +112,22 @@ const SEED_PRODUCT_BASE = {
       lengthCm: 15,
       price: 35000,
       description: "2~3인용",
+    },
+    {
+      id: "size_seed_2ho",
+      visible: "ENABLE",
+      displayName: "2호",
+      lengthCm: 18,
+      price: 40000,
+      description: "3~4인용",
+    },
+    {
+      id: "size_seed_3ho",
+      visible: "ENABLE",
+      displayName: "3호",
+      lengthCm: 21,
+      price: 45000,
+      description: "4~5인용",
     },
   ],
   FLAVOR_OPTIONS: [

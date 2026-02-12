@@ -61,12 +61,9 @@ export const ENABLE_DISABLE_OPTIONS = [
 
 // 케이크 사이즈 표시명 드롭다운 옵션
 export const CAKE_SIZE_DISPLAY_NAME_OPTIONS = [
+  { value: CakeSizeDisplayName.DOSIRAK, label: "도시락" },
   { value: CakeSizeDisplayName.MINI, label: "미니" },
   { value: CakeSizeDisplayName.SIZE_1, label: "1호" },
   { value: CakeSizeDisplayName.SIZE_2, label: "2호" },
   { value: CakeSizeDisplayName.SIZE_3, label: "3호" },
-  { value: CakeSizeDisplayName.SIZE_4, label: "4호" },
-  { value: CakeSizeDisplayName.SIZE_5, label: "5호" },
-  { value: CakeSizeDisplayName.SIZE_6, label: "6호" },
-  { value: CakeSizeDisplayName.SIZE_7, label: "7호" },
 ] as const;
