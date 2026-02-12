@@ -8,6 +8,23 @@ import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/u
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
 import { isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
 
+// 주소를 구/군/읍/면/리 단위까지만 표시
+function shortenAddress(address: string): string {
+  const parts = address.split(" ");
+  for (let i = 0; i < parts.length; i++) {
+    if (/[구군읍면리]$/.test(parts[i])) {
+      return parts.slice(0, i + 1).join(" ");
+    }
+  }
+  // 구/군/읍/면/리가 없으면 시까지
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i].endsWith("시")) {
+      return parts.slice(0, i + 1).join(" ");
+    }
+  }
+  return address;
+}
+
 // Haversine 공식으로 두 좌표 간 거리 계산 (km)
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // 지구 반지름 (km)
@@ -166,7 +183,7 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
             <span className="text-sm text-gray-900">·</span>
           </>
         )}
-        <span className="text-sm text-gray-900">{store.roadAddress}</span>
+        <span className="text-sm text-gray-900">{shortenAddress(store.roadAddress)}</span>
       </div>
 
       {/* 설명 */}
