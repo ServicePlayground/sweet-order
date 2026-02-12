@@ -248,48 +248,9 @@ jobs:
             # 상세 용량 정보 출력
             show_disk_usage_details
 
-            # 사용하지 않는 프로그램 정리 함수
-            cleanup_unused_programs() {
-              echo "🧹 사용하지 않는 프로그램 정리 중..."
-              local freed_space=0
-              
-              # Nginx 제거 (워크플로우에서 사용하지 않음)
-              if command -v nginx &> /dev/null; then
-                echo "  🗑️ Nginx 제거 중..."
-                sudo systemctl stop nginx 2>/dev/null || true
-                sudo systemctl disable nginx 2>/dev/null || true
-                sudo dnf remove -y nginx 2>/dev/null || true
-                echo "  ✅ Nginx 제거 완료"
-              fi
-              
-              # Certbot 제거 (워크플로우에서 사용하지 않음)
-              if command -v certbot &> /dev/null; then
-                echo "  🗑️ Certbot 제거 중..."
-                sudo dnf remove -y certbot python3-certbot-nginx 2>/dev/null || true
-                echo "  ✅ Certbot 제거 완료"
-              fi
-              
-              # Nginx 설정 파일 정리
-              if [ -d /etc/nginx ]; then
-                echo "  🗑️ Nginx 설정 파일 정리 중..."
-                sudo rm -rf /etc/nginx 2>/dev/null || true
-              fi
-              
-              # Certbot 인증서 디렉토리 정리 (Let's Encrypt 인증서가 있다면)
-              if [ -d /etc/letsencrypt ]; then
-                echo "  🗑️ Let's Encrypt 인증서 디렉토리 정리 중..."
-                sudo rm -rf /etc/letsencrypt 2>/dev/null || true
-              fi
-              
-              echo "✅ 사용하지 않는 프로그램 정리 완료"
-            }
-
             # 디스크 부족 시에만 정리 작업 실행 (보조 수단)
             if [ "$USE_PERCENT" -gt 80 ]; then
               echo "⚠️ 디스크 사용량이 높습니다. 정리 작업 시작..."
-              
-              # 사용하지 않는 프로그램 정리 (한 번만 실행)
-              cleanup_unused_programs
               
               cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
               cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
