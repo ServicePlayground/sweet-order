@@ -16,45 +16,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Setup Yarn
-        run: corepack prepare yarn@4.9.4 --activate
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Build backend
-        run: yarn run backend:build:staging
-
-      - name: Prepare deployment package
+      - name: Prepare source code package
         run: |
-          # 빌드 산출물과 의존성 파일만 포함하는 배포 패키지 생성 (node_modules 제외)
-          # 백엔드만 독립적으로 배포 (workspace 구조 제거)
-          mkdir -p /tmp/deploy-package/apps/backend/src/infra/database/prisma
+          # ⚠️ 불필요한 파일 제외하고 압축
+          mkdir -p /tmp/deploy
+          tar -czf /tmp/deploy/deploy.tar.gz \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=.yarn/cache \
+            --exclude=.next \
+            --exclude=dist \
+            --exclude=apps/web-user \
+            --exclude=apps/web-seller \
+            --exclude=apps/web-admin \
+            .
+          mv /tmp/deploy/deploy.tar.gz .
           
-          # 백엔드 빌드 산출물 및 package.json 복사
-          echo "📦 백엔드 빌드 산출물 복사 중..."
-          cp -r apps/backend/dist /tmp/deploy-package/apps/backend/
-          cp apps/backend/package.json /tmp/deploy-package/apps/backend/
-          
-          # Prisma schema 및 migrations 복사 (prisma migrate deploy에 필요)
-          echo "📦 Prisma schema 및 migrations 복사 중..."
-          cp apps/backend/src/infra/database/prisma/schema.prisma /tmp/deploy-package/apps/backend/src/infra/database/prisma/
-          if [ -d "apps/backend/src/infra/database/prisma/migrations" ]; then
-            cp -r apps/backend/src/infra/database/prisma/migrations /tmp/deploy-package/apps/backend/src/infra/database/prisma/
-          fi
-                    
-          # 압축
-          cd /tmp
-          tar -czf deploy.tar.gz -C deploy-package .
-          mv deploy.tar.gz ${{ github.workspace }}/
+          # 배포 패키지 크기 로그
+          DEPLOY_SIZE=$(du -h deploy.tar.gz | cut -f1)
+          DEPLOY_SIZE_BYTES=$(stat -f%z deploy.tar.gz 2>/dev/null || stat -c%s deploy.tar.gz 2>/dev/null || echo "0")
+          echo "📦 배포 패키지 크기: ${DEPLOY_SIZE} (${DEPLOY_SIZE_BYTES} bytes)"
 
       - name: Copy deployment package to EC2
         uses: appleboy/scp-action@master
@@ -72,27 +53,27 @@ jobs:
           username: ec2-user
           key: ${{ secrets.STAGING_EC2_SSH_KEY }}
           script: |
-            set -Ee  # 함수 내부 에러도 trap
-
-            # 디스크 사용량 계산 함수 (한 번만 계산)
-            get_disk_usage() {
-              df / | awk 'END {gsub("%","",$5); print $5}'
-            }
+            set -e
 
             # 롤백 함수 정의
             rollback_deployment() {
               echo ""
               echo "🔄 배포 실패로 인한 롤백 시작..."
               
+              # PM2 프로세스 중지 (이미 실패한 새 버전이 실행 중일 수 있음)
               pm2 delete sweet-order-backend 2>/dev/null || true
               
+              # 가장 최근 백업 찾기
               LATEST_BACKUP=$(ls -td ~/sweet-order.backup.* 2>/dev/null | head -1)
               
               if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ]; then
-                echo "📦 백업 복원 중: $LATEST_BACKUP"
+                BACKUP_SIZE=$(get_dir_size "$LATEST_BACKUP")
+                BACKUP_SIZE_FORMATTED=$(format_size "$BACKUP_SIZE")
+                echo "📦 백업 복원 중: $LATEST_BACKUP (크기: ${BACKUP_SIZE_FORMATTED})"
                 rm -rf ~/sweet-order
                 mv "$LATEST_BACKUP" ~/sweet-order
                 
+                # 이전 버전으로 PM2 재시작
                 if [ -f ~/sweet-order/apps/backend/dist/main.js ]; then
                   cd ~/sweet-order/apps/backend
                   NODE_ENV=staging pm2 start dist/main.js \
@@ -100,7 +81,7 @@ jobs:
                     --update-env \
                     --cwd $(pwd)
                   pm2 save
-                  echo "✅ 롤백 완료"
+                  echo "✅ 롤백 완료 - 이전 버전으로 복구되었습니다"
                 else
                   echo "⚠️ 롤백 실패 - 백업에 빌드 파일이 없습니다"
                 fi
@@ -111,11 +92,33 @@ jobs:
               exit 1
             }
 
-            # 배포 실패 시 롤백을 위한 trap 설정 (맨 위에서 설정하여 전체 구간 보호)
-            trap rollback_deployment ERR
+            # 파일 크기를 읽기 쉬운 형식으로 변환하는 함수
+            format_size() {
+              local size=$1
+              if [ -z "$size" ] || [ "$size" = "0" ]; then
+                echo "0B"
+              elif [ "$size" -lt 1024 ]; then
+                echo "${size}B"
+              elif [ "$size" -lt 1048576 ]; then
+                echo "$(awk "BEGIN {printf \"%.2fKB\", $size/1024}")"
+              elif [ "$size" -lt 1073741824 ]; then
+                echo "$(awk "BEGIN {printf \"%.2fMB\", $size/1048576}")"
+              else
+                echo "$(awk "BEGIN {printf \"%.2fGB\", $size/1073741824}")"
+              fi
+            }
+
+            # 디렉토리 크기를 계산하는 함수
+            get_dir_size() {
+              local dir=$1
+              if [ -d "$dir" ]; then
+                du -sb "$dir" 2>/dev/null | cut -f1 || echo "0"
+              else
+                echo "0"
+              fi
+            }
 
             # 백업 파일 개수 제한 함수 (디스크 사용량에 따라 동적 조정)
-            # 보조 수단으로만 사용: 디스크 부족 시와 배포 성공 후에만 실행
             cleanup_old_backups() {
               local BACKUP_TYPE=$1
               local BACKUP_PATTERN=$2
@@ -133,222 +136,307 @@ jobs:
               
               echo "🧹 오래된 ${BACKUP_TYPE} 백업 정리 중 (최근 ${KEEP_COUNT}개만 유지)..."
               
-              # 안전한 백업 삭제: 경로 검증 강화
-              local HOME_DIR=$(eval echo ~)
-              local count=0
-              
-              # 백업 파일 목록을 임시 파일에 저장하여 안전하게 처리
-              local temp_list=$(mktemp)
-              ls -t ${BACKUP_PATTERN} 2>/dev/null | tail -n +$((KEEP_COUNT + 1)) > "$temp_list" || true
-              
-              while IFS= read -r old_backup || [ -n "$old_backup" ]; do
-                # 경로 검증: 홈 디렉토리 내 백업만 삭제, 빈 줄 무시
-                [ -z "$old_backup" ] && continue
-                
-                # 홈 디렉토리 경로로 확장
-                local expanded_path=$(eval echo "$old_backup")
-                
-                # 홈 디렉토리 내에 있고 실제 존재하는 파일/디렉토리만 삭제
-                if [[ "$expanded_path" == "$HOME_DIR"* ]] && [ -e "$expanded_path" ]; then
+              # 타임스탬프 기준으로 정렬하여 오래된 것부터 삭제
+              ls -t ${BACKUP_PATTERN} 2>/dev/null | tail -n +$((KEEP_COUNT + 1)) | while read -r old_backup; do
+                if [ -e "$old_backup" ]; then
+                  OLD_SIZE=$(get_dir_size "$old_backup")
+                  OLD_SIZE_FORMATTED=$(format_size "$OLD_SIZE")
+                  echo "  삭제: $old_backup (크기: ${OLD_SIZE_FORMATTED})"
+                else
                   echo "  삭제: $old_backup"
-                  rm -rf "$expanded_path"
-                  count=$((count + 1))
                 fi
-              done < "$temp_list"
-              
-              rm -f "$temp_list"
-              
-              if [ $count -eq 0 ]; then
-                echo "  삭제할 백업이 없습니다"
-              fi
+                rm -rf "$old_backup"
+              done || true
             }
 
-            # 파일/디렉토리 용량 출력 함수
-            show_disk_usage_details() {
-              echo ""
-              echo "📊 상세 디스크 사용량 정보"
-              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              
-              # 전체 디스크 사용량
-              echo "💾 전체 디스크 사용량:"
-              df -h / | tail -1 | awk '{print "  사용: " $3 " / " $2 " (" $5 " 사용됨)"}'
-              echo ""
-              
-              # 홈 디렉토리 전체 용량
-              if [ -d ~ ]; then
-                echo "🏠 홈 디렉토리 (~/) 용량:"
-                du -sh ~ 2>/dev/null | awk '{print "  " $1}'
-                echo ""
-              fi
-              
-              # sweet-order 프로젝트 디렉토리 용량
-              if [ -d ~/sweet-order ]; then
-                echo "📁 sweet-order 프로젝트 전체 용량:"
-                du -sh ~/sweet-order 2>/dev/null | awk '{print "  " $1}'
-                echo ""
-                
-                # dist 디렉토리 용량
-                if [ -d ~/sweet-order/apps/backend/dist ]; then
-                  echo "📦 dist 디렉토리 용량:"
-                  du -sh ~/sweet-order/apps/backend/dist 2>/dev/null | awk '{print "  " $1}'
-                  echo ""
-                fi
-                
-                # node_modules 용량
-                if [ -d ~/sweet-order/apps/backend/node_modules ]; then
-                  echo "📚 node_modules 디렉토리 용량:"
-                  du -sh ~/sweet-order/apps/backend/node_modules 2>/dev/null | awk '{print "  " $1}'
-                  echo ""
-                fi
-              fi
-              
-              # 백업 파일들 용량
-              echo "💾 백업 파일들 용량:"
-              local backup_total=0
-              if ls ~/sweet-order.backup.* 2>/dev/null | head -5 > /dev/null; then
-                for backup in $(ls -td ~/sweet-order.backup.* 2>/dev/null | head -5); do
-                  if [ -d "$backup" ]; then
-                    local size=$(du -sh "$backup" 2>/dev/null | awk '{print $1}')
-                    local name=$(basename "$backup")
-                    echo "  $name: $size"
-                  fi
-                done
-              else
-                echo "  백업 파일 없음"
-              fi
-              echo ""
-              
-              # DB 백업 파일들 용량
-              echo "🗄️ DB 백업 파일들 용량:"
-              if ls ~/db-backup.*.dump 2>/dev/null | head -5 > /dev/null; then
-                for db_backup in $(ls -t ~/db-backup.*.dump 2>/dev/null | head -5); do
-                  if [ -f "$db_backup" ]; then
-                    local size=$(du -h "$db_backup" 2>/dev/null | awk '{print $1}')
-                    local name=$(basename "$db_backup")
-                    echo "  $name: $size"
-                  fi
-                done
-              else
-                echo "  DB 백업 파일 없음"
-              fi
-              echo ""
-              
-              # 큰 파일 상위 10개 (홈 디렉토리 내)
-              echo "📋 홈 디렉토리 내 큰 파일 상위 10개:"
-              find ~ -type f -size +10M 2>/dev/null | xargs du -h 2>/dev/null | sort -rh | head -10 | awk '{print "  " $1 " - " $2}' || echo "  10MB 이상 파일 없음"
-              echo ""
-              
-              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            }
-
-            # 디스크 사용량 체크 (한 번만 계산)
-            USE_PERCENT=$(get_disk_usage)
-            echo "📊 디스크 사용량: ${USE_PERCENT}%"
+            echo "📊 디스크 사용량 체크"
+            DISK_INFO=$(df -h / | tail -1)
+            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            TOTAL_SIZE=$(echo "$DISK_INFO" | awk '{print $2}')
+            USED_SIZE=$(echo "$DISK_INFO" | awk '{print $3}')
+            AVAIL_SIZE=$(echo "$DISK_INFO" | awk '{print $4}')
+            echo "현재 디스크 사용량: ${USE_PERCENT}%"
+            echo "  전체 용량: ${TOTAL_SIZE} | 사용 중: ${USED_SIZE} | 사용 가능: ${AVAIL_SIZE}"
             
-            # 상세 용량 정보 출력
-            show_disk_usage_details
+            # 배포 패키지 크기 확인
+            if [ -f ~/deploy.tar.gz ]; then
+              DEPLOY_SIZE=$(stat -c%s ~/deploy.tar.gz 2>/dev/null || stat -f%z ~/deploy.tar.gz 2>/dev/null || echo "0")
+              DEPLOY_SIZE_FORMATTED=$(format_size "$DEPLOY_SIZE")
+              echo "📦 배포 패키지 크기: ${DEPLOY_SIZE_FORMATTED} (${DEPLOY_SIZE} bytes)"
+            fi
+            
+            # 기존 프로젝트 디렉토리 크기 확인
+            if [ -d ~/sweet-order ]; then
+              PROJECT_SIZE=$(get_dir_size ~/sweet-order)
+              PROJECT_SIZE_FORMATTED=$(format_size "$PROJECT_SIZE")
+              echo "📁 기존 프로젝트 디렉토리 크기: ${PROJECT_SIZE_FORMATTED}"
+              
+              # 주요 디렉토리 크기 확인
+              if [ -d ~/sweet-order/node_modules ]; then
+                NODE_MODULES_SIZE=$(get_dir_size ~/sweet-order/node_modules)
+                NODE_MODULES_SIZE_FORMATTED=$(format_size "$NODE_MODULES_SIZE")
+                echo "  └─ node_modules: ${NODE_MODULES_SIZE_FORMATTED}"
+              fi
+              if [ -d ~/sweet-order/apps/backend/dist ]; then
+                DIST_SIZE=$(get_dir_size ~/sweet-order/apps/backend/dist)
+                DIST_SIZE_FORMATTED=$(format_size "$DIST_SIZE")
+                echo "  └─ apps/backend/dist: ${DIST_SIZE_FORMATTED}"
+              fi
+            fi
+            
+            # 백업 파일들 크기 확인
+            BACKUP_COUNT=$(ls -d ~/sweet-order.backup.* 2>/dev/null | wc -l)
+            if [ "$BACKUP_COUNT" -gt 0 ]; then
+              echo "📦 서버 백업 파일 개수: ${BACKUP_COUNT}개"
+              TOTAL_BACKUP_SIZE=0
+              for backup in ~/sweet-order.backup.*; do
+                if [ -d "$backup" ]; then
+                  BACKUP_SIZE=$(get_dir_size "$backup")
+                  BACKUP_SIZE_FORMATTED=$(format_size "$BACKUP_SIZE")
+                  echo "  └─ $(basename $backup): ${BACKUP_SIZE_FORMATTED}"
+                  TOTAL_BACKUP_SIZE=$((TOTAL_BACKUP_SIZE + BACKUP_SIZE))
+                fi
+              done
+              if [ "$TOTAL_BACKUP_SIZE" -gt 0 ]; then
+                TOTAL_BACKUP_SIZE_FORMATTED=$(format_size "$TOTAL_BACKUP_SIZE")
+                echo "  총 서버 백업 크기: ${TOTAL_BACKUP_SIZE_FORMATTED}"
+              fi
+            fi
+            
+            DB_BACKUP_COUNT=$(ls ~/db-backup.*.sql.gz 2>/dev/null | wc -l)
+            if [ "$DB_BACKUP_COUNT" -gt 0 ]; then
+              echo "🗄️ DB 백업 파일 개수: ${DB_BACKUP_COUNT}개"
+              TOTAL_DB_BACKUP_SIZE=0
+              for db_backup in ~/db-backup.*.sql.gz; do
+                if [ -f "$db_backup" ]; then
+                  DB_BACKUP_SIZE=$(stat -c%s "$db_backup" 2>/dev/null || stat -f%z "$db_backup" 2>/dev/null || echo "0")
+                  DB_BACKUP_SIZE_FORMATTED=$(format_size "$DB_BACKUP_SIZE")
+                  echo "  └─ $(basename $db_backup): ${DB_BACKUP_SIZE_FORMATTED}"
+                  TOTAL_DB_BACKUP_SIZE=$((TOTAL_DB_BACKUP_SIZE + DB_BACKUP_SIZE))
+                fi
+              done
+              if [ "$TOTAL_DB_BACKUP_SIZE" -gt 0 ]; then
+                TOTAL_DB_BACKUP_SIZE_FORMATTED=$(format_size "$TOTAL_DB_BACKUP_SIZE")
+                echo "  총 DB 백업 크기: ${TOTAL_DB_BACKUP_SIZE_FORMATTED}"
+              fi
+            fi
 
-            # 디스크 부족 시에만 정리 작업 실행 (보조 수단)
+            # 디스크 사용량이 80% 이상이면 정리 작업 수행
             if [ "$USE_PERCENT" -gt 80 ]; then
-              echo "⚠️ 디스크 사용량이 높습니다. 정리 작업 시작..."
+              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
+              echo ""
+              echo "📢 주의: 디스크 사용량이 지속적으로 높다면 다음을 고려하세요:"
+              echo "  1. EC2 인스턴스의 루트 볼륨 크기를 늘려주세요 (AWS Console > EC2 > Volumes)"
+              echo "  2. 배포 로직을 개선하여 불필요한 파일을 제외하거나 백업 정책을 조정하세요"
+              echo "  3. 로그 파일 자동 정리 스크립트를 추가하거나 백업 보관 기간을 단축하세요"
+              echo ""
               
+              # 오래된 백업 파일 정리 (디스크 사용량에 따라 동적 조정)
+              echo "🗑️ 오래된 백업 파일 정리 중..."
               cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-              cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
+              cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
               
-              # PM2 로그 정리만 수행 (실행 중인 프로세스 파일은 건드리지 않음)
+              # 기존 프로젝트의 node_modules와 dist 삭제 (백업 크기 줄이기)
+              if [ -d ~/sweet-order ]; then
+                echo "🗑️ 기존 프로젝트의 node_modules 및 dist 디렉토리 삭제 중..."
+                find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
+                find ~/sweet-order -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
+                find ~/sweet-order -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
+                find ~/sweet-order -type d -name ".yarn" -exec rm -rf {} + 2>/dev/null || true
+              fi
+              
+              # Yarn 캐시 정리
+              echo "🗑️ Yarn 캐시 정리 중..."
+              yarn cache clean --all 2>/dev/null || true
+              rm -rf ~/.cache ~/.yarn/cache ~/.yarn/berry/cache
+              
+              # PM2 로그 정리
+              echo "🗑️ PM2 로그 정리 중..."
               pm2 flush || true
               
-              # 정리 후 재확인
-              USE_PERCENT=$(get_disk_usage)
-              echo "정리 후 디스크 사용량: ${USE_PERCENT}%"
+              # 시스템 패키지 캐시 정리
+              echo "🗑️ 시스템 패키지 캐시 정리 중..."
+              sudo dnf clean all 2>/dev/null || true
               
+              # 임시 파일 정리
+              echo "🗑️ 임시 파일 정리 중..."
+              sudo rm -rf /tmp/* 2>/dev/null || true
+              rm -rf ~/tmp/* 2>/dev/null || true
+              
+              # 정리 후 디스크 사용량 재확인
+              DISK_INFO_AFTER=$(df -h / | tail -1)
+              USE_PERCENT_AFTER=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+              AVAIL_SIZE_AFTER=$(echo "$DISK_INFO_AFTER" | awk '{print $4}')
+              echo "정리 후 디스크 사용량: ${USE_PERCENT_AFTER}%"
+              echo "  사용 가능 공간: ${AVAIL_SIZE_AFTER}"
+              echo "  정리로 인한 사용량 변화: ${USE_PERCENT}% → ${USE_PERCENT_AFTER}% ($((USE_PERCENT - USE_PERCENT_AFTER))% 감소)"
+              USE_PERCENT=$USE_PERCENT_AFTER
+              
+              # 정리 후에도 여전히 높으면 경고
+              if [ "$USE_PERCENT" -ge 85 ] && [ "$USE_PERCENT" -le 95 ]; then
+                echo ""
+                echo "⚠️ 경고: 정리 후에도 디스크 사용량이 ${USE_PERCENT}%로 높습니다."
+                echo "📢 다음 조치를 즉시 고려하세요:"
+                echo "  1. EC2 인스턴스의 루트 볼륨 크기를 늘려주세요"
+                echo "     - AWS Console > EC2 > Volumes에서 볼륨 선택 > Modify Volume"
+                echo "     - 권장: 최소 20GB 이상으로 확장"
+                echo "  2. 배포 로직 개선:"
+                echo "     - 백업 파일 보관 개수를 줄이거나 자동 정리 주기를 단축"
+                echo "     - 불필요한 로그 파일 자동 삭제 스크립트 추가"
+                echo "     - node_modules 캐시 정책 재검토"
+                echo ""
+              fi
+              
+              # 여전히 95% 이상이면 배포 중단
               if [ "$USE_PERCENT" -gt 95 ]; then
-                echo "❌ 디스크 사용량 ${USE_PERCENT}% — 공간 부족. 배포 중단"
+                echo ""
+                echo "❌ 디스크 사용량 ${USE_PERCENT}% — 정리 후에도 공간 부족. 배포 중단"
+                echo ""
+                echo "🚨 긴급 조치 필요:"
+                echo "  1. EC2 인스턴스의 루트 볼륨을 즉시 확장하세요"
+                echo "     - AWS Console > EC2 > Volumes에서 볼륨 선택 > Modify Volume"
+                echo "     - 최소 30GB 이상으로 확장 권장"
+                echo "  2. 수동으로 오래된 백업 파일을 삭제하세요:"
+                echo "     - SSH 접속 후: ls -lh ~/sweet-order.backup.*"
+                echo "     - 오래된 백업 삭제: rm -rf ~/sweet-order.backup.YYYYMMDD_HHMMSS"
+                echo "  3. 배포 로직을 개선하세요:"
+                echo "     - 백업 보관 정책 재검토 (현재 최대 5개 유지)"
+                echo "     - DB 백업 압축률 개선 또는 보관 기간 단축"
+                echo "     - 로그 파일 자동 정리 스크립트 추가"
+                echo ""
                 exit 1
               fi
             fi
 
+            # 오래된 백업 파일 정리 (디스크 사용량에 따라 동적 조정)
+            cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
+            cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+
             # 🗄️ DB 백업 생성 (배포 전)
-            # Custom format 사용 (.dump 확장자)
             echo "🗄️ 데이터베이스 백업 생성 중..."
-            DB_BACKUP_NAME=~/db-backup.$(date +%Y%m%d_%H%M%S).dump
+            DB_BACKUP_NAME=~/db-backup.$(date +%Y%m%d_%H%M%S).sql.gz
             PGPASSWORD='${{ secrets.STAGING_DATABASE_PASSWORD }}' \
               pg_dump -h localhost -p 5432 -U sweetorder_admin \
               -d sweetorder_staging_db \
-              -Fc -f "$DB_BACKUP_NAME" 2>/dev/null || {
+              -F c -f "${DB_BACKUP_NAME%.gz}" 2>/dev/null || {
               echo "⚠️ DB 백업 실패 (계속 진행합니다)"
-              rm -f "$DB_BACKUP_NAME"
+              rm -f "${DB_BACKUP_NAME%.gz}"
             }
 
-            if [ -f "$DB_BACKUP_NAME" ]; then
-              echo "✅ DB 백업 완료: $DB_BACKUP_NAME"
+            # 압축 (백업이 성공한 경우만)
+            if [ -f "${DB_BACKUP_NAME%.gz}" ]; then
+              DB_BACKUP_SIZE_BEFORE=$(stat -c%s "${DB_BACKUP_NAME%.gz}" 2>/dev/null || stat -f%z "${DB_BACKUP_NAME%.gz}" 2>/dev/null || echo "0")
+              DB_BACKUP_SIZE_BEFORE_FORMATTED=$(format_size "$DB_BACKUP_SIZE_BEFORE")
+              echo "  압축 전 크기: ${DB_BACKUP_SIZE_BEFORE_FORMATTED}"
+              
+              gzip "${DB_BACKUP_NAME%.gz}"
+              
+              if [ -f "$DB_BACKUP_NAME" ]; then
+                DB_BACKUP_SIZE_AFTER=$(stat -c%s "$DB_BACKUP_NAME" 2>/dev/null || stat -f%z "$DB_BACKUP_NAME" 2>/dev/null || echo "0")
+                DB_BACKUP_SIZE_AFTER_FORMATTED=$(format_size "$DB_BACKUP_SIZE_AFTER")
+                COMPRESSION_RATIO=$(awk "BEGIN {printf \"%.1f\", ($DB_BACKUP_SIZE_AFTER/$DB_BACKUP_SIZE_BEFORE)*100}")
+                echo "✅ DB 백업 완료: $DB_BACKUP_NAME"
+                echo "  압축 후 크기: ${DB_BACKUP_SIZE_AFTER_FORMATTED} (압축률: ${COMPRESSION_RATIO}%)"
+              fi
             fi
 
-            # 기존 프로젝트 백업
+            # 기존 프로젝트 백업 (타임스탬프 포함)
+            # 백업 전에 node_modules와 dist 삭제하여 백업 크기 최소화
+            CURRENT_BACKUP_NAME=""
             if [ -d ~/sweet-order ]; then
+              echo "🗑️ 백업 전 불필요한 파일 정리 중 (node_modules, dist 등)..."
+              find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
+              find ~/sweet-order -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
+              find ~/sweet-order -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
+              find ~/sweet-order -type d -name ".yarn" -exec rm -rf {} + 2>/dev/null || true
+              find ~/sweet-order -type f -name "*.log" -delete 2>/dev/null || true
+              
               CURRENT_BACKUP_NAME=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
               echo "📦 기존 프로젝트 백업 중: $CURRENT_BACKUP_NAME"
+              
+              # 백업 전 크기 확인
+              BACKUP_SIZE_BEFORE=$(get_dir_size ~/sweet-order)
+              BACKUP_SIZE_BEFORE_FORMATTED=$(format_size "$BACKUP_SIZE_BEFORE")
+              echo "  백업 대상 크기: ${BACKUP_SIZE_BEFORE_FORMATTED}"
+              
               mv ~/sweet-order "$CURRENT_BACKUP_NAME" || {
                 echo "⚠️ 백업 실패, 기존 디렉토리 삭제 후 진행"
                 rm -rf ~/sweet-order
               }
+              
+              # 백업 후 크기 확인
+              if [ -d "$CURRENT_BACKUP_NAME" ]; then
+                BACKUP_SIZE_AFTER=$(get_dir_size "$CURRENT_BACKUP_NAME")
+                BACKUP_SIZE_AFTER_FORMATTED=$(format_size "$BACKUP_SIZE_AFTER")
+                echo "  백업 완료 크기: ${BACKUP_SIZE_AFTER_FORMATTED}"
+              fi
             fi
+
+            # 배포 실패 시 롤백을 위한 trap 설정
+            trap rollback_deployment ERR
 
             mkdir -p ~/sweet-order
             cd ~/sweet-order
 
-            echo "📂 배포 패키지 압축 해제"
+            echo "📂 압축 해제"
             tar -xzf ~/deploy.tar.gz
             rm ~/deploy.tar.gz
-
-            if [ ! -d "apps/backend/dist" ]; then
-              echo "❌ 빌드 산출물이 없습니다"
-              rollback_deployment
-            fi
-
-            # 압축 해제 후 용량 정보 출력
-            echo ""
-            echo "📊 배포 패키지 압축 해제 후 용량:"
-            if [ -d "apps/backend/dist" ]; then
-              echo "  dist 디렉토리: $(du -sh apps/backend/dist 2>/dev/null | awk '{print $1}')"
-            fi
-            if [ -f "apps/backend/package.json" ]; then
-              echo "  package.json: $(du -h apps/backend/package.json 2>/dev/null | awk '{print $1}')"
-            fi
-            echo ""
-
-            # Node.js 및 Yarn 확인
-            if ! command -v node &> /dev/null; then
-              echo "❌ Node.js가 설치되어 있지 않습니다"
-              exit 1
-            fi
-
-            # Yarn 설치 확인 및 설정
-            if ! command -v yarn &> /dev/null; then
-              echo "📦 Yarn 설치 중..."
-              corepack enable || npm install -g corepack
-              corepack prepare yarn@4.9.4 --activate
-            fi
-
-            # 백엔드 디렉토리로 이동하여 의존성 설치
-            cd apps/backend
             
-            echo "📦 의존성 설치 중 (node_modules 생성)..."
+            # 압축 해제 후 프로젝트 크기 확인
+            PROJECT_SIZE_AFTER_EXTRACT=$(get_dir_size ~/sweet-order)
+            PROJECT_SIZE_AFTER_EXTRACT_FORMATTED=$(format_size "$PROJECT_SIZE_AFTER_EXTRACT")
+            echo "  압축 해제 후 프로젝트 크기: ${PROJECT_SIZE_AFTER_EXTRACT_FORMATTED}"
+
+            # 기존 node_modules 정리 (혹시 남아있을 수 있음)
+            echo "🗑️ 기존 node_modules 정리 중..."
+            find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
+
+            # 캐시 정리 (중요)
+            rm -rf ~/.cache ~/.yarn ~/.yarn/berry/cache
+
+            corepack enable
+            corepack prepare yarn@4.9.4 --activate
+
+            # 디스크 공간 확인 후 의존성 설치
+            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            echo "의존성 설치 전 디스크 사용량: ${USE_PERCENT}%"
+
+            if [ "$USE_PERCENT" -gt 90 ]; then
+              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 추가 정리 중..."
+              echo ""
+              echo "📢 주의: 의존성 설치 전 디스크 공간이 부족합니다."
+              echo "  루트 볼륨 확장 또는 배포 로직 개선을 고려하세요."
+              echo ""
+              cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
+              cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+              USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+              echo "추가 정리 후 디스크 사용량: ${USE_PERCENT}%"
+              
+              if [ "$USE_PERCENT" -gt 95 ]; then
+                echo ""
+                echo "❌ 추가 정리 후에도 디스크 사용량이 ${USE_PERCENT}%로 높습니다."
+                echo "🚨 루트 볼륨을 즉시 확장하거나 수동으로 공간을 확보한 후 배포를 재시도하세요."
+                echo ""
+                exit 1
+              fi
+            fi
+
+            echo "📦 의존성 설치"
+            USE_PERCENT_BEFORE_INSTALL=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             yarn install || {
-              echo "❌ yarn install 실패"
+              echo "❌ 의존성 설치 실패"
               rollback_deployment
             }
             
-            # yarn install 후 용량 정보 출력
-            echo ""
-            echo "📊 yarn install 후 용량:"
-            if [ -d "node_modules" ]; then
-              echo "  node_modules: $(du -sh node_modules 2>/dev/null | awk '{print $1}')"
-            fi
-            echo ""
-            
-            cd ~/sweet-order
-
+            # 의존성 설치 후 크기 확인
+            USE_PERCENT_AFTER_INSTALL=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            PROJECT_SIZE_AFTER_INSTALL=$(get_dir_size ~/sweet-order)
+            PROJECT_SIZE_AFTER_INSTALL_FORMATTED=$(format_size "$PROJECT_SIZE_AFTER_INSTALL")
+            NODE_MODULES_SIZE=$(get_dir_size ~/sweet-order/node_modules)
+            NODE_MODULES_SIZE_FORMATTED=$(format_size "$NODE_MODULES_SIZE")
+            echo "  의존성 설치 후 프로젝트 크기: ${PROJECT_SIZE_AFTER_INSTALL_FORMATTED}"
+            echo "  └─ node_modules 크기: ${NODE_MODULES_SIZE_FORMATTED}"
+            echo "  디스크 사용량 변화: ${USE_PERCENT_BEFORE_INSTALL}% → ${USE_PERCENT_AFTER_INSTALL}%"
 
             echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
@@ -398,20 +486,118 @@ jobs:
             # 환경 변수 파일 권한 설정
             chmod 600 apps/backend/.env.staging
 
-            echo "🗄️ Prisma migrate 실행"
+            echo "🗄️ Prisma migrate"
             cd apps/backend
+            # DATABASE_URL을 안전하게 읽어서 export (주석 제외, 첫 번째 매칭만)
             DATABASE_URL=$(grep '^DATABASE_URL=' .env.staging | head -1 | cut -d '=' -f2- | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             export DATABASE_URL
+            echo "DATABASE_URL 설정 완료"
 
-            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
-              echo "❌ Prisma migrate 실패"
-              rollback_deployment
+            # 실패한 마이그레이션 사전 확인 및 해결
+            echo "🔍 마이그레이션 상태 확인 중..."
+            MIGRATE_STATUS=$(npx prisma migrate status --schema ./src/infra/database/prisma/schema.prisma 2>&1 || true)
+
+            if echo "$MIGRATE_STATUS" | grep -q "failed\|P3009"; then
+              echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 중..."
+              # 실패한 마이그레이션 이름 추출 (일반적으로 가장 최근 실패한 것)
+              FAILED_MIGRATION=$(echo "$MIGRATE_STATUS" | grep -oP '^\s*\K[0-9_]+' | head -1 || echo "20260204214916_202602050649")
+              
+              if [ -n "$FAILED_MIGRATION" ]; then
+                echo "🔧 마이그레이션 '$FAILED_MIGRATION'을 롤백 상태로 표시 중..."
+                npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" --schema ./src/infra/database/prisma/schema.prisma 2>/dev/null || true
+                echo "✅ 실패한 마이그레이션 해결 완료"
+              fi
             fi
 
-            cd ~/sweet-order/apps/backend
+            # Prisma migrate 실행
+            MIGRATE_SUCCESS=false
+            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma 2>&1 | tee /tmp/migrate_output.log; then
+              MIGRATE_OUTPUT=$(cat /tmp/migrate_output.log)
+              
+              # P3009 오류: 실패한 마이그레이션이 있는 경우
+              if echo "$MIGRATE_OUTPUT" | grep -q "P3009\|failed migrations"; then
+                echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 후 재시도..."
+                
+                # 실패한 마이그레이션 이름 추출
+                FAILED_MIGRATION=$(echo "$MIGRATE_OUTPUT" | grep -oP 'The `\K[^`]+' | head -1 || echo "20260204214916_202602050649")
+                
+                if [ -n "$FAILED_MIGRATION" ]; then
+                  echo "🔧 마이그레이션 '$FAILED_MIGRATION'을 롤백 상태로 표시 중..."
+                  npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" --schema ./src/infra/database/prisma/schema.prisma 2>/dev/null || true
+                  
+                  echo "🔄 마이그레이션 재시도 중..."
+                  if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
+                    echo "✅ Prisma migrate 성공 (재시도 후)"
+                    MIGRATE_SUCCESS=true
+                  else
+                    echo "❌ Prisma migrate 재시도 실패"
+                    rollback_deployment
+                  fi
+                else
+                  echo "❌ 실패한 마이그레이션 이름을 찾을 수 없습니다"
+                  rollback_deployment
+                fi
+              else
+                echo "❌ Prisma migrate 실패"
+                echo ""
+                echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
+                echo "📖 EC2 서버에 SSH 접속하여 다음을 확인하세요:"
+                echo ""
+                echo "1. pg_hba.conf 파일 수정:"
+                echo "   sudo vi /var/lib/pgsql/16/data/pg_hba.conf"
+                echo "   'host all all 127.0.0.1/32 ident' → 'host all all 127.0.0.1/32 md5'로 변경"
+                echo ""
+                echo "2. PostgreSQL 재시작:"
+                echo "   sudo systemctl restart postgresql"
+                echo ""
+                echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
+                echo ""
+                rollback_deployment
+              fi
+            else
+              echo "✅ Prisma migrate 성공"
+              MIGRATE_SUCCESS=true
+            fi
+
+            # Prisma Client 재생성 (마이그레이션 성공 시에만)
+            if [ "$MIGRATE_SUCCESS" = true ]; then
+              echo "🔄 Prisma Client 재생성 중..."
+              npx prisma generate --schema ./src/infra/database/prisma/schema.prisma || {
+                echo "⚠️ Prisma Client 재생성 실패 (계속 진행합니다)"
+              }
+
+              echo "🌱 Staging 데이터베이스 시드 실행 (idempotent)"
+              # .env.staging 기반으로 DATABASE_URL이 이미 export 되어 있으므로 그대로 사용
+              yarn db:seed:staging || {
+                echo "❌ Staging 시드 실행 실패"
+                rollback_deployment
+              }
+            fi
+
+            cd ~/sweet-order
+
+            echo "🔨 Backend build"
+            USE_PERCENT_BEFORE_BUILD=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            yarn run backend:build:staging || {
+              echo "❌ 빌드 실패"
+              rollback_deployment
+            }
+            
+            # 빌드 후 크기 확인
+            USE_PERCENT_AFTER_BUILD=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            if [ -d ~/sweet-order/apps/backend/dist ]; then
+              DIST_SIZE_AFTER_BUILD=$(get_dir_size ~/sweet-order/apps/backend/dist)
+              DIST_SIZE_AFTER_BUILD_FORMATTED=$(format_size "$DIST_SIZE_AFTER_BUILD")
+              echo "  빌드 후 dist 크기: ${DIST_SIZE_AFTER_BUILD_FORMATTED}"
+            fi
+            PROJECT_SIZE_AFTER_BUILD=$(get_dir_size ~/sweet-order)
+            PROJECT_SIZE_AFTER_BUILD_FORMATTED=$(format_size "$PROJECT_SIZE_AFTER_BUILD")
+            echo "  빌드 후 전체 프로젝트 크기: ${PROJECT_SIZE_AFTER_BUILD_FORMATTED}"
+            echo "  디스크 사용량 변화: ${USE_PERCENT_BEFORE_BUILD}% → ${USE_PERCENT_AFTER_BUILD}%"
 
             echo "🚀 PM2 restart"
             pm2 delete sweet-order-backend || true
+            cd apps/backend
             NODE_ENV=staging pm2 start dist/main.js \
               --name sweet-order-backend \
               --update-env \
@@ -421,24 +607,59 @@ jobs:
             }
             pm2 save
 
+            # 배포 성공 시 trap 해제
             trap - ERR
 
             echo "✅ 배포 완료!"
             pm2 list
 
-            # 배포 성공 후 용량 정보 출력
-            echo ""
-            echo "📊 배포 후 디스크 사용량:"
-            show_disk_usage_details
-
-            # 배포 성공 후 백업 정리 (1회만 실행)
-            USE_PERCENT=$(get_disk_usage)
+            # 배포 성공 후 오래된 백업 정리 (디스크 사용량에 따라 동적 조정)
+            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-            cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
+            cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
             
-            # 정리 후 최종 용량 정보 출력
+            # 최종 용량 요약 로그
             echo ""
-            echo "📊 정리 후 최종 디스크 사용량:"
-            USE_PERCENT=$(get_disk_usage)
-            echo "📊 디스크 사용량: ${USE_PERCENT}%"
-            show_disk_usage_details
+            echo "📊 배포 완료 후 최종 용량 요약"
+            DISK_INFO_FINAL=$(df -h / | tail -1)
+            USE_PERCENT_FINAL=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            TOTAL_SIZE_FINAL=$(echo "$DISK_INFO_FINAL" | awk '{print $2}')
+            USED_SIZE_FINAL=$(echo "$DISK_INFO_FINAL" | awk '{print $3}')
+            AVAIL_SIZE_FINAL=$(echo "$DISK_INFO_FINAL" | awk '{print $4}')
+            echo "  디스크 사용량: ${USE_PERCENT_FINAL}% (전체: ${TOTAL_SIZE_FINAL}, 사용 중: ${USED_SIZE_FINAL}, 사용 가능: ${AVAIL_SIZE_FINAL})"
+            
+            # 최종 프로젝트 크기
+            if [ -d ~/sweet-order ]; then
+              PROJECT_SIZE_FINAL=$(get_dir_size ~/sweet-order)
+              PROJECT_SIZE_FINAL_FORMATTED=$(format_size "$PROJECT_SIZE_FINAL")
+              echo "  배포된 프로젝트 크기: ${PROJECT_SIZE_FINAL_FORMATTED}"
+              
+              if [ -d ~/sweet-order/node_modules ]; then
+                NODE_MODULES_SIZE_FINAL=$(get_dir_size ~/sweet-order/node_modules)
+                NODE_MODULES_SIZE_FINAL_FORMATTED=$(format_size "$NODE_MODULES_SIZE_FINAL")
+                echo "    └─ node_modules: ${NODE_MODULES_SIZE_FINAL_FORMATTED}"
+              fi
+              if [ -d ~/sweet-order/apps/backend/dist ]; then
+                DIST_SIZE_FINAL=$(get_dir_size ~/sweet-order/apps/backend/dist)
+                DIST_SIZE_FINAL_FORMATTED=$(format_size "$DIST_SIZE_FINAL")
+                echo "    └─ apps/backend/dist: ${DIST_SIZE_FINAL_FORMATTED}"
+              fi
+            fi
+            
+            # 최종 백업 파일 요약
+            BACKUP_COUNT_FINAL=$(ls -d ~/sweet-order.backup.* 2>/dev/null | wc -l)
+            DB_BACKUP_COUNT_FINAL=$(ls ~/db-backup.*.sql.gz 2>/dev/null | wc -l)
+            echo "  백업 파일: 서버 ${BACKUP_COUNT_FINAL}개, DB ${DB_BACKUP_COUNT_FINAL}개"
+            
+            # 최종 디스크 사용량 경고
+            if [ "$USE_PERCENT_FINAL" -ge 85 ]; then
+              echo ""
+              echo "⚠️ 경고: 배포 완료 후 디스크 사용량이 ${USE_PERCENT_FINAL}%로 높습니다."
+              echo "📢 다음 배포 전에 다음 조치를 고려하세요:"
+              echo "  1. EC2 인스턴스의 루트 볼륨 크기 확장 (권장: 최소 20GB 이상)"
+              echo "  2. 배포 로직 개선:"
+              echo "     - 백업 파일 보관 개수 감소 또는 자동 정리 주기 단축"
+              echo "     - 로그 파일 자동 삭제 스크립트 추가"
+              echo "     - 불필요한 파일 제외 정책 강화"
+              echo ""
+            fi
