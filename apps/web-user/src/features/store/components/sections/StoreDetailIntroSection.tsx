@@ -1,11 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useAddStoreLike";
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
+import { isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+
+// 위치 브릿지 타입 확장
+declare global {
+  interface Window {
+    mylocation?: {
+      postMessage: (message: string) => void;
+    };
+    receiveLocation?: (latitude: number, longitude: number) => void;
+  }
+}
 
 // Haversine 공식으로 두 좌표 간 거리 계산 (km)
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -36,26 +47,46 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
   const isLikeLoading = isAddingLike || isRemovingLike;
 
+  // 좌표로 거리 계산
+  const calculateAndSetDistance = useCallback((latitude: number, longitude: number) => {
+    const dist = calculateDistance(
+      latitude,
+      longitude,
+      store.latitude,
+      store.longitude
+    );
+    setDistance(dist);
+  }, [store.latitude, store.longitude]);
+
   // 현재 위치 가져오기 및 거리 계산
   useEffect(() => {
+    // 앱 웹뷰 환경인 경우 - 브릿지 사용
+    if (isWebViewEnvironment()) {
+      window.receiveLocation = (latitude: number, longitude: number) => {
+        calculateAndSetDistance(latitude, longitude);
+      };
+
+      // 앱에 위치 요청
+      if (window.mylocation) {
+        window.mylocation.postMessage("true");
+      }
+
+      return;
+    }
+
+    // 웹 브라우저 환경인 경우 - Geolocation API 사용
     if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const dist = calculateDistance(
-          position.coords.latitude,
-          position.coords.longitude,
-          store.latitude,
-          store.longitude
-        );
-        setDistance(dist);
+        calculateAndSetDistance(position.coords.latitude, position.coords.longitude);
       },
       () => {
         // 위치 권한 거부 시 거리 표시 안함
         setDistance(null);
       }
     );
-  }, [store.latitude, store.longitude]);
+  }, [calculateAndSetDistance]);
 
   const handleLikeToggle = () => {
     if (isLikeLoading) return;
