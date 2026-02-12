@@ -594,74 +594,76 @@ async function seedProductReviews(
  * 스토어 피드를 생성합니다.
  *
  * 동작 방식:
+ * - 데이터베이스에 존재하는 모든 스토어를 조회
  * - 각 스토어별로 피드 개수 확인
  * - 피드가 1개 이상이면 건너뛰기
  * - 피드가 0개인 스토어에만 피드 생성
  *
  * 특징:
- * - 첫 번째 스토어에 피드가 0개면 2개의 피드 생성
- * - 두 번째 스토어에 피드가 0개면 1개의 피드 생성
+ * - 모든 스토어에 대해 피드가 없는 경우 피드를 생성
+ * - 첫 번째로 발견된 피드가 없는 스토어에 2개의 피드 생성
+ * - 두 번째로 발견된 피드가 없는 스토어에 1개의 피드 생성
+ * - 세 번째 이후 스토어에도 피드가 없으면 FEED3를 재사용하여 생성
  * - 각 스토어별로 독립적으로 확인하여 생성
  */
 async function seedStoreFeeds(stores: Awaited<ReturnType<typeof upsertStores>>) {
-  // 스토어가 없으면 피드 생성 불가
-  if (!stores || stores.length === 0) {
+  // 데이터베이스에 존재하는 모든 스토어 조회
+  const allStores = await prisma.store.findMany({
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (!allStores || allStores.length === 0) {
     console.warn("⚠️ 스토어가 없어 피드를 생성할 수 없습니다.");
     return 0;
   }
 
-  const [store1, store2] = stores;
   const feeds = [];
+  let isFirstStoreWithNoFeeds = true; // 첫 번째 피드가 없는 스토어인지 여부
 
-  // 첫 번째 스토어의 피드 개수 확인
-  if (store1) {
-    const store1FeedCount = await prisma.storeFeed.count({
-      where: { storeId: store1.id },
+  // 모든 스토어에 대해 피드 확인 및 생성
+  for (const store of allStores) {
+    const storeFeedCount = await prisma.storeFeed.count({
+      where: { storeId: store.id },
     });
 
     // 피드가 0개인 경우에만 생성
-    if (store1FeedCount === 0) {
-      feeds.push(
-        prisma.storeFeed.create({
-          data: {
-            storeId: store1.id,
-            title: SEED_STORE_FEEDS.FEED1.TITLE,
-            content: SEED_STORE_FEEDS.FEED1.CONTENT,
-            createdAt: SEED_STORE_FEEDS.FEED1.CREATED_AT,
-          },
-        }),
-      );
-      feeds.push(
-        prisma.storeFeed.create({
-          data: {
-            storeId: store1.id,
-            title: SEED_STORE_FEEDS.FEED2.TITLE,
-            content: SEED_STORE_FEEDS.FEED2.CONTENT,
-            createdAt: SEED_STORE_FEEDS.FEED2.CREATED_AT,
-          },
-        }),
-      );
-    }
-  }
-
-  // 두 번째 스토어의 피드 개수 확인
-  if (store2) {
-    const store2FeedCount = await prisma.storeFeed.count({
-      where: { storeId: store2.id },
-    });
-
-    // 피드가 0개인 경우에만 생성
-    if (store2FeedCount === 0) {
-      feeds.push(
-        prisma.storeFeed.create({
-          data: {
-            storeId: store2.id,
-            title: SEED_STORE_FEEDS.FEED3.TITLE,
-            content: SEED_STORE_FEEDS.FEED3.CONTENT,
-            createdAt: SEED_STORE_FEEDS.FEED3.CREATED_AT,
-          },
-        }),
-      );
+    if (storeFeedCount === 0) {
+      if (isFirstStoreWithNoFeeds) {
+        // 첫 번째 피드가 없는 스토어에 2개의 피드 생성
+        feeds.push(
+          prisma.storeFeed.create({
+            data: {
+              storeId: store.id,
+              title: SEED_STORE_FEEDS.FEED1.TITLE,
+              content: SEED_STORE_FEEDS.FEED1.CONTENT,
+              createdAt: SEED_STORE_FEEDS.FEED1.CREATED_AT,
+            },
+          }),
+        );
+        feeds.push(
+          prisma.storeFeed.create({
+            data: {
+              storeId: store.id,
+              title: SEED_STORE_FEEDS.FEED2.TITLE,
+              content: SEED_STORE_FEEDS.FEED2.CONTENT,
+              createdAt: SEED_STORE_FEEDS.FEED2.CREATED_AT,
+            },
+          }),
+        );
+        isFirstStoreWithNoFeeds = false; // 첫 번째 스토어 처리 완료
+      } else {
+        // 두 번째 이후 피드가 없는 스토어에 1개의 피드 생성
+        feeds.push(
+          prisma.storeFeed.create({
+            data: {
+              storeId: store.id,
+              title: SEED_STORE_FEEDS.FEED3.TITLE,
+              content: SEED_STORE_FEEDS.FEED3.CONTENT,
+              createdAt: SEED_STORE_FEEDS.FEED3.CREATED_AT,
+            },
+          }),
+        );
+      }
     }
   }
 

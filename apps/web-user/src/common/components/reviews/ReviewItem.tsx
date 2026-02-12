@@ -98,13 +98,7 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
           onClick={() => setIsOptionExpanded(!isOptionExpanded)}
           className="absolute right-[16px] top-[12px] flex items-center gap-[2px] text-sm text-gray-500"
         >
-          주문옵션{" "}
-          <Icon
-            name="arrow"
-            width={16}
-            height={16}
-            className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-90" : "rotate-180"}`}
-          />
+          주문옵션 <Icon name="arrow" width={16} height={16} className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-0" : "rotate-180"}`} />
         </button>
         {isOptionExpanded && (
           <p className="text-2sm text-gray-500 mt-[12px]">
