@@ -35,23 +35,19 @@ jobs:
 
       - name: Prepare deployment package
         run: |
-          # 빌드 산출물과 node_modules를 포함하는 배포 패키지 생성
+          # 빌드 산출물과 의존성 파일만 포함하는 배포 패키지 생성 (node_modules 제외)
           mkdir -p /tmp/deploy-package/apps/backend
           
-          # 백엔드 빌드 산출물 복사
-          cp -r apps/backend/dist /tmp/deploy-package/apps/backend/
-
-          # 루트의 node_modules 복사 (Yarn workspace hoisting으로 공통 의존성이 여기에 있음)
-          if [ -d "node_modules" ]; then
-            echo "📦 루트 node_modules 복사 중..."
-            cp -r node_modules /tmp/deploy-package/
-          fi
+          # 루트 파일 복사 (package.json, yarn.lock, .yarnrc.yml)
+          echo "📦 루트 의존성 파일 복사 중..."
+          cp package.json /tmp/deploy-package/
+          cp yarn.lock /tmp/deploy-package/
+          cp .yarnrc.yml /tmp/deploy-package/
           
-          # 백엔드 node_modules 복사 (백엔드 고유 의존성이 있을 수 있음)
-          if [ -d "apps/backend/node_modules" ]; then
-            echo "📦 백엔드 node_modules 복사 중..."
-            cp -r apps/backend/node_modules /tmp/deploy-package/apps/backend/
-          fi
+          # 백엔드 빌드 산출물 및 package.json 복사
+          echo "📦 백엔드 빌드 산출물 복사 중..."
+          cp -r apps/backend/dist /tmp/deploy-package/apps/backend/
+          cp apps/backend/package.json /tmp/deploy-package/apps/backend/
           
           # 압축
           cd /tmp
@@ -226,6 +222,25 @@ jobs:
               echo "❌ 빌드 산출물이 없습니다"
               rollback_deployment
             fi
+
+            # Node.js 및 Yarn 확인
+            if ! command -v node &> /dev/null; then
+              echo "❌ Node.js가 설치되어 있지 않습니다"
+              exit 1
+            fi
+
+            # Yarn 설치 확인 및 설정
+            if ! command -v yarn &> /dev/null; then
+              echo "📦 Yarn 설치 중..."
+              corepack enable || npm install -g corepack
+              corepack prepare yarn@4.9.4 --activate
+            fi
+
+            echo "📦 의존성 설치 중 (node_modules 생성)..."
+            yarn install || {
+              echo "❌ yarn install 실패"
+              rollback_deployment
+            }
 
             echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
