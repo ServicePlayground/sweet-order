@@ -59,14 +59,11 @@ export enum ProductType {
  * 케이크 사이즈 표시명 enum
  */
 export enum CakeSizeDisplayName {
+  DOSIRAK = "도시락",
   MINI = "미니",
   SIZE_1 = "1호",
   SIZE_2 = "2호",
   SIZE_3 = "3호",
-  SIZE_4 = "4호",
-  SIZE_5 = "5호",
-  SIZE_6 = "6호",
-  SIZE_7 = "7호",
 }
 
 /**
@@ -86,13 +83,21 @@ export const SWAGGER_EXAMPLES = {
       {
         id: "size_abcd1234",
         visible: EnableStatus.ENABLE,
+        displayName: CakeSizeDisplayName.DOSIRAK,
+        lengthCm: 8,
+        price: 25000,
+        description: "1인용",
+      },
+      {
+        id: "size_efgh5678",
+        visible: EnableStatus.ENABLE,
         displayName: CakeSizeDisplayName.MINI,
         lengthCm: 10,
         price: 30000,
         description: "1~2인용",
       },
       {
-        id: "size_efgh5678",
+        id: "size_ijkl9012",
         visible: EnableStatus.ENABLE,
         displayName: CakeSizeDisplayName.SIZE_1,
         lengthCm: 15,

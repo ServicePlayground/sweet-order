@@ -17,14 +17,11 @@ export enum ProductType {
  * 케이크 사이즈 표시명 enum
  */
 export enum CakeSizeDisplayName {
+  DOSIRAK = "도시락",
   MINI = "미니",
   SIZE_1 = "1호",
   SIZE_2 = "2호",
   SIZE_3 = "3호",
-  SIZE_4 = "4호",
-  SIZE_5 = "5호",
-  SIZE_6 = "6호",
-  SIZE_7 = "7호",
 }
 
 // 케이크 사이즈 옵션
