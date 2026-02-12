@@ -16,21 +16,47 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Prepare source code package
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Yarn
+        run: corepack prepare yarn@4.9.4 --activate
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build backend
+        run: yarn run backend:build:staging
+
+      - name: Prepare deployment package
         run: |
-          # ⚠️ 불필요한 파일 제외하고 압축
-          mkdir -p /tmp/deploy
-          tar -czf /tmp/deploy/deploy.tar.gz \
-            --exclude=.git \
-            --exclude=node_modules \
-            --exclude=.yarn/cache \
-            --exclude=.next \
-            --exclude=dist \
-            --exclude=apps/web-user \
-            --exclude=apps/web-seller \
-            --exclude=apps/web-admin \
-            .
-          mv /tmp/deploy/deploy.tar.gz .
+          # 빌드 산출물과 node_modules를 포함하는 배포 패키지 생성
+          mkdir -p /tmp/deploy-package/apps/backend
+          
+          # 백엔드 빌드 산출물 복사
+          cp -r apps/backend/dist /tmp/deploy-package/apps/backend/
+
+          # 루트의 node_modules 복사 (Yarn workspace hoisting으로 공통 의존성이 여기에 있음)
+          if [ -d "node_modules" ]; then
+            echo "📦 루트 node_modules 복사 중..."
+            cp -r node_modules /tmp/deploy-package/
+          fi
+          
+          # 백엔드 node_modules 복사 (백엔드 고유 의존성이 있을 수 있음)
+          if [ -d "apps/backend/node_modules" ]; then
+            echo "📦 백엔드 node_modules 복사 중..."
+            cp -r apps/backend/node_modules /tmp/deploy-package/apps/backend/
+          fi
+          
+          # 압축
+          cd /tmp
+          tar -czf deploy.tar.gz -C deploy-package .
+          mv deploy.tar.gz ${{ github.workspace }}/
 
       - name: Copy deployment package to EC2
         uses: appleboy/scp-action@master
@@ -48,17 +74,20 @@ jobs:
           username: ec2-user
           key: ${{ secrets.STAGING_EC2_SSH_KEY }}
           script: |
-            set -e
+            set -Ee  # 함수 내부 에러도 trap
+
+            # 디스크 사용량 계산 함수 (한 번만 계산)
+            get_disk_usage() {
+              df / | awk 'END {gsub("%","",$5); print $5}'
+            }
 
             # 롤백 함수 정의
             rollback_deployment() {
               echo ""
               echo "🔄 배포 실패로 인한 롤백 시작..."
               
-              # PM2 프로세스 중지 (이미 실패한 새 버전이 실행 중일 수 있음)
               pm2 delete sweet-order-backend 2>/dev/null || true
               
-              # 가장 최근 백업 찾기
               LATEST_BACKUP=$(ls -td ~/sweet-order.backup.* 2>/dev/null | head -1)
               
               if [ -n "$LATEST_BACKUP" ] && [ -d "$LATEST_BACKUP" ]; then
@@ -66,7 +95,6 @@ jobs:
                 rm -rf ~/sweet-order
                 mv "$LATEST_BACKUP" ~/sweet-order
                 
-                # 이전 버전으로 PM2 재시작
                 if [ -f ~/sweet-order/apps/backend/dist/main.js ]; then
                   cd ~/sweet-order/apps/backend
                   NODE_ENV=staging pm2 start dist/main.js \
@@ -74,7 +102,7 @@ jobs:
                     --update-env \
                     --cwd $(pwd)
                   pm2 save
-                  echo "✅ 롤백 완료 - 이전 버전으로 복구되었습니다"
+                  echo "✅ 롤백 완료"
                 else
                   echo "⚠️ 롤백 실패 - 백업에 빌드 파일이 없습니다"
                 fi
@@ -85,7 +113,11 @@ jobs:
               exit 1
             }
 
+            # 배포 실패 시 롤백을 위한 trap 설정 (맨 위에서 설정하여 전체 구간 보호)
+            trap rollback_deployment ERR
+
             # 백업 파일 개수 제한 함수 (디스크 사용량에 따라 동적 조정)
+            # 보조 수단으로만 사용: 디스크 부족 시와 배포 성공 후에만 실행
             cleanup_old_backups() {
               local BACKUP_TYPE=$1
               local BACKUP_PATTERN=$2
@@ -103,96 +135,78 @@ jobs:
               
               echo "🧹 오래된 ${BACKUP_TYPE} 백업 정리 중 (최근 ${KEEP_COUNT}개만 유지)..."
               
-              # 타임스탬프 기준으로 정렬하여 오래된 것부터 삭제
-              ls -t ${BACKUP_PATTERN} 2>/dev/null | tail -n +$((KEEP_COUNT + 1)) | while read -r old_backup; do
-                echo "  삭제: $old_backup"
-                rm -rf "$old_backup"
-              done || true
+              # 안전한 백업 삭제: 경로 검증 강화
+              local HOME_DIR=$(eval echo ~)
+              local count=0
+              
+              # 백업 파일 목록을 임시 파일에 저장하여 안전하게 처리
+              local temp_list=$(mktemp)
+              ls -t ${BACKUP_PATTERN} 2>/dev/null | tail -n +$((KEEP_COUNT + 1)) > "$temp_list" || true
+              
+              while IFS= read -r old_backup || [ -n "$old_backup" ]; do
+                # 경로 검증: 홈 디렉토리 내 백업만 삭제, 빈 줄 무시
+                [ -z "$old_backup" ] && continue
+                
+                # 홈 디렉토리 경로로 확장
+                local expanded_path=$(eval echo "$old_backup")
+                
+                # 홈 디렉토리 내에 있고 실제 존재하는 파일/디렉토리만 삭제
+                if [[ "$expanded_path" == "$HOME_DIR"* ]] && [ -e "$expanded_path" ]; then
+                  echo "  삭제: $old_backup"
+                  rm -rf "$expanded_path"
+                  count=$((count + 1))
+                fi
+              done < "$temp_list"
+              
+              rm -f "$temp_list"
+              
+              if [ $count -eq 0 ]; then
+                echo "  삭제할 백업이 없습니다"
+              fi
             }
 
-            echo "📊 디스크 사용량 체크"
-            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-            echo "현재 디스크 사용량: ${USE_PERCENT}%"
+            # 디스크 사용량 체크 (한 번만 계산)
+            USE_PERCENT=$(get_disk_usage)
+            echo "📊 디스크 사용량: ${USE_PERCENT}%"
 
-            # 디스크 사용량이 80% 이상이면 정리 작업 수행
+            # 디스크 부족 시에만 정리 작업 실행 (보조 수단)
             if [ "$USE_PERCENT" -gt 80 ]; then
-              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
+              echo "⚠️ 디스크 사용량이 높습니다. 정리 작업 시작..."
               
-              # 오래된 백업 파일 정리 (디스크 사용량에 따라 동적 조정)
-              echo "🗑️ 오래된 백업 파일 정리 중..."
               cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-              cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+              cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
               
-              # 기존 프로젝트의 node_modules와 dist 삭제 (백업 크기 줄이기)
-              if [ -d ~/sweet-order ]; then
-                echo "🗑️ 기존 프로젝트의 node_modules 및 dist 디렉토리 삭제 중..."
-                find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
-                find ~/sweet-order -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
-                find ~/sweet-order -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
-                find ~/sweet-order -type d -name ".yarn" -exec rm -rf {} + 2>/dev/null || true
-              fi
-              
-              # Yarn 캐시 정리
-              echo "🗑️ Yarn 캐시 정리 중..."
-              yarn cache clean --all 2>/dev/null || true
-              rm -rf ~/.cache ~/.yarn/cache ~/.yarn/berry/cache
-              
-              # PM2 로그 정리
-              echo "🗑️ PM2 로그 정리 중..."
+              # PM2 로그 정리만 수행 (실행 중인 프로세스 파일은 건드리지 않음)
               pm2 flush || true
               
-              # 시스템 패키지 캐시 정리
-              echo "🗑️ 시스템 패키지 캐시 정리 중..."
-              sudo dnf clean all 2>/dev/null || true
-              
-              # 임시 파일 정리
-              echo "🗑️ 임시 파일 정리 중..."
-              sudo rm -rf /tmp/* 2>/dev/null || true
-              rm -rf ~/tmp/* 2>/dev/null || true
-              
-              # 정리 후 디스크 사용량 재확인
-              USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+              # 정리 후 재확인
+              USE_PERCENT=$(get_disk_usage)
               echo "정리 후 디스크 사용량: ${USE_PERCENT}%"
               
-              # 여전히 95% 이상이면 배포 중단
               if [ "$USE_PERCENT" -gt 95 ]; then
-                echo "❌ 디스크 사용량 ${USE_PERCENT}% — 정리 후에도 공간 부족. 배포 중단"
+                echo "❌ 디스크 사용량 ${USE_PERCENT}% — 공간 부족. 배포 중단"
                 exit 1
               fi
             fi
 
-            # 오래된 백업 파일 정리 (디스크 사용량에 따라 동적 조정)
-            cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-            cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
-
             # 🗄️ DB 백업 생성 (배포 전)
+            # Custom format 사용 (.dump 확장자)
             echo "🗄️ 데이터베이스 백업 생성 중..."
-            DB_BACKUP_NAME=~/db-backup.$(date +%Y%m%d_%H%M%S).sql.gz
+            DB_BACKUP_NAME=~/db-backup.$(date +%Y%m%d_%H%M%S).dump
             PGPASSWORD='${{ secrets.STAGING_DATABASE_PASSWORD }}' \
               pg_dump -h localhost -p 5432 -U sweetorder_admin \
               -d sweetorder_staging_db \
-              -F c -f "${DB_BACKUP_NAME%.gz}" 2>/dev/null || {
+              -Fc -f "$DB_BACKUP_NAME" 2>/dev/null || {
               echo "⚠️ DB 백업 실패 (계속 진행합니다)"
-              rm -f "${DB_BACKUP_NAME%.gz}"
+              rm -f "$DB_BACKUP_NAME"
             }
 
-            # 압축 (백업이 성공한 경우만)
-            if [ -f "${DB_BACKUP_NAME%.gz}" ]; then
-              gzip "${DB_BACKUP_NAME%.gz}"
+            if [ -f "$DB_BACKUP_NAME" ]; then
               echo "✅ DB 백업 완료: $DB_BACKUP_NAME"
             fi
 
-            # 기존 프로젝트 백업 (타임스탬프 포함)
-            # 백업 전에 node_modules와 dist 삭제하여 백업 크기 최소화
-            CURRENT_BACKUP_NAME=""
+            # 기존 프로젝트 백업
             if [ -d ~/sweet-order ]; then
-              echo "🗑️ 백업 전 불필요한 파일 정리 중 (node_modules, dist 등)..."
-              find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
-              find ~/sweet-order -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
-              find ~/sweet-order -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
-              find ~/sweet-order -type d -name ".yarn" -exec rm -rf {} + 2>/dev/null || true
-              find ~/sweet-order -type f -name "*.log" -delete 2>/dev/null || true
-              
               CURRENT_BACKUP_NAME=~/sweet-order.backup.$(date +%Y%m%d_%H%M%S)
               echo "📦 기존 프로젝트 백업 중: $CURRENT_BACKUP_NAME"
               mv ~/sweet-order "$CURRENT_BACKUP_NAME" || {
@@ -201,43 +215,17 @@ jobs:
               }
             fi
 
-            # 배포 실패 시 롤백을 위한 trap 설정
-            trap rollback_deployment ERR
-
             mkdir -p ~/sweet-order
             cd ~/sweet-order
 
-            echo "📂 압축 해제"
+            echo "📂 배포 패키지 압축 해제"
             tar -xzf ~/deploy.tar.gz
             rm ~/deploy.tar.gz
 
-            # 기존 node_modules 정리 (혹시 남아있을 수 있음)
-            echo "🗑️ 기존 node_modules 정리 중..."
-            find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
-
-            # 캐시 정리 (중요)
-            rm -rf ~/.cache ~/.yarn ~/.yarn/berry/cache
-
-            corepack enable
-            corepack prepare yarn@4.9.4 --activate
-
-            # 디스크 공간 확인 후 의존성 설치
-            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-            echo "의존성 설치 전 디스크 사용량: ${USE_PERCENT}%"
-
-            if [ "$USE_PERCENT" -gt 90 ]; then
-              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 추가 정리 중..."
-              cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-              cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
-              USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
-              echo "추가 정리 후 디스크 사용량: ${USE_PERCENT}%"
-            fi
-
-            echo "📦 의존성 설치"
-            yarn install || {
-              echo "❌ 의존성 설치 실패"
+            if [ ! -d "apps/backend/dist" ]; then
+              echo "❌ 빌드 산출물이 없습니다"
               rollback_deployment
-            }
+            fi
 
             echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
@@ -287,105 +275,20 @@ jobs:
             # 환경 변수 파일 권한 설정
             chmod 600 apps/backend/.env.staging
 
-            echo "🗄️ Prisma migrate"
+            echo "🗄️ Prisma migrate 실행"
             cd apps/backend
-            # DATABASE_URL을 안전하게 읽어서 export (주석 제외, 첫 번째 매칭만)
             DATABASE_URL=$(grep '^DATABASE_URL=' .env.staging | head -1 | cut -d '=' -f2- | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             export DATABASE_URL
-            echo "DATABASE_URL 설정 완료"
 
-            # 실패한 마이그레이션 사전 확인 및 해결
-            echo "🔍 마이그레이션 상태 확인 중..."
-            MIGRATE_STATUS=$(npx prisma migrate status --schema ./src/infra/database/prisma/schema.prisma 2>&1 || true)
-
-            if echo "$MIGRATE_STATUS" | grep -q "failed\|P3009"; then
-              echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 중..."
-              # 실패한 마이그레이션 이름 추출 (일반적으로 가장 최근 실패한 것)
-              FAILED_MIGRATION=$(echo "$MIGRATE_STATUS" | grep -oP '^\s*\K[0-9_]+' | head -1 || echo "20260204214916_202602050649")
-              
-              if [ -n "$FAILED_MIGRATION" ]; then
-                echo "🔧 마이그레이션 '$FAILED_MIGRATION'을 롤백 상태로 표시 중..."
-                npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" --schema ./src/infra/database/prisma/schema.prisma 2>/dev/null || true
-                echo "✅ 실패한 마이그레이션 해결 완료"
-              fi
-            fi
-
-            # Prisma migrate 실행
-            MIGRATE_SUCCESS=false
-            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma 2>&1 | tee /tmp/migrate_output.log; then
-              MIGRATE_OUTPUT=$(cat /tmp/migrate_output.log)
-              
-              # P3009 오류: 실패한 마이그레이션이 있는 경우
-              if echo "$MIGRATE_OUTPUT" | grep -q "P3009\|failed migrations"; then
-                echo "⚠️ 실패한 마이그레이션 감지. 롤백 상태로 표시 후 재시도..."
-                
-                # 실패한 마이그레이션 이름 추출
-                FAILED_MIGRATION=$(echo "$MIGRATE_OUTPUT" | grep -oP 'The `\K[^`]+' | head -1 || echo "20260204214916_202602050649")
-                
-                if [ -n "$FAILED_MIGRATION" ]; then
-                  echo "🔧 마이그레이션 '$FAILED_MIGRATION'을 롤백 상태로 표시 중..."
-                  npx prisma migrate resolve --rolled-back "$FAILED_MIGRATION" --schema ./src/infra/database/prisma/schema.prisma 2>/dev/null || true
-                  
-                  echo "🔄 마이그레이션 재시도 중..."
-                  if npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
-                    echo "✅ Prisma migrate 성공 (재시도 후)"
-                    MIGRATE_SUCCESS=true
-                  else
-                    echo "❌ Prisma migrate 재시도 실패"
-                    rollback_deployment
-                  fi
-                else
-                  echo "❌ 실패한 마이그레이션 이름을 찾을 수 없습니다"
-                  rollback_deployment
-                fi
-              else
-                echo "❌ Prisma migrate 실패"
-                echo ""
-                echo "⚠️ PostgreSQL 인증 설정이 필요할 수 있습니다."
-                echo "📖 EC2 서버에 SSH 접속하여 다음을 확인하세요:"
-                echo ""
-                echo "1. pg_hba.conf 파일 수정:"
-                echo "   sudo vi /var/lib/pgsql/16/data/pg_hba.conf"
-                echo "   'host all all 127.0.0.1/32 ident' → 'host all all 127.0.0.1/32 md5'로 변경"
-                echo ""
-                echo "2. PostgreSQL 재시작:"
-                echo "   sudo systemctl restart postgresql"
-                echo ""
-                echo "3. 자세한 내용은 docs/infra/aws/EC2_Route53.md 3.3단계를 참고하세요."
-                echo ""
-                rollback_deployment
-              fi
-            else
-              echo "✅ Prisma migrate 성공"
-              MIGRATE_SUCCESS=true
-            fi
-
-            # Prisma Client 재생성 (마이그레이션 성공 시에만)
-            if [ "$MIGRATE_SUCCESS" = true ]; then
-              echo "🔄 Prisma Client 재생성 중..."
-              npx prisma generate --schema ./src/infra/database/prisma/schema.prisma || {
-                echo "⚠️ Prisma Client 재생성 실패 (계속 진행합니다)"
-              }
-
-              echo "🌱 Staging 데이터베이스 시드 실행 (idempotent)"
-              # .env.staging 기반으로 DATABASE_URL이 이미 export 되어 있으므로 그대로 사용
-              yarn db:seed:staging || {
-                echo "❌ Staging 시드 실행 실패"
-                rollback_deployment
-              }
-            fi
-
-            cd ~/sweet-order
-
-            echo "🔨 Backend build"
-            yarn run backend:build:staging || {
-              echo "❌ 빌드 실패"
+            if ! npx prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma; then
+              echo "❌ Prisma migrate 실패"
               rollback_deployment
-            }
+            fi
+
+            cd ~/sweet-order/apps/backend
 
             echo "🚀 PM2 restart"
             pm2 delete sweet-order-backend || true
-            cd apps/backend
             NODE_ENV=staging pm2 start dist/main.js \
               --name sweet-order-backend \
               --update-env \
@@ -395,13 +298,12 @@ jobs:
             }
             pm2 save
 
-            # 배포 성공 시 trap 해제
             trap - ERR
 
             echo "✅ 배포 완료!"
             pm2 list
 
-            # 배포 성공 후 오래된 백업 정리 (디스크 사용량에 따라 동적 조정)
-            USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+            # 배포 성공 후 백업 정리 (1회만 실행)
+            USE_PERCENT=$(get_disk_usage)
             cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-            cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+            cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
