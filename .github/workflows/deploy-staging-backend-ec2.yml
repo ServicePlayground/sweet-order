@@ -36,19 +36,14 @@ jobs:
       - name: Prepare deployment package
         run: |
           # 빌드 산출물과 의존성 파일만 포함하는 배포 패키지 생성 (node_modules 제외)
+          # 백엔드만 독립적으로 배포 (workspace 구조 제거)
           mkdir -p /tmp/deploy-package/apps/backend
-          
-          # 루트 파일 복사 (package.json, yarn.lock, .yarnrc.yml)
-          echo "📦 루트 의존성 파일 복사 중..."
-          cp package.json /tmp/deploy-package/
-          cp yarn.lock /tmp/deploy-package/
-          cp .yarnrc.yml /tmp/deploy-package/
           
           # 백엔드 빌드 산출물 및 package.json 복사
           echo "📦 백엔드 빌드 산출물 복사 중..."
           cp -r apps/backend/dist /tmp/deploy-package/apps/backend/
           cp apps/backend/package.json /tmp/deploy-package/apps/backend/
-          
+                    
           # 압축
           cd /tmp
           tar -czf deploy.tar.gz -C deploy-package .
@@ -236,11 +231,16 @@ jobs:
               corepack prepare yarn@4.9.4 --activate
             fi
 
+            # 백엔드 디렉토리로 이동하여 의존성 설치
+            cd apps/backend
+            
             echo "📦 의존성 설치 중 (node_modules 생성)..."
             yarn install || {
               echo "❌ yarn install 실패"
               rollback_deployment
             }
+            
+            cd ~/sweet-order
 
             echo "⚙️ 환경 변수 파일 생성 중..."
             cat > apps/backend/.env.staging << EOF
