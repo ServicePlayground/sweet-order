@@ -114,14 +114,18 @@ jobs:
             USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             echo "현재 디스크 사용량: ${USE_PERCENT}%"
 
-            # 디스크 사용량이 80% 이상이면 정리 작업 수행
+            # 오래된 백업 파일 정리 (항상 실행, 디스크 사용량에 따라 유지 개수만 조정)
+            echo "🗑️ 오래된 백업 파일 정리 중..."
+            cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
+            cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+            cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
+
+            # 디스크 사용량이 80% 이상이면 추가 정리 작업 수행
             if [ "$USE_PERCENT" -gt 80 ]; then
-              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 정리 작업을 시작합니다..."
-              
-              # 오래된 백업 파일 정리 (디스크 사용량에 따라 동적 조정)
-              echo "🗑️ 오래된 백업 파일 정리 중..."
-              cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-              cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+              echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 추가 정리 작업을 시작합니다..."
+              if [ "$USE_PERCENT" -ge 85 ]; then
+                echo "📢 주의: 디스크 사용량이 지속적으로 높다면 EC2 루트 볼륨 확장 또는 배포 로직 개선을 고려하세요"
+              fi
               
               # 기존 프로젝트의 node_modules와 dist 삭제 (백업 크기 줄이기)
               if [ -d ~/sweet-order ]; then
@@ -160,10 +164,6 @@ jobs:
                 exit 1
               fi
             fi
-
-            # 오래된 백업 파일 정리 (디스크 사용량에 따라 동적 조정)
-            cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
-            cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
 
             # 🗄️ DB 백업 생성 (배포 전)
             echo "🗄️ 데이터베이스 백업 생성 중..."
@@ -229,6 +229,7 @@ jobs:
               echo "⚠️ 디스크 사용량이 ${USE_PERCENT}%로 높습니다. 추가 정리 중..."
               cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
               cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+              cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
               USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
               echo "추가 정리 후 디스크 사용량: ${USE_PERCENT}%"
             fi
@@ -405,3 +406,4 @@ jobs:
             USE_PERCENT=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
             cleanup_old_backups "서버" "~/sweet-order.backup.*" "$USE_PERCENT"
             cleanup_old_backups "DB" "~/db-backup.*.sql.gz" "$USE_PERCENT"
+            cleanup_old_backups "DB" "~/db-backup.*.dump" "$USE_PERCENT"
