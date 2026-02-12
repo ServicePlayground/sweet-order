@@ -34,6 +34,7 @@ const config: Config = {
         },
         black: {
           DEFAULT: "#000000",
+          900: "#1F1F1E",
         },
         gray: {
           50: "#F6F6F6",
@@ -45,7 +46,7 @@ const config: Config = {
           600: "#686864",
           700: "#4E4E4B",
           800: "#343432",
-          900: "#21272C",
+          900: "#1F1F1E",
         },
         primary: {
           DEFAULT: "#FF653E",

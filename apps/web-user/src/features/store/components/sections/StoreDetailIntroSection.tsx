@@ -8,16 +8,6 @@ import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/u
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
 import { isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
 
-// 위치 브릿지 타입 확장
-declare global {
-  interface Window {
-    mylocation?: {
-      postMessage: (message: string) => void;
-    };
-    receiveLocation?: (latitude: number, longitude: number) => void;
-  }
-}
-
 // Haversine 공식으로 두 좌표 간 거리 계산 (km)
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // 지구 반지름 (km)
@@ -62,8 +52,10 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   useEffect(() => {
     // 앱 웹뷰 환경인 경우 - 브릿지 사용
     if (isWebViewEnvironment()) {
-      window.receiveLocation = (latitude: number, longitude: number) => {
-        calculateAndSetDistance(latitude, longitude);
+      window.receiveLocation = (latitude: string | number, longitude: string | number) => {
+        const lat = typeof latitude === "string" ? parseFloat(latitude) : latitude;
+        const lng = typeof longitude === "string" ? parseFloat(longitude) : longitude;
+        calculateAndSetDistance(lat, lng);
       };
 
       // 앱에 위치 요청
