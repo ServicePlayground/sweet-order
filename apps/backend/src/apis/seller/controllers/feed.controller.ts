@@ -56,7 +56,9 @@ export class SellerFeedController {
     description: "자신이 소유한 스토어의 피드 목록을 조회합니다.",
   })
   @SwaggerResponse(200, { dataDto: FeedListResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -94,7 +96,9 @@ export class SellerFeedController {
     description: "자신이 소유한 스토어의 피드 상세 정보를 조회합니다.",
   })
   @SwaggerResponse(200, { dataDto: FeedResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -132,7 +136,9 @@ export class SellerFeedController {
     description: "판매자가 스토어 피드를 등록합니다.",
   })
   @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -169,7 +175,9 @@ export class SellerFeedController {
     description: "판매자가 등록한 스토어 피드를 수정합니다.",
   })
   @SwaggerResponse(200, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -210,7 +218,9 @@ export class SellerFeedController {
   @SwaggerResponse(200, {
     dataExample: createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })

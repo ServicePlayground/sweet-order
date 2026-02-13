@@ -94,7 +94,18 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
       }
 
       // 그 외 토큰 누락 등 일반 인증 실패
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+      // 토큰이 없는 경우 확인
+      const request = context.switchToHttp().getRequest();
+      const authHeader = request.headers?.authorization;
+      const hasToken =
+        authHeader && authHeader.startsWith("Bearer ") && authHeader.substring(7).trim();
+
+      if (!hasToken) {
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING);
+      }
+
+      // 토큰이 있지만 알 수 없는 에러인 경우
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
     }
 
     // 역할 검증 (메타데이터가 있고 역할이 지정된 경우에만 수행)

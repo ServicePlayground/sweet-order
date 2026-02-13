@@ -360,7 +360,7 @@ export class UserService {
     });
 
     if (!userInfo) {
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
     }
 
     // Authorization 헤더에서 access token 추출

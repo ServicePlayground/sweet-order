@@ -45,7 +45,6 @@ export const AUTH_ERROR_MESSAGES = {
   GOOGLE_ID_ALREADY_EXISTS: "이미 사용 중인 구글 계정입니다.",
   GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED: "구글 OAuth 토큰 교환 실패",
   THROTTLE_LIMIT_EXCEEDED: "ThrottlerException: Too Many Requests",
-  UNAUTHORIZED: "Unauthorized",
 } as const;
 
 /**

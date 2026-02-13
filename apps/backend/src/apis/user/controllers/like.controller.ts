@@ -38,7 +38,9 @@ export class UserLikeController {
     description: "상품에 좋아요를 추가합니다.",
   })
   @SwaggerResponse(201, { dataDto: LikeResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   @SwaggerResponse(409, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_ALREADY_EXISTS),
@@ -62,7 +64,9 @@ export class UserLikeController {
     description: "상품의 좋아요를 취소합니다.",
   })
   @SwaggerResponse(200, { dataDto: LikeResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_NOT_FOUND),
   })
@@ -85,7 +89,9 @@ export class UserLikeController {
     description: "스토어에 좋아요를 추가합니다.",
   })
   @SwaggerResponse(201, { dataDto: LikeResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   @SwaggerResponse(409, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.STORE_LIKE_ALREADY_EXISTS),
@@ -109,7 +115,9 @@ export class UserLikeController {
     description: "스토어의 좋아요를 취소합니다.",
   })
   @SwaggerResponse(200, { dataDto: LikeResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.STORE_LIKE_NOT_FOUND),
   })
