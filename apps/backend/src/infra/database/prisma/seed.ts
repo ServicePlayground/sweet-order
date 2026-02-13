@@ -724,7 +724,7 @@ async function main() {
   const stores = await upsertStores(users);
   const products = await upsertProducts(stores);
   const reviewCreatedCount = await seedProductReviews(users, products, stores);
-  const feedCreatedCount = await seedStoreFeeds(stores);
+  const feedCreatedCount = await seedStoreFeeds();
 
   console.log(`✅ Seed users created/retrieved: ${users.length}`);
   console.log(`✅ Stores created/retrieved: ${stores.length}`);
