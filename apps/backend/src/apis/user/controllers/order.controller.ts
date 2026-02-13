@@ -55,7 +55,7 @@ export class UserOrderController {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE),
   })
   @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED),
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PRODUCT_NOT_FOUND),
@@ -80,7 +80,7 @@ export class UserOrderController {
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
   @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED),
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),

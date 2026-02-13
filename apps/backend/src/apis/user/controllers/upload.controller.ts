@@ -62,7 +62,9 @@ export class UserUploadController {
     },
   })
   @SwaggerResponse(200, { dataDto: UploadFileResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })

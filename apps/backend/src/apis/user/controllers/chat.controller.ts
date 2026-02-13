@@ -57,7 +57,9 @@ export class UserChatController {
       "스토어와의 채팅방을 생성하거나 기존 채팅방을 조회합니다. 기존 채팅방이 있으면 해당 채팅방 ID를 반환합니다.",
   })
   @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.CHAT_ROOM_CREATED_RESPONSE })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -90,7 +92,9 @@ export class UserChatController {
       "사용자의 모든 채팅방 목록을 조회합니다. 마지막 메시지 시간 기준으로 정렬됩니다. 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: ChatRoomListResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -121,7 +125,9 @@ export class UserChatController {
     description: "채팅방 입장 시 사용자의 읽지 않은 메시지 수를 0으로 초기화합니다.",
   })
   @SwaggerResponse(200, { dataExample: { success: true } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
   })
@@ -139,7 +145,9 @@ export class UserChatController {
     description: "채팅방의 메시지 목록을 조회합니다. 페이지 기반 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: MessageListResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
   })

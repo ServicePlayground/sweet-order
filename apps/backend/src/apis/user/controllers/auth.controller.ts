@@ -349,7 +349,9 @@ export class UserAuthController {
   @SwaggerResponse(400, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
@@ -394,7 +396,9 @@ export class UserAuthController {
       "Authorization 헤더의 Access Token을 사용하여 현재 로그인한 사용자의 정보를 조회합니다. accessToken과 사용자 정보를 함께 반환합니다.",
   })
   @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.USER_DATA_RESPONSE })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
+  @SwaggerResponse(401, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
+  })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
   })
