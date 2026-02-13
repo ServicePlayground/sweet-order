@@ -59,6 +59,7 @@ export enum VisibleStatus {
 }
 
 export interface CakeSizeOption {
+  id: string;
   visible: VisibleStatus;
   description: string;
   displayName: string;
@@ -67,6 +68,7 @@ export interface CakeSizeOption {
 }
 
 export interface CakeFlavorOption {
+  id: string;
   visible: VisibleStatus;
   displayName: string;
   price: number;

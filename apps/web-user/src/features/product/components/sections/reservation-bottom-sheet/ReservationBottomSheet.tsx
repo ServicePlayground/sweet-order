@@ -3,30 +3,33 @@
 import { BottomSheet } from "@/apps/web-user/common/components/bottom-sheets/BottomSheet";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
-import { useRouter } from "next/navigation";
 import { ReservationBottomSheetProps } from "./types";
 import { useReservationBottomSheet } from "./useReservationBottomSheet";
 import { ReservationOptionsView } from "./ReservationOptionsView";
 import { ReservationCalendarView } from "./ReservationCalendarView";
 import { ReservationConfirmView } from "./ReservationConfirmView";
+import { useCreateOrder } from "@/apps/web-user/features/order/hooks/mutations/useCreateOrder";
+import { CreateOrderRequest } from "@/apps/web-user/features/order/types/order.type";
+import { useUploadFile } from "@/apps/web-user/features/upload/hooks/mutations/useUploadFile";
 
 export function ReservationBottomSheet({
   isOpen,
+  productId,
   price,
   cakeTitle,
   cakeImageUrl,
   cakeSizeOptions,
   cakeFlavorOptions,
-  cakeSize,
   productType,
-  productNoticeProducer,
-  productNoticeAddress,
   pickupAddress,
   pickupRoadAddress,
+  pickupZonecode,
+  pickupLatitude,
+  pickupLongitude,
   onClose,
-  onConfirm,
 }: ReservationBottomSheetProps) {
-  const router = useRouter();
+  const { mutate: createOrder, isPending: isCreatingOrder } = useCreateOrder();
+  const { mutateAsync: uploadFile } = useUploadFile();
   const {
     view,
     setView,
@@ -52,6 +55,7 @@ export function ReservationBottomSheet({
     setIsDeleteModalOpen,
     totalQuantity,
     totalPrice,
+    currentOptionPrice,
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
@@ -63,7 +67,6 @@ export function ReservationBottomSheet({
     handleConfirmCancel,
     handleClose,
     handleGoToConfirm,
-    handleFinalConfirm,
     handleQuantityChange,
     handleDeleteClick,
     handleConfirmDelete,
@@ -79,7 +82,6 @@ export function ReservationBottomSheet({
     cakeSizeOptions,
     cakeFlavorOptions,
     onClose,
-    onConfirm,
   });
 
   const getTitle = () => {
@@ -95,7 +97,9 @@ export function ReservationBottomSheet({
         <div className="px-[20px]">
           <div className="flex items-center justify-between pt-[14px]">
             <span className="text-sm text-gray-700">총 금액</span>
-            <span className="text-xl font-bold text-gray-900">{price.toLocaleString()}원</span>
+            <span className="text-xl font-bold text-gray-900">
+              {currentOptionPrice.toLocaleString()}원
+            </span>
           </div>
           <div className="py-[12px] flex gap-[8px]">
             <span className="w-[100px]">
@@ -138,31 +142,82 @@ export function ReservationBottomSheet({
         </div>
         <div className="py-[12px]">
           <Button
-            onClick={() => {
-              const payload = {
-                items: orderItems.map((item) => ({
-                  ...item,
-                  date: item.date ? item.date.toISOString() : null,
-                })),
+            onClick={async () => {
+              // 각 OrderItem의 이미지를 업로드하고 URL 받기
+              const itemsWithImageUrls = await Promise.all(
+                orderItems.map(async (item) => {
+                  // 각 항목의 이미지 File을 업로드하고 URL 받기
+                  let uploadedImageUrls: string[] = [];
+                  if (item.imageFiles && item.imageFiles.length > 0) {
+                    // 모든 이미지 File을 병렬로 업로드
+                    uploadedImageUrls = await Promise.all(
+                      item.imageFiles.map(async (file) => {
+                        const response = await uploadFile(file);
+                        return response.fileUrl;
+                      }),
+                    );
+                  }
+
+                  // 사이즈 옵션 정보 찾기
+                  const sizeOption = cakeSizeOptions?.find((opt) => opt.displayName === item.size);
+                  // 맛 옵션 정보 찾기
+                  const flavorOption = cakeFlavorOptions?.find(
+                    (opt) => opt.displayName === item.flavor,
+                  );
+
+                  return {
+                    pickupDate: item.date ? item.date.toISOString() : "",
+                    // 사이즈 옵션 정보 (있는 경우만)
+                    ...(sizeOption && {
+                      sizeId: sizeOption.id,
+                      sizeDisplayName: sizeOption.displayName,
+                      sizeLengthCm: sizeOption.lengthCm,
+                      sizeDescription: sizeOption.description,
+                      sizePrice: sizeOption.price,
+                    }),
+                    // 맛 옵션 정보 (있는 경우만)
+                    ...(flavorOption && {
+                      flavorId: flavorOption.id,
+                      flavorDisplayName: flavorOption.displayName,
+                      flavorPrice: flavorOption.price,
+                    }),
+                    // 기타 옵션
+                    ...(item.letteringMessage && {
+                      letteringMessage: item.letteringMessage,
+                    }),
+                    ...(item.requestMessage && {
+                      requestMessage: item.requestMessage,
+                    }),
+                    quantity: item.quantity,
+                    imageUrls: uploadedImageUrls,
+                  };
+                }),
+              );
+
+              // API 요청 데이터 구성
+              const orderRequest: CreateOrderRequest = {
+                productId,
                 totalQuantity,
                 totalPrice,
-                cakeTitle,
-                cakeSize,
-                cakeImageUrl,
-                price,
-                productType,
-                productNoticeProducer,
-                productNoticeAddress,
-                pickupAddress,
-                pickupRoadAddress,
+                // 픽업 정보 (있는 경우만)
+                ...(pickupAddress && { pickupAddress }),
+                ...(pickupRoadAddress && { pickupRoadAddress }),
+                ...(pickupZonecode && { pickupZonecode }),
+                ...(pickupLatitude !== undefined && { pickupLatitude }),
+                ...(pickupLongitude !== undefined && { pickupLongitude }),
+                items: itemsWithImageUrls,
               };
-              sessionStorage.setItem("reservationComplete", JSON.stringify(payload));
-              handleFinalConfirm();
-              router.push("/reservation/complete");
+
+              // API 호출
+              createOrder(orderRequest);
             }}
-            disabled={orderItems.length === 0}
+            disabled={orderItems.length === 0 || isCreatingOrder}
           >
-            {productType === "BASIC_CAKE" ? "예약하기" : "예약신청"}
+            {isCreatingOrder
+              ? "처리 중..."
+              : productType === "BASIC_CAKE"
+                ? "예약하기"
+                : "예약신청"}
           </Button>
         </div>
       </div>

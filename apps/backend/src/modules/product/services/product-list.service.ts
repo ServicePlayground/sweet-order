@@ -140,8 +140,17 @@ export class ProductListService {
    * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
    */
   async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType, productCategoryTypes } =
-      query;
+    const {
+      search,
+      page,
+      limit,
+      sortBy,
+      minPrice,
+      maxPrice,
+      storeId,
+      productType,
+      productCategoryTypes,
+    } = query;
 
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
       visibilityStatus: EnableStatus.ENABLE,
