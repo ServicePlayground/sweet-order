@@ -2,7 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { OrderCreateService } from "@apps/backend/modules/order/services/order-create.service";
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
 import { CreateOrderRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
-import { CreateOrderResponseDto, OrderResponseDto } from "@apps/backend/modules/order/dto/order-response.dto";
+import {
+  CreateOrderResponseDto,
+  OrderResponseDto,
+} from "@apps/backend/modules/order/dto/order-response.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -35,4 +38,3 @@ export class OrderService {
     return this.orderDetailService.getOrderById(orderId, user.sub);
   }
 }
-

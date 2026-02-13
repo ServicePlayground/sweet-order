@@ -97,7 +97,9 @@ export function ReservationBottomSheet({
         <div className="px-[20px]">
           <div className="flex items-center justify-between pt-[14px]">
             <span className="text-sm text-gray-700">총 금액</span>
-            <span className="text-xl font-bold text-gray-900">{currentOptionPrice.toLocaleString()}원</span>
+            <span className="text-xl font-bold text-gray-900">
+              {currentOptionPrice.toLocaleString()}원
+            </span>
           </div>
           <div className="py-[12px] flex gap-[8px]">
             <span className="w-[100px]">
@@ -141,75 +143,73 @@ export function ReservationBottomSheet({
         <div className="py-[12px]">
           <Button
             onClick={async () => {
-                // 각 OrderItem의 이미지를 업로드하고 URL 받기
-                const itemsWithImageUrls = await Promise.all(
-                  orderItems.map(async (item) => {
-                    // 각 항목의 이미지 File을 업로드하고 URL 받기
-                    let uploadedImageUrls: string[] = [];
-                    if (item.imageFiles && item.imageFiles.length > 0) {
-                      // 모든 이미지 File을 병렬로 업로드
-                      uploadedImageUrls = await Promise.all(
-                        item.imageFiles.map(async (file) => {
-                          const response = await uploadFile(file);
-                          return response.fileUrl;
-                        }),
-                      );
-                    }
-
-                    // 사이즈 옵션 정보 찾기
-                    const sizeOption = cakeSizeOptions?.find(
-                      (opt) => opt.displayName === item.size,
+              // 각 OrderItem의 이미지를 업로드하고 URL 받기
+              const itemsWithImageUrls = await Promise.all(
+                orderItems.map(async (item) => {
+                  // 각 항목의 이미지 File을 업로드하고 URL 받기
+                  let uploadedImageUrls: string[] = [];
+                  if (item.imageFiles && item.imageFiles.length > 0) {
+                    // 모든 이미지 File을 병렬로 업로드
+                    uploadedImageUrls = await Promise.all(
+                      item.imageFiles.map(async (file) => {
+                        const response = await uploadFile(file);
+                        return response.fileUrl;
+                      }),
                     );
-                    // 맛 옵션 정보 찾기
-                    const flavorOption = cakeFlavorOptions?.find(
-                      (opt) => opt.displayName === item.flavor,
-                    );
+                  }
 
-                    return {
-                      pickupDate: item.date ? item.date.toISOString() : "",
-                      // 사이즈 옵션 정보 (있는 경우만)
-                      ...(sizeOption && {
-                        sizeId: sizeOption.id,
-                        sizeDisplayName: sizeOption.displayName,
-                        sizeLengthCm: sizeOption.lengthCm,
-                        sizeDescription: sizeOption.description,
-                        sizePrice: sizeOption.price,
-                      }),
-                      // 맛 옵션 정보 (있는 경우만)
-                      ...(flavorOption && {
-                        flavorId: flavorOption.id,
-                        flavorDisplayName: flavorOption.displayName,
-                        flavorPrice: flavorOption.price,
-                      }),
-                      // 기타 옵션
-                      ...(item.letteringMessage && {
-                        letteringMessage: item.letteringMessage,
-                      }),
-                      ...(item.requestMessage && {
-                        requestMessage: item.requestMessage,
-                      }),
-                      quantity: item.quantity,
-                      imageUrls: uploadedImageUrls,
-                    };
-                  }),
-                );
+                  // 사이즈 옵션 정보 찾기
+                  const sizeOption = cakeSizeOptions?.find((opt) => opt.displayName === item.size);
+                  // 맛 옵션 정보 찾기
+                  const flavorOption = cakeFlavorOptions?.find(
+                    (opt) => opt.displayName === item.flavor,
+                  );
 
-                // API 요청 데이터 구성
-                const orderRequest: CreateOrderRequest = {
-                  productId,
-                  totalQuantity,
-                  totalPrice,
-                  // 픽업 정보 (있는 경우만)
-                  ...(pickupAddress && { pickupAddress }),
-                  ...(pickupRoadAddress && { pickupRoadAddress }),
-                  ...(pickupZonecode && { pickupZonecode }),
-                  ...(pickupLatitude !== undefined && { pickupLatitude }),
-                  ...(pickupLongitude !== undefined && { pickupLongitude }),
-                  items: itemsWithImageUrls,
-                };
+                  return {
+                    pickupDate: item.date ? item.date.toISOString() : "",
+                    // 사이즈 옵션 정보 (있는 경우만)
+                    ...(sizeOption && {
+                      sizeId: sizeOption.id,
+                      sizeDisplayName: sizeOption.displayName,
+                      sizeLengthCm: sizeOption.lengthCm,
+                      sizeDescription: sizeOption.description,
+                      sizePrice: sizeOption.price,
+                    }),
+                    // 맛 옵션 정보 (있는 경우만)
+                    ...(flavorOption && {
+                      flavorId: flavorOption.id,
+                      flavorDisplayName: flavorOption.displayName,
+                      flavorPrice: flavorOption.price,
+                    }),
+                    // 기타 옵션
+                    ...(item.letteringMessage && {
+                      letteringMessage: item.letteringMessage,
+                    }),
+                    ...(item.requestMessage && {
+                      requestMessage: item.requestMessage,
+                    }),
+                    quantity: item.quantity,
+                    imageUrls: uploadedImageUrls,
+                  };
+                }),
+              );
 
-                // API 호출
-                createOrder(orderRequest);
+              // API 요청 데이터 구성
+              const orderRequest: CreateOrderRequest = {
+                productId,
+                totalQuantity,
+                totalPrice,
+                // 픽업 정보 (있는 경우만)
+                ...(pickupAddress && { pickupAddress }),
+                ...(pickupRoadAddress && { pickupRoadAddress }),
+                ...(pickupZonecode && { pickupZonecode }),
+                ...(pickupLatitude !== undefined && { pickupLatitude }),
+                ...(pickupLongitude !== undefined && { pickupLongitude }),
+                items: itemsWithImageUrls,
+              };
+
+              // API 호출
+              createOrder(orderRequest);
             }}
             disabled={orderItems.length === 0 || isCreatingOrder}
           >

@@ -27,4 +27,3 @@ export function useOrderDetail(orderId: string) {
 
   return query;
 }
-

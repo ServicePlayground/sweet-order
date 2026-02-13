@@ -319,7 +319,8 @@ export function useReservationBottomSheet({
   // 현재 선택 중인 옵션의 가격 계산 (options 뷰에서 사용)
   const currentOptionPrice = useMemo(() => {
     const sizePrice = cakeSizeOptions?.find((s) => s.displayName === selectedSize)?.price ?? 0;
-    const flavorPrice = cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
+    const flavorPrice =
+      cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
     return price + sizePrice + flavorPrice;
   }, [price, selectedSize, selectedFlavor, cakeSizeOptions, cakeFlavorOptions]);
 

@@ -133,11 +133,11 @@ export class CreateOrderItemDto {
 
 /**
  * 주문 생성 요청 DTO
- * 
+ *
  * 하나의 주문은 하나의 상품(productId)에 대한 주문이지만,
  * 여러 개의 주문 항목(items)을 가질 수 있습니다.
  * 각 주문 항목은 서로 다른 옵션 조합(날짜/시간, 사이즈, 맛 등)을 가질 수 있습니다.
- * 
+ *
  * 예시:
  * - 같은 케이크를 1월 1일 오후 12시에 도시락 사이즈로 주문
  * - 같은 케이크를 1월 1일 오후 2시에 미니 사이즈로 주문
@@ -220,4 +220,3 @@ export class CreateOrderRequestDto {
   @Type(() => CreateOrderItemDto)
   items: CreateOrderItemDto[];
 }
-

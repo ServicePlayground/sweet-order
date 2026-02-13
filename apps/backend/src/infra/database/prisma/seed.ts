@@ -634,7 +634,7 @@ async function seedProductReviews(
  * - 세 번째 이후 스토어에도 피드가 없으면 FEED3를 재사용하여 생성
  * - 각 스토어별로 독립적으로 확인하여 생성
  */
-async function seedStoreFeeds(stores: Awaited<ReturnType<typeof upsertStores>>) {
+async function seedStoreFeeds() {
   // 데이터베이스에 존재하는 모든 스토어 조회
   const allStores = await prisma.store.findMany({
     orderBy: { createdAt: "asc" },

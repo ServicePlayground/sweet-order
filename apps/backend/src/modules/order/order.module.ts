@@ -14,4 +14,3 @@ import { OrderDetailService } from "@apps/backend/modules/order/services/order-d
   exports: [OrderService],
 })
 export class OrderModule {}
-

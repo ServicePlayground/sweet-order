@@ -1,5 +1,8 @@
 import { Order, OrderItem } from "@apps/backend/infra/database/prisma/generated/client";
-import { OrderItemResponseDto, OrderResponseDto } from "@apps/backend/modules/order/dto/order-response.dto";
+import {
+  OrderItemResponseDto,
+  OrderResponseDto,
+} from "@apps/backend/modules/order/dto/order-response.dto";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
 
 /**
@@ -71,4 +74,3 @@ export class OrderMapperUtil {
     } satisfies OrderResponseDto;
   }
 }
-

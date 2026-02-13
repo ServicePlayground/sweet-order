@@ -40,4 +40,3 @@ export class OrderDetailService {
     return OrderMapperUtil.mapToOrderResponse(order);
   }
 }
-

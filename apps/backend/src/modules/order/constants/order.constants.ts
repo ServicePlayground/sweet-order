@@ -84,4 +84,3 @@ export const SWAGGER_RESPONSE_EXAMPLES = {
     id: SWAGGER_EXAMPLES.ORDER_DATA.id,
   },
 } as const;
-

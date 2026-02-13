@@ -85,4 +85,3 @@ export interface OrderResponse {
   updatedAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   orderItems: OrderItemResponse[];
 }
-

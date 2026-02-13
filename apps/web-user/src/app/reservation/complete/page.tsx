@@ -36,10 +36,10 @@ export default function ReservationCompletePage() {
 
   // 주문 상세조회
   const { data: orderData, isLoading: isOrderLoading } = useOrderDetail(orderId || "");
-  
+
   // 상품 상세조회 (주문 데이터가 있을 때만)
   const { data: productData, isLoading: isProductLoading } = useProductDetail(
-    orderData?.productId || ""
+    orderData?.productId || "",
   );
 
   useEffect(() => {
@@ -88,19 +88,11 @@ export default function ReservationCompletePage() {
         <div className="h-full overflow-y-auto">
           {cakeImageUrl && (
             <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
-              <Image
-                src={cakeImageUrl}
-                alt={cakeTitle}
-                fill
-                className="object-cover"
-              />
+              <Image src={cakeImageUrl} alt={cakeTitle} fill className="object-cover" />
             </div>
           )}
           <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
-            {orderData.orderStatus === OrderStatus.CONFIRMED
-              ? "예약 완료"
-              : "예약신청 완료"}{" "}
-            🎉
+            {orderData.orderStatus === OrderStatus.CONFIRMED ? "예약 완료" : "예약신청 완료"} 🎉
           </p>
           {orderData.orderStatus === OrderStatus.PENDING && (
             <p className="flex items-center gap-[8px] mb-[20px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-light rounded-xl">
@@ -112,7 +104,10 @@ export default function ReservationCompletePage() {
             <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
               <span className="text-gray-500">픽업장소</span>
               <span className="text-gray-900">
-                {orderData.pickupRoadAddress || orderData.pickupAddress || productData.pickupRoadAddress || productData.pickupAddress}
+                {orderData.pickupRoadAddress ||
+                  orderData.pickupAddress ||
+                  productData.pickupRoadAddress ||
+                  productData.pickupAddress}
               </span>
             </p>
             <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
@@ -177,9 +172,7 @@ export default function ReservationCompletePage() {
                           <span className="text-xs text-gray-500">사이즈</span>
                           <p className="flex items-center justify-between text-2sm text-gray-900">
                             <span>{item.sizeDisplayName}</span>
-                            {sizePrice > 0 && (
-                              <span>+{sizePrice.toLocaleString()}원</span>
-                            )}
+                            {sizePrice > 0 && <span>+{sizePrice.toLocaleString()}원</span>}
                           </p>
                         </div>
                       )}
@@ -188,9 +181,7 @@ export default function ReservationCompletePage() {
                           <span className="text-xs text-gray-500">맛</span>
                           <p className="flex items-center justify-between text-2sm text-gray-900">
                             <span>{item.flavorDisplayName}</span>
-                            {flavorPrice > 0 && (
-                              <span>+{flavorPrice.toLocaleString()}원</span>
-                            )}
+                            {flavorPrice > 0 && <span>+{flavorPrice.toLocaleString()}원</span>}
                           </p>
                         </div>
                       )}

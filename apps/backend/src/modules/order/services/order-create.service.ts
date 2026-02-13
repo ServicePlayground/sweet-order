@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CreateOrderRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
 import {
@@ -171,4 +167,3 @@ export class OrderCreateService {
     });
   }
 }
-

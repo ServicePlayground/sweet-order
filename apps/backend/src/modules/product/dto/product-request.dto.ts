@@ -101,7 +101,8 @@ export class GetProductsRequestDto {
   productType?: ProductType;
 
   @ApiPropertyOptional({
-    description: "(필터) 상품 카테고리 타입 - 1개 또는 여러 개. 해당 타입 중 하나라도 가지면 조회 (생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진)",
+    description:
+      "(필터) 상품 카테고리 타입 - 1개 또는 여러 개. 해당 타입 중 하나라도 가지면 조회 (생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진)",
     enum: ProductCategoryType,
     isArray: true,
     example: [ProductCategoryType.BIRTHDAY],
@@ -534,7 +535,8 @@ export class CreateProductRequestDto {
   detailDescription?: string;
 
   @ApiPropertyOptional({
-    description: "상품 카테고리 타입 (없거나 여러 개) - 생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진",
+    description:
+      "상품 카테고리 타입 (없거나 여러 개) - 생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진",
     enum: ProductCategoryType,
     isArray: true,
     example: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
@@ -783,7 +785,8 @@ export class UpdateProductRequestDto {
   detailDescription?: string;
 
   @ApiPropertyOptional({
-    description: "상품 카테고리 타입 (없거나 여러 개) - 생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진. 빈 배열이면 전체 제거",
+    description:
+      "상품 카테고리 타입 (없거나 여러 개) - 생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진. 빈 배열이면 전체 제거",
     enum: ProductCategoryType,
     isArray: true,
     example: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
@@ -794,7 +797,8 @@ export class UpdateProductRequestDto {
   productCategoryTypes?: ProductCategoryType[];
 
   @ApiPropertyOptional({
-    description: "검색 태그 (없거나 여러 개) - 검색어로 상품 조회 시 상품명과 함께 검색됨. 빈 배열이면 전체 제거",
+    description:
+      "검색 태그 (없거나 여러 개) - 검색어로 상품 조회 시 상품명과 함께 검색됨. 빈 배열이면 전체 제거",
     type: [String],
     example: ["생일케이크", "초콜릿", "당일배송"],
   })

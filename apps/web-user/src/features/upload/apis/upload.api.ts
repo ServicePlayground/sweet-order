@@ -15,4 +15,3 @@ export const uploadApi = {
     return response.data.data;
   },
 };
-

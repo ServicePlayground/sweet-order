@@ -1,8 +1,5 @@
 import { userClient } from "@/apps/web-user/common/config/axios.config";
-import {
-  CreateOrderRequest,
-  OrderResponse,
-} from "@/apps/web-user/features/order/types/order.type";
+import { CreateOrderRequest, OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 
 export const orderApi = {
   // 주문 생성 (id만 반환)
@@ -16,4 +13,3 @@ export const orderApi = {
     return response.data.data;
   },
 };
-
