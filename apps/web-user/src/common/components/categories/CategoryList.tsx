@@ -1,0 +1,75 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Image from "next/image";
+
+interface Category {
+  id: string;
+  name: string;
+  image: string | null;
+}
+
+const MOCK_CATEGORIES: Category[] = [
+  { id: "1", name: "생일", image: null },
+  { id: "2", name: "연인", image: null },
+  { id: "3", name: "친구", image: null },
+  { id: "4", name: "직장", image: null },
+  { id: "5", name: "당일픽업", image: null },
+  { id: "6", name: "기념일", image: null },
+  { id: "7", name: "감사", image: null },
+  { id: "8", name: "축하", image: null },
+];
+
+export default function CategoryList() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.pageX - (scrollRef.current?.offsetLeft ?? 0));
+    setScrollLeft(scrollRef.current?.scrollLeft ?? 0);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    scrollRef.current.scrollLeft = scrollLeft - (x - startX);
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  return (
+    <div
+      ref={scrollRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      className={`flex gap-[10px] py-2 overflow-x-auto scrollbar-hide relative ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+    >
+      {MOCK_CATEGORIES.map((category) => (
+        <button
+          key={category.id}
+          type="button"
+          className="flex flex-col items-center gap-[6px] shrink-0"
+        >
+          <div className="w-[59px] h-[59px] rounded-full overflow-hidden bg-[#f5f5f5]">
+            {category.image && (
+              <Image
+                src={category.image}
+                alt={category.name}
+                width={59}
+                height={59}
+                className="object-cover w-full h-full"
+              />
+            )}
+          </div>
+          <span className="text-xs text-gray-700 select-none">{category.name}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
