@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { OrderItem, ReservationSelection, ViewType } from "./types";
+import { OrderItem, ViewType } from "./types";
 import {
   CakeFlavorOption,
   CakeSizeOption,
@@ -13,7 +13,6 @@ interface UseReservationBottomSheetProps {
   cakeSizeOptions?: CakeSizeOption[];
   cakeFlavorOptions?: CakeFlavorOption[];
   onClose: () => void;
-  onConfirm: (selection: ReservationSelection) => void;
 }
 
 /**
@@ -31,7 +30,6 @@ export function useReservationBottomSheet({
   cakeSizeOptions,
   cakeFlavorOptions,
   onClose,
-  onConfirm,
 }: UseReservationBottomSheetProps) {
   // ========================================
   // 뷰 상태 관리
@@ -202,6 +200,8 @@ export function useReservationBottomSheet({
       letteringMessage,
       requestMessage,
       quantity: 1,
+      imageFiles: [...attachedImages], // 현재 선택된 이미지 File 목록 저장
+      imageUrls: imageUrls, // 미리보기용 로컬 URL 목록 저장
     };
 
     if (editingIndex !== null) {
@@ -218,13 +218,6 @@ export function useReservationBottomSheet({
     setIsAddingFromConfirm(false);
     setIsEditingFromConfirm(false);
     setView("confirm");
-  };
-
-  // 최종 확정 처리 (부모로 데이터 전달)
-  const handleFinalConfirm = () => {
-    onConfirm({ items: orderItems });
-    setView("options");
-    setOrderItems([]);
   };
 
   // 주문 수량 증감 처리
@@ -260,6 +253,8 @@ export function useReservationBottomSheet({
     setSelectedCream(item.cream);
     setLetteringMessage(item.letteringMessage);
     setRequestMessage(item.requestMessage);
+    // 편집 시 기존 이미지 File 복원
+    setAttachedImages(item.imageFiles || []);
     setEditingIndex(index);
     setIsAddingFromConfirm(false);
     setIsEditingFromConfirm(true);
@@ -321,6 +316,13 @@ export function useReservationBottomSheet({
     0,
   );
 
+  // 현재 선택 중인 옵션의 가격 계산 (options 뷰에서 사용)
+  const currentOptionPrice = useMemo(() => {
+    const sizePrice = cakeSizeOptions?.find((s) => s.displayName === selectedSize)?.price ?? 0;
+    const flavorPrice = cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
+    return price + sizePrice + flavorPrice;
+  }, [price, selectedSize, selectedFlavor, cakeSizeOptions, cakeFlavorOptions]);
+
   const isOptionsValid =
     selectedDate &&
     selectedSize &&
@@ -369,6 +371,7 @@ export function useReservationBottomSheet({
     // Computed
     totalQuantity,
     totalPrice,
+    currentOptionPrice,
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
@@ -382,7 +385,6 @@ export function useReservationBottomSheet({
     handleConfirmCancel,
     handleClose,
     handleGoToConfirm,
-    handleFinalConfirm,
     handleQuantityChange,
     handleDeleteClick,
     handleConfirmDelete,

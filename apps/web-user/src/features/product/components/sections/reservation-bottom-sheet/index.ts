@@ -1,2 +1,2 @@
 export { ReservationBottomSheet } from "./ReservationBottomSheet";
-export type { OrderItem, ReservationSelection, ReservationBottomSheetProps } from "./types";
+export type { OrderItem, ReservationBottomSheetProps } from "./types";

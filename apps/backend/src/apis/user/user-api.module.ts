@@ -4,6 +4,7 @@ import { UserProductController } from "@apps/backend/apis/user/controllers/produ
 import { UserUploadController } from "@apps/backend/apis/user/controllers/upload.controller";
 import { UserStoreController } from "@apps/backend/apis/user/controllers/store.controller";
 import { UserChatController } from "@apps/backend/apis/user/controllers/chat.controller";
+import { UserOrderController } from "@apps/backend/apis/user/controllers/order.controller";
 import { AuthModule } from "@apps/backend/modules/auth/auth.module";
 import { ProductModule } from "@apps/backend/modules/product/product.module";
 import { UploadModule } from "@apps/backend/modules/upload/upload.module";
@@ -15,6 +16,7 @@ import { ReviewModule } from "@apps/backend/modules/review/review.module";
 import { UserReviewController } from "@apps/backend/apis/user/controllers/review.controller";
 import { LikeModule } from "@apps/backend/modules/like/like.module";
 import { UserLikeController } from "@apps/backend/apis/user/controllers/like.controller";
+import { OrderModule } from "@apps/backend/modules/order/order.module";
 
 /**
  * User API 모듈
@@ -32,6 +34,7 @@ import { UserLikeController } from "@apps/backend/apis/user/controllers/like.con
     FeedModule,
     ReviewModule,
     LikeModule,
+    OrderModule,
   ],
   controllers: [
     UserUploadController,
@@ -42,6 +45,7 @@ import { UserLikeController } from "@apps/backend/apis/user/controllers/like.con
     UserFeedController,
     UserReviewController,
     UserLikeController,
+    UserOrderController,
   ],
 })
 export class UserApiModule {}
