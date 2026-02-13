@@ -13,6 +13,7 @@ import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/Select
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
 import { ProductCreationCategorySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCategorySection";
+import { ProductCreationSearchTagSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationSearchTagSection";
 
 export interface ProductCreationBasicInfoSectionProps {
   form: IProductForm;
@@ -20,6 +21,7 @@ export interface ProductCreationBasicInfoSectionProps {
   onSalesStatusChange: (value: EnableStatus) => void;
   onVisibilityStatusChange: (value: EnableStatus) => void;
   onProductCategoryTypesChange: (value: ProductCategoryType[]) => void;
+  onSearchTagsChange: (value: string[]) => void;
   onMainImageChange: (url: string) => void;
   onAdditionalImagesChange: (urls: string[]) => void;
   onChange: (
@@ -35,6 +37,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   onSalesStatusChange,
   onVisibilityStatusChange,
   onProductCategoryTypesChange,
+  onSearchTagsChange,
   onMainImageChange,
   onAdditionalImagesChange,
   onChange,
@@ -96,6 +99,13 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       <ProductCreationCategorySection
         value={form.productCategoryTypes ?? []}
         onChange={onProductCategoryTypesChange}
+        disabled={disabled}
+      />
+
+      {/* 검색 태그 설정 */}
+      <ProductCreationSearchTagSection
+        value={form.searchTags ?? []}
+        onChange={onSearchTagsChange}
         disabled={disabled}
       />
 

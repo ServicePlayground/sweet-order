@@ -143,6 +143,9 @@ export class ProductUpdateService {
     if (updateProductDto.productCategoryTypes !== undefined) {
       updateData.productCategoryTypes = updateProductDto.productCategoryTypes;
     }
+    if (updateProductDto.searchTags !== undefined) {
+      updateData.searchTags = updateProductDto.searchTags;
+    }
     if (updateProductDto.productNoticeFoodType !== undefined) {
       updateData.productNoticeFoodType = updateProductDto.productNoticeFoodType;
     }

@@ -190,6 +190,13 @@ export class ProductResponseDto {
   productCategoryTypes: ProductCategoryType[];
 
   @ApiPropertyOptional({
+    description: "검색 태그 목록 (없을 수 있고, 여러 개 가능)",
+    type: [String],
+    example: ["생일케이크", "초콜릿", "당일배송"],
+  })
+  searchTags: string[];
+
+  @ApiPropertyOptional({
     description: "상세 설명 (HTML)",
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.detailDescription,
   })

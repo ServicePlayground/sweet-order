@@ -544,6 +544,16 @@ export class CreateProductRequestDto {
   @IsEnum(ProductCategoryType, { each: true })
   productCategoryTypes?: ProductCategoryType[];
 
+  @ApiPropertyOptional({
+    description: "검색 태그 (없거나 여러 개) - 검색어로 상품 조회 시 상품명과 함께 검색됨",
+    type: [String],
+    example: ["생일케이크", "초콜릿", "당일배송"],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  searchTags?: string[];
+
   @ApiProperty({
     description: "식품의 유형",
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.productNoticeFoodType,
@@ -782,6 +792,16 @@ export class UpdateProductRequestDto {
   @IsArray()
   @IsEnum(ProductCategoryType, { each: true })
   productCategoryTypes?: ProductCategoryType[];
+
+  @ApiPropertyOptional({
+    description: "검색 태그 (없거나 여러 개) - 검색어로 상품 조회 시 상품명과 함께 검색됨. 빈 배열이면 전체 제거",
+    type: [String],
+    example: ["생일케이크", "초콜릿", "당일배송"],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  searchTags?: string[];
 
   @ApiPropertyOptional({
     description: "식품의 유형",

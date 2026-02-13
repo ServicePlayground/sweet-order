@@ -95,6 +95,7 @@ export interface Product {
   imageUploadEnabled: ImageUploadEnabled;
   productType: ProductType;
   productCategoryTypes: ProductCategoryType[]; // 카테고리 (없거나 여러 개)
+  searchTags: string[]; // 검색 태그 (없거나 여러 개)
   detailDescription?: string;
   productNoticeFoodType: string;
   productNoticeProducer: string;

@@ -112,6 +112,7 @@ export class ProductListService {
     if (search) {
       searchConditions.push(
         { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
+        { searchTags: { has: search } }, // 검색 태그에서 검색 (정확히 일치)
       );
     }
 

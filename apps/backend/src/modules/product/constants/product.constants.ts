@@ -139,6 +139,7 @@ export const SWAGGER_EXAMPLES = {
     imageUploadEnabled: EnableStatus.ENABLE,
     productType: "CUSTOM_CAKE",
     productCategoryTypes: ["BIRTHDAY", "SIMPLE"],
+    searchTags: ["생일케이크", "초콜릿", "당일배송"],
     // 상세 정보
     detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
     // 고시정보 (식품 판매 시 법적 필수 항목)

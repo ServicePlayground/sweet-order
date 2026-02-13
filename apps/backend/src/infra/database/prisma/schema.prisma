@@ -91,6 +91,7 @@ model Product {
   visibilityStatus  EnableStatus @map("visibility_status") // 노출 상태
   productType           ProductType @default(BASIC_CAKE) @map("product_type") // 상품 타입 (기본/커스텀)
   productCategoryTypes  ProductCategoryType[] @default([]) @map("product_category_types") // 상품 카테고리 타입 (없거나 여러 개)
+  searchTags            String[] @default([]) @map("search_tags") // 검색 태그 (없거나 여러 개)
   detailDescription     String? @map("detail_description") // 상세 설명
 
   // 비즈니스 필드 - 케이크 옵션

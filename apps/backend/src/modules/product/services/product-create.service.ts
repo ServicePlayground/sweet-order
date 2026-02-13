@@ -99,6 +99,7 @@ export class ProductCreateService {
         imageUploadEnabled: createProductDto.imageUploadEnabled,
         productType,
         productCategoryTypes: createProductDto.productCategoryTypes ?? [],
+        searchTags: createProductDto.searchTags ?? [],
         detailDescription: createProductDto.detailDescription,
         productNumber,
         productNoticeFoodType: createProductDto.productNoticeFoodType,

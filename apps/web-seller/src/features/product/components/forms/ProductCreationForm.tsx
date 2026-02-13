@@ -44,6 +44,7 @@ export const defaultForm: IProductForm = {
   letteringMaxLength: 0,
   imageUploadEnabled: EnableStatus.ENABLE,
   productCategoryTypes: [],
+  searchTags: [],
   detailDescription: "",
   productNoticeFoodType: "",
   productNoticeProducer: "",
@@ -187,6 +188,13 @@ export const ProductCreationForm: React.FC<Props> = ({
     onChange?.(next);
   };
 
+  const handleSearchTagsChange = (value: string[]) => {
+    if (disabled) return;
+    const next = { ...form, searchTags: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
   const handleDetailDescriptionChange = (value: string) => {
     const next = { ...form, detailDescription: value };
     setForm(next);
@@ -249,6 +257,7 @@ export const ProductCreationForm: React.FC<Props> = ({
                 onSalesStatusChange={handleSalesStatusChange}
                 onVisibilityStatusChange={handleVisibilityStatusChange}
                 onProductCategoryTypesChange={handleProductCategoryTypesChange}
+                onSearchTagsChange={handleSearchTagsChange}
                 onMainImageChange={handleMainImageChange}
                 onAdditionalImagesChange={handleAdditionalImagesChange}
                 onChange={handleChange}

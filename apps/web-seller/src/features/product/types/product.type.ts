@@ -64,6 +64,8 @@ export interface IProductForm {
   salePrice: number;
   salesStatus: EnableStatus;
   visibilityStatus: EnableStatus;
+  productCategoryTypes?: ProductCategoryType[]; // 카테고리 (없거나 여러 개)
+  searchTags?: string[]; // 검색 태그 (없거나 여러 개)
 
   // 케이크 옵션
   cakeSizeOptions?: CakeSizeOption[];
@@ -75,7 +77,6 @@ export interface IProductForm {
   letteringMaxLength: number;
   imageUploadEnabled: EnableStatus;
   productType?: ProductType;
-  productCategoryTypes?: ProductCategoryType[]; // 카테고리 (없거나 여러 개)
 
   // 상세정보
   detailDescription?: string;
@@ -194,6 +195,7 @@ export interface IUpdateProductRequest {
   imageUploadEnabled?: EnableStatus;
   productType?: ProductType;
   productCategoryTypes?: ProductCategoryType[];
+  searchTags?: string[];
   detailDescription?: string;
   productNoticeFoodType?: string;
   productNoticeProducer?: string;
