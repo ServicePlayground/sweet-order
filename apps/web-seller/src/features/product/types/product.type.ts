@@ -13,6 +13,21 @@ export enum ProductType {
   CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
 }
 
+/** 상품 카테고리 타입 (복수 선택 가능) */
+export enum ProductCategoryType {
+  BIRTHDAY = "BIRTHDAY", // 생일
+  LOVER = "LOVER", // 연인
+  FRIEND = "FRIEND", // 친구
+  FAMILY = "FAMILY", // 가족
+  ANNIVERSARY = "ANNIVERSARY", // 기념일
+  SAME_DAY_PICKUP = "SAME_DAY_PICKUP", // 당일픽업
+  LETTERING = "LETTERING", // 레터링
+  CHARACTER = "CHARACTER", // 캐릭터
+  SIMPLE = "SIMPLE", // 심플
+  FLOWER = "FLOWER", // 꽃
+  PHOTO = "PHOTO", // 사진
+}
+
 /**
  * 케이크 사이즈 표시명 enum
  */
@@ -49,6 +64,8 @@ export interface IProductForm {
   salePrice: number;
   salesStatus: EnableStatus;
   visibilityStatus: EnableStatus;
+  productCategoryTypes?: ProductCategoryType[]; // 카테고리 (없거나 여러 개)
+  searchTags?: string[]; // 검색 태그 (없거나 여러 개)
 
   // 케이크 옵션
   cakeSizeOptions?: CakeSizeOption[];
@@ -116,6 +133,7 @@ export interface IGetProductsListParams {
   visibilityStatus?: EnableStatus;
   minPrice?: number;
   maxPrice?: number;
+  productCategoryTypes?: ProductCategoryType[];
 }
 
 /**
@@ -176,6 +194,8 @@ export interface IUpdateProductRequest {
   letteringMaxLength?: number;
   imageUploadEnabled?: EnableStatus;
   productType?: ProductType;
+  productCategoryTypes?: ProductCategoryType[];
+  searchTags?: string[];
   detailDescription?: string;
   productNoticeFoodType?: string;
   productNoticeProducer?: string;

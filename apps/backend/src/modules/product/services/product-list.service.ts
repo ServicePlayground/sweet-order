@@ -7,6 +7,7 @@ import {
 import {
   EnableStatus,
   ProductType,
+  ProductCategoryType,
   SortBy,
   PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
@@ -97,7 +98,7 @@ export class ProductListService {
   }
 
   /**
-   * 공통 필터 조건 추가 (검색어, 가격, 상품 타입)
+   * 공통 필터 조건 추가 (검색어, 가격, 상품 타입, 상품 카테고리 타입)
    */
   private addCommonFilters(
     where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] },
@@ -105,11 +106,13 @@ export class ProductListService {
     minPrice?: number,
     maxPrice?: number,
     productType?: ProductType,
+    productCategoryTypes?: ProductCategoryType[],
   ): void {
     const searchConditions: Prisma.ProductWhereInput[] = [];
     if (search) {
       searchConditions.push(
         { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
+        { searchTags: { has: search } }, // 검색 태그에서 검색 (정확히 일치)
       );
     }
 
@@ -123,6 +126,10 @@ export class ProductListService {
       where.productType = productType;
     }
 
+    if (productCategoryTypes?.length) {
+      where.productCategoryTypes = { hasSome: productCategoryTypes };
+    }
+
     if (searchConditions.length > 0) {
       where.AND = where.AND || [];
       where.AND.push({ OR: searchConditions });
@@ -133,7 +140,8 @@ export class ProductListService {
    * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
    */
   async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType } = query;
+    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType, productCategoryTypes } =
+      query;
 
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
       visibilityStatus: EnableStatus.ENABLE,
@@ -143,7 +151,7 @@ export class ProductListService {
       where.storeId = storeId;
     }
 
-    this.addCommonFilters(where, search, minPrice, maxPrice, productType);
+    this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
     const totalItems = await this.prisma.product.count({ where });
 
@@ -251,6 +259,7 @@ export class ProductListService {
       salesStatus,
       visibilityStatus,
       productType,
+      productCategoryTypes,
     } = query;
 
     const userStores = await this.prisma.store.findMany({
@@ -292,7 +301,7 @@ export class ProductListService {
       where.visibilityStatus = visibilityStatus;
     }
 
-    this.addCommonFilters(where, search, minPrice, maxPrice, productType);
+    this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
     const totalItems = await this.prisma.product.count({ where });
 

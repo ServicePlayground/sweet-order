@@ -1,4 +1,4 @@
-import { PrismaClient } from "./generated/client";
+import { PrismaClient, ProductCategoryType } from "./generated/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -149,6 +149,8 @@ const SEED_PRODUCT_BASE = {
     REQUIRED: "OPTIONAL",
     MAX_LENGTH: 20,
   },
+  SEARCH_TAGS: ["생일케이크", "초콜릿", "당일배송"],
+  PRODUCT_CATEGORY_TYPES: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
   DETAIL_DESCRIPTION: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
   PRODUCT_NOTICE: {
     FOOD_TYPE: "케이크류",
@@ -491,6 +493,8 @@ async function upsertProducts(stores: Awaited<ReturnType<typeof upsertStores>>) 
         letteringMaxLength: SEED_PRODUCT_BASE.LETTERING.MAX_LENGTH,
         imageUploadEnabled,
         productType,
+        productCategoryTypes: SEED_PRODUCT_BASE.PRODUCT_CATEGORY_TYPES,
+        searchTags: SEED_PRODUCT_BASE.SEARCH_TAGS,
         detailDescription: SEED_PRODUCT_BASE.DETAIL_DESCRIPTION,
         productNumber,
         productNoticeFoodType: SEED_PRODUCT_BASE.PRODUCT_NOTICE.FOOD_TYPE,

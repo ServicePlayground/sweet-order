@@ -13,6 +13,7 @@ import {
   OptionRequired,
   CakeSizeOption,
   CakeFlavorOption,
+  ProductCategoryType,
 } from "@/apps/web-seller/features/product/types/product.type";
 import { ProductCreationBasicInfoSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationBasicInfoSection";
 import { ProductCreationCakeOptionsSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCakeOptionsSection";
@@ -42,6 +43,8 @@ export const defaultForm: IProductForm = {
   letteringRequired: OptionRequired.OPTIONAL,
   letteringMaxLength: 0,
   imageUploadEnabled: EnableStatus.ENABLE,
+  productCategoryTypes: [],
+  searchTags: [],
   detailDescription: "",
   productNoticeFoodType: "",
   productNoticeProducer: "",
@@ -178,6 +181,20 @@ export const ProductCreationForm: React.FC<Props> = ({
     onChange?.(next);
   };
 
+  const handleProductCategoryTypesChange = (value: ProductCategoryType[]) => {
+    if (disabled) return;
+    const next = { ...form, productCategoryTypes: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleSearchTagsChange = (value: string[]) => {
+    if (disabled) return;
+    const next = { ...form, searchTags: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
   const handleDetailDescriptionChange = (value: string) => {
     const next = { ...form, detailDescription: value };
     setForm(next);
@@ -239,9 +256,12 @@ export const ProductCreationForm: React.FC<Props> = ({
                 errors={errors}
                 onSalesStatusChange={handleSalesStatusChange}
                 onVisibilityStatusChange={handleVisibilityStatusChange}
+                onProductCategoryTypesChange={handleProductCategoryTypesChange}
+                onSearchTagsChange={handleSearchTagsChange}
                 onMainImageChange={handleMainImageChange}
                 onAdditionalImagesChange={handleAdditionalImagesChange}
                 onChange={handleChange}
+                disabled={disabled}
               />
 
               {/* 케이크 옵션 섹션 */}

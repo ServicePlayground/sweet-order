@@ -3,6 +3,7 @@ import {
   OptionRequired,
   EnableStatus,
   ProductType,
+  ProductCategoryType,
   CakeSizeDisplayName,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
@@ -179,6 +180,21 @@ export class ProductResponseDto {
     example: ProductType.CUSTOM_CAKE,
   })
   productType: ProductType;
+
+  @ApiPropertyOptional({
+    description: "상품 카테고리 타입 목록 (없을 수 있고, 여러 개 가능)",
+    enum: ProductCategoryType,
+    isArray: true,
+    example: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
+  })
+  productCategoryTypes: ProductCategoryType[];
+
+  @ApiPropertyOptional({
+    description: "검색 태그 목록 (없을 수 있고, 여러 개 가능)",
+    type: [String],
+    example: ["생일케이크", "초콜릿", "당일배송"],
+  })
+  searchTags: string[];
 
   @ApiPropertyOptional({
     description: "상세 설명 (HTML)",
