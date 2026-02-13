@@ -1,5 +1,9 @@
 import React from "react";
-import { IProductForm, EnableStatus } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  IProductForm,
+  EnableStatus,
+  ProductCategoryType,
+} from "@/apps/web-seller/features/product/types/product.type";
 import {
   SALES_STATUS_OPTIONS,
   VISIBILITY_STATUS_OPTIONS,
@@ -8,17 +12,20 @@ import { MultipleImageUpload } from "@/apps/web-seller/common/components/images/
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { ProductCreationCategorySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCategorySection";
 
 export interface ProductCreationBasicInfoSectionProps {
   form: IProductForm;
   errors: Partial<Record<keyof IProductForm, string>>;
   onSalesStatusChange: (value: EnableStatus) => void;
   onVisibilityStatusChange: (value: EnableStatus) => void;
+  onProductCategoryTypesChange: (value: ProductCategoryType[]) => void;
   onMainImageChange: (url: string) => void;
   onAdditionalImagesChange: (urls: string[]) => void;
   onChange: (
     key: keyof IProductForm,
   ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  disabled?: boolean;
 }
 
 // 상품 등록 폼 - 기본 정보 섹션
@@ -27,9 +34,11 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   errors,
   onSalesStatusChange,
   onVisibilityStatusChange,
+  onProductCategoryTypesChange,
   onMainImageChange,
   onAdditionalImagesChange,
   onChange,
+  disabled = false,
 }) => {
   // images 배열에서 첫 번째 요소를 대표 이미지로, 나머지를 추가 이미지로 분리
   const mainImage = form.images?.[0] || "";
@@ -82,6 +91,13 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
         />
         {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
       </div>
+
+      {/* 카테고리 설정 (중복 선택 가능) */}
+      <ProductCreationCategorySection
+        value={form.productCategoryTypes ?? []}
+        onChange={onProductCategoryTypesChange}
+        disabled={disabled}
+      />
 
       <div>
         <MultipleImageUpload

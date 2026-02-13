@@ -140,6 +140,9 @@ export class ProductUpdateService {
     if (updateProductDto.detailDescription !== undefined) {
       updateData.detailDescription = updateProductDto.detailDescription;
     }
+    if (updateProductDto.productCategoryTypes !== undefined) {
+      updateData.productCategoryTypes = updateProductDto.productCategoryTypes;
+    }
     if (updateProductDto.productNoticeFoodType !== undefined) {
       updateData.productNoticeFoodType = updateProductDto.productNoticeFoodType;
     }

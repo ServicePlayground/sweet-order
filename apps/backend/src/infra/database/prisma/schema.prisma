@@ -89,8 +89,9 @@ model Product {
   salePrice         Int @map("sale_price") // 판매 가격
   salesStatus       EnableStatus @map("sales_status") // 판매 상태
   visibilityStatus  EnableStatus @map("visibility_status") // 노출 상태
-  productType       ProductType @default(BASIC_CAKE) @map("product_type") // 상품 타입
-  detailDescription String? @map("detail_description") // 상세 설명
+  productType           ProductType @default(BASIC_CAKE) @map("product_type") // 상품 타입 (기본/커스텀)
+  productCategoryTypes  ProductCategoryType[] @default([]) @map("product_category_types") // 상품 카테고리 타입 (없거나 여러 개)
+  detailDescription     String? @map("detail_description") // 상세 설명
 
   // 비즈니스 필드 - 케이크 옵션
   cakeSizeOptions   Json? @map("cake_size_options") // 케이크 사이즈 옵션
@@ -358,6 +359,21 @@ enum EnableStatus {
 enum ProductType {
   BASIC_CAKE  // 기본 케이크
   CUSTOM_CAKE // 커스텀 케이크
+}
+
+// 상품 카테고리 타입
+enum ProductCategoryType {
+  BIRTHDAY       // 생일
+  LOVER          // 연인
+  FRIEND         // 친구
+  FAMILY         // 가족
+  ANNIVERSARY    // 기념일
+  SAME_DAY_PICKUP // 당일픽업
+  LETTERING      // 레터링
+  CHARACTER      // 캐릭터
+  SIMPLE         // 심플
+  FLOWER         // 꽃
+  PHOTO          // 사진
 }
 
 enum UserRole {

@@ -98,6 +98,7 @@ export class ProductCreateService {
         letteringMaxLength: createProductDto.letteringMaxLength,
         imageUploadEnabled: createProductDto.imageUploadEnabled,
         productType,
+        productCategoryTypes: createProductDto.productCategoryTypes ?? [],
         detailDescription: createProductDto.detailDescription,
         productNumber,
         productNoticeFoodType: createProductDto.productNoticeFoodType,

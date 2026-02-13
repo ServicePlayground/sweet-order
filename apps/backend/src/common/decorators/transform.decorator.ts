@@ -27,6 +27,22 @@ export function StringToArray() {
 }
 
 /**
+ * 쿼리 파라미터를 선택적 배열로 변환합니다.
+ * 값이 없으면 undefined(필터 미적용), 단일 값이면 1개짜리 배열, 여러 값이면 배열 그대로 반환합니다.
+ *
+ * 사용법:
+ * - undefined / null / "" → undefined
+ * - "BIRTHDAY" → ["BIRTHDAY"]
+ * - ["BIRTHDAY", "LOVER"] → ["BIRTHDAY", "LOVER"]
+ */
+export function OptionalStringToArray() {
+  return Transform(({ value }) => {
+    if (value === undefined || value === null || value === "") return undefined;
+    return Array.isArray(value) ? value : [value];
+  });
+}
+
+/**
  * 문자열을 숫자로 변환하는 Transform 데코레이터
  *
  * 사용법:

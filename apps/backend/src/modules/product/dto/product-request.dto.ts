@@ -12,12 +12,14 @@ import {
 import {
   StringToNumber,
   OptionalStringToNumber,
+  OptionalStringToArray,
 } from "@apps/backend/common/decorators/transform.decorator";
 import {
   SortBy,
   OptionRequired,
   EnableStatus,
   ProductType,
+  ProductCategoryType,
   CakeSizeDisplayName,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
@@ -97,6 +99,18 @@ export class GetProductsRequestDto {
   @IsOptional()
   @IsEnum(ProductType)
   productType?: ProductType;
+
+  @ApiPropertyOptional({
+    description: "(필터) 상품 카테고리 타입 - 1개 또는 여러 개. 해당 타입 중 하나라도 가지면 조회 (생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진)",
+    enum: ProductCategoryType,
+    isArray: true,
+    example: [ProductCategoryType.BIRTHDAY],
+  })
+  @IsOptional()
+  @OptionalStringToArray()
+  @IsArray()
+  @IsEnum(ProductCategoryType, { each: true })
+  productCategoryTypes?: ProductCategoryType[];
 }
 
 /**
@@ -189,6 +203,18 @@ export class GetSellerProductsRequestDto {
   @IsOptional()
   @IsEnum(ProductType)
   productType?: ProductType;
+
+  @ApiPropertyOptional({
+    description: "(필터) 상품 카테고리 타입 - 1개 또는 여러 개. 해당 타입 중 하나라도 가지면 조회",
+    enum: ProductCategoryType,
+    isArray: true,
+    example: [ProductCategoryType.BIRTHDAY],
+  })
+  @IsOptional()
+  @OptionalStringToArray()
+  @IsArray()
+  @IsEnum(ProductCategoryType, { each: true })
+  productCategoryTypes?: ProductCategoryType[];
 }
 
 /**
@@ -507,6 +533,17 @@ export class CreateProductRequestDto {
   @IsString()
   detailDescription?: string;
 
+  @ApiPropertyOptional({
+    description: "상품 카테고리 타입 (없거나 여러 개) - 생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진",
+    enum: ProductCategoryType,
+    isArray: true,
+    example: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(ProductCategoryType, { each: true })
+  productCategoryTypes?: ProductCategoryType[];
+
   @ApiProperty({
     description: "식품의 유형",
     example: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.productNoticeFoodType,
@@ -734,6 +771,17 @@ export class UpdateProductRequestDto {
   @IsOptional()
   @IsString()
   detailDescription?: string;
+
+  @ApiPropertyOptional({
+    description: "상품 카테고리 타입 (없거나 여러 개) - 생일, 연인, 친구, 가족, 기념일, 당일픽업, 레터링, 캐릭터, 심플, 꽃, 사진. 빈 배열이면 전체 제거",
+    enum: ProductCategoryType,
+    isArray: true,
+    example: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(ProductCategoryType, { each: true })
+  productCategoryTypes?: ProductCategoryType[];
 
   @ApiPropertyOptional({
     description: "식품의 유형",
