@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { StoreMapperUtil } from "@apps/backend/modules/store/utils/store-mapper.util";
@@ -7,6 +7,7 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
+import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 
 /**
  * 스토어 목록 조회 서비스
@@ -27,7 +28,7 @@ export class StoreListService {
    * @returns 스토어 상세 정보
    */
   async getStoreByIdForUser(storeId: string, user?: JwtVerifiedPayload) {
-    const store = await this.prisma.store.findFirst({
+    const store = await this.prisma.store.findUnique({
       where: { id: storeId },
     });
 
@@ -40,8 +41,11 @@ export class StoreListService {
     if (user?.sub) {
       try {
         isLiked = await this.likeStoreDetailService.isStoreLiked(user.sub, storeId);
-      } catch (error) {
-        // 좋아요 확인 실패 시 null로 처리 (에러 무시)
+      } catch (error: unknown) {
+        // 스토어 삭제 등 경합으로 좋아요 조회 시점에 대상이 사라진 경우에만 null 처리
+        if (!(error instanceof NotFoundException)) {
+          throw error;
+        }
         isLiked = null;
       }
     }
@@ -57,7 +61,8 @@ export class StoreListService {
 
   /**
    * 사용자의 스토어 목록 조회 (판매자용)
-   * @param userId 사용자 ID
+   * 현재 로그인한 사용자(판매자)가 자신의 스토어 목록을 조회합니다.
+   * @param userId 사용자 ID (현재 로그인한 사용자)
    * @param query 페이지네이션 쿼리 파라미터
    * @returns 스토어 목록
    */
@@ -79,34 +84,11 @@ export class StoreListService {
       take: limit,
     });
 
-    // 좋아요 여부 확인 (로그인한 사용자의 경우, N+1 방지)
-    const storeIds = stores.map((store) => store.id);
-    const likedStoreIds = new Set<string>();
-    if (storeIds.length > 0) {
-      const likes = await this.prisma.storeLike.findMany({
-        where: {
-          userId,
-          storeId: {
-            in: storeIds,
-          },
-        },
-        select: {
-          storeId: true,
-        },
-      });
-      likes.forEach((like) => likedStoreIds.add(like.storeId));
-    }
-
     // 스토어 응답 매핑
     const storeResponses = (await StoreMapperUtil.mapToStoreResponse(
       stores,
       this.prisma,
     )) as StoreResponseDto[];
-
-    // 좋아요 여부 추가
-    storeResponses.forEach((store) => {
-      store.isLiked = likedStoreIds.has(store.id);
-    });
 
     // 페이지네이션 메타 정보
     const meta = calculatePaginationMeta(page, limit, totalItems);
@@ -125,43 +107,31 @@ export class StoreListService {
    * @returns 스토어 상세 정보
    */
   async getStoreByIdForSeller(storeId: string, user: JwtVerifiedPayload) {
-    const store = await this.prisma.store.findFirst({
+    // 스토어 소유권 확인
+    await StoreOwnershipUtil.verifyStoreOwnership(this.prisma, storeId, user.sub);
+
+    const store = await this.prisma.store.findUnique({
       where: { id: storeId },
-      select: {
-        id: true,
-        userId: true,
-      },
     });
 
     if (!store) {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    // 권한 확인: 스토어 소유자인지 확인
-    if (store.userId !== user.sub) {
-      throw new UnauthorizedException(STORE_ERROR_MESSAGES.FORBIDDEN);
-    }
-
-    // 전체 스토어 정보 조회
-    const fullStore = await this.prisma.store.findFirst({
-      where: { id: storeId },
-    });
-
-    if (!fullStore) {
-      throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    // 좋아요 여부 확인 (로그인한 사용자의 경우)
+    // 좋아요 여부 확인 (현재 로그인한 사용자(판매자)가 자신의 스토어를 좋아요 했는지 확인)
     let isLiked: boolean | null = null;
     try {
       isLiked = await this.likeStoreDetailService.isStoreLiked(user.sub, storeId);
-    } catch (error) {
-      // 좋아요 확인 실패 시 null로 처리 (에러 무시)
+    } catch (error: unknown) {
+      // 스토어 삭제 등 경합으로 좋아요 조회 시점에 대상이 사라진 경우에만 null 처리
+      if (!(error instanceof NotFoundException)) {
+        throw error;
+      }
       isLiked = null;
     }
 
     const storeResponse = (await StoreMapperUtil.mapToStoreResponse(
-      fullStore,
+      store,
       this.prisma,
     )) as StoreResponseDto;
     storeResponse.isLiked = isLiked;

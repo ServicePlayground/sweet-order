@@ -1,4 +1,10 @@
-import { Injectable, ExecutionContext, CanActivate, UnauthorizedException } from "@nestjs/common";
+import {
+  Injectable,
+  ExecutionContext,
+  CanActivate,
+  UnauthorizedException,
+  ForbiddenException,
+} from "@nestjs/common";
 import { Observable } from "rxjs";
 import { Reflector } from "@nestjs/core";
 import { AuthGuard as BaseAuthGuard } from "@nestjs/passport";
@@ -112,7 +118,7 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
     if (authMetadata?.roles && authMetadata.roles.length > 0) {
       const hasRequiredRole = authMetadata.roles.includes(user.role);
       if (!hasRequiredRole) {
-        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED);
+        throw new ForbiddenException(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED);
       }
     }
 

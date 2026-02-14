@@ -128,8 +128,12 @@ export class LikeUserListService {
   ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
     if (query.type === LikeType.PRODUCT) {
       return this.getMyProductLikesForUser(userId, query);
-    } else {
+    } else if (query.type === LikeType.STORE) {
       return this.getMyStoreLikesForUser(userId, query);
+    } else {
+      // 타입이 명시되지 않은 경우 기본값으로 상품 목록 반환
+      // (DTO 검증에서 이미 enum 검증이 이루어지므로 이 경우는 발생하지 않음)
+      return this.getMyProductLikesForUser(userId, query);
     }
   }
 }

@@ -70,10 +70,10 @@ export class SellerProductController {
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   async getProducts(
@@ -97,10 +97,10 @@ export class SellerProductController {
   })
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async getProductDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     return await this.productService.getProductDetailForSeller(id, req.user);
@@ -119,10 +119,10 @@ export class SellerProductController {
   })
   @SwaggerResponse(201, { dataDto: CreateProductResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   @SwaggerResponse(404, {
@@ -147,10 +147,10 @@ export class SellerProductController {
   })
   @SwaggerResponse(200, { dataDto: UpdateProductResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async updateProduct(
     @Param("id") id: string,
@@ -174,10 +174,10 @@ export class SellerProductController {
     dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED),
   })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async deleteProduct(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     await this.productService.deleteProductForSeller(id, req.user);

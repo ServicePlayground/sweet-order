@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
+import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 
 /**
  * 주문 상세조회 서비스
@@ -22,15 +23,17 @@ export class OrderDetailService {
     // 주문 소유권 확인
     await OrderOwnershipUtil.verifyOrderUserOwnership(this.prisma, orderId, userId);
 
-    // 주문 조회 (orderItems 포함)
+    // 주문 항목 정보 포함하여 조회
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        orderItems: true,
-      },
+      include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
     });
 
-    return OrderMapperUtil.mapToOrderResponse(order!);
+    if (!order) {
+      throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    return OrderMapperUtil.mapToOrderResponse(order);
   }
 
   /**
@@ -42,19 +45,18 @@ export class OrderDetailService {
    */
   async getOrderByIdForSeller(orderId: string, userId: string): Promise<OrderResponseDto> {
     // 주문 소유권 확인
-    await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId, {
-      id: true,
-      userId: true,
-    });
+    await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId);
 
-    // 주문 조회 (orderItems 포함)
+    // 주문 항목 정보 포함하여 조회
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        orderItems: true,
-      },
+      include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
     });
 
-    return OrderMapperUtil.mapToOrderResponse(order!);
+    if (!order) {
+      throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    return OrderMapperUtil.mapToOrderResponse(order);
   }
 }

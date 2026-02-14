@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
+  CreateOrderItemDto,
   CreateOrderRequestDto,
   CreateOrderResponseDto,
 } from "@apps/backend/modules/order/dto/order-create.dto";
@@ -20,6 +21,173 @@ import {
 @Injectable()
 export class OrderCreateService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private parseSizeOptions(options: unknown): Array<{
+    id: string;
+    visible: EnableStatus;
+    displayName: string;
+    lengthCm?: number;
+    description?: string;
+    price: number;
+  }> {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+
+    return options
+      .map((option) => {
+        if (!option || typeof option !== "object") {
+          return null;
+        }
+
+        const candidate = option as Record<string, unknown>;
+        if (
+          typeof candidate.id !== "string" ||
+          typeof candidate.visible !== "string" ||
+          typeof candidate.displayName !== "string" ||
+          typeof candidate.price !== "number"
+        ) {
+          return null;
+        }
+
+        return {
+          id: candidate.id,
+          visible: candidate.visible as EnableStatus,
+          displayName: candidate.displayName,
+          lengthCm: typeof candidate.lengthCm === "number" ? candidate.lengthCm : undefined,
+          description:
+            typeof candidate.description === "string" ? candidate.description : undefined,
+          price: candidate.price,
+        };
+      })
+      .filter((option): option is NonNullable<typeof option> => option !== null);
+  }
+
+  private parseFlavorOptions(options: unknown): Array<{
+    id: string;
+    visible: EnableStatus;
+    displayName: string;
+    price: number;
+  }> {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+
+    return options
+      .map((option) => {
+        if (!option || typeof option !== "object") {
+          return null;
+        }
+
+        const candidate = option as Record<string, unknown>;
+        if (
+          typeof candidate.id !== "string" ||
+          typeof candidate.visible !== "string" ||
+          typeof candidate.displayName !== "string" ||
+          typeof candidate.price !== "number"
+        ) {
+          return null;
+        }
+
+        return {
+          id: candidate.id,
+          visible: candidate.visible as EnableStatus,
+          displayName: candidate.displayName,
+          price: candidate.price,
+        };
+      })
+      .filter((option): option is NonNullable<typeof option> => option !== null);
+  }
+
+  private validateAndNormalizeItem(
+    item: CreateOrderItemDto,
+    sizeOptionMap: Map<
+      string,
+      {
+        id: string;
+        visible: EnableStatus;
+        displayName: string;
+        lengthCm?: number;
+        description?: string;
+        price: number;
+      }
+    >,
+    flavorOptionMap: Map<
+      string,
+      {
+        id: string;
+        visible: EnableStatus;
+        displayName: string;
+        price: number;
+      }
+    >,
+    baseSalePrice: number,
+  ) {
+    const hasSizePayload =
+      item.sizeDisplayName !== undefined ||
+      item.sizeLengthCm !== undefined ||
+      item.sizeDescription !== undefined ||
+      item.sizePrice !== undefined;
+    const hasFlavorPayload = item.flavorDisplayName !== undefined || item.flavorPrice !== undefined;
+
+    let selectedSize: {
+      id: string;
+      displayName: string;
+      lengthCm?: number;
+      description?: string;
+      price: number;
+    } | null = null;
+
+    if (item.sizeId) {
+      const matchedSize = sizeOptionMap.get(item.sizeId);
+      if (!matchedSize || matchedSize.visible !== EnableStatus.ENABLE) {
+        throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
+      }
+      selectedSize = {
+        id: matchedSize.id,
+        displayName: matchedSize.displayName,
+        lengthCm: matchedSize.lengthCm,
+        description: matchedSize.description,
+        price: matchedSize.price,
+      };
+    } else if (hasSizePayload) {
+      throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
+    }
+
+    let selectedFlavor: { id: string; displayName: string; price: number } | null = null;
+    if (item.flavorId) {
+      const matchedFlavor = flavorOptionMap.get(item.flavorId);
+      if (!matchedFlavor || matchedFlavor.visible !== EnableStatus.ENABLE) {
+        throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
+      }
+      selectedFlavor = {
+        id: matchedFlavor.id,
+        displayName: matchedFlavor.displayName,
+        price: matchedFlavor.price,
+      };
+    } else if (hasFlavorPayload) {
+      throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
+    }
+
+    const itemPrice = baseSalePrice + (selectedSize?.price ?? 0) + (selectedFlavor?.price ?? 0);
+
+    return {
+      pickupDate: new Date(item.pickupDate),
+      sizeId: selectedSize?.id ?? null,
+      sizeDisplayName: selectedSize?.displayName ?? null,
+      sizeLengthCm: selectedSize?.lengthCm ?? null,
+      sizeDescription: selectedSize?.description ?? null,
+      sizePrice: selectedSize?.price ?? null,
+      flavorId: selectedFlavor?.id ?? null,
+      flavorDisplayName: selectedFlavor?.displayName ?? null,
+      flavorPrice: selectedFlavor?.price ?? null,
+      letteringMessage: item.letteringMessage ?? null,
+      requestMessage: item.requestMessage ?? null,
+      quantity: item.quantity,
+      itemPrice,
+      imageUrls: item.imageUrls ?? [],
+    };
+  }
 
   /**
    * 주문 생성 (사용자용)
@@ -74,98 +242,115 @@ export class OrderCreateService {
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_TOTAL_QUANTITY);
     }
 
-    // 총 금액 검증 (기본 가격 + 사이즈 추가 가격(없으면 0) + 맛 추가 가격(없으면 0)) * 수량
-    const calculatedTotalPrice = items.reduce((sum, item) => {
-      const sizePrice = item.sizePrice ?? 0;
-      const flavorPrice = item.flavorPrice ?? 0;
-      const itemPrice = product.salePrice + sizePrice + flavorPrice;
-      return sum + itemPrice * item.quantity;
-    }, 0);
+    const sizeOptionMap = new Map(
+      this.parseSizeOptions(product.cakeSizeOptions).map((option) => [option.id, option]),
+    );
+    const flavorOptionMap = new Map(
+      this.parseFlavorOptions(product.cakeFlavorOptions).map((option) => [option.id, option]),
+    );
+    const normalizedItems = items.map((item) =>
+      this.validateAndNormalizeItem(item, sizeOptionMap, flavorOptionMap, product.salePrice),
+    );
+
+    // 총 금액 검증 (서버 기준 옵션 가격으로 계산)
+    const calculatedTotalPrice = normalizedItems.reduce(
+      (sum, item) => sum + item.itemPrice * item.quantity,
+      0,
+    );
 
     if (calculatedTotalPrice !== totalPrice) {
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_TOTAL_PRICE);
     }
 
     // 주문 생성 (트랜잭션)
-    return await this.prisma.$transaction(async (tx) => {
-      // 주문 번호 생성 (예: ORD-20240101-001)
-      const now = new Date();
-      const dateStr = now.toISOString().split("T")[0].replace(/-/g, "");
+    // 주문 번호 중복 방지를 위해 최대 10회 재시도
+    const maxRetries = 10;
+    let retryCount = 0;
 
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(now);
-      endOfDay.setHours(23, 59, 59, 999);
+    while (retryCount < maxRetries) {
+      try {
+        return await this.prisma.$transaction(async (tx) => {
+          // 주문 번호 생성 (예: ORD-20240101-001)
+          const now = new Date();
+          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
 
-      const todayOrderCount = await tx.order.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
-        },
-      });
+          const startOfDay = new Date(now);
+          startOfDay.setUTCHours(0, 0, 0, 0);
+          const endOfDay = new Date(now);
+          endOfDay.setUTCHours(23, 59, 59, 999);
 
-      const sequence = String(todayOrderCount + 1).padStart(3, "0");
-      const orderNumber = `ORD-${dateStr}-${sequence}`;
+          const todayOrderCount = await tx.order.count({
+            where: {
+              createdAt: {
+                gte: startOfDay,
+                lte: endOfDay,
+              },
+            },
+          });
 
-      // 상품 타입에 따라 주문 상태 결정
-      // 일반 케이크(BASIC_CAKE): 예약확정(CONFIRMED)
-      // 주문제작 케이크(CUSTOM_CAKE): 예약중(PENDING)
-      const orderStatus =
-        product.productType === ProductType.BASIC_CAKE
-          ? OrderStatus.CONFIRMED
-          : OrderStatus.PENDING;
+          // 재시도 시 sequence에 retryCount를 더하여 중복 방지
+          const sequence = String(todayOrderCount + 1 + retryCount).padStart(3, "0");
+          const orderNumber = `ORD-${dateStr}-${sequence}`;
 
-      const order = await tx.order.create({
-        data: {
-          userId,
-          productId,
-          storeId: product.storeId,
-          orderNumber,
-          totalQuantity,
-          totalPrice,
-          pickupAddress: pickupAddress ?? null,
-          pickupRoadAddress: pickupRoadAddress ?? null,
-          pickupZonecode: pickupZonecode ?? null,
-          pickupLatitude: pickupLatitude ?? null,
-          pickupLongitude: pickupLongitude ?? null,
-          orderStatus,
-          orderItems: {
-            create: items.map((item) => {
-              // 가격 계산: 기본 가격 + 사이즈 추가 가격(없으면 0) + 맛 추가 가격(없으면 0)
-              const sizePrice = item.sizePrice ?? 0;
-              const flavorPrice = item.flavorPrice ?? 0;
-              const itemPrice = product.salePrice + sizePrice + flavorPrice;
-              return {
-                pickupDate: new Date(item.pickupDate),
-                // 사이즈 옵션 정보 (옵션이 없는 상품의 경우 null)
-                sizeId: item.sizeId ?? null,
-                sizeDisplayName: item.sizeDisplayName ?? null,
-                sizeLengthCm: item.sizeLengthCm ?? null,
-                sizeDescription: item.sizeDescription ?? null,
-                sizePrice: item.sizePrice ?? null,
-                // 맛 옵션 정보 (옵션이 없는 상품의 경우 null)
-                flavorId: item.flavorId ?? null,
-                flavorDisplayName: item.flavorDisplayName ?? null,
-                flavorPrice: item.flavorPrice ?? null,
-                // 기타 옵션
-                letteringMessage: item.letteringMessage ?? null,
-                requestMessage: item.requestMessage ?? null,
-                quantity: item.quantity,
-                itemPrice, // 개별 항목 가격 저장
-                imageUrls: item.imageUrls ?? [],
-              };
-            }),
-          },
-        },
-        include: {
-          orderItems: true,
-        },
-      });
+          // 상품 타입에 따라 주문 상태 결정
+          // 일반 케이크(BASIC_CAKE): 예약확정(CONFIRMED)
+          // 주문제작 케이크(CUSTOM_CAKE): 예약중(PENDING)
+          const orderStatus =
+            product.productType === ProductType.BASIC_CAKE
+              ? OrderStatus.CONFIRMED
+              : OrderStatus.PENDING;
 
-      // 주문 ID만 반환
-      return { id: order.id };
-    });
+          const order = await tx.order.create({
+            data: {
+              userId,
+              productId,
+              storeId: product.storeId,
+              orderNumber,
+              totalQuantity,
+              totalPrice,
+              pickupAddress: pickupAddress ?? null,
+              pickupRoadAddress: pickupRoadAddress ?? null,
+              pickupZonecode: pickupZonecode ?? null,
+              pickupLatitude: pickupLatitude ?? null,
+              pickupLongitude: pickupLongitude ?? null,
+              orderStatus,
+              orderItems: {
+                create: normalizedItems,
+              },
+            },
+            include: {
+              orderItems: true,
+            },
+          });
+
+          // 주문 ID만 반환
+          return { id: order.id };
+        });
+      } catch (error: any) {
+        // 주문 번호 중복 에러인 경우 재시도
+        if (error?.code === "P2002") {
+          const rawTarget = error?.meta?.target;
+          const targetText = Array.isArray(rawTarget)
+            ? rawTarget.join(",")
+            : String(rawTarget ?? "");
+          const isOrderNumberConflict =
+            targetText.includes("order_number") || targetText.includes("orderNumber");
+
+          if (!rawTarget || isOrderNumberConflict) {
+            retryCount++;
+            if (retryCount >= maxRetries) {
+              throw new BadRequestException(ORDER_ERROR_MESSAGES.ORDER_CREATE_FAILED);
+            }
+            // 짧은 지연 후 재시도
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            continue;
+          }
+        }
+        // 다른 에러는 그대로 throw
+        throw error;
+      }
+    }
+
+    throw new BadRequestException(ORDER_ERROR_MESSAGES.ORDER_CREATE_FAILED);
   }
 }

@@ -13,6 +13,15 @@ import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/produc
 export class ProductUpdateService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private isOptionWithId(value: unknown): value is Record<string, unknown> & { id: string } {
+    return Boolean(
+      value &&
+      typeof value === "object" &&
+      "id" in value &&
+      typeof (value as { id: unknown }).id === "string",
+    );
+  }
+
   /**
    * 케이크 옵션용 랜덤 ID 생성
    * - 생성 시 한 번만 부여되고 이후에는 변경되지 않도록 사용
@@ -26,14 +35,14 @@ export class ProductUpdateService {
    * 케이크 옵션에 ID 부여 (기존 ID 유지, 새 옵션에는 새 ID 생성)
    */
   private processCakeOptionsWithIds(
-    existingOptions: any[],
+    existingOptions: unknown[],
     newOptions: Array<{ id?: string }>,
     prefix: "size" | "flavor",
   ): Array<{ id: string }> {
-    const existingOptionsById = new Map<string, any>();
+    const existingOptionsById = new Map<string, Record<string, unknown> & { id: string }>();
 
     for (const option of existingOptions) {
-      if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
+      if (this.isOptionWithId(option)) {
         existingOptionsById.set(option.id, option);
       }
     }
@@ -92,7 +101,9 @@ export class ProductUpdateService {
       updateData.visibilityStatus = updateProductDto.visibilityStatus;
     }
     if (updateProductDto.cakeSizeOptions !== undefined) {
-      const existingSizeOptions: any[] = (product?.cakeSizeOptions as any[]) ?? [];
+      const existingSizeOptions = Array.isArray(product?.cakeSizeOptions)
+        ? product.cakeSizeOptions
+        : [];
       const nextSizeOptions = this.processCakeOptionsWithIds(
         existingSizeOptions,
         updateProductDto.cakeSizeOptions ?? [],
@@ -103,7 +114,9 @@ export class ProductUpdateService {
     }
 
     if (updateProductDto.cakeFlavorOptions !== undefined) {
-      const existingFlavorOptions: any[] = (product?.cakeFlavorOptions as any[]) ?? [];
+      const existingFlavorOptions = Array.isArray(product?.cakeFlavorOptions)
+        ? product.cakeFlavorOptions
+        : [];
       const nextFlavorOptions = this.processCakeOptionsWithIds(
         existingFlavorOptions,
         updateProductDto.cakeFlavorOptions ?? [],

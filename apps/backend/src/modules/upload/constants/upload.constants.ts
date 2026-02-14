@@ -10,7 +10,6 @@ export const UPLOAD_CONSTANTS = {
     "image/png",
     "image/gif",
     "image/webp",
-    "image/svg+xml",
     // 문서
     "application/pdf",
     "application/msword",
@@ -28,7 +27,6 @@ export const UPLOAD_CONSTANTS = {
     ".png",
     ".gif",
     ".webp",
-    ".svg",
     ".pdf",
     ".doc",
     ".docx",

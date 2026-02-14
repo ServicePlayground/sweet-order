@@ -3,7 +3,12 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
+import { FeedSanitizeUtil } from "@apps/backend/modules/feed/utils/feed-sanitize.util";
 
+/**
+ * 피드 수정 서비스
+ * 피드 수정 관련 로직을 담당합니다.
+ */
 @Injectable()
 export class FeedUpdateService {
   constructor(private readonly prisma: PrismaService) {}
@@ -11,9 +16,20 @@ export class FeedUpdateService {
   /**
    * 피드 수정 (판매자용)
    */
-  async updateFeed(feedId: string, updateFeedDto: UpdateFeedRequestDto, user: JwtVerifiedPayload) {
+  async updateFeed(
+    storeId: string,
+    feedId: string,
+    updateFeedDto: UpdateFeedRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
     // 피드 소유권 확인
-    await FeedOwnershipUtil.verifyFeedOwnership(this.prisma, feedId, user.sub, { userId: true });
+    await FeedOwnershipUtil.verifyFeedOwnership(
+      this.prisma,
+      feedId,
+      user.sub,
+      { userId: true },
+      storeId,
+    );
 
     const updatedFeed = await this.prisma.storeFeed.update({
       where: {
@@ -21,7 +37,7 @@ export class FeedUpdateService {
       },
       data: {
         title: updateFeedDto.title,
-        content: updateFeedDto.content,
+        content: FeedSanitizeUtil.sanitizeHtml(updateFeedDto.content),
       },
     });
 

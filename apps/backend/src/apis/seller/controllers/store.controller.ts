@@ -134,7 +134,7 @@ export class SellerStoreController {
   @ApiOperation({
     summary: "(로그인 필요) 내 스토어 목록 조회",
     description:
-      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 페이지네이션을 지원합니다. 각 스토어의 좋아요 여부(isLiked)도 함께 반환됩니다.",
+      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   @SwaggerAuthResponses()
@@ -159,10 +159,10 @@ export class SellerStoreController {
   })
   @SwaggerResponse(200, { dataDto: StoreResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     return await this.storeService.getStoreByIdForSeller(id, req.user);
@@ -180,10 +180,10 @@ export class SellerStoreController {
   })
   @SwaggerResponse(200, { dataDto: UpdateStoreResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async updateStore(
     @Param("id") id: string,

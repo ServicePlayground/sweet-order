@@ -16,6 +16,8 @@ import { ChatService } from "../chat.service";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { MessageResponseDto } from "../dto/chat-message-list.dto";
+import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
+import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
 
 /**
  * WebSocket 게이트웨이
@@ -91,8 +93,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       `[🔌 연결 시도] handleConnection called - socketId: ${client.id}, origin: ${origin}, transport: ${transport}, remoteAddress: ${remoteAddress}`,
     );
     this.logger.log(`[🔌 연결 시도] userAgent: ${userAgent}`);
-    this.logger.log(`[🔌 연결 시도] handshake query: ${JSON.stringify(client.handshake.query)}`);
-    this.logger.log(`[🔌 연결 시도] handshake auth: ${JSON.stringify(client.handshake.auth)}`);
+    this.logger.log(
+      `[🔌 연결 시도] handshake query keys: ${Object.keys(client.handshake.query || {}).join(",")}`,
+    );
+    // 민감정보(토큰)가 포함될 수 있어 auth 전체 payload는 로그에 남기지 않습니다.
+    this.logger.log(
+      `[🔌 연결 시도] handshake auth keys: ${Object.keys((client.handshake.auth as Record<string, unknown>) || {}).join(",")}`,
+    );
 
     try {
       // JWT 토큰 추출 및 검증
@@ -213,26 +220,49 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * 채팅방 조인
    */
   @SubscribeMessage("join-room")
-  handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
+  async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
     const userId = client.data.userId;
+    const userType = client.data.userType;
     const { roomId } = data;
 
     this.logger.log(
       `[📥 이벤트 수신] join-room - socketId: ${client.id}, userId: ${userId || "없음"}, roomId: ${roomId || "없음"}`,
     );
 
-    if (!userId || !roomId) {
+    if (!userId || !userType || !roomId) {
       this.logger.warn(
-        `[❌ 잘못된 요청] join-room - userId: ${userId || "없음"}, roomId: ${roomId || "없음"}`,
+        `[❌ 잘못된 요청] join-room - userId: ${userId || "없음"}, userType: ${userType || "없음"}, roomId: ${roomId || "없음"}`,
       );
       return { error: "Invalid request" };
     }
 
-    client.join(`room:${roomId}`);
-    this.logger.log(
-      `[✅ 채팅방 조인] User ${userId} joined room ${roomId} - socketId: ${client.id}`,
-    );
-    return { success: true, roomId };
+    try {
+      // 채팅방 존재/권한 검증 없이 join을 허용하면, roomId를 아는 다른 사용자가 메시지를 도청할 수 있음
+      const chatRoom = await this.prisma.chatRoom.findUnique({
+        where: { id: roomId },
+      });
+
+      if (!chatRoom) {
+        return { error: CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND };
+      }
+
+      await ChatPermissionUtil.verifyChatRoomAccess(chatRoom, userId, userType, this.prisma);
+
+      client.join(`room:${roomId}`);
+      this.logger.log(
+        `[✅ 채팅방 조인] User ${userId} joined room ${roomId} - socketId: ${client.id}`,
+      );
+      return { success: true, roomId };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `[❌ 채팅방 조인 거부] join-room - socketId: ${client.id}, userId: ${userId}, roomId: ${roomId}, error: ${errorMessage}`,
+      );
+      if (error instanceof Error && error.stack) {
+        this.logger.debug(`[join-room 디버그] stack: ${error.stack}`);
+      }
+      return { error: CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND };
+    }
   }
 
   /**

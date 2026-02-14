@@ -61,8 +61,11 @@ export class SellerOrderController {
   })
   @SwaggerResponse(200, { dataDto: OrderListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   async getOrders(
     @Query() query: GetSellerOrdersRequestDto,
@@ -83,8 +86,11 @@ export class SellerOrderController {
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
@@ -108,8 +114,11 @@ export class SellerOrderController {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED),
   })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),

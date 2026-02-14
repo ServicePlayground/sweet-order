@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   GetSellerOrdersRequestDto,
@@ -9,6 +9,7 @@ import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
+import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 
 /**
  * 주문 목록 조회 서비스
@@ -57,7 +58,7 @@ export class OrderListService {
     // 스토어 필터
     if (storeId) {
       if (!userStoreIds.includes(storeId)) {
-        throw new Error("해당 스토어에 대한 권한이 없습니다.");
+        throw new ForbiddenException(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED);
       }
       where.storeId = storeId;
     }
@@ -114,7 +115,7 @@ export class OrderListService {
     // 페이지네이션
     const skip = (page - 1) * limit;
 
-    // 주문 조회 (orderItems, product, user 포함)
+    // 주문 조회
     const orders = await this.prisma.order.findMany({
       where,
       orderBy,
@@ -122,30 +123,13 @@ export class OrderListService {
       take: limit,
       include: {
         orderItems: true,
-        product: {
-          select: {
-            id: true,
-            name: true,
-            images: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            name: true,
-            nickname: true,
-          },
-        },
       },
     });
 
     // DTO로 변환
-    const data: OrderResponseDto[] = orders.map((order) => {
-      const orderResponse = OrderMapperUtil.mapToOrderResponse(order);
-
-      // 추가 정보 포함 (product, user 정보는 별도로 관리하지 않지만 필요시 확장 가능)
-      return orderResponse;
-    });
+    const data: OrderResponseDto[] = orders.map((order) =>
+      OrderMapperUtil.mapToOrderResponse(order),
+    );
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
 

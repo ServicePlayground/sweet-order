@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { ProductService as ProductDataService } from "@apps/backend/modules/product/services/product.service";
 import {
   GetProductsRequestDto,
   GetSellerProductsRequestDto,
@@ -7,43 +6,55 @@ import {
 import { CreateProductRequestDto } from "@apps/backend/modules/product/dto/product-create.dto";
 import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { ProductListService } from "@apps/backend/modules/product/services/product-list.service";
+import { ProductDetailService } from "@apps/backend/modules/product/services/product-detail.service";
+import { ProductCreateService } from "@apps/backend/modules/product/services/product-create.service";
+import { ProductUpdateService } from "@apps/backend/modules/product/services/product-update.service";
+import { ProductDeleteService } from "@apps/backend/modules/product/services/product-delete.service";
 
 /**
  * 상품 서비스
- *
- * 모든 상품 관련 기능을 통합하여 제공하는 메인 서비스입니다.
- * ProductDataService를 조합하여 사용합니다.
+ * 사용자용 상품 조회, 검색, 필터링 등의 비즈니스 로직을 처리합니다.
  */
 @Injectable()
 export class ProductService {
-  constructor(private readonly productDataService: ProductDataService) {}
+  constructor(
+    private readonly productListService: ProductListService,
+    private readonly productDetailService: ProductDetailService,
+    private readonly productCreateService: ProductCreateService,
+    private readonly productUpdateService: ProductUpdateService,
+    private readonly productDeleteService: ProductDeleteService,
+  ) {}
 
   /**
    * 상품 목록 조회 (사용자용)
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    */
   async getProductsForUser(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    return this.productDataService.getProductsForUser(query, user);
+    return this.productListService.getProductsForUser(query, user);
   }
 
   /**
    * 상품 상세 조회 (사용자용)
    */
   async getProductDetailForUser(id: string, user?: JwtVerifiedPayload) {
-    return this.productDataService.getProductDetailForUser(id, user);
+    return this.productDetailService.getProductDetailForUser(id, user);
   }
 
   /**
-   * 상품 목록 조회 (판매자용)
+   * 판매자용 상품 목록 조회 (판매자용)
+   * 자신이 소유한 스토어의 상품만 조회합니다.
    */
   async getProductsForSeller(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
-    return this.productDataService.getProductsForSeller(query, user);
+    return this.productListService.getProductsForSeller(query, user);
   }
 
   /**
-   * 상품 상세 조회 (판매자용)
+   * 판매자용 상품 상세 조회 (판매자용)
+   * 자신이 소유한 스토어의 상품만 조회 가능합니다.
    */
   async getProductDetailForSeller(id: string, user: JwtVerifiedPayload) {
-    return this.productDataService.getProductDetailForSeller(id, user);
+    return this.productDetailService.getProductDetailForSeller(id, user);
   }
 
   /**
@@ -53,7 +64,7 @@ export class ProductService {
     createProductDto: CreateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return this.productDataService.createProductForSeller(createProductDto, user);
+    return this.productCreateService.createProductForSeller(createProductDto, user);
   }
 
   /**
@@ -64,13 +75,13 @@ export class ProductService {
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return this.productDataService.updateProductForSeller(id, updateProductDto, user);
+    return this.productUpdateService.updateProductForSeller(id, updateProductDto, user);
   }
 
   /**
    * 상품 삭제 (판매자용)
    */
   async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
-    this.productDataService.deleteProductForSeller(id, user);
+    await this.productDeleteService.deleteProductForSeller(id, user);
   }
 }

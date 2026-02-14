@@ -1,4 +1,4 @@
-import { NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
 import { StoreFeed } from "@apps/backend/infra/database/prisma/generated/client";
@@ -15,13 +15,14 @@ export class FeedOwnershipUtil {
    * @param includeStoreSelect 스토어 조회 시 포함할 필드
    * @returns 피드 정보 (스토어 정보 포함)
    * @throws NotFoundException 피드를 찾을 수 없을 경우
-   * @throws UnauthorizedException 스토어 소유권이 없을 경우
+   * @throws ForbiddenException 스토어 소유권이 없을 경우
    */
   static async verifyFeedOwnership(
     prisma: PrismaService,
     feedId: string,
     userId: string,
     includeStoreSelect?: { userId: boolean; logoImageUrl?: boolean },
+    expectedStoreId?: string,
   ): Promise<
     StoreFeed & {
       store: { userId: string; logoImageUrl?: string | null };
@@ -30,6 +31,7 @@ export class FeedOwnershipUtil {
     const feed = await prisma.storeFeed.findFirst({
       where: {
         id: feedId,
+        ...(expectedStoreId && { storeId: expectedStoreId }),
       },
       include: {
         store: {
@@ -46,7 +48,7 @@ export class FeedOwnershipUtil {
     }
 
     if (feed.store.userId !== userId) {
-      throw new UnauthorizedException(FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
+      throw new ForbiddenException(FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
     }
 
     return feed as StoreFeed & {
@@ -61,7 +63,7 @@ export class FeedOwnershipUtil {
    * @param userId 사용자 ID (스토어 소유자)
    * @param errorMessage 커스텀 에러 메시지 (옵셔널)
    * @throws NotFoundException 스토어를 찾을 수 없을 경우
-   * @throws UnauthorizedException 스토어 소유권이 없을 경우
+   * @throws ForbiddenException 스토어 소유권이 없을 경우
    */
   static async verifyStoreOwnership(
     prisma: PrismaService,
@@ -84,7 +86,7 @@ export class FeedOwnershipUtil {
     }
 
     if (store.userId !== userId) {
-      throw new UnauthorizedException(errorMessage || FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
+      throw new ForbiddenException(errorMessage || FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
     }
   }
 }

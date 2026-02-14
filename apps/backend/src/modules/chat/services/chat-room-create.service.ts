@@ -21,6 +21,7 @@ export class ChatRoomCreateService {
     // 스토어 존재 여부 확인
     const store = await this.prisma.store.findUnique({
       where: { id: storeId },
+      select: { id: true },
     });
 
     if (!store) {

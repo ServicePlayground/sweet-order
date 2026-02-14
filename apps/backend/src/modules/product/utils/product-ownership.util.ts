@@ -1,4 +1,4 @@
-import { NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { Product, Prisma } from "@apps/backend/infra/database/prisma/generated/client";
@@ -15,7 +15,7 @@ export class ProductOwnershipUtil {
    * @param includeStoreSelect 스토어 조회 시 포함할 필드
    * @returns 상품 정보 (스토어 정보 포함)
    * @throws NotFoundException 상품을 찾을 수 없을 경우
-   * @throws UnauthorizedException 스토어 소유권이 없을 경우
+   * @throws ForbiddenException 스토어 소유권이 없을 경우
    */
   static async verifyProductOwnership(
     prisma: PrismaService,
@@ -42,7 +42,7 @@ export class ProductOwnershipUtil {
     }
 
     if (product.store.userId !== userId) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
+      throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
     return product as Product & { store: { userId: string; [key: string]: any } };
@@ -54,7 +54,7 @@ export class ProductOwnershipUtil {
    * @param storeId 스토어 ID
    * @param userId 사용자 ID (스토어 소유자)
    * @throws NotFoundException 스토어를 찾을 수 없을 경우
-   * @throws UnauthorizedException 스토어 소유권이 없을 경우
+   * @throws ForbiddenException 스토어 소유권이 없을 경우
    */
   static async verifyStoreOwnership(
     prisma: PrismaService,
@@ -76,7 +76,7 @@ export class ProductOwnershipUtil {
     }
 
     if (store.userId !== userId) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
+      throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
     }
   }
 }

@@ -45,17 +45,10 @@ export class ProductCreateService {
       const endOfDay = new Date(now);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const todayProductCount = await tx.product.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-            lte: endOfDay,
-          },
-        },
-      });
-
-      const sequence = String(todayProductCount + 1).padStart(3, "0");
-      const productNumber = `${dateStr}-${sequence}`;
+      const millisOfDay = now.getTime() - startOfDay.getTime();
+      const timePart = String(millisOfDay).padStart(8, "0");
+      const randomPart = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
+      const productNumber = `${dateStr}-${timePart}${randomPart}`;
 
       const productType =
         createProductDto.imageUploadEnabled === EnableStatus.ENABLE

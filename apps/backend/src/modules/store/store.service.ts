@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { StoreCreationService } from "@apps/backend/modules/store/services/store-creation.service";
+import { StoreCreateService } from "@apps/backend/modules/store/services/store-create.service";
 import { StoreListService } from "@apps/backend/modules/store/services/store-list.service";
 import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
 import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-create.dto";
@@ -11,12 +11,12 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
  * 스토어 서비스
  *
  * 스토어 관련 기능을 통합하여 제공하는 메인 서비스입니다.
- * StoreCreationService, StoreListService를 조합하여 사용합니다.
+ * StoreCreateService, StoreListService를 조합하여 사용합니다.
  */
 @Injectable()
 export class StoreService {
   constructor(
-    private readonly storeCreationService: StoreCreationService,
+    private readonly storeCreateService: StoreCreateService,
     private readonly storeListService: StoreListService,
     private readonly storeUpdateService: StoreUpdateService,
   ) {}
@@ -36,7 +36,7 @@ export class StoreService {
    * 1단계, 2단계 API를 다시 호출하여 검증하고 스토어를 생성합니다.
    */
   async createStoreForSeller(userId: string, createStoreDto: CreateStoreRequestDto) {
-    return await this.storeCreationService.createStoreForSeller(userId, createStoreDto);
+    return await this.storeCreateService.createStoreForSeller(userId, createStoreDto);
   }
 
   /**

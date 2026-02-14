@@ -7,6 +7,7 @@ import {
 import { ReviewSortBy } from "@apps/backend/modules/review/constants/review.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
+import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
 
 /**
  * 내가 작성한 후기 목록 조회 서비스
@@ -18,7 +19,7 @@ export class ReviewUserListService {
 
   /**
    * 내가 작성한 후기 목록 조회 (사용자용)
-   * 필터링, 정렬, 무한스크롤을 지원합니다.
+   * 필터링, 정렬, 페이지네이션을 지원합니다.
    */
   async getMyReviewsForUser(
     userId: string,
@@ -43,26 +44,12 @@ export class ReviewUserListService {
       take: limit,
       include: {
         user: {
-          select: {
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ReviewMapperUtil.USER_INFO_SELECT,
         },
       },
     });
 
-    const data = reviews.map((review) => ({
-      id: review.id,
-      productId: review.productId,
-      userId: review.userId,
-      rating: review.rating,
-      content: review.content,
-      imageUrls: review.imageUrls,
-      userNickname: review.user.nickname,
-      userProfileImageUrl: review.user.profileImageUrl,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    }));
+    const data = reviews.map((review) => ReviewMapperUtil.mapToReviewResponse(review));
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
 

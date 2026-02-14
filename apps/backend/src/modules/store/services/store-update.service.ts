@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateStoreRequestDto } from "@apps/backend/modules/store/dto/store-update.dto";
-import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 
 /**
  * 스토어 수정 서비스
@@ -25,39 +25,36 @@ export class StoreUpdateService {
     updateStoreDto: UpdateStoreRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    // 스토어 존재 여부 및 소유권 확인
-    const store = await this.prisma.store.findFirst({
-      where: {
-        id: storeId,
-      },
-      select: {
-        id: true,
-        userId: true,
-      },
-    });
-
-    // 스토어가 존재하지 않으면 404 에러
-    if (!store) {
-      throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    // 권한 확인: 스토어 소유자인지 확인
-    if (store.userId !== user.sub) {
-      throw new UnauthorizedException(STORE_ERROR_MESSAGES.FORBIDDEN);
-    }
+    // 스토어 소유권 확인
+    await StoreOwnershipUtil.verifyStoreOwnership(this.prisma, storeId, user.sub);
 
     // 업데이트할 데이터 준비
-    const updateData: any = {};
+    const updateData: {
+      logoImageUrl?: string;
+      description?: string;
+      name: string;
+      address: string;
+      roadAddress: string;
+      zonecode: string;
+      latitude: number;
+      longitude: number;
+    } = {
+      // 필수 필드
+      name: updateStoreDto.name,
+      address: updateStoreDto.address,
+      roadAddress: updateStoreDto.roadAddress,
+      zonecode: updateStoreDto.zonecode,
+      latitude: updateStoreDto.latitude,
+      longitude: updateStoreDto.longitude,
+    };
 
-    // 필수 필드: 그대로 업데이트
-    updateData.logoImageUrl = updateStoreDto.logoImageUrl;
-    updateData.description = updateStoreDto.description;
-    updateData.name = updateStoreDto.name;
-    updateData.address = updateStoreDto.address;
-    updateData.roadAddress = updateStoreDto.roadAddress;
-    updateData.zonecode = updateStoreDto.zonecode;
-    updateData.latitude = updateStoreDto.latitude;
-    updateData.longitude = updateStoreDto.longitude;
+    // 선택적 필드: 값이 제공된 경우에만 업데이트
+    if (updateStoreDto.logoImageUrl !== undefined) {
+      updateData.logoImageUrl = updateStoreDto.logoImageUrl;
+    }
+    if (updateStoreDto.description !== undefined) {
+      updateData.description = updateStoreDto.description;
+    }
 
     // 스토어 수정
     const updatedStore = await this.prisma.store.update({

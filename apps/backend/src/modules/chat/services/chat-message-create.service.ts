@@ -5,6 +5,7 @@ import { ChatRoomDetailService } from "./chat-room-detail.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatGateway } from "../gateways/chat.gateway";
 import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
  * 채팅 메시지 생성 서비스
@@ -98,8 +99,7 @@ export class ChatMessageCreateService {
    * 채팅방 메타데이터 업데이트
    */
   private async updateChatRoomMetadata(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx: any,
+    tx: Prisma.TransactionClient,
     roomId: string,
     lastMessagePreview: string,
     senderType: "user" | "store",

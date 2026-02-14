@@ -4,6 +4,7 @@ import {
   OrderResponseDto,
 } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
  * Prisma Order 엔티티 타입 (orderItems 포함)
@@ -17,6 +18,13 @@ type OrderWithItems = Order & {
  * Prisma Order 및 OrderItem 엔티티를 응답 DTO로 변환하는 공통 로직을 제공합니다.
  */
 export class OrderMapperUtil {
+  /**
+   * OrderItems select 필드
+   * 주문 조회 시 orderItems를 포함하기 위한 공통 include 필드
+   */
+  static readonly ORDER_ITEMS_INCLUDE = {
+    orderItems: true,
+  } as const satisfies Prisma.OrderInclude;
   /**
    * Prisma OrderItem 엔티티를 OrderItemResponseDto로 변환
    * @param orderItem - Prisma OrderItem 엔티티

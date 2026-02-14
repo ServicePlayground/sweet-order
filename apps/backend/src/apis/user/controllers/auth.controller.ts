@@ -354,7 +354,7 @@ export class UserAuthController {
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
   @SwaggerResponse(409, {
@@ -387,7 +387,7 @@ export class UserAuthController {
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.REFRESH_TOKEN_MISSING_REQUIRED_INFO),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
   @SwaggerResponse(429, {

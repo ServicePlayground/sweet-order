@@ -37,7 +37,12 @@ export class OrderUpdateService {
     // 상태 변경 유효성 검증
     const { orderStatus } = updateDto;
 
-    // PENDING -> CONFIRMED만 허용 (현재는 두 가지 상태만 존재)
+    // 같은 상태로 변경하는 경우 방지
+    if (order.orderStatus === orderStatus) {
+      throw new BadRequestException(ORDER_ERROR_MESSAGES.SAME_STATUS);
+    }
+
+    // CONFIRMED -> PENDING 역전환 방지
     if (order.orderStatus === OrderStatus.CONFIRMED && orderStatus === OrderStatus.PENDING) {
       throw new BadRequestException(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED);
     }

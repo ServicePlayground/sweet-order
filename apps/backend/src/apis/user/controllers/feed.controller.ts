@@ -46,6 +46,6 @@ export class UserFeedController {
   @SwaggerResponse(200, { dataDto: FeedResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
   async getFeedDetail(@Param("storeId") storeId: string, @Param("id") feedId: string) {
-    return await this.feedService.getFeedByIdForUser(feedId);
+    return await this.feedService.getFeedByIdForUser(feedId, storeId);
   }
 }

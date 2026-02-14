@@ -22,6 +22,8 @@ import {
   MyProductLikeListResponseDto,
   MyStoreLikeListResponseDto,
 } from "@apps/backend/modules/like/dto/like-user-list.dto";
+import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
+import { createMessageObject } from "@apps/backend/common/utils/message.util";
 
 /**
  * 마이페이지 컨트롤러
@@ -77,6 +79,12 @@ export class UserMypageController {
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
   @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  })
   async getMyOrderById(
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },

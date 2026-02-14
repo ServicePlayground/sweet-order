@@ -76,6 +76,9 @@ export class UserOrderController {
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
   @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
+  })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
   })

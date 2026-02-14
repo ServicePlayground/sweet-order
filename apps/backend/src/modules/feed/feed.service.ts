@@ -35,8 +35,8 @@ export class FeedService {
   /**
    * 피드 상세 조회 (사용자용)
    */
-  async getFeedByIdForUser(feedId: string) {
-    return this.feedDetailService.getFeedByIdForUser(feedId);
+  async getFeedByIdForUser(feedId: string, storeId?: string) {
+    return this.feedDetailService.getFeedByIdForUser(feedId, storeId);
   }
 
   /**
@@ -50,18 +50,19 @@ export class FeedService {
    * 피드 수정 (판매자용)
    */
   async updateFeedForSeller(
+    storeId: string,
     feedId: string,
     updateFeedDto: UpdateFeedRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return this.feedUpdateService.updateFeed(feedId, updateFeedDto, user);
+    return this.feedUpdateService.updateFeed(storeId, feedId, updateFeedDto, user);
   }
 
   /**
    * 피드 삭제 (판매자용)
    */
-  async deleteFeedForSeller(feedId: string, user: JwtVerifiedPayload) {
-    await this.feedDeleteService.deleteFeed(feedId, user);
+  async deleteFeedForSeller(storeId: string, feedId: string, user: JwtVerifiedPayload) {
+    await this.feedDeleteService.deleteFeed(storeId, feedId, user);
   }
 
   /**
@@ -78,7 +79,7 @@ export class FeedService {
   /**
    * 피드 상세 조회 (판매자용)
    */
-  async getFeedByIdForSeller(feedId: string, user: JwtVerifiedPayload) {
-    return this.feedDetailService.getFeedByIdForSeller(feedId, user);
+  async getFeedByIdForSeller(feedId: string, user: JwtVerifiedPayload, storeId: string) {
+    return this.feedDetailService.getFeedByIdForSeller(feedId, user, storeId);
   }
 }

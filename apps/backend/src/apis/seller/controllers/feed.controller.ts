@@ -60,10 +60,10 @@ export class SellerFeedController {
   })
   @SwaggerResponse(200, { dataDto: FeedListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
@@ -86,10 +86,10 @@ export class SellerFeedController {
   })
   @SwaggerResponse(200, { dataDto: FeedResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -98,7 +98,7 @@ export class SellerFeedController {
     @Param("id") feedId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.feedService.getFeedByIdForSeller(feedId, req.user);
+    return await this.feedService.getFeedByIdForSeller(feedId, req.user, storeId);
   }
 
   /**
@@ -113,7 +113,7 @@ export class SellerFeedController {
   @SwaggerResponse(201, { dataDto: CreateFeedResponseDto })
   @SwaggerAuthResponses()
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN),
   })
   async createFeed(
@@ -137,10 +137,10 @@ export class SellerFeedController {
   })
   @SwaggerResponse(200, { dataDto: UpdateFeedResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -150,7 +150,7 @@ export class SellerFeedController {
     @Body() updateFeedDto: UpdateFeedRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.feedService.updateFeedForSeller(id, updateFeedDto, req.user);
+    return await this.feedService.updateFeedForSeller(storeId, id, updateFeedDto, req.user);
   }
 
   /**
@@ -166,10 +166,10 @@ export class SellerFeedController {
     dataExample: createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED),
   })
   @SwaggerAuthResponses()
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -178,7 +178,7 @@ export class SellerFeedController {
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.feedService.deleteFeedForSeller(id, req.user);
+    await this.feedService.deleteFeedForSeller(storeId, id, req.user);
     return createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED);
   }
 }
