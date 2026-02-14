@@ -15,11 +15,11 @@ import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 
 /**
- * 후기 관련 컨트롤러 (사용자용)
+ * 후기 관련 컨트롤러
  */
 @ApiTags("후기")
 @ApiExtraModels(ReviewListResponseDto, ReviewResponseDto)
-@Controller(`${USER_ROLES.USER}`)
+@Controller(`${USER_ROLES.USER}/review`)
 @Auth({ isPublic: true })
 export class UserReviewController {
   constructor(private readonly reviewService: ReviewService) {}
@@ -27,7 +27,7 @@ export class UserReviewController {
   /**
    * 상품 후기 목록 조회 API
    */
-  @Get("product/:productId/review")
+  @Get("product/:productId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "상품 후기 목록 조회",
@@ -45,7 +45,7 @@ export class UserReviewController {
   /**
    * 상품 후기 단일 조회 API
    */
-  @Get("product/:productId/review/:reviewId")
+  @Get("product/:productId/:reviewId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "상품 후기 단일 조회",
@@ -66,7 +66,7 @@ export class UserReviewController {
   /**
    * 스토어 후기 목록 조회 API
    */
-  @Get("store/:storeId/review")
+  @Get("store/:storeId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "스토어 후기 목록 조회",
@@ -82,7 +82,7 @@ export class UserReviewController {
   /**
    * 스토어 후기 단일 조회 API
    */
-  @Get("store/:storeId/review/:reviewId")
+  @Get("store/:storeId/:reviewId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "스토어 후기 단일 조회",

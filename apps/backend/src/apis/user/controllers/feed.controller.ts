@@ -11,11 +11,11 @@ import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-reques
 import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-detail.dto";
 
 /**
- * 피드 관련 컨트롤러 (사용자용)
+ * 피드 관련 컨트롤러
  */
 @ApiTags("피드")
 @ApiExtraModels(FeedListResponseDto, FeedResponseDto)
-@Controller(`${USER_ROLES.USER}/store/:storeId/feed`)
+@Controller(`${USER_ROLES.USER}/feed`)
 @Auth({ isPublic: true })
 export class UserFeedController {
   constructor(private readonly feedService: FeedService) {}
@@ -23,7 +23,7 @@ export class UserFeedController {
   /**
    * 스토어 피드 목록 조회 API
    */
-  @Get()
+  @Get("store/:storeId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "스토어 피드 목록 조회",
@@ -37,7 +37,7 @@ export class UserFeedController {
   /**
    * 스토어 피드 상세 조회 API
    */
-  @Get(":id")
+  @Get("store/:storeId/:id")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "스토어 피드 상세 조회",
