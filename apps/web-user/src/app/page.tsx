@@ -15,6 +15,7 @@ import {
   logoutFromWebView,
   requestLocationFromWebView,
 } from "@/apps/web-user/common/utils/webview.bridge";
+import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
 
 export default function Home() {
   const { isAuthenticated, accessToken } = useAuthStore();
@@ -365,43 +366,7 @@ export default function Home() {
 
       {/* 스토어 목록 (QA용) */}
       {uniqueStoreIds.length > 0 && (
-        <div style={{ marginBottom: "60px" }}>
-          <h2
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#111827",
-              marginBottom: "24px",
-            }}
-          >
-            스토어 목록 (QA용)
-          </h2>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
-            {uniqueStoreIds.map((storeId) => (
-              <Link
-                key={storeId}
-                href={`/store/${storeId}`}
-                style={{
-                  padding: "16px",
-                  backgroundColor: "#f3f4f6",
-                  borderRadius: "8px",
-                  color: "#111827",
-                  textDecoration: "none",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                }}
-              >
-                🏪 스토어: {storeId}
-              </Link>
-            ))}
-          </div>
-        </div>
+        <StoreListSection storeIds={uniqueStoreIds} />
       )}
 
       {/* 로그인 상태 표시 (임시) */}
@@ -551,6 +516,116 @@ export default function Home() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// 스토어 목록 섹션 컴포넌트
+function StoreListSection({ storeIds }: { storeIds: string[] }) {
+  return (
+    <div style={{ marginBottom: "60px" }}>
+      <h2
+        style={{
+          fontSize: "24px",
+          fontWeight: 700,
+          color: "#111827",
+          marginBottom: "24px",
+        }}
+      >
+        스토어 목록 (QA용)
+      </h2>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+        }}
+      >
+        {storeIds.map((storeId) => (
+          <StoreItem key={storeId} storeId={storeId} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 스토어 아이템 컴포넌트
+function StoreItem({ storeId }: { storeId: string }) {
+  const { data: store } = useStoreDetail(storeId);
+
+  const handleNaverClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (store) {
+      window.location.href = `nmap://route/car?dlat=${store.latitude}&dlng=${store.longitude}`;
+    }
+  };
+
+  const handleKakaoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (store) {
+      window.location.href = `kakaomap://route?ep=${store.latitude},${store.longitude}&by=CAR`;
+    }
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+      }}
+    >
+      <Link
+        href={`/store/${storeId}`}
+        style={{
+          flex: 1,
+          padding: "16px",
+          backgroundColor: "#f3f4f6",
+          borderRadius: "8px",
+          color: "#111827",
+          textDecoration: "none",
+          fontSize: "14px",
+          fontWeight: 500,
+        }}
+      >
+        🏪 스토어: {storeId}
+      </Link>
+      {store && (
+        <>
+          <button
+            onClick={handleNaverClick}
+            style={{
+              padding: "12px 16px",
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "#ffffff",
+              backgroundColor: "#03C75A",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            네이버
+          </button>
+          <button
+            onClick={handleKakaoClick}
+            style={{
+              padding: "12px 16px",
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "#000000",
+              backgroundColor: "#FEE500",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            카카오
+          </button>
+        </>
+      )}
     </div>
   );
 }
