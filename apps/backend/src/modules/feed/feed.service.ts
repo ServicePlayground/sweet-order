@@ -26,38 +26,42 @@ export class FeedService {
   ) {}
 
   /**
-   * 피드 생성 (판매자용)
-   */
-  async createFeed(userId: string, createFeedDto: CreateFeedRequestDto) {
-    return this.feedCreateService.createFeed(userId, createFeedDto);
-  }
-
-  /**
-   * 피드 수정 (판매자용)
-   */
-  async updateFeed(feedId: string, updateFeedDto: UpdateFeedRequestDto, user: JwtVerifiedPayload) {
-    return this.feedUpdateService.updateFeed(feedId, updateFeedDto, user);
-  }
-
-  /**
-   * 피드 삭제 (판매자용)
-   */
-  async deleteFeed(feedId: string, user: JwtVerifiedPayload) {
-    await this.feedDeleteService.deleteFeed(feedId, user);
-  }
-
-  /**
    * 피드 목록 조회 (사용자용)
    */
-  async getFeedsByStoreId(storeId: string, query: PaginationRequestDto) {
+  async getFeedsByStoreIdForUser(storeId: string, query: PaginationRequestDto) {
     return this.feedListService.getFeedsByStoreId(storeId, query);
   }
 
   /**
    * 피드 상세 조회 (사용자용)
    */
-  async getFeedById(feedId: string) {
+  async getFeedByIdForUser(feedId: string) {
     return this.feedDetailService.getFeedById(feedId);
+  }
+
+  /**
+   * 피드 생성 (판매자용)
+   */
+  async createFeedForSeller(userId: string, createFeedDto: CreateFeedRequestDto) {
+    return this.feedCreateService.createFeed(userId, createFeedDto);
+  }
+
+  /**
+   * 피드 수정 (판매자용)
+   */
+  async updateFeedForSeller(
+    feedId: string,
+    updateFeedDto: UpdateFeedRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
+    return this.feedUpdateService.updateFeed(feedId, updateFeedDto, user);
+  }
+
+  /**
+   * 피드 삭제 (판매자용)
+   */
+  async deleteFeedForSeller(feedId: string, user: JwtVerifiedPayload) {
+    await this.feedDeleteService.deleteFeed(feedId, user);
   }
 
   /**

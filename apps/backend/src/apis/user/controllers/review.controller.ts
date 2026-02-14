@@ -39,7 +39,7 @@ export class UserReviewController {
     @Param("productId") productId: string,
     @Query() query: GetReviewsRequestDto,
   ) {
-    return await this.reviewService.getProductReviews(productId, query);
+    return await this.reviewService.getProductReviewsForUser(productId, query);
   }
 
   /**
@@ -60,7 +60,7 @@ export class UserReviewController {
     @Param("productId") productId: string,
     @Param("reviewId") reviewId: string,
   ) {
-    return await this.reviewService.getProductReview(productId, reviewId);
+    return await this.reviewService.getProductReviewForUser(productId, reviewId);
   }
 
   /**
@@ -76,7 +76,7 @@ export class UserReviewController {
   @SwaggerResponse(200, { dataDto: ReviewListResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreReviews(@Param("storeId") storeId: string, @Query() query: GetReviewsRequestDto) {
-    return await this.reviewService.getStoreReviews(storeId, query);
+    return await this.reviewService.getStoreReviewsForUser(storeId, query);
   }
 
   /**
@@ -94,6 +94,6 @@ export class UserReviewController {
     dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND),
   })
   async getStoreReview(@Param("storeId") storeId: string, @Param("reviewId") reviewId: string) {
-    return await this.reviewService.getStoreReview(storeId, reviewId);
+    return await this.reviewService.getStoreReviewForUser(storeId, reviewId);
   }
 }

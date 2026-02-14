@@ -80,7 +80,7 @@ export class SellerProductController {
     @Query() query: GetSellerProductsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.productService.getSellerProducts(query, req.user);
+    return await this.productService.getProductsForSeller(query, req.user);
   }
 
   /**
@@ -103,7 +103,7 @@ export class SellerProductController {
   @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async getProductDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
-    return await this.productService.getSellerProductDetail(id, req.user);
+    return await this.productService.getProductDetailForSeller(id, req.user);
   }
 
   /**
@@ -132,7 +132,7 @@ export class SellerProductController {
     @Body() createProductDto: CreateProductRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.productService.createProduct(createProductDto, req.user);
+    return await this.productService.createProductForSeller(createProductDto, req.user);
   }
 
   /**
@@ -157,7 +157,7 @@ export class SellerProductController {
     @Body() updateProductDto: UpdateProductRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.productService.updateProduct(id, updateProductDto, req.user);
+    return await this.productService.updateProductForSeller(id, updateProductDto, req.user);
   }
 
   /**
@@ -180,7 +180,7 @@ export class SellerProductController {
   @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async deleteProduct(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
-    await this.productService.deleteProduct(id, req.user);
+    await this.productService.deleteProductForSeller(id, req.user);
     return createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED);
   }
 }

@@ -122,7 +122,7 @@ export class SellerStoreController {
     @Request() req: { user: JwtVerifiedPayload },
     @Body() createStoreDto: CreateStoreRequestDto,
   ) {
-    return await this.storeService.createStore(req.user.sub, createStoreDto);
+    return await this.storeService.createStoreForSeller(req.user.sub, createStoreDto);
   }
 
   /**
@@ -142,7 +142,7 @@ export class SellerStoreController {
     @Request() req: { user: JwtVerifiedPayload },
     @Query() query: PaginationRequestDto,
   ) {
-    return await this.storeService.getStoresByUserId(req.user.sub, query);
+    return await this.storeService.getStoresByUserIdForSeller(req.user.sub, query);
   }
 
   /**
@@ -190,6 +190,6 @@ export class SellerStoreController {
     @Body() updateStoreDto: UpdateStoreRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.storeService.updateStore(id, updateStoreDto, req.user);
+    return await this.storeService.updateStoreForSeller(id, updateStoreDto, req.user);
   }
 }

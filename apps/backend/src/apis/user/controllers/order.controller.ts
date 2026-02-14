@@ -60,7 +60,7 @@ export class UserOrderController {
     @Body() createOrderDto: CreateOrderRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<CreateOrderResponseDto> {
-    return await this.orderService.createOrder(createOrderDto, req.user);
+    return await this.orderService.createOrderForUser(createOrderDto, req.user);
   }
 
   /**
@@ -83,6 +83,6 @@ export class UserOrderController {
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<OrderResponseDto> {
-    return await this.orderService.getOrderById(id, req.user);
+    return await this.orderService.getOrderByIdForUser(id, req.user);
   }
 }

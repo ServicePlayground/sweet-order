@@ -19,44 +19,47 @@ export class ProductService {
   constructor(private readonly productDataService: ProductDataService) {}
 
   /**
-   * 상품 목록 조회 (필터링, 정렬, 무한 스크롤 지원)
+   * 상품 목록 조회 (사용자용)
    */
-  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
+  async getProductsForUser(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
     return this.productDataService.getProducts(query, user);
   }
 
   /**
-   * 상품 상세 조회
+   * 상품 상세 조회 (사용자용)
    */
-  async getProductDetail(id: string, user?: JwtVerifiedPayload) {
+  async getProductDetailForUser(id: string, user?: JwtVerifiedPayload) {
     return this.productDataService.getProductDetail(id, user);
   }
 
   /**
-   * (판매자용) 상품 목록 조회
+   * 상품 목록 조회 (판매자용)
    */
-  async getSellerProducts(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
+  async getProductsForSeller(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
     return this.productDataService.getSellerProducts(query, user);
   }
 
   /**
-   * (판매자용) 상품 상세 조회
+   * 상품 상세 조회 (판매자용)
    */
-  async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
+  async getProductDetailForSeller(id: string, user: JwtVerifiedPayload) {
     return this.productDataService.getSellerProductDetail(id, user);
   }
 
   /**
-   * (판매자용) 상품 등록
+   * 상품 등록 (판매자용)
    */
-  async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
+  async createProductForSeller(
+    createProductDto: CreateProductRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
     return this.productDataService.createProduct(createProductDto, user);
   }
 
   /**
-   * (판매자용) 상품 수정
+   * 상품 수정 (판매자용)
    */
-  async updateProduct(
+  async updateProductForSeller(
     id: string,
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,
@@ -65,9 +68,9 @@ export class ProductService {
   }
 
   /**
-   * (판매자용) 상품 삭제
+   * 상품 삭제 (판매자용)
    */
-  async deleteProduct(id: string, user: JwtVerifiedPayload) {
+  async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
     this.productDataService.deleteProduct(id, user);
   }
 }

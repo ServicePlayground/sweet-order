@@ -53,7 +53,7 @@ export class UserLikeController {
     @Param("productId") productId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.addProductLike(req.user.sub, productId);
+    await this.likeService.addProductLikeForUser(req.user.sub, productId);
     return { message: LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_ADDED };
   }
 
@@ -76,7 +76,7 @@ export class UserLikeController {
     @Param("productId") productId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.removeProductLike(req.user.sub, productId);
+    await this.likeService.removeProductLikeForUser(req.user.sub, productId);
     return { message: LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_REMOVED };
   }
 
@@ -100,7 +100,7 @@ export class UserLikeController {
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.addStoreLike(req.user.sub, storeId);
+    await this.likeService.addStoreLikeForUser(req.user.sub, storeId);
     return { message: LIKE_SUCCESS_MESSAGES.STORE_LIKE_ADDED };
   }
 
@@ -123,7 +123,7 @@ export class UserLikeController {
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.removeStoreLike(req.user.sub, storeId);
+    await this.likeService.removeStoreLikeForUser(req.user.sub, storeId);
     return { message: LIKE_SUCCESS_MESSAGES.STORE_LIKE_REMOVED };
   }
 }

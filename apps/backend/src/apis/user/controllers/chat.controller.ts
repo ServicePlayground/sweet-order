@@ -63,7 +63,7 @@ export class UserChatController {
     @Body() createChatRoomDto: CreateChatRoomRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.chatService.createOrGetChatRoom(req.user.sub, createChatRoomDto);
+    return await this.chatService.createOrGetChatRoomForUser(req.user.sub, createChatRoomDto);
   }
 
   /**
@@ -83,7 +83,7 @@ export class UserChatController {
     @Request() req: { user: JwtVerifiedPayload },
     @Query() query: PaginationRequestDto,
   ) {
-    return await this.chatService.getChatRoomsByUserId(req.user.sub, query);
+    return await this.chatService.getChatRoomsByUserIdForUser(req.user.sub, query);
   }
 
   /**

@@ -52,7 +52,7 @@ export class SellerChatController {
     @Request() req: { user: JwtVerifiedPayload },
     @Query() query: PaginationRequestDto,
   ) {
-    return await this.chatService.getChatRoomsByStoreId(storeId, req.user.sub, query);
+    return await this.chatService.getChatRoomsByStoreIdForSeller(storeId, req.user.sub, query);
   }
 
   /**

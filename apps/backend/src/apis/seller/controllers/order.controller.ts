@@ -68,7 +68,7 @@ export class SellerOrderController {
     @Query() query: GetSellerOrdersRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.orderService.getSellerOrders(query, req.user);
+    return await this.orderService.getOrdersForSeller(query, req.user);
   }
 
   /**
@@ -90,7 +90,7 @@ export class SellerOrderController {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
   })
   async getOrderDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
-    return await this.orderService.getSellerOrderById(id, req.user);
+    return await this.orderService.getOrderByIdForSeller(id, req.user);
   }
 
   /**
@@ -119,6 +119,6 @@ export class SellerOrderController {
     @Body() updateDto: UpdateOrderStatusRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.orderService.updateOrderStatus(id, updateDto, req.user);
+    return await this.orderService.updateOrderStatusForSeller(id, updateDto, req.user);
   }
 }

@@ -81,7 +81,7 @@ export class UserMypageController {
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<OrderResponseDto> {
-    return await this.orderService.getOrderById(id, req.user);
+    return await this.orderService.getOrderByIdForUser(id, req.user);
   }
 
   /**
@@ -100,7 +100,7 @@ export class UserMypageController {
     @Query() query: GetMyReviewsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<MyReviewListResponseDto> {
-    return await this.reviewService.getMyReviews(req.user.sub, query);
+    return await this.reviewService.getMyReviewsForUser(req.user.sub, query);
   }
 
   /**
@@ -121,6 +121,6 @@ export class UserMypageController {
     @Query() query: GetMyLikesRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
-    return await this.likeService.getMyLikes(req.user.sub, query);
+    return await this.likeService.getMyLikesForUser(req.user.sub, query);
   }
 }

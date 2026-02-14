@@ -31,7 +31,7 @@ export class UserFeedController {
   })
   @SwaggerResponse(200, { dataDto: FeedListResponseDto })
   async getFeeds(@Param("storeId") storeId: string, @Query() query: PaginationRequestDto) {
-    return await this.feedService.getFeedsByStoreId(storeId, query);
+    return await this.feedService.getFeedsByStoreIdForUser(storeId, query);
   }
 
   /**
@@ -46,6 +46,6 @@ export class UserFeedController {
   @SwaggerResponse(200, { dataDto: FeedResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
   async getFeedDetail(@Param("storeId") storeId: string, @Param("id") feedId: string) {
-    return await this.feedService.getFeedById(feedId);
+    return await this.feedService.getFeedByIdForUser(feedId);
   }
 }

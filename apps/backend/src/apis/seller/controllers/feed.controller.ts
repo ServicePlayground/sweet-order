@@ -123,7 +123,7 @@ export class SellerFeedController {
   ) {
     // storeId를 DTO에 설정
     createFeedDto.storeId = storeId;
-    return await this.feedService.createFeed(req.user.sub, createFeedDto);
+    return await this.feedService.createFeedForSeller(req.user.sub, createFeedDto);
   }
 
   /**
@@ -150,7 +150,7 @@ export class SellerFeedController {
     @Body() updateFeedDto: UpdateFeedRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.feedService.updateFeed(id, updateFeedDto, req.user);
+    return await this.feedService.updateFeedForSeller(id, updateFeedDto, req.user);
   }
 
   /**
@@ -178,7 +178,7 @@ export class SellerFeedController {
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.feedService.deleteFeed(id, req.user);
+    await this.feedService.deleteFeedForSeller(id, req.user);
     return createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED);
   }
 }
