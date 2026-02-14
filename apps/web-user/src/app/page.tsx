@@ -557,7 +557,8 @@ function StoreItem({ storeId }: { storeId: string }) {
     e.preventDefault();
     e.stopPropagation();
     if (store) {
-      window.location.href = `nmap://route/car?dlat=${store.latitude}&dlng=${store.longitude}`;
+      const webUrl = `https://map.naver.com/v5/?c=${store.longitude},${store.latitude},15,0,0,0,dh`;
+      window.location.href = webUrl;
     }
   };
 
@@ -565,7 +566,8 @@ function StoreItem({ storeId }: { storeId: string }) {
     e.preventDefault();
     e.stopPropagation();
     if (store) {
-      window.location.href = `kakaomap://route?ep=${store.latitude},${store.longitude}&by=CAR`;
+      const webUrl = `https://map.kakao.com/link/to/%EB%AA%A9%EC%A0%81%EC%A7%80,${store.latitude},${store.longitude}`;
+      window.location.href = webUrl;
     }
   };
 
