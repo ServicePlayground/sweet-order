@@ -43,6 +43,14 @@ export enum OrderSortBy {
 }
 
 /**
+ * 주문 타입 enum (픽업 예정/지난 예약)
+ */
+export enum OrderType {
+  UPCOMING = "UPCOMING", // 픽업 예정
+  PAST = "PAST", // 지난 예약
+}
+
+/**
  * Swagger 예시 데이터
  */
 const ORDER_ITEM_EXAMPLE = {

@@ -3,6 +3,7 @@ import { OrderCreateService } from "@apps/backend/modules/order/services/order-c
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
 import { OrderListService } from "@apps/backend/modules/order/services/order-list.service";
 import { OrderUpdateService } from "@apps/backend/modules/order/services/order-update.service";
+import { OrderUserListService } from "@apps/backend/modules/order/services/order-user-list.service";
 import {
   CreateOrderRequestDto,
   CreateOrderResponseDto,
@@ -12,6 +13,10 @@ import {
   GetSellerOrdersRequestDto,
   OrderListResponseDto,
 } from "@apps/backend/modules/order/dto/order-list.dto";
+import {
+  GetUserOrdersRequestDto,
+  UserOrderListResponseDto,
+} from "@apps/backend/modules/order/dto/order-user-list.dto";
 import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
@@ -28,6 +33,7 @@ export class OrderService {
     private readonly orderDetailService: OrderDetailService,
     private readonly orderListService: OrderListService,
     private readonly orderUpdateService: OrderUpdateService,
+    private readonly orderUserListService: OrderUserListService,
   ) {}
 
   /**
@@ -73,5 +79,15 @@ export class OrderService {
     user: JwtVerifiedPayload,
   ): Promise<{ id: string }> {
     return this.orderUpdateService.updateOrderStatus(orderId, updateDto, user.sub);
+  }
+
+  /**
+   * 주문 목록 조회 (사용자용)
+   */
+  async getUserOrders(
+    query: GetUserOrdersRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<UserOrderListResponseDto> {
+    return this.orderUserListService.getUserOrders(query, user.sub);
   }
 }

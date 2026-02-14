@@ -5,6 +5,7 @@ import { UserUploadController } from "@apps/backend/apis/user/controllers/upload
 import { UserStoreController } from "@apps/backend/apis/user/controllers/store.controller";
 import { UserChatController } from "@apps/backend/apis/user/controllers/chat.controller";
 import { UserOrderController } from "@apps/backend/apis/user/controllers/order.controller";
+import { UserMypageController } from "@apps/backend/apis/user/controllers/mypage.controller";
 import { AuthModule } from "@apps/backend/modules/auth/auth.module";
 import { ProductModule } from "@apps/backend/modules/product/product.module";
 import { UploadModule } from "@apps/backend/modules/upload/upload.module";
@@ -46,6 +47,7 @@ import { OrderModule } from "@apps/backend/modules/order/order.module";
     UserReviewController,
     UserLikeController,
     UserOrderController,
+    UserMypageController,
   ],
 })
 export class UserApiModule {}

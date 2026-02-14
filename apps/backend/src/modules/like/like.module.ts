@@ -7,6 +7,7 @@ import { LikeProductDetailService } from "@apps/backend/modules/like/services/li
 import { LikeStoreCreateService } from "@apps/backend/modules/like/services/like-store-create.service";
 import { LikeStoreDeleteService } from "@apps/backend/modules/like/services/like-store-delete.service";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
+import { LikeUserListService } from "@apps/backend/modules/like/services/like-user-list.service";
 
 /**
  * 좋아요 모듈
@@ -22,6 +23,7 @@ import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like
     LikeStoreCreateService,
     LikeStoreDeleteService,
     LikeStoreDetailService,
+    LikeUserListService,
   ],
   exports: [LikeService, LikeProductDetailService, LikeStoreDetailService],
 })

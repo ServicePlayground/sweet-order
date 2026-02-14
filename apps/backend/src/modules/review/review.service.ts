@@ -1,7 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { ReviewListService } from "@apps/backend/modules/review/services/review-list.service";
 import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
+import { ReviewUserListService } from "@apps/backend/modules/review/services/review-user-list.service";
 import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-list.dto";
+import {
+  GetMyReviewsRequestDto,
+  MyReviewListResponseDto,
+} from "@apps/backend/modules/review/dto/review-user-list.dto";
 
 /**
  * 후기 서비스
@@ -14,6 +19,7 @@ export class ReviewService {
   constructor(
     private readonly reviewListService: ReviewListService,
     private readonly reviewDetailService: ReviewDetailService,
+    private readonly reviewUserListService: ReviewUserListService,
   ) {}
 
   /**
@@ -42,5 +48,15 @@ export class ReviewService {
    */
   async getStoreReview(storeId: string, reviewId: string) {
     return this.reviewDetailService.getStoreReview(storeId, reviewId);
+  }
+
+  /**
+   * 내가 작성한 후기 목록 조회
+   */
+  async getMyReviews(
+    userId: string,
+    query: GetMyReviewsRequestDto,
+  ): Promise<MyReviewListResponseDto> {
+    return this.reviewUserListService.getMyReviews(userId, query);
   }
 }
