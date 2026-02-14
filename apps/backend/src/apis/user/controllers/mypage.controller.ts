@@ -5,11 +5,8 @@ import { ReviewService } from "@apps/backend/modules/review/review.service";
 import { LikeService } from "@apps/backend/modules/like/like.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
-import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  USER_ROLES,
-  AUTH_ERROR_MESSAGES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   GetUserOrdersRequestDto,
@@ -59,9 +56,7 @@ export class UserMypageController {
       "자신의 주문 목록을 조회합니다. 픽업 예정/지난 예약을 구분하여 조회할 수 있으며, 필터링, 정렬, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: UserOrderListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   async getMyOrders(
     @Query() query: GetUserOrdersRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
@@ -81,9 +76,7 @@ export class UserMypageController {
       "주문 ID를 통해 자신의 주문 상세 정보를 조회합니다. 자신의 주문만 조회할 수 있습니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   async getMyOrderById(
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },
@@ -102,9 +95,7 @@ export class UserMypageController {
     description: "자신이 작성한 후기 목록을 조회합니다. 정렬, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: MyReviewListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   async getMyReviews(
     @Query() query: GetMyReviewsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
@@ -125,9 +116,7 @@ export class UserMypageController {
   })
   @SwaggerResponse(200, { dataDto: MyProductLikeListResponseDto })
   @SwaggerResponse(200, { dataDto: MyStoreLikeListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   async getMyLikes(
     @Query() query: GetMyLikesRequestDto,
     @Request() req: { user: JwtVerifiedPayload },

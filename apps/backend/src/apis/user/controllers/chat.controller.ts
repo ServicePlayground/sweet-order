@@ -13,12 +13,10 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ChatService } from "@apps/backend/modules/chat/chat.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { JwtVerifiedPayload, AuthenticatedUser } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
 import {
   CreateChatRoomRequestDto,
@@ -59,21 +57,7 @@ export class UserChatController {
       "스토어와의 채팅방을 생성하거나 기존 채팅방을 조회합니다. 기존 채팅방이 있으면 해당 채팅방 ID를 반환합니다.",
   })
   @SwaggerResponse(201, { dataDto: CreateChatRoomResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, { dataExample: createMessageObject(CHAT_ERROR_MESSAGES.STORE_NOT_FOUND) })
   async createOrGetChatRoom(
     @Body() createChatRoomDto: CreateChatRoomRequestDto,
@@ -94,21 +78,7 @@ export class UserChatController {
       "사용자의 모든 채팅방 목록을 조회합니다. 마지막 메시지 시간 기준으로 정렬됩니다. 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: ChatRoomListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   async getChatRooms(
     @Request() req: { user: JwtVerifiedPayload },
     @Query() query: PaginationRequestDto,
@@ -127,9 +97,7 @@ export class UserChatController {
     description: "채팅방 입장 시 사용자의 읽지 않은 메시지 수를 0으로 초기화합니다.",
   })
   @SwaggerResponse(200, { dataExample: { success: true } })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, {
     dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
   })
@@ -147,9 +115,7 @@ export class UserChatController {
     description: "채팅방의 메시지 목록을 조회합니다. 페이지 기반 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: MessageListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, {
     dataExample: createMessageObject(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND),
   })

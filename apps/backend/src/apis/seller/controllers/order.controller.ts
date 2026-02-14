@@ -13,6 +13,7 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   AUTH_ERROR_MESSAGES,
@@ -59,18 +60,7 @@ export class SellerOrderController {
       "자신이 소유한 스토어의 주문 목록을 조회합니다. 필터링, 정렬, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
@@ -92,23 +82,9 @@ export class SellerOrderController {
     description: "자신이 소유한 스토어의 주문 상세 정보를 조회합니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
@@ -131,23 +107,9 @@ export class SellerOrderController {
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),

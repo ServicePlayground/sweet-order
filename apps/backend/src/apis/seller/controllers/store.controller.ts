@@ -14,6 +14,7 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { StoreService } from "@apps/backend/modules/store/store.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import {
   CreateStoreRequestDto,
   CreateStoreResponseDto,
@@ -116,22 +117,7 @@ export class SellerStoreController {
       STORE_ERROR_MESSAGES.STORE_ALREADY_EXISTS_WITH_SAME_BUSINESS_INFO,
     ),
   })
-  // 인증 오류 응답
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   async createStore(
     @Request() req: { user: JwtVerifiedPayload },
     @Body() createStoreDto: CreateStoreRequestDto,
@@ -151,22 +137,7 @@ export class SellerStoreController {
       "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 페이지네이션을 지원합니다. 각 스토어의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
-  // 인증 오류 응답
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   async getMyStores(
     @Request() req: { user: JwtVerifiedPayload },
     @Query() query: PaginationRequestDto,
@@ -187,21 +158,7 @@ export class SellerStoreController {
       "자신이 소유한 스토어의 상세 정보를 조회합니다. 로그인한 사용자의 경우 해당 스토어의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
@@ -222,21 +179,7 @@ export class SellerStoreController {
     description: "판매자가 등록한 스토어를 수정합니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateStoreResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })

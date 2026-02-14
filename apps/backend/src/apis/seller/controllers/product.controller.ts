@@ -15,6 +15,7 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ProductService } from "@apps/backend/modules/product/product.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   PRODUCT_ERROR_MESSAGES,
@@ -68,21 +69,7 @@ export class SellerProductController {
       "자신이 소유한 스토어의 상품 목록을 조회합니다. 필터링, 정렬, 무한 스크롤을 지원합니다. 로그인한 사용자의 경우 각 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
@@ -109,21 +96,7 @@ export class SellerProductController {
       "자신이 소유한 스토어의 상품 상세 정보를 조회합니다. 로그인한 사용자의 경우 해당 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
@@ -145,21 +118,7 @@ export class SellerProductController {
       "판매자가 새로운 상품을 등록합니다. 스토어 소유권을 확인하고 상품 정보를 저장합니다.",
   })
   @SwaggerResponse(201, { dataDto: CreateProductResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
@@ -187,21 +146,7 @@ export class SellerProductController {
     description: "판매자가 등록한 상품을 수정합니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateProductResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
@@ -228,21 +173,7 @@ export class SellerProductController {
   @SwaggerResponse(200, {
     dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })

@@ -8,12 +8,10 @@ import {
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -54,9 +52,7 @@ export class UserOrderController {
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PRODUCT_NOT_FOUND),
   })
@@ -79,9 +75,7 @@ export class UserOrderController {
       "주문 ID를 통해 자신의 주문 상세 정보를 조회합니다. 자신의 주문만 조회할 수 있습니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
   })
