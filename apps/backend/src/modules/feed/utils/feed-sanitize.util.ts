@@ -24,13 +24,10 @@ export class FeedSanitizeUtil {
     let sanitized = input;
 
     // 위험 태그 제거 - 반복 적용하여 치환 후 새로 생긴 위험 패턴도 제거
+    // 열린 태그나 self-closing 태그만 제거하여 치환 후 새로운 위험 패턴이 생기는 것을 방지
     let previousSanitized: string;
     do {
       previousSanitized = sanitized;
-      sanitized = sanitized.replace(
-        /<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi,
-        "",
-      );
       sanitized = sanitized.replace(
         /<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*\/?\s*>/gi,
         "",
