@@ -14,6 +14,7 @@ import {
   navigateToLoginPage,
   logoutFromWebView,
   requestLocationFromWebView,
+  toExternalAppSchemeUrl,
 } from "@/apps/web-user/common/utils/webview.bridge";
 import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
 
@@ -365,9 +366,7 @@ export default function Home() {
       </div>
 
       {/* 스토어 목록 (QA용) */}
-      {uniqueStoreIds.length > 0 && (
-        <StoreListSection storeIds={uniqueStoreIds} />
-      )}
+      {uniqueStoreIds.length > 0 && <StoreListSection storeIds={uniqueStoreIds} />}
 
       {/* 로그인 상태 표시 (임시) */}
       <div
@@ -557,8 +556,9 @@ function StoreItem({ storeId }: { storeId: string }) {
     e.preventDefault();
     e.stopPropagation();
     if (store) {
-      const webUrl = `https://map.naver.com/v5/?c=${store.longitude},${store.latitude},15,0,0,0,dh`;
-      window.location.href = webUrl;
+      // 네이버지도 앱 딥링크 (설치되어 있으면 앱으로 바로 이동)
+      const appUrl = `nmap://map?lat=${store.latitude}&lng=${store.longitude}&zoom=15&appname=sweetorder`;
+      window.location.href = toExternalAppSchemeUrl(appUrl);
     }
   };
 
@@ -566,8 +566,9 @@ function StoreItem({ storeId }: { storeId: string }) {
     e.preventDefault();
     e.stopPropagation();
     if (store) {
-      const webUrl = `https://map.kakao.com/link/to/%EB%AA%A9%EC%A0%81%EC%A7%80,${store.latitude},${store.longitude}`;
-      window.location.href = webUrl;
+      // 카카오맵 앱 딥링크 (설치되어 있으면 앱으로 바로 이동)
+      const appUrl = `kakaomap://look?p=${store.latitude},${store.longitude}`;
+      window.location.href = toExternalAppSchemeUrl(appUrl);
     }
   };
 
