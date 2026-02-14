@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
+import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 
 /**
  * 주문 항목 응답 DTO
@@ -224,4 +225,21 @@ export class CreateOrderResponseDto {
     example: SWAGGER_EXAMPLES.ORDER_DATA.id,
   })
   id: string;
+}
+
+/**
+ * 주문 목록 응답 DTO
+ */
+export class OrderListResponseDto {
+  @ApiProperty({
+    description: "주문 목록",
+    type: [OrderResponseDto],
+  })
+  data: OrderResponseDto[];
+
+  @ApiProperty({
+    description: "페이지네이션 메타 정보",
+    type: PaginationMetaResponseDto,
+  })
+  meta: PaginationMetaResponseDto;
 }
