@@ -22,9 +22,9 @@ export class LikeUserListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 내가 좋아요한 상품 목록 조회
+   * 내가 좋아요한 상품 목록 조회 (사용자용)
    */
-  async getMyProductLikes(
+  async getMyProductLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyProductLikeListResponseDto> {
@@ -79,9 +79,9 @@ export class LikeUserListService {
   }
 
   /**
-   * 내가 좋아요한 스토어 목록 조회
+   * 내가 좋아요한 스토어 목록 조회 (사용자용)
    */
-  async getMyStoreLikes(
+  async getMyStoreLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyStoreLikeListResponseDto> {
@@ -119,16 +119,21 @@ export class LikeUserListService {
   }
 
   /**
-   * 내가 좋아요한 목록 조회 (타입에 따라 상품 또는 스토어)
+   * 내가 좋아요한 목록 조회 (사용자용)
+   * 타입에 따라 상품 또는 스토어 목록을 반환합니다.
    */
-  async getMyLikes(
+  async getMyLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
     if (query.type === LikeType.PRODUCT) {
-      return this.getMyProductLikes(userId, query);
+      return this.getMyProductLikesForUser(userId, query);
+    } else if (query.type === LikeType.STORE) {
+      return this.getMyStoreLikesForUser(userId, query);
     } else {
-      return this.getMyStoreLikes(userId, query);
+      // 타입이 명시되지 않은 경우 기본값으로 상품 목록 반환
+      // (DTO 검증에서 이미 enum 검증이 이루어지므로 이 경우는 발생하지 않음)
+      return this.getMyProductLikesForUser(userId, query);
     }
   }
 }

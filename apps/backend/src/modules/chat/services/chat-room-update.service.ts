@@ -15,7 +15,7 @@ export class ChatRoomUpdateService {
   ) {}
 
   /**
-   * 채팅방 읽음 처리
+   * 채팅방 읽음 처리 (공통)
    */
   async markChatRoomAsRead(roomId: string, readerId: string, readerType: "user" | "store") {
     const chatRoom = await this.chatRoomDetailService.findChatRoomById(roomId);

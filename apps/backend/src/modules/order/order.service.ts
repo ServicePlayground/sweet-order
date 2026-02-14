@@ -37,57 +37,60 @@ export class OrderService {
   ) {}
 
   /**
-   * 주문 생성
+   * 주문 생성 (사용자용)
    */
-  async createOrder(
+  async createOrderForUser(
     createOrderDto: CreateOrderRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<CreateOrderResponseDto> {
-    return this.orderCreateService.createOrder(user.sub, createOrderDto);
+    return this.orderCreateService.createOrderForUser(user.sub, createOrderDto);
   }
 
   /**
    * 주문 상세조회 (사용자용)
    */
-  async getOrderById(orderId: string, user: JwtVerifiedPayload): Promise<OrderResponseDto> {
-    return this.orderDetailService.getOrderById(orderId, user.sub);
-  }
-
-  /**
-   * 주문 상세조회 (판매자용)
-   */
-  async getSellerOrderById(orderId: string, user: JwtVerifiedPayload): Promise<OrderResponseDto> {
-    return this.orderDetailService.getSellerOrderById(orderId, user.sub);
-  }
-
-  /**
-   * 주문 목록 조회 (판매자용)
-   */
-  async getSellerOrders(
-    query: GetSellerOrdersRequestDto,
-    user: JwtVerifiedPayload,
-  ): Promise<OrderListResponseDto> {
-    return this.orderListService.getSellerOrders(query, user);
-  }
-
-  /**
-   * 주문 상태 변경 (판매자용)
-   */
-  async updateOrderStatus(
-    orderId: string,
-    updateDto: UpdateOrderStatusRequestDto,
-    user: JwtVerifiedPayload,
-  ): Promise<{ id: string }> {
-    return this.orderUpdateService.updateOrderStatus(orderId, updateDto, user.sub);
+  async getOrderByIdForUser(orderId: string, user: JwtVerifiedPayload): Promise<OrderResponseDto> {
+    return this.orderDetailService.getOrderByIdForUser(orderId, user.sub);
   }
 
   /**
    * 주문 목록 조회 (사용자용)
    */
-  async getUserOrders(
+  async getUserOrdersForUser(
     query: GetUserOrdersRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<UserOrderListResponseDto> {
-    return this.orderUserListService.getUserOrders(query, user.sub);
+    return this.orderUserListService.getUserOrdersForUser(query, user.sub);
+  }
+
+  /**
+   * 주문 상세조회 (판매자용)
+   */
+  async getOrderByIdForSeller(
+    orderId: string,
+    user: JwtVerifiedPayload,
+  ): Promise<OrderResponseDto> {
+    return this.orderDetailService.getOrderByIdForSeller(orderId, user.sub);
+  }
+
+  /**
+   * 주문 목록 조회 (판매자용)
+   */
+  async getOrdersForSeller(
+    query: GetSellerOrdersRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<OrderListResponseDto> {
+    return this.orderListService.getOrdersForSeller(query, user);
+  }
+
+  /**
+   * 주문 상태 변경 (판매자용)
+   */
+  async updateOrderStatusForSeller(
+    orderId: string,
+    updateDto: UpdateOrderStatusRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<{ id: string }> {
+    return this.orderUpdateService.updateOrderStatusForSeller(orderId, updateDto, user.sub);
   }
 }

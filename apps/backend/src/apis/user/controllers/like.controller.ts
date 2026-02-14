@@ -3,12 +3,10 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { LikeService } from "@apps/backend/modules/like/like.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   LIKE_ERROR_MESSAGES,
   LIKE_SUCCESS_MESSAGES,
@@ -42,13 +40,11 @@ export class UserLikeController {
   @Auth({ isPublic: false }) // 인증 필수
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: "(로그인필요) 상품 좋아요 추가",
+    summary: "(로그인 필요) 상품 좋아요 추가",
     description: "상품에 좋아요를 추가합니다.",
   })
   @SwaggerResponse(201, { dataDto: LikeProductResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   @SwaggerResponse(409, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_ALREADY_EXISTS),
@@ -57,7 +53,7 @@ export class UserLikeController {
     @Param("productId") productId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.addProductLike(req.user.sub, productId);
+    await this.likeService.addProductLikeForUser(req.user.sub, productId);
     return { message: LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_ADDED };
   }
 
@@ -68,13 +64,11 @@ export class UserLikeController {
   @Auth({ isPublic: false }) // 인증 필수
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: "(로그인필요) 상품 좋아요 삭제",
+    summary: "(로그인 필요) 상품 좋아요 삭제",
     description: "상품의 좋아요를 취소합니다.",
   })
   @SwaggerResponse(200, { dataDto: LikeProductDeleteResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_NOT_FOUND),
   })
@@ -82,7 +76,7 @@ export class UserLikeController {
     @Param("productId") productId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.removeProductLike(req.user.sub, productId);
+    await this.likeService.removeProductLikeForUser(req.user.sub, productId);
     return { message: LIKE_SUCCESS_MESSAGES.PRODUCT_LIKE_REMOVED };
   }
 
@@ -93,13 +87,11 @@ export class UserLikeController {
   @Auth({ isPublic: false }) // 인증 필수
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: "(로그인필요) 스토어 좋아요 추가",
+    summary: "(로그인 필요) 스토어 좋아요 추가",
     description: "스토어에 좋아요를 추가합니다.",
   })
   @SwaggerResponse(201, { dataDto: LikeStoreResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   @SwaggerResponse(409, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.STORE_LIKE_ALREADY_EXISTS),
@@ -108,7 +100,7 @@ export class UserLikeController {
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.addStoreLike(req.user.sub, storeId);
+    await this.likeService.addStoreLikeForUser(req.user.sub, storeId);
     return { message: LIKE_SUCCESS_MESSAGES.STORE_LIKE_ADDED };
   }
 
@@ -119,13 +111,11 @@ export class UserLikeController {
   @Auth({ isPublic: false }) // 인증 필수
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: "(로그인필요) 스토어 좋아요 삭제",
+    summary: "(로그인 필요) 스토어 좋아요 삭제",
     description: "스토어의 좋아요를 취소합니다.",
   })
   @SwaggerResponse(200, { dataDto: LikeStoreDeleteResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
+  @SwaggerAuthResponses()
   @SwaggerResponse(404, {
     dataExample: createMessageObject(LIKE_ERROR_MESSAGES.STORE_LIKE_NOT_FOUND),
   })
@@ -133,7 +123,7 @@ export class UserLikeController {
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.likeService.removeStoreLike(req.user.sub, storeId);
+    await this.likeService.removeStoreLikeForUser(req.user.sub, storeId);
     return { message: LIKE_SUCCESS_MESSAGES.STORE_LIKE_REMOVED };
   }
 }

@@ -7,14 +7,18 @@ import { SWAGGER_EXAMPLES as USER_SWAGGER_EXAMPLES } from "@apps/backend/modules
  */
 export const ORDER_ERROR_MESSAGES = {
   NOT_FOUND: "주문을 찾을 수 없습니다.",
+  FORBIDDEN: "해당 주문에 대한 권한이 없습니다.",
   PRODUCT_NOT_FOUND: "상품을 찾을 수 없습니다.",
   PRODUCT_INACTIVE: "판매중지된 상품입니다.",
   PRODUCT_NOT_AVAILABLE: "구매할 수 없는 상품입니다.",
   STORE_NOT_FOUND: "스토어를 찾을 수 없습니다.",
+  STORE_NOT_OWNED: "해당 스토어에 대한 권한이 없습니다.",
   INVALID_ORDER_ITEMS: "주문 항목이 올바르지 않습니다.",
   INVALID_TOTAL_QUANTITY: "총 수량이 올바르지 않습니다.",
   INVALID_TOTAL_PRICE: "총 금액이 올바르지 않습니다.",
   CANNOT_REVERT_CONFIRMED: "이미 확정된 주문은 대기 상태로 변경할 수 없습니다.",
+  SAME_STATUS: "이미 해당 상태입니다.",
+  ORDER_CREATE_FAILED: "주문 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
 } as const;
 
 /**

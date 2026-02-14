@@ -6,7 +6,7 @@ import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-reques
 import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
 
 /**
- * 후기 목록 조회 요청 DTO (무한 스크롤)
+ * 후기 목록 조회 요청 DTO (페이지네이션)
  */
 export class GetReviewsRequestDto extends PaginationRequestDto {
   @ApiProperty({

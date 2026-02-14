@@ -12,7 +12,7 @@ export const reviewApi = {
     productId,
     ...params
   }: GetProductReviewsParams): Promise<ReviewListResponse> => {
-    const response = await userClient.get(`/product/${productId}/review`, { params });
+    const response = await userClient.get(`/review/product/${productId}`, { params });
     return response.data.data;
   },
 
@@ -21,13 +21,13 @@ export const reviewApi = {
     storeId,
     ...params
   }: GetStoreReviewsParams): Promise<ReviewListResponse> => {
-    const response = await userClient.get(`/store/${storeId}/review`, { params });
+    const response = await userClient.get(`/review/store/${storeId}`, { params });
     return response.data.data;
   },
 
   // 스토어 후기 단일 조회
   getStoreReview: async (storeId: string, reviewId: string): Promise<Review> => {
-    const response = await userClient.get(`/store/${storeId}/review/${reviewId}`);
+    const response = await userClient.get(`/review/store/${storeId}/${reviewId}`);
     return response.data.data;
   },
 };

@@ -8,6 +8,112 @@ import * as crypto from "crypto";
  */
 export class FileValidator {
   /**
+   * 파일 시그니처(매직 바이트) 기반 타입 판별
+   */
+  private static detectFileTypeByMagic(
+    buffer: Buffer,
+  ): "jpeg" | "png" | "gif" | "webp" | "pdf" | "ole" | "zip" | "text" | "unknown" {
+    if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+      return "jpeg";
+    }
+
+    if (
+      buffer.length >= 8 &&
+      buffer[0] === 0x89 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x4e &&
+      buffer[3] === 0x47 &&
+      buffer[4] === 0x0d &&
+      buffer[5] === 0x0a &&
+      buffer[6] === 0x1a &&
+      buffer[7] === 0x0a
+    ) {
+      return "png";
+    }
+
+    if (
+      buffer.length >= 6 &&
+      buffer[0] === 0x47 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x38 &&
+      (buffer[4] === 0x37 || buffer[4] === 0x39) &&
+      buffer[5] === 0x61
+    ) {
+      return "gif";
+    }
+
+    if (
+      buffer.length >= 12 &&
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46 &&
+      buffer[8] === 0x57 &&
+      buffer[9] === 0x45 &&
+      buffer[10] === 0x42 &&
+      buffer[11] === 0x50
+    ) {
+      return "webp";
+    }
+
+    if (
+      buffer.length >= 5 &&
+      buffer[0] === 0x25 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x44 &&
+      buffer[3] === 0x46 &&
+      buffer[4] === 0x2d
+    ) {
+      return "pdf";
+    }
+
+    // OLE 컨테이너 (.doc/.xls)
+    if (
+      buffer.length >= 8 &&
+      buffer[0] === 0xd0 &&
+      buffer[1] === 0xcf &&
+      buffer[2] === 0x11 &&
+      buffer[3] === 0xe0 &&
+      buffer[4] === 0xa1 &&
+      buffer[5] === 0xb1 &&
+      buffer[6] === 0x1a &&
+      buffer[7] === 0xe1
+    ) {
+      return "ole";
+    }
+
+    // ZIP 기반 OOXML 컨테이너 (.docx/.xlsx)
+    if (
+      buffer.length >= 4 &&
+      buffer[0] === 0x50 &&
+      buffer[1] === 0x4b &&
+      (buffer[2] === 0x03 || buffer[2] === 0x05 || buffer[2] === 0x07) &&
+      (buffer[3] === 0x04 || buffer[3] === 0x06 || buffer[3] === 0x08)
+    ) {
+      return "zip";
+    }
+
+    // text/plain: ASCII/UTF-8 제어문자 일부만 허용
+    const sample = buffer.subarray(0, Math.min(buffer.length, 512));
+    let textLike = true;
+    for (const byte of sample) {
+      if (byte === 0x09 || byte === 0x0a || byte === 0x0d) {
+        continue;
+      }
+      if (byte < 0x20) {
+        textLike = false;
+        break;
+      }
+    }
+    if (textLike) {
+      return "text";
+    }
+
+    return "unknown";
+  }
+
+  /**
    * 파일 크기 검증
    */
   static validateFileSize(buffer: Buffer): void {
@@ -128,7 +234,6 @@ export class FileValidator {
       ".png": ["image/png"],
       ".gif": ["image/gif"],
       ".webp": ["image/webp"],
-      ".svg": ["image/svg+xml"],
       ".pdf": ["application/pdf"],
       ".doc": ["application/msword"],
       ".docx": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
@@ -146,6 +251,53 @@ export class FileValidator {
       throw new BadRequestException(
         `파일 확장자(${ext})와 MIME 타입(${mimetype})이 일치하지 않습니다.`,
       );
+    }
+  }
+
+  /**
+   * 매직 바이트 기준 검증
+   */
+  static validateMagicBytes(filename: string, mimetype: string, buffer: Buffer): void {
+    const ext = path.extname(filename).toLowerCase();
+    const detected = this.detectFileTypeByMagic(buffer);
+
+    const allowedByExt: Record<string, Array<typeof detected>> = {
+      ".jpg": ["jpeg"],
+      ".jpeg": ["jpeg"],
+      ".png": ["png"],
+      ".gif": ["gif"],
+      ".webp": ["webp"],
+      ".pdf": ["pdf"],
+      ".doc": ["ole"],
+      ".xls": ["ole"],
+      ".docx": ["zip"],
+      ".xlsx": ["zip"],
+      ".txt": ["text"],
+    };
+
+    const allowedByMime: Record<string, Array<typeof detected>> = {
+      "image/jpeg": ["jpeg"],
+      "image/jpg": ["jpeg"],
+      "image/png": ["png"],
+      "image/gif": ["gif"],
+      "image/webp": ["webp"],
+      "application/pdf": ["pdf"],
+      "application/msword": ["ole"],
+      "application/vnd.ms-excel": ["ole"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["zip"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["zip"],
+      "text/plain": ["text"],
+    };
+
+    if (!allowedByExt[ext] || !allowedByMime[mimetype]) {
+      throw new BadRequestException("지원하지 않는 파일 형식입니다.");
+    }
+
+    const extOk = allowedByExt[ext].includes(detected);
+    const mimeOk = allowedByMime[mimetype].includes(detected);
+
+    if (!extOk || !mimeOk) {
+      throw new BadRequestException("파일 내용과 확장자/타입이 일치하지 않습니다.");
     }
   }
 
@@ -172,6 +324,9 @@ export class FileValidator {
 
     // 확장자와 MIME 타입 일치 검증
     this.validateExtensionMimeTypeMatch(file.originalname, file.mimetype);
+
+    // 매직 바이트(파일 시그니처) 검증
+    this.validateMagicBytes(file.originalname, file.mimetype, file.buffer);
 
     // 파일 이름 정규화
     const normalizedFilename = this.normalizeFilename(file.originalname);

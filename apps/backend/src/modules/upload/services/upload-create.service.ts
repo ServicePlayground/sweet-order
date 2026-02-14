@@ -22,10 +22,8 @@ export class UploadCreateService {
     this.bucket = this.configService.get<string>("S3_BUCKET");
     this.cloudfrontDomain = this.configService.get<string>("CLOUDFRONT_DOMAIN");
 
-    if (!this.bucket || !this.region || !this.cloudfrontDomain) {
-      throw new Error(
-        "S3_BUCKET 또는 AWS_REGION 또는 CLOUDFRONT_DOMAIN 환경 변수가 설정되어 있지 않습니다.",
-      );
+    if (!this.bucket || !this.region) {
+      throw new Error("S3_BUCKET 또는 AWS_REGION 환경 변수가 설정되어 있지 않습니다.");
     }
 
     const accessKeyId = this.configService.get<string>("AWS_ACCESS_KEY_ID");
@@ -43,7 +41,11 @@ export class UploadCreateService {
       },
     });
 
-    this.logger.log(`S3 Client 초기화 완료: ${this.region}, Bucket: ${this.bucket}`);
+    this.logger.log(
+      `S3 Client 초기화 완료: ${this.region}, Bucket: ${this.bucket}, CloudFront: ${
+        this.cloudfrontDomain ? "enabled" : "disabled"
+      }`,
+    );
   }
 
   /**

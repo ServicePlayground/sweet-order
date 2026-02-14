@@ -30,42 +30,42 @@ export class ChatService {
   ) {}
 
   /**
-   * 채팅방 생성 또는 조회
+   * 채팅방 생성 또는 조회 (사용자용)
    */
-  async createOrGetChatRoom(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
-    return await this.chatRoomCreateService.createOrGetChatRoom(userId, createChatRoomDto);
+  async createOrGetChatRoomForUser(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
+    return await this.chatRoomCreateService.createOrGetChatRoomForUser(userId, createChatRoomDto);
   }
 
   /**
-   * 사용자의 채팅방 목록 조회
+   * 사용자의 채팅방 목록 조회 (사용자용)
    */
-  async getChatRoomsByUserId(
+  async getChatRoomsByUserIdForUser(
     userId: string,
     query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
-    return await this.chatRoomListService.getChatRoomsByUserId(userId, query);
+    return await this.chatRoomListService.getChatRoomsByUserIdForUser(userId, query);
   }
 
   /**
    * 스토어의 채팅방 목록 조회 (판매자용)
    */
-  async getChatRoomsByStoreId(
+  async getChatRoomsByStoreIdForSeller(
     storeId: string,
     userId: string,
     query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomForSellerResponseDto[]; meta: any }> {
-    return await this.chatRoomListService.getChatRoomsByStoreId(storeId, userId, query);
+    return await this.chatRoomListService.getChatRoomsByStoreIdForSeller(storeId, userId, query);
   }
 
   /**
-   * 채팅방 읽음 처리
+   * 채팅방 읽음 처리 (공통)
    */
   async markChatRoomAsRead(roomId: string, readerId: string, readerType: "user" | "store") {
     return await this.chatRoomUpdateService.markChatRoomAsRead(roomId, readerId, readerType);
   }
 
   /**
-   * 메시지 전송
+   * 메시지 전송 (공통)
    */
   async sendMessage(
     roomId: string,
@@ -77,7 +77,7 @@ export class ChatService {
   }
 
   /**
-   * 채팅방 메시지 목록 조회 (페이지 기반 페이지네이션)
+   * 채팅방 메시지 목록 조회 (공통)
    */
   async getMessages(
     roomId: string,

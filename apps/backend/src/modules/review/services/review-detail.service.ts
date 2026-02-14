@@ -3,6 +3,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { REVIEW_ERROR_MESSAGES } from "@apps/backend/modules/review/constants/review.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
+import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
 
 /**
  * 후기 단일 조회 서비스
@@ -13,9 +14,9 @@ export class ReviewDetailService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 상품 후기 단일 조회
+   * 상품 후기 단일 조회 (사용자용)
    */
-  async getProductReview(productId: string, reviewId: string) {
+  async getProductReviewForUser(productId: string, reviewId: string) {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
       select: { id: true },
@@ -32,10 +33,7 @@ export class ReviewDetailService {
       },
       include: {
         user: {
-          select: {
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ReviewMapperUtil.USER_INFO_SELECT,
         },
       },
     });
@@ -44,25 +42,14 @@ export class ReviewDetailService {
       throw new NotFoundException(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND);
     }
 
-    return {
-      id: review.id,
-      productId: review.productId,
-      userId: review.userId,
-      rating: review.rating,
-      content: review.content,
-      imageUrls: review.imageUrls,
-      userNickname: review.user.nickname,
-      userProfileImageUrl: review.user.profileImageUrl,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    };
+    return ReviewMapperUtil.mapToReviewResponse(review);
   }
 
   /**
-   * 스토어 후기 단일 조회
+   * 스토어 후기 단일 조회 (사용자용)
    * 해당 스토어의 상품 중 하나에 대한 후기를 조회합니다.
    */
-  async getStoreReview(storeId: string, reviewId: string) {
+  async getStoreReviewForUser(storeId: string, reviewId: string) {
     const store = await this.prisma.store.findUnique({
       where: { id: storeId },
       select: { id: true },
@@ -72,26 +59,16 @@ export class ReviewDetailService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    const products = await this.prisma.product.findMany({
-      where: { storeId },
-      select: { id: true },
-    });
-
-    const productIds = products.map((product) => product.id);
-
     const review = await this.prisma.productReview.findFirst({
       where: {
         id: reviewId,
-        productId: {
-          in: productIds,
+        product: {
+          storeId,
         },
       },
       include: {
         user: {
-          select: {
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ReviewMapperUtil.USER_INFO_SELECT,
         },
       },
     });
@@ -100,17 +77,6 @@ export class ReviewDetailService {
       throw new NotFoundException(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND);
     }
 
-    return {
-      id: review.id,
-      productId: review.productId,
-      userId: review.userId,
-      rating: review.rating,
-      content: review.content,
-      imageUrls: review.imageUrls,
-      userNickname: review.user.nickname,
-      userProfileImageUrl: review.user.profileImageUrl,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    };
+    return ReviewMapperUtil.mapToReviewResponse(review);
   }
 }

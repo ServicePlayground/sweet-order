@@ -31,40 +31,40 @@ export class LikeService {
   ) {}
 
   /**
-   * 상품 좋아요 추가
+   * 상품 좋아요 추가 (사용자용)
    */
-  async addProductLike(userId: string, productId: string) {
-    return this.likeProductCreateService.addProductLike(userId, productId);
+  async addProductLikeForUser(userId: string, productId: string) {
+    return this.likeProductCreateService.addProductLikeForUser(userId, productId);
   }
 
   /**
-   * 상품 좋아요 삭제
+   * 상품 좋아요 삭제 (사용자용)
    */
-  async removeProductLike(userId: string, productId: string) {
-    return this.likeProductDeleteService.removeProductLike(userId, productId);
+  async removeProductLikeForUser(userId: string, productId: string) {
+    return this.likeProductDeleteService.removeProductLikeForUser(userId, productId);
   }
 
   /**
-   * 스토어 좋아요 추가
+   * 스토어 좋아요 추가 (사용자용)
    */
-  async addStoreLike(userId: string, storeId: string) {
-    return this.likeStoreCreateService.addStoreLike(userId, storeId);
+  async addStoreLikeForUser(userId: string, storeId: string) {
+    return this.likeStoreCreateService.addStoreLikeForUser(userId, storeId);
   }
 
   /**
-   * 스토어 좋아요 삭제
+   * 스토어 좋아요 삭제 (사용자용)
    */
-  async removeStoreLike(userId: string, storeId: string) {
-    return this.likeStoreDeleteService.removeStoreLike(userId, storeId);
+  async removeStoreLikeForUser(userId: string, storeId: string) {
+    return this.likeStoreDeleteService.removeStoreLikeForUser(userId, storeId);
   }
 
   /**
-   * 내가 좋아요한 목록 조회 (타입에 따라 상품 또는 스토어)
+   * 내가 좋아요한 목록 조회 (사용자용)
    */
-  async getMyLikes(
+  async getMyLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
-    return this.likeUserListService.getMyLikes(userId, query);
+    return this.likeUserListService.getMyLikesForUser(userId, query);
   }
 }

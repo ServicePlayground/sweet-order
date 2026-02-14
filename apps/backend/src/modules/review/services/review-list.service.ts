@@ -6,6 +6,7 @@ import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/stor
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
+import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
 
 /**
  * 후기 목록 조회 서비스
@@ -16,9 +17,10 @@ export class ReviewListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 상품 후기 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 상품 후기 목록 조회 (사용자용)
+   * 필터링, 정렬, 페이지네이션을 지원합니다.
    */
-  async getProductReviews(productId: string, query: GetReviewsRequestDto) {
+  async getProductReviewsForUser(productId: string, query: GetReviewsRequestDto) {
     const { page, limit, sortBy } = query;
 
     const product = await this.prisma.product.findUnique({
@@ -47,26 +49,12 @@ export class ReviewListService {
       take: limit,
       include: {
         user: {
-          select: {
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ReviewMapperUtil.USER_INFO_SELECT,
         },
       },
     });
 
-    const data = reviews.map((review) => ({
-      id: review.id,
-      productId: review.productId,
-      userId: review.userId,
-      rating: review.rating,
-      content: review.content,
-      imageUrls: review.imageUrls,
-      userNickname: review.user.nickname,
-      userProfileImageUrl: review.user.profileImageUrl,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    }));
+    const data = reviews.map((review) => ReviewMapperUtil.mapToReviewResponse(review));
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
 
@@ -74,10 +62,11 @@ export class ReviewListService {
   }
 
   /**
-   * 스토어 후기 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 스토어 후기 목록 조회 (사용자용)
    * 해당 스토어의 모든 상품에 대한 후기를 합쳐서 보여줍니다.
+   * 필터링, 정렬, 페이지네이션을 지원합니다.
    */
-  async getStoreReviews(storeId: string, query: GetReviewsRequestDto) {
+  async getStoreReviewsForUser(storeId: string, query: GetReviewsRequestDto) {
     const { page, limit, sortBy } = query;
 
     const store = await this.prisma.store.findUnique({
@@ -89,23 +78,9 @@ export class ReviewListService {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    const products = await this.prisma.product.findMany({
-      where: { storeId },
-      select: { id: true },
-    });
-
-    const productIds = products.map((product) => product.id);
-
-    if (productIds.length === 0) {
-      return {
-        data: [],
-        meta: calculatePaginationMeta(page, limit, 0),
-      };
-    }
-
     const where: Prisma.ProductReviewWhereInput = {
-      productId: {
-        in: productIds,
+      product: {
+        storeId,
       },
     };
 
@@ -122,26 +97,12 @@ export class ReviewListService {
       take: limit,
       include: {
         user: {
-          select: {
-            nickname: true,
-            profileImageUrl: true,
-          },
+          select: ReviewMapperUtil.USER_INFO_SELECT,
         },
       },
     });
 
-    const data = reviews.map((review) => ({
-      id: review.id,
-      productId: review.productId,
-      userId: review.userId,
-      rating: review.rating,
-      content: review.content,
-      imageUrls: review.imageUrls,
-      userNickname: review.user.nickname,
-      userProfileImageUrl: review.user.profileImageUrl,
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    }));
+    const data = reviews.map((review) => ReviewMapperUtil.mapToReviewResponse(review));
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
 

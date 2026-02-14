@@ -19,7 +19,8 @@ export class ChatMessageListService {
   ) {}
 
   /**
-   * 채팅방 메시지 목록 조회 (페이지 기반 페이지네이션)
+   * 채팅방 메시지 목록 조회 (공통)
+   * 페이지 기반 페이지네이션을 지원합니다.
    */
   async getMessages(
     roomId: string,

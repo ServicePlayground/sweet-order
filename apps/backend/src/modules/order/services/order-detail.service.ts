@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
+import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
+import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 
 /**
  * 주문 상세조회 서비스
@@ -18,25 +19,20 @@ export class OrderDetailService {
    * @param userId - 사용자 ID (권한 확인용)
    * @returns 주문 정보 (OrderResponseDto)
    */
-  async getOrderById(orderId: string, userId: string): Promise<OrderResponseDto> {
-    // 주문 조회 (orderItems 포함)
+  async getOrderByIdForUser(orderId: string, userId: string): Promise<OrderResponseDto> {
+    // 주문 소유권 확인
+    await OrderOwnershipUtil.verifyOrderUserOwnership(this.prisma, orderId, userId);
+
+    // 주문 항목 정보 포함하여 조회
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        orderItems: true,
-      },
+      include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
     });
 
     if (!order) {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    // 사용자 권한 확인 (자신의 주문만 조회 가능)
-    if (order.userId !== userId) {
-      throw new UnauthorizedException(ORDER_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    // Prisma 엔티티를 DTO로 변환하여 반환
     return OrderMapperUtil.mapToOrderResponse(order);
   }
 
@@ -47,31 +43,20 @@ export class OrderDetailService {
    * @param userId - 판매자 사용자 ID (권한 확인용)
    * @returns 주문 정보 (OrderResponseDto)
    */
-  async getSellerOrderById(orderId: string, userId: string): Promise<OrderResponseDto> {
-    // 주문 조회 (orderItems, store 포함)
+  async getOrderByIdForSeller(orderId: string, userId: string): Promise<OrderResponseDto> {
+    // 주문 소유권 확인
+    await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId);
+
+    // 주문 항목 정보 포함하여 조회
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: {
-        orderItems: true,
-        store: {
-          select: {
-            id: true,
-            userId: true,
-          },
-        },
-      },
+      include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
     });
 
     if (!order) {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    // 권한 확인: 스토어 소유자인지 확인
-    if (order.store.userId !== userId) {
-      throw new UnauthorizedException(ORDER_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    // Prisma 엔티티를 DTO로 변환하여 반환
     return OrderMapperUtil.mapToOrderResponse(order);
   }
 }

@@ -15,11 +15,11 @@ import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 
 /**
- * 후기 관련 컨트롤러 (사용자용)
+ * 후기 관련 컨트롤러
  */
 @ApiTags("후기")
 @ApiExtraModels(ReviewListResponseDto, ReviewResponseDto)
-@Controller(`${USER_ROLES.USER}`)
+@Controller(`${USER_ROLES.USER}/review`)
 @Auth({ isPublic: true })
 export class UserReviewController {
   constructor(private readonly reviewService: ReviewService) {}
@@ -27,7 +27,7 @@ export class UserReviewController {
   /**
    * 상품 후기 목록 조회 API
    */
-  @Get("product/:productId/review")
+  @Get("product/:productId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "상품 후기 목록 조회",
@@ -39,13 +39,13 @@ export class UserReviewController {
     @Param("productId") productId: string,
     @Query() query: GetReviewsRequestDto,
   ) {
-    return await this.reviewService.getProductReviews(productId, query);
+    return await this.reviewService.getProductReviewsForUser(productId, query);
   }
 
   /**
    * 상품 후기 단일 조회 API
    */
-  @Get("product/:productId/review/:reviewId")
+  @Get("product/:productId/:reviewId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "상품 후기 단일 조회",
@@ -60,13 +60,13 @@ export class UserReviewController {
     @Param("productId") productId: string,
     @Param("reviewId") reviewId: string,
   ) {
-    return await this.reviewService.getProductReview(productId, reviewId);
+    return await this.reviewService.getProductReviewForUser(productId, reviewId);
   }
 
   /**
    * 스토어 후기 목록 조회 API
    */
-  @Get("store/:storeId/review")
+  @Get("store/:storeId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "스토어 후기 목록 조회",
@@ -76,13 +76,13 @@ export class UserReviewController {
   @SwaggerResponse(200, { dataDto: ReviewListResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreReviews(@Param("storeId") storeId: string, @Query() query: GetReviewsRequestDto) {
-    return await this.reviewService.getStoreReviews(storeId, query);
+    return await this.reviewService.getStoreReviewsForUser(storeId, query);
   }
 
   /**
    * 스토어 후기 단일 조회 API
    */
-  @Get("store/:storeId/review/:reviewId")
+  @Get("store/:storeId/:reviewId")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "스토어 후기 단일 조회",
@@ -94,6 +94,6 @@ export class UserReviewController {
     dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND),
   })
   async getStoreReview(@Param("storeId") storeId: string, @Param("reviewId") reviewId: string) {
-    return await this.reviewService.getStoreReview(storeId, reviewId);
+    return await this.reviewService.getStoreReviewForUser(storeId, reviewId);
   }
 }

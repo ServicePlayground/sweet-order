@@ -12,11 +12,8 @@ import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiExtraModels } from "@ne
 import { UploadService } from "@apps/backend/modules/upload/upload.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
-import { createMessageObject } from "@apps/backend/common/utils/message.util";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { UPLOAD_CONSTANTS } from "@apps/backend/modules/upload/constants/upload.constants";
 import { UploadFileResponseDto } from "@apps/backend/modules/upload/dto/upload-create.dto";
 
@@ -62,21 +59,7 @@ export class UserUploadController {
     },
   })
   @SwaggerResponse(200, { dataDto: UploadFileResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   async uploadFile(
     @UploadedFile()
     file:

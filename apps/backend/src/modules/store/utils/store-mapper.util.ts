@@ -41,7 +41,10 @@ export class StoreMapperUtil {
     const isSingle = !Array.isArray(stores);
 
     if (storesArray.length === 0) {
-      return isSingle ? ({} as StoreResponseDto) : [];
+      if (isSingle) {
+        throw new Error("단일 스토어 매핑 대상이 비어 있습니다.");
+      }
+      return [];
     }
 
     const storeIds = storesArray.map((store) => store.id);

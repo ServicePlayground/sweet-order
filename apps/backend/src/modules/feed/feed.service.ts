@@ -26,38 +26,43 @@ export class FeedService {
   ) {}
 
   /**
+   * 피드 목록 조회 (사용자용)
+   */
+  async getFeedsByStoreIdForUser(storeId: string, query: PaginationRequestDto) {
+    return this.feedListService.getFeedsByStoreIdForUser(storeId, query);
+  }
+
+  /**
+   * 피드 상세 조회 (사용자용)
+   */
+  async getFeedByIdForUser(feedId: string, storeId?: string) {
+    return this.feedDetailService.getFeedByIdForUser(feedId, storeId);
+  }
+
+  /**
    * 피드 생성 (판매자용)
    */
-  async createFeed(userId: string, createFeedDto: CreateFeedRequestDto) {
+  async createFeedForSeller(userId: string, createFeedDto: CreateFeedRequestDto) {
     return this.feedCreateService.createFeed(userId, createFeedDto);
   }
 
   /**
    * 피드 수정 (판매자용)
    */
-  async updateFeed(feedId: string, updateFeedDto: UpdateFeedRequestDto, user: JwtVerifiedPayload) {
-    return this.feedUpdateService.updateFeed(feedId, updateFeedDto, user);
+  async updateFeedForSeller(
+    storeId: string,
+    feedId: string,
+    updateFeedDto: UpdateFeedRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
+    return this.feedUpdateService.updateFeed(storeId, feedId, updateFeedDto, user);
   }
 
   /**
    * 피드 삭제 (판매자용)
    */
-  async deleteFeed(feedId: string, user: JwtVerifiedPayload) {
-    await this.feedDeleteService.deleteFeed(feedId, user);
-  }
-
-  /**
-   * 피드 목록 조회 (사용자용)
-   */
-  async getFeedsByStoreId(storeId: string, query: PaginationRequestDto) {
-    return this.feedListService.getFeedsByStoreId(storeId, query);
-  }
-
-  /**
-   * 피드 상세 조회 (사용자용)
-   */
-  async getFeedById(feedId: string) {
-    return this.feedDetailService.getFeedById(feedId);
+  async deleteFeedForSeller(storeId: string, feedId: string, user: JwtVerifiedPayload) {
+    await this.feedDeleteService.deleteFeed(storeId, feedId, user);
   }
 
   /**
@@ -74,7 +79,7 @@ export class FeedService {
   /**
    * 피드 상세 조회 (판매자용)
    */
-  async getFeedByIdForSeller(feedId: string, user: JwtVerifiedPayload) {
-    return this.feedDetailService.getFeedByIdForSeller(feedId, user);
+  async getFeedByIdForSeller(feedId: string, user: JwtVerifiedPayload, storeId: string) {
+    return this.feedDetailService.getFeedByIdForSeller(feedId, user, storeId);
   }
 }

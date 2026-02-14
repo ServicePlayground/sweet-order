@@ -1,17 +1,26 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-update.dto";
 import {
   EnableStatus,
   ProductType,
-  PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
 
 @Injectable()
 export class ProductUpdateService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private isOptionWithId(value: unknown): value is Record<string, unknown> & { id: string } {
+    return Boolean(
+      value &&
+      typeof value === "object" &&
+      "id" in value &&
+      typeof (value as { id: unknown }).id === "string",
+    );
+  }
 
   /**
    * 케이크 옵션용 랜덤 ID 생성
@@ -26,14 +35,14 @@ export class ProductUpdateService {
    * 케이크 옵션에 ID 부여 (기존 ID 유지, 새 옵션에는 새 ID 생성)
    */
   private processCakeOptionsWithIds(
-    existingOptions: any[],
+    existingOptions: unknown[],
     newOptions: Array<{ id?: string }>,
     prefix: "size" | "flavor",
   ): Array<{ id: string }> {
-    const existingOptionsById = new Map<string, any>();
+    const existingOptionsById = new Map<string, Record<string, unknown> & { id: string }>();
 
     for (const option of existingOptions) {
-      if (option && typeof option === "object" && "id" in option && typeof option.id === "string") {
+      if (this.isOptionWithId(option)) {
         existingOptionsById.set(option.id, option);
       }
     }
@@ -57,31 +66,22 @@ export class ProductUpdateService {
   /**
    * 상품 수정 (판매자용)
    */
-  async updateProduct(
+  async updateProductForSeller(
     id: string,
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        store: {
-          select: {
-            userId: true,
-          },
-        },
+    // 상품 소유권 확인
+    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
+
+    // 기존 상품 정보 조회 (옵션 업데이트를 위해 필요)
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      select: {
+        cakeSizeOptions: true,
+        cakeFlavorOptions: true,
       },
     });
-
-    if (!product || !product.store) {
-      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    if (product.store.userId !== user.sub) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
-    }
 
     const updateData: Prisma.ProductUpdateInput = {};
 
@@ -101,7 +101,9 @@ export class ProductUpdateService {
       updateData.visibilityStatus = updateProductDto.visibilityStatus;
     }
     if (updateProductDto.cakeSizeOptions !== undefined) {
-      const existingSizeOptions: any[] = (product.cakeSizeOptions as any[]) ?? [];
+      const existingSizeOptions = Array.isArray(product?.cakeSizeOptions)
+        ? product.cakeSizeOptions
+        : [];
       const nextSizeOptions = this.processCakeOptionsWithIds(
         existingSizeOptions,
         updateProductDto.cakeSizeOptions ?? [],
@@ -112,7 +114,9 @@ export class ProductUpdateService {
     }
 
     if (updateProductDto.cakeFlavorOptions !== undefined) {
-      const existingFlavorOptions: any[] = (product.cakeFlavorOptions as any[]) ?? [];
+      const existingFlavorOptions = Array.isArray(product?.cakeFlavorOptions)
+        ? product.cakeFlavorOptions
+        : [];
       const nextFlavorOptions = this.processCakeOptionsWithIds(
         existingFlavorOptions,
         updateProductDto.cakeFlavorOptions ?? [],

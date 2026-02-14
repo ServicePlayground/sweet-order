@@ -15,6 +15,7 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { FeedService } from "@apps/backend/modules/feed/feed.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,
@@ -25,6 +26,7 @@ import {
   FEED_ERROR_MESSAGES,
   FEED_SUCCESS_MESSAGES,
 } from "@apps/backend/modules/feed/constants/feed.constants";
+import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import {
   CreateFeedRequestDto,
   CreateFeedResponseDto,
@@ -57,28 +59,14 @@ export class SellerFeedController {
     description: "자신이 소유한 스토어의 피드 목록을 조회합니다.",
   })
   @SwaggerResponse(200, { dataDto: FeedListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
-  @SwaggerResponse(404, { dataExample: createMessageObject("스토어를 찾을 수 없습니다.") })
+  @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getFeeds(
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
@@ -97,25 +85,11 @@ export class SellerFeedController {
     description: "자신이 소유한 스토어의 피드 상세 정보를 조회합니다.",
   })
   @SwaggerResponse(200, { dataDto: FeedResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -124,7 +98,7 @@ export class SellerFeedController {
     @Param("id") feedId: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.feedService.getFeedByIdForSeller(feedId, req.user);
+    return await this.feedService.getFeedByIdForSeller(feedId, req.user, storeId);
   }
 
   /**
@@ -137,24 +111,10 @@ export class SellerFeedController {
     description: "판매자가 스토어 피드를 등록합니다.",
   })
   @SwaggerResponse(201, { dataDto: CreateFeedResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(404, { dataExample: createMessageObject("스토어를 찾을 수 없습니다.") })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject("스토어를 수정할 권한이 없습니다."),
+  @SwaggerAuthResponses()
+  @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN),
   })
   async createFeed(
     @Param("storeId") storeId: string,
@@ -163,7 +123,7 @@ export class SellerFeedController {
   ) {
     // storeId를 DTO에 설정
     createFeedDto.storeId = storeId;
-    return await this.feedService.createFeed(req.user.sub, createFeedDto);
+    return await this.feedService.createFeedForSeller(req.user.sub, createFeedDto);
   }
 
   /**
@@ -176,25 +136,11 @@ export class SellerFeedController {
     description: "판매자가 등록한 스토어 피드를 수정합니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateFeedResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -204,7 +150,7 @@ export class SellerFeedController {
     @Body() updateFeedDto: UpdateFeedRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.feedService.updateFeed(id, updateFeedDto, req.user);
+    return await this.feedService.updateFeedForSeller(storeId, id, updateFeedDto, req.user);
   }
 
   /**
@@ -219,25 +165,11 @@ export class SellerFeedController {
   @SwaggerResponse(200, {
     dataExample: createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -246,7 +178,7 @@ export class SellerFeedController {
     @Param("id") id: string,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    await this.feedService.deleteFeed(id, req.user);
+    await this.feedService.deleteFeedForSeller(storeId, id, req.user);
     return createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED);
   }
 }

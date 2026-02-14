@@ -19,11 +19,11 @@ export class OrderUserListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 사용자용 주문 목록 조회 (필터링, 정렬, 페이지네이션 지원)
+   * 사용자용 주문 목록 조회 (사용자용)
    * 자신의 주문만 조회합니다.
    * 픽업 예정/지난 예약을 구분하여 조회할 수 있습니다.
    */
-  async getUserOrders(
+  async getUserOrdersForUser(
     query: GetUserOrdersRequestDto,
     userId: string,
   ): Promise<UserOrderListResponseDto> {

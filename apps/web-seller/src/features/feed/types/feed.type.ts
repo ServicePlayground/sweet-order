@@ -45,6 +45,13 @@ export interface IFeed {
 }
 
 /**
+ * 피드 생성/수정 응답
+ */
+export interface IFeedMutationResponse {
+  id: string;
+}
+
+/**
  * 피드 목록 응답
  */
 export interface IFeedListResponse {

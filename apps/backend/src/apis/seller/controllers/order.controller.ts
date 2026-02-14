@@ -13,6 +13,7 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   AUTH_ERROR_MESSAGES,
@@ -59,26 +60,18 @@ export class SellerOrderController {
       "자신이 소유한 스토어의 주문 목록을 조회합니다. 필터링, 정렬, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderListResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   async getOrders(
     @Query() query: GetSellerOrdersRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.orderService.getSellerOrders(query, req.user);
+    return await this.orderService.getOrdersForSeller(query, req.user);
   }
 
   /**
@@ -92,29 +85,18 @@ export class SellerOrderController {
     description: "자신이 소유한 스토어의 주문 상세 정보를 조회합니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
   })
   async getOrderDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
-    return await this.orderService.getSellerOrderById(id, req.user);
+    return await this.orderService.getOrderByIdForSeller(id, req.user);
   }
 
   /**
@@ -131,23 +113,12 @@ export class SellerOrderController {
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
   })
   @SwaggerResponse(404, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
@@ -157,6 +128,6 @@ export class SellerOrderController {
     @Body() updateDto: UpdateOrderStatusRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.orderService.updateOrderStatus(id, updateDto, req.user);
+    return await this.orderService.updateOrderStatusForSeller(id, updateDto, req.user);
   }
 }
