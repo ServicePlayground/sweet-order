@@ -1,4 +1,4 @@
-import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-response.dto";
+import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-detail.dto";
 
 /**
  * 피드 매핑 유틸리티

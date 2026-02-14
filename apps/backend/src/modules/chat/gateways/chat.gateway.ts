@@ -15,7 +15,7 @@ import { ConfigService } from "@nestjs/config";
 import { ChatService } from "../chat.service";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { MessageResponseDto } from "../dto/message-response.dto";
+import { MessageResponseDto } from "../dto/chat-message-list.dto";
 
 /**
  * WebSocket 게이트웨이

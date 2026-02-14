@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, Inject, forwardRef } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { MessageResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+import { MessageResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
 import { ChatRoomDetailService } from "./chat-room-detail.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatGateway } from "../gateways/chat.gateway";

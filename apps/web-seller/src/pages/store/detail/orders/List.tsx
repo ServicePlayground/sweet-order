@@ -1,0 +1,169 @@
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/apps/web-seller/common/components/@shadcn-ui/select";
+import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+import { useOrderList } from "@/apps/web-seller/features/order/hooks/queries/useOrderList";
+import { OrderList } from "@/apps/web-seller/features/order/components/list/OrderList";
+import { OrderSortBy, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
+import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+
+export const StoreDetailOrderListPage: React.FC = () => {
+  const { storeId } = useParams();
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<OrderSortBy>(OrderSortBy.LATEST);
+  const [orderStatus, setOrderStatus] = useState<OrderStatus | undefined>(undefined);
+  const [orderNumber, setOrderNumber] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const limit = 30;
+
+  // 필터가 변경되면 페이지를 1로 리셋
+  useEffect(() => {
+    setPage(1);
+  }, [orderStatus, orderNumber, startDate, endDate]);
+
+  if (!storeId) {
+    return (
+      <div>
+        <h2 className="text-xl font-semibold">스토어가 선택되지 않았습니다.</h2>
+      </div>
+    );
+  }
+
+  const { data, isLoading, isError } = useOrderList({
+    page,
+    limit,
+    sortBy,
+    storeId,
+    orderStatus,
+    orderNumber: orderNumber.trim() || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  });
+
+  const orders = data?.data || [];
+  const meta = data?.meta;
+
+  return (
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">주문 목록</h1>
+      </div>
+
+      {/* 필터 및 정렬 */}
+      <div className="space-y-4 rounded-lg border bg-card p-4">
+        {/* 통계 및 정렬 */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            총 <span className="font-semibold text-foreground">{meta?.totalItems || 0}</span>개의
+            주문
+          </div>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as OrderSortBy)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="정렬 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={OrderSortBy.LATEST}>최신순</SelectItem>
+              <SelectItem value={OrderSortBy.OLDEST}>오래된순</SelectItem>
+              <SelectItem value={OrderSortBy.PRICE_DESC}>금액 높은순</SelectItem>
+              <SelectItem value={OrderSortBy.PRICE_ASC}>금액 낮은순</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 필터 */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* 주문 상태 필터 */}
+          <div className="space-y-2">
+            <Label>주문 상태</Label>
+            <Select
+              value={orderStatus || "ALL"}
+              onValueChange={(value) =>
+                setOrderStatus(value === "ALL" ? undefined : (value as OrderStatus))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="상태 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">전체</SelectItem>
+                <SelectItem value={OrderStatus.PENDING}>대기중</SelectItem>
+                <SelectItem value={OrderStatus.CONFIRMED}>확정됨</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 주문 번호 검색 */}
+          <div className="space-y-2">
+            <Label>주문 번호</Label>
+            <Input
+              placeholder="주문 번호 검색"
+              value={orderNumber}
+              onChange={(e) => setOrderNumber(e.target.value)}
+            />
+          </div>
+
+          {/* 시작 날짜 */}
+          <div className="space-y-2">
+            <Label>시작 날짜</Label>
+            <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          </div>
+
+          {/* 종료 날짜 */}
+          <div className="space-y-2">
+            <Label>종료 날짜</Label>
+            <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      {/* 주문 목록 */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">주문을 불러오는 중...</div>
+        </div>
+      ) : isError ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-destructive">주문을 불러오는 중 오류가 발생했습니다.</div>
+        </div>
+      ) : (
+        <>
+          <OrderList orders={orders} />
+
+          {/* 페이지네이션 */}
+          {meta && meta.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                이전
+              </Button>
+              <div className="text-sm text-muted-foreground">
+                {page} / {meta.totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+                disabled={page === meta.totalPages}
+              >
+                다음
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};

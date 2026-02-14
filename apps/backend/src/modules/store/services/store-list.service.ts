@@ -2,9 +2,9 @@ import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/co
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { StoreMapperUtil } from "@apps/backend/modules/store/utils/store-mapper.util";
-import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { GetStoresRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
 
@@ -61,7 +61,7 @@ export class StoreListService {
    * @param query 페이지네이션 쿼리 파라미터
    * @returns 스토어 목록
    */
-  async getStoresByUserId(userId: string, query: GetStoresRequestDto) {
+  async getStoresByUserId(userId: string, query: PaginationRequestDto) {
     const { page, limit } = query;
 
     // 전체 개수 조회

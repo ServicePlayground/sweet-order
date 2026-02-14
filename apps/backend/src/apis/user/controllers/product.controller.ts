@@ -1,16 +1,18 @@
 import { Controller, Get, Query, HttpCode, HttpStatus, Param, Request } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ProductService } from "@apps/backend/modules/product/product.service";
-import { GetProductsRequestDto } from "@apps/backend/modules/product/dto/product-request.dto";
+import {
+  GetProductsRequestDto,
+  ProductListResponseDto,
+} from "@apps/backend/modules/product/dto/product-list.dto";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import {
-  ProductListResponseDto,
   ProductResponseDto,
   CakeSizeOptionResponseDto,
   CakeFlavorOptionResponseDto,
-} from "@apps/backend/modules/product/dto/product-response.dto";
+} from "@apps/backend/modules/product/dto/product-detail.dto";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";

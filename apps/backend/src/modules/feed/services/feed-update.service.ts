@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { UpdateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-request.dto";
+import { UpdateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
 

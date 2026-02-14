@@ -2,7 +2,7 @@ import { Order, OrderItem } from "@apps/backend/infra/database/prisma/generated/
 import {
   OrderItemResponseDto,
   OrderResponseDto,
-} from "@apps/backend/modules/order/dto/order-response.dto";
+} from "@apps/backend/modules/order/dto/order-detail.dto";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
 
 /**

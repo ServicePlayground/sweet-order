@@ -9,6 +9,8 @@ import { ChatModule } from "@apps/backend/modules/chat/chat.module";
 import { SellerChatController } from "./controllers/chat.controller";
 import { FeedModule } from "@apps/backend/modules/feed/feed.module";
 import { SellerFeedController } from "./controllers/feed.controller";
+import { OrderModule } from "@apps/backend/modules/order/order.module";
+import { SellerOrderController } from "./controllers/order.controller";
 
 /**
  * Seller API 모듈
@@ -16,13 +18,14 @@ import { SellerFeedController } from "./controllers/feed.controller";
  * Seller 관련 API를 제공합니다.
  */
 @Module({
-  imports: [ProductModule, BusinessModule, StoreModule, ChatModule, FeedModule],
+  imports: [ProductModule, BusinessModule, StoreModule, ChatModule, FeedModule, OrderModule],
   controllers: [
     SellerProductController,
     SellerBusinessController,
     SellerStoreController,
     SellerChatController,
     SellerFeedController,
+    SellerOrderController,
   ],
 })
 export class SellerApiModule {}

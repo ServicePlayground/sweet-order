@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-request.dto";
+import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-update.dto";
 import {
   EnableStatus,
   ProductType,

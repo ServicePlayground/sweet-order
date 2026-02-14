@@ -1,6 +1,6 @@
 import { Store } from "@apps/backend/infra/database/prisma/generated/client";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**

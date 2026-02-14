@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNumber, Min, Max, IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsNumber, Min, Max } from "class-validator";
 import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
-import { ReviewSortBy } from "@apps/backend/modules/review/constants/review.constants";
 
 /**
- * 후기 목록 조회 요청 DTO (무한 스크롤)
+ * 페이지네이션 요청 베이스 DTO
+ * 목록 조회 요청 DTO에서 공통으로 사용하는 page와 limit 필드를 제공합니다.
  */
-export class GetReviewsRequestDto {
+export class PaginationRequestDto {
   @ApiProperty({
     description: "(무한 스크롤 필수) 페이지 번호 (1부터 시작)",
     example: 1,
@@ -27,13 +27,4 @@ export class GetReviewsRequestDto {
   @Min(1)
   @Max(100)
   limit: number;
-
-  @ApiProperty({
-    description: "정렬",
-    enum: ReviewSortBy,
-    example: ReviewSortBy.LATEST,
-  })
-  @IsNotEmpty()
-  @IsEnum(ReviewSortBy)
-  sortBy: ReviewSortBy;
 }

@@ -2,11 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { StoreCreationService } from "@apps/backend/modules/store/services/store-creation.service";
 import { StoreListService } from "@apps/backend/modules/store/services/store-list.service";
 import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
-import {
-  CreateStoreRequestDto,
-  UpdateStoreRequestDto,
-  GetStoresRequestDto,
-} from "@apps/backend/modules/store/dto/store.request.dto";
+import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-create.dto";
+import { UpdateStoreRequestDto } from "@apps/backend/modules/store/dto/store-update.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -47,7 +45,7 @@ export class StoreService {
    * @param query 페이지네이션 쿼리 파라미터
    * @returns 스토어 목록
    */
-  async getStoresByUserId(userId: string, query: GetStoresRequestDto) {
+  async getStoresByUserId(userId: string, query: PaginationRequestDto) {
     return await this.storeListService.getStoresByUserId(userId, query);
   }
 

@@ -6,11 +6,9 @@ import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-respons
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
-import { GetFeedsRequestDto } from "@apps/backend/modules/feed/dto/feed-request.dto";
-import {
-  FeedListResponseDto,
-  FeedResponseDto,
-} from "@apps/backend/modules/feed/dto/feed-response.dto";
+import { FeedListResponseDto } from "@apps/backend/modules/feed/dto/feed-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
+import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-detail.dto";
 
 /**
  * 피드 관련 컨트롤러 (사용자용)
@@ -32,7 +30,7 @@ export class UserFeedController {
     description: "특정 스토어의 피드 목록을 조회합니다. 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: FeedListResponseDto })
-  async getFeeds(@Param("storeId") storeId: string, @Query() query: GetFeedsRequestDto) {
+  async getFeeds(@Param("storeId") storeId: string, @Query() query: PaginationRequestDto) {
     return await this.feedService.getFeedsByStoreId(storeId, query);
   }
 

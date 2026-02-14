@@ -14,6 +14,7 @@ export const ORDER_ERROR_MESSAGES = {
   INVALID_ORDER_ITEMS: "주문 항목이 올바르지 않습니다.",
   INVALID_TOTAL_QUANTITY: "총 수량이 올바르지 않습니다.",
   INVALID_TOTAL_PRICE: "총 금액이 올바르지 않습니다.",
+  CANNOT_REVERT_CONFIRMED: "이미 확정된 주문은 대기 상태로 변경할 수 없습니다.",
 } as const;
 
 /**
@@ -29,6 +30,16 @@ export const ORDER_SUCCESS_MESSAGES = {
 export enum OrderStatus {
   PENDING = "PENDING", // 대기중 (예약신청)
   CONFIRMED = "CONFIRMED", // 확정됨 (예약확정)
+}
+
+/**
+ * 주문 정렬 타입 enum
+ */
+export enum OrderSortBy {
+  LATEST = "LATEST", // 최신순
+  OLDEST = "OLDEST", // 오래된순
+  PRICE_DESC = "PRICE_DESC", // 금액 높은순
+  PRICE_ASC = "PRICE_ASC", // 금액 낮은순
 }
 
 /**
@@ -57,6 +68,7 @@ const ORDER_ITEM_EXAMPLE = {
   createdAt: new Date("2024-01-15T12:00:00.000Z"),
   updatedAt: new Date("2024-01-15T12:00:00.000Z"),
 } as const;
+
 export const SWAGGER_EXAMPLES = {
   ORDER_DATA: {
     id: "QXZw02vBqVXNQ29c4w9n9ZdG",
@@ -77,10 +89,4 @@ export const SWAGGER_EXAMPLES = {
     updatedAt: new Date("2024-01-01T12:00:00.000Z"),
   },
   ORDER_ITEM: ORDER_ITEM_EXAMPLE,
-} as const;
-
-export const SWAGGER_RESPONSE_EXAMPLES = {
-  ORDER_CREATED_RESPONSE: {
-    id: SWAGGER_EXAMPLES.ORDER_DATA.id,
-  },
 } as const;

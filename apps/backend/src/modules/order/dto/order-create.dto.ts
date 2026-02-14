@@ -220,3 +220,15 @@ export class CreateOrderRequestDto {
   @Type(() => CreateOrderItemDto)
   items: CreateOrderItemDto[];
 }
+
+/**
+ * 주문 생성 응답 DTO
+ * 주문 생성 시 주문 ID만 반환합니다.
+ */
+export class CreateOrderResponseDto {
+  @ApiProperty({
+    description: "주문 ID",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.id,
+  })
+  id: string;
+}

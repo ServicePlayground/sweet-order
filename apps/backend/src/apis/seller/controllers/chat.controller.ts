@@ -11,14 +11,11 @@ import {
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
 import {
-  GetMessagesRequestDto,
-  GetChatRoomsRequestDto,
-} from "@apps/backend/modules/chat/dto/chat-request.dto";
-import {
   ChatRoomListForSellerResponseDto,
   ChatRoomForSellerResponseDto,
-} from "@apps/backend/modules/chat/dto/chat-response.dto";
-import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+} from "@apps/backend/modules/chat/dto/chat-room-list.dto";
+import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 
 /**
  * 채팅 관련 컨트롤러 (판매자용)
@@ -69,7 +66,7 @@ export class SellerChatController {
   async getChatRoomsByStore(
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
-    @Query() query: GetChatRoomsRequestDto,
+    @Query() query: PaginationRequestDto,
   ) {
     return await this.chatService.getChatRoomsByStoreId(storeId, req.user.sub, query);
   }
@@ -113,7 +110,7 @@ export class SellerChatController {
   })
   async getMessages(
     @Param("roomId") roomId: string,
-    @Query() query: GetMessagesRequestDto,
+    @Query() query: PaginationRequestDto,
     @Request() req: { user: AuthenticatedUser },
   ) {
     return await this.chatService.getMessages(roomId, req.user.sub, "store", query);

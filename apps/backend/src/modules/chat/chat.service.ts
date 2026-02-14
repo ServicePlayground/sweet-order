@@ -1,17 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import {
-  CreateChatRoomRequestDto,
-  GetChatRoomsRequestDto,
-  GetMessagesRequestDto,
-} from "@apps/backend/modules/chat/dto/chat-request.dto";
+import { CreateChatRoomRequestDto } from "@apps/backend/modules/chat/dto/chat-room-create.dto";
 import {
   ChatRoomResponseDto,
   ChatRoomForSellerResponseDto,
-} from "@apps/backend/modules/chat/dto/chat-response.dto";
-import {
-  MessageResponseDto,
-  MessageListResponseDto,
-} from "@apps/backend/modules/chat/dto/message-response.dto";
+} from "@apps/backend/modules/chat/dto/chat-room-list.dto";
+import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
+import { MessageResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
 import { ChatRoomCreateService } from "@apps/backend/modules/chat/services/chat-room-create.service";
 import { ChatRoomListService } from "@apps/backend/modules/chat/services/chat-room-list.service";
 import { ChatRoomUpdateService } from "@apps/backend/modules/chat/services/chat-room-update.service";
@@ -46,7 +41,7 @@ export class ChatService {
    */
   async getChatRoomsByUserId(
     userId: string,
-    query: GetChatRoomsRequestDto,
+    query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
     return await this.chatRoomListService.getChatRoomsByUserId(userId, query);
   }
@@ -57,7 +52,7 @@ export class ChatService {
   async getChatRoomsByStoreId(
     storeId: string,
     userId: string,
-    query: GetChatRoomsRequestDto,
+    query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomForSellerResponseDto[]; meta: any }> {
     return await this.chatRoomListService.getChatRoomsByStoreId(storeId, userId, query);
   }
@@ -88,7 +83,7 @@ export class ChatService {
     roomId: string,
     userId: string,
     userType: "user" | "store",
-    query: GetMessagesRequestDto,
+    query: PaginationRequestDto,
   ): Promise<MessageListResponseDto> {
     return await this.chatMessageListService.getMessages(roomId, userId, userType, query);
   }

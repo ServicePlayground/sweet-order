@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { CreateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-request.dto";
+import { CreateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-create.dto";
 
 @Injectable()
 export class FeedCreateService {

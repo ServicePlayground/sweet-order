@@ -10,6 +10,8 @@ import { StoreDetailEditPage } from "@/apps/web-seller/pages/store/detail/Edit";
 import { StoreDetailFeedListPage } from "@/apps/web-seller/pages/store/detail/feed/List";
 import { StoreDetailFeedCreatePage } from "@/apps/web-seller/pages/store/detail/feed/Create";
 import { StoreDetailFeedDetailPage } from "@/apps/web-seller/pages/store/detail/feed/Detail";
+import { StoreDetailOrderListPage } from "@/apps/web-seller/pages/store/detail/orders/List";
+import { StoreDetailOrderDetailPage } from "@/apps/web-seller/pages/store/detail/orders/Detail";
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
 import { BasicLoginPage } from "@/apps/web-seller/pages/auth/BasicLogin";
 import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
@@ -33,6 +35,9 @@ export const ROUTES = {
   STORE_DETAIL_FEED_CREATE: (storeId: string) => `/stores/${storeId}/feed/create`,
   STORE_DETAIL_FEED_DETAIL: (storeId: string, feedId: string) =>
     `/stores/${storeId}/feed/${feedId}`,
+  STORE_DETAIL_ORDERS_LIST: (storeId: string) => `/stores/${storeId}/orders`,
+  STORE_DETAIL_ORDERS_DETAIL: (storeId: string, orderId: string) =>
+    `/stores/${storeId}/orders/${orderId}`,
   STORE_DETAIL_EDIT: (storeId: string) => `/stores/${storeId}/edit`,
   // 인증 관련 경로
   AUTH: {
@@ -78,6 +83,11 @@ export const ADMIN_ROUTE_CONFIG = [
   {
     path: ROUTES.STORE_DETAIL_FEED_DETAIL(":storeId", ":feedId"),
     element: StoreDetailFeedDetailPage,
+  },
+  { path: ROUTES.STORE_DETAIL_ORDERS_LIST(":storeId"), element: StoreDetailOrderListPage },
+  {
+    path: ROUTES.STORE_DETAIL_ORDERS_DETAIL(":storeId", ":orderId"),
+    element: StoreDetailOrderDetailPage,
   },
   { path: ROUTES.STORE_DETAIL_EDIT(":storeId"), element: StoreDetailEditPage },
 ] as const;

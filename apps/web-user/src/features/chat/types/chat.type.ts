@@ -10,7 +10,6 @@ export interface ChatRoomStore {
 // 채팅방 정보 (사용자용)
 export interface ChatRoom {
   id: string;
-  storeId: string;
   store: ChatRoomStore;
   lastMessage: string | null;
   lastMessageAt: Date | null;

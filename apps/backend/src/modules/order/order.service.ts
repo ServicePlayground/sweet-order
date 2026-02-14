@@ -1,11 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { OrderCreateService } from "@apps/backend/modules/order/services/order-create.service";
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
-import { CreateOrderRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
+import { OrderListService } from "@apps/backend/modules/order/services/order-list.service";
+import { OrderUpdateService } from "@apps/backend/modules/order/services/order-update.service";
 import {
+  CreateOrderRequestDto,
   CreateOrderResponseDto,
-  OrderResponseDto,
-} from "@apps/backend/modules/order/dto/order-response.dto";
+} from "@apps/backend/modules/order/dto/order-create.dto";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
+import {
+  GetSellerOrdersRequestDto,
+  OrderListResponseDto,
+} from "@apps/backend/modules/order/dto/order-list.dto";
+import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -19,6 +26,8 @@ export class OrderService {
   constructor(
     private readonly orderCreateService: OrderCreateService,
     private readonly orderDetailService: OrderDetailService,
+    private readonly orderListService: OrderListService,
+    private readonly orderUpdateService: OrderUpdateService,
   ) {}
 
   /**
@@ -32,9 +41,37 @@ export class OrderService {
   }
 
   /**
-   * 주문 상세조회
+   * 주문 상세조회 (사용자용)
    */
   async getOrderById(orderId: string, user: JwtVerifiedPayload): Promise<OrderResponseDto> {
     return this.orderDetailService.getOrderById(orderId, user.sub);
+  }
+
+  /**
+   * 주문 상세조회 (판매자용)
+   */
+  async getSellerOrderById(orderId: string, user: JwtVerifiedPayload): Promise<OrderResponseDto> {
+    return this.orderDetailService.getSellerOrderById(orderId, user.sub);
+  }
+
+  /**
+   * 주문 목록 조회 (판매자용)
+   */
+  async getSellerOrders(
+    query: GetSellerOrdersRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<OrderListResponseDto> {
+    return this.orderListService.getSellerOrders(query, user);
+  }
+
+  /**
+   * 주문 상태 변경 (판매자용)
+   */
+  async updateOrderStatus(
+    orderId: string,
+    updateDto: UpdateOrderStatusRequestDto,
+    user: JwtVerifiedPayload,
+  ): Promise<{ id: string }> {
+    return this.orderUpdateService.updateOrderStatus(orderId, updateDto, user.sub);
   }
 }
