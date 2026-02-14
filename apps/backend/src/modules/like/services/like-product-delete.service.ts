@@ -11,11 +11,11 @@ export class LikeProductDeleteService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 상품 좋아요 삭제
+   * 상품 좋아요 삭제 (사용자용)
    * @param userId 사용자 ID
    * @param productId 상품 ID
    */
-  async removeProductLike(userId: string, productId: string) {
+  async removeProductLikeForUser(userId: string, productId: string) {
     // 좋아요 존재 여부 확인
     const existingLike = await this.prisma.productLike.findUnique({
       where: {

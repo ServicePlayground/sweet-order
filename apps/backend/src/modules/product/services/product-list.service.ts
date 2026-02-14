@@ -137,9 +137,10 @@ export class ProductListService {
   }
 
   /**
-   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 상품 목록 조회 (사용자용)
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    */
-  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
+  async getProductsForUser(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
     const {
       search,
       page,
@@ -253,10 +254,10 @@ export class ProductListService {
   }
 
   /**
-   * 판매자용 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 판매자용 상품 목록 조회 (판매자용)
    * 자신이 소유한 스토어의 상품만 조회합니다.
    */
-  async getSellerProducts(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
+  async getProductsForSeller(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
     const {
       search,
       page,

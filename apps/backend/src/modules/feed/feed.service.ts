@@ -29,14 +29,14 @@ export class FeedService {
    * 피드 목록 조회 (사용자용)
    */
   async getFeedsByStoreIdForUser(storeId: string, query: PaginationRequestDto) {
-    return this.feedListService.getFeedsByStoreId(storeId, query);
+    return this.feedListService.getFeedsByStoreIdForUser(storeId, query);
   }
 
   /**
    * 피드 상세 조회 (사용자용)
    */
   async getFeedByIdForUser(feedId: string) {
-    return this.feedDetailService.getFeedById(feedId);
+    return this.feedDetailService.getFeedByIdForUser(feedId);
   }
 
   /**

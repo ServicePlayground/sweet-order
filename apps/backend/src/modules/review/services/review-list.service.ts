@@ -16,9 +16,10 @@ export class ReviewListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 상품 후기 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 상품 후기 목록 조회 (사용자용)
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    */
-  async getProductReviews(productId: string, query: GetReviewsRequestDto) {
+  async getProductReviewsForUser(productId: string, query: GetReviewsRequestDto) {
     const { page, limit, sortBy } = query;
 
     const product = await this.prisma.product.findUnique({
@@ -74,10 +75,11 @@ export class ReviewListService {
   }
 
   /**
-   * 스토어 후기 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 스토어 후기 목록 조회 (사용자용)
    * 해당 스토어의 모든 상품에 대한 후기를 합쳐서 보여줍니다.
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    */
-  async getStoreReviews(storeId: string, query: GetReviewsRequestDto) {
+  async getStoreReviewsForUser(storeId: string, query: GetReviewsRequestDto) {
     const { page, limit, sortBy } = query;
 
     const store = await this.prisma.store.findUnique({

@@ -23,7 +23,7 @@ export class OrderUpdateService {
    * @param userId - 사용자 ID (권한 확인용)
    * @returns 업데이트된 주문 ID
    */
-  async updateOrderStatus(
+  async updateOrderStatusForSeller(
     orderId: string,
     updateDto: UpdateOrderStatusRequestDto,
     userId: string,

@@ -22,7 +22,7 @@ export class ChatMessageCreateService {
   ) {}
 
   /**
-   * 메시지 전송
+   * 메시지 전송 (공통)
    */
   async sendMessage(
     roomId: string,

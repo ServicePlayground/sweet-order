@@ -21,12 +21,12 @@ export class StoreListService {
   ) {}
 
   /**
-   * 스토어 상세 조회
+   * 스토어 상세 조회 (사용자용)
    * @param storeId 스토어 ID
    * @param user 로그인한 사용자 정보 (옵셔널)
    * @returns 스토어 상세 정보
    */
-  async getStoreById(storeId: string, user?: JwtVerifiedPayload) {
+  async getStoreByIdForUser(storeId: string, user?: JwtVerifiedPayload) {
     const store = await this.prisma.store.findFirst({
       where: { id: storeId },
     });
@@ -61,7 +61,7 @@ export class StoreListService {
    * @param query 페이지네이션 쿼리 파라미터
    * @returns 스토어 목록
    */
-  async getStoresByUserId(userId: string, query: PaginationRequestDto) {
+  async getStoresByUserIdForSeller(userId: string, query: PaginationRequestDto) {
     const { page, limit } = query;
 
     // 전체 개수 조회

@@ -12,11 +12,11 @@ export class LikeProductCreateService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 상품 좋아요 추가
+   * 상품 좋아요 추가 (사용자용)
    * @param userId 사용자 ID
    * @param productId 상품 ID
    */
-  async addProductLike(userId: string, productId: string) {
+  async addProductLikeForUser(userId: string, productId: string) {
     // 상품 존재 여부 확인
     const product = await this.prisma.product.findUnique({
       where: { id: productId },

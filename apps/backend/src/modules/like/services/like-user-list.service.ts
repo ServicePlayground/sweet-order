@@ -22,9 +22,9 @@ export class LikeUserListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 내가 좋아요한 상품 목록 조회
+   * 내가 좋아요한 상품 목록 조회 (사용자용)
    */
-  async getMyProductLikes(
+  async getMyProductLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyProductLikeListResponseDto> {
@@ -79,9 +79,9 @@ export class LikeUserListService {
   }
 
   /**
-   * 내가 좋아요한 스토어 목록 조회
+   * 내가 좋아요한 스토어 목록 조회 (사용자용)
    */
-  async getMyStoreLikes(
+  async getMyStoreLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyStoreLikeListResponseDto> {
@@ -119,16 +119,17 @@ export class LikeUserListService {
   }
 
   /**
-   * 내가 좋아요한 목록 조회 (타입에 따라 상품 또는 스토어)
+   * 내가 좋아요한 목록 조회 (사용자용)
+   * 타입에 따라 상품 또는 스토어 목록을 반환합니다.
    */
-  async getMyLikes(
+  async getMyLikesForUser(
     userId: string,
     query: GetMyLikesRequestDto,
   ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
     if (query.type === LikeType.PRODUCT) {
-      return this.getMyProductLikes(userId, query);
+      return this.getMyProductLikesForUser(userId, query);
     } else {
-      return this.getMyStoreLikes(userId, query);
+      return this.getMyStoreLikesForUser(userId, query);
     }
   }
 }

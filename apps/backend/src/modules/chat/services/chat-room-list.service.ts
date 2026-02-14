@@ -18,9 +18,9 @@ export class ChatRoomListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 사용자의 채팅방 목록 조회
+   * 사용자의 채팅방 목록 조회 (사용자용)
    */
-  async getChatRoomsByUserId(
+  async getChatRoomsByUserIdForUser(
     userId: string,
     query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
@@ -63,7 +63,7 @@ export class ChatRoomListService {
   /**
    * 스토어의 채팅방 목록 조회 (판매자용)
    */
-  async getChatRoomsByStoreId(
+  async getChatRoomsByStoreIdForSeller(
     storeId: string,
     userId: string,
     query: PaginationRequestDto,

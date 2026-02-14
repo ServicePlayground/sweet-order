@@ -10,7 +10,7 @@ export class ProductDeleteService {
   /**
    * 상품 삭제 (판매자용)
    */
-  async deleteProduct(id: string, user: JwtVerifiedPayload) {
+  async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
     // 상품 소유권 확인
     await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
 

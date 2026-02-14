@@ -33,7 +33,7 @@ export class ChatService {
    * 채팅방 생성 또는 조회 (사용자용)
    */
   async createOrGetChatRoomForUser(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
-    return await this.chatRoomCreateService.createOrGetChatRoom(userId, createChatRoomDto);
+    return await this.chatRoomCreateService.createOrGetChatRoomForUser(userId, createChatRoomDto);
   }
 
   /**
@@ -43,7 +43,7 @@ export class ChatService {
     userId: string,
     query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
-    return await this.chatRoomListService.getChatRoomsByUserId(userId, query);
+    return await this.chatRoomListService.getChatRoomsByUserIdForUser(userId, query);
   }
 
   /**
@@ -54,7 +54,7 @@ export class ChatService {
     userId: string,
     query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomForSellerResponseDto[]; meta: any }> {
-    return await this.chatRoomListService.getChatRoomsByStoreId(storeId, userId, query);
+    return await this.chatRoomListService.getChatRoomsByStoreIdForSeller(storeId, userId, query);
   }
 
   /**

@@ -25,7 +25,10 @@ export class ProductCreateService {
   /**
    * 상품 등록 (판매자용)
    */
-  async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
+  async createProductForSeller(
+    createProductDto: CreateProductRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
     // 스토어 소유권 확인
     await ProductOwnershipUtil.verifyStoreOwnership(
       this.prisma,

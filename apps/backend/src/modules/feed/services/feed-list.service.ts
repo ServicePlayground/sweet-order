@@ -13,7 +13,7 @@ export class FeedListService {
   /**
    * 피드 목록 조회 (사용자용)
    */
-  async getFeedsByStoreId(storeId: string, query: PaginationRequestDto) {
+  async getFeedsByStoreIdForUser(storeId: string, query: PaginationRequestDto) {
     const { page, limit } = query;
 
     const totalItems = await this.prisma.storeFeed.count({

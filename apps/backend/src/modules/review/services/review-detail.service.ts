@@ -13,9 +13,9 @@ export class ReviewDetailService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 상품 후기 단일 조회
+   * 상품 후기 단일 조회 (사용자용)
    */
-  async getProductReview(productId: string, reviewId: string) {
+  async getProductReviewForUser(productId: string, reviewId: string) {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
       select: { id: true },
@@ -59,10 +59,10 @@ export class ReviewDetailService {
   }
 
   /**
-   * 스토어 후기 단일 조회
+   * 스토어 후기 단일 조회 (사용자용)
    * 해당 스토어의 상품 중 하나에 대한 후기를 조회합니다.
    */
-  async getStoreReview(storeId: string, reviewId: string) {
+  async getStoreReviewForUser(storeId: string, reviewId: string) {
     const store = await this.prisma.store.findUnique({
       where: { id: storeId },
       select: { id: true },

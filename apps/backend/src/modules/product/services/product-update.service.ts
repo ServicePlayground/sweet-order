@@ -57,7 +57,7 @@ export class ProductUpdateService {
   /**
    * 상품 수정 (판매자용)
    */
-  async updateProduct(
+  async updateProductForSeller(
     id: string,
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,

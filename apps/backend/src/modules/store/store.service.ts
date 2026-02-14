@@ -28,7 +28,7 @@ export class StoreService {
    * @returns 스토어 상세 정보
    */
   async getStoreByIdForUser(storeId: string, user?: JwtVerifiedPayload) {
-    return await this.storeListService.getStoreById(storeId, user);
+    return await this.storeListService.getStoreByIdForUser(storeId, user);
   }
 
   /**
@@ -36,7 +36,7 @@ export class StoreService {
    * 1단계, 2단계 API를 다시 호출하여 검증하고 스토어를 생성합니다.
    */
   async createStoreForSeller(userId: string, createStoreDto: CreateStoreRequestDto) {
-    return await this.storeCreationService.createStore(userId, createStoreDto);
+    return await this.storeCreationService.createStoreForSeller(userId, createStoreDto);
   }
 
   /**
@@ -46,7 +46,7 @@ export class StoreService {
    * @returns 스토어 목록
    */
   async getStoresByUserIdForSeller(userId: string, query: PaginationRequestDto) {
-    return await this.storeListService.getStoresByUserId(userId, query);
+    return await this.storeListService.getStoresByUserIdForSeller(userId, query);
   }
 
   /**
@@ -71,6 +71,6 @@ export class StoreService {
     updateStoreDto: UpdateStoreRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return await this.storeUpdateService.updateStore(storeId, updateStoreDto, user);
+    return await this.storeUpdateService.updateStoreForSeller(storeId, updateStoreDto, user);
   }
 }

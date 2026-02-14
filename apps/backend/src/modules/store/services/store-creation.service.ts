@@ -18,10 +18,10 @@ export class StoreCreationService {
   ) {}
 
   /**
-   * 스토어 생성 (3단계)
+   * 스토어 생성 (판매자용)
    * 1단계, 2단계 API를 다시 호출하여 검증하고 스토어를 생성합니다.
    */
-  async createStore(userId: string, createStoreDto: CreateStoreRequestDto) {
+  async createStoreForSeller(userId: string, createStoreDto: CreateStoreRequestDto) {
     // 1) 1단계와 2단계의 사업자등록번호가 일치하는지 검증
     // 하이픈 제거 후 비교
     const businessNo1 = createStoreDto.businessValidation.b_no.replace(/[-\s]/g, "");

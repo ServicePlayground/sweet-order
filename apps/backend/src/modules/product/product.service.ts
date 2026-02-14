@@ -22,28 +22,28 @@ export class ProductService {
    * 상품 목록 조회 (사용자용)
    */
   async getProductsForUser(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    return this.productDataService.getProducts(query, user);
+    return this.productDataService.getProductsForUser(query, user);
   }
 
   /**
    * 상품 상세 조회 (사용자용)
    */
   async getProductDetailForUser(id: string, user?: JwtVerifiedPayload) {
-    return this.productDataService.getProductDetail(id, user);
+    return this.productDataService.getProductDetailForUser(id, user);
   }
 
   /**
    * 상품 목록 조회 (판매자용)
    */
   async getProductsForSeller(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
-    return this.productDataService.getSellerProducts(query, user);
+    return this.productDataService.getProductsForSeller(query, user);
   }
 
   /**
    * 상품 상세 조회 (판매자용)
    */
   async getProductDetailForSeller(id: string, user: JwtVerifiedPayload) {
-    return this.productDataService.getSellerProductDetail(id, user);
+    return this.productDataService.getProductDetailForSeller(id, user);
   }
 
   /**
@@ -53,7 +53,7 @@ export class ProductService {
     createProductDto: CreateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return this.productDataService.createProduct(createProductDto, user);
+    return this.productDataService.createProductForSeller(createProductDto, user);
   }
 
   /**
@@ -64,13 +64,13 @@ export class ProductService {
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return this.productDataService.updateProduct(id, updateProductDto, user);
+    return this.productDataService.updateProductForSeller(id, updateProductDto, user);
   }
 
   /**
    * 상품 삭제 (판매자용)
    */
   async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
-    this.productDataService.deleteProduct(id, user);
+    this.productDataService.deleteProductForSeller(id, user);
   }
 }

@@ -18,7 +18,7 @@ export class OrderDetailService {
    * @param userId - 사용자 ID (권한 확인용)
    * @returns 주문 정보 (OrderResponseDto)
    */
-  async getOrderById(orderId: string, userId: string): Promise<OrderResponseDto> {
+  async getOrderByIdForUser(orderId: string, userId: string): Promise<OrderResponseDto> {
     // 주문 소유권 확인
     await OrderOwnershipUtil.verifyOrderUserOwnership(this.prisma, orderId, userId);
 
@@ -40,7 +40,7 @@ export class OrderDetailService {
    * @param userId - 판매자 사용자 ID (권한 확인용)
    * @returns 주문 정보 (OrderResponseDto)
    */
-  async getSellerOrderById(orderId: string, userId: string): Promise<OrderResponseDto> {
+  async getOrderByIdForSeller(orderId: string, userId: string): Promise<OrderResponseDto> {
     // 주문 소유권 확인
     await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId, {
       id: true,

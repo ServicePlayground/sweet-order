@@ -20,7 +20,7 @@ export class StoreUpdateService {
    * @param user 인증된 사용자 정보
    * @returns 수정된 스토어 ID
    */
-  async updateStore(
+  async updateStoreForSeller(
     storeId: string,
     updateStoreDto: UpdateStoreRequestDto,
     user: JwtVerifiedPayload,

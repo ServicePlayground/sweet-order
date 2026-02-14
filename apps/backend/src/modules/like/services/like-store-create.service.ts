@@ -12,11 +12,11 @@ export class LikeStoreCreateService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 스토어 좋아요 추가
+   * 스토어 좋아요 추가 (사용자용)
    * @param userId 사용자 ID
    * @param storeId 스토어 ID
    */
-  async addStoreLike(userId: string, storeId: string) {
+  async addStoreLikeForUser(userId: string, storeId: string) {
     // 스토어 존재 여부 확인
     const store = await this.prisma.store.findUnique({
       where: { id: storeId },

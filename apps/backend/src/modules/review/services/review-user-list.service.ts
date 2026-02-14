@@ -17,9 +17,10 @@ export class ReviewUserListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 내가 작성한 후기 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 내가 작성한 후기 목록 조회 (사용자용)
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    */
-  async getMyReviews(
+  async getMyReviewsForUser(
     userId: string,
     query: GetMyReviewsRequestDto,
   ): Promise<MyReviewListResponseDto> {

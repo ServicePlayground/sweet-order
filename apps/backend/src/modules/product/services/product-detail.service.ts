@@ -17,11 +17,11 @@ export class ProductDetailService {
   ) {}
 
   /**
-   * 상품 상세 조회
+   * 상품 상세 조회 (사용자용)
    * @param id - 상품 ID
    * @param user - 로그인한 사용자 정보 (옵셔널)
    */
-  async getProductDetail(id: string, user?: JwtVerifiedPayload) {
+  async getProductDetailForUser(id: string, user?: JwtVerifiedPayload) {
     const product = await this.prisma.product.findFirst({
       where: {
         id,
@@ -54,10 +54,10 @@ export class ProductDetailService {
   }
 
   /**
-   * 판매자용 상품 상세 조회
+   * 판매자용 상품 상세 조회 (판매자용)
    * 자신이 소유한 스토어의 상품만 조회 가능합니다.
    */
-  async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
+  async getProductDetailForSeller(id: string, user: JwtVerifiedPayload) {
     // 소유권 확인 (이미 상품이 존재함을 보장)
     await ProductOwnershipUtil.verifyProductOwnership(
       this.prisma,

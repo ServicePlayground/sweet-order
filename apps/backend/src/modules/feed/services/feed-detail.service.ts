@@ -12,7 +12,7 @@ export class FeedDetailService {
   /**
    * 피드 상세 조회 (사용자용)
    */
-  async getFeedById(feedId: string) {
+  async getFeedByIdForUser(feedId: string) {
     const feed = await this.prisma.storeFeed.findFirst({
       where: {
         id: feedId,

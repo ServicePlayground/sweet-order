@@ -12,10 +12,10 @@ export class ChatRoomCreateService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 채팅방 생성 또는 조회
+   * 채팅방 생성 또는 조회 (사용자용)
    * 기존 채팅방이 있으면 반환하고, 없으면 생성합니다.
    */
-  async createOrGetChatRoom(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
+  async createOrGetChatRoomForUser(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
     const { storeId } = createChatRoomDto;
 
     // 스토어 존재 여부 확인

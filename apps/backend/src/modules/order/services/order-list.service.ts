@@ -19,10 +19,10 @@ export class OrderListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 판매자용 주문 목록 조회 (필터링, 정렬, 페이지네이션 지원)
+   * 판매자용 주문 목록 조회 (판매자용)
    * 자신이 소유한 스토어의 주문만 조회합니다.
    */
-  async getSellerOrders(
+  async getOrdersForSeller(
     query: GetSellerOrdersRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<OrderListResponseDto> {

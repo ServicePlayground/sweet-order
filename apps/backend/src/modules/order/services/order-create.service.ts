@@ -22,12 +22,12 @@ export class OrderCreateService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 주문 생성
+   * 주문 생성 (사용자용)
    * @param userId - 사용자 ID
    * @param createOrderDto - 주문 생성 요청 DTO
    * @returns 생성된 주문 ID
    */
-  async createOrder(
+  async createOrderForUser(
     userId: string,
     createOrderDto: CreateOrderRequestDto,
   ): Promise<CreateOrderResponseDto> {

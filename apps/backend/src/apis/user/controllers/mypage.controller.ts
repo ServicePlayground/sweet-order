@@ -61,7 +61,7 @@ export class UserMypageController {
     @Query() query: GetUserOrdersRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<UserOrderListResponseDto> {
-    return await this.orderService.getUserOrders(query, req.user);
+    return await this.orderService.getUserOrdersForUser(query, req.user);
   }
 
   /**

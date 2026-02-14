@@ -43,24 +43,24 @@ export class OrderService {
     createOrderDto: CreateOrderRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<CreateOrderResponseDto> {
-    return this.orderCreateService.createOrder(user.sub, createOrderDto);
+    return this.orderCreateService.createOrderForUser(user.sub, createOrderDto);
   }
 
   /**
    * 주문 상세조회 (사용자용)
    */
   async getOrderByIdForUser(orderId: string, user: JwtVerifiedPayload): Promise<OrderResponseDto> {
-    return this.orderDetailService.getOrderById(orderId, user.sub);
+    return this.orderDetailService.getOrderByIdForUser(orderId, user.sub);
   }
 
   /**
    * 주문 목록 조회 (사용자용)
    */
-  async getUserOrders(
+  async getUserOrdersForUser(
     query: GetUserOrdersRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<UserOrderListResponseDto> {
-    return this.orderUserListService.getUserOrders(query, user.sub);
+    return this.orderUserListService.getUserOrdersForUser(query, user.sub);
   }
 
   /**
@@ -70,7 +70,7 @@ export class OrderService {
     orderId: string,
     user: JwtVerifiedPayload,
   ): Promise<OrderResponseDto> {
-    return this.orderDetailService.getSellerOrderById(orderId, user.sub);
+    return this.orderDetailService.getOrderByIdForSeller(orderId, user.sub);
   }
 
   /**
@@ -80,7 +80,7 @@ export class OrderService {
     query: GetSellerOrdersRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<OrderListResponseDto> {
-    return this.orderListService.getSellerOrders(query, user);
+    return this.orderListService.getOrdersForSeller(query, user);
   }
 
   /**
@@ -91,6 +91,6 @@ export class OrderService {
     updateDto: UpdateOrderStatusRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<{ id: string }> {
-    return this.orderUpdateService.updateOrderStatus(orderId, updateDto, user.sub);
+    return this.orderUpdateService.updateOrderStatusForSeller(orderId, updateDto, user.sub);
   }
 }

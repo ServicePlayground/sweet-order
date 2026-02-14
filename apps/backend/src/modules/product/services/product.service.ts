@@ -27,61 +27,65 @@ export class ProductService {
   ) {}
 
   /**
-   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 상품 목록 조회 (사용자용)
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    * @param query - 조회 조건
    * @param user - 로그인한 사용자 정보 (옵셔널)
    */
-  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    return this.productListService.getProducts(query, user);
+  async getProductsForUser(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
+    return this.productListService.getProductsForUser(query, user);
   }
 
   /**
-   * 상품 상세 조회
+   * 상품 상세 조회 (사용자용)
    * @param id - 상품 ID
    * @param user - 로그인한 사용자 정보 (옵셔널)
    */
-  async getProductDetail(id: string, user?: JwtVerifiedPayload) {
-    return this.productDetailService.getProductDetail(id, user);
+  async getProductDetailForUser(id: string, user?: JwtVerifiedPayload) {
+    return this.productDetailService.getProductDetailForUser(id, user);
   }
 
   /**
-   * 판매자용 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 판매자용 상품 목록 조회 (판매자용)
    * 자신이 소유한 스토어의 상품만 조회합니다.
    */
-  async getSellerProducts(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
-    return this.productListService.getSellerProducts(query, user);
+  async getProductsForSeller(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
+    return this.productListService.getProductsForSeller(query, user);
   }
 
   /**
-   * 판매자용 상품 상세 조회
+   * 판매자용 상품 상세 조회 (판매자용)
    * 자신이 소유한 스토어의 상품만 조회 가능합니다.
    */
-  async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
-    return this.productDetailService.getSellerProductDetail(id, user);
+  async getProductDetailForSeller(id: string, user: JwtVerifiedPayload) {
+    return this.productDetailService.getProductDetailForSeller(id, user);
   }
 
   /**
    * 상품 등록 (판매자용)
    */
-  async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
-    return this.productCreateService.createProduct(createProductDto, user);
+  async createProductForSeller(
+    createProductDto: CreateProductRequestDto,
+    user: JwtVerifiedPayload,
+  ) {
+    return this.productCreateService.createProductForSeller(createProductDto, user);
   }
 
   /**
    * 상품 수정 (판매자용)
    */
-  async updateProduct(
+  async updateProductForSeller(
     id: string,
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return this.productUpdateService.updateProduct(id, updateProductDto, user);
+    return this.productUpdateService.updateProductForSeller(id, updateProductDto, user);
   }
 
   /**
    * 상품 삭제 (판매자용)
    */
-  async deleteProduct(id: string, user: JwtVerifiedPayload) {
-    await this.productDeleteService.deleteProduct(id, user);
+  async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
+    await this.productDeleteService.deleteProductForSeller(id, user);
   }
 }
