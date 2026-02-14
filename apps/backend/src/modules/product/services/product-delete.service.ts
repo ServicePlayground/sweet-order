@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
 
 @Injectable()
 export class ProductDeleteService {
@@ -11,26 +11,8 @@ export class ProductDeleteService {
    * 상품 삭제 (판매자용)
    */
   async deleteProduct(id: string, user: JwtVerifiedPayload) {
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        store: {
-          select: {
-            userId: true,
-          },
-        },
-      },
-    });
-
-    if (!product || !product.store) {
-      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    if (product.store.userId !== user.sub) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
-    }
+    // 상품 소유권 확인
+    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
 
     await this.prisma.product.delete({
       where: {

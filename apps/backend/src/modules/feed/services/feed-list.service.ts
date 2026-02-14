@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { FeedMapperUtil } from "@apps/backend/modules/feed/utils/feed-mapper.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
+import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
 
 @Injectable()
 export class FeedListService {
@@ -58,23 +58,8 @@ export class FeedListService {
     user: JwtVerifiedPayload,
     query: PaginationRequestDto,
   ) {
-    const store = await this.prisma.store.findFirst({
-      where: {
-        id: storeId,
-      },
-      select: {
-        id: true,
-        userId: true,
-      },
-    });
-
-    if (!store) {
-      throw new NotFoundException("스토어를 찾을 수 없습니다.");
-    }
-
-    if (store.userId !== user.sub) {
-      throw new UnauthorizedException(FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
-    }
+    // 스토어 소유권 확인
+    await FeedOwnershipUtil.verifyStoreOwnership(this.prisma, storeId, user.sub);
 
     const { page, limit } = query;
 

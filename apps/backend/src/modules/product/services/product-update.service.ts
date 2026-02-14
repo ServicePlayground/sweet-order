@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-update.dto";
 import {
   EnableStatus,
   ProductType,
-  PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
 
 @Injectable()
 export class ProductUpdateService {
@@ -62,26 +62,17 @@ export class ProductUpdateService {
     updateProductDto: UpdateProductRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        store: {
-          select: {
-            userId: true,
-          },
-        },
+    // 상품 소유권 확인
+    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
+
+    // 기존 상품 정보 조회 (옵션 업데이트를 위해 필요)
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      select: {
+        cakeSizeOptions: true,
+        cakeFlavorOptions: true,
       },
     });
-
-    if (!product || !product.store) {
-      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    if (product.store.userId !== user.sub) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
-    }
 
     const updateData: Prisma.ProductUpdateInput = {};
 
@@ -101,7 +92,7 @@ export class ProductUpdateService {
       updateData.visibilityStatus = updateProductDto.visibilityStatus;
     }
     if (updateProductDto.cakeSizeOptions !== undefined) {
-      const existingSizeOptions: any[] = (product.cakeSizeOptions as any[]) ?? [];
+      const existingSizeOptions: any[] = (product?.cakeSizeOptions as any[]) ?? [];
       const nextSizeOptions = this.processCakeOptionsWithIds(
         existingSizeOptions,
         updateProductDto.cakeSizeOptions ?? [],
@@ -112,7 +103,7 @@ export class ProductUpdateService {
     }
 
     if (updateProductDto.cakeFlavorOptions !== undefined) {
-      const existingFlavorOptions: any[] = (product.cakeFlavorOptions as any[]) ?? [];
+      const existingFlavorOptions: any[] = (product?.cakeFlavorOptions as any[]) ?? [];
       const nextFlavorOptions = this.processCakeOptionsWithIds(
         existingFlavorOptions,
         updateProductDto.cakeFlavorOptions ?? [],

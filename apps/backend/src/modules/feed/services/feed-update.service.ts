@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
+import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
 
 @Injectable()
 export class FeedUpdateService {
@@ -12,26 +12,8 @@ export class FeedUpdateService {
    * 피드 수정 (판매자용)
    */
   async updateFeed(feedId: string, updateFeedDto: UpdateFeedRequestDto, user: JwtVerifiedPayload) {
-    const feed = await this.prisma.storeFeed.findFirst({
-      where: {
-        id: feedId,
-      },
-      include: {
-        store: {
-          select: {
-            userId: true,
-          },
-        },
-      },
-    });
-
-    if (!feed || !feed.store) {
-      throw new NotFoundException(FEED_ERROR_MESSAGES.FEED_NOT_FOUND);
-    }
-
-    if (feed.store.userId !== user.sub) {
-      throw new UnauthorizedException(FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
-    }
+    // 피드 소유권 확인
+    await FeedOwnershipUtil.verifyFeedOwnership(this.prisma, feedId, user.sub, { userId: true });
 
     const updatedFeed = await this.prisma.storeFeed.update({
       where: {

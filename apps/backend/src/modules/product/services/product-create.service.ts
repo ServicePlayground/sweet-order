@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CreateProductRequestDto } from "@apps/backend/modules/product/dto/product-create.dto";
 import {
   EnableStatus,
   ProductType,
-  PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
 
 @Injectable()
 export class ProductCreateService {
@@ -26,19 +26,12 @@ export class ProductCreateService {
    * 상품 등록 (판매자용)
    */
   async createProduct(createProductDto: CreateProductRequestDto, user: JwtVerifiedPayload) {
-    const store = await this.prisma.store.findFirst({
-      where: {
-        id: createProductDto.storeId,
-      },
-    });
-
-    if (!store) {
-      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.STORE_NOT_FOUND);
-    }
-
-    if (store.userId !== user.sub) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
-    }
+    // 스토어 소유권 확인
+    await ProductOwnershipUtil.verifyStoreOwnership(
+      this.prisma,
+      createProductDto.storeId,
+      user.sub,
+    );
 
     return await this.prisma.$transaction(async (tx) => {
       const now = new Date();

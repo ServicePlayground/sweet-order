@@ -18,7 +18,7 @@ export class FeedMapperUtil {
     createdAt: Date;
     updatedAt: Date;
     store: {
-      logoImageUrl: string | null;
+      logoImageUrl?: string | null;
     };
   }): FeedResponseDto {
     return {
@@ -26,7 +26,7 @@ export class FeedMapperUtil {
       storeId: feed.storeId,
       title: feed.title,
       content: feed.content,
-      storeLogoImageUrl: feed.store.logoImageUrl,
+      storeLogoImageUrl: feed.store.logoImageUrl ?? "",
       createdAt: feed.createdAt,
       updatedAt: feed.updatedAt,
     };

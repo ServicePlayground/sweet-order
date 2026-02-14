@@ -1,15 +1,11 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-  BadRequestException,
-} from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
 import {
   OrderStatus,
   ORDER_ERROR_MESSAGES,
 } from "@apps/backend/modules/order/constants/order.constants";
+import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
 
 /**
  * 주문 상태 변경 서비스
@@ -32,27 +28,11 @@ export class OrderUpdateService {
     updateDto: UpdateOrderStatusRequestDto,
     userId: string,
   ): Promise<{ id: string }> {
-    // 주문 조회
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        store: {
-          select: {
-            id: true,
-            userId: true,
-          },
-        },
-      },
+    // 주문 소유권 확인 및 조회
+    const order = await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId, {
+      id: true,
+      userId: true,
     });
-
-    if (!order) {
-      throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    // 권한 확인: 스토어 소유자인지 확인
-    if (order.store.userId !== userId) {
-      throw new UnauthorizedException(ORDER_ERROR_MESSAGES.NOT_FOUND);
-    }
 
     // 상태 변경 유효성 검증
     const { orderStatus } = updateDto;

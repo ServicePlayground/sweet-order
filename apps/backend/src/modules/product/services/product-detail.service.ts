@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
@@ -7,6 +7,7 @@ import {
 } from "@apps/backend/modules/product/constants/product.constants";
 import { ProductMapperUtil } from "@apps/backend/modules/product/utils/product-mapper.util";
 import { LikeProductDetailService } from "@apps/backend/modules/like/services/like-product-detail.service";
+import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
 
 @Injectable()
 export class ProductDetailService {
@@ -57,6 +58,15 @@ export class ProductDetailService {
    * 자신이 소유한 스토어의 상품만 조회 가능합니다.
    */
   async getSellerProductDetail(id: string, user: JwtVerifiedPayload) {
+    // 소유권 확인 (이미 상품이 존재함을 보장)
+    await ProductOwnershipUtil.verifyProductOwnership(
+      this.prisma,
+      id,
+      user.sub,
+      ProductMapperUtil.STORE_INFO_WITH_USER_ID_SELECT,
+    );
+
+    // 리뷰 정보 포함하여 조회
     const product = await this.prisma.product.findFirst({
       where: {
         id,
@@ -71,12 +81,9 @@ export class ProductDetailService {
       },
     });
 
-    if (!product || !product.store) {
+    // verifyProductOwnership이 이미 상품 존재를 보장하므로 null 체크 불필요하지만, 타입 안정성을 위해 유지
+    if (!product) {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
-    }
-
-    if (product.store.userId !== user.sub) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
     let isLiked: boolean | null = null;
