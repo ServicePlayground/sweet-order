@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { GetFeedsRequestDto } from "@apps/backend/modules/feed/dto/feed-request.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { FeedMapperUtil } from "@apps/backend/modules/feed/utils/feed-mapper.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
@@ -13,7 +13,7 @@ export class FeedListService {
   /**
    * 피드 목록 조회 (사용자용)
    */
-  async getFeedsByStoreId(storeId: string, query: GetFeedsRequestDto) {
+  async getFeedsByStoreId(storeId: string, query: PaginationRequestDto) {
     const { page, limit } = query;
 
     const totalItems = await this.prisma.storeFeed.count({
@@ -56,7 +56,7 @@ export class FeedListService {
   async getFeedsByStoreIdForSeller(
     storeId: string,
     user: JwtVerifiedPayload,
-    query: GetFeedsRequestDto,
+    query: PaginationRequestDto,
   ) {
     const store = await this.prisma.store.findFirst({
       where: {

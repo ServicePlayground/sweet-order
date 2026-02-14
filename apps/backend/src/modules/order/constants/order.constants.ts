@@ -68,6 +68,7 @@ const ORDER_ITEM_EXAMPLE = {
   createdAt: new Date("2024-01-15T12:00:00.000Z"),
   updatedAt: new Date("2024-01-15T12:00:00.000Z"),
 } as const;
+
 export const SWAGGER_EXAMPLES = {
   ORDER_DATA: {
     id: "QXZw02vBqVXNQ29c4w9n9ZdG",
@@ -88,10 +89,4 @@ export const SWAGGER_EXAMPLES = {
     updatedAt: new Date("2024-01-01T12:00:00.000Z"),
   },
   ORDER_ITEM: ORDER_ITEM_EXAMPLE,
-} as const;
-
-export const SWAGGER_RESPONSE_EXAMPLES = {
-  ORDER_CREATED_RESPONSE: {
-    id: SWAGGER_EXAMPLES.ORDER_DATA.id,
-  },
 } as const;

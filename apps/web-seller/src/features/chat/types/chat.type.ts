@@ -10,8 +10,6 @@ export interface ChatRoomUser {
 // 채팅방 정보 (판매자용)
 export interface ChatRoomForSeller {
   id: string;
-  userId: string;
-  storeId: string;
   user: ChatRoomUser;
   lastMessage: string | null;
   lastMessageAt: Date | null;

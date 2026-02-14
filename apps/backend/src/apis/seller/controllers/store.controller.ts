@@ -16,8 +16,12 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import {
   CreateStoreRequestDto,
+  CreateStoreResponseDto,
+} from "@apps/backend/modules/store/dto/store-create.dto";
+import {
   UpdateStoreRequestDto,
-} from "@apps/backend/modules/store/dto/store.request.dto";
+  UpdateStoreResponseDto,
+} from "@apps/backend/modules/store/dto/store-update.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
   AUTH_ERROR_MESSAGES,
@@ -28,21 +32,21 @@ import {
   KFTC_API_ERROR_MESSAGES,
 } from "@apps/backend/modules/business/constants/business.contants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  STORE_ERROR_MESSAGES,
-  SWAGGER_EXAMPLES,
-} from "@apps/backend/modules/store/constants/store.constants";
-import {
-  StoreListResponseDto,
-  StoreResponseDto,
-} from "@apps/backend/modules/store/dto/store-response.dto";
-import { GetStoresRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
+import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
+import { StoreListResponseDto } from "@apps/backend/modules/store/dto/store-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 
 /**
  * 스토어 관련 컨트롤러
  */
 @ApiTags("스토어")
-@ApiExtraModels(StoreListResponseDto, StoreResponseDto)
+@ApiExtraModels(
+  CreateStoreResponseDto,
+  UpdateStoreResponseDto,
+  StoreListResponseDto,
+  StoreResponseDto,
+)
 @Controller(`${USER_ROLES.SELLER}/store`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // USER, SELLER, ADMIN 모두 접근 가능
 export class SellerStoreController {
@@ -59,7 +63,7 @@ export class SellerStoreController {
     description:
       "1단계(사업자등록번호 진위확인)와 2단계(통신판매사업자 등록상세 조회)의 요청 파라미터를 재검증하고 스토어를 생성합니다. \n1단계 사업자등록번호는 2단계 사업자등록번호와 같아야 합니다. \n같은 사업자등록번호와 인허가관리번호(통신판매사업자 신고번호) 조합으로 이미 스토어가 존재하면 오류가 발생합니다.",
   })
-  @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
+  @SwaggerResponse(201, { dataDto: CreateStoreResponseDto })
   // 사업자등록번호 진위확인 API 오류 응답
   @SwaggerResponse(400, {
     dataExample: createMessageObject(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE),
@@ -165,7 +169,7 @@ export class SellerStoreController {
   })
   async getMyStores(
     @Request() req: { user: JwtVerifiedPayload },
-    @Query() query: GetStoresRequestDto,
+    @Query() query: PaginationRequestDto,
   ) {
     return await this.storeService.getStoresByUserId(req.user.sub, query);
   }
@@ -217,7 +221,7 @@ export class SellerStoreController {
     summary: "(로그인 필요) 스토어 수정",
     description: "판매자가 등록한 스토어를 수정합니다.",
   })
-  @SwaggerResponse(200, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
+  @SwaggerResponse(200, { dataDto: UpdateStoreResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })

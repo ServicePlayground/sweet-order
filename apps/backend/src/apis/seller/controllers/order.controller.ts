@@ -20,12 +20,13 @@ import {
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   GetSellerOrdersRequestDto,
-  UpdateOrderStatusRequestDto,
-} from "@apps/backend/modules/order/dto/order-request.dto";
-import {
   OrderListResponseDto,
-  OrderResponseDto,
-} from "@apps/backend/modules/order/dto/order-response.dto";
+} from "@apps/backend/modules/order/dto/order-list.dto";
+import {
+  UpdateOrderStatusRequestDto,
+  UpdateOrderStatusResponseDto,
+} from "@apps/backend/modules/order/dto/order-update.dto";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
@@ -35,7 +36,12 @@ import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/orde
  * 판매자용 주문 관리 API 엔드포인트를 제공합니다.
  */
 @ApiTags("주문")
-@ApiExtraModels(OrderListResponseDto, OrderResponseDto, PaginationMetaResponseDto)
+@ApiExtraModels(
+  UpdateOrderStatusResponseDto,
+  OrderListResponseDto,
+  OrderResponseDto,
+  PaginationMetaResponseDto,
+)
 @Controller(`${USER_ROLES.SELLER}/orders`)
 @Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] }) // SELLER와 ADMIN 역할만 접근 가능
 export class SellerOrderController {
@@ -121,7 +127,7 @@ export class SellerOrderController {
     summary: "(로그인 필요) 주문 상태 변경",
     description: "자신이 소유한 스토어의 주문 상태를 변경합니다.",
   })
-  @SwaggerResponse(200, { dataExample: { id: "QXZw02vBqVXNQ29c4w9n9ZdG" } })
+  @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED),
   })

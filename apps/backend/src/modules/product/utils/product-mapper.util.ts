@@ -1,4 +1,4 @@
-import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-response.dto";
+import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**

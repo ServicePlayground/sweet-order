@@ -19,12 +19,9 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 import {
   PRODUCT_ERROR_MESSAGES,
   PRODUCT_SUCCESS_MESSAGES,
-  SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
-import {
-  ProductListResponseDto,
-  ProductResponseDto,
-} from "@apps/backend/modules/product/dto/product-response.dto";
+import { ProductListResponseDto } from "@apps/backend/modules/product/dto/product-list.dto";
+import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
@@ -33,16 +30,26 @@ import {
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   CreateProductRequestDto,
+  CreateProductResponseDto,
+} from "@apps/backend/modules/product/dto/product-create.dto";
+import {
   UpdateProductRequestDto,
-  GetSellerProductsRequestDto,
-} from "@apps/backend/modules/product/dto/product-request.dto";
+  UpdateProductResponseDto,
+} from "@apps/backend/modules/product/dto/product-update.dto";
+import { GetSellerProductsRequestDto } from "@apps/backend/modules/product/dto/product-list.dto";
 
 /**
  * 판매자 상품 컨트롤러
  * 판매자용 상품 관리 API 엔드포인트를 제공합니다.
  */
 @ApiTags("상품")
-@ApiExtraModels(ProductListResponseDto, ProductResponseDto, PaginationMetaResponseDto)
+@ApiExtraModels(
+  CreateProductResponseDto,
+  UpdateProductResponseDto,
+  ProductListResponseDto,
+  ProductResponseDto,
+  PaginationMetaResponseDto,
+)
 @Controller(`${USER_ROLES.SELLER}/products`)
 @Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] }) // SELLER와 ADMIN 역할만 접근 가능
 export class SellerProductController {
@@ -137,7 +144,7 @@ export class SellerProductController {
     description:
       "판매자가 새로운 상품을 등록합니다. 스토어 소유권을 확인하고 상품 정보를 저장합니다.",
   })
-  @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.PRODUCT_DATA.id } })
+  @SwaggerResponse(201, { dataDto: CreateProductResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
@@ -179,7 +186,7 @@ export class SellerProductController {
     summary: "(로그인 필요) 상품 수정",
     description: "판매자가 등록한 상품을 수정합니다.",
   })
-  @SwaggerResponse(200, { dataExample: { id: SWAGGER_EXAMPLES.PRODUCT_DATA.id } })
+  @SwaggerResponse(200, { dataDto: UpdateProductResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })

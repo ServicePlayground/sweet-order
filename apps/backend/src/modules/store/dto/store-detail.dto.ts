@@ -3,7 +3,6 @@ import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.co
 import { SWAGGER_EXAMPLES as BUSINESS_SWAGGER_EXAMPLES } from "@apps/backend/modules/business/constants/business.contants";
 import { SWAGGER_EXAMPLES as USER_SWAGGER_EXAMPLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
-import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 
 /**
  * 스토어 응답 DTO
@@ -146,21 +145,4 @@ export class StoreResponseDto {
     example: SWAGGER_EXAMPLES.CREATED_AT,
   })
   updatedAt: Date;
-}
-
-/**
- * 스토어 목록 조회 응답 DTO
- */
-export class StoreListResponseDto {
-  @ApiProperty({
-    description: "스토어 목록",
-    type: [StoreResponseDto],
-  })
-  data: StoreResponseDto[];
-
-  @ApiProperty({
-    description: "페이지네이션 메타 정보",
-    type: PaginationMetaResponseDto,
-  })
-  meta: PaginationMetaResponseDto;
 }

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
-import { CreateChatRoomRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
+import { CreateChatRoomRequestDto } from "@apps/backend/modules/chat/dto/chat-room-create.dto";
 
 /**
  * 채팅방 생성 서비스

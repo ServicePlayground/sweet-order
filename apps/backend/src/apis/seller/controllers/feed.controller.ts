@@ -27,20 +27,21 @@ import {
 } from "@apps/backend/modules/feed/constants/feed.constants";
 import {
   CreateFeedRequestDto,
-  UpdateFeedRequestDto,
-  GetFeedsRequestDto,
-} from "@apps/backend/modules/feed/dto/feed-request.dto";
+  CreateFeedResponseDto,
+} from "@apps/backend/modules/feed/dto/feed-create.dto";
 import {
-  FeedListResponseDto,
-  FeedResponseDto,
-} from "@apps/backend/modules/feed/dto/feed-response.dto";
-import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
+  UpdateFeedRequestDto,
+  UpdateFeedResponseDto,
+} from "@apps/backend/modules/feed/dto/feed-update.dto";
+import { FeedListResponseDto } from "@apps/backend/modules/feed/dto/feed-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
+import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-detail.dto";
 
 /**
  * 피드 관련 컨트롤러 (판매자용)
  */
 @ApiTags("피드")
-@ApiExtraModels(FeedListResponseDto, FeedResponseDto)
+@ApiExtraModels(CreateFeedResponseDto, UpdateFeedResponseDto, FeedListResponseDto, FeedResponseDto)
 @Controller(`${USER_ROLES.SELLER}/store/:storeId/feed`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] })
 export class SellerFeedController {
@@ -81,7 +82,7 @@ export class SellerFeedController {
   async getFeeds(
     @Param("storeId") storeId: string,
     @Request() req: { user: JwtVerifiedPayload },
-    @Query() query: GetFeedsRequestDto,
+    @Query() query: PaginationRequestDto,
   ) {
     return await this.feedService.getFeedsByStoreIdForSeller(storeId, req.user, query);
   }
@@ -135,7 +136,7 @@ export class SellerFeedController {
     summary: "(로그인 필요) 스토어 피드 등록",
     description: "판매자가 스토어 피드를 등록합니다.",
   })
-  @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
+  @SwaggerResponse(201, { dataDto: CreateFeedResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
@@ -174,7 +175,7 @@ export class SellerFeedController {
     summary: "(로그인 필요) 스토어 피드 수정",
     description: "판매자가 등록한 스토어 피드를 수정합니다.",
   })
-  @SwaggerResponse(200, { dataExample: { id: SWAGGER_EXAMPLES.ID } })
+  @SwaggerResponse(200, { dataDto: UpdateFeedResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })

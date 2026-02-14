@@ -1,11 +1,11 @@
 import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus, Request } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { OrderService } from "@apps/backend/modules/order/order.service";
-import { CreateOrderRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
 import {
+  CreateOrderRequestDto,
   CreateOrderResponseDto,
-  OrderResponseDto,
-} from "@apps/backend/modules/order/dto/order-response.dto";
+} from "@apps/backend/modules/order/dto/order-create.dto";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";

@@ -15,13 +15,21 @@ import {
 } from "@apps/backend/modules/like/constants/like.constants";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
-import { LikeResponseDto } from "@apps/backend/modules/like/dto/like-response.dto";
+import { LikeProductResponseDto } from "@apps/backend/modules/like/dto/like-product-create.dto";
+import { LikeProductDeleteResponseDto } from "@apps/backend/modules/like/dto/like-product-delete.dto";
+import { LikeStoreResponseDto } from "@apps/backend/modules/like/dto/like-store-create.dto";
+import { LikeStoreDeleteResponseDto } from "@apps/backend/modules/like/dto/like-store-delete.dto";
 
 /**
  * 좋아요 관련 컨트롤러 (사용자용)
  */
 @ApiTags("좋아요")
-@ApiExtraModels(LikeResponseDto)
+@ApiExtraModels(
+  LikeProductResponseDto,
+  LikeProductDeleteResponseDto,
+  LikeStoreResponseDto,
+  LikeStoreDeleteResponseDto,
+)
 @Controller(`${USER_ROLES.USER}`)
 @Auth({ isPublic: true })
 export class UserLikeController {
@@ -37,7 +45,7 @@ export class UserLikeController {
     summary: "(로그인필요) 상품 좋아요 추가",
     description: "상품에 좋아요를 추가합니다.",
   })
-  @SwaggerResponse(201, { dataDto: LikeResponseDto })
+  @SwaggerResponse(201, { dataDto: LikeProductResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
@@ -63,7 +71,7 @@ export class UserLikeController {
     summary: "(로그인필요) 상품 좋아요 삭제",
     description: "상품의 좋아요를 취소합니다.",
   })
-  @SwaggerResponse(200, { dataDto: LikeResponseDto })
+  @SwaggerResponse(200, { dataDto: LikeProductDeleteResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
@@ -88,7 +96,7 @@ export class UserLikeController {
     summary: "(로그인필요) 스토어 좋아요 추가",
     description: "스토어에 좋아요를 추가합니다.",
   })
-  @SwaggerResponse(201, { dataDto: LikeResponseDto })
+  @SwaggerResponse(201, { dataDto: LikeStoreResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
@@ -114,7 +122,7 @@ export class UserLikeController {
     summary: "(로그인필요) 스토어 좋아요 삭제",
     description: "스토어의 좋아요를 취소합니다.",
   })
-  @SwaggerResponse(200, { dataDto: LikeResponseDto })
+  @SwaggerResponse(200, { dataDto: LikeStoreDeleteResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })

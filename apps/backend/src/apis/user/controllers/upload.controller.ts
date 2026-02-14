@@ -18,7 +18,7 @@ import {
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { UPLOAD_CONSTANTS } from "@apps/backend/modules/upload/constants/upload.constants";
-import { UploadFileResponseDto } from "@apps/backend/modules/upload/dto/upload-response.dto";
+import { UploadFileResponseDto } from "@apps/backend/modules/upload/dto/upload-create.dto";
 
 /**
  * 사용자 업로드 컨트롤러

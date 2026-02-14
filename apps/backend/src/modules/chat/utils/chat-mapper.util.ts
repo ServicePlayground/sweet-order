@@ -2,8 +2,9 @@ import { Message } from "@apps/backend/infra/database/prisma/generated/client";
 import {
   ChatRoomResponseDto,
   ChatRoomForSellerResponseDto,
-} from "@apps/backend/modules/chat/dto/chat-response.dto";
-import { MessageResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+} from "@apps/backend/modules/chat/dto/chat-room-list.dto";
+import { MessageResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
+import { MessageSenderType } from "@apps/backend/modules/chat/constants/chat.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
@@ -74,7 +75,7 @@ export class ChatMapperUtil {
       roomId: message.roomId,
       text: message.text,
       senderId: message.senderId,
-      senderType: message.senderType.toLowerCase() as "user" | "store",
+      senderType: message.senderType.toLowerCase() as MessageSenderType,
       createdAt: message.createdAt,
     };
   }
@@ -87,7 +88,6 @@ export class ChatMapperUtil {
   static mapToChatRoomResponseDto(chatRoom: ChatRoomWithStore): ChatRoomResponseDto {
     return {
       id: chatRoom.id,
-      storeId: chatRoom.storeId,
       store: {
         id: chatRoom.store.id,
         name: chatRoom.store.name,
@@ -112,8 +112,6 @@ export class ChatMapperUtil {
   ): ChatRoomForSellerResponseDto {
     return {
       id: chatRoom.id,
-      userId: chatRoom.userId,
-      storeId: chatRoom.storeId,
       user: {
         id: chatRoom.user.id,
         nickname: chatRoom.user.nickname,

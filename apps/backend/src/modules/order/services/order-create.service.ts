@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { CreateOrderRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
+import {
+  CreateOrderRequestDto,
+  CreateOrderResponseDto,
+} from "@apps/backend/modules/order/dto/order-create.dto";
 import {
   ORDER_ERROR_MESSAGES,
   OrderStatus,
@@ -9,7 +12,6 @@ import {
   EnableStatus,
   ProductType,
 } from "@apps/backend/modules/product/constants/product.constants";
-import { CreateOrderResponseDto } from "@apps/backend/modules/order/dto/order-response.dto";
 
 /**
  * 주문 생성 서비스

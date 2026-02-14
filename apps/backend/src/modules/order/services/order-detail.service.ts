@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/co
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
-import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-response.dto";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 
 /**
  * 주문 상세조회 서비스

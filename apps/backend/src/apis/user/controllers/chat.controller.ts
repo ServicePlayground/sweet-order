@@ -19,27 +19,29 @@ import {
   AUTH_ERROR_MESSAGES,
   USER_ROLES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
-import {
-  CHAT_ERROR_MESSAGES,
-  SWAGGER_RESPONSE_EXAMPLES,
-} from "@apps/backend/modules/chat/constants/chat.constants";
+import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
 import {
   CreateChatRoomRequestDto,
-  GetMessagesRequestDto,
-  GetChatRoomsRequestDto,
-} from "@apps/backend/modules/chat/dto/chat-request.dto";
+  CreateChatRoomResponseDto,
+} from "@apps/backend/modules/chat/dto/chat-room-create.dto";
 import {
   ChatRoomListResponseDto,
   ChatRoomResponseDto,
-} from "@apps/backend/modules/chat/dto/chat-response.dto";
-import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+} from "@apps/backend/modules/chat/dto/chat-room-list.dto";
+import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 
 /**
  * 채팅 관련 컨트롤러 (사용자용)
  * 채팅방과 메시지 관리를 통합적으로 처리합니다.
  */
 @ApiTags("채팅")
-@ApiExtraModels(ChatRoomListResponseDto, ChatRoomResponseDto, MessageListResponseDto)
+@ApiExtraModels(
+  CreateChatRoomResponseDto,
+  ChatRoomListResponseDto,
+  ChatRoomResponseDto,
+  MessageListResponseDto,
+)
 @Controller(`${USER_ROLES.USER}/chat-room`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // 인증 필수
 export class UserChatController {
@@ -56,7 +58,7 @@ export class UserChatController {
     description:
       "스토어와의 채팅방을 생성하거나 기존 채팅방을 조회합니다. 기존 채팅방이 있으면 해당 채팅방 ID를 반환합니다.",
   })
-  @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.CHAT_ROOM_CREATED_RESPONSE })
+  @SwaggerResponse(201, { dataDto: CreateChatRoomResponseDto })
   @SwaggerResponse(401, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
   })
@@ -109,7 +111,7 @@ export class UserChatController {
   })
   async getChatRooms(
     @Request() req: { user: JwtVerifiedPayload },
-    @Query() query: GetChatRoomsRequestDto,
+    @Query() query: PaginationRequestDto,
   ) {
     return await this.chatService.getChatRoomsByUserId(req.user.sub, query);
   }
@@ -153,7 +155,7 @@ export class UserChatController {
   })
   async getMessages(
     @Param("roomId") roomId: string,
-    @Query() query: GetMessagesRequestDto,
+    @Query() query: PaginationRequestDto,
     @Request() req: { user: AuthenticatedUser },
   ) {
     const userType = req.user.role === "SELLER" ? "store" : "user";

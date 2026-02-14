@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ReviewListService } from "@apps/backend/modules/review/services/review-list.service";
 import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
-import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-request.dto";
+import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-list.dto";
 
 /**
  * 후기 서비스

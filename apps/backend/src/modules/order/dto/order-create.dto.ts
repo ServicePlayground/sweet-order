@@ -7,19 +7,11 @@ import {
   ValidateNested,
   IsOptional,
   IsDateString,
-  IsEnum,
   Min,
-  Max,
   MaxLength,
 } from "class-validator";
 import { Type } from "class-transformer";
-import {
-  SWAGGER_EXAMPLES,
-  OrderStatus,
-  OrderSortBy,
-} from "@apps/backend/modules/order/constants/order.constants";
-import { StringToNumber } from "@apps/backend/common/decorators/transform.decorator";
-import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
+import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
 
 /**
  * 주문 항목 생성 요청 DTO
@@ -230,91 +222,13 @@ export class CreateOrderRequestDto {
 }
 
 /**
- * 판매자용 주문 목록 조회 요청 DTO (페이지네이션)
+ * 주문 생성 응답 DTO
+ * 주문 생성 시 주문 ID만 반환합니다.
  */
-export class GetSellerOrdersRequestDto {
+export class CreateOrderResponseDto {
   @ApiProperty({
-    description: "(페이지네이션 필수) 페이지 번호 (1부터 시작)",
-    example: 1,
+    description: "주문 ID",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.id,
   })
-  @StringToNumber()
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  page: number;
-
-  @ApiProperty({
-    description: "(페이지네이션 필수) 조회할 항목 수",
-    example: 30,
-  })
-  @StringToNumber()
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  limit: number;
-
-  @ApiProperty({
-    description: "정렬",
-    enum: OrderSortBy,
-    example: OrderSortBy.LATEST,
-  })
-  @IsNotEmpty()
-  @IsEnum(OrderSortBy)
-  sortBy: OrderSortBy;
-
-  @ApiPropertyOptional({
-    description: "(필터) 스토어 ID - 자신이 소유한 스토어의 주문만 조회",
-    example: STORE_SWAGGER_EXAMPLES.ID,
-  })
-  @IsOptional()
-  @IsString()
-  storeId?: string;
-
-  @ApiPropertyOptional({
-    description: "(필터) 주문 상태",
-    enum: OrderStatus,
-    example: OrderStatus.PENDING,
-  })
-  @IsOptional()
-  @IsEnum(OrderStatus)
-  orderStatus?: OrderStatus;
-
-  @ApiPropertyOptional({
-    description: "(필터) 시작 날짜 (YYYY-MM-DD 형식)",
-    example: "2024-01-01",
-  })
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
-
-  @ApiPropertyOptional({
-    description: "(필터) 종료 날짜 (YYYY-MM-DD 형식)",
-    example: "2024-12-31",
-  })
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
-
-  @ApiPropertyOptional({
-    description: "(검색) 주문 번호 (부분 일치)",
-    example: "ORD-20240101-001",
-  })
-  @IsOptional()
-  @IsString()
-  orderNumber?: string;
-}
-
-/**
- * 주문 상태 변경 요청 DTO
- */
-export class UpdateOrderStatusRequestDto {
-  @ApiProperty({
-    description: "변경할 주문 상태",
-    enum: OrderStatus,
-    example: OrderStatus.CONFIRMED,
-  })
-  @IsNotEmpty()
-  @IsEnum(OrderStatus)
-  orderStatus: OrderStatus;
+  id: string;
 }

@@ -5,14 +5,14 @@ import { OrderListService } from "@apps/backend/modules/order/services/order-lis
 import { OrderUpdateService } from "@apps/backend/modules/order/services/order-update.service";
 import {
   CreateOrderRequestDto,
-  GetSellerOrdersRequestDto,
-  UpdateOrderStatusRequestDto,
-} from "@apps/backend/modules/order/dto/order-request.dto";
-import {
   CreateOrderResponseDto,
-  OrderResponseDto,
+} from "@apps/backend/modules/order/dto/order-create.dto";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
+import {
+  GetSellerOrdersRequestDto,
   OrderListResponseDto,
-} from "@apps/backend/modules/order/dto/order-response.dto";
+} from "@apps/backend/modules/order/dto/order-list.dto";
+import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**

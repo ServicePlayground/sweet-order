@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
+import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
 import {
   OrderStatus,
   ORDER_ERROR_MESSAGES,

@@ -3,7 +3,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   GetProductsRequestDto,
   GetSellerProductsRequestDto,
-} from "@apps/backend/modules/product/dto/product-request.dto";
+} from "@apps/backend/modules/product/dto/product-list.dto";
 import {
   EnableStatus,
   ProductType,

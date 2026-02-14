@@ -2,9 +2,9 @@ import { Injectable } from "@nestjs/common";
 import {
   GetProductsRequestDto,
   GetSellerProductsRequestDto,
-  CreateProductRequestDto,
-  UpdateProductRequestDto,
-} from "@apps/backend/modules/product/dto/product-request.dto";
+} from "@apps/backend/modules/product/dto/product-list.dto";
+import { CreateProductRequestDto } from "@apps/backend/modules/product/dto/product-create.dto";
+import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { ProductListService } from "@apps/backend/modules/product/services/product-list.service";
 import { ProductDetailService } from "@apps/backend/modules/product/services/product-detail.service";

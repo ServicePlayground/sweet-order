@@ -3,9 +3,9 @@ import { ProductService as ProductDataService } from "@apps/backend/modules/prod
 import {
   GetProductsRequestDto,
   GetSellerProductsRequestDto,
-  CreateProductRequestDto,
-  UpdateProductRequestDto,
-} from "@apps/backend/modules/product/dto/product-request.dto";
+} from "@apps/backend/modules/product/dto/product-list.dto";
+import { CreateProductRequestDto } from "@apps/backend/modules/product/dto/product-create.dto";
+import { UpdateProductRequestDto } from "@apps/backend/modules/product/dto/product-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**

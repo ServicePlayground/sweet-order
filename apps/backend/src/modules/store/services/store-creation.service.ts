@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { BusinessService } from "@apps/backend/modules/business/business.service";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store.request.dto";
+import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-create.dto";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 
 /**

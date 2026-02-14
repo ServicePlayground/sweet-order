@@ -4,84 +4,35 @@ import {
   EnableStatus,
   ProductType,
   ProductCategoryType,
-  CakeSizeDisplayName,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
-import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
+import {
+  CreateCakeSizeOptionDto,
+  CreateCakeFlavorOptionDto,
+} from "@apps/backend/modules/product/dto/product-create.dto";
 
 /**
  * 케이크 사이즈 옵션 응답 DTO
  */
-export class CakeSizeOptionResponseDto {
+export class CakeSizeOptionResponseDto extends CreateCakeSizeOptionDto {
   @ApiProperty({
     description: "옵션 고유 ID",
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].id,
   })
-  id: string;
-
-  @ApiProperty({
-    description: "노출 여부",
-    enum: EnableStatus,
-    example: EnableStatus.ENABLE,
-  })
-  visible: EnableStatus;
-
-  @ApiProperty({
-    description: "표시명",
-    enum: CakeSizeDisplayName,
-    example: CakeSizeDisplayName.MINI,
-  })
-  displayName: CakeSizeDisplayName;
-
-  @ApiProperty({
-    description: "케이크 지름/길이 (cm 단위)",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].lengthCm,
-  })
-  lengthCm: number;
-
-  @ApiProperty({
-    description: "설명",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].description,
-  })
-  description: string;
-
-  @ApiProperty({
-    description: "해당 사이즈의 가격",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeSizeOptions[0].price,
-  })
-  price: number;
+  declare id: string;
 }
 
 /**
  * 케이크 맛 옵션 응답 DTO
  */
-export class CakeFlavorOptionResponseDto {
+export class CakeFlavorOptionResponseDto extends CreateCakeFlavorOptionDto {
   @ApiProperty({
     description: "옵션 고유 ID",
     example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].id,
   })
-  id: string;
-
-  @ApiProperty({
-    description: "노출 여부",
-    enum: EnableStatus,
-    example: EnableStatus.ENABLE,
-  })
-  visible: EnableStatus;
-
-  @ApiProperty({
-    description: "표시명",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].displayName,
-  })
-  displayName: string;
-
-  @ApiProperty({
-    description: "해당 맛 옵션의 추가 가격",
-    example: SWAGGER_EXAMPLES.PRODUCT_DATA.cakeFlavorOptions[0].price,
-  })
-  price: number;
+  declare id: string;
 }
 
 /**
@@ -371,21 +322,4 @@ export class ProductResponseDto {
     example: STORE_SWAGGER_EXAMPLES.LONGITUDE,
   })
   pickupLongitude: number;
-}
-
-/**
- * 상품 목록 조회 응답 DTO
- */
-export class ProductListResponseDto {
-  @ApiProperty({
-    description: "상품 목록",
-    type: [ProductResponseDto],
-  })
-  data: ProductResponseDto[];
-
-  @ApiProperty({
-    description: "페이지네이션 메타 정보",
-    type: PaginationMetaResponseDto,
-  })
-  meta: PaginationMetaResponseDto;
 }

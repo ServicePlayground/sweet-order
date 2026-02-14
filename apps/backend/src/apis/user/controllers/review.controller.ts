@@ -6,11 +6,11 @@ import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-respons
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { REVIEW_ERROR_MESSAGES } from "@apps/backend/modules/review/constants/review.constants";
-import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-request.dto";
 import {
+  GetReviewsRequestDto,
   ReviewListResponseDto,
-  ReviewResponseDto,
-} from "@apps/backend/modules/review/dto/review-response.dto";
+} from "@apps/backend/modules/review/dto/review-list.dto";
+import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 

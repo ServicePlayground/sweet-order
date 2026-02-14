@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { GetSellerOrdersRequestDto } from "@apps/backend/modules/order/dto/order-request.dto";
+import {
+  GetSellerOrdersRequestDto,
+  OrderListResponseDto,
+} from "@apps/backend/modules/order/dto/order-list.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  OrderListResponseDto,
-  OrderResponseDto,
-} from "@apps/backend/modules/order/dto/order-response.dto";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 
 /**
  * 주문 목록 조회 서비스

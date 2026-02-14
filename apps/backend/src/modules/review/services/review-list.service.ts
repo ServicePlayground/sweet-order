@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-request.dto";
+import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-list.dto";
 import { ReviewSortBy } from "@apps/backend/modules/review/constants/review.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";

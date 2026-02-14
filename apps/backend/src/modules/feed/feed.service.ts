@@ -1,9 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import {
-  CreateFeedRequestDto,
-  UpdateFeedRequestDto,
-  GetFeedsRequestDto,
-} from "@apps/backend/modules/feed/dto/feed-request.dto";
+import { CreateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-create.dto";
+import { UpdateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-update.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { FeedCreateService } from "@apps/backend/modules/feed/services/feed-create.service";
 import { FeedUpdateService } from "@apps/backend/modules/feed/services/feed-update.service";
@@ -51,7 +49,7 @@ export class FeedService {
   /**
    * 피드 목록 조회 (사용자용)
    */
-  async getFeedsByStoreId(storeId: string, query: GetFeedsRequestDto) {
+  async getFeedsByStoreId(storeId: string, query: PaginationRequestDto) {
     return this.feedListService.getFeedsByStoreId(storeId, query);
   }
 
@@ -68,7 +66,7 @@ export class FeedService {
   async getFeedsByStoreIdForSeller(
     storeId: string,
     user: JwtVerifiedPayload,
-    query: GetFeedsRequestDto,
+    query: PaginationRequestDto,
   ) {
     return this.feedListService.getFeedsByStoreIdForSeller(storeId, user, query);
   }
