@@ -5,6 +5,7 @@ import { OrderCreateService } from "@apps/backend/modules/order/services/order-c
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
 import { OrderListService } from "@apps/backend/modules/order/services/order-list.service";
 import { OrderUpdateService } from "@apps/backend/modules/order/services/order-update.service";
+import { OrderUserListService } from "@apps/backend/modules/order/services/order-user-list.service";
 
 /**
  * 주문 모듈
@@ -18,6 +19,7 @@ import { OrderUpdateService } from "@apps/backend/modules/order/services/order-u
     OrderDetailService,
     OrderListService,
     OrderUpdateService,
+    OrderUserListService,
   ],
   exports: [OrderService],
 })

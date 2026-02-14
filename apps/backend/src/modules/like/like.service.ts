@@ -5,6 +5,12 @@ import { LikeProductDetailService } from "@apps/backend/modules/like/services/li
 import { LikeStoreCreateService } from "@apps/backend/modules/like/services/like-store-create.service";
 import { LikeStoreDeleteService } from "@apps/backend/modules/like/services/like-store-delete.service";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
+import { LikeUserListService } from "@apps/backend/modules/like/services/like-user-list.service";
+import {
+  GetMyLikesRequestDto,
+  MyProductLikeListResponseDto,
+  MyStoreLikeListResponseDto,
+} from "@apps/backend/modules/like/dto/like-user-list.dto";
 
 /**
  * 좋아요 서비스
@@ -21,6 +27,7 @@ export class LikeService {
     private readonly likeStoreCreateService: LikeStoreCreateService,
     private readonly likeStoreDeleteService: LikeStoreDeleteService,
     private readonly likeStoreDetailService: LikeStoreDetailService,
+    private readonly likeUserListService: LikeUserListService,
   ) {}
 
   /**
@@ -49,5 +56,15 @@ export class LikeService {
    */
   async removeStoreLike(userId: string, storeId: string) {
     return this.likeStoreDeleteService.removeStoreLike(userId, storeId);
+  }
+
+  /**
+   * 내가 좋아요한 목록 조회 (타입에 따라 상품 또는 스토어)
+   */
+  async getMyLikes(
+    userId: string,
+    query: GetMyLikesRequestDto,
+  ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
+    return this.likeUserListService.getMyLikes(userId, query);
   }
 }
