@@ -16,7 +16,7 @@ export class SentryUtil {
       statusCode: number,
     ): boolean {
       // 5xx 에러는 항상 전송
-      if (statusCode >= 400) {
+      if (statusCode >= 500) {
         return true;
       }
   
