@@ -1,7 +1,3 @@
-// IMPORTANT: Make sure to import `sentry.config.ts` at the top of your file.
-// This must be imported before all other imports
-import "@apps/backend/common/config/sentry.config";
-
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, Logger } from "@nestjs/common";
 import { SwaggerModule } from "@nestjs/swagger";
@@ -22,6 +18,7 @@ import {
 } from "@apps/backend/common/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
+import { initializeSentry } from "@apps/backend/common/config/sentry.config";
 
 /**
  * NestJS 애플리케이션의 진입점
@@ -39,6 +36,9 @@ async function bootstrap(): Promise<void> {
 
   // ConfigService 인스턴스 생성 (.env 환경 변수에 저장된 설정값들 가져올 수 있음)
   const configService = app.get(ConfigService);
+
+  // Sentry 초기화 (ConfigService 사용해야함)
+  initializeSentry(configService);
 
   // 포트와 환경 변수 가져오기
   const port = configService.get("PORT");
