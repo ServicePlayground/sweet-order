@@ -18,6 +18,15 @@ if ((nodeEnv === "staging" || nodeEnv === "production") && sentryDsn) {
     tracesSampleRate: nodeEnv === "production" ? 0.1 : 1.0, // 상용: 10%, 검증: 100%
     // 기본 PII 데이터 수집 비활성화 (개인정보 보호)
     sendDefaultPii: false,
+    // 에러 필터링 비활성화 - 모든 에러를 Sentry로 전송
+    // (ErrorResponseInterceptor에서 이미 400 이상만 필터링하므로 여기서는 모든 에러 전송)
+    ignoreErrors: [],
+    beforeSend(event) {
+      // 모든 에러를 전송 (필터링하지 않음)
+      // ErrorResponseInterceptor에서 이미 400 이상만 전송하도록 필터링했으므로
+      // 여기서는 추가 필터링 없이 모든 에러를 전송
+      return event;
+    },
   });
 }
 
