@@ -29,25 +29,31 @@ export class LikeStoreCreateService {
 
     try {
       // 좋아요 추가 및 스토어의 likeCount 증가 - 트랜잭션으로 일관성 보장
-      await this.prisma.$transaction(async (tx) => {
-        // 좋아요 추가 (중복 생성은 DB unique 제약으로 방지)
-        await tx.storeLike.create({
-          data: {
-            userId,
-            storeId,
-          },
-        });
-
-        // 스토어의 likeCount 증가 (원자적 연산)
-        await tx.store.update({
-          where: { id: storeId },
-          data: {
-            likeCount: {
-              increment: 1,
+      await this.prisma.$transaction(
+        async (tx) => {
+          // 좋아요 추가 (중복 생성은 DB unique 제약으로 방지)
+          await tx.storeLike.create({
+            data: {
+              userId,
+              storeId,
             },
-          },
-        });
-      });
+          });
+
+          // 스토어의 likeCount 증가 (원자적 연산)
+          await tx.store.update({
+            where: { id: storeId },
+            data: {
+              likeCount: {
+                increment: 1,
+              },
+            },
+          });
+        },
+        {
+          maxWait: 5000, // 최대 대기 시간 (5초)
+          timeout: 10000, // 타임아웃 (10초)
+        },
+      );
     } catch (error: any) {
       if (error?.code === "P2002") {
         throw new ConflictException(LIKE_ERROR_MESSAGES.STORE_LIKE_ALREADY_EXISTS);

@@ -269,63 +269,69 @@ export class OrderCreateService {
 
     while (retryCount < maxRetries) {
       try {
-        return await this.prisma.$transaction(async (tx) => {
-          // 주문 번호 생성 (예: ORD-20240101-001)
-          const now = new Date();
-          const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
+        return await this.prisma.$transaction(
+          async (tx) => {
+            // 주문 번호 생성 (예: ORD-20240101-001)
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
 
-          const startOfDay = new Date(now);
-          startOfDay.setUTCHours(0, 0, 0, 0);
-          const endOfDay = new Date(now);
-          endOfDay.setUTCHours(23, 59, 59, 999);
+            const startOfDay = new Date(now);
+            startOfDay.setUTCHours(0, 0, 0, 0);
+            const endOfDay = new Date(now);
+            endOfDay.setUTCHours(23, 59, 59, 999);
 
-          const todayOrderCount = await tx.order.count({
-            where: {
-              createdAt: {
-                gte: startOfDay,
-                lte: endOfDay,
+            const todayOrderCount = await tx.order.count({
+              where: {
+                createdAt: {
+                  gte: startOfDay,
+                  lte: endOfDay,
+                },
               },
-            },
-          });
+            });
 
-          // 재시도 시 sequence에 retryCount를 더하여 중복 방지
-          const sequence = String(todayOrderCount + 1 + retryCount).padStart(3, "0");
-          const orderNumber = `ORD-${dateStr}-${sequence}`;
+            // 재시도 시 sequence에 retryCount를 더하여 중복 방지
+            const sequence = String(todayOrderCount + 1 + retryCount).padStart(3, "0");
+            const orderNumber = `ORD-${dateStr}-${sequence}`;
 
-          // 상품 타입에 따라 주문 상태 결정
-          // 일반 케이크(BASIC_CAKE): 예약확정(CONFIRMED)
-          // 주문제작 케이크(CUSTOM_CAKE): 예약중(PENDING)
-          const orderStatus =
-            product.productType === ProductType.BASIC_CAKE
-              ? OrderStatus.CONFIRMED
-              : OrderStatus.PENDING;
+            // 상품 타입에 따라 주문 상태 결정
+            // 일반 케이크(BASIC_CAKE): 예약확정(CONFIRMED)
+            // 주문제작 케이크(CUSTOM_CAKE): 예약중(PENDING)
+            const orderStatus =
+              product.productType === ProductType.BASIC_CAKE
+                ? OrderStatus.CONFIRMED
+                : OrderStatus.PENDING;
 
-          const order = await tx.order.create({
-            data: {
-              userId,
-              productId,
-              storeId: product.storeId,
-              orderNumber,
-              totalQuantity,
-              totalPrice,
-              pickupAddress: pickupAddress ?? null,
-              pickupRoadAddress: pickupRoadAddress ?? null,
-              pickupZonecode: pickupZonecode ?? null,
-              pickupLatitude: pickupLatitude ?? null,
-              pickupLongitude: pickupLongitude ?? null,
-              orderStatus,
-              orderItems: {
-                create: normalizedItems,
+            const order = await tx.order.create({
+              data: {
+                userId,
+                productId,
+                storeId: product.storeId,
+                orderNumber,
+                totalQuantity,
+                totalPrice,
+                pickupAddress: pickupAddress ?? null,
+                pickupRoadAddress: pickupRoadAddress ?? null,
+                pickupZonecode: pickupZonecode ?? null,
+                pickupLatitude: pickupLatitude ?? null,
+                pickupLongitude: pickupLongitude ?? null,
+                orderStatus,
+                orderItems: {
+                  create: normalizedItems,
+                },
               },
-            },
-            include: {
-              orderItems: true,
-            },
-          });
+              include: {
+                orderItems: true,
+              },
+            });
 
-          // 주문 ID만 반환
-          return { id: order.id };
-        });
+            // 주문 ID만 반환
+            return { id: order.id };
+          },
+          {
+            maxWait: 5000, // 최대 대기 시간 (5초)
+            timeout: 10000, // 타임아웃 (10초)
+          },
+        );
       } catch (error: any) {
         // 주문 번호 중복 에러인 경우 재시도
         if (error?.code === "P2002") {

@@ -127,12 +127,27 @@ export class GoogleService {
       if (error.code === "ETIMEDOUT") {
         this.logger.error("구글 토큰 교환 타임아웃 발생:", error.message);
       }
-      console.error("=== Google OAuth 에러 상세 정보 ===");
-      console.error("error.code:", error.code);
-      console.error("error.message:", error.message);
-      console.error("error.response.status:", error.response?.status);
-      console.error("error.response.statusText:", error.response?.statusText);
-      console.error("===========================");
+
+      // 민감 정보를 제거한 에러 로깅
+      const sanitizedError = {
+        code: error.code,
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+      };
+
+      this.logger.error("Google OAuth 에러 발생:", JSON.stringify(sanitizedError, null, 2));
+
+      // 개발 환경에서만 상세 정보 로깅
+      if (process.env.NODE_ENV === "development") {
+        this.logger.debug("Google OAuth 에러 상세 정보:", {
+          code: error.code,
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+        });
+      }
+
       throw error;
     }
   }
@@ -171,24 +186,30 @@ export class GoogleService {
     }
 
     // 3. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
-    return await this.prisma.$transaction(async (tx) => {
-      // JWT 토큰 생성 (최소 정보만 포함: sub만)
-      const tokenPair = await this.jwtUtil.generateTokenPair({
-        sub: user.id,
-      });
+    return await this.prisma.$transaction(
+      async (tx) => {
+        // JWT 토큰 생성 (최소 정보만 포함: sub만)
+        const tokenPair = await this.jwtUtil.generateTokenPair({
+          sub: user.id,
+        });
 
-      // 마지막 로그인 시간 업데이트
-      await tx.user.update({
-        where: { id: user.id },
-        data: { lastLoginAt: new Date() },
-      });
+        // 마지막 로그인 시간 업데이트
+        await tx.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        });
 
-      // 응답에 토큰만 반환 (사용자 정보는 제외)
-      return {
-        accessToken: tokenPair.accessToken,
-        refreshToken: tokenPair.refreshToken,
-      };
-    });
+        // 응답에 토큰만 반환 (사용자 정보는 제외)
+        return {
+          accessToken: tokenPair.accessToken,
+          refreshToken: tokenPair.refreshToken,
+        };
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
   }
 
   /**
@@ -230,53 +251,65 @@ export class GoogleService {
         }
       } else if (existingPhoneUser.userId) {
         // 일반 계정(userId)에서만 사용중인 경우 -> 업데이트 후 로그인 처리
-        return await this.prisma.$transaction(async (tx) => {
-          const user = await tx.user.update({
-            where: { id: existingPhoneUser.id },
-            data: {
-              googleId,
-              googleEmail,
-              lastLoginAt: new Date(),
-            },
-          });
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const user = await tx.user.update({
+              where: { id: existingPhoneUser.id },
+              data: {
+                googleId,
+                googleEmail,
+                lastLoginAt: new Date(),
+              },
+            });
 
-          // JWT 토큰 생성 (최소 정보만 포함: sub만)
-          const tokenPair = await this.jwtUtil.generateTokenPair({
-            sub: user.id,
-          });
+            // JWT 토큰 생성 (최소 정보만 포함: sub만)
+            const tokenPair = await this.jwtUtil.generateTokenPair({
+              sub: user.id,
+            });
 
-          // 응답에 토큰만 반환 (사용자 정보는 제외)
-          return {
-            accessToken: tokenPair.accessToken,
-            refreshToken: tokenPair.refreshToken,
-          };
-        });
+            // 응답에 토큰만 반환 (사용자 정보는 제외)
+            return {
+              accessToken: tokenPair.accessToken,
+              refreshToken: tokenPair.refreshToken,
+            };
+          },
+          {
+            maxWait: 5000, // 최대 대기 시간 (5초)
+            timeout: 10000, // 타임아웃 (10초)
+          },
+        );
       }
     }
 
     // 3. 휴대폰번호가 중복되지 않은 경우 - 새 사용자 생성
-    return await this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          googleId,
-          googleEmail,
-          phone: normalizedPhone,
-          isPhoneVerified: true,
-          lastLoginAt: new Date(),
-        },
-      });
+    return await this.prisma.$transaction(
+      async (tx) => {
+        const user = await tx.user.create({
+          data: {
+            googleId,
+            googleEmail,
+            phone: normalizedPhone,
+            isPhoneVerified: true,
+            lastLoginAt: new Date(),
+          },
+        });
 
-      // JWT 토큰 생성 (최소 정보만 포함: sub만)
-      const tokenPair = await this.jwtUtil.generateTokenPair({
-        sub: user.id,
-      });
+        // JWT 토큰 생성 (최소 정보만 포함: sub만)
+        const tokenPair = await this.jwtUtil.generateTokenPair({
+          sub: user.id,
+        });
 
-      // 응답에 토큰만 반환 (사용자 정보는 제외)
-      return {
-        accessToken: tokenPair.accessToken,
-        refreshToken: tokenPair.refreshToken,
-      };
-    });
+        // 응답에 토큰만 반환 (사용자 정보는 제외)
+        return {
+          accessToken: tokenPair.accessToken,
+          refreshToken: tokenPair.refreshToken,
+        };
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
   }
 
   /**

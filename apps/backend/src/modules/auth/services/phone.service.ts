@@ -37,26 +37,32 @@ export class PhoneService {
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
-    await this.prisma.$transaction(async (tx) => {
-      // 기존 미인증 레코드 삭제 (같은 목적의 인증코드만 삭제하여 다른 목적의 인증코드는 유지)
-      await tx.phoneVerification.deleteMany({
-        where: {
-          phone: normalizedPhone,
-          purpose,
-          isVerified: false,
-        },
-      });
+    await this.prisma.$transaction(
+      async (tx) => {
+        // 기존 미인증 레코드 삭제 (같은 목적의 인증코드만 삭제하여 다른 목적의 인증코드는 유지)
+        await tx.phoneVerification.deleteMany({
+          where: {
+            phone: normalizedPhone,
+            purpose,
+            isVerified: false,
+          },
+        });
 
-      // 새 인증 정보 생성
-      await tx.phoneVerification.create({
-        data: {
-          phone: normalizedPhone,
-          verificationCode,
-          expiresAt,
-          purpose,
-        },
-      });
-    });
+        // 새 인증 정보 생성
+        await tx.phoneVerification.create({
+          data: {
+            phone: normalizedPhone,
+            verificationCode,
+            expiresAt,
+            purpose,
+          },
+        });
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
 
     // 3. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
     // TODO: 실제 SMS 발송 서비스 연동 (예: 네이버 클라우드 플랫폼, 카카오 알림톡 등)
@@ -93,14 +99,20 @@ export class PhoneService {
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
       }
 
-      await this.prisma.$transaction(async (tx) => {
-        await tx.phoneVerification.update({
-          where: { id: existingVerification.id },
-          data: {
-            isVerified: true, // is_verified 플래그로 본인인증 상태 관리
-          },
-        });
-      });
+      await this.prisma.$transaction(
+        async (tx) => {
+          await tx.phoneVerification.update({
+            where: { id: existingVerification.id },
+            data: {
+              isVerified: true, // is_verified 플래그로 본인인증 상태 관리
+            },
+          });
+        },
+        {
+          maxWait: 5000, // 최대 대기 시간 (5초)
+          timeout: 10000, // 타임아웃 (10초)
+        },
+      );
       return;
     }
 
@@ -127,15 +139,21 @@ export class PhoneService {
     }
 
     // 3. 인증 성공 처리 - 트랜잭션으로 안전하게 처리
-    await this.prisma.$transaction(async (tx) => {
-      // 현재 인증을 완료 상태로 업데이트
-      await tx.phoneVerification.update({
-        where: { id: phoneVerification.id },
-        data: {
-          isVerified: true, // is_verified 플래그로 본인인증 상태 관리
-        },
-      });
-    });
+    await this.prisma.$transaction(
+      async (tx) => {
+        // 현재 인증을 완료 상태로 업데이트
+        await tx.phoneVerification.update({
+          where: { id: phoneVerification.id },
+          data: {
+            isVerified: true, // is_verified 플래그로 본인인증 상태 관리
+          },
+        });
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
   }
 
   /**

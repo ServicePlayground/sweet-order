@@ -64,46 +64,52 @@ export class StoreCreateService {
     // DB에 스토어 저장 및 사용자 role 업데이트 - 트랜잭션으로 원자성 보장
     // 사업자등록번호는 정규화(하이픈 제거)하여 저장하여 일관성 유지
     try {
-      return await this.prisma.$transaction(async (tx) => {
-        const store = await tx.store.create({
-          data: {
-            userId,
-            // 스토어 정보
-            logoImageUrl: createStoreDto.logoImageUrl,
-            name: createStoreDto.name,
-            description: createStoreDto.description,
-            // 주소/위치 정보
-            address: createStoreDto.address,
-            roadAddress: createStoreDto.roadAddress,
-            zonecode: createStoreDto.zonecode,
-            latitude: createStoreDto.latitude,
-            longitude: createStoreDto.longitude,
-            // 사업자 정보 (1단계 - 사용자 입력값만 저장, 사업자등록번호는 정규화하여 저장)
-            businessNo: normalizedBusinessNo,
-            representativeName: createStoreDto.businessValidation.p_nm,
-            openingDate: createStoreDto.businessValidation.start_dt,
-            businessName: createStoreDto.businessValidation.b_nm,
-            businessSector: createStoreDto.businessValidation.b_sector,
-            businessType: createStoreDto.businessValidation.b_type,
-            // 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
-            permissionManagementNumber: createStoreDto.onlineTradingCompanyDetail.prmmiMnno,
-            // 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
-            // 필요시 외부 API를 호출하여 최신 상태 조회
-          },
-        });
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const store = await tx.store.create({
+            data: {
+              userId,
+              // 스토어 정보
+              logoImageUrl: createStoreDto.logoImageUrl,
+              name: createStoreDto.name,
+              description: createStoreDto.description,
+              // 주소/위치 정보
+              address: createStoreDto.address,
+              roadAddress: createStoreDto.roadAddress,
+              zonecode: createStoreDto.zonecode,
+              latitude: createStoreDto.latitude,
+              longitude: createStoreDto.longitude,
+              // 사업자 정보 (1단계 - 사용자 입력값만 저장, 사업자등록번호는 정규화하여 저장)
+              businessNo: normalizedBusinessNo,
+              representativeName: createStoreDto.businessValidation.p_nm,
+              openingDate: createStoreDto.businessValidation.start_dt,
+              businessName: createStoreDto.businessValidation.b_nm,
+              businessSector: createStoreDto.businessValidation.b_sector,
+              businessType: createStoreDto.businessValidation.b_type,
+              // 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
+              permissionManagementNumber: createStoreDto.onlineTradingCompanyDetail.prmmiMnno,
+              // 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
+              // 필요시 외부 API를 호출하여 최신 상태 조회
+            },
+          });
 
-        // 스토어 생성 완료 후 사용자 role을 seller로 변경 (이미 seller인 경우 유지)
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            role: "SELLER",
-          },
-        });
+          // 스토어 생성 완료 후 사용자 role을 seller로 변경 (이미 seller인 경우 유지)
+          await tx.user.update({
+            where: { id: userId },
+            data: {
+              role: "SELLER",
+            },
+          });
 
-        return {
-          id: store.id,
-        };
-      });
+          return {
+            id: store.id,
+          };
+        },
+        {
+          maxWait: 5000, // 최대 대기 시간 (5초)
+          timeout: 10000, // 타임아웃 (10초)
+        },
+      );
     } catch (error: unknown) {
       // 동시 요청 경합으로 DB unique 제약(P2002)에 걸리는 경우를 도메인 에러로 변환
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

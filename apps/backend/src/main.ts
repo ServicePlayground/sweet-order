@@ -17,6 +17,7 @@ import {
   userSwaggerConfig,
 } from "@apps/backend/common/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 
 /**
  * NestJS 애플리케이션의 진입점
@@ -41,8 +42,35 @@ async function bootstrap(): Promise<void> {
 
   // Health check (CORS 제외, global prefix 제외, interceptor/guard 등 미적용)
   const httpAdapter = app.getHttpAdapter();
-  httpAdapter.getInstance().get("/health", (_req: any, res: any) => {
-    res.status(200).send("OK");
+  httpAdapter.getInstance().get("/health", async (_req: any, res: any) => {
+    try {
+      // PrismaService 가져오기
+      const prismaService = app.get(PrismaService);
+
+      // 데이터베이스 연결 상태 확인
+      const isDbConnected = await prismaService.checkConnection();
+
+      if (!isDbConnected) {
+        return res.status(503).json({
+          status: "unhealthy",
+          database: "disconnected",
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      res.status(200).json({
+        status: "healthy",
+        database: "connected",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: "unhealthy",
+        database: "unknown",
+        error: "Health check failed",
+        timestamp: new Date().toISOString(),
+      });
+    }
   });
 
   // CORS 설정
