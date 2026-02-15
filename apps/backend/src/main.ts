@@ -1,3 +1,7 @@
+// IMPORTANT: Make sure to import `sentry.config.ts` at the top of your file.
+// This must be imported before all other imports
+import "@apps/backend/common/config/sentry.config";
+
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, Logger } from "@nestjs/common";
 import { SwaggerModule } from "@nestjs/swagger";

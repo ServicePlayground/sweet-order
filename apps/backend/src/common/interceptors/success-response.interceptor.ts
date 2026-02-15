@@ -1,5 +1,7 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from "@nestjs/common";
 import { map } from "rxjs/operators";
+import { randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 
 /**
  * Success Response Interceptor
@@ -17,12 +19,18 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 
+    // Response ID 생성 (성공 응답 구분자 포함)
+    const responseId = `${Date.now()}-success-${randomUUID()}-${randomBytes(4).toString("hex")}`;
+    
+    // Response 헤더에 추가 (클라이언트가 추적할 수 있도록)
+    response.setHeader("X-Response-ID", responseId);
+
     // 현재는 모든 응답을 변환 (필요시 특정 메서드 제외 로직 추가 가능)
 
     return next.handle().pipe(
       map((data: object) => {
         if (process.env.NODE_ENV === "development") {
-          this.logger.debug(`Success: ${request.method} ${request.url} - ${response.statusCode}`);
+          this.logger.debug(`[${responseId}] Success: ${request.method} ${request.url} - ${response.statusCode}`);
         }
 
         // 통일된 응답 형태로 변환
@@ -31,6 +39,7 @@ export class SuccessResponseInterceptor<T> implements NestInterceptor<T> {
           data: data,
           timestamp: new Date().toISOString(),
           statusCode: response.statusCode,
+          responseId: responseId,
         };
       }),
     );
