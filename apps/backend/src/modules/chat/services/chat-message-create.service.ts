@@ -42,22 +42,28 @@ export class ChatMessageCreateService {
     const lastMessagePreview = this.createLastMessagePreview(trimmedText);
 
     // 트랜잭션으로 메시지 생성과 채팅방 업데이트를 원자적으로 처리
-    const message = await this.prisma.$transaction(async (tx) => {
-      // 메시지 생성
-      const createdMessage = await tx.message.create({
-        data: {
-          roomId,
-          text: trimmedText,
-          senderId,
-          senderType: senderType.toUpperCase() as "USER" | "STORE",
-        },
-      });
+    const message = await this.prisma.$transaction(
+      async (tx) => {
+        // 메시지 생성
+        const createdMessage = await tx.message.create({
+          data: {
+            roomId,
+            text: trimmedText,
+            senderId,
+            senderType: senderType.toUpperCase() as "USER" | "STORE",
+          },
+        });
 
-      // 채팅방 메타데이터 업데이트
-      await this.updateChatRoomMetadata(tx, roomId, lastMessagePreview, senderType);
+        // 채팅방 메타데이터 업데이트
+        await this.updateChatRoomMetadata(tx, roomId, lastMessagePreview, senderType);
 
-      return createdMessage;
-    });
+        return createdMessage;
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
 
     const messageDto = ChatMapperUtil.mapToMessageResponseDto(message);
 

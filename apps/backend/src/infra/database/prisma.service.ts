@@ -5,6 +5,7 @@ import { PrismaClient } from "./prisma/generated/client";
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
+  private isConnected = false; // 데이터베이스 연결 상태 추적
 
   constructor(private readonly configService: ConfigService) {
     const databaseUrl = configService.get<string>("DATABASE_URL");
@@ -34,6 +35,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     for (let i = 1; i <= retries; i++) {
       try {
         await this.$connect();
+        this.isConnected = true;
         this.logger.log("✅ Prisma DB 연결 성공");
         return;
       } catch (e: any) {
@@ -41,13 +43,44 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         const msg = e?.message || e?.toString?.() || e;
         this.logger.warn(`⚠️ Prisma 연결 실패 (${i}/${retries}) - ${code}: ${msg}`);
         if (i === retries) {
-          this.logger.error("🚫 Prisma 연결 재시도 모두 실패 — 앱은 계속 실행됩니다(헬스는 200).");
-          // 마지막에도 throw 하지 않음: 프로세스는 살아 있어야 App Runner 헬스체크 통과
-          return;
+          this.isConnected = false;
+          
+          this.logger.error("🚫 Prisma 연결 재시도 모두 실패 — 애플리케이션을 종료합니다.");
+          throw new Error(
+            `데이터베이스 연결에 실패했습니다. (${code}: ${msg})`,
+          );
         }
         await new Promise((r) => setTimeout(r, delayMs));
       }
     }
+  }
+
+  /**
+   * 데이터베이스 연결 상태 확인
+   * @returns 연결 상태 (true: 연결됨, false: 연결 안됨)
+   */
+  async checkConnection(): Promise<boolean> {
+    if (!this.isConnected) {
+      return false;
+    }
+
+    try {
+      // 간단한 쿼리로 연결 상태 확인
+      await this.$queryRaw`SELECT 1`;
+      return true;
+    } catch (error) {
+      this.isConnected = false;
+      this.logger.warn("데이터베이스 연결 상태 확인 실패:", error);
+      return false;
+    }
+  }
+
+  /**
+   * 데이터베이스 연결 상태 반환 (동기)
+   * @returns 연결 상태
+   */
+  getConnectionStatus(): boolean {
+    return this.isConnected;
   }
 
   async onModuleDestroy(): Promise<void> {

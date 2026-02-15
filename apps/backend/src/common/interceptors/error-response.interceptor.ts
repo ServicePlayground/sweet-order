@@ -7,6 +7,7 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Response } from "express";
+import { SensitiveDataUtil } from "@apps/backend/common/utils/sensitive-data.util";
 
 /**
  * Error Response Interceptor
@@ -42,8 +43,19 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
       statusCode: status,
     };
 
+    // 운영 환경에서도 에러 로깅 (민감 정보 제거)
+    const sanitizedError = SensitiveDataUtil.sanitizeError(exception);
+    const sanitizedData = SensitiveDataUtil.maskSensitiveFields(data);
+
+    // 로그에 민감 정보가 포함되지 않도록 마스킹 처리
+    this.logger.error(
+      `Error: ${request.method} ${request.url} - ${status}`,
+      JSON.stringify(sanitizedData, null, 2),
+    );
+
+    // 개발 환경에서만 상세 에러 정보 로깅
     if (process.env.NODE_ENV === "development") {
-      this.logger.error(`Error: ${request.method} ${request.url} - ${status}`, data);
+      this.logger.debug("Error details:", sanitizedError);
     }
 
     // 클라이언트에게 통일된 JSON 형태로 에러 응답 전송

@@ -29,30 +29,36 @@ export class LikeProductDeleteService {
 
     try {
       // 좋아요 삭제 및 상품의 likeCount 감소 - 트랜잭션으로 일관성 보장
-      await this.prisma.$transaction(async (tx) => {
-        // 좋아요 삭제
-        await tx.productLike.delete({
-          where: {
-            userId_productId: {
-              userId,
-              productId,
+      await this.prisma.$transaction(
+        async (tx) => {
+          // 좋아요 삭제
+          await tx.productLike.delete({
+            where: {
+              userId_productId: {
+                userId,
+                productId,
+              },
             },
-          },
-        });
+          });
 
-        // 상품의 likeCount 감소 (원자적 연산, 음수 방지를 위해 조건부 업데이트)
-        await tx.product.updateMany({
-          where: {
-            id: productId,
-            likeCount: { gt: 0 },
-          },
-          data: {
-            likeCount: {
-              decrement: 1,
+          // 상품의 likeCount 감소 (원자적 연산, 음수 방지를 위해 조건부 업데이트)
+          await tx.product.updateMany({
+            where: {
+              id: productId,
+              likeCount: { gt: 0 },
             },
-          },
-        });
-      });
+            data: {
+              likeCount: {
+                decrement: 1,
+              },
+            },
+          });
+        },
+        {
+          maxWait: 5000, // 최대 대기 시간 (5초)
+          timeout: 10000, // 타임아웃 (10초)
+        },
+      );
     } catch (error: any) {
       if (error?.code === "P2025") {
         throw new NotFoundException(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_NOT_FOUND);
