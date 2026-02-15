@@ -15,6 +15,7 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { ProductMapperUtil } from "@apps/backend/modules/product/utils/product-mapper.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 @Injectable()
 export class ProductListService {
@@ -354,6 +355,9 @@ export class ProductListService {
 
     if (storeId) {
       if (!userStoreIds.includes(storeId)) {
+        LoggerUtil.log(
+          `상품 목록 조회 실패: 스토어 소유권 없음 - userId: ${user.sub}, storeId: ${storeId}`,
+        );
         throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
       }
       where.storeId = storeId;

@@ -1,3 +1,5 @@
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+
 /**
  * 피드 HTML sanitize 유틸
  * - 최소한의 서버 방어선으로 위험 태그/속성을 제거합니다.
@@ -31,6 +33,9 @@ export class FeedSanitizeUtil {
     // ReDoS 공격 방지를 위한 입력 길이 제한
     const MAX_INPUT_LENGTH = 100000; // 100KB
     if (input.length > MAX_INPUT_LENGTH) {
+      LoggerUtil.log(
+        `피드 HTML sanitize 실패: 입력 문자열이 너무 깁니다 - length: ${input.length}, maxLength: ${MAX_INPUT_LENGTH}`,
+      );
       throw new Error("Input string is too long");
     }
 

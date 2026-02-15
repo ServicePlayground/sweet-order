@@ -9,6 +9,7 @@ import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 휴대폰 인증 서비스
@@ -91,11 +92,17 @@ export class PhoneService {
 
       // 인증 정보가 존재하지 않는 경우
       if (!existingVerification) {
+        LoggerUtil.log(
+          `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${purpose}`,
+        );
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
       }
 
       // 2. 만료 시간 확인 - 5분 후 자동 만료
       if (existingVerification.expiresAt < new Date()) {
+        LoggerUtil.log(
+          `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${purpose}, expiresAt: ${existingVerification.expiresAt}`,
+        );
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
       }
 
@@ -130,11 +137,17 @@ export class PhoneService {
 
     // 인증 정보가 존재하지 않는 경우
     if (!phoneVerification) {
+      LoggerUtil.log(
+        `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${purpose}, verificationCode: ${verificationCode}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
     }
 
     // 2. 만료 시간 확인 - 5분 후 자동 만료
     if (phoneVerification.expiresAt < new Date()) {
+      LoggerUtil.log(
+        `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${purpose}, expiresAt: ${phoneVerification.expiresAt}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
     }
 

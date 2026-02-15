@@ -4,7 +4,6 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
   Inject,
 } from "@nestjs/common";
 import { Response } from "express";
@@ -13,6 +12,7 @@ import { randomUUID } from "crypto";
 import { randomBytes } from "crypto";
 import { SensitiveDataUtil } from "@apps/backend/common/utils/sensitive-data.util";
 import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * Error Response Interceptor
@@ -20,12 +20,9 @@ import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
  */
 @Catch()
 export class ErrorResponseInterceptor implements ExceptionFilter {
-  private readonly logger = new Logger(ErrorResponseInterceptor.name);
   private readonly nodeEnv: string;
 
-  constructor(
-    @Inject(ConfigService) private readonly configService: ConfigService,
-  ) {
+  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {
     this.nodeEnv = this.configService.get<string>("NODE_ENV", "development");
   }
 
@@ -48,7 +45,7 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
 
     // Response ID 생성 (에러 응답 구분자 포함)
     const responseId = `${Date.now()}-error-${randomUUID()}-${randomBytes(4).toString("hex")}`;
-    
+
     // Response 헤더에 추가 (클라이언트가 추적할 수 있도록)
     response.setHeader("X-Response-ID", responseId);
 
@@ -65,24 +62,18 @@ export class ErrorResponseInterceptor implements ExceptionFilter {
     const sanitizedError = SensitiveDataUtil.sanitizeError(exception);
     const sanitizedData = SensitiveDataUtil.maskSensitiveFields(data);
 
-    // 환경별 로깅
-    // Production: 최소한의 정보만, Dev/Staging: 상세 정보
+    // 에러 로깅 (개발, 검증)
     const baseMessage = `[${responseId}] Error: ${request.method} ${request.url} - ${status}`;
-    if (this.nodeEnv === "production") {
-      this.logger.error(baseMessage);
-    } else {
-      const detailedMessage = sanitizedData
-        ? `${baseMessage}\n${JSON.stringify(sanitizedData, null, 2)}`
-        : baseMessage;
-      this.logger.error(detailedMessage);
-      // 개발/검증 환경에서만 상세 에러 정보 로깅
-      this.logger.debug(`[${responseId}] Error details:`, sanitizedError);
-    }
+    const detailedMessage = sanitizedData
+      ? `${baseMessage}\n${JSON.stringify(sanitizedData, null, 2)}`
+      : baseMessage;
+    LoggerUtil.log(detailedMessage);
+    LoggerUtil.log(`[${responseId}] Error details:`, sanitizedError);
 
-    // Sentry로 전송 (필요한 경우만)
+    // Sentry로 전송 (검증, 상용)
     const shouldSend = SentryUtil.shouldSendToSentry(status);
     const level = SentryUtil.getErrorLevel(status);
-    if ((this.nodeEnv === "staging" || this.nodeEnv === "production") && shouldSend) {
+    if (shouldSend) {
       // 예외 전송 (responseId를 태그로 추가하여 클라이언트에서 Sentry에서 찾을 수 있도록)
       SentryUtil.captureException(exception, level, { responseId });
     }

@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { Store, Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 소유권 확인 유틸리티
@@ -35,10 +36,16 @@ export class StoreOwnershipUtil {
     });
 
     if (!store) {
+      LoggerUtil.log(
+        `스토어 소유권 확인 실패: 스토어 없음 - storeId: ${storeId}, userId: ${userId}`,
+      );
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
     if (store.userId !== userId) {
+      LoggerUtil.log(
+        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeUserId: ${store.userId}`,
+      );
       throw new ForbiddenException(STORE_ERROR_MESSAGES.FORBIDDEN);
     }
 

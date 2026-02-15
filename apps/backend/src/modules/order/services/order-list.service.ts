@@ -10,6 +10,7 @@ import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.u
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 주문 목록 조회 서비스
@@ -58,6 +59,9 @@ export class OrderListService {
     // 스토어 필터
     if (storeId) {
       if (!userStoreIds.includes(storeId)) {
+        LoggerUtil.log(
+          `주문 목록 조회 실패: 스토어 소유권 없음 - userId: ${user.sub}, storeId: ${storeId}`,
+        );
         throw new ForbiddenException(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED);
       }
       where.storeId = storeId;

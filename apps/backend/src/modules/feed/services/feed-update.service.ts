@@ -4,6 +4,7 @@ import { UpdateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-update
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
 import { FeedSanitizeUtil } from "@apps/backend/modules/feed/utils/feed-sanitize.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 피드 수정 서비스
@@ -31,18 +32,25 @@ export class FeedUpdateService {
       storeId,
     );
 
-    const updatedFeed = await this.prisma.storeFeed.update({
-      where: {
-        id: feedId,
-      },
-      data: {
-        title: updateFeedDto.title,
-        content: FeedSanitizeUtil.sanitizeHtml(updateFeedDto.content),
-      },
-    });
+    try {
+      const updatedFeed = await this.prisma.storeFeed.update({
+        where: {
+          id: feedId,
+        },
+        data: {
+          title: updateFeedDto.title,
+          content: FeedSanitizeUtil.sanitizeHtml(updateFeedDto.content),
+        },
+      });
 
-    return {
-      id: updatedFeed.id,
-    };
+      return {
+        id: updatedFeed.id,
+      };
+    } catch (error: unknown) {
+      LoggerUtil.log(
+        `피드 수정 실패: 트랜잭션 에러 - userId: ${user.sub}, storeId: ${storeId}, feedId: ${feedId}, error: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
+    }
   }
 }

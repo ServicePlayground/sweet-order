@@ -1,8 +1,9 @@
-import { Injectable, Logger, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import { OnlineTradingCompanyDetailRequestDto } from "@apps/backend/modules/business/dto/business-request.dto";
 import { KFTC_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 공정거래위원회 통신판매사업자 등록상세 조회 API 전용 서비스
@@ -10,7 +11,6 @@ import { KFTC_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constant
  */
 @Injectable()
 export class KftcApiService {
-  private readonly logger = new Logger(KftcApiService.name);
   private readonly kftcApiUrl?: string;
   private readonly dataGoKrApiKey?: string;
   private readonly axiosInstance: AxiosInstance;
@@ -20,6 +20,7 @@ export class KftcApiService {
     this.dataGoKrApiKey = this.configService.get<string>("DATA_GO_KR_API_KEY");
 
     if (!this.kftcApiUrl || !this.dataGoKrApiKey) {
+      LoggerUtil.log("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
       throw new Error("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
     }
 
@@ -57,18 +58,22 @@ export class KftcApiService {
           (error.response?.status >= 500 && error.response?.status < 600); // 5xx 서버 에러
 
         if (!isRetryable || attempt === maxRetries) {
+          LoggerUtil.log(
+            `공정거래위원회 API 호출 최종 실패 - attempt: ${attempt}/${maxRetries}, error: ${error.message || String(error)}`,
+          );
           throw error;
         }
 
         // 지수 백오프: 1초, 2초, 4초
         const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 4000);
-        this.logger.warn(
+        LoggerUtil.log(
           `공정거래위원회 API 호출 실패 (${attempt}/${maxRetries}), ${delayMs}ms 후 재시도...`,
         );
         await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
 
+    LoggerUtil.log(`공정거래위원회 API 호출 모든 재시도 실패 - maxRetries: ${maxRetries}`);
     throw lastError;
   }
 
@@ -79,6 +84,7 @@ export class KftcApiService {
   async getOnlineTradingCompanyDetail(detailDto: OnlineTradingCompanyDetailRequestDto) {
     try {
       if (!this.kftcApiUrl || !this.dataGoKrApiKey) {
+        LoggerUtil.log("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
         throw new Error("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
       }
 
@@ -108,6 +114,7 @@ export class KftcApiService {
       const items = response.data.items;
       // 데이터가 없는 경우
       if (!items || items.length === 0) {
+        LoggerUtil.log(`통신판매사업자 등록상세 조회 실패: ${KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND}`);
         throw new Error(KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND);
       }
 
@@ -121,6 +128,7 @@ export class KftcApiService {
       */
     } catch (error: any) {
       if (error.message) {
+        LoggerUtil.log(`통신판매사업자 등록상세 조회 실패: ${error.message}`);
         throw new BadRequestException(error.message);
       }
 
@@ -128,7 +136,7 @@ export class KftcApiService {
       const errorMessage =
         KFTC_API_ERROR_MESSAGES[statusCode as keyof typeof KFTC_API_ERROR_MESSAGES];
 
-      this.logger.error(`통신판매사업자 등록상세 조회 실패: ${errorMessage}`);
+      LoggerUtil.log(`통신판매사업자 등록상세 조회 실패: ${errorMessage}`);
       throw new BadRequestException(errorMessage);
     }
   }

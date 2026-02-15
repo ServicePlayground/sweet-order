@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from "@nestjs/common
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { LIKE_ERROR_MESSAGES } from "@apps/backend/modules/like/constants/like.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 좋아요 생성 서비스
@@ -24,6 +25,9 @@ export class LikeStoreCreateService {
     });
 
     if (!store) {
+      LoggerUtil.log(
+        `스토어 좋아요 추가 실패: 스토어를 찾을 수 없음 - userId: ${userId}, storeId: ${storeId}`,
+      );
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -56,11 +60,20 @@ export class LikeStoreCreateService {
       );
     } catch (error: any) {
       if (error?.code === "P2002") {
+        LoggerUtil.log(
+          `스토어 좋아요 추가 실패: 이미 좋아요 존재 - userId: ${userId}, storeId: ${storeId}`,
+        );
         throw new ConflictException(LIKE_ERROR_MESSAGES.STORE_LIKE_ALREADY_EXISTS);
       }
       if (error?.code === "P2025") {
+        LoggerUtil.log(
+          `스토어 좋아요 추가 실패: 스토어를 찾을 수 없음 (트랜잭션 중) - userId: ${userId}, storeId: ${storeId}`,
+        );
         throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
       }
+      LoggerUtil.log(
+        `스토어 좋아요 추가 실패: 트랜잭션 에러 - userId: ${userId}, storeId: ${storeId}, error: ${error?.message || String(error)}`,
+      );
       throw error;
     }
   }

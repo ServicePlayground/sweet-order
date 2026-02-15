@@ -4,6 +4,7 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
 import { FeedMapperUtil } from "@apps/backend/modules/feed/utils/feed-mapper.util";
 import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 피드 상세 조회 서비스
@@ -30,10 +31,16 @@ export class FeedDetailService {
 
     // storeId 조건 확인 (제공된 경우)
     if (storeId && feed && feed.storeId !== storeId) {
+      LoggerUtil.log(
+        `피드 상세 조회 실패: 스토어 ID 불일치 - feedId: ${feedId}, storeId: ${storeId}, feedStoreId: ${feed.storeId}`,
+      );
       throw new NotFoundException(FEED_ERROR_MESSAGES.FEED_NOT_FOUND);
     }
 
     if (!feed) {
+      LoggerUtil.log(
+        `피드 상세 조회 실패: 피드 없음 - feedId: ${feedId}, storeId: ${storeId || "없음"}`,
+      );
       throw new NotFoundException(FEED_ERROR_MESSAGES.FEED_NOT_FOUND);
     }
 

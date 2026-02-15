@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
  * - 개발 환경: Sentry 비활성화
  * - 검증 환경(staging): Sentry 활성화
  * - 상용 환경(production): Sentry 활성화
- * 
+ *
  * @param configService ConfigService 인스턴스
  */
 export function initializeSentry(configService: ConfigService): void {
@@ -28,4 +28,3 @@ export function initializeSentry(configService: ConfigService): void {
     });
   }
 }
-

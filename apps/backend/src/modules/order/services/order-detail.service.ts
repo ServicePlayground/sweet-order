@@ -4,6 +4,7 @@ import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 주문 상세조회 서비스
@@ -30,6 +31,7 @@ export class OrderDetailService {
     });
 
     if (!order) {
+      LoggerUtil.log(`주문 상세 조회 실패: 주문 없음 - orderId: ${orderId}, userId: ${userId}`);
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -54,6 +56,7 @@ export class OrderDetailService {
     });
 
     if (!order) {
+      LoggerUtil.log(`주문 상세 조회 실패: 주문 없음 - orderId: ${orderId}, userId: ${userId}`);
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 

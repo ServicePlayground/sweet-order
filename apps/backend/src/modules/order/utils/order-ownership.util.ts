@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { Order, Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 주문 소유권 확인 유틸리티
@@ -37,10 +38,14 @@ export class OrderOwnershipUtil {
     });
 
     if (!order) {
+      LoggerUtil.log(`주문 소유권 확인 실패: 주문 없음 - orderId: ${orderId}, userId: ${userId}`);
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
     if (order.store.userId !== userId) {
+      LoggerUtil.log(
+        `주문 소유권 확인 실패: 소유권 없음 - orderId: ${orderId}, userId: ${userId}, storeUserId: ${order.store.userId}`,
+      );
       throw new ForbiddenException(ORDER_ERROR_MESSAGES.FORBIDDEN);
     }
 
@@ -66,10 +71,14 @@ export class OrderOwnershipUtil {
     });
 
     if (!order) {
+      LoggerUtil.log(`주문 소유권 확인 실패: 주문 없음 - orderId: ${orderId}, userId: ${userId}`);
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
     if (order.userId !== userId) {
+      LoggerUtil.log(
+        `주문 소유권 확인 실패: 소유권 없음 - orderId: ${orderId}, userId: ${userId}, orderUserId: ${order.userId}`,
+      );
       throw new ForbiddenException(ORDER_ERROR_MESSAGES.FORBIDDEN);
     }
 

@@ -2,6 +2,7 @@ import { BadRequestException } from "@nestjs/common";
 import { UPLOAD_CONSTANTS } from "../constants/upload.constants";
 import * as path from "path";
 import * as crypto from "crypto";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 파일 검증 유틸리티
@@ -118,12 +119,16 @@ export class FileValidator {
    */
   static validateFileSize(buffer: Buffer): void {
     if (buffer.length > UPLOAD_CONSTANTS.MAX_FILE_SIZE) {
+      LoggerUtil.log(
+        `파일 크기 검증 실패: 크기 초과 - size: ${buffer.length}, maxSize: ${UPLOAD_CONSTANTS.MAX_FILE_SIZE}`,
+      );
       throw new BadRequestException(
         `파일 크기는 ${UPLOAD_CONSTANTS.MAX_FILE_SIZE / (1024 * 1024)}MB를 초과할 수 없습니다.`,
       );
     }
 
     if (buffer.length === 0) {
+      LoggerUtil.log(`파일 크기 검증 실패: 빈 파일`);
       throw new BadRequestException("빈 파일은 업로드할 수 없습니다.");
     }
   }
@@ -136,16 +141,21 @@ export class FileValidator {
 
     // 확장자가 없는 경우
     if (!ext) {
+      LoggerUtil.log(`파일 확장자 검증 실패: 확장자 없음 - filename: ${filename}`);
       throw new BadRequestException("파일 확장자가 필요합니다.");
     }
 
     // 차단된 확장자인 경우
     if (UPLOAD_CONSTANTS.BLOCKED_EXTENSIONS.includes(ext)) {
+      LoggerUtil.log(`파일 확장자 검증 실패: 차단된 확장자 - filename: ${filename}, ext: ${ext}`);
       throw new BadRequestException(`업로드가 허용되지 않은 파일 형식입니다: ${ext}`);
     }
 
     // 허용된 확장자인지 확인
     if (!UPLOAD_CONSTANTS.ALLOWED_EXTENSIONS.includes(ext)) {
+      LoggerUtil.log(
+        `파일 확장자 검증 실패: 지원하지 않는 확장자 - filename: ${filename}, ext: ${ext}`,
+      );
       throw new BadRequestException(`지원하지 않는 파일 형식입니다: ${ext}`);
     }
   }
@@ -155,10 +165,12 @@ export class FileValidator {
    */
   static validateMimeType(mimetype: string): void {
     if (!mimetype || typeof mimetype !== "string") {
+      LoggerUtil.log(`파일 MIME 타입 검증 실패: 타입 정보 없음 - mimetype: ${mimetype}`);
       throw new BadRequestException("파일 타입 정보가 올바르지 않습니다.");
     }
 
     if (!UPLOAD_CONSTANTS.ALLOWED_MIME_TYPES.includes(mimetype)) {
+      LoggerUtil.log(`파일 MIME 타입 검증 실패: 지원하지 않는 타입 - mimetype: ${mimetype}`);
       throw new BadRequestException(`지원하지 않는 파일 타입입니다: ${mimetype}`);
     }
   }
@@ -170,6 +182,7 @@ export class FileValidator {
    */
   static normalizeFilename(originalname: string): string {
     if (!originalname || typeof originalname !== "string") {
+      LoggerUtil.log(`파일 이름 정규화 실패: 이름 정보 없음 - originalname: ${originalname}`);
       throw new BadRequestException("파일 이름이 올바르지 않습니다.");
     }
 
@@ -195,6 +208,9 @@ export class FileValidator {
 
     // 빈 문자열 체크
     if (!normalized || normalized.trim() === "") {
+      LoggerUtil.log(
+        `파일 이름 정규화 실패: 유효한 이름 생성 불가 - originalname: ${originalname}`,
+      );
       throw new BadRequestException("유효한 파일 이름을 생성할 수 없습니다.");
     }
 
@@ -244,10 +260,16 @@ export class FileValidator {
 
     const expectedMimes = extensionMimeMap[ext];
     if (!expectedMimes) {
+      LoggerUtil.log(
+        `파일 확장자-MIME 타입 일치 검증 실패: 지원하지 않는 확장자 - filename: ${filename}, ext: ${ext}`,
+      );
       throw new BadRequestException(`지원하지 않는 파일 확장자입니다: ${ext}`);
     }
 
     if (!expectedMimes.includes(mimetype)) {
+      LoggerUtil.log(
+        `파일 확장자-MIME 타입 일치 검증 실패: 타입 불일치 - filename: ${filename}, ext: ${ext}, mimetype: ${mimetype}`,
+      );
       throw new BadRequestException(
         `파일 확장자(${ext})와 MIME 타입(${mimetype})이 일치하지 않습니다.`,
       );
@@ -290,6 +312,9 @@ export class FileValidator {
     };
 
     if (!allowedByExt[ext] || !allowedByMime[mimetype]) {
+      LoggerUtil.log(
+        `파일 매직 바이트 검증 실패: 지원하지 않는 형식 - filename: ${filename}, ext: ${ext}, mimetype: ${mimetype}`,
+      );
       throw new BadRequestException("지원하지 않는 파일 형식입니다.");
     }
 
@@ -297,6 +322,9 @@ export class FileValidator {
     const mimeOk = allowedByMime[mimetype].includes(detected);
 
     if (!extOk || !mimeOk) {
+      LoggerUtil.log(
+        `파일 매직 바이트 검증 실패: 내용 불일치 - filename: ${filename}, ext: ${ext}, mimetype: ${mimetype}, detected: ${detected}`,
+      );
       throw new BadRequestException("파일 내용과 확장자/타입이 일치하지 않습니다.");
     }
   }
@@ -310,6 +338,9 @@ export class FileValidator {
   } {
     // 기본 필수 필드 검증
     if (!file || !file.originalname || !file.buffer || !file.mimetype) {
+      LoggerUtil.log(
+        `파일 검증 실패: 필수 필드 없음 - hasFile: ${!!file}, hasOriginalname: ${!!file?.originalname}, hasBuffer: ${!!file?.buffer}, hasMimetype: ${!!file?.mimetype}`,
+      );
       throw new BadRequestException("파일 정보가 올바르지 않습니다.");
     }
 

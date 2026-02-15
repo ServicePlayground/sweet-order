@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, Logger } from "@nestjs/common";
+import { Injectable, ConflictException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
 import { ConfigService } from "@nestjs/config";
@@ -14,6 +14,7 @@ import {
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 구글 OAuth 서비스
@@ -21,7 +22,6 @@ import {
  */
 @Injectable()
 export class GoogleService {
-  private readonly logger = new Logger(GoogleService.name);
   private readonly googleClientId: string;
   private readonly googleClientSecret: string;
   private readonly googleRedirectUri: string;
@@ -104,7 +104,7 @@ export class GoogleService {
       const { access_token, token_type } = tokenResponse.data;
 
       // Access Token으로 사용자 정보 요청
-      this.logger.log("사용자 정보 요청 시작");
+      LoggerUtil.log("사용자 정보 요청 시작");
       const userInfoResponse = await this.httpClient.get(
         "https://www.googleapis.com/oauth2/v2/userinfo",
         {
@@ -123,11 +123,6 @@ export class GoogleService {
         },
       };
     } catch (error: any) {
-      // ETIMEDOUT 에러에 대한 특별 처리
-      if (error.code === "ETIMEDOUT") {
-        this.logger.error("구글 토큰 교환 타임아웃 발생:", error.message);
-      }
-
       // 민감 정보를 제거한 에러 로깅
       const sanitizedError = {
         code: error.code,
@@ -136,17 +131,7 @@ export class GoogleService {
         statusText: error.response?.statusText,
       };
 
-      this.logger.error("Google OAuth 에러 발생:", JSON.stringify(sanitizedError, null, 2));
-
-      // 개발 환경에서만 상세 정보 로깅
-      if (process.env.NODE_ENV === "development") {
-        this.logger.debug("Google OAuth 에러 상세 정보:", {
-          code: error.code,
-          message: error.message,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-        });
-      }
+      LoggerUtil.log(`Google OAuth 에러 발생: ${JSON.stringify(sanitizedError, null, 2)}`);
 
       throw error;
     }
@@ -169,6 +154,9 @@ export class GoogleService {
 
     if (!user) {
       // 새 사용자인 경우 -> 휴대폰 인증 필요
+      LoggerUtil.log(
+        `구글 로그인 실패: 새 사용자 (휴대폰 인증 필요) - googleId: ${googleId}, googleEmail: ${googleEmail}`,
+      );
       throw new BadRequestException({
         message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
         googleId: googleId,
@@ -178,6 +166,9 @@ export class GoogleService {
 
     // 2. 휴대폰 인증 상태 확인
     if (!user.phone || !user.isPhoneVerified) {
+      LoggerUtil.log(
+        `구글 로그인 실패: 휴대폰 인증 미완료 - googleId: ${googleId}, userId: ${user.id}, hasPhone: ${!!user.phone}, isPhoneVerified: ${user.isPhoneVerified}`,
+      );
       throw new BadRequestException({
         message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
         googleId: googleId,
@@ -230,6 +221,9 @@ export class GoogleService {
       PhoneVerificationPurpose.GOOGLE_REGISTRATION,
     );
     if (!isPhoneVerified) {
+      LoggerUtil.log(
+        `구글 회원가입 실패: 휴대폰 인증 미완료 - googleId: ${googleId}, phone: ${normalizedPhone}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -244,9 +238,15 @@ export class GoogleService {
         // 구글 계정(googleId)에서 이미 사용중인 경우 -> 에러 발생
         if (existingPhoneUser.userId && existingPhoneUser.googleId) {
           // 일반 로그인과 구글 로그인 모두 가능한 계정
+          LoggerUtil.log(
+            `구글 회원가입 실패: 휴대폰번호 중복 (다중 계정) - googleId: ${googleId}, phone: ${normalizedPhone}`,
+          );
           throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS);
         } else {
           // 구글 로그인 계정만 존재
+          LoggerUtil.log(
+            `구글 회원가입 실패: 휴대폰번호 중복 (구글 계정) - googleId: ${googleId}, phone: ${normalizedPhone}`,
+          );
           throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
         }
       } else if (existingPhoneUser.userId) {
@@ -321,6 +321,7 @@ export class GoogleService {
     });
 
     if (existingUser) {
+      LoggerUtil.log(`구글 회원가입 실패: 구글 ID 중복 - googleId: ${googleId}`);
       throw new ConflictException(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS);
     }
   }

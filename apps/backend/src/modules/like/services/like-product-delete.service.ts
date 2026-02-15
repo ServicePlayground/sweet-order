@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { LIKE_ERROR_MESSAGES } from "@apps/backend/modules/like/constants/like.constants";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 상품 좋아요 삭제 서비스
@@ -24,6 +25,9 @@ export class LikeProductDeleteService {
     });
 
     if (!product) {
+      LoggerUtil.log(
+        `상품 좋아요 삭제 실패: 상품을 찾을 수 없음 - userId: ${userId}, productId: ${productId}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -61,8 +65,14 @@ export class LikeProductDeleteService {
       );
     } catch (error: any) {
       if (error?.code === "P2025") {
+        LoggerUtil.log(
+          `상품 좋아요 삭제 실패: 좋아요를 찾을 수 없음 - userId: ${userId}, productId: ${productId}`,
+        );
         throw new NotFoundException(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_NOT_FOUND);
       }
+      LoggerUtil.log(
+        `상품 좋아요 삭제 실패: 트랜잭션 에러 - userId: ${userId}, productId: ${productId}, error: ${error?.message || String(error)}`,
+      );
       throw error;
     }
   }

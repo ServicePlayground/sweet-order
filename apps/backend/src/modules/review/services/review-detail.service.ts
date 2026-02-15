@@ -4,6 +4,7 @@ import { REVIEW_ERROR_MESSAGES } from "@apps/backend/modules/review/constants/re
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 후기 단일 조회 서비스
@@ -23,6 +24,9 @@ export class ReviewDetailService {
     });
 
     if (!product) {
+      LoggerUtil.log(
+        `후기 상세 조회 실패: 상품 없음 - productId: ${productId}, reviewId: ${reviewId}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -39,6 +43,9 @@ export class ReviewDetailService {
     });
 
     if (!review) {
+      LoggerUtil.log(
+        `후기 상세 조회 실패: 후기 없음 - productId: ${productId}, reviewId: ${reviewId}`,
+      );
       throw new NotFoundException(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND);
     }
 
@@ -56,6 +63,9 @@ export class ReviewDetailService {
     });
 
     if (!store) {
+      LoggerUtil.log(
+        `후기 상세 조회 실패: 스토어 없음 - storeId: ${storeId}, reviewId: ${reviewId}`,
+      );
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -74,6 +84,7 @@ export class ReviewDetailService {
     });
 
     if (!review) {
+      LoggerUtil.log(`후기 상세 조회 실패: 후기 없음 - storeId: ${storeId}, reviewId: ${reviewId}`);
       throw new NotFoundException(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND);
     }
 

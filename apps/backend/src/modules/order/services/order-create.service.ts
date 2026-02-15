@@ -13,6 +13,7 @@ import {
   EnableStatus,
   ProductType,
 } from "@apps/backend/modules/product/constants/product.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 주문 생성 서비스
@@ -141,6 +142,9 @@ export class OrderCreateService {
     if (item.sizeId) {
       const matchedSize = sizeOptionMap.get(item.sizeId);
       if (!matchedSize || matchedSize.visible !== EnableStatus.ENABLE) {
+        LoggerUtil.log(
+          `주문 항목 검증 실패: 유효하지 않은 사이즈 옵션 - sizeId: ${item.sizeId}, visible: ${matchedSize?.visible}`,
+        );
         throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
       }
       selectedSize = {
@@ -151,6 +155,9 @@ export class OrderCreateService {
         price: matchedSize.price,
       };
     } else if (hasSizePayload) {
+      LoggerUtil.log(
+        `주문 항목 검증 실패: sizeId 없이 사이즈 정보 제공 - hasSizePayload: ${hasSizePayload}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
     }
 
@@ -158,6 +165,9 @@ export class OrderCreateService {
     if (item.flavorId) {
       const matchedFlavor = flavorOptionMap.get(item.flavorId);
       if (!matchedFlavor || matchedFlavor.visible !== EnableStatus.ENABLE) {
+        LoggerUtil.log(
+          `주문 항목 검증 실패: 유효하지 않은 맛 옵션 - flavorId: ${item.flavorId}, visible: ${matchedFlavor?.visible}`,
+        );
         throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
       }
       selectedFlavor = {
@@ -166,6 +176,9 @@ export class OrderCreateService {
         price: matchedFlavor.price,
       };
     } else if (hasFlavorPayload) {
+      LoggerUtil.log(
+        `주문 항목 검증 실패: flavorId 없이 맛 정보 제공 - hasFlavorPayload: ${hasFlavorPayload}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
     }
 
@@ -220,25 +233,38 @@ export class OrderCreateService {
     });
 
     if (!product) {
+      LoggerUtil.log(
+        `주문 생성 실패: 상품을 찾을 수 없음 - productId: ${productId}, userId: ${userId}`,
+      );
       throw new NotFoundException(ORDER_ERROR_MESSAGES.PRODUCT_NOT_FOUND);
     }
 
     if (product.salesStatus !== EnableStatus.ENABLE) {
+      LoggerUtil.log(
+        `주문 생성 실패: 상품 판매 비활성화 - productId: ${productId}, userId: ${userId}, salesStatus: ${product.salesStatus}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.PRODUCT_INACTIVE);
     }
 
     if (product.visibilityStatus !== EnableStatus.ENABLE) {
+      LoggerUtil.log(
+        `주문 생성 실패: 상품 비공개 상태 - productId: ${productId}, userId: ${userId}, visibilityStatus: ${product.visibilityStatus}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE);
     }
 
     // 주문 항목 검증
     if (!items || items.length === 0) {
+      LoggerUtil.log(`주문 생성 실패: 주문 항목 없음 - productId: ${productId}, userId: ${userId}`);
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
     }
 
     // 총 수량 검증
     const calculatedTotalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
     if (calculatedTotalQuantity !== totalQuantity) {
+      LoggerUtil.log(
+        `주문 생성 실패: 총 수량 불일치 - productId: ${productId}, userId: ${userId}, calculated: ${calculatedTotalQuantity}, provided: ${totalQuantity}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_TOTAL_QUANTITY);
     }
 
@@ -259,6 +285,9 @@ export class OrderCreateService {
     );
 
     if (calculatedTotalPrice !== totalPrice) {
+      LoggerUtil.log(
+        `주문 생성 실패: 총 금액 불일치 - productId: ${productId}, userId: ${userId}, calculated: ${calculatedTotalPrice}, provided: ${totalPrice}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_TOTAL_PRICE);
     }
 
@@ -345,18 +374,30 @@ export class OrderCreateService {
           if (!rawTarget || isOrderNumberConflict) {
             retryCount++;
             if (retryCount >= maxRetries) {
+              LoggerUtil.log(
+                `주문 생성 최종 실패: 재시도 횟수 초과 - userId: ${userId}, productId: ${productId}, retryCount: ${retryCount}, maxRetries: ${maxRetries}`,
+              );
               throw new BadRequestException(ORDER_ERROR_MESSAGES.ORDER_CREATE_FAILED);
             }
+            LoggerUtil.log(
+              `주문 생성 재시도: 주문 번호 중복 - userId: ${userId}, productId: ${productId}, retryCount: ${retryCount}/${maxRetries}`,
+            );
             // 짧은 지연 후 재시도
             await new Promise((resolve) => setTimeout(resolve, 10));
             continue;
           }
         }
-        // 다른 에러는 그대로 throw
+        // 다른 에러는 로그 남기고 throw
+        LoggerUtil.log(
+          `주문 생성 실패: 트랜잭션 에러 - userId: ${userId}, productId: ${productId}, error: ${error?.message || String(error)}`,
+        );
         throw error;
       }
     }
 
+    LoggerUtil.log(
+      `주문 생성 최종 실패: 재시도 루프 종료 - userId: ${userId}, productId: ${productId}, maxRetries: ${maxRetries}`,
+    );
     throw new BadRequestException(ORDER_ERROR_MESSAGES.ORDER_CREATE_FAILED);
   }
 }

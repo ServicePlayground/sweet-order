@@ -6,6 +6,7 @@ import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permis
 import { ChatGateway } from "../gateways/chat.gateway";
 import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 채팅 메시지 생성 서비스
@@ -80,10 +81,14 @@ export class ChatMessageCreateService {
     const trimmedText = text.trim();
 
     if (trimmedText.length === 0) {
+      LoggerUtil.log(`메시지 검증 실패: 메시지 내용이 비어있음`);
       throw new BadRequestException("메시지 내용이 비어있습니다.");
     }
 
     if (trimmedText.length > ChatMessageCreateService.MAX_MESSAGE_LENGTH) {
+      LoggerUtil.log(
+        `메시지 검증 실패: 메시지 길이 초과 - length: ${trimmedText.length}, maxLength: ${ChatMessageCreateService.MAX_MESSAGE_LENGTH}`,
+      );
       throw new BadRequestException(
         `메시지는 ${ChatMessageCreateService.MAX_MESSAGE_LENGTH}자를 초과할 수 없습니다.`,
       );
