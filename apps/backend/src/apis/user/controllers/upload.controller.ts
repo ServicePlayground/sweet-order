@@ -14,8 +14,12 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
-import { UPLOAD_CONSTANTS } from "@apps/backend/modules/upload/constants/upload.constants";
+import {
+  UPLOAD_CONSTANTS,
+  UPLOAD_ERROR_MESSAGES,
+} from "@apps/backend/modules/upload/constants/upload.constants";
 import { UploadFileResponseDto } from "@apps/backend/modules/upload/dto/upload-create.dto";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 사용자 업로드 컨트롤러
@@ -71,7 +75,8 @@ export class UserUploadController {
       | undefined,
   ) {
     if (!file) {
-      throw new BadRequestException("파일이 업로드되지 않았습니다.");
+      LoggerUtil.log(UPLOAD_ERROR_MESSAGES.FILE_NOT_UPLOADED);
+      throw new BadRequestException(UPLOAD_ERROR_MESSAGES.FILE_NOT_UPLOADED);
     }
 
     const fileUrl = await this.uploadService.uploadFile({

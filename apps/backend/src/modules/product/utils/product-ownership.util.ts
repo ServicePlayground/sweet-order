@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { Product, Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 상품 소유권 확인 유틸리티
@@ -38,10 +39,16 @@ export class ProductOwnershipUtil {
     });
 
     if (!product || !product.store) {
+      LoggerUtil.log(
+        `상품 소유권 확인 실패: 상품 없음 - productId: ${productId}, userId: ${userId}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
     if (product.store.userId !== userId) {
+      LoggerUtil.log(
+        `상품 소유권 확인 실패: 소유권 없음 - productId: ${productId}, userId: ${userId}, storeUserId: ${product.store.userId}`,
+      );
       throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
@@ -72,10 +79,16 @@ export class ProductOwnershipUtil {
     });
 
     if (!store) {
+      LoggerUtil.log(
+        `스토어 소유권 확인 실패: 스토어 없음 - storeId: ${storeId}, userId: ${userId}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.STORE_NOT_FOUND);
     }
 
     if (store.userId !== userId) {
+      LoggerUtil.log(
+        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeUserId: ${store.userId}`,
+      );
       throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
     }
   }

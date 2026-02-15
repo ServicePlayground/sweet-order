@@ -8,6 +8,7 @@ import {
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 @Injectable()
 export class ProductUpdateService {
@@ -193,15 +194,22 @@ export class ProductUpdateService {
       updateData.productNoticeCustomerService = updateProductDto.productNoticeCustomerService;
     }
 
-    const updatedProduct = await this.prisma.product.update({
-      where: {
-        id,
-      },
-      data: updateData,
-    });
+    try {
+      const updatedProduct = await this.prisma.product.update({
+        where: {
+          id,
+        },
+        data: updateData,
+      });
 
-    return {
-      id: updatedProduct.id,
-    };
+      return {
+        id: updatedProduct.id,
+      };
+    } catch (error: unknown) {
+      LoggerUtil.log(
+        `상품 수정 실패: 트랜잭션 에러 - userId: ${user.sub}, productId: ${id}, error: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
+    }
   }
 }

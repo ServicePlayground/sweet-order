@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from "@nestjs/common
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { LIKE_ERROR_MESSAGES } from "@apps/backend/modules/like/constants/like.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 상품 좋아요 생성 서비스
@@ -24,6 +25,9 @@ export class LikeProductCreateService {
     });
 
     if (!product) {
+      LoggerUtil.log(
+        `상품 좋아요 추가 실패: 상품을 찾을 수 없음 - userId: ${userId}, productId: ${productId}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -56,11 +60,20 @@ export class LikeProductCreateService {
       );
     } catch (error: any) {
       if (error?.code === "P2002") {
+        LoggerUtil.log(
+          `상품 좋아요 추가 실패: 이미 좋아요 존재 - userId: ${userId}, productId: ${productId}`,
+        );
         throw new ConflictException(LIKE_ERROR_MESSAGES.PRODUCT_LIKE_ALREADY_EXISTS);
       }
       if (error?.code === "P2025") {
+        LoggerUtil.log(
+          `상품 좋아요 추가 실패: 상품을 찾을 수 없음 (트랜잭션 중) - userId: ${userId}, productId: ${productId}`,
+        );
         throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
       }
+      LoggerUtil.log(
+        `상품 좋아요 추가 실패: 트랜잭션 에러 - userId: ${userId}, productId: ${productId}, error: ${error?.message || String(error)}`,
+      );
       throw error;
     }
   }

@@ -2,6 +2,7 @@ import { ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
 import { ChatRoom } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 채팅방 권한 확인 유틸리티
@@ -23,6 +24,9 @@ export class ChatPermissionUtil {
   ): Promise<void> {
     if (userType === "user") {
       if (chatRoom.userId !== userId) {
+        LoggerUtil.log(
+          `채팅방 접근 권한 없음: 사용자 타입 - userId: ${userId}, chatRoomId: ${chatRoom.id}, chatRoomUserId: ${chatRoom.userId}`,
+        );
         throw new ForbiddenException(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND);
       }
     } else {
@@ -32,6 +36,9 @@ export class ChatPermissionUtil {
         select: { userId: true },
       });
       if (!store || store.userId !== userId) {
+        LoggerUtil.log(
+          `채팅방 접근 권한 없음: 스토어 타입 - userId: ${userId}, chatRoomId: ${chatRoom.id}, storeId: ${chatRoom.storeId}, storeUserId: ${store?.userId || "없음"}`,
+        );
         throw new ForbiddenException(CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND);
       }
     }

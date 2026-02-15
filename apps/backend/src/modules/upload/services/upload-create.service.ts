@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { FileValidator } from "../utils/file-validator.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 업로드 생성 서비스
@@ -11,7 +12,6 @@ import { FileValidator } from "../utils/file-validator.util";
  */
 @Injectable()
 export class UploadCreateService {
-  private readonly logger = new Logger(UploadCreateService.name);
   private readonly s3Client: S3Client;
   private readonly bucket?: string;
   private readonly region?: string;
@@ -23,6 +23,7 @@ export class UploadCreateService {
     this.cloudfrontDomain = this.configService.get<string>("CLOUDFRONT_DOMAIN");
 
     if (!this.bucket || !this.region) {
+      LoggerUtil.log("S3_BUCKET 또는 AWS_REGION 환경 변수가 설정되어 있지 않습니다.");
       throw new Error("S3_BUCKET 또는 AWS_REGION 환경 변수가 설정되어 있지 않습니다.");
     }
 
@@ -30,6 +31,7 @@ export class UploadCreateService {
     const secretAccessKey = this.configService.get<string>("AWS_SECRET_ACCESS_KEY");
 
     if (!accessKeyId || !secretAccessKey) {
+      LoggerUtil.log("AWS_ACCESS_KEY_ID 또는 AWS_SECRET_ACCESS_KEY가 설정되어 있지 않습니다.");
       throw new Error("AWS_ACCESS_KEY_ID 또는 AWS_SECRET_ACCESS_KEY가 설정되어 있지 않습니다.");
     }
 
@@ -41,7 +43,7 @@ export class UploadCreateService {
       },
     });
 
-    this.logger.log(
+    LoggerUtil.log(
       `S3 Client 초기화 완료: ${this.region}, Bucket: ${this.bucket}, CloudFront: ${
         this.cloudfrontDomain ? "enabled" : "disabled"
       }`,
@@ -83,12 +85,25 @@ export class UploadCreateService {
         ? `https://${this.cloudfrontDomain}/${encodedKey}`
         : `https://${this.bucket}.s3.${this.region}.amazonaws.com/${encodedKey}`;
 
-      this.logger.debug(`파일 업로드 완료: ${uniqueFilename} (원본: ${file.originalname})`);
+      LoggerUtil.log(`파일 업로드 완료: ${uniqueFilename} (원본: ${file.originalname})`);
 
       return fileUrl;
     } catch (error: any) {
-      this.logger.error(`파일 업로드 실패: ${error.message}`, error.stack);
-      // 민감한 정보 노출 방지 (스택 트레이스는 로그에만 기록)
+      // S3 관련 에러는 내부 서버 에러로 처리
+      if (error.name === "S3ServiceException" || error.$metadata?.httpStatusCode >= 500) {
+        LoggerUtil.log(`파일 업로드 실패: S3 서버 에러 - error: ${error.message || String(error)}`);
+        throw new InternalServerErrorException("파일 업로드 중 서버 오류가 발생했습니다.");
+      }
+
+      // 클라이언트 에러는 원본 메시지 유지 (이미 FileValidator에서 로깅됨)
+      if (error.name === "BadRequestException" || error instanceof BadRequestException) {
+        throw error;
+      }
+
+      // 기타 에러는 일반 메시지
+      LoggerUtil.log(
+        `파일 업로드 실패: 알 수 없는 에러 - error: ${error.message || String(error)}`,
+      );
       throw new BadRequestException("파일 업로드에 실패했습니다. 파일 형식과 크기를 확인해주세요.");
     }
   }

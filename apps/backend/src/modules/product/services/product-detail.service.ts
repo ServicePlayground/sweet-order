@@ -8,6 +8,7 @@ import {
 import { ProductMapperUtil } from "@apps/backend/modules/product/utils/product-mapper.util";
 import { LikeProductDetailService } from "@apps/backend/modules/like/services/like-product-detail.service";
 import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 @Injectable()
 export class ProductDetailService {
@@ -37,6 +38,9 @@ export class ProductDetailService {
     });
 
     if (!product || product.visibilityStatus !== EnableStatus.ENABLE) {
+      LoggerUtil.log(
+        `상품 상세 조회 실패: 상품 없음 또는 비공개 - productId: ${id}, visibilityStatus: ${product?.visibilityStatus || "없음"}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -82,6 +86,7 @@ export class ProductDetailService {
     });
 
     if (!productWithReviews) {
+      LoggerUtil.log(`상품 상세 조회 실패: 상품 없음 - productId: ${id}, userId: ${user.sub}`);
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 

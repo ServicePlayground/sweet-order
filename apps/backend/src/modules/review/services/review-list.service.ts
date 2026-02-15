@@ -7,6 +7,7 @@ import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 후기 목록 조회 서비스
@@ -29,6 +30,7 @@ export class ReviewListService {
     });
 
     if (!product) {
+      LoggerUtil.log(`후기 목록 조회 실패: 상품 없음 - productId: ${productId}`);
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -75,6 +77,7 @@ export class ReviewListService {
     });
 
     if (!store) {
+      LoggerUtil.log(`후기 목록 조회 실패: 스토어 없음 - storeId: ${storeId}`);
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 

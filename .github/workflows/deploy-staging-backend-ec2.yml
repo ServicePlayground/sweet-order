@@ -283,6 +283,9 @@ jobs:
             AWS_REGION=ap-northeast-2
             S3_BUCKET=${{ secrets.STAGING_S3_BUCKET }}
             CLOUDFRONT_DOMAIN=${{ secrets.STAGING_CLOUDFRONT_DOMAIN }}
+
+            # Sentry
+            SENTRY_DSN=${{ secrets.STAGING_SENTRY_DSN }}
             EOF
 
             # 환경 변수 파일 권한 설정

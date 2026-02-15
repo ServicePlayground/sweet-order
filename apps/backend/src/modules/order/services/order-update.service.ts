@@ -6,6 +6,7 @@ import {
   ORDER_ERROR_MESSAGES,
 } from "@apps/backend/modules/order/constants/order.constants";
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 주문 상태 변경 서비스
@@ -39,11 +40,17 @@ export class OrderUpdateService {
 
     // 같은 상태로 변경하는 경우 방지
     if (order.orderStatus === orderStatus) {
+      LoggerUtil.log(
+        `주문 상태 변경 실패: 동일한 상태 - orderId: ${orderId}, userId: ${userId}, currentStatus: ${order.orderStatus}, requestedStatus: ${orderStatus}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.SAME_STATUS);
     }
 
     // CONFIRMED -> PENDING 역전환 방지
     if (order.orderStatus === OrderStatus.CONFIRMED && orderStatus === OrderStatus.PENDING) {
+      LoggerUtil.log(
+        `주문 상태 변경 실패: CONFIRMED에서 PENDING으로 역전환 불가 - orderId: ${orderId}, userId: ${userId}, currentStatus: ${order.orderStatus}, requestedStatus: ${orderStatus}`,
+      );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED);
     }
 

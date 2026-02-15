@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
 import { StoreFeed } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 피드 소유권 확인 유틸리티
@@ -44,10 +45,14 @@ export class FeedOwnershipUtil {
     });
 
     if (!feed || !feed.store) {
+      LoggerUtil.log(`피드 소유권 확인 실패: 피드 없음 - feedId: ${feedId}, userId: ${userId}`);
       throw new NotFoundException(FEED_ERROR_MESSAGES.FEED_NOT_FOUND);
     }
 
     if (feed.store.userId !== userId) {
+      LoggerUtil.log(
+        `피드 소유권 확인 실패: 소유권 없음 - feedId: ${feedId}, userId: ${userId}, storeUserId: ${feed.store.userId}`,
+      );
       throw new ForbiddenException(FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
     }
 
@@ -82,10 +87,16 @@ export class FeedOwnershipUtil {
     });
 
     if (!store) {
+      LoggerUtil.log(
+        `스토어 소유권 확인 실패: 스토어 없음 - storeId: ${storeId}, userId: ${userId}`,
+      );
       throw new NotFoundException(errorMessage || FEED_ERROR_MESSAGES.STORE_NOT_FOUND);
     }
 
     if (store.userId !== userId) {
+      LoggerUtil.log(
+        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeUserId: ${store.userId}`,
+      );
       throw new ForbiddenException(errorMessage || FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
     }
   }

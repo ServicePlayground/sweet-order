@@ -3,6 +3,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { UpdateStoreRequestDto } from "@apps/backend/modules/store/dto/store-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 수정 서비스
@@ -56,16 +57,23 @@ export class StoreUpdateService {
       updateData.description = updateStoreDto.description;
     }
 
-    // 스토어 수정
-    const updatedStore = await this.prisma.store.update({
-      where: {
-        id: storeId,
-      },
-      data: updateData,
-    });
+    try {
+      // 스토어 수정
+      const updatedStore = await this.prisma.store.update({
+        where: {
+          id: storeId,
+        },
+        data: updateData,
+      });
 
-    return {
-      id: updatedStore.id,
-    };
+      return {
+        id: updatedStore.id,
+      };
+    } catch (error: unknown) {
+      LoggerUtil.log(
+        `스토어 수정 실패: 트랜잭션 에러 - userId: ${user.sub}, storeId: ${storeId}, error: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
+    }
   }
 }

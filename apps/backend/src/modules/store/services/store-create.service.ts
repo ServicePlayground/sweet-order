@@ -4,6 +4,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-create.dto";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 생성 서비스
@@ -28,6 +29,9 @@ export class StoreCreateService {
     const businessNo1 = createStoreDto.businessValidation.b_no.replace(/[-\s]/g, "");
     const businessNo2 = createStoreDto.onlineTradingCompanyDetail.brno.replace(/[-\s]/g, "");
     if (businessNo1 !== businessNo2) {
+      LoggerUtil.log(
+        `스토어 생성 실패: 사업자등록번호 불일치 - userId: ${userId}, businessNo1: ${businessNo1}, businessNo2: ${businessNo2}`,
+      );
       throw new BadRequestException(STORE_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_MISMATCH);
     }
 
@@ -46,6 +50,9 @@ export class StoreCreateService {
       },
     });
     if (existingStore) {
+      LoggerUtil.log(
+        `스토어 생성 실패: 동일한 사업자 정보로 이미 존재 - userId: ${userId}, businessNo: ${normalizedBusinessNo}, permissionManagementNumber: ${createStoreDto.onlineTradingCompanyDetail.prmmiMnno}`,
+      );
       throw new BadRequestException(
         STORE_ERROR_MESSAGES.STORE_ALREADY_EXISTS_WITH_SAME_BUSINESS_INFO,
       );
@@ -113,10 +120,16 @@ export class StoreCreateService {
     } catch (error: unknown) {
       // 동시 요청 경합으로 DB unique 제약(P2002)에 걸리는 경우를 도메인 에러로 변환
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        LoggerUtil.log(
+          `스토어 생성 실패: DB unique 제약 위반 - userId: ${userId}, error: ${error.message}`,
+        );
         throw new BadRequestException(
           STORE_ERROR_MESSAGES.STORE_ALREADY_EXISTS_WITH_SAME_BUSINESS_INFO,
         );
       }
+      LoggerUtil.log(
+        `스토어 생성 실패: 트랜잭션 에러 - userId: ${userId}, error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw error;
     }
   }

@@ -8,6 +8,7 @@ import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-reques
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
 import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 목록 조회 서비스
@@ -33,6 +34,7 @@ export class StoreListService {
     });
 
     if (!store) {
+      LoggerUtil.log(`스토어 상세 조회 실패: 스토어 없음 - storeId: ${storeId}`);
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
@@ -115,6 +117,7 @@ export class StoreListService {
     });
 
     if (!store) {
+      LoggerUtil.log(`스토어 상세 조회 실패: 스토어 없음 - storeId: ${storeId}`);
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 

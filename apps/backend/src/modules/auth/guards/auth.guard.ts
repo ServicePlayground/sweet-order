@@ -10,6 +10,7 @@ import { Reflector } from "@nestjs/core";
 import { AuthGuard as BaseAuthGuard } from "@nestjs/passport";
 import { UserRole } from "@apps/backend/modules/auth/types/auth.types";
 import { AUTH_ERROR_MESSAGES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 통합 인증 메타데이터 키
@@ -85,6 +86,7 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
     if (err || !user) {
       // 이미 Nest UnauthorizedException으로 올라온 경우는 그대로 전달
       if (err instanceof UnauthorizedException) {
+        LoggerUtil.log(`인증 실패: UnauthorizedException - message: ${err.message || "unknown"}`);
         throw err;
       }
 
@@ -92,10 +94,12 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
       const errorName = info?.name || err?.name;
 
       if (errorName === "TokenExpiredError") {
+        LoggerUtil.log(`인증 실패: 토큰 만료 - errorName: ${errorName}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED);
       }
 
       if (errorName === "JsonWebTokenError") {
+        LoggerUtil.log(`인증 실패: 잘못된 토큰 - errorName: ${errorName}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
       }
 
@@ -107,10 +111,12 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
         authHeader && authHeader.startsWith("Bearer ") && authHeader.substring(7).trim();
 
       if (!hasToken) {
+        LoggerUtil.log(`인증 실패: 토큰 없음`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING);
       }
 
       // 토큰이 있지만 알 수 없는 에러인 경우
+      LoggerUtil.log(`인증 실패: 알 수 없는 에러 - errorName: ${errorName || "unknown"}`);
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
     }
 
@@ -118,6 +124,9 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
     if (authMetadata?.roles && authMetadata.roles.length > 0) {
       const hasRequiredRole = authMetadata.roles.includes(user.role);
       if (!hasRequiredRole) {
+        LoggerUtil.log(
+          `인증 실패: 권한 없음 - userId: ${user.id || user.sub}, userRole: ${user.role}, requiredRoles: ${authMetadata.roles.join(",")}`,
+        );
         throw new ForbiddenException(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED);
       }
     }

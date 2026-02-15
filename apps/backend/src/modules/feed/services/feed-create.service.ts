@@ -3,6 +3,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { CreateFeedRequestDto } from "@apps/backend/modules/feed/dto/feed-create.dto";
 import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
 import { FeedSanitizeUtil } from "@apps/backend/modules/feed/utils/feed-sanitize.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 피드 생성 서비스
@@ -19,16 +20,23 @@ export class FeedCreateService {
     // 스토어 소유권 확인
     await FeedOwnershipUtil.verifyStoreOwnership(this.prisma, createFeedDto.storeId, userId);
 
-    const feed = await this.prisma.storeFeed.create({
-      data: {
-        storeId: createFeedDto.storeId,
-        title: createFeedDto.title,
-        content: FeedSanitizeUtil.sanitizeHtml(createFeedDto.content),
-      },
-    });
+    try {
+      const feed = await this.prisma.storeFeed.create({
+        data: {
+          storeId: createFeedDto.storeId,
+          title: createFeedDto.title,
+          content: FeedSanitizeUtil.sanitizeHtml(createFeedDto.content),
+        },
+      });
 
-    return {
-      id: feed.id,
-    };
+      return {
+        id: feed.id,
+      };
+    } catch (error: unknown) {
+      LoggerUtil.log(
+        `피드 생성 실패: 트랜잭션 에러 - userId: ${userId}, storeId: ${createFeedDto.storeId}, error: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
+    }
   }
 }

@@ -6,6 +6,7 @@ import { FeedMapperUtil } from "@apps/backend/modules/feed/utils/feed-mapper.uti
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { FeedOwnershipUtil } from "@apps/backend/modules/feed/utils/feed-ownership.util";
 import { FEED_ERROR_MESSAGES } from "@apps/backend/modules/feed/constants/feed.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 피드 목록 조회 서비스
@@ -30,6 +31,7 @@ export class FeedListService {
     });
 
     if (!store) {
+      LoggerUtil.log(`피드 목록 조회 실패: 스토어 없음 - storeId: ${storeId}`);
       throw new NotFoundException(FEED_ERROR_MESSAGES.STORE_NOT_FOUND);
     }
 

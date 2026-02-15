@@ -24,6 +24,7 @@ import {
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { UserMapperUtil } from "@apps/backend/modules/auth/utils/user-mapper.util";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 사용자 관리 서비스
@@ -64,6 +65,9 @@ export class UserService {
       PhoneVerificationPurpose.REGISTRATION,
     );
     if (!isPhoneVerified) {
+      LoggerUtil.log(
+        `회원가입 실패: 휴대폰 인증 미완료 - userId: ${userId}, phone: ${normalizedPhone}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED); // 400
     }
 
@@ -81,9 +85,15 @@ export class UserService {
         // 일반 계정(userId)에서 이미 사용중인 경우 -> 에러 발생
         if (existingPhoneUser.userId && existingPhoneUser.googleId) {
           // 일반 로그인과 구글 로그인 모두 가능한 계정
+          LoggerUtil.log(
+            `회원가입 실패: 휴대폰번호 중복 (다중 계정) - userId: ${userId}, phone: ${normalizedPhone}`,
+          );
           throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS);
         } else {
           // 일반 로그인 계정만 존재
+          LoggerUtil.log(
+            `회원가입 실패: 휴대폰번호 중복 (일반 계정) - userId: ${userId}, phone: ${normalizedPhone}`,
+          );
           throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GENERAL_ACCOUNT_EXISTS);
         }
       } else if (existingPhoneUser.googleId) {
@@ -174,6 +184,7 @@ export class UserService {
     });
 
     if (existingUser) {
+      LoggerUtil.log(`회원가입 실패: 사용자 ID 중복 - userId: ${userId}`);
       throw new ConflictException(AUTH_ERROR_MESSAGES.USER_ID_ALREADY_EXISTS);
     }
   }
@@ -190,17 +201,20 @@ export class UserService {
     });
 
     if (!user) {
+      LoggerUtil.log(`로그인 실패: 계정 없음 - userId: ${userId}`);
       throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND); // 400
     }
 
     // 2. 비밀번호 검증
     const isPasswordValid = await PasswordUtil.verifyPassword(password, user.passwordHash || "");
     if (!isPasswordValid) {
+      LoggerUtil.log(`로그인 실패: 비밀번호 불일치 - userId: ${userId}`);
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
     // 3. 휴대폰 인증 상태 확인
     if (!user.isPhoneVerified) {
+      LoggerUtil.log(`로그인 실패: 휴대폰 인증 미완료 - userId: ${userId}`);
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -247,6 +261,7 @@ export class UserService {
       PhoneVerificationPurpose.ID_FIND,
     );
     if (!isPhoneVerified) {
+      LoggerUtil.log(`계정 찾기 실패: 휴대폰 인증 미완료 - phone: ${normalizedPhone}`);
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -256,6 +271,7 @@ export class UserService {
     });
 
     if (!user) {
+      LoggerUtil.log(`계정 찾기 실패: 계정 없음 - phone: ${normalizedPhone}`);
       throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
     }
 
@@ -272,6 +288,9 @@ export class UserService {
 
     // 둘 다 없는 경우 (예외 상황)
     if (!result.userId && !result.googleEmail) {
+      LoggerUtil.log(
+        `계정 찾기 실패: 계정 정보 없음 - phone: ${normalizedPhone}, userId: ${user.id}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
     }
 
@@ -291,11 +310,15 @@ export class UserService {
     });
 
     if (!user) {
+      LoggerUtil.log(`비밀번호 변경 실패: 계정 없음 - userId: ${userId}`);
       throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
     }
 
     // 2. 휴대폰 번호 일치 확인
     if (user.phone !== normalizedPhone) {
+      LoggerUtil.log(
+        `비밀번호 변경 실패: 휴대폰 번호 불일치 - userId: ${userId}, phone: ${normalizedPhone}, userPhone: ${user.phone}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.ID_PHONE_MISMATCH);
     }
 
@@ -305,6 +328,9 @@ export class UserService {
       PhoneVerificationPurpose.PASSWORD_RECOVERY,
     );
     if (!isPhoneVerified) {
+      LoggerUtil.log(
+        `비밀번호 변경 실패: 휴대폰 인증 미완료 - userId: ${userId}, phone: ${normalizedPhone}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -341,6 +367,7 @@ export class UserService {
     });
 
     if (!currentUser) {
+      LoggerUtil.log(`휴대폰 번호 변경 실패: 사용자 없음 - userId: ${user.sub}`);
       throw new BadRequestException(AUTH_ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
@@ -350,6 +377,9 @@ export class UserService {
     });
 
     if (existingUser) {
+      LoggerUtil.log(
+        `휴대폰 번호 변경 실패: 새 휴대폰 번호 중복 - userId: ${user.sub}, newPhone: ${normalizedNewPhone}`,
+      );
       throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_ALREADY_EXISTS);
     }
 
@@ -359,6 +389,9 @@ export class UserService {
       PhoneVerificationPurpose.PHONE_CHANGE,
     );
     if (!isPhoneVerified) {
+      LoggerUtil.log(
+        `휴대폰 번호 변경 실패: 새 휴대폰 인증 미완료 - userId: ${user.sub}, newPhone: ${normalizedNewPhone}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
     }
 
@@ -390,6 +423,7 @@ export class UserService {
     });
 
     if (!userInfo) {
+      LoggerUtil.log(`현재 사용자 조회 실패: 계정 없음 - userId: ${user.sub}`);
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
     }
 

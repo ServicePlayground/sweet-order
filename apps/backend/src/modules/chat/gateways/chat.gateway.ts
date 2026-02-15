@@ -9,7 +9,7 @@ import {
   ConnectedSocket,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { Logger, Inject, forwardRef } from "@nestjs/common";
+import { Inject, forwardRef, BadRequestException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { ChatService } from "../chat.service";
@@ -18,6 +18,8 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 import { MessageResponseDto } from "../dto/chat-message-list.dto";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * WebSocket 게이트웨이
@@ -41,7 +43,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   @WebSocketServer()
   server: Server;
 
-  private readonly logger = new Logger(ChatGateway.name);
   private readonly connectedUsers = new Map<string, Set<string>>(); // userId -> Set<socketId>
 
   constructor(
@@ -51,7 +52,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.logger.log("ChatGateway constructor called - Gateway instance created");
+    LoggerUtil.log("ChatGateway constructor called - Gateway instance created");
   }
 
   /**
@@ -59,23 +60,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    * 이 시점에 Socket.IO 서버가 완전히 초기화되어 있습니다.
    */
   afterInit() {
-    this.logger.log(`[✅ 정상] Socket.IO server initialized successfully`);
-    this.logger.log(`[✅ 정상] Socket.IO server path: /socket.io/`);
-    this.logger.log(`[✅ 정상] Socket.IO server transports: websocket, polling`);
-    this.logger.log(`[✅ 정상] CORS origins: ${process.env.CORS_ORIGIN || "not set"}`);
+    LoggerUtil.log(`[✅ 정상] Socket.IO server initialized successfully`);
+    LoggerUtil.log(`[✅ 정상] Socket.IO server path: /socket.io/`);
+    LoggerUtil.log(`[✅ 정상] Socket.IO server transports: websocket, polling`);
+    LoggerUtil.log(`[✅ 정상] CORS origins: ${process.env.CORS_ORIGIN || "not set"}`);
 
     // Socket.IO 서버에 연결 이벤트 리스너 등록 (디버깅용)
     this.server.on("connection", (socket) => {
-      this.logger.log(
+      LoggerUtil.log(
         `[🔌 연결 시도] Socket.IO connection event received - socketId: ${socket.id}, transport: ${socket.conn.transport.name}`,
       );
     });
 
     this.server.on("connection_error", (error) => {
-      this.logger.error(
-        `[❌ 연결 오류] Socket.IO connection_error event: ${error.message}`,
-        error.stack,
-      );
+      LoggerUtil.log(`[❌ 연결 오류] Socket.IO connection_error event: ${error.message}`);
     });
   }
 
@@ -89,35 +87,35 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const transport = client.conn.transport.name;
     const remoteAddress = client.handshake.address || "unknown";
 
-    this.logger.log(
+    LoggerUtil.log(
       `[🔌 연결 시도] handleConnection called - socketId: ${client.id}, origin: ${origin}, transport: ${transport}, remoteAddress: ${remoteAddress}`,
     );
-    this.logger.log(`[🔌 연결 시도] userAgent: ${userAgent}`);
-    this.logger.log(
+    LoggerUtil.log(`[🔌 연결 시도] userAgent: ${userAgent}`);
+    LoggerUtil.log(
       `[🔌 연결 시도] handshake query keys: ${Object.keys(client.handshake.query || {}).join(",")}`,
     );
     // 민감정보(토큰)가 포함될 수 있어 auth 전체 payload는 로그에 남기지 않습니다.
-    this.logger.log(
+    LoggerUtil.log(
       `[🔌 연결 시도] handshake auth keys: ${Object.keys((client.handshake.auth as Record<string, unknown>) || {}).join(",")}`,
     );
 
     try {
       // JWT 토큰 추출 및 검증
-      this.logger.log(`[1단계] 토큰 추출 시작 - socketId: ${client.id}`);
+      LoggerUtil.log(`[1단계] 토큰 추출 시작 - socketId: ${client.id}`);
       const token = this.extractTokenFromSocket(client);
 
       if (!token) {
         const errorMessage = "No token provided";
-        this.logger.warn(
+        LoggerUtil.log(
           `[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}, origin: ${origin}`,
         );
-        this.logger.warn(
+        LoggerUtil.log(
           `[❌ 연결 거부] auth.token: ${client.handshake.auth?.token ? "있음" : "없음"}`,
         );
-        this.logger.warn(
+        LoggerUtil.log(
           `[❌ 연결 거부] query.token: ${client.handshake.query.token ? "있음" : "없음"}`,
         );
-        this.logger.warn(
+        LoggerUtil.log(
           `[❌ 연결 거부] Authorization header: ${client.handshake.headers.authorization ? "있음" : "없음"}`,
         );
         // 에러 메시지를 클라이언트에 전달한 후 연결 종료
@@ -126,22 +124,22 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return;
       }
 
-      this.logger.log(
+      LoggerUtil.log(
         `[✅ 1단계 완료] 토큰 추출 성공 - socketId: ${client.id}, token length: ${token.length}`,
       );
 
-      this.logger.log(`[2단계] JWT 토큰 검증 시작 - socketId: ${client.id}`);
+      LoggerUtil.log(`[2단계] JWT 토큰 검증 시작 - socketId: ${client.id}`);
       const payload = await this.jwtService.verifyAsync<JwtVerifiedPayload>(token, {
         secret: this.configService.get<string>("JWT_SECRET"),
       });
 
       const userId = payload.sub;
-      this.logger.log(
+      LoggerUtil.log(
         `[✅ 2단계 완료] JWT 토큰 검증 성공 - socketId: ${client.id}, userId: ${userId}`,
       );
 
       // DB에서 사용자 정보 조회 (role 확인용)
-      this.logger.log(`[3단계] 사용자 정보 조회 시작 - socketId: ${client.id}, userId: ${userId}`);
+      LoggerUtil.log(`[3단계] 사용자 정보 조회 시작 - socketId: ${client.id}, userId: ${userId}`);
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { role: true },
@@ -149,7 +147,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       if (!user) {
         const errorMessage = `User not found: ${userId}`;
-        this.logger.warn(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}`);
+        LoggerUtil.log(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}`);
         // 에러 메시지를 클라이언트에 전달한 후 연결 종료
         client.emit("error", { message: errorMessage, code: "USER_NOT_FOUND" });
         client.disconnect(true);
@@ -157,7 +155,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
 
       const userType = user.role === "SELLER" ? "store" : "user";
-      this.logger.log(
+      LoggerUtil.log(
         `[✅ 3단계 완료] 사용자 정보 조회 성공 - socketId: ${client.id}, userId: ${userId}, role: ${user.role}, userType: ${userType}`,
       );
 
@@ -171,18 +169,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       }
       this.connectedUsers.get(userId)!.add(client.id);
 
-      this.logger.log(
+      LoggerUtil.log(
         `[✅ 연결 완료] User connected successfully - userId: ${userId}, socketId: ${client.id}, type: ${userType}, total connections for user: ${this.connectedUsers.get(userId)!.size}`,
       );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
+      LoggerUtil.log(
         `[❌ 연결 오류] Connection error - socketId: ${client.id}, error: ${errorMessage}`,
       );
-      if (errorStack) {
-        this.logger.error(`[❌ 연결 오류] Stack trace: ${errorStack}`);
-      }
       // 에러 메시지를 클라이언트에 전달한 후 연결 종료
       client.emit("error", {
         message: errorMessage,
@@ -208,11 +202,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           this.connectedUsers.delete(userId);
         }
       }
-      this.logger.log(
+      LoggerUtil.log(
         `[🔌 연결 해제] User disconnected - userId: ${userId}, socketId: ${client.id}, remaining connections: ${userSockets?.size || 0}`,
       );
     } else {
-      this.logger.log(`[🔌 연결 해제] User disconnected (no userId) - socketId: ${client.id}`);
+      LoggerUtil.log(`[🔌 연결 해제] User disconnected (no userId) - socketId: ${client.id}`);
     }
   }
 
@@ -225,12 +219,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const userType = client.data.userType;
     const { roomId } = data;
 
-    this.logger.log(
+    LoggerUtil.log(
       `[📥 이벤트 수신] join-room - socketId: ${client.id}, userId: ${userId || "없음"}, roomId: ${roomId || "없음"}`,
     );
 
     if (!userId || !userType || !roomId) {
-      this.logger.warn(
+      LoggerUtil.log(
         `[❌ 잘못된 요청] join-room - userId: ${userId || "없음"}, userType: ${userType || "없음"}, roomId: ${roomId || "없음"}`,
       );
       return { error: "Invalid request" };
@@ -249,18 +243,29 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       await ChatPermissionUtil.verifyChatRoomAccess(chatRoom, userId, userType, this.prisma);
 
       client.join(`room:${roomId}`);
-      this.logger.log(
+      LoggerUtil.log(
         `[✅ 채팅방 조인] User ${userId} joined room ${roomId} - socketId: ${client.id}`,
       );
       return { success: true, roomId };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.warn(
+      LoggerUtil.log(
         `[❌ 채팅방 조인 거부] join-room - socketId: ${client.id}, userId: ${userId}, roomId: ${roomId}, error: ${errorMessage}`,
       );
       if (error instanceof Error && error.stack) {
-        this.logger.debug(`[join-room 디버그] stack: ${error.stack}`);
+        LoggerUtil.log(`[join-room 디버그] stack: ${error.stack}`);
       }
+
+      // 중요한 에러는 Sentry로 전송 (BadRequestException이 아닌 경우)
+      if (error instanceof Error && !(error instanceof BadRequestException)) {
+        SentryUtil.captureException(error, "error", {
+          userId,
+          roomId,
+          handler: "join-room",
+          socketId: client.id,
+        });
+      }
+
       return { error: CHAT_ERROR_MESSAGES.CHAT_ROOM_NOT_FOUND };
     }
   }
@@ -278,7 +283,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     client.leave(`room:${roomId}`);
-    this.logger.log(`User ${userId} left room ${roomId}`);
+    LoggerUtil.log(`User ${userId} left room ${roomId}`);
     return { success: true, roomId };
   }
 
@@ -301,13 +306,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     try {
       // ChatService를 통해 메시지 저장 및 브로드캐스트
       const message = await this.chatService.sendMessage(roomId, text, userId, userType);
-      this.logger.log(`Message sent by user ${userId} in room ${roomId}: ${message.id}`);
+      LoggerUtil.log(`Message sent by user ${userId} in room ${roomId}: ${message.id}`);
       return { success: true, message };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(
+      LoggerUtil.log(
         `Failed to send message: ${errorMessage} (userId: ${userId}, roomId: ${roomId})`,
       );
+
+      // 중요한 에러는 Sentry로 전송 (BadRequestException이 아닌 경우)
+      if (error instanceof Error && !(error instanceof BadRequestException)) {
+        SentryUtil.captureException(error, "error", {
+          userId,
+          roomId,
+          handler: "send-message",
+        });
+      }
+
       return { error: errorMessage };
     }
   }
@@ -317,7 +332,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
    */
   broadcastMessage(roomId: string, message: MessageResponseDto) {
     this.server.to(`room:${roomId}`).emit("new-message", message);
-    this.logger.log(`Message broadcasted to room ${roomId}: ${message.id}`);
+    LoggerUtil.log(`Message broadcasted to room ${roomId}: ${message.id}`);
   }
 
   /**
