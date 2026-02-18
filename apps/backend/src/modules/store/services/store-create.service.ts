@@ -35,34 +35,14 @@ export class StoreCreateService {
       throw new BadRequestException(STORE_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_MISMATCH);
     }
 
-    // 2) 같은 사업자등록번호와 인허가관리번호 조합으로 이미 스토어가 존재하는지 확인
-    // 한 사용자는 여러 스토어를 생성할 수 있지만, 같은 사업자 정보로는 중복 생성 불가
-    // 사업자등록번호 정규화 (하이픈 제거) 후 비교
-    // DB에 저장된 값도 정규화되어 있으므로 정규화된 값으로 비교
-    // 스키마에 @@unique([userId, businessNo, permissionManagementNumber]) 제약조건이 있어
-    // 같은 사용자 내에서 동일한 사업자 정보로 중복 생성이 방지됩니다.
+    // 사업자등록번호 정규화 (하이픈 제거)
     const normalizedBusinessNo = businessNo1;
-    const existingStore = await this.prisma.store.findFirst({
-      where: {
-        userId,
-        businessNo: normalizedBusinessNo,
-        permissionManagementNumber: createStoreDto.onlineTradingCompanyDetail.prmmiMnno,
-      },
-    });
-    if (existingStore) {
-      LoggerUtil.log(
-        `스토어 생성 실패: 동일한 사업자 정보로 이미 존재 - userId: ${userId}, businessNo: ${normalizedBusinessNo}, permissionManagementNumber: ${createStoreDto.onlineTradingCompanyDetail.prmmiMnno}`,
-      );
-      throw new BadRequestException(
-        STORE_ERROR_MESSAGES.STORE_ALREADY_EXISTS_WITH_SAME_BUSINESS_INFO,
-      );
-    }
 
-    // 3) 1단계: 사업자등록번호 진위확인 (재검증)
+    // 2) 1단계: 사업자등록번호 진위확인 (재검증)
     // 응답 값은 저장하지 않음 - 필요시 외부 API 호출로 최신 상태 조회
     await this.businessService.verifyBusinessRegistration(createStoreDto.businessValidation);
 
-    // 4) 2단계: 통신판매사업자 등록상세 조회 (재검증)
+    // 3) 2단계: 통신판매사업자 등록상세 조회 (재검증)
     // 응답 값은 저장하지 않음 - 필요시 외부 API 호출로 최신 상태 조회
     await this.businessService.getOnlineTradingCompanyDetail(
       createStoreDto.onlineTradingCompanyDetail,

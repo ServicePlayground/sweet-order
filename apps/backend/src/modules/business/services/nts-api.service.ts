@@ -17,10 +17,12 @@ export class NtsApiService {
   private readonly ntsApiUrl?: string;
   private readonly dataGoKrApiKey?: string;
   private readonly axiosInstance: AxiosInstance;
+  private readonly nodeEnv?: string;
 
   constructor(private readonly configService: ConfigService) {
     this.ntsApiUrl = this.configService.get<string>("NTS_API_URL");
     this.dataGoKrApiKey = this.configService.get<string>("DATA_GO_KR_API_KEY");
+    this.nodeEnv = this.configService.get<string>("NODE_ENV");
 
     if (!this.ntsApiUrl || !this.dataGoKrApiKey) {
       LoggerUtil.log("NTS_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
@@ -86,13 +88,19 @@ export class NtsApiService {
    */
   async verifyBusinessRegistration(validationDto: BusinessValidationRequestDto) {
     try {
+      const isProduction = this.nodeEnv === "production";
+
       if (!this.ntsApiUrl) {
         LoggerUtil.log("NTS_API_URL가 설정되지 않았습니다.");
         throw new Error("NTS_API_URL가 설정되지 않았습니다.");
       }
 
-      // TODO: (임시) 반드시 주석 해제 필요
-      /*
+      // production 환경이 아닌 경우 검증 통과
+      if (!isProduction) {
+        LoggerUtil.log(`[${this.nodeEnv}] 사업자등록번호 진위확인 건너뜀`);
+        return;
+      }
+
       // 사업자등록번호 정규화 (하이픈 제거)
       const normalizedBusinessNumber = validationDto.b_no.replace(/[-\s]/g, "");
 
@@ -117,7 +125,7 @@ export class NtsApiService {
 
       // 응답 데이터 존재 여부 확인
       if (!response.data?.data?.[0]) {
-        LoggerUtil.log(`사업자등록번호 진위확인 실패: ${NTS_API_ERROR_MESSAGES.DATA_NOT_FOUND}`);
+        LoggerUtil.log(NTS_API_ERROR_MESSAGES.DATA_NOT_FOUND);
         throw new Error(NTS_API_ERROR_MESSAGES.DATA_NOT_FOUND);
       }
 
@@ -125,29 +133,28 @@ export class NtsApiService {
 
       // 법적 필수 검증 조건 확인
       if (responseData.valid === B_STT_CD.INACTIVE) {
-        LoggerUtil.log(`사업자등록번호 진위확인 실패: ${responseData.valid_msg}`);
+        LoggerUtil.log(responseData.valid_msg);
         throw new Error(responseData.valid_msg);
       }
       if (
         responseData.status?.b_stt_cd === B_STT_CD.INACTIVE ||
         responseData.status?.b_stt_cd === B_STT_CD.CLOSED
       ) {
-        LoggerUtil.log(`사업자등록번호 진위확인 실패: ${NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE}`);
+        LoggerUtil.log(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
         throw new Error(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
       }
-      */
     } catch (error: any) {
       if (error.message) {
-        LoggerUtil.log(`사업자등록번호 진위확인 실패: ${error.message}`);
-        throw new BadRequestException(error.message);
+        LoggerUtil.log(`[NTS_API] 사업자등록번호 진위확인 실패: ${error.message}`);
+        throw new BadRequestException(`[NTS_API] 사업자등록번호 진위확인 실패: ${error.message}`);
       }
 
       const statusCode = error.response?.data?.status_code;
       const errorMessage =
         NTS_API_ERROR_MESSAGES[statusCode as keyof typeof NTS_API_ERROR_MESSAGES];
 
-      LoggerUtil.log(`사업자등록번호 진위확인 실패: ${errorMessage}`);
-      throw new BadRequestException(errorMessage);
+      LoggerUtil.log(`[NTS_API] 사업자등록번호 진위확인 실패: ${errorMessage}`);
+      throw new BadRequestException(`[NTS_API] 사업자등록번호 진위확인 실패: ${errorMessage}`);
     }
   }
 }

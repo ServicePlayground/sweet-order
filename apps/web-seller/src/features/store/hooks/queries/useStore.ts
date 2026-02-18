@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useMutation, useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { storeApi } from "@/apps/web-seller/features/store/apis/store.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
@@ -11,26 +11,26 @@ import {
   IGetStoresParams,
   IStoreListResponse,
 } from "@/apps/web-seller/features/store/types/store.type";
-import { STORE_SUCCESS_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { storeQueryKeys } from "../../constants/storeQueryKeys.constant";
-import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
-import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
-import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
 
 // 스토어 생성 뮤테이션
 export function useCreateStore() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (request: ICreateStoreRequest) => storeApi.createStore(request),
     onSuccess: (response) => {
       addAlert({
         severity: "success",
-        message: STORE_SUCCESS_MESSAGES.STORE_CREATED,
+        message: "스토어 등록이 완료되었습니다.",
       });
+      // 스토어 목록 쿼리 무효화하여 사이드바에 새 스토어가 바로 반영되도록 함
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(response.id) });
       navigate(ROUTES.STORE_DETAIL_HOME(response.id));
     },
     onError: (error) => {
@@ -46,6 +46,7 @@ export function useCreateStore() {
 export function useUpdateStore() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ storeId, request }: { storeId: string; request: IUpdateStoreRequest }) =>
@@ -53,8 +54,10 @@ export function useUpdateStore() {
     onSuccess: (response, variables) => {
       addAlert({
         severity: "success",
-        message: STORE_SUCCESS_MESSAGES.STORE_UPDATED || "스토어가 수정되었습니다.",
+        message: "스토어 수정이 완료되었습니다.",
       });
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(variables.storeId) });
       navigate(ROUTES.STORE_DETAIL_HOME(variables.storeId));
     },
     onError: (error) => {
@@ -68,7 +71,6 @@ export function useUpdateStore() {
 
 // 스토어 목록 조회 쿼리 (무한 스크롤)
 export function useStoreList({ limit = 20 }: Partial<IGetStoresParams> = {}) {
-  const { setStores } = useStoreStore();
   const { addAlert } = useAlertStore();
   const { isAuthenticated } = useAuthStore();
 
@@ -92,13 +94,6 @@ export function useStoreList({ limit = 20 }: Partial<IGetStoresParams> = {}) {
     initialPageParam: 1,
     enabled: isAuthenticated, // 인증된 경우에만 자동으로 호출
   });
-
-  useEffect(() => {
-    if (query.isSuccess && query.data) {
-      const allStores = flattenAndDeduplicateInfiniteData<IStoreListItem>(query.data);
-      setStores(allStores);
-    }
-  }, [query.isSuccess, query.data, setStores]);
 
   useEffect(() => {
     if (query.isError) {

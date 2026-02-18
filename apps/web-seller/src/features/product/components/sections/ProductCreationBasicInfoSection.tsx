@@ -8,7 +8,7 @@ import {
   SALES_STATUS_OPTIONS,
   VISIBILITY_STATUS_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
-import { MultipleImageUpload } from "@/apps/web-seller/common/components/images/MultipleImageUpload";
+import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/ImageMultiUpload";
 import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
@@ -110,21 +110,27 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
       />
 
       <div>
-        <MultipleImageUpload
-          label="상품 대표 이미지"
+        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+          상품 대표 이미지
+        </Label>
+        <ImageMultiUpload
+          width={300}
+          height={300}
           value={mainImage ? [mainImage] : []}
           onChange={(urls) => onMainImageChange(urls[0] || "")}
-          error={errors.images}
-          required
           maxImages={1}
+          enableDragDrop={true}
         />
       </div>
       <div>
-        <MultipleImageUpload
-          label="추가 이미지"
+        <Label>추가 이미지</Label>
+        <ImageMultiUpload
+          width={300}
+          height={300}
           value={additionalImages}
           onChange={onAdditionalImagesChange}
           maxImages={7}
+          enableDragDrop={true}
         />
       </div>
     </div>

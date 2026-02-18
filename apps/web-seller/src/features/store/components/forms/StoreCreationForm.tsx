@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
-import { STORE_ERROR_MESSAGES } from "@/apps/web-seller/features/store/constants/store.constant";
-import { ImageUpload } from "@/apps/web-seller/common/components/images/ImageUpload";
+import {
+  validateStoreName,
+  validateStoreDescription,
+} from "@/apps/web-seller/features/store/utils/validator.util";
+import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/ImageMultiUpload";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
@@ -46,14 +49,15 @@ export const StoreCreationForm: React.FC<Props> = ({
   const validate = () => {
     const newErrors: Partial<Record<keyof IStoreForm, string>> = {};
 
-    if (!form.name.trim()) {
-      newErrors.name = STORE_ERROR_MESSAGES.NAME_REQUIRED;
-    } else if (form.name.length > 100) {
-      newErrors.name = STORE_ERROR_MESSAGES.NAME_TOO_LONG;
+    // 스토어 이름 검증
+    const nameError = validateStoreName(form.name);
+    if (nameError) {
+      newErrors.name = nameError;
     }
-
-    if (form.description && form.description.length > 500) {
-      newErrors.description = STORE_ERROR_MESSAGES.DESCRIPTION_TOO_LONG;
+    // 스토어 설명 검증
+    const descriptionError = validateStoreDescription(form.description);
+    if (descriptionError) {
+      newErrors.description = descriptionError;
     }
 
     setErrors(newErrors);
@@ -78,17 +82,18 @@ export const StoreCreationForm: React.FC<Props> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-6">
         <div>
-          <ImageUpload
-            width={360}
-            height={360}
-            label="로고 이미지"
-            value={form.logoImageUrl || ""}
-            onChange={(url) => {
-              const next = { ...form, logoImageUrl: url };
+          <Label>로고 이미지</Label>
+          <ImageMultiUpload
+            width={300}
+            height={300}
+            value={form.logoImageUrl ? [form.logoImageUrl] : []}
+            onChange={(urls) => {
+              const next = { ...form, logoImageUrl: urls[0] || "" };
               setForm(next);
               onChange?.(next);
             }}
-            error={errors.logoImageUrl}
+            maxImages={1}
+            enableDragDrop={true}
           />
         </div>
         <div>

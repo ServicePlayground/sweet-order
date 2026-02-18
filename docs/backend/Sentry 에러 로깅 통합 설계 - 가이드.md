@@ -86,6 +86,7 @@ apps/backend/src/
 **역할**: Sentry SDK 초기화 및 환경별 설정
 
 **주요 설정**:
+
 - 검증(staging) 또는 상용(production) 환경에서만 초기화
 - `tracesSampleRate: 0`: Transaction 비활성화 (에러 이벤트만 전송하여 비용 절감)
 - `sendDefaultPii: false`: 기본 PII 데이터 수집 비활성화 (개인정보 보호)
@@ -96,15 +97,18 @@ apps/backend/src/
 ### 3.1 개발 환경 (development)
 
 **로깅**:
+
 - ✅ `LoggerUtil.log()`: 콘솔에 로그 출력
 - ✅ `morgan`: HTTP 요청 로깅 (main.ts에서 설정)
 - ❌ Sentry: 비활성화
 
 **에러 확인 방법**:
+
 - 로컬 콘솔에서 직접 확인
 - 개발 서버 실행 시 터미널에 모든 로그 출력
 
 **설정**:
+
 ```env
 NODE_ENV=development
 SENTRY_DSN=  # 비어있거나 설정하지 않음
@@ -113,11 +117,13 @@ SENTRY_DSN=  # 비어있거나 설정하지 않음
 ### 3.2 검증 환경 (staging)
 
 **로깅**:
+
 - ✅ `LoggerUtil.log()`: 콘솔에 로그 출력
 - ✅ `morgan`: HTTP 요청 로깅
 - ✅ Sentry: 활성화 (5xx 에러만 전송)
 
 **에러 확인 방법**:
+
 - **로깅**: SSH로 서버에 직접 접속하여 로그 확인
   ```bash
   # 서버 접속 후
@@ -128,6 +134,7 @@ SENTRY_DSN=  # 비어있거나 설정하지 않음
 - **에러**: Sentry 대시보드에서 확인
 
 **설정**:
+
 ```env
 NODE_ENV=staging
 SENTRY_DSN=https://xxx@sentry.io/xxx
@@ -136,15 +143,18 @@ SENTRY_DSN=https://xxx@sentry.io/xxx
 ### 3.3 상용 환경 (production)
 
 **로깅**:
+
 - ❌ `LoggerUtil.log()`: 로깅하지 않음 (성능 최적화)
 - ❌ `morgan`: 비활성화
 - ✅ Sentry: 활성화 (5xx 에러만 전송)
 
 **에러 확인 방법**:
+
 - **로깅**: 운영 환경에서는 로깅 비활성화 (성능 최적화)
 - **에러**: Sentry 대시보드에서만 확인
 
 **설정**:
+
 ```env
 NODE_ENV=production
 SENTRY_DSN=https://xxx@sentry.io/xxx
@@ -213,11 +223,13 @@ async function bootstrap(): Promise<void> {
 모든 에러 응답에는 `responseId`가 포함되어 있으며, 이 ID는 Sentry의 태그로도 전송됩니다.
 
 **클라이언트에서 사용**:
+
 1. 에러 응답에서 `responseId` 추출
 2. Sentry 대시보드에서 `responseId` 태그로 검색
 3. 해당 에러의 상세 정보 확인
 
 **예시**:
+
 ```json
 {
   "success": false,
@@ -243,6 +255,7 @@ Sentry에서 태그: `responseId: 1706004000000-error-uuid-hex`
 ### 6.2 Sentry 전송 전 필터링
 
 `ErrorResponseInterceptor`에서:
+
 1. `SensitiveDataUtil.sanitizeError()`: 에러 객체의 민감 정보 제거
 2. `SensitiveDataUtil.maskSensitiveFields()`: 응답 데이터의 민감 정보 마스킹
 

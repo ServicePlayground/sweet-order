@@ -14,10 +14,12 @@ export class KftcApiService {
   private readonly kftcApiUrl?: string;
   private readonly dataGoKrApiKey?: string;
   private readonly axiosInstance: AxiosInstance;
+  private readonly nodeEnv?: string;
 
   constructor(private readonly configService: ConfigService) {
     this.kftcApiUrl = this.configService.get<string>("KFTC_API_URL");
     this.dataGoKrApiKey = this.configService.get<string>("DATA_GO_KR_API_KEY");
+    this.nodeEnv = this.configService.get<string>("NODE_ENV");
 
     if (!this.kftcApiUrl || !this.dataGoKrApiKey) {
       LoggerUtil.log("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
@@ -83,13 +85,19 @@ export class KftcApiService {
    */
   async getOnlineTradingCompanyDetail(detailDto: OnlineTradingCompanyDetailRequestDto) {
     try {
+      const isProduction = this.nodeEnv === "production";
+
       if (!this.kftcApiUrl || !this.dataGoKrApiKey) {
         LoggerUtil.log("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
         throw new Error("KFTC_API_URL 또는 DATA_GO_KR_API_KEY가 설정되지 않았습니다.");
       }
 
-      // TODO: (임시) 반드시 주석 해제 필요
-      /*
+      // production 환경이 아닌 경우 검증 통과
+      if (!isProduction) {
+        LoggerUtil.log(`[${this.nodeEnv}] 통신판매사업자 등록상세 조회 건너뜀`);
+        return;
+      }
+
       // 사업자등록번호 정규화 (하이픈 제거)
       const normalizedBusinessNumber = detailDto.brno.replace(/[-\s]/g, "");
 
@@ -114,7 +122,7 @@ export class KftcApiService {
       const items = response.data.items;
       // 데이터가 없는 경우
       if (!items || items.length === 0) {
-        LoggerUtil.log(`통신판매사업자 등록상세 조회 실패: ${KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND}`);
+        LoggerUtil.log(KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND);
         throw new Error(KFTC_API_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND);
       }
 
@@ -125,19 +133,23 @@ export class KftcApiService {
       // 운영상태가 null/undefined이거나 "정상영업"이 아닌 경우 오류 처리
       if (!detail.operSttusCdNm || detail.operSttusCdNm !== "정상영업") {
         throw new BadRequestException(KFTC_API_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL);
-      */
+      }
     } catch (error: any) {
       if (error.message) {
-        LoggerUtil.log(`통신판매사업자 등록상세 조회 실패: ${error.message}`);
-        throw new BadRequestException(error.message);
+        LoggerUtil.log(`[KFTC_API] 통신판매사업자 등록상세 조회 실패: ${error.message}`);
+        throw new BadRequestException(
+          `[KFTC_API] 통신판매사업자 등록상세 조회 실패: ${error.message}`,
+        );
       }
 
       const statusCode = error.response?.data?.resultCode;
       const errorMessage =
         KFTC_API_ERROR_MESSAGES[statusCode as keyof typeof KFTC_API_ERROR_MESSAGES];
 
-      LoggerUtil.log(`통신판매사업자 등록상세 조회 실패: ${errorMessage}`);
-      throw new BadRequestException(errorMessage);
+      LoggerUtil.log(`[KFTC_API] 통신판매사업자 등록상세 조회 실패: ${errorMessage}`);
+      throw new BadRequestException(
+        `[KFTC_API] 통신판매사업자 등록상세 조회 실패: ${errorMessage}`,
+      );
     }
   }
 }

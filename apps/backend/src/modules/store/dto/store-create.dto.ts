@@ -1,18 +1,15 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  ValidateNested,
-  IsNumber,
-  Min,
-  Max,
-} from "class-validator";
+import { IsNotEmpty, IsString, ValidateNested, IsNumber, Min, Max } from "class-validator";
 import {
   BusinessValidationRequestDto,
   OnlineTradingCompanyDetailRequestDto,
 } from "@apps/backend/modules/business/dto/business-request.dto";
+import {
+  IsValidStoreName,
+  IsValidStoreDescription,
+  IsValidLogoImageUrl,
+} from "@apps/backend/modules/store/decorators/validators.decorator";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
 
@@ -45,16 +42,14 @@ export class CreateStoreRequestDto {
     example: UPLOAD_SWAGGER_EXAMPLES.FILE_URL,
     required: false,
   })
-  @IsString()
-  @IsOptional()
+  @IsValidLogoImageUrl()
   logoImageUrl?: string;
 
   @ApiProperty({
     description: "스토어 이름",
     example: SWAGGER_EXAMPLES.NAME,
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsValidStoreName()
   name: string;
 
   @ApiProperty({
@@ -62,8 +57,7 @@ export class CreateStoreRequestDto {
     example: SWAGGER_EXAMPLES.DESCRIPTION,
     required: false,
   })
-  @IsString()
-  @IsOptional()
+  @IsValidStoreDescription()
   description?: string;
 
   // 주소/위치 정보 (필수)

@@ -1,12 +1,3 @@
-export const BUSINESS_ERROR_MESSAGES = {
-  BUSINESS_VALIDATION_FAILED: "사업자등록번호 진위확인에 실패했습니다.",
-  BUSINESS_REGISTRATION_NUMBER_INVALID_FORMAT:
-    "사업자등록번호는 하이픈 없는 10자리 숫자이며 유효한 번호여야 합니다.",
-  OPENING_DATE_INVALID_FORMAT: "개업일자는 YYYYMMDD 형식의 유효한 날짜여야 합니다.",
-  PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT:
-    "인허가관리번호는 YYYY-한글지역명-숫자4자리 형식이어야 합니다. (예: 2021-서울강동-0422)",
-} as const;
-
 export const NTS_API_ERROR_MESSAGES = {
   HTTP_ERROR: "Http Error입니다.",
   INTERNAL_ERROR: "Internal Server Error입니다.",
@@ -40,9 +31,9 @@ export const KFTC_API_ERROR_MESSAGES = {
   ONLINE_TRADING_COMPANY_DETAIL_NOT_FOUND: "통신판매사업자 등록 정보가 존재하지 않습니다.",
 } as const;
 
-export const BUSINESS_SUCCESS_MESSAGES = {
-  BUSINESS_VALIDATION_SUCCESS: "사업자등록번호 진위확인이 완료되었습니다.",
-  ONLINE_TRADING_COMPANY_DETAIL_SUCCESS: "통신판매사업자 등록상세 조회가 완료되었습니다.",
+export const BUSINESS_ERROR_MESSAGES = {
+  BUSINESS_REGISTRATION_NUMBER_ALREADY_EXISTS: "이미 등록된 사업자등록번호입니다.",
+  PERMISSION_MANAGEMENT_NUMBER_ALREADY_EXISTS: "이미 등록된 통신판매업번호입니다.",
 } as const;
 
 export enum B_STT_CD {
@@ -156,91 +147,4 @@ export const SWAGGER_EXAMPLES = {
   CHRG_DEPT_TELNO: "02-480-1300", // 담당부서 전화번호
   RPRSV_NM: "김희정", // 대표자명
   RPRSV_EMLADR: "paniskuki2@naver.com", // 대표자 이메일주소
-} as const;
-
-/**
- * Swagger 응답 예시 데이터
- * 복합 응답 구조를 위한 예시 데이터를 제공합니다.
- */
-export const SWAGGER_RESPONSE_EXAMPLES = {
-  /* 사업자등록 응답 예시 */
-  BUSINESS_VALIDATION_RESPONSE: {
-    request: {
-      b_no: SWAGGER_EXAMPLES.B_NO,
-      start_dt: SWAGGER_EXAMPLES.START_DT,
-      p_nm: SWAGGER_EXAMPLES.P_NM,
-      b_nm: SWAGGER_EXAMPLES.B_NM,
-      b_sector: SWAGGER_EXAMPLES.B_SECTOR,
-      b_type: SWAGGER_EXAMPLES.B_TYPE,
-    },
-    response: {
-      b_no: SWAGGER_EXAMPLES.B_NO,
-      b_stt: SWAGGER_EXAMPLES.B_STT,
-      b_stt_cd: SWAGGER_EXAMPLES.B_STT_CD,
-      tax_type: SWAGGER_EXAMPLES.TAX_TYPE,
-      tax_type_cd: SWAGGER_EXAMPLES.TAX_TYPE_CD,
-      end_dt: SWAGGER_EXAMPLES.END_DT,
-      utcc_yn: SWAGGER_EXAMPLES.UTCC_YN,
-      tax_type_change_dt: SWAGGER_EXAMPLES.TAX_TYPE_CHANGE_DT,
-      invoice_apply_dt: SWAGGER_EXAMPLES.INVOICE_APPLY_DT,
-      rbf_tax_type: SWAGGER_EXAMPLES.RBF_TAX_TYPE,
-      rbf_tax_type_cd: SWAGGER_EXAMPLES.RBF_TAX_TYPE_CD,
-    },
-  },
-
-  /* 통신판매사업자 등록상세 조회 응답 예시 */
-  ONLINE_TRADING_COMPANY_DETAIL_RESPONSE: {
-    opnSn: SWAGGER_EXAMPLES.OPN_SN,
-    prmmiYr: SWAGGER_EXAMPLES.PRMMI_YR,
-    prmmiMnno: SWAGGER_EXAMPLES.PRMMI_MNNO,
-    ctpvNm: SWAGGER_EXAMPLES.CTPV_NM,
-    dclrInstNm: SWAGGER_EXAMPLES.DCLR_INST_NM,
-    operSttusCdNm: SWAGGER_EXAMPLES.OPER_STTUS_CD_NM,
-    smtxTrgtYnCn: SWAGGER_EXAMPLES.SMTX_TRGT_YNCN,
-    corpYnNm: SWAGGER_EXAMPLES.CORP_YN_NM,
-    bzmnNm: SWAGGER_EXAMPLES.BZMN_NM,
-    bzmnRgsSttusSeNm: SWAGGER_EXAMPLES.BZMN_RGS_STTUS_SE_NM,
-    crno: SWAGGER_EXAMPLES.CRNO,
-    brno: SWAGGER_EXAMPLES.BRNO,
-    telno: SWAGGER_EXAMPLES.TELNO,
-    fxno: SWAGGER_EXAMPLES.FXNO,
-    lctnRnAddr: SWAGGER_EXAMPLES.LCTN_RN_ADDR,
-    lctnAddr: SWAGGER_EXAMPLES.LCTN_ADDR,
-    domnCn: SWAGGER_EXAMPLES.DOMN_CN,
-    opnServerPlaceAladr: SWAGGER_EXAMPLES.OPN_SERVER_PLACE_ALADDR,
-    ntslMthdNm: SWAGGER_EXAMPLES.NTSL_MTHD_NM,
-    ntslMthdCn: SWAGGER_EXAMPLES.NTSL_MTHD_CN,
-    trtmntPrdlstNm: SWAGGER_EXAMPLES.TRTMNT_PRDLST_NM,
-    ntslPrdlstCn: SWAGGER_EXAMPLES.NTSL_PRDLST_CN,
-    dclrCn: SWAGGER_EXAMPLES.DCLR_CN,
-    chgCn: SWAGGER_EXAMPLES.CHG_CN,
-    chgRsnCn: SWAGGER_EXAMPLES.CHG_RSN_CN,
-    tcbizBgngDate: SWAGGER_EXAMPLES.TCBIZ_BGNG_DATE,
-    tcbizEndDate: SWAGGER_EXAMPLES.TCBIZ_END_DATE,
-    clsbizDate: SWAGGER_EXAMPLES.CLSBIZ_DATE,
-    bsnResmptDate: SWAGGER_EXAMPLES.BSN_RESMPT_DATE,
-    spcssRsnCn: SWAGGER_EXAMPLES.SPCSS_RSN_CN,
-    dclrDate: SWAGGER_EXAMPLES.DCLR_DATE,
-    lctnRnOzip: SWAGGER_EXAMPLES.LCTN_RN_OZIP,
-    rnAddr: SWAGGER_EXAMPLES.RN_ADDR,
-    opnMdfcnDt: SWAGGER_EXAMPLES.OPN_MDFCN_DT,
-    prcsDeptDtlNm: SWAGGER_EXAMPLES.PRCS_DEPT_DTL_NM,
-    prcsDeptAreaNm: SWAGGER_EXAMPLES.PRCS_DEPT_AREA_NM,
-    prcsDeptNm: SWAGGER_EXAMPLES.PRCS_DEPT_NM,
-    chrgDeptTelno: SWAGGER_EXAMPLES.CHRG_DEPT_TELNO,
-    rprsvNm: SWAGGER_EXAMPLES.RPRSV_NM,
-    rprsvEmladr: SWAGGER_EXAMPLES.RPRSV_EMLADR,
-  },
-} as const;
-
-export const SWAGGER_DESCRIPTIONS = {
-  B_NO: "사업자등록번호 (10자리 숫자, 하이픈 제거)",
-  P_NM: "대표자명 (외국인 사업자의 경우에는 영문명 입력)",
-  START_DT: "개업일자 (YYYYMMDD 형식, 하이픈 제거)",
-  B_NM: `상호 (1) 상호가 주식회사인 경우, 아래의 단어에 대해서는 상호의 맨 앞 또는 맨 뒤에 붙어도 동일하게 검색 가능 - (주) - 주식회사 - （주）--> 'ㄴ' 으로 한자키 입력을 통한 특수문자 괄호 2) 앞뒤 공백(empty space) 무시하고 검색))`,
-  B_SECTOR: `업태명: (1) 모든 공백(앞뒤 포함)에 대해 무시하고 검색됨 예) '서 비 스' -> '서비스' 로 검색됨)`,
-  B_TYPE: "종목명 (1) 모든 공백(앞뒤 포함)에 대해 무시하고 검색됨 (주업태명과 동일))",
-  B_ADR:
-    "사업장 주소 (모든 공백(앞뒤 포함)에 대해 무시하고 검색됨 (예시: 서울특별시 강남구, 경기도 부천시))",
-  PRMMI_MNNO: "인허가관리번호 (통신판매사업자 신고번호, 예: 2021-서울강동-0422)",
 } as const;

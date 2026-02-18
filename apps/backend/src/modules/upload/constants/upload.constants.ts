@@ -10,14 +10,14 @@ export const UPLOAD_CONSTANTS = {
     "image/png",
     "image/gif",
     "image/webp",
-    // 문서
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
-    // 기타
-    "text/plain",
+    // 문서 (주석처리 - 이미지만 허용)
+    // "application/pdf",
+    // "application/msword",
+    // "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+    // "application/vnd.ms-excel",
+    // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+    // 기타 (주석처리 - 이미지만 허용)
+    // "text/plain",
   ] as readonly string[],
 
   // 허용된 파일 확장자
@@ -27,12 +27,13 @@ export const UPLOAD_CONSTANTS = {
     ".png",
     ".gif",
     ".webp",
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".xls",
-    ".xlsx",
-    ".txt",
+    // 문서 확장자 (주석처리 - 이미지만 허용)
+    // ".pdf",
+    // ".doc",
+    // ".docx",
+    // ".xls",
+    // ".xlsx",
+    // ".txt",
   ] as readonly string[],
 
   // 차단된 파일 확장자 (실행 파일 등)

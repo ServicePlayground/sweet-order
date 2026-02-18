@@ -1,12 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store";
+import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
+import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 
 export const RootPage: React.FC = () => {
   const navigate = useNavigate();
-  const { stores } = useStoreStore();
+  const { data: storeListData } = useStoreList();
+  const stores = useMemo(() => {
+    if (!storeListData) return [];
+    return flattenAndDeduplicateInfiniteData<IStoreListItem>(storeListData);
+  }, [storeListData]);
 
   useEffect(() => {
     if (stores.length > 0) {
