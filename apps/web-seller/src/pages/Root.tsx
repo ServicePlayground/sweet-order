@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 
 export const RootPage: React.FC = () => {
   const navigate = useNavigate();

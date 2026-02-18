@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { Menu, User, LogOut } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
-import { useLogout } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useLogout } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 
 const drawerWidth = 300;
 

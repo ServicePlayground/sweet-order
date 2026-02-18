@@ -6,8 +6,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/apps/web-seller/common/components/@shadcn-ui/select";
-import { useProductList } from "@/apps/web-seller/features/product/hooks/queries/useProductList";
+} from "@/apps/web-seller/common/components/selects/Select";
+import { useProductList } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { ProductList } from "@/apps/web-seller/features/product/components/list/ProductList";
 import { SortBy, IProductItem } from "@/apps/web-seller/features/product/types/product.type";

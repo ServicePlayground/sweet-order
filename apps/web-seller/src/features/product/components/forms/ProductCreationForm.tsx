@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "@/apps/web-seller/common/components/@shadcn-ui/tabs";
+} from "@/apps/web-seller/common/components/tabs/Tabs";
 import {
   IProductForm,
   EnableStatus,

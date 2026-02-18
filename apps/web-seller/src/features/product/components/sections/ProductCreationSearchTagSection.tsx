@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from "react";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { X } from "lucide-react";
 
 export interface ProductCreationSearchTagSectionProps {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/apps/web-seller/common/components/inputs/Input";
 import { Button } from "@/apps/web-seller/common/components/buttons/Button";
-import { useRegister } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useRegister } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
 import { isValidPassword } from "@/apps/web-seller/common/utils/validator.util";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";

@@ -1,13 +1,13 @@
 "use client";
 
 import { FallbackProps } from "react-error-boundary";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import {
-  Alert,
+  BaseAlert as Alert,
   AlertTitle,
   AlertDescription,
-} from "@/apps/web-seller/common/components/@shadcn-ui/alert";
+} from "@/apps/web-seller/common/components/alerts/BaseAlert";
 import { AlertCircle, RotateCcw, RotateCw } from "lucide-react";
 
 interface ErrorFallbackProps extends FallbackProps {

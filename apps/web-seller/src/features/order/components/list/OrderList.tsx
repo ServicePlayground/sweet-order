@@ -1,8 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { OrderResponse, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useUpdateOrderStatus";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
+import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
+import { StatusBadge } from "@/apps/web-seller/common/components/badges/StatusBadge";
 
 interface OrderListProps {
   orders: OrderResponse[];
@@ -30,28 +32,16 @@ export function OrderList({ orders }: OrderListProps) {
   const getStatusBadge = (status: OrderStatus) => {
     switch (status) {
       case OrderStatus.PENDING:
-        return (
-          <span className="rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-white">
-            대기중
-          </span>
-        );
+        return <StatusBadge variant="warning">대기중</StatusBadge>;
       case OrderStatus.CONFIRMED:
-        return (
-          <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
-            확정됨
-          </span>
-        );
+        return <StatusBadge variant="success">확정됨</StatusBadge>;
       default:
         return null;
     }
   };
 
   if (orders.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        주문이 없습니다.
-      </div>
-    );
+    return <EmptyState message="주문이 없습니다." />;
   }
 
   return (

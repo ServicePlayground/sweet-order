@@ -1,7 +1,7 @@
 import React from "react";
 import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 export interface ProductCreationProductNoticeSectionProps {
   form: IProductForm;

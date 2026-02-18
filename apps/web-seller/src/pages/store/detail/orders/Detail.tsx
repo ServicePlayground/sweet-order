@@ -1,17 +1,17 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useOrderDetail } from "@/apps/web-seller/features/order/hooks/queries/useOrderDetail";
-import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useUpdateOrderStatus";
+import { useOrderDetail } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
+import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
 import { OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+} from "@/apps/web-seller/common/components/cards/Card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { Badge } from "@/apps/web-seller/common/components/@shadcn-ui/badge";
+import { Badge } from "@/apps/web-seller/common/components/badges/Badge";
 
 export const StoreDetailOrderDetailPage: React.FC = () => {
   const { storeId, orderId } = useParams<{ storeId: string; orderId: string }>();

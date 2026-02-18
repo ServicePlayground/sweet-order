@@ -2,11 +2,9 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
 import { IStoreForm, IUpdateStoreRequest } from "@/apps/web-seller/features/store/types/store.type";
-import {
-  useStoreDetail,
-  useUpdateStore,
-} from "@/apps/web-seller/features/store/hooks/queries/useStore";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
+import { useUpdateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export const StoreDetailEditPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();

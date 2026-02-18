@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { TrendingUp, ShoppingCart, Package, DollarSign } from "lucide-react";
 
 const StatCard = ({

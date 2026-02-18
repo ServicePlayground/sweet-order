@@ -1,62 +1,78 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import {
-  Alert as AlertComponent,
+  BaseAlert as AlertComponent,
   AlertTitle,
   AlertDescription,
-} from "@/apps/web-seller/common/components/@shadcn-ui/alert";
+} from "@/apps/web-seller/common/components/alerts/BaseAlert";
 import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react";
-import { cn } from "@/apps/web-seller/common/lib/utils";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
+
+export type AlertSeverity = "success" | "error" | "warning" | "info";
+
+interface AlertIconProps {
+  severity: AlertSeverity | string;
+}
+
+const AlertIcon: React.FC<AlertIconProps> = ({ severity }) => {
+  switch (severity) {
+    case "success":
+      return <CheckCircle className="h-4 w-4" />;
+    case "error":
+      return <AlertCircle className="h-4 w-4" />;
+    case "warning":
+      return <AlertTriangle className="h-4 w-4" />;
+    case "info":
+    default:
+      return <Info className="h-4 w-4" />;
+  }
+};
+
+const getAlertSeverityClasses = (severity: AlertSeverity | string): string => {
+  switch (severity) {
+    case "success":
+      return "border-green-500 text-green-900 bg-green-50 dark:bg-green-950 dark:text-green-100";
+    case "error":
+      return "border-red-500 text-red-900 bg-red-50 dark:bg-red-950 dark:text-red-100";
+    case "warning":
+      return "border-orange-500 text-orange-900 bg-orange-50 dark:bg-orange-950 dark:text-orange-100";
+    case "info":
+      return "border-blue-500 text-blue-900 bg-blue-50 dark:bg-blue-950 dark:text-blue-100";
+    default:
+      return "";
+  }
+};
 
 export function Alert() {
   const { alerts, removeAlert } = useAlertStore();
+  const timersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   useEffect(() => {
+    // 기존 타이머 정리
+    timersRef.current.forEach((timer) => clearTimeout(timer));
+    timersRef.current.clear();
+
+    // 새로운 타이머 설정
     alerts.forEach((alert) => {
       if (alert.autoHideDuration) {
         const timer = setTimeout(() => {
           removeAlert(alert.id);
+          timersRef.current.delete(alert.id);
         }, alert.autoHideDuration);
-
-        return () => clearTimeout(timer);
+        timersRef.current.set(alert.id, timer);
       }
     });
+
+    return () => {
+      timersRef.current.forEach((timer) => clearTimeout(timer));
+      timersRef.current.clear();
+    };
   }, [alerts, removeAlert]);
 
   const handleClose = (id: string) => {
     removeAlert(id);
-  };
-
-  const getIcon = (severity: string) => {
-    switch (severity) {
-      case "success":
-        return <CheckCircle className="h-4 w-4" />;
-      case "error":
-        return <AlertCircle className="h-4 w-4" />;
-      case "warning":
-        return <AlertTriangle className="h-4 w-4" />;
-      case "info":
-        return <Info className="h-4 w-4" />;
-      default:
-        return <Info className="h-4 w-4" />;
-    }
-  };
-
-  const getSeverityClasses = (severity: string) => {
-    switch (severity) {
-      case "success":
-        return "border-green-500 text-green-900 bg-green-50 dark:bg-green-950 dark:text-green-100";
-      case "error":
-        return "border-red-500 text-red-900 bg-red-50 dark:bg-red-950 dark:text-red-100";
-      case "warning":
-        return "border-orange-500 text-orange-900 bg-orange-50 dark:bg-orange-950 dark:text-orange-100";
-      case "info":
-        return "border-blue-500 text-blue-900 bg-blue-50 dark:bg-blue-950 dark:text-blue-100";
-      default:
-        return "";
-    }
   };
 
   return (
@@ -73,10 +89,12 @@ export function Alert() {
           }}
         >
           <AlertComponent
-            className={cn("relative shadow-lg border-2", getSeverityClasses(alert.severity))}
+            className={cn("relative shadow-lg border-2", getAlertSeverityClasses(alert.severity))}
           >
             <div className="flex items-start gap-3">
-              <div className="text-current">{getIcon(alert.severity)}</div>
+              <div className="text-current">
+                <AlertIcon severity={alert.severity} />
+              </div>
               <div className="flex-1">
                 {alert.title && <AlertTitle className="mb-1">{alert.title}</AlertTitle>}
                 <AlertDescription>{alert.message}</AlertDescription>

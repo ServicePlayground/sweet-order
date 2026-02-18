@@ -8,10 +8,10 @@ import {
   OPTION_REQUIRED_OPTIONS,
   ENABLE_DISABLE_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
-import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { SelectBox } from "@/apps/web-seller/common/components/selects/SelectBox";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export interface ProductCreationLetteringPolicySectionProps {
   form: IProductForm;

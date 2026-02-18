@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { IOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/types/business.type";
 import { validatePermissionManagementNumber } from "@/apps/web-seller/features/business/utils/validator.util";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 interface Props {
   onSubmit: (data: IOnlineTradingCompanyDetailForm) => void;

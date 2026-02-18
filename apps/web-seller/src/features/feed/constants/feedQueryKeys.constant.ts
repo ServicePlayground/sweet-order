@@ -6,7 +6,7 @@ import { IGetFeedsParams } from "@/apps/web-seller/features/feed/types/feed.type
 export const feedQueryKeys = {
   all: ["feed"] as const,
   lists: () => ["feed", "list"] as const,
-  list: (storeId: string, params: IGetFeedsParams) => ["feed", "list", storeId, params] as const,
+  list: (params: IGetFeedsParams) => ["feed", "list", params] as const,
   details: () => ["feed", "detail"] as const,
   detail: (feedId: string) => ["feed", "detail", feedId] as const,
 } as const;
