@@ -6,11 +6,11 @@ import {
   IUpdateProductRequest,
   EnableStatus,
 } from "@/apps/web-seller/features/product/types/product.type";
+import { useProductDetail } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
 import {
-  useProductDetail,
   useUpdateProduct,
   useDeleteProduct,
-} from "@/apps/web-seller/features/product/hooks/queries/useProduct";
+} from "@/apps/web-seller/features/product/hooks/mutations/useProductMutation";
 import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 
 export const StoreDetailProductDetailPage: React.FC = () => {

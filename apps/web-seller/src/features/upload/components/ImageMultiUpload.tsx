@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { CloudUpload, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/lib/utils";
-import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
+import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/mutations/useUploadMutation";
 import { ImagePreview } from "@/apps/web-seller/common/components/images/ImagePreview";
 import {
   validateFileSize,

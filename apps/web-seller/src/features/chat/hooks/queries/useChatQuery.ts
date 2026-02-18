@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { chatApi } from "@/apps/web-seller/features/chat/apis/chat.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
@@ -83,19 +83,4 @@ export function useMessages(roomId: string, limit: number = 50) {
   }, [query.isError, query.error, addAlert]);
 
   return query;
-}
-
-// 채팅방 읽음 처리
-export function useMarkChatRoomAsRead() {
-  const { addAlert } = useAlertStore();
-
-  return useMutation({
-    mutationFn: (roomId: string) => chatApi.markChatRoomAsRead(roomId),
-    onError: (error) => {
-      addAlert({
-        severity: "error",
-        message: getApiMessage.error(error),
-      });
-    },
-  });
 }

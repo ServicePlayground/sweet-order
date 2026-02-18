@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useOrderDetail } from "@/apps/web-seller/features/order/hooks/queries/useOrderDetail";
-import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useUpdateOrderStatus";
+import { useOrderDetail } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
+import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
 import { OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
 import {
   Card,

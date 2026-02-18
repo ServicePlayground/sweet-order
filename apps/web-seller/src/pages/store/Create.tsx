@@ -12,8 +12,8 @@ import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import {
   useGetOnlineTradingCompanyDetail,
   useVerifyBusinessRegistration,
-} from "@/apps/web-seller/features/business/hooks/queries/useBusiness";
-import { useCreateStore } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+} from "@/apps/web-seller/features/business/hooks/mutations/useBusinessMutation";
+import { useCreateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
 import { defaultForm as defaultBusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { defaultForm as defaultOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
 import { defaultForm as defaultStoreForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";

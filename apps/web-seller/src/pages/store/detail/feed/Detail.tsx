@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useFeedDetail } from "@/apps/web-seller/features/feed/hooks/queries/useFeedQuery";
 import {
-  useFeedDetail,
   useUpdateFeed,
   useDeleteFeed,
-} from "@/apps/web-seller/features/feed/hooks/queries/useFeed";
+} from "@/apps/web-seller/features/feed/hooks/mutations/useFeedMutation";
 import { IUpdateFeedRequest } from "@/apps/web-seller/features/feed/types/feed.type";
 import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";

@@ -5,7 +5,7 @@ import { Menu, User, LogOut } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
-import { useLogout } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useLogout } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 
 const drawerWidth = 300;
 

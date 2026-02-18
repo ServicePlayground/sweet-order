@@ -6,6 +6,7 @@ import {
   OrderListResponse,
   IGetOrdersListParams,
   OrderSortBy,
+  OrderResponse,
 } from "@/apps/web-seller/features/order/types/order.type";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
@@ -56,6 +57,27 @@ export function useOrderList({
       }
       return orderApi.getOrders(params);
     },
+  });
+
+  useEffect(() => {
+    if (query.isError) {
+      addAlert({
+        severity: "error",
+        message: getApiMessage.error(query.error),
+      });
+    }
+  }, [query.isError, query.error, addAlert]);
+
+  return query;
+}
+
+export function useOrderDetail(orderId: string) {
+  const { addAlert } = useAlertStore();
+
+  const query = useQuery<OrderResponse>({
+    queryKey: orderQueryKeys.detail(orderId),
+    queryFn: () => orderApi.getOrderDetail(orderId),
+    enabled: !!orderId,
   });
 
   useEffect(() => {

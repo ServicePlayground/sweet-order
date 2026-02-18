@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  useMessages,
-  useMarkChatRoomAsRead,
-} from "@/apps/web-seller/features/chat/hooks/queries/useChat";
+import { useMessages } from "@/apps/web-seller/features/chat/hooks/queries/useChatQuery";
+import { useMarkChatRoomAsRead } from "@/apps/web-seller/features/chat/hooks/mutations/useChatMutation";
 import { chatSocketService } from "@/apps/web-seller/features/chat/services/chat-socket.service";
 import { Message } from "@/apps/web-seller/features/chat/types/chat.type";
 import { Send } from "lucide-react";

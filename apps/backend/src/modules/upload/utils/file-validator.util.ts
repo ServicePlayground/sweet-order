@@ -224,7 +224,7 @@ export class FileValidator {
   static generateUniqueFilename(originalname: string): string {
     // 원본 파일명에서 확장자만 추출
     const ext = path.extname(originalname);
-  
+
     // 타임스탬프 + 랜덤 문자열 생성
     const timestamp = Date.now();
     const randomString = crypto.randomBytes(4).toString("hex");

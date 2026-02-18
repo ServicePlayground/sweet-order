@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useCreateFeed } from "@/apps/web-seller/features/feed/hooks/queries/useFeed";
+import { useCreateFeed } from "@/apps/web-seller/features/feed/hooks/mutations/useFeedMutation";
 import { ICreateFeedRequest } from "@/apps/web-seller/features/feed/types/feed.type";
 import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";

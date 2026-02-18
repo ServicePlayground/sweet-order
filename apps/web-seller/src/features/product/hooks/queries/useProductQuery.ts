@@ -1,14 +1,36 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { productApi } from "@/apps/web-seller/features/product/apis/product.api";
+import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
+import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { productQueryKeys } from "@/apps/web-seller/features/product/constants/productQueryKeys.constant";
 import {
   ProductListResponse,
   IGetProductsListParams,
   SortBy,
 } from "@/apps/web-seller/features/product/types/product.type";
-import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
-import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
+
+// 상품 상세 조회 쿼리
+export function useProductDetail(productId: string) {
+  const { addAlert } = useAlertStore();
+
+  const query = useQuery({
+    queryKey: productQueryKeys.detail(productId),
+    queryFn: () => productApi.getProductDetail(productId),
+    enabled: !!productId,
+  });
+
+  useEffect(() => {
+    if (query.isError) {
+      addAlert({
+        severity: "error",
+        message: getApiMessage.error(query.error),
+      });
+    }
+  }, [query.isError, query.error, addAlert]);
+
+  return query;
+}
 
 export function useProductList({
   limit = 30,

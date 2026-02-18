@@ -4,7 +4,7 @@ import { Button } from "@/apps/web-seller/common/components/buttons/Button";
 import {
   useSendPhoneVerification,
   useVerifyPhoneCode,
-} from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+} from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
 import {
   isValidPhone,

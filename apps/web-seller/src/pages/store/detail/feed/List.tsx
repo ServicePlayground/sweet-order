@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useParams } from "react-router-dom";
-import { useFeedList } from "@/apps/web-seller/features/feed/hooks/queries/useFeed";
+import { useFeedList } from "@/apps/web-seller/features/feed/hooks/queries/useFeedQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import { IFeed } from "@/apps/web-seller/features/feed/types/feed.type";

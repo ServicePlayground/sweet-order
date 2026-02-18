@@ -3,7 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { getMenuItems } from "@/apps/web-seller/common/constants/menu.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";

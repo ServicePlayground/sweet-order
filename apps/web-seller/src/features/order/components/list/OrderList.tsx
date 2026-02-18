@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { OrderResponse, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useUpdateOrderStatus";
+import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
 
 interface OrderListProps {
   orders: OrderResponse[];

@@ -62,12 +62,12 @@ export const validateFileType = (file: File, accept: string): string | null => {
   // 확장자로만 검증
   const isValidExtension = acceptedExtensions.some((accepted) => {
     const normalizedAccepted = accepted.toLowerCase();
-    
+
     // 확장자로 매칭 (예: ".jpg", ".png")
     if (normalizedAccepted.startsWith(".")) {
       return fileExtension === normalizedAccepted;
     }
-    
+
     return false;
   });
 

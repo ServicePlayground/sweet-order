@@ -1,9 +1,7 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 import { authApi } from "@/apps/web-seller/features/auth/apis/auth.api";
-import { authQueryKeys } from "@/apps/web-seller/features/auth/constants/authQueryKeys.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
@@ -50,28 +48,6 @@ export function useRegister() {
       });
     },
   });
-}
-
-// 현재 사용자 정보 조회 (새로고침 시 자동 실행)
-export function useMe() {
-  const { setInitialized, login } = useAuthStore();
-
-  const query = useQuery({
-    queryKey: authQueryKeys.me,
-    queryFn: authApi.me,
-    throwOnError: false,
-    refetchOnWindowFocus: true,
-  });
-
-  // 쿼리 결과 처리
-  useEffect(() => {
-    if (query.isSuccess && query.data) {
-      login({});
-    }
-    setInitialized(true);
-  }, [query.isSuccess, query.isError, query.data, setInitialized, login]);
-
-  return query;
 }
 
 // 로그아웃 뮤테이션 (백엔드 API가 없으므로 로컬에서만 처리, isPending 상태를 위해 useMutation 유지)

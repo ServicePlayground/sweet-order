@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { cn } from "@/apps/web-seller/common/lib/utils";
-import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/queries/useUpload";
+import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/mutations/useUploadMutation";
 
 export interface RichTextEditorProps {
   value: string;

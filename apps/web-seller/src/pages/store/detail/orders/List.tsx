@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/apps/web-seller/common/components/@shadcn-ui/select";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { useOrderList } from "@/apps/web-seller/features/order/hooks/queries/useOrderList";
+import { useOrderList } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
 import { OrderList } from "@/apps/web-seller/features/order/components/list/OrderList";
 import { OrderSortBy, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
