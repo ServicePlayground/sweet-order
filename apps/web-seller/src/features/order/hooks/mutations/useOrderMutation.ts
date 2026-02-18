@@ -8,6 +8,7 @@ import {
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 
+// 주문 상태 변경 뮤테이션
 export function useUpdateOrderStatus() {
   const { addAlert } = useAlertStore();
   const queryClient = useQueryClient();
@@ -19,13 +20,12 @@ export function useUpdateOrderStatus() {
   >({
     mutationFn: ({ orderId, request }) => orderApi.updateOrderStatus(orderId, request),
     onSuccess: () => {
-      // 주문 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: orderQueryKeys.all });
-
       addAlert({
         severity: "success",
         message: "주문 상태가 변경되었습니다.",
       });
+      // 주문 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: orderQueryKeys.all });
     },
     onError: (error) => {
       addAlert({

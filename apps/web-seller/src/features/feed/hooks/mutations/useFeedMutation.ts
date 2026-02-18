@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { feedApi } from "@/apps/web-seller/features/feed/apis/feed.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
@@ -8,11 +8,13 @@ import {
   IUpdateFeedRequest,
 } from "@/apps/web-seller/features/feed/types/feed.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { feedQueryKeys } from "@/apps/web-seller/features/feed/constants/feedQueryKeys.constant";
 
 // 피드 생성 뮤테이션
 export function useCreateFeed() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ storeId, request }: { storeId: string; request: ICreateFeedRequest }) =>
@@ -22,7 +24,8 @@ export function useCreateFeed() {
         severity: "success",
         message: "피드가 등록되었습니다.",
       });
-      // 피드 목록으로 이동
+      // 피드 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: feedQueryKeys.all });
       navigate(ROUTES.STORE_DETAIL_FEED_LIST(variables.storeId));
     },
     onError: (error) => {
@@ -38,6 +41,7 @@ export function useCreateFeed() {
 export function useUpdateFeed() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
@@ -54,7 +58,8 @@ export function useUpdateFeed() {
         severity: "success",
         message: "피드가 수정되었습니다.",
       });
-      // 피드 목록으로 이동
+      // 피드 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: feedQueryKeys.all });
       navigate(ROUTES.STORE_DETAIL_FEED_LIST(variables.storeId));
     },
     onError: (error) => {
@@ -70,6 +75,7 @@ export function useUpdateFeed() {
 export function useDeleteFeed() {
   const { addAlert } = useAlertStore();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ storeId, feedId }: { storeId: string; feedId: string }) =>
@@ -79,7 +85,8 @@ export function useDeleteFeed() {
         severity: "success",
         message: "피드가 삭제되었습니다.",
       });
-      // 피드 목록으로 이동
+      // 피드 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: feedQueryKeys.all });
       navigate(ROUTES.STORE_DETAIL_FEED_LIST(variables.storeId));
     },
     onError: (error) => {

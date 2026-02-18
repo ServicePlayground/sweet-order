@@ -23,9 +23,8 @@ export function useCreateStore() {
         severity: "success",
         message: "스토어 등록이 완료되었습니다.",
       });
-      // 스토어 목록/상세 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: storeQueryKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(response.id) });
+      // 스토어 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
       navigate(ROUTES.STORE_DETAIL_HOME(response.id));
     },
     onError: (error) => {
@@ -51,8 +50,8 @@ export function useUpdateStore() {
         severity: "success",
         message: "스토어 수정이 완료되었습니다.",
       });
-      queryClient.invalidateQueries({ queryKey: storeQueryKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(variables.storeId) });
+      // 스토어 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
       navigate(ROUTES.STORE_DETAIL_HOME(variables.storeId));
     },
     onError: (error) => {

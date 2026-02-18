@@ -16,7 +16,7 @@ export function useChatRoomsByStore(storeId: string, limit: number = 20) {
   const { addAlert } = useAlertStore();
 
   const query = useInfiniteQuery<ChatRoomListForSellerResponse>({
-    queryKey: chatQueryKeys.list(storeId, { limit }),
+    queryKey: chatQueryKeys.list({ storeId, limit }),
     queryFn: ({ pageParam = 1 }) => {
       const params: GetChatRoomsRequest = {
         page: pageParam as number,

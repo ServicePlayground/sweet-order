@@ -21,14 +21,16 @@ export interface IUpdateFeedRequest {
  * 피드 목록 조회 쿼리 키용 파라미터 (page 제외)
  */
 export interface IGetFeedsParams {
+  storeId: string;
   limit: number;
 }
 
 /**
- * 피드 목록 조회 요청 파라미터
+ * 피드 목록 조회 요청 파라미터 (storeId는 URL 경로에 포함되므로 제외)
  */
-export interface IGetFeedsRequest extends IGetFeedsParams {
+export interface IGetFeedsRequest {
   page: number;
+  limit: number;
 }
 
 /**

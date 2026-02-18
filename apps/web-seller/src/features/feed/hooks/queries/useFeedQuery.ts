@@ -15,7 +15,7 @@ export function useFeedList(storeId: string, limit: number = 20) {
   const { addAlert } = useAlertStore();
 
   const query = useInfiniteQuery<IFeedListResponse>({
-    queryKey: feedQueryKeys.list(storeId, { limit }),
+    queryKey: feedQueryKeys.list({ storeId, limit }),
     queryFn: ({ pageParam = 1 }) => {
       const params: IGetFeedsRequest = {
         page: pageParam as number,
