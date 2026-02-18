@@ -3,6 +3,7 @@ import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import {
   validateStoreName,
   validateStoreDescription,
+  validateDetailAddress,
 } from "@/apps/web-seller/features/store/utils/validator.util";
 import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/ImageMultiUpload";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
@@ -24,6 +25,7 @@ export const defaultForm: IStoreForm = {
   logoImageUrl: "",
   address: "",
   roadAddress: "",
+  detailAddress: "",
   zonecode: "",
   latitude: 0,
   longitude: 0,
@@ -58,6 +60,11 @@ export const StoreCreationForm: React.FC<Props> = ({
     const descriptionError = validateStoreDescription(form.description);
     if (descriptionError) {
       newErrors.description = descriptionError;
+    }
+    // 상세주소 검증
+    const detailAddressError = validateDetailAddress(form.detailAddress);
+    if (detailAddressError) {
+      newErrors.detailAddress = detailAddressError;
     }
 
     setErrors(newErrors);
@@ -146,6 +153,20 @@ export const StoreCreationForm: React.FC<Props> = ({
             }}
             error={errors.address}
           />
+        </div>
+        <div>
+          <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+            상세주소
+          </Label>
+          <Input
+            placeholder="상세주소를 입력해주세요"
+            value={form.detailAddress}
+            onChange={handleChange("detailAddress")}
+            className={errors.detailAddress ? "border-destructive" : ""}
+          />
+          {errors.detailAddress && (
+            <p className="text-sm text-destructive mt-1">{errors.detailAddress}</p>
+          )}
         </div>
       </div>
 

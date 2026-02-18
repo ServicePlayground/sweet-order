@@ -18,6 +18,7 @@ type ProductWithStore = Prisma.ProductGetPayload<{
         logoImageUrl: true;
         address: true;
         roadAddress: true;
+        detailAddress: true;
         zonecode: true;
         latitude: true;
         longitude: true;
@@ -43,6 +44,7 @@ export type ProductWithReviewsAndStore = Prisma.ProductGetPayload<{
         logoImageUrl: true;
         address: true;
         roadAddress: true;
+        detailAddress: true;
         zonecode: true;
         latitude: true;
         longitude: true;
@@ -64,6 +66,7 @@ export class ProductMapperUtil {
     logoImageUrl: true,
     address: true,
     roadAddress: true,
+    detailAddress: true,
     zonecode: true,
     latitude: true,
     longitude: true,
@@ -127,13 +130,15 @@ export class ProductMapperUtil {
       averageRating,
       totalReviewCount,
       isLiked: isLiked !== undefined ? isLiked : null,
-      storeName: store?.name || "",
+      storeName: store.name,
       storeLogoImageUrl: store?.logoImageUrl || undefined,
-      pickupAddress: store?.address || "",
-      pickupRoadAddress: store?.roadAddress || "",
-      pickupZonecode: store?.zonecode || "",
-      pickupLatitude: store?.latitude || 0,
-      pickupLongitude: store?.longitude || 0,
+      // 픽업장소
+      pickupAddress: store.address ?? "",
+      pickupRoadAddress: store.roadAddress ?? "",
+      pickupDetailAddress: store.detailAddress ?? "",
+      pickupZonecode: store.zonecode ?? "",
+      pickupLatitude: store.latitude ?? 0,
+      pickupLongitude: store.longitude ?? 0,
     } as ProductResponseDto;
   }
 }

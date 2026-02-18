@@ -63,6 +63,7 @@ export class StoreCreateService {
               // 주소/위치 정보
               address: createStoreDto.address,
               roadAddress: createStoreDto.roadAddress,
+              detailAddress: createStoreDto.detailAddress,
               zonecode: createStoreDto.zonecode,
               latitude: createStoreDto.latitude,
               longitude: createStoreDto.longitude,

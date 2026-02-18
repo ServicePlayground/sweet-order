@@ -107,7 +107,8 @@ export default function ReservationCompletePage() {
                 {orderData.pickupRoadAddress ||
                   orderData.pickupAddress ||
                   productData.pickupRoadAddress ||
-                  productData.pickupAddress}
+                  productData.pickupAddress}{" "}
+                {orderData.pickupDetailAddress}
               </span>
             </p>
             <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">

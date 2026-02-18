@@ -45,26 +45,29 @@ export const validateFileType = (file: File, accept: string): string | null => {
 
   // 파일명에서 확장자 추출
   const fileName = file.name.toLowerCase();
-  const fileExtension = fileName.substring(fileName.lastIndexOf("."));
+  const lastDotIndex = fileName.lastIndexOf(".");
+  const fileExtension =
+    lastDotIndex !== -1 && lastDotIndex < fileName.length - 1
+      ? fileName.substring(lastDotIndex)
+      : "";
 
-  // MIME 타입 추출
-  const fileMimeType = file.type.toLowerCase();
+  // 확장자가 없으면 검증 실패
+  if (!fileExtension) {
+    const allowedTypes = acceptedExtensions
+      .map((ext) => (ext.startsWith(".") ? ext : ext.split("/")[1] || ext))
+      .join(", ");
+    return `${allowedTypes} 형식의 이미지만 업로드 가능합니다.`;
+  }
 
-  // 확장자 또는 MIME 타입으로 검증
+  // 확장자로만 검증
   const isValidExtension = acceptedExtensions.some((accepted) => {
     const normalizedAccepted = accepted.toLowerCase();
+    
     // 확장자로 매칭 (예: ".jpg", ".png")
     if (normalizedAccepted.startsWith(".")) {
       return fileExtension === normalizedAccepted;
     }
-    // MIME 타입으로 매칭 (예: "image/jpeg", "image/*")
-    if (normalizedAccepted.includes("/")) {
-      if (normalizedAccepted.endsWith("/*")) {
-        const baseType = normalizedAccepted.split("/")[0];
-        return fileMimeType.startsWith(`${baseType}/`);
-      }
-      return fileMimeType === normalizedAccepted;
-    }
+    
     return false;
   });
 

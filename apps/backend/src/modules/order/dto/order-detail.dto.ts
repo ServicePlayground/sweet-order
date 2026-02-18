@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
+import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
 
 /**
  * 주문 항목 응답 DTO
@@ -115,7 +116,7 @@ export class OrderItemResponseDto {
 /**
  * 주문 응답 DTO
  */
-export class OrderResponseDto {
+export class OrderResponseDto extends PickupAddressDto {
   @ApiProperty({
     description: "주문 ID",
     example: SWAGGER_EXAMPLES.ORDER_DATA.id,
@@ -158,35 +159,7 @@ export class OrderResponseDto {
   })
   totalPrice: number;
 
-  @ApiPropertyOptional({
-    description: "픽업 주소 (지번 주소)",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupAddress,
-  })
-  pickupAddress?: string;
-
-  @ApiPropertyOptional({
-    description: "픽업 주소 (도로명 주소)",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupRoadAddress,
-  })
-  pickupRoadAddress?: string;
-
-  @ApiPropertyOptional({
-    description: "픽업 장소 우편번호",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupZonecode,
-  })
-  pickupZonecode?: string;
-
-  @ApiPropertyOptional({
-    description: "픽업 장소 위도",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupLatitude,
-  })
-  pickupLatitude?: number;
-
-  @ApiPropertyOptional({
-    description: "픽업 장소 경도",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupLongitude,
-  })
-  pickupLongitude?: number;
+  // 픽업장소 정보는 PickupAddressDto 상속
 
   @ApiProperty({
     description: "주문 상태",

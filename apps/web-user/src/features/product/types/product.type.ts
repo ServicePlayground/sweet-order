@@ -119,9 +119,10 @@ export interface Product {
   // 스토어 정보
   storeName: string;
   storeLogoImageUrl?: string | null;
-  // 픽업장소 정보 (스토어 위치 정보)
+  // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
+  pickupDetailAddress?: string;
   pickupZonecode: string;
   pickupLatitude: number;
   pickupLongitude: number;

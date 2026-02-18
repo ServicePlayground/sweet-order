@@ -3,11 +3,12 @@ import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.co
 import { SWAGGER_EXAMPLES as BUSINESS_SWAGGER_EXAMPLES } from "@apps/backend/modules/business/constants/business.contants";
 import { SWAGGER_EXAMPLES as USER_SWAGGER_EXAMPLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
+import { StoreAddressDto } from "@apps/backend/modules/store/dto/store-common.dto";
 
 /**
  * 스토어 응답 DTO
  */
-export class StoreResponseDto {
+export class StoreResponseDto extends StoreAddressDto {
   @ApiProperty({
     description: "스토어 ID",
     example: SWAGGER_EXAMPLES.ID,
@@ -80,35 +81,7 @@ export class StoreResponseDto {
   })
   permissionManagementNumber: string;
 
-  @ApiProperty({
-    description: "지번 주소",
-    example: SWAGGER_EXAMPLES.ADDRESS,
-  })
-  address: string;
-
-  @ApiProperty({
-    description: "도로명 주소",
-    example: SWAGGER_EXAMPLES.ROAD_ADDRESS,
-  })
-  roadAddress: string;
-
-  @ApiProperty({
-    description: "우편번호",
-    example: SWAGGER_EXAMPLES.ZONECODE,
-  })
-  zonecode: string;
-
-  @ApiProperty({
-    description: "위도",
-    example: SWAGGER_EXAMPLES.LATITUDE,
-  })
-  latitude: number;
-
-  @ApiProperty({
-    description: "경도",
-    example: SWAGGER_EXAMPLES.LONGITUDE,
-  })
-  longitude: number;
+  // 주소/위치는 StoreAddressDto 상속
 
   @ApiProperty({
     description: "좋아요 수",

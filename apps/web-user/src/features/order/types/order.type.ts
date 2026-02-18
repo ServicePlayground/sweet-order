@@ -25,11 +25,13 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[];
   totalQuantity: number;
   totalPrice: number;
-  pickupAddress?: string;
-  pickupRoadAddress?: string;
-  pickupZonecode?: string;
-  pickupLatitude?: number;
-  pickupLongitude?: number;
+  // 픽업장소
+  pickupAddress: string;
+  pickupRoadAddress: string;
+  pickupDetailAddress?: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
 }
 
 /**
@@ -75,11 +77,13 @@ export interface OrderResponse {
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;
-  pickupAddress?: string;
-  pickupRoadAddress?: string;
-  pickupZonecode?: string;
-  pickupLatitude?: number;
-  pickupLongitude?: number;
+  // 픽업장소
+  pickupAddress: string;
+  pickupRoadAddress: string;
+  pickupDetailAddress?: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
   orderStatus: OrderStatus;
   createdAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   updatedAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨

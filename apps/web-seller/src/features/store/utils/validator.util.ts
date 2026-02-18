@@ -50,3 +50,27 @@ export const validateStoreDescription = (description: string | undefined): strin
 
   return null;
 };
+
+/**
+ * 상세주소 유효성 검증 및 에러 메시지 반환
+ */
+export const validateDetailAddress = (detailAddress: string): string | null => {
+  // 미입력 검증
+  if (!detailAddress || !detailAddress.trim()) {
+    return "상세주소를 입력해주세요.";
+  }
+
+  const trimmedAddress = detailAddress.trim();
+
+  // 2자 미만 검증
+  if (trimmedAddress.length < 2) {
+    return "상세주소를 2자 이상 입력해주세요.";
+  }
+
+  // 1000자 초과 검증
+  if (trimmedAddress.length > 1000) {
+    return "상세주소는 1000자 이하여야 합니다.";
+  }
+
+  return null;
+};

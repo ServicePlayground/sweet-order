@@ -557,7 +557,7 @@ function StoreItem({ storeId }: { storeId: string }) {
     e.stopPropagation();
     if (store) {
       // 네이버지도 앱 딥링크 (설치되어 있으면 앱으로 바로 이동)
-      const appUrl = `nmap://map?lat=${store.latitude}&lng=${store.longitude}&zoom=15&appname=sweetorder`;
+      const appUrl = `nmap://map?lat=${store.latitude}&lng=${store.longitude}&zoom=15&appname=com.example.sweetorder`;
       window.location.href = toExternalAppSchemeUrl(appUrl);
     }
   };

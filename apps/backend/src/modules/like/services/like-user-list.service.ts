@@ -54,6 +54,7 @@ export class LikeUserListService {
                 logoImageUrl: true,
                 address: true,
                 roadAddress: true,
+                detailAddress: true,
                 zonecode: true,
                 latitude: true,
                 longitude: true,

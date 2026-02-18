@@ -23,6 +23,7 @@ export function ReservationBottomSheet({
   productType,
   pickupAddress,
   pickupRoadAddress,
+  pickupDetailAddress,
   pickupZonecode,
   pickupLatitude,
   pickupLongitude,
@@ -199,12 +200,13 @@ export function ReservationBottomSheet({
                 productId,
                 totalQuantity,
                 totalPrice,
-                // 픽업 정보 (있는 경우만)
-                ...(pickupAddress && { pickupAddress }),
-                ...(pickupRoadAddress && { pickupRoadAddress }),
-                ...(pickupZonecode && { pickupZonecode }),
-                ...(pickupLatitude !== undefined && { pickupLatitude }),
-                ...(pickupLongitude !== undefined && { pickupLongitude }),
+                // 픽업 정보
+                pickupAddress,
+                pickupRoadAddress,
+                pickupDetailAddress,
+                pickupZonecode,
+                pickupLatitude,
+                pickupLongitude,
                 items: itemsWithImageUrls,
               };
 

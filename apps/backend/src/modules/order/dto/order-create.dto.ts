@@ -12,6 +12,7 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
+import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
 
 /**
  * 주문 항목 생성 요청 DTO
@@ -143,7 +144,7 @@ export class CreateOrderItemDto {
  * - 같은 케이크를 1월 1일 오후 2시에 미니 사이즈로 주문
  * - 두 항목이 하나의 주문에 포함됨
  */
-export class CreateOrderRequestDto {
+export class CreateOrderRequestDto extends PickupAddressDto {
   @ApiProperty({
     description: "상품 ID (하나의 주문은 하나의 상품에 대한 주문)",
     example: SWAGGER_EXAMPLES.ORDER_DATA.productId,
@@ -170,45 +171,7 @@ export class CreateOrderRequestDto {
   @Min(0)
   totalPrice: number;
 
-  @ApiPropertyOptional({
-    description: "픽업 주소 (지번 주소)",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupAddress,
-  })
-  @IsOptional()
-  @IsString()
-  pickupAddress?: string;
-
-  @ApiPropertyOptional({
-    description: "픽업 주소 (도로명 주소)",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupRoadAddress,
-  })
-  @IsOptional()
-  @IsString()
-  pickupRoadAddress?: string;
-
-  @ApiPropertyOptional({
-    description: "픽업 장소 우편번호",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupZonecode,
-  })
-  @IsOptional()
-  @IsString()
-  pickupZonecode?: string;
-
-  @ApiPropertyOptional({
-    description: "픽업 장소 위도",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupLatitude,
-  })
-  @IsOptional()
-  @IsNumber()
-  pickupLatitude?: number;
-
-  @ApiPropertyOptional({
-    description: "픽업 장소 경도",
-    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupLongitude,
-  })
-  @IsOptional()
-  @IsNumber()
-  pickupLongitude?: number;
+  // 픽업장소 정보는 PickupAddressDto 상속
 
   @ApiProperty({
     description: "주문 항목 목록 (같은 상품의 여러 옵션 조합을 포함할 수 있음)",

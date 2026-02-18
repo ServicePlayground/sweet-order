@@ -30,11 +30,13 @@ export interface ReservationBottomSheetProps {
   productType: ProductType;
   productNoticeProducer?: string;
   productNoticeAddress?: string;
+  // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
-  pickupZonecode?: string;
-  pickupLatitude?: number;
-  pickupLongitude?: number;
+  pickupDetailAddress?: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
   onClose: () => void;
 }
 
