@@ -250,12 +250,13 @@ export class FileValidator {
       ".png": ["image/png"],
       ".gif": ["image/gif"],
       ".webp": ["image/webp"],
-      ".pdf": ["application/pdf"],
-      ".doc": ["application/msword"],
-      ".docx": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-      ".xls": ["application/vnd.ms-excel"],
-      ".xlsx": ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
-      ".txt": ["text/plain"],
+      // 문서 확장자 (주석처리 - 이미지만 허용)
+      // ".pdf": ["application/pdf"],
+      // ".doc": ["application/msword"],
+      // ".docx": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+      // ".xls": ["application/vnd.ms-excel"],
+      // ".xlsx": ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+      // ".txt": ["text/plain"],
     };
 
     const expectedMimes = extensionMimeMap[ext];
@@ -289,12 +290,13 @@ export class FileValidator {
       ".png": ["png"],
       ".gif": ["gif"],
       ".webp": ["webp"],
-      ".pdf": ["pdf"],
-      ".doc": ["ole"],
-      ".xls": ["ole"],
-      ".docx": ["zip"],
-      ".xlsx": ["zip"],
-      ".txt": ["text"],
+      // 문서 확장자 (주석처리 - 이미지만 허용)
+      // ".pdf": ["pdf"],
+      // ".doc": ["ole"],
+      // ".xls": ["ole"],
+      // ".docx": ["zip"],
+      // ".xlsx": ["zip"],
+      // ".txt": ["text"],
     };
 
     const allowedByMime: Record<string, Array<typeof detected>> = {
@@ -303,12 +305,13 @@ export class FileValidator {
       "image/png": ["png"],
       "image/gif": ["gif"],
       "image/webp": ["webp"],
-      "application/pdf": ["pdf"],
-      "application/msword": ["ole"],
-      "application/vnd.ms-excel": ["ole"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["zip"],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["zip"],
-      "text/plain": ["text"],
+      // 문서 MIME 타입 (주석처리 - 이미지만 허용)
+      // "application/pdf": ["pdf"],
+      // "application/msword": ["ole"],
+      // "application/vnd.ms-excel": ["ole"],
+      // "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["zip"],
+      // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["zip"],
+      // "text/plain": ["text"],
     };
 
     if (!allowedByExt[ext] || !allowedByMime[mimetype]) {

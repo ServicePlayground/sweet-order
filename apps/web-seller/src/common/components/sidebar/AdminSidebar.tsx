@@ -3,7 +3,9 @@ import { ChevronLeft } from "lucide-react";
 import { getMenuItems } from "@/apps/web-seller/common/constants/menu.constant";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useStoreStore } from "@/apps/web-seller/features/store/store/store.store.ts";
+import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
+import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import {
   Select,
@@ -31,7 +33,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const { stores } = useStoreStore();
+  const { data: storeListData } = useStoreList();
+  const stores = React.useMemo(() => {
+    if (!storeListData) return [];
+    return flattenAndDeduplicateInfiniteData<IStoreListItem>(storeListData);
+  }, [storeListData]);
 
   const storeIdFromPath = React.useMemo(() => {
     const match = currentPath.match(/^\/stores\/([^/]+)/);
@@ -72,7 +78,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-full bg-background border-r z-50 transition-transform duration-300",
+          "fixed top-0 left-0 h-full bg-[#1a1a1a] border-r border-zinc-800 z-50 transition-transform duration-300",
           isMobile && !open && "-translate-x-full",
           !isMobile && !open && "-translate-x-full",
         )}
@@ -80,16 +86,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       >
         <div className="flex flex-col h-full">
           {/* Toolbar */}
-          <div className="flex items-center h-16 px-4 border-b">
+          <div className="flex items-center h-16 px-4 border-b border-zinc-800 gap-2">
             {stores.length > 0 ? (
-              <div className="min-w-[160px]">
+              <div className="flex-1 min-w-0">
                 <Select value={storeIdFromPath || ""} onValueChange={onSelectStore}>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 w-full bg-zinc-800 text-zinc-100 border-zinc-700 hover:bg-zinc-700">
                     <SelectValue placeholder="스토어 선택" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
                     {stores.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
+                      <SelectItem
+                        key={s.id}
+                        value={s.id}
+                        className="text-zinc-100 hover:bg-zinc-700 focus:bg-zinc-700"
+                      >
                         {s.name}
                       </SelectItem>
                     ))}
@@ -97,10 +107,15 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 </Select>
               </div>
             ) : (
-              <div className="text-sm font-medium truncate">SWEET ORDER</div>
+              <div className="flex-1 text-sm font-medium truncate text-zinc-100">SWEET ORDER</div>
             )}
             {!isMobile && (
-              <Button variant="ghost" size="icon" onClick={onToggle} className="ml-auto">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                className="flex-shrink-0 text-zinc-100 hover:bg-zinc-800 hover:text-zinc-50"
+              >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             )}
@@ -126,11 +141,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                         isParentSelected
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-accent hover:text-accent-foreground",
+                          ? "bg-zinc-700 text-zinc-50"
+                          : "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50",
                       )}
                     >
-                      {item.icon && <span className="flex-shrink-0 w-5 h-5">{item.icon}</span>}
+                      {item.icon && (
+                        <span className="flex-shrink-0 w-5 h-5 text-inherit">{item.icon}</span>
+                      )}
                       <span className="flex-1 text-left">{item.text}</span>
                     </button>
 
@@ -143,8 +160,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                               className={cn(
                                 "w-full flex items-center px-3 py-2 rounded-md text-sm transition-colors",
                                 currentPath === child.path
-                                  ? "bg-primary text-primary-foreground"
-                                  : "hover:bg-accent hover:text-accent-foreground",
+                                  ? "bg-zinc-700 text-zinc-50"
+                                  : "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50",
                               )}
                             >
                               <span className="flex-1 text-left">{child.text}</span>

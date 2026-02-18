@@ -13,6 +13,7 @@ import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants"
 import {
   NTS_API_ERROR_MESSAGES,
   KFTC_API_ERROR_MESSAGES,
+  BUSINESS_ERROR_MESSAGES,
 } from "@apps/backend/modules/business/constants/business.contants";
 
 /**
@@ -36,6 +37,11 @@ export class SellerBusinessController {
       "국세청 API를 통해 사업자등록번호, 대표자명, 개업일자의 진위를 확인합니다. \n휴업 또는 폐업상태인 경우 오류가 발생합니다.",
   })
   @SwaggerResponse(200, { dataExample: { available: true } })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(
+      BUSINESS_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_ALREADY_EXISTS,
+    ),
+  })
   @SwaggerResponse(400, {
     dataExample: createMessageObject(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE),
   })
@@ -68,6 +74,11 @@ export class SellerBusinessController {
       "공정거래위원회 API를 통해 통신판매사업자 등록상세 정보를 조회합니다. \n휴업 또는 폐업상태인 경우 오류가 발생합니다.",
   })
   @SwaggerResponse(200, { dataExample: { available: true } })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(
+      BUSINESS_ERROR_MESSAGES.PERMISSION_MANAGEMENT_NUMBER_ALREADY_EXISTS,
+    ),
+  })
   @SwaggerResponse(400, { dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES["01"]) })
   @SwaggerResponse(400, { dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES["02"]) })
   @SwaggerResponse(400, { dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES["03"]) })

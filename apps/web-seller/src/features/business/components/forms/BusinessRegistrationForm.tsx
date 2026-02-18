@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { IBusinessRegistrationForm } from "@/apps/web-seller/features/business/types/business.type";
 import {
-  isValidBusinessNo,
-  isValidStartDateYmd,
-} from "@/apps/web-seller/common/utils/validator.util";
-import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
+  validateBusinessNo,
+  validateRepresentativeName,
+  validateStartDate,
+  validateBusinessName,
+  validateBusinessSector,
+  validateBusinessType,
+} from "@/apps/web-seller/features/business/utils/validator.util";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
@@ -16,12 +19,12 @@ interface Props {
 }
 
 export const defaultForm: IBusinessRegistrationForm = {
-  b_no: "",
-  p_nm: "",
-  start_dt: "",
-  b_nm: "",
-  b_sector: "",
-  b_type: "",
+  b_no: "", // 사업자등록번호
+  p_nm: "", // 대표자명
+  start_dt: "", // 개업일
+  b_nm: "", // 상호
+  b_sector: "", // 업태
+  b_type: "", // 종목
 };
 
 export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
@@ -40,15 +43,31 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
   const validate = () => {
     const newErrors: Partial<Record<keyof IBusinessRegistrationForm, string>> = {};
 
-    if (!isValidBusinessNo(form.b_no))
-      newErrors.b_no = BUSINESS_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_INVALID_FORMAT;
-    if (!form.p_nm.trim()) newErrors.p_nm = BUSINESS_ERROR_MESSAGES.REPRESENTATIVE_NAME_REQUIRED;
-    if (!isValidStartDateYmd(form.start_dt))
-      newErrors.start_dt = BUSINESS_ERROR_MESSAGES.OPENING_DATE_INVALID_FORMAT;
-    if (!form.b_nm.trim()) newErrors.b_nm = BUSINESS_ERROR_MESSAGES.BUSINESS_NAME_REQUIRED;
-    if (!form.b_sector.trim())
-      newErrors.b_sector = BUSINESS_ERROR_MESSAGES.BUSINESS_SECTOR_REQUIRED;
-    if (!form.b_type.trim()) newErrors.b_type = BUSINESS_ERROR_MESSAGES.BUSINESS_TYPE_REQUIRED;
+    const businessNoError = validateBusinessNo(form.b_no);
+    if (businessNoError) {
+      newErrors.b_no = businessNoError;
+    }
+    const representativeNameError = validateRepresentativeName(form.p_nm);
+    if (representativeNameError) {
+      newErrors.p_nm = representativeNameError;
+    }
+    const startDateError = validateStartDate(form.start_dt);
+    if (startDateError) {
+      newErrors.start_dt = startDateError;
+    }
+    const businessNameError = validateBusinessName(form.b_nm);
+    if (businessNameError) {
+      newErrors.b_nm = businessNameError;
+    }
+    const businessSectorError = validateBusinessSector(form.b_sector);
+    if (businessSectorError) {
+      newErrors.b_sector = businessSectorError;
+    }
+    const businessTypeError = validateBusinessType(form.b_type);
+    if (businessTypeError) {
+      newErrors.b_type = businessTypeError;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -56,7 +75,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
   const handleChange =
     (key: keyof IBusinessRegistrationForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      // 숫자만 허용해야 하는 필드들: b_no(10자리), start_dt(YYYYMMDD)
+      // 숫자만 허용해야 하는 필드들: b_no(사업자등록번호), start_dt(개업일)
       const value = key === "b_no" || key === "start_dt" ? raw.replace(/\D/g, "") : raw;
       const next = { ...form, [key]: value };
       setForm(next);
@@ -78,7 +97,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             사업자등록번호
           </Label>
           <Input
-            placeholder="1234567890"
+            placeholder="하이픈(-) 없이 10자리 숫자로 입력해주세요."
             value={form.b_no}
             onChange={handleChange("b_no")}
             inputMode="numeric"
@@ -96,6 +115,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             placeholder="홍길동"
             value={form.p_nm}
             onChange={handleChange("p_nm")}
+            maxLength={30}
             className={errors.p_nm ? "border-destructive" : ""}
           />
           {errors.p_nm && <p className="text-sm text-destructive mt-1">{errors.p_nm}</p>}
@@ -119,6 +139,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             placeholder="스위트오더"
             value={form.b_nm}
             onChange={handleChange("b_nm")}
+            maxLength={50}
             className={errors.b_nm ? "border-destructive" : ""}
           />
           {errors.b_nm && <p className="text-sm text-destructive mt-1">{errors.b_nm}</p>}
@@ -129,6 +150,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             placeholder="도매 및 소매업"
             value={form.b_sector}
             onChange={handleChange("b_sector")}
+            maxLength={50}
             className={errors.b_sector ? "border-destructive" : ""}
           />
           {errors.b_sector && <p className="text-sm text-destructive mt-1">{errors.b_sector}</p>}
@@ -139,6 +161,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
             placeholder="전자상거래 소매 중개업"
             value={form.b_type}
             onChange={handleChange("b_type")}
+            maxLength={50}
             className={errors.b_type ? "border-destructive" : ""}
           />
           {errors.b_type && <p className="text-sm text-destructive mt-1">{errors.b_type}</p>}

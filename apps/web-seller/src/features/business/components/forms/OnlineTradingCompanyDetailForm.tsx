@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { IOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/types/business.type";
-import { isValidPermissionManagementNumber } from "@/apps/web-seller/common/utils/validator.util";
-import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
+import { validatePermissionManagementNumber } from "@/apps/web-seller/features/business/utils/validator.util";
 import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
 import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
 import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
@@ -14,7 +13,7 @@ interface Props {
 }
 
 export const defaultForm: IOnlineTradingCompanyDetailForm = {
-  prmmiMnno: "",
+  prmmiMnno: "", // 인허가관리번호
 };
 
 export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
@@ -38,8 +37,10 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
   const validate = () => {
     const newErrors: Partial<Record<keyof IOnlineTradingCompanyDetailForm, string>> = {};
 
-    if (!isValidPermissionManagementNumber(form.prmmiMnno))
-      newErrors.prmmiMnno = BUSINESS_ERROR_MESSAGES.PERMISSION_MANAGEMENT_NUMBER_INVALID_FORMAT;
+    const permissionManagementNumberError = validatePermissionManagementNumber(form.prmmiMnno);
+    if (permissionManagementNumberError) {
+      newErrors.prmmiMnno = permissionManagementNumberError;
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

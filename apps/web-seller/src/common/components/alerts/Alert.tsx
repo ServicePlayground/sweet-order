@@ -49,7 +49,7 @@ export function Alert() {
       case "success":
         return "border-green-500 text-green-900 bg-green-50 dark:bg-green-950 dark:text-green-100";
       case "error":
-        return "border-destructive text-destructive-foreground bg-destructive/10";
+        return "border-red-500 text-red-900 bg-red-50 dark:bg-red-950 dark:text-red-100";
       case "warning":
         return "border-orange-500 text-orange-900 bg-orange-50 dark:bg-orange-950 dark:text-orange-100";
       case "info":
@@ -76,14 +76,14 @@ export function Alert() {
             className={cn("relative shadow-lg border-2", getSeverityClasses(alert.severity))}
           >
             <div className="flex items-start gap-3">
-              {getIcon(alert.severity)}
+              <div className="text-current">{getIcon(alert.severity)}</div>
               <div className="flex-1">
                 {alert.title && <AlertTitle className="mb-1">{alert.title}</AlertTitle>}
                 <AlertDescription>{alert.message}</AlertDescription>
               </div>
               <button
                 onClick={() => handleClose(alert.id)}
-                className="flex-shrink-0 p-1 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
+                className="flex-shrink-0 p-1 rounded-sm opacity-70 hover:opacity-100 transition-opacity text-current"
               >
                 <X className="h-4 w-4" />
               </button>
