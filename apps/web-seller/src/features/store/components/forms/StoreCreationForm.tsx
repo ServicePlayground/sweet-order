@@ -6,10 +6,10 @@ import {
   validateDetailAddress,
 } from "@/apps/web-seller/features/store/utils/validator.util";
 import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/ImageMultiUpload";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
-import { AddressInput } from "@/apps/web-seller/common/components/address/AddressInput";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { AddressInput } from "@/apps/web-seller/common/components/inputs/AddressInput";
 
 interface Props {
   onSubmit: (data: IStoreForm) => void;

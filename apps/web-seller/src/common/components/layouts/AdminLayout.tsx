@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { Menu, User, LogOut } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";

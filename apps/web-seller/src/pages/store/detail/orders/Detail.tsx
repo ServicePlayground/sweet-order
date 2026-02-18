@@ -8,10 +8,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+} from "@/apps/web-seller/common/components/cards/Card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { Badge } from "@/apps/web-seller/common/components/@shadcn-ui/badge";
+import { Badge } from "@/apps/web-seller/common/components/badges/Badge";
 
 export const StoreDetailOrderDetailPage: React.FC = () => {
   const { storeId, orderId } = useParams<{ storeId: string; orderId: string }>();

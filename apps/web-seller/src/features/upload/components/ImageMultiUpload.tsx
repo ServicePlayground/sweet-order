@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { CloudUpload, Trash2, Loader2 } from "lucide-react";
-import { cn } from "@/apps/web-seller/common/lib/utils";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/mutations/useUploadMutation";
 import { ImagePreview } from "@/apps/web-seller/common/components/images/ImagePreview";
 import {

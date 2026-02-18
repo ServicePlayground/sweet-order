@@ -4,7 +4,7 @@ import { StoreCreationForm } from "@/apps/web-seller/features/store/components/f
 import { IStoreForm, IUpdateStoreRequest } from "@/apps/web-seller/features/store/types/store.type";
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { useUpdateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export const StoreDetailEditPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();

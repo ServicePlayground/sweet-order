@@ -1,7 +1,7 @@
 import React from "react";
 import { ProductCategoryType } from "@/apps/web-seller/features/product/types/product.type";
 import { PRODUCT_CATEGORY_GROUPS } from "@/apps/web-seller/features/product/constants/product.constant";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 export interface ProductCreationCategorySectionProps {
   value: ProductCategoryType[];

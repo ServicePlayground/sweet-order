@@ -1,58 +1,34 @@
 import React from "react";
+import { BaseInput } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({ label, error, ...props }) => {
-  return (
-    <div style={{ width: "100%" }}>
-      {label && (
-        <label
-          style={{
-            display: "block",
-            marginBottom: "8px",
-            fontSize: "14px",
-            fontWeight: "500",
-            color: "#333",
-          }}
-        >
-          {label}
-        </label>
-      )}
-      <input
-        {...props}
-        style={{
-          width: "100%",
-          height: "48px",
-          padding: "0 16px",
-          border: `1px solid ${error ? "#e74c3c" : "#e0e0e0"}`,
-          borderRadius: "6px",
-          fontSize: "16px",
-          outline: "none",
-          transition: "border-color 0.2s ease",
-          ...props.style,
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = error ? "#e74c3c" : "#007bff";
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = error ? "#e74c3c" : "#e0e0e0";
-        }}
-      />
-      {error && (
-        <p
-          style={{
-            marginTop: "6px",
-            fontSize: "12px",
-            color: "#e74c3c",
-            marginBottom: 0,
-          }}
-        >
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, className, ...props }, ref) => {
+    return (
+      <div className="w-full">
+        {label && (
+          <Label className="block mb-2 text-sm font-medium text-foreground">{label}</Label>
+        )}
+        <BaseInput
+          ref={ref}
+          className={cn(
+            "h-12 px-4 text-base rounded-md transition-colors",
+            error && "border-destructive focus-visible:ring-destructive",
+            className,
+          )}
+          {...props}
+        />
+        {error && (
+          <p className="mt-1.5 text-xs text-destructive mb-0">{error}</p>
+        )}
+      </div>
+    );
+  },
+);
+Input.displayName = "Input";

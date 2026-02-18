@@ -9,9 +9,9 @@ import {
   VISIBILITY_STATUS_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
 import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/ImageMultiUpload";
-import { SelectBox } from "@/apps/web-seller/common/components/selectboxs/SelectBox";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { SelectBox } from "@/apps/web-seller/common/components/selects/SelectBox";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { ProductCreationCategorySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCategorySection";
 import { ProductCreationSearchTagSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationSearchTagSection";
 

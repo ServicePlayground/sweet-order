@@ -5,8 +5,8 @@ import { useMarkChatRoomAsRead } from "@/apps/web-seller/features/chat/hooks/mut
 import { chatSocketService } from "@/apps/web-seller/features/chat/services/chat-socket.service";
 import { Message } from "@/apps/web-seller/features/chat/types/chat.type";
 import { Send } from "lucide-react";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Textarea } from "@/apps/web-seller/common/components/@shadcn-ui/textarea";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { Textarea } from "@/apps/web-seller/common/components/textareas/Textarea";
 import { formatTime } from "@/apps/web-seller/common/utils/date.util";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";

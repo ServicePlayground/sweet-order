@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { ProgressBar } from "@/apps/web-seller/common/components/progressbars/progressbar";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { ProgressBar } from "@/apps/web-seller/common/components/progressbars/ProgressBar";
 import { BusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { OnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";

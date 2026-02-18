@@ -6,15 +6,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/apps/web-seller/common/components/@shadcn-ui/select";
-import { cn } from "@/apps/web-seller/common/lib/utils";
+} from "@/apps/web-seller/common/components/selects/Select";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 
 interface AdminSidebarProps {
   isMobile: boolean;

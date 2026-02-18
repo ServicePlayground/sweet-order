@@ -6,13 +6,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/apps/web-seller/common/components/@shadcn-ui/select";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
+} from "@/apps/web-seller/common/components/selects/Select";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { useOrderList } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
 import { OrderList } from "@/apps/web-seller/features/order/components/list/OrderList";
 import { OrderSortBy, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 export const StoreDetailOrderListPage: React.FC = () => {
   const { storeId } = useParams();

@@ -11,7 +11,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
 } from "@/apps/web-seller/features/product/hooks/mutations/useProductMutation";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export const StoreDetailProductDetailPage: React.FC = () => {
   const { storeId, productId } = useParams<{ storeId: string; productId: string }>();
