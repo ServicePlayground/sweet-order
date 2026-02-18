@@ -152,6 +152,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         productNoticeAddress={data.productNoticeAddress}
         pickupAddress={data.pickupAddress}
         pickupRoadAddress={data.pickupRoadAddress}
+        pickupDetailAddress={data.pickupDetailAddress}
         pickupZonecode={data.pickupZonecode}
         pickupLatitude={data.pickupLatitude}
         pickupLongitude={data.pickupLongitude}

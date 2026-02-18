@@ -7,8 +7,8 @@ import { IStoreAddress } from "@/apps/web-seller/features/store/types/store.type
 
 interface AddressInputProps {
   required?: boolean;
-  value: IStoreAddress;
-  onChange: (data: IStoreAddress) => void;
+  value: Omit<IStoreAddress, "detailAddress">;
+  onChange: (data: Omit<IStoreAddress, "detailAddress">) => void;
   error?: string;
 }
 

@@ -14,9 +14,10 @@ export interface StoreInfo {
   businessType: string;
   // 통신판매사업자 정보
   permissionManagementNumber: string;
-  // 주소/위치 정보 (필수)
+  // 주소/위치 정보
   address: string;
   roadAddress: string;
+  detailAddress: string;
   zonecode: string;
   latitude: number;
   longitude: number;

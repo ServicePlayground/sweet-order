@@ -23,6 +23,7 @@ export const SWAGGER_EXAMPLES = {
   // 주소/위치 정보
   ADDRESS: "서울특별시 강남구 역삼동 456-789",
   ROAD_ADDRESS: "서울특별시 강남구 테헤란로 123",
+  DETAIL_ADDRESS: "101호",
   ZONECODE: "06234",
   LATITUDE: 37.5665,
   LONGITUDE: 126.978,

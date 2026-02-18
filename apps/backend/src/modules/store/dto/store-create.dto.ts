@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsString, ValidateNested, IsNumber, Min, Max } from "class-validator";
+import { ValidateNested } from "class-validator";
 import {
   BusinessValidationRequestDto,
   OnlineTradingCompanyDetailRequestDto,
@@ -12,12 +12,13 @@ import {
 } from "@apps/backend/modules/store/decorators/validators.decorator";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
+import { StoreAddressDto } from "@apps/backend/modules/store/dto/store-common.dto";
 
 /**
  * 스토어 생성 요청 DTO (3단계)
  * 1단계, 2단계의 요청 파라미터와 스토어 정보를 포함합니다.
  */
-export class CreateStoreRequestDto {
+export class CreateStoreRequestDto extends StoreAddressDto {
   // 1단계: 사업자등록번호 진위확인 요청
   @ApiProperty({
     description: "1단계 사업자등록번호 진위확인 요청 정보",
@@ -60,50 +61,7 @@ export class CreateStoreRequestDto {
   @IsValidStoreDescription()
   description?: string;
 
-  // 주소/위치 정보 (필수)
-  @ApiProperty({
-    description: "지번 주소 (예: 서울특별시 강남구 역삼동 456-789)",
-    example: SWAGGER_EXAMPLES.ADDRESS,
-  })
-  @IsString()
-  @IsNotEmpty()
-  address: string;
-
-  @ApiProperty({
-    description: "도로명 주소 (예: 서울특별시 강남구 테헤란로 123)",
-    example: SWAGGER_EXAMPLES.ROAD_ADDRESS,
-  })
-  @IsString()
-  @IsNotEmpty()
-  roadAddress: string;
-
-  @ApiProperty({
-    description: "우편번호",
-    example: SWAGGER_EXAMPLES.ZONECODE,
-  })
-  @IsString()
-  @IsNotEmpty()
-  zonecode: string;
-
-  @ApiProperty({
-    description: "위도 (카카오지도 마커 표시 및 거리 계산용)",
-    example: SWAGGER_EXAMPLES.LATITUDE,
-  })
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  @IsNotEmpty()
-  latitude: number;
-
-  @ApiProperty({
-    description: "경도 (카카오지도 마커 표시 및 거리 계산용)",
-    example: SWAGGER_EXAMPLES.LONGITUDE,
-  })
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  @IsNotEmpty()
-  longitude: number;
+  // 주소/위치는 StoreAddressDto 상속
 }
 
 /**

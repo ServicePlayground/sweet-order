@@ -187,9 +187,8 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             <div>
               <div className="text-sm font-medium text-muted-foreground">주소</div>
               <div>{order.pickupRoadAddress || order.pickupAddress}</div>
-              {order.pickupAddress && order.pickupRoadAddress && (
-                <div className="text-sm text-muted-foreground">{order.pickupAddress}</div>
-              )}
+              {order.pickupAddress && order.pickupRoadAddress && <div>{order.pickupAddress}</div>}
+              {order.pickupDetailAddress && <div>{order.pickupDetailAddress}</div>}
             </div>
             {order.pickupZonecode && (
               <div>
@@ -200,7 +199,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             {order.pickupLatitude && order.pickupLongitude && (
               <div>
                 <div className="text-sm font-medium text-muted-foreground">위치</div>
-                <div className="text-sm">
+                <div>
                   위도: {order.pickupLatitude}, 경도: {order.pickupLongitude}
                 </div>
               </div>

@@ -153,6 +153,7 @@ export interface IProductItem extends ICreateProductRequest {
   // 픽업장소 정보 (스토어 위치 정보)
   pickupAddress: string;
   pickupRoadAddress: string;
+  pickupDetailAddress?: string;
   pickupZonecode: string;
   pickupLatitude: number;
   pickupLongitude: number;

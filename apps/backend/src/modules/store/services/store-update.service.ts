@@ -36,6 +36,7 @@ export class StoreUpdateService {
       name: string;
       address: string;
       roadAddress: string;
+      detailAddress: string;
       zonecode: string;
       latitude: number;
       longitude: number;
@@ -44,6 +45,7 @@ export class StoreUpdateService {
       name: updateStoreDto.name,
       address: updateStoreDto.address,
       roadAddress: updateStoreDto.roadAddress,
+      detailAddress: updateStoreDto.detailAddress,
       zonecode: updateStoreDto.zonecode,
       latitude: updateStoreDto.latitude,
       longitude: updateStoreDto.longitude,

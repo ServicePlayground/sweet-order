@@ -52,11 +52,13 @@ export interface OrderResponse {
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;
-  pickupAddress?: string;
-  pickupRoadAddress?: string;
-  pickupZonecode?: string;
-  pickupLatitude?: number;
-  pickupLongitude?: number;
+  // 픽업장소
+  pickupAddress: string;
+  pickupRoadAddress: string;
+  pickupDetailAddress?: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
   orderStatus: OrderStatus;
   createdAt: Date;
   updatedAt: Date;

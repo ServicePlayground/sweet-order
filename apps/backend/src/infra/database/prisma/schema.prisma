@@ -176,11 +176,12 @@ model Store {
   description  String? // 스토어 설명
 
   // 비즈니스 필드 - 주소/위치 정보 (카카오지도 활용용)
-  address     String // 지번 주소 (예: "서울특별시 강남구 역삼동 456-789")
-  roadAddress String // 도로명 주소 (예: "서울특별시 강남구 테헤란로 123")
-  zonecode    String // 우편번호
-  latitude    Float // 위도 (카카오지도 마커 표시 및 거리 계산용)
-  longitude   Float // 경도 (카카오지도 마커 표시 및 거리 계산용)
+  address      String? // 지번 주소 (예: "서울특별시 강남구 역삼동 456-789")
+  roadAddress  String? // 도로명 주소 (예: "서울특별시 강남구 테헤란로 123")
+  detailAddress String? // 상세주소 (예: "101호", "지하 1층")
+  zonecode     String? // 우편번호
+  latitude     Float? // 위도 (카카오지도 마커 표시 및 거리 계산용)
+  longitude    Float? // 경도 (카카오지도 마커 표시 및 거리 계산용)
 
   // 비즈니스 필드 - 사업자 정보 (1단계 - 사용자 입력값만 저장)
   businessNo        String @map("business_no") // 사업자등록번호
@@ -366,11 +367,12 @@ model Order {
   totalPrice     Int @map("total_price") // 총 금액
 
   // 비즈니스 필드 - 픽업 정보
-  pickupAddress    String? @map("pickup_address") // 픽업 주소 (지번 주소, 예: "서울특별시 강남구 역삼동 456-789")
-  pickupRoadAddress String? @map("pickup_road_address") // 픽업 주소 (도로명 주소, 예: "서울특별시 강남구 테헤란로 123")
-  pickupZonecode    String? @map("pickup_zonecode") // 픽업 장소 우편번호
-  pickupLatitude    Float? @map("pickup_latitude") // 픽업 장소 위도
-  pickupLongitude   Float? @map("pickup_longitude") // 픽업 장소 경도
+  pickupAddress      String? @map("pickup_address") // 픽업 주소 (지번 주소, 예: "서울특별시 강남구 역삼동 456-789")
+  pickupRoadAddress  String? @map("pickup_road_address") // 픽업 주소 (도로명 주소, 예: "서울특별시 강남구 테헤란로 123")
+  pickupDetailAddress String? @map("pickup_detail_address") // 픽업 상세주소 (예: "101호", "지하 1층")
+  pickupZonecode     String? @map("pickup_zonecode") // 픽업 장소 우편번호
+  pickupLatitude     Float? @map("pickup_latitude") // 픽업 장소 위도
+  pickupLongitude    Float? @map("pickup_longitude") // 픽업 장소 경도
 
   // 비즈니스 필드 - 주문 상태
   orderStatus OrderStatus @default(PENDING) @map("order_status") // 주문 상태

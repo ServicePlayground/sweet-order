@@ -163,6 +163,52 @@ export class IsValidStoreDescriptionConstraint implements ValidatorConstraintInt
 }
 
 /**
+ * 상세주소 유효성 검증 제약 조건
+ */
+@ValidatorConstraint({ name: "isValidDetailAddress", async: false })
+export class IsValidDetailAddressConstraint implements ValidatorConstraintInterface {
+  private errorType: string = "";
+
+  validate(detailAddress: string): boolean {
+    // 미입력 검증
+    if (!detailAddress || !detailAddress.trim()) {
+      this.errorType = "미입력";
+      return false;
+    }
+
+    const trimmedAddress = detailAddress.trim();
+
+    // 2자 미만 검증
+    if (trimmedAddress.length < 2) {
+      this.errorType = "2자미만";
+      return false;
+    }
+
+    // 1000자 초과 검증
+    if (trimmedAddress.length > 1000) {
+      this.errorType = "1000자초과";
+      return false;
+    }
+
+    this.errorType = "";
+    return true;
+  }
+
+  defaultMessage(): string {
+    if (this.errorType === "미입력") {
+      return "상세주소를 입력해주세요.";
+    }
+    if (this.errorType === "2자미만") {
+      return "상세주소를 2자 이상 입력해주세요.";
+    }
+    if (this.errorType === "1000자초과") {
+      return "상세주소는 1000자 이하여야 합니다.";
+    }
+    return "상세주소를 입력해주세요.";
+  }
+}
+
+/**
  * 공통 데코레이터 팩토리 함수
  */
 function createValidatorDecorator(
@@ -199,4 +245,11 @@ export function IsValidStoreName(validationOptions?: ValidationOptions) {
  */
 export function IsValidStoreDescription(validationOptions?: ValidationOptions) {
   return createValidatorDecorator(new IsValidStoreDescriptionConstraint(), validationOptions);
+}
+
+/**
+ * 상세주소 유효성 검증 데코레이터
+ */
+export function IsValidDetailAddress(validationOptions?: ValidationOptions) {
+  return createValidatorDecorator(new IsValidDetailAddressConstraint(), validationOptions);
 }
