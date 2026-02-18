@@ -222,16 +222,16 @@ export class FileValidator {
    * 기존 파일과 충돌 방지를 위해 타임스탬프와 랜덤 문자열을 추가
    */
   static generateUniqueFilename(originalname: string): string {
-    const normalized = this.normalizeFilename(originalname);
-    const ext = path.extname(normalized);
-    const nameWithoutExt = path.basename(normalized, ext);
-
+    // 원본 파일명에서 확장자만 추출
+    const ext = path.extname(originalname);
+  
     // 타임스탬프 + 랜덤 문자열 생성
     const timestamp = Date.now();
     const randomString = crypto.randomBytes(4).toString("hex");
 
     // 고유 파일명: 원본이름_타임스탬프_랜덤.확장자
-    const uniqueName = `${nameWithoutExt}_${timestamp}_${randomString}${ext}`;
+    // 원본 파일명이 없으면 (확장자만 있는 경우) 빈 문자열이 되어 .png_타임스탬프_랜덤 형식이 됨
+    const uniqueName = `${timestamp}_${randomString}${ext}`;
 
     return `${UPLOAD_CONSTANTS.UPLOAD_DIRECTORY}/${uniqueName}`;
   }
@@ -336,7 +336,6 @@ export class FileValidator {
    * 전체 파일 검증 (통합)
    */
   static validateFile(file: { originalname: string; mimetype: string; buffer: Buffer }): {
-    normalizedFilename: string;
     uniqueFilename: string;
   } {
     // 기본 필수 필드 검증
@@ -362,14 +361,10 @@ export class FileValidator {
     // 매직 바이트(파일 시그니처) 검증
     this.validateMagicBytes(file.originalname, file.mimetype, file.buffer);
 
-    // 파일 이름 정규화
-    const normalizedFilename = this.normalizeFilename(file.originalname);
-
     // 고유 파일 이름 생성
     const uniqueFilename = this.generateUniqueFilename(file.originalname);
 
     return {
-      normalizedFilename,
       uniqueFilename,
     };
   }
