@@ -25,6 +25,7 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[];
   totalQuantity: number;
   totalPrice: number;
+  storeName: string;
   // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;

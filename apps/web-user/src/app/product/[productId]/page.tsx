@@ -150,6 +150,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         productType={data.productType}
         productNoticeProducer={data.productNoticeProducer}
         productNoticeAddress={data.productNoticeAddress}
+        storeName={data.storeName}
         pickupAddress={data.pickupAddress}
         pickupRoadAddress={data.pickupRoadAddress}
         pickupDetailAddress={data.pickupDetailAddress}

@@ -21,6 +21,7 @@ export function ReservationBottomSheet({
   cakeSizeOptions,
   cakeFlavorOptions,
   productType,
+  storeName,
   pickupAddress,
   pickupRoadAddress,
   pickupDetailAddress,
@@ -205,6 +206,7 @@ export function ReservationBottomSheet({
                 productId,
                 totalQuantity,
                 totalPrice,
+                storeName,
                 // 픽업 정보
                 pickupAddress,
                 pickupRoadAddress,

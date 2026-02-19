@@ -30,6 +30,7 @@ export interface ReservationBottomSheetProps {
   productType: ProductType;
   productNoticeProducer?: string;
   productNoticeAddress?: string;
+  storeName: string;
   // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;

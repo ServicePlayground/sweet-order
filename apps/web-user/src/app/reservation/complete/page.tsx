@@ -85,7 +85,6 @@ export default function ReservationCompletePage() {
       )}
 
       <div className="absolute bottom-[76px] left-0 right-0 h-[calc(70%-48px)] px-[20px] pt-[56px] bg-white rounded-t-4xl">
-        
         {cakeImageUrl && (
           <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
             <Image src={cakeImageUrl} alt={cakeTitle} fill className="object-cover" />
@@ -110,11 +109,13 @@ export default function ReservationCompletePage() {
             <div className="relative flex items-start justify-between mb-[24px] px-[16px] text-sm after:content-[''] after:absolute after:bottom-[-12px] after:left-4 after:right-4 after:h-[1px] after:bg-gray-50">
               <span className="text-gray-500">픽업장소</span>
               <span className="flex flex-col items-end text-gray-900">
-                <span>{orderData.storeName || '스토어명 없음'}</span>
-                <span className="text-gray-400 text-2sm">{orderData.pickupRoadAddress ||
-                  orderData.pickupAddress ||
-                  productData.pickupRoadAddress ||
-                  productData.pickupAddress}
+                <span>{orderData.storeName || "스토어명 없음"}</span>
+                <span className="text-gray-400 text-2sm">
+                  {orderData.pickupRoadAddress ||
+                    orderData.pickupAddress ||
+                    productData.pickupRoadAddress ||
+                    productData.pickupAddress}
+                  {orderData.pickupDetailAddress && ` ${orderData.pickupDetailAddress}`}
                 </span>
               </span>
             </div>
@@ -224,17 +225,17 @@ export default function ReservationCompletePage() {
                 </div>
               );
             })}
-        </div>
-        <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] max-w-[638px] mx-auto bg-white">
-          <div className="flex gap-[8px]">
-            <Link href={`/store/${orderData.storeId}`} className="flex-1">
-              <Button variant="outline">예약 상세보기</Button>
-            </Link>
-            <Link href="/" className="flex-1">
-              <Button variant="outline">홈으로 가기</Button>
-            </Link>
           </div>
-        </div>
+          <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] max-w-[638px] mx-auto bg-white">
+            <div className="flex gap-[8px]">
+              <Link href={`/store/${orderData.storeId}`} className="flex-1">
+                <Button variant="outline">예약 상세보기</Button>
+              </Link>
+              <Link href="/" className="flex-1">
+                <Button variant="outline">홈으로 가기</Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
       <button className="absolute top-[14px] right-[20px]" onClick={() => router.push("/")}>
