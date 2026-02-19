@@ -213,7 +213,6 @@ export function useReservationBottomSheet({
       cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
 
     const newItem: OrderItem = {
-      date: selectedDate,
       size: selectedSize,
       sizePrice,
       flavor: selectedFlavor,
@@ -227,32 +226,13 @@ export function useReservationBottomSheet({
     };
 
     if (editingIndex !== null) {
-      // 옵션변경 모드에서 날짜가 변경되었으면 기존 orderItems의 날짜도 전부 업데이트
-      if (isEditingFromConfirm && selectedDate) {
-        setOrderItems((prev) =>
-          prev.map((item, i) =>
-            i === editingIndex
-              ? { ...newItem, quantity: item.quantity }
-              : { ...item, date: selectedDate },
-          ),
-        );
-      } else {
-        setOrderItems((prev) =>
-          prev.map((item, i) =>
-            i === editingIndex ? { ...newItem, quantity: item.quantity } : item,
-          ),
-        );
-      }
+      setOrderItems((prev) =>
+        prev.map((item, i) =>
+          i === editingIndex ? { ...newItem, quantity: item.quantity } : item,
+        ),
+      );
     } else {
-      // 상품추가 모드에서 날짜가 변경되었으면 기존 orderItems의 날짜도 전부 업데이트
-      if (isAddingFromConfirm && selectedDate) {
-        setOrderItems((prev) => [
-          ...prev.map((item) => ({ ...item, date: selectedDate })),
-          newItem,
-        ]);
-      } else {
-        setOrderItems((prev) => [...prev, newItem]);
-      }
+      setOrderItems((prev) => [...prev, newItem]);
     }
 
     resetCurrentOptions();
@@ -288,7 +268,6 @@ export function useReservationBottomSheet({
   // 특정 상품 편집 모드로 전환
   const handleEditItem = (index: number) => {
     const item = orderItems[index];
-    setSelectedDate(item.date);
     setSelectedSize(item.size);
     setSelectedFlavor(item.flavor);
     setSelectedCream(item.cream);
@@ -305,12 +284,6 @@ export function useReservationBottomSheet({
   // 새 상품 추가 모드로 전환
   const handleAddNewItem = () => {
     resetCurrentOptions();
-    // 첫 번째 orderItem의 날짜를 유지
-    if (orderItems.length > 0 && orderItems[0].date) {
-      setSelectedDate(orderItems[0].date);
-    } else {
-      setSelectedDate(null);
-    }
     setIsAddingFromConfirm(true);
     setIsEditingFromConfirm(false);
     setView("options");
