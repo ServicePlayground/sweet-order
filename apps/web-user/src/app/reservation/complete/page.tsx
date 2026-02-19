@@ -96,7 +96,7 @@ export default function ReservationCompletePage() {
           <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
             {snapshot.productType === ProductType.BASIC_CAKE ? "예약완료" : "예약신청완료"} 🎉
           </p>
-          <div className="pb-[60px] h-[calc(100%-56px)] overflow-y-auto"> 
+          <div className="pb-[60px] h-[calc(100%-56px)] overflow-y-auto">
             <p className="flex items-center gap-[8px] mb-[28px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-50 rounded-xl">
               <Icon name="warning" width={16} height={16} className="text-blue-400" />
               예약 확정까지 1-2일 소요될 수 있어요.
@@ -105,7 +105,8 @@ export default function ReservationCompletePage() {
               <div className="flex items-start justify-between mb-[6px] px-[16px] text-sm">
                 <span className="text-gray-500">픽업장소</span>
                 <span className="text-gray-900 text-end">
-                  {snapshot.productNoticeProducer}<br />
+                  {snapshot.productNoticeProducer}
+                  <br />
                   <span className="text-gray-400 text-2sm">{snapshot.productNoticeAddress}</span>
                 </span>
               </div>

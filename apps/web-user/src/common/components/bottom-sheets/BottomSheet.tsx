@@ -96,7 +96,9 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
         {footer && (
           <div
             className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white transition-transform duration-200"
-            style={{ transform: keyboardHeight > 0 ? `translateY(${keyboardHeight}px)` : undefined }}
+            style={{
+              transform: keyboardHeight > 0 ? `translateY(${keyboardHeight}px)` : undefined,
+            }}
           >
             {footer}
           </div>

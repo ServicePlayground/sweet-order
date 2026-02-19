@@ -50,7 +50,9 @@ export function ReservationConfirmView({
               <div className="flex pb-[12px] border-b border-gray-100">
                 <div className="flex-1 flex flex-col">
                   <div className="text-sm font-bold text-gray-900">{cakeTitle}</div>
-                  <div className="text-sm font-bold text-gray-900 mb-[4px]">{(price + item.sizePrice + item.flavorPrice).toLocaleString()}원</div>
+                  <div className="text-sm font-bold text-gray-900 mb-[4px]">
+                    {(price + item.sizePrice + item.flavorPrice).toLocaleString()}원
+                  </div>
                   <ul className="text-xs text-gray-700 pl-[18px] list-disc">
                     <li>사이즈 : {item.size}</li>
                     <li>맛 : {item.flavor}</li>

@@ -126,7 +126,9 @@ export const Select = <T extends string | number = string>({
         >
           <span className="flex items-center justify-between w-full">
             <span>{displayLabel}</span>
-            {selectedOption?.subLabel && <span className="text-gray-900">{selectedOption.subLabel}</span>}
+            {selectedOption?.subLabel && (
+              <span className="text-gray-900">{selectedOption.subLabel}</span>
+            )}
           </span>
         </button>
         <Icon

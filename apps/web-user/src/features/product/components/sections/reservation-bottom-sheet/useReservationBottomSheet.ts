@@ -316,7 +316,8 @@ export function useReservationBottomSheet({
   };
 
   const currentSizePrice = cakeSizeOptions?.find((s) => s.displayName === selectedSize)?.price ?? 0;
-  const currentFlavorPrice = cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
+  const currentFlavorPrice =
+    cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
   const currentOptionPrice = price + currentSizePrice + currentFlavorPrice;
 
   const totalQuantity = orderItems.reduce((sum, item) => sum + item.quantity, 0);

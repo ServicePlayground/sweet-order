@@ -55,15 +55,13 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   const isLikeLoading = isAddingLike || isRemovingLike;
 
   // 좌표로 거리 계산
-  const calculateAndSetDistance = useCallback((latitude: number, longitude: number) => {
-    const dist = calculateDistance(
-      latitude,
-      longitude,
-      store.latitude,
-      store.longitude
-    );
-    setDistance(dist);
-  }, [store.latitude, store.longitude]);
+  const calculateAndSetDistance = useCallback(
+    (latitude: number, longitude: number) => {
+      const dist = calculateDistance(latitude, longitude, store.latitude, store.longitude);
+      setDistance(dist);
+    },
+    [store.latitude, store.longitude],
+  );
 
   // 현재 위치 가져오기 및 거리 계산
   useEffect(() => {
