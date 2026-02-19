@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import {
-  MessageListResponseDto,
-  MessagePaginationMetaResponseDto,
-} from "@apps/backend/modules/chat/dto/message-response.dto";
-import { GetMessagesRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
+import { MessageListResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { ChatRoomDetailService } from "./chat-room-detail.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
@@ -22,13 +19,14 @@ export class ChatMessageListService {
   ) {}
 
   /**
-   * 채팅방 메시지 목록 조회 (페이지 기반 페이지네이션)
+   * 채팅방 메시지 목록 조회 (공통)
+   * 페이지 기반 페이지네이션을 지원합니다.
    */
   async getMessages(
     roomId: string,
     userId: string,
     userType: "user" | "store",
-    query: GetMessagesRequestDto,
+    query: PaginationRequestDto,
   ): Promise<MessageListResponseDto> {
     // 채팅방 조회 및 권한 확인
     const chatRoom = await this.chatRoomDetailService.findChatRoomById(roomId);
@@ -58,11 +56,7 @@ export class ChatMessageListService {
       .map((msg) => ChatMapperUtil.mapToMessageResponseDto(msg));
 
     // 페이지네이션 메타 정보 계산
-    const meta: MessagePaginationMetaResponseDto = calculatePaginationMeta(
-      page,
-      limit,
-      totalItems,
-    ) as MessagePaginationMetaResponseDto;
+    const meta = calculatePaginationMeta(page, limit, totalItems);
 
     return {
       data: reversedMessages,

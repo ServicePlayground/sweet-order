@@ -10,17 +10,17 @@ import {
   CAKE_SIZE_DISPLAY_NAME_OPTIONS,
   VISIBILITY_STATUS_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/apps/web-seller/common/components/@shadcn-ui/select";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+} from "@/apps/web-seller/common/components/selects/Select";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import { Trash2, Plus } from "lucide-react";
 
 export interface ProductCreationCakeOptionsSectionProps {
@@ -49,7 +49,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
   const handleAddSizeOption = () => {
     const newOption: CakeSizeOption = {
       visible: EnableStatus.ENABLE,
-      displayName: CakeSizeDisplayName.MINI,
+      displayName: CakeSizeDisplayName.DOSIRAK,
       lengthCm: 0,
       price: 0,
       description: "",

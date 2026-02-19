@@ -55,18 +55,29 @@ export enum ProductType {
   CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
 }
 
+export enum ProductCategoryType {
+  BIRTHDAY = "BIRTHDAY", // 생일
+  LOVER = "LOVER", // 연인
+  FRIEND = "FRIEND", // 친구
+  FAMILY = "FAMILY", // 가족
+  ANNIVERSARY = "ANNIVERSARY", // 기념일
+  SAME_DAY_PICKUP = "SAME_DAY_PICKUP", // 당일픽업
+  LETTERING = "LETTERING", // 레터링
+  CHARACTER = "CHARACTER", // 캐릭터
+  SIMPLE = "SIMPLE", // 심플
+  FLOWER = "FLOWER", // 꽃
+  PHOTO = "PHOTO", // 사진
+}
+
 /**
  * 케이크 사이즈 표시명 enum
  */
 export enum CakeSizeDisplayName {
+  DOSIRAK = "도시락",
   MINI = "미니",
   SIZE_1 = "1호",
   SIZE_2 = "2호",
   SIZE_3 = "3호",
-  SIZE_4 = "4호",
-  SIZE_5 = "5호",
-  SIZE_6 = "6호",
-  SIZE_7 = "7호",
 }
 
 /**
@@ -86,13 +97,21 @@ export const SWAGGER_EXAMPLES = {
       {
         id: "size_abcd1234",
         visible: EnableStatus.ENABLE,
+        displayName: CakeSizeDisplayName.DOSIRAK,
+        lengthCm: 8,
+        price: 25000,
+        description: "1인용",
+      },
+      {
+        id: "size_efgh5678",
+        visible: EnableStatus.ENABLE,
         displayName: CakeSizeDisplayName.MINI,
         lengthCm: 10,
         price: 30000,
         description: "1~2인용",
       },
       {
-        id: "size_efgh5678",
+        id: "size_ijkl9012",
         visible: EnableStatus.ENABLE,
         displayName: CakeSizeDisplayName.SIZE_1,
         lengthCm: 15,
@@ -119,6 +138,8 @@ export const SWAGGER_EXAMPLES = {
     letteringMaxLength: 20,
     imageUploadEnabled: EnableStatus.ENABLE,
     productType: "CUSTOM_CAKE",
+    productCategoryTypes: ["BIRTHDAY", "SIMPLE"],
+    searchTags: ["생일케이크", "초콜릿", "당일배송"],
     // 상세 정보
     detailDescription: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
     // 고시정보 (식품 판매 시 법적 필수 항목)

@@ -9,6 +9,7 @@ import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 휴대폰 인증 서비스
@@ -37,26 +38,32 @@ export class PhoneService {
     const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
-    await this.prisma.$transaction(async (tx) => {
-      // 기존 미인증 레코드 삭제 (같은 목적의 인증코드만 삭제하여 다른 목적의 인증코드는 유지)
-      await tx.phoneVerification.deleteMany({
-        where: {
-          phone: normalizedPhone,
-          purpose,
-          isVerified: false,
-        },
-      });
+    await this.prisma.$transaction(
+      async (tx) => {
+        // 기존 미인증 레코드 삭제 (같은 목적의 인증코드만 삭제하여 다른 목적의 인증코드는 유지)
+        await tx.phoneVerification.deleteMany({
+          where: {
+            phone: normalizedPhone,
+            purpose,
+            isVerified: false,
+          },
+        });
 
-      // 새 인증 정보 생성
-      await tx.phoneVerification.create({
-        data: {
-          phone: normalizedPhone,
-          verificationCode,
-          expiresAt,
-          purpose,
-        },
-      });
-    });
+        // 새 인증 정보 생성
+        await tx.phoneVerification.create({
+          data: {
+            phone: normalizedPhone,
+            verificationCode,
+            expiresAt,
+            purpose,
+          },
+        });
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
 
     // 3. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
     // TODO: 실제 SMS 발송 서비스 연동 (예: 네이버 클라우드 플랫폼, 카카오 알림톡 등)
@@ -85,22 +92,34 @@ export class PhoneService {
 
       // 인증 정보가 존재하지 않는 경우
       if (!existingVerification) {
+        LoggerUtil.log(
+          `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${purpose}`,
+        );
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
       }
 
       // 2. 만료 시간 확인 - 5분 후 자동 만료
       if (existingVerification.expiresAt < new Date()) {
+        LoggerUtil.log(
+          `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${purpose}, expiresAt: ${existingVerification.expiresAt}`,
+        );
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
       }
 
-      await this.prisma.$transaction(async (tx) => {
-        await tx.phoneVerification.update({
-          where: { id: existingVerification.id },
-          data: {
-            isVerified: true, // is_verified 플래그로 본인인증 상태 관리
-          },
-        });
-      });
+      await this.prisma.$transaction(
+        async (tx) => {
+          await tx.phoneVerification.update({
+            where: { id: existingVerification.id },
+            data: {
+              isVerified: true, // is_verified 플래그로 본인인증 상태 관리
+            },
+          });
+        },
+        {
+          maxWait: 5000, // 최대 대기 시간 (5초)
+          timeout: 10000, // 타임아웃 (10초)
+        },
+      );
       return;
     }
 
@@ -118,24 +137,36 @@ export class PhoneService {
 
     // 인증 정보가 존재하지 않는 경우
     if (!phoneVerification) {
+      LoggerUtil.log(
+        `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${purpose}, verificationCode: ${verificationCode}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
     }
 
     // 2. 만료 시간 확인 - 5분 후 자동 만료
     if (phoneVerification.expiresAt < new Date()) {
+      LoggerUtil.log(
+        `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${purpose}, expiresAt: ${phoneVerification.expiresAt}`,
+      );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
     }
 
     // 3. 인증 성공 처리 - 트랜잭션으로 안전하게 처리
-    await this.prisma.$transaction(async (tx) => {
-      // 현재 인증을 완료 상태로 업데이트
-      await tx.phoneVerification.update({
-        where: { id: phoneVerification.id },
-        data: {
-          isVerified: true, // is_verified 플래그로 본인인증 상태 관리
-        },
-      });
-    });
+    await this.prisma.$transaction(
+      async (tx) => {
+        // 현재 인증을 완료 상태로 업데이트
+        await tx.phoneVerification.update({
+          where: { id: phoneVerification.id },
+          data: {
+            isVerified: true, // is_verified 플래그로 본인인증 상태 관리
+          },
+        });
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
   }
 
   /**

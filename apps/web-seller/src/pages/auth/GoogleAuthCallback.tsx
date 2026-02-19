@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   useGoogleLogin,
   useGoogleRegister,
-} from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+} from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import {
   GoogleLoginFormData,

@@ -17,3 +17,11 @@ export const LIKE_SUCCESS_MESSAGES = {
   STORE_LIKE_ADDED: "스토어에 좋아요를 추가했습니다.",
   STORE_LIKE_REMOVED: "스토어 좋아요를 취소했습니다.",
 } as const;
+
+/**
+ * 좋아요 타입 enum
+ */
+export enum LikeType {
+  PRODUCT = "PRODUCT", // 상품 좋아요
+  STORE = "STORE", // 스토어 좋아요
+}

@@ -10,15 +10,14 @@ export const UPLOAD_CONSTANTS = {
     "image/png",
     "image/gif",
     "image/webp",
-    "image/svg+xml",
-    // 문서
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
-    // 기타
-    "text/plain",
+    // 문서 (주석처리 - 이미지만 허용)
+    // "application/pdf",
+    // "application/msword",
+    // "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+    // "application/vnd.ms-excel",
+    // "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+    // 기타 (주석처리 - 이미지만 허용)
+    // "text/plain",
   ] as readonly string[],
 
   // 허용된 파일 확장자
@@ -28,13 +27,13 @@ export const UPLOAD_CONSTANTS = {
     ".png",
     ".gif",
     ".webp",
-    ".svg",
-    ".pdf",
-    ".doc",
-    ".docx",
-    ".xls",
-    ".xlsx",
-    ".txt",
+    // 문서 확장자 (주석처리 - 이미지만 허용)
+    // ".pdf",
+    // ".doc",
+    // ".docx",
+    // ".xls",
+    // ".xlsx",
+    // ".txt",
   ] as readonly string[],
 
   // 차단된 파일 확장자 (실행 파일 등)
@@ -71,6 +70,13 @@ export const UPLOAD_CONSTANTS = {
 
   // 업로드 디렉토리 (S3 내부 경로)
   UPLOAD_DIRECTORY: "uploads",
+} as const;
+
+/**
+ * 업로드 관련 에러 메시지
+ */
+export const UPLOAD_ERROR_MESSAGES = {
+  FILE_NOT_UPLOADED: "파일이 업로드되지 않았습니다.",
 } as const;
 
 export const SWAGGER_EXAMPLES = {

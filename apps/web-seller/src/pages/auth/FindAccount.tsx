@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { useFindAccount } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useFindAccount } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import FindAccountResultForm from "@/apps/web-seller/features/auth/components/forms/FindAccountResultForm";
 import {

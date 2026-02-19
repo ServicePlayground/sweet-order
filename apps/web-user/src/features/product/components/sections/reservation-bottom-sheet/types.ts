@@ -14,14 +14,13 @@ export interface OrderItem {
   letteringMessage: string;
   requestMessage: string;
   quantity: number;
-}
-
-export interface ReservationSelection {
-  items: OrderItem[];
+  imageFiles: File[]; // 업로드할 이미지 File 목록
+  imageUrls: string[]; // 미리보기용 로컬 URL 목록 (blob URL)
 }
 
 export interface ReservationBottomSheetProps {
   isOpen: boolean;
+  productId: string;
   price: number;
   cakeTitle: string;
   cakeImageUrl: string;
@@ -31,10 +30,14 @@ export interface ReservationBottomSheetProps {
   productType: ProductType;
   productNoticeProducer?: string;
   productNoticeAddress?: string;
+  // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
+  pickupDetailAddress?: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
   onClose: () => void;
-  onConfirm: (selection: ReservationSelection) => void;
 }
 
 export type ViewType = "options" | "calendar" | "confirm";

@@ -129,3 +129,20 @@ export function useWebViewBridge() {
     };
   }, [setAccessToken, clearAccessToken, setLocation]);
 }
+
+// ============================================================================
+// 외부 앱 유도용 커스텀 스키마 URL
+// ============================================================================
+
+/**
+ * Flutter에서 커스텀 스키마로 가로채 외부 앱(지도 등)으로 유도하기 위한 URL prefix
+ */
+export const EXTERNAL_APP_SCHEME_PREFIX = "apps://";
+
+/**
+ * 외부 앱 유도용 커스텀 스키마 URL로 래핑합니다.
+ * 예) https://example.com -> apps://https://example.com
+ */
+export function toExternalAppSchemeUrl(webUrl: string): string {
+  return `${EXTERNAL_APP_SCHEME_PREFIX}${webUrl}`;
+}

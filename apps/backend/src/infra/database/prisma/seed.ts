@@ -1,4 +1,4 @@
-import { PrismaClient } from "./generated/client";
+import { PrismaClient, ProductCategoryType } from "./generated/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -45,6 +45,7 @@ const SEED_STORES = {
       "https://static-staging.sweetorders.com/uploads/NYenL1720090515_1770124331535_5b9aa552.png",
     ADDRESS: "서울특별시 강동구 천호동 123-45",
     ROAD_ADDRESS: "서울특별시 강동구 천호대로 100",
+    DETAIL_ADDRESS: "101호",
     ZONECODE: "05278",
     LATITUDE: 37.5386,
     LONGITUDE: 127.1259,
@@ -65,6 +66,7 @@ const SEED_STORES = {
     LOGO_IMAGE_URL: "https://static-staging.sweetorders.com/uploads/.png_1770124350794_a40b9a07",
     ADDRESS: "서울특별시 강남구 역삼동 456-78",
     ROAD_ADDRESS: "서울특별시 강남구 테헤란로 200",
+    DETAIL_ADDRESS: "102호",
     ZONECODE: "06234",
     LATITUDE: 37.4981,
     LONGITUDE: 127.0276,
@@ -90,6 +92,14 @@ const SEED_PRODUCT_BASE = {
   SALE_PRICE: 45000,
   SIZE_OPTIONS: [
     {
+      id: "size_seed_dosirak",
+      visible: "ENABLE",
+      displayName: "도시락",
+      lengthCm: 8,
+      price: 25000,
+      description: "1인용",
+    },
+    {
       id: "size_seed_mini",
       visible: "ENABLE",
       displayName: "미니",
@@ -104,6 +114,22 @@ const SEED_PRODUCT_BASE = {
       lengthCm: 15,
       price: 35000,
       description: "2~3인용",
+    },
+    {
+      id: "size_seed_2ho",
+      visible: "ENABLE",
+      displayName: "2호",
+      lengthCm: 18,
+      price: 40000,
+      description: "3~4인용",
+    },
+    {
+      id: "size_seed_3ho",
+      visible: "ENABLE",
+      displayName: "3호",
+      lengthCm: 21,
+      price: 45000,
+      description: "4~5인용",
     },
   ],
   FLAVOR_OPTIONS: [
@@ -125,6 +151,8 @@ const SEED_PRODUCT_BASE = {
     REQUIRED: "OPTIONAL",
     MAX_LENGTH: 20,
   },
+  SEARCH_TAGS: ["생일케이크", "초콜릿", "당일배송"],
+  PRODUCT_CATEGORY_TYPES: [ProductCategoryType.BIRTHDAY, ProductCategoryType.SIMPLE],
   DETAIL_DESCRIPTION: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
   PRODUCT_NOTICE: {
     FOOD_TYPE: "케이크류",
@@ -351,6 +379,7 @@ async function upsertStores(users: Awaited<ReturnType<typeof upsertSeedUsers>>) 
         logoImageUrl: SEED_STORES.STORE1.LOGO_IMAGE_URL,
         address: SEED_STORES.STORE1.ADDRESS,
         roadAddress: SEED_STORES.STORE1.ROAD_ADDRESS,
+        detailAddress: SEED_STORES.STORE1.DETAIL_ADDRESS,
         zonecode: SEED_STORES.STORE1.ZONECODE,
         latitude: SEED_STORES.STORE1.LATITUDE,
         longitude: SEED_STORES.STORE1.LONGITUDE,
@@ -389,6 +418,7 @@ async function upsertStores(users: Awaited<ReturnType<typeof upsertSeedUsers>>) 
         logoImageUrl: SEED_STORES.STORE2.LOGO_IMAGE_URL,
         address: SEED_STORES.STORE2.ADDRESS,
         roadAddress: SEED_STORES.STORE2.ROAD_ADDRESS,
+        detailAddress: SEED_STORES.STORE2.DETAIL_ADDRESS,
         zonecode: SEED_STORES.STORE2.ZONECODE,
         latitude: SEED_STORES.STORE2.LATITUDE,
         longitude: SEED_STORES.STORE2.LONGITUDE,
@@ -467,6 +497,8 @@ async function upsertProducts(stores: Awaited<ReturnType<typeof upsertStores>>) 
         letteringMaxLength: SEED_PRODUCT_BASE.LETTERING.MAX_LENGTH,
         imageUploadEnabled,
         productType,
+        productCategoryTypes: SEED_PRODUCT_BASE.PRODUCT_CATEGORY_TYPES,
+        searchTags: SEED_PRODUCT_BASE.SEARCH_TAGS,
         detailDescription: SEED_PRODUCT_BASE.DETAIL_DESCRIPTION,
         productNumber,
         productNoticeFoodType: SEED_PRODUCT_BASE.PRODUCT_NOTICE.FOOD_TYPE,
@@ -594,74 +626,76 @@ async function seedProductReviews(
  * 스토어 피드를 생성합니다.
  *
  * 동작 방식:
+ * - 데이터베이스에 존재하는 모든 스토어를 조회
  * - 각 스토어별로 피드 개수 확인
  * - 피드가 1개 이상이면 건너뛰기
  * - 피드가 0개인 스토어에만 피드 생성
  *
  * 특징:
- * - 첫 번째 스토어에 피드가 0개면 2개의 피드 생성
- * - 두 번째 스토어에 피드가 0개면 1개의 피드 생성
+ * - 모든 스토어에 대해 피드가 없는 경우 피드를 생성
+ * - 첫 번째로 발견된 피드가 없는 스토어에 2개의 피드 생성
+ * - 두 번째로 발견된 피드가 없는 스토어에 1개의 피드 생성
+ * - 세 번째 이후 스토어에도 피드가 없으면 FEED3를 재사용하여 생성
  * - 각 스토어별로 독립적으로 확인하여 생성
  */
-async function seedStoreFeeds(stores: Awaited<ReturnType<typeof upsertStores>>) {
-  // 스토어가 없으면 피드 생성 불가
-  if (!stores || stores.length === 0) {
+async function seedStoreFeeds() {
+  // 데이터베이스에 존재하는 모든 스토어 조회
+  const allStores = await prisma.store.findMany({
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (!allStores || allStores.length === 0) {
     console.warn("⚠️ 스토어가 없어 피드를 생성할 수 없습니다.");
     return 0;
   }
 
-  const [store1, store2] = stores;
   const feeds = [];
+  let isFirstStoreWithNoFeeds = true; // 첫 번째 피드가 없는 스토어인지 여부
 
-  // 첫 번째 스토어의 피드 개수 확인
-  if (store1) {
-    const store1FeedCount = await prisma.storeFeed.count({
-      where: { storeId: store1.id },
+  // 모든 스토어에 대해 피드 확인 및 생성
+  for (const store of allStores) {
+    const storeFeedCount = await prisma.storeFeed.count({
+      where: { storeId: store.id },
     });
 
     // 피드가 0개인 경우에만 생성
-    if (store1FeedCount === 0) {
-      feeds.push(
-        prisma.storeFeed.create({
-          data: {
-            storeId: store1.id,
-            title: SEED_STORE_FEEDS.FEED1.TITLE,
-            content: SEED_STORE_FEEDS.FEED1.CONTENT,
-            createdAt: SEED_STORE_FEEDS.FEED1.CREATED_AT,
-          },
-        }),
-      );
-      feeds.push(
-        prisma.storeFeed.create({
-          data: {
-            storeId: store1.id,
-            title: SEED_STORE_FEEDS.FEED2.TITLE,
-            content: SEED_STORE_FEEDS.FEED2.CONTENT,
-            createdAt: SEED_STORE_FEEDS.FEED2.CREATED_AT,
-          },
-        }),
-      );
-    }
-  }
-
-  // 두 번째 스토어의 피드 개수 확인
-  if (store2) {
-    const store2FeedCount = await prisma.storeFeed.count({
-      where: { storeId: store2.id },
-    });
-
-    // 피드가 0개인 경우에만 생성
-    if (store2FeedCount === 0) {
-      feeds.push(
-        prisma.storeFeed.create({
-          data: {
-            storeId: store2.id,
-            title: SEED_STORE_FEEDS.FEED3.TITLE,
-            content: SEED_STORE_FEEDS.FEED3.CONTENT,
-            createdAt: SEED_STORE_FEEDS.FEED3.CREATED_AT,
-          },
-        }),
-      );
+    if (storeFeedCount === 0) {
+      if (isFirstStoreWithNoFeeds) {
+        // 첫 번째 피드가 없는 스토어에 2개의 피드 생성
+        feeds.push(
+          prisma.storeFeed.create({
+            data: {
+              storeId: store.id,
+              title: SEED_STORE_FEEDS.FEED1.TITLE,
+              content: SEED_STORE_FEEDS.FEED1.CONTENT,
+              createdAt: SEED_STORE_FEEDS.FEED1.CREATED_AT,
+            },
+          }),
+        );
+        feeds.push(
+          prisma.storeFeed.create({
+            data: {
+              storeId: store.id,
+              title: SEED_STORE_FEEDS.FEED2.TITLE,
+              content: SEED_STORE_FEEDS.FEED2.CONTENT,
+              createdAt: SEED_STORE_FEEDS.FEED2.CREATED_AT,
+            },
+          }),
+        );
+        isFirstStoreWithNoFeeds = false; // 첫 번째 스토어 처리 완료
+      } else {
+        // 두 번째 이후 피드가 없는 스토어에 1개의 피드 생성
+        feeds.push(
+          prisma.storeFeed.create({
+            data: {
+              storeId: store.id,
+              title: SEED_STORE_FEEDS.FEED3.TITLE,
+              content: SEED_STORE_FEEDS.FEED3.CONTENT,
+              createdAt: SEED_STORE_FEEDS.FEED3.CREATED_AT,
+            },
+          }),
+        );
+      }
     }
   }
 
@@ -694,7 +728,7 @@ async function main() {
   const stores = await upsertStores(users);
   const products = await upsertProducts(stores);
   const reviewCreatedCount = await seedProductReviews(users, products, stores);
-  const feedCreatedCount = await seedStoreFeeds(stores);
+  const feedCreatedCount = await seedStoreFeeds();
 
   console.log(`✅ Seed users created/retrieved: ${users.length}`);
   console.log(`✅ Stores created/retrieved: ${stores.length}`);

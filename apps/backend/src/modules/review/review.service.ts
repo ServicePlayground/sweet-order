@@ -1,7 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { ReviewListService } from "@apps/backend/modules/review/services/review-list.service";
 import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
-import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-request.dto";
+import { ReviewUserListService } from "@apps/backend/modules/review/services/review-user-list.service";
+import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-list.dto";
+import {
+  GetMyReviewsRequestDto,
+  MyReviewListResponseDto,
+} from "@apps/backend/modules/review/dto/review-user-list.dto";
 
 /**
  * 후기 서비스
@@ -14,33 +19,44 @@ export class ReviewService {
   constructor(
     private readonly reviewListService: ReviewListService,
     private readonly reviewDetailService: ReviewDetailService,
+    private readonly reviewUserListService: ReviewUserListService,
   ) {}
 
   /**
-   * 상품 후기 목록 조회
+   * 상품 후기 목록 조회 (사용자용)
    */
-  async getProductReviews(productId: string, query: GetReviewsRequestDto) {
-    return this.reviewListService.getProductReviews(productId, query);
+  async getProductReviewsForUser(productId: string, query: GetReviewsRequestDto) {
+    return this.reviewListService.getProductReviewsForUser(productId, query);
   }
 
   /**
-   * 상품 후기 단일 조회
+   * 상품 후기 단일 조회 (사용자용)
    */
-  async getProductReview(productId: string, reviewId: string) {
-    return this.reviewDetailService.getProductReview(productId, reviewId);
+  async getProductReviewForUser(productId: string, reviewId: string) {
+    return this.reviewDetailService.getProductReviewForUser(productId, reviewId);
   }
 
   /**
-   * 스토어 후기 목록 조회
+   * 스토어 후기 목록 조회 (사용자용)
    */
-  async getStoreReviews(storeId: string, query: GetReviewsRequestDto) {
-    return this.reviewListService.getStoreReviews(storeId, query);
+  async getStoreReviewsForUser(storeId: string, query: GetReviewsRequestDto) {
+    return this.reviewListService.getStoreReviewsForUser(storeId, query);
   }
 
   /**
-   * 스토어 후기 단일 조회
+   * 스토어 후기 단일 조회 (사용자용)
    */
-  async getStoreReview(storeId: string, reviewId: string) {
-    return this.reviewDetailService.getStoreReview(storeId, reviewId);
+  async getStoreReviewForUser(storeId: string, reviewId: string) {
+    return this.reviewDetailService.getStoreReviewForUser(storeId, reviewId);
+  }
+
+  /**
+   * 내가 작성한 후기 목록 조회 (사용자용)
+   */
+  async getMyReviewsForUser(
+    userId: string,
+    query: GetMyReviewsRequestDto,
+  ): Promise<MyReviewListResponseDto> {
+    return this.reviewUserListService.getMyReviewsForUser(userId, query);
   }
 }

@@ -1,5 +1,4 @@
 import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
-import { PRODUCT_ERROR_MESSAGES } from "@/apps/web-seller/features/product/constants/product.constant";
 
 export const validateProductForm = (
   form: IProductForm,
@@ -8,89 +7,82 @@ export const validateProductForm = (
 
   // 기본 정보 검증 - 대표 이미지 (images 배열의 첫 번째 요소) 필수
   if (!form.images || form.images.length === 0 || !form.images[0]?.trim()) {
-    newErrors.images = PRODUCT_ERROR_MESSAGES.MAIN_IMAGE_REQUIRED;
+    newErrors.images = "상품 대표 이미지를 등록해주세요.";
   }
 
   if (!form.name.trim()) {
-    newErrors.name = PRODUCT_ERROR_MESSAGES.NAME_REQUIRED;
+    newErrors.name = "상품명을 입력해주세요.";
   }
 
   if (!form.salesStatus) {
-    newErrors.salesStatus = PRODUCT_ERROR_MESSAGES.SALES_STATUS_REQUIRED;
+    newErrors.salesStatus = "판매 여부를 선택해주세요.";
   }
 
   if (!form.visibilityStatus) {
-    newErrors.visibilityStatus = PRODUCT_ERROR_MESSAGES.VISIBILITY_STATUS_REQUIRED;
+    newErrors.visibilityStatus = "노출 여부를 선택해주세요.";
   }
 
   if (form.salePrice === null || form.salePrice === undefined) {
-    newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_REQUIRED;
+    newErrors.salePrice = "판매가를 입력해주세요.";
   } else if (form.salePrice <= 0) {
-    newErrors.salePrice = PRODUCT_ERROR_MESSAGES.SALE_PRICE_INVALID;
+    newErrors.salePrice = "판매가는 0보다 큰 숫자여야 합니다.";
   }
 
   // 상품정보제공고시 검증
   if (!form.productNoticeFoodType?.trim()) {
-    newErrors.productNoticeFoodType = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_FOOD_TYPE_REQUIRED;
+    newErrors.productNoticeFoodType = "식품의 유형을 입력해주세요.";
   }
 
   if (!form.productNoticeProducer?.trim()) {
-    newErrors.productNoticeProducer = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_PRODUCER_REQUIRED;
+    newErrors.productNoticeProducer = "제조사를 입력해주세요.";
   }
 
   if (!form.productNoticeOrigin?.trim()) {
-    newErrors.productNoticeOrigin = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_ORIGIN_REQUIRED;
+    newErrors.productNoticeOrigin = "원산지를 입력해주세요.";
   }
 
   if (!form.productNoticeAddress?.trim()) {
-    newErrors.productNoticeAddress = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_ADDRESS_REQUIRED;
+    newErrors.productNoticeAddress = "소재지를 입력해주세요.";
   }
 
   if (!form.productNoticeManufactureDate?.trim()) {
-    newErrors.productNoticeManufactureDate =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_MANUFACTURE_DATE_REQUIRED;
+    newErrors.productNoticeManufactureDate = "제조연월일을 입력해주세요.";
   }
 
   if (!form.productNoticeExpirationDate?.trim()) {
-    newErrors.productNoticeExpirationDate =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_EXPIRATION_DATE_REQUIRED;
+    newErrors.productNoticeExpirationDate = "소비기한 또는 품질유지기한을 입력해주세요.";
   }
 
   if (!form.productNoticePackageCapacity?.trim()) {
-    newErrors.productNoticePackageCapacity =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_PACKAGE_CAPACITY_REQUIRED;
+    newErrors.productNoticePackageCapacity = "포장단위별 용량/수량을 입력해주세요.";
   }
 
   if (!form.productNoticePackageQuantity?.trim()) {
-    newErrors.productNoticePackageQuantity =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_PACKAGE_QUANTITY_REQUIRED;
+    newErrors.productNoticePackageQuantity = "포장 단위별 수량을 입력해주세요.";
   }
 
   if (!form.productNoticeIngredients?.trim()) {
-    newErrors.productNoticeIngredients = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_INGREDIENTS_REQUIRED;
+    newErrors.productNoticeIngredients = "원재료명 및 함량을 입력해주세요.";
   }
 
   if (!form.productNoticeCalories?.trim()) {
-    newErrors.productNoticeCalories = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_CALORIES_REQUIRED;
+    newErrors.productNoticeCalories = "영양성분을 입력해주세요.";
   }
 
   if (!form.productNoticeSafetyNotice?.trim()) {
-    newErrors.productNoticeSafetyNotice =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_SAFETY_NOTICE_REQUIRED;
+    newErrors.productNoticeSafetyNotice = "소비자안전을 위한 주의사항을 입력해주세요.";
   }
 
   if (!form.productNoticeGmoNotice?.trim()) {
-    newErrors.productNoticeGmoNotice = PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_GMO_NOTICE_REQUIRED;
+    newErrors.productNoticeGmoNotice = "유전자변형식품에 해당하는 경우의 표시를 입력해주세요.";
   }
 
   if (!form.productNoticeImportNotice?.trim()) {
-    newErrors.productNoticeImportNotice =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_IMPORT_NOTICE_REQUIRED;
+    newErrors.productNoticeImportNotice = "수입식품의 경우를 입력해주세요.";
   }
 
   if (!form.productNoticeCustomerService?.trim()) {
-    newErrors.productNoticeCustomerService =
-      PRODUCT_ERROR_MESSAGES.PRODUCT_NOTICE_CUSTOMER_SERVICE_REQUIRED;
+    newErrors.productNoticeCustomerService = "고객센터를 입력해주세요.";
   }
 
   return newErrors;

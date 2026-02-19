@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Package, MessageSquare, Store, FileText } from "lucide-react";
+import { Home, Package, MessageSquare, Store, FileText, ShoppingCart } from "lucide-react";
 import { ROUTES } from "./paths.constant";
 
 export interface MenuChildItem {
@@ -46,9 +46,9 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
       ],
     },
     {
-      text: "채팅",
-      icon: React.createElement(MessageSquare, { className: "w-5 h-5" }),
-      children: [{ text: "채팅 목록", path: ROUTES.STORE_DETAIL_CHAT_LIST(storeId) }],
+      text: "주문",
+      icon: React.createElement(ShoppingCart, { className: "w-5 h-5" }),
+      children: [{ text: "주문 목록", path: ROUTES.STORE_DETAIL_ORDERS_LIST(storeId) }],
     },
     {
       text: "피드",
@@ -57,6 +57,11 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
         { text: "피드 목록", path: ROUTES.STORE_DETAIL_FEED_LIST(storeId) },
         { text: "피드 등록", path: ROUTES.STORE_DETAIL_FEED_CREATE(storeId) },
       ],
+    },
+    {
+      text: "채팅",
+      icon: React.createElement(MessageSquare, { className: "w-5 h-5" }),
+      children: [{ text: "채팅 목록", path: ROUTES.STORE_DETAIL_CHAT_LIST(storeId) }],
     },
   ];
 }

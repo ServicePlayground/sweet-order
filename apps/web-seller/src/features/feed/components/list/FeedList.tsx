@@ -5,7 +5,8 @@ import he from "he";
 import { IFeed } from "@/apps/web-seller/features/feed/types/feed.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { formatRelativeTime } from "@/apps/web-seller/common/utils/date.util";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
 
 interface FeedListProps {
   feeds: IFeed[];
@@ -16,11 +17,7 @@ export const FeedList: React.FC<FeedListProps> = ({ feeds }) => {
   const { storeId } = useParams<{ storeId: string }>();
 
   if (feeds.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <p>등록된 피드가 없습니다.</p>
-      </div>
-    );
+    return <EmptyState message="등록된 피드가 없습니다." />;
   }
 
   const handleFeedClick = (feedId: string) => {

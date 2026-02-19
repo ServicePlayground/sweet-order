@@ -6,12 +6,12 @@ import {
   IUpdateProductRequest,
   EnableStatus,
 } from "@/apps/web-seller/features/product/types/product.type";
+import { useProductDetail } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
 import {
-  useProductDetail,
   useUpdateProduct,
   useDeleteProduct,
-} from "@/apps/web-seller/features/product/hooks/queries/useProduct";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+} from "@/apps/web-seller/features/product/hooks/mutations/useProductMutation";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export const StoreDetailProductDetailPage: React.FC = () => {
   const { storeId, productId } = useParams<{ storeId: string; productId: string }>();
@@ -57,6 +57,8 @@ export const StoreDetailProductDetailPage: React.FC = () => {
     letteringRequired: product.letteringRequired as any,
     letteringMaxLength: product.letteringMaxLength,
     imageUploadEnabled: product.imageUploadEnabled as any,
+    productCategoryTypes: product.productCategoryTypes ?? [],
+    searchTags: product.searchTags ?? [],
     detailDescription: product.detailDescription,
     productNoticeFoodType: product.productNoticeFoodType,
     productNoticeProducer: product.productNoticeProducer,
@@ -88,6 +90,8 @@ export const StoreDetailProductDetailPage: React.FC = () => {
       letteringRequired: data.letteringRequired,
       letteringMaxLength: data.letteringMaxLength,
       imageUploadEnabled: data.imageUploadEnabled,
+      productCategoryTypes: data.productCategoryTypes,
+      searchTags: data.searchTags,
       detailDescription: data.detailDescription,
       productNoticeFoodType: data.productNoticeFoodType,
       productNoticeProducer: data.productNoticeProducer,

@@ -7,6 +7,7 @@ import {
 export interface IStoreAddress {
   address: string; // 지번 주소
   roadAddress: string; // 도로명 주소
+  detailAddress: string; // 상세주소
   zonecode: string; // 우편번호
   latitude: number; // 위도
   longitude: number; // 경도

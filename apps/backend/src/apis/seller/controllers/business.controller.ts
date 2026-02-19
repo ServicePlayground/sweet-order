@@ -3,18 +3,17 @@ import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { BusinessService } from "@apps/backend/modules/business/business.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import {
   BusinessValidationRequestDto,
   OnlineTradingCompanyDetailRequestDto,
 } from "@apps/backend/modules/business/dto/business-request.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   NTS_API_ERROR_MESSAGES,
   KFTC_API_ERROR_MESSAGES,
+  BUSINESS_ERROR_MESSAGES,
 } from "@apps/backend/modules/business/constants/business.contants";
 
 /**
@@ -39,6 +38,11 @@ export class SellerBusinessController {
   })
   @SwaggerResponse(200, { dataExample: { available: true } })
   @SwaggerResponse(400, {
+    dataExample: createMessageObject(
+      BUSINESS_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_ALREADY_EXISTS,
+    ),
+  })
+  @SwaggerResponse(400, {
     dataExample: createMessageObject(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE),
   })
   @SwaggerResponse(400, { dataExample: createMessageObject(NTS_API_ERROR_MESSAGES.HTTP_ERROR) })
@@ -52,19 +56,7 @@ export class SellerBusinessController {
   @SwaggerResponse(400, {
     dataExample: createMessageObject(NTS_API_ERROR_MESSAGES.BAD_JSON_REQUEST),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   async verifyBusinessRegistration(@Body() validationDto: BusinessValidationRequestDto) {
     await this.businessService.verifyBusinessRegistration(validationDto);
     return { available: true };
@@ -82,6 +74,11 @@ export class SellerBusinessController {
       "공정거래위원회 API를 통해 통신판매사업자 등록상세 정보를 조회합니다. \n휴업 또는 폐업상태인 경우 오류가 발생합니다.",
   })
   @SwaggerResponse(200, { dataExample: { available: true } })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(
+      BUSINESS_ERROR_MESSAGES.PERMISSION_MANAGEMENT_NUMBER_ALREADY_EXISTS,
+    ),
+  })
   @SwaggerResponse(400, { dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES["01"]) })
   @SwaggerResponse(400, { dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES["02"]) })
   @SwaggerResponse(400, { dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES["03"]) })
@@ -109,19 +106,7 @@ export class SellerBusinessController {
   @SwaggerResponse(400, {
     dataExample: createMessageObject(KFTC_API_ERROR_MESSAGES.INTERNAL_ERROR),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
+  @SwaggerAuthResponses()
   async getOnlineTradingCompanyDetail(@Query() detailDto: OnlineTradingCompanyDetailRequestDto) {
     await this.businessService.getOnlineTradingCompanyDetail(detailDto);
     return { available: true };

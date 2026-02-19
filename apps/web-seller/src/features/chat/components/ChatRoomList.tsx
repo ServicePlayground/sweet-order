@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ChatRoomForSeller } from "@/apps/web-seller/features/chat/types/chat.type";
 import { formatRelativeTime } from "@/apps/web-seller/common/utils/date.util";
+import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
 
 interface ChatRoomListProps {
   chatRooms: ChatRoomForSeller[];
@@ -12,11 +13,7 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({ chatRooms, storeId }
   const navigate = useNavigate();
 
   if (chatRooms.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <p>채팅방이 없습니다.</p>
-      </div>
-    );
+    return <EmptyState message="채팅방이 없습니다." />;
   }
 
   return (

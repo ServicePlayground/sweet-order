@@ -5,8 +5,8 @@ import {
   IProductForm,
   ICreateProductRequest,
 } from "@/apps/web-seller/features/product/types/product.type";
-import { useCreateProduct } from "@/apps/web-seller/features/product/hooks/queries/useProduct";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { useCreateProduct } from "@/apps/web-seller/features/product/hooks/mutations/useProductMutation";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export const StoreDetailProductCreatePage: React.FC = () => {
   const { storeId } = useParams();

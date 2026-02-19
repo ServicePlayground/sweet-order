@@ -5,6 +5,7 @@ import {
   IGetFeedsRequest,
   IFeed,
   IFeedListResponse,
+  IFeedMutationResponse,
 } from "@/apps/web-seller/features/feed/types/feed.type";
 import { MessageResponse } from "@/apps/web-seller/common/types/api.type";
 
@@ -22,7 +23,10 @@ export const feedApi = {
   },
 
   // 피드 등록
-  createFeed: async (storeId: string, request: ICreateFeedRequest): Promise<IFeed> => {
+  createFeed: async (
+    storeId: string,
+    request: ICreateFeedRequest,
+  ): Promise<IFeedMutationResponse> => {
     const response = await sellerClient.post(`/store/${storeId}/feed`, request);
     return response.data.data;
   },
@@ -32,7 +36,7 @@ export const feedApi = {
     storeId: string,
     feedId: string,
     request: IUpdateFeedRequest,
-  ): Promise<IFeed> => {
+  ): Promise<IFeedMutationResponse> => {
     const response = await sellerClient.put(`/store/${storeId}/feed/${feedId}`, request);
     return response.data.data;
   },

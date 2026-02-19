@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useFeedDetail } from "@/apps/web-seller/features/feed/hooks/queries/useFeedQuery";
 import {
-  useFeedDetail,
   useUpdateFeed,
   useDeleteFeed,
-} from "@/apps/web-seller/features/feed/hooks/queries/useFeed";
+} from "@/apps/web-seller/features/feed/hooks/mutations/useFeedMutation";
 import { IUpdateFeedRequest } from "@/apps/web-seller/features/feed/types/feed.type";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
-import { Input } from "@/apps/web-seller/common/components/@shadcn-ui/input";
-import { Label } from "@/apps/web-seller/common/components/@shadcn-ui/label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { RichTextEditor } from "@/apps/web-seller/common/components/editors/RichTextEditor";
 
 export const StoreDetailFeedDetailPage: React.FC = () => {

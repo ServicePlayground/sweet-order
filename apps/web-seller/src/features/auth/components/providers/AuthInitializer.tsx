@@ -1,7 +1,7 @@
-import { useMe } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useMe } from "@/apps/web-seller/features/auth/hooks/queries/useAuthQuery";
 import { useAuthStore } from "../../store/auth.store";
 import { LoadingFallback } from "@/apps/web-seller/common/components/fallbacks/LoadingFallback";
-import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 
 interface AuthInitializerProviderProps {
   children: React.ReactNode;

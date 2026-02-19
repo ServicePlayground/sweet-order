@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 좋아요 상세 서비스
@@ -24,6 +25,9 @@ export class LikeStoreDetailService {
     });
 
     if (!store) {
+      LoggerUtil.log(
+        `스토어 좋아요 여부 확인 실패: 스토어 없음 - userId: ${userId}, storeId: ${storeId}`,
+      );
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 

@@ -1,10 +1,12 @@
 import { Injectable, BadRequestException, Inject, forwardRef } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { MessageResponseDto } from "@apps/backend/modules/chat/dto/message-response.dto";
+import { MessageResponseDto } from "@apps/backend/modules/chat/dto/chat-message-list.dto";
 import { ChatRoomDetailService } from "./chat-room-detail.service";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { ChatGateway } from "../gateways/chat.gateway";
 import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 채팅 메시지 생성 서비스
@@ -22,7 +24,7 @@ export class ChatMessageCreateService {
   ) {}
 
   /**
-   * 메시지 전송
+   * 메시지 전송 (공통)
    */
   async sendMessage(
     roomId: string,
@@ -41,22 +43,28 @@ export class ChatMessageCreateService {
     const lastMessagePreview = this.createLastMessagePreview(trimmedText);
 
     // 트랜잭션으로 메시지 생성과 채팅방 업데이트를 원자적으로 처리
-    const message = await this.prisma.$transaction(async (tx) => {
-      // 메시지 생성
-      const createdMessage = await tx.message.create({
-        data: {
-          roomId,
-          text: trimmedText,
-          senderId,
-          senderType: senderType.toUpperCase() as "USER" | "STORE",
-        },
-      });
+    const message = await this.prisma.$transaction(
+      async (tx) => {
+        // 메시지 생성
+        const createdMessage = await tx.message.create({
+          data: {
+            roomId,
+            text: trimmedText,
+            senderId,
+            senderType: senderType.toUpperCase() as "USER" | "STORE",
+          },
+        });
 
-      // 채팅방 메타데이터 업데이트
-      await this.updateChatRoomMetadata(tx, roomId, lastMessagePreview, senderType);
+        // 채팅방 메타데이터 업데이트
+        await this.updateChatRoomMetadata(tx, roomId, lastMessagePreview, senderType);
 
-      return createdMessage;
-    });
+        return createdMessage;
+      },
+      {
+        maxWait: 5000, // 최대 대기 시간 (5초)
+        timeout: 10000, // 타임아웃 (10초)
+      },
+    );
 
     const messageDto = ChatMapperUtil.mapToMessageResponseDto(message);
 
@@ -73,10 +81,14 @@ export class ChatMessageCreateService {
     const trimmedText = text.trim();
 
     if (trimmedText.length === 0) {
+      LoggerUtil.log(`메시지 검증 실패: 메시지 내용이 비어있음`);
       throw new BadRequestException("메시지 내용이 비어있습니다.");
     }
 
     if (trimmedText.length > ChatMessageCreateService.MAX_MESSAGE_LENGTH) {
+      LoggerUtil.log(
+        `메시지 검증 실패: 메시지 길이 초과 - length: ${trimmedText.length}, maxLength: ${ChatMessageCreateService.MAX_MESSAGE_LENGTH}`,
+      );
       throw new BadRequestException(
         `메시지는 ${ChatMessageCreateService.MAX_MESSAGE_LENGTH}자를 초과할 수 없습니다.`,
       );
@@ -98,8 +110,7 @@ export class ChatMessageCreateService {
    * 채팅방 메타데이터 업데이트
    */
   private async updateChatRoomMetadata(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx: any,
+    tx: Prisma.TransactionClient,
     roomId: string,
     lastMessagePreview: string,
     senderType: "user" | "store",

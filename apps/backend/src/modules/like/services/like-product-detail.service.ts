@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 상품 좋아요 상세 서비스
@@ -24,6 +25,9 @@ export class LikeProductDetailService {
     });
 
     if (!product) {
+      LoggerUtil.log(
+        `상품 좋아요 여부 확인 실패: 상품 없음 - userId: ${userId}, productId: ${productId}`,
+      );
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 

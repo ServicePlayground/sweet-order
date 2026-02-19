@@ -1,30 +1,25 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   GetProductsRequestDto,
   GetSellerProductsRequestDto,
-} from "@apps/backend/modules/product/dto/product-request.dto";
+} from "@apps/backend/modules/product/dto/product-list.dto";
 import {
   EnableStatus,
   ProductType,
+  ProductCategoryType,
   SortBy,
   PRODUCT_ERROR_MESSAGES,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
-import {
-  ProductMapperUtil,
-  ProductWithReviewsAndStore,
-} from "@apps/backend/modules/product/utils/product-mapper.util";
+import { ProductMapperUtil } from "@apps/backend/modules/product/utils/product-mapper.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { LikeProductDetailService } from "@apps/backend/modules/like/services/like-product-detail.service";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 @Injectable()
 export class ProductListService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly likeProductDetailService: LikeProductDetailService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * 여러 상품에 대한 좋아요 여부를 한 번에 조회 (N+1 문제 방지)
@@ -52,52 +47,100 @@ export class ProductListService {
     return new Set(likes.map((like) => like.productId));
   }
 
-  /**
-   * 후기 통계 계산 (후기 수와 평균 별점)
-   */
-  private calculateReviewStats<T extends { reviews: Array<{ rating: number }> }>(
-    products: T[],
-  ): (T & { reviewCount: number; avgRating: number })[] {
-    return products.map((product) => {
-      const reviewCount = product.reviews.length;
-      const avgRating =
-        reviewCount > 0
-          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
-          : 0;
+  private buildReviewSortFilterSql(params: {
+    onlyVisible?: boolean;
+    userStoreIds?: string[];
+    storeId?: string;
+    salesStatus?: EnableStatus;
+    visibilityStatus?: EnableStatus;
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    productType?: ProductType;
+    productCategoryTypes?: ProductCategoryType[];
+  }): Prisma.Sql {
+    const conditions: Prisma.Sql[] = [];
 
-      return {
-        ...product,
-        reviewCount,
-        avgRating,
-      };
-    });
-  }
-
-  /**
-   * 후기 통계 기반 정렬 (후기 수 또는 평균 별점)
-   */
-  private sortProductsByReviewStats<
-    T extends { reviewCount: number; avgRating: number; createdAt: Date },
-  >(products: T[], sortBy: SortBy): void {
-    if (sortBy === SortBy.REVIEW_COUNT) {
-      products.sort((a, b) => {
-        if (b.reviewCount !== a.reviewCount) {
-          return b.reviewCount - a.reviewCount;
-        }
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      });
-    } else if (sortBy === SortBy.RATING_AVG) {
-      products.sort((a, b) => {
-        if (b.avgRating !== a.avgRating) {
-          return b.avgRating - a.avgRating;
-        }
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      });
+    if (params.onlyVisible) {
+      conditions.push(Prisma.sql`p.visibility_status::text = ${EnableStatus.ENABLE}`);
     }
+
+    if (params.userStoreIds && params.userStoreIds.length > 0) {
+      conditions.push(Prisma.sql`p.store_id IN (${Prisma.join(params.userStoreIds)})`);
+    }
+
+    if (params.storeId) {
+      conditions.push(Prisma.sql`p.store_id = ${params.storeId}`);
+    }
+
+    if (params.salesStatus !== undefined) {
+      conditions.push(Prisma.sql`p.sales_status::text = ${params.salesStatus}`);
+    }
+
+    if (params.visibilityStatus !== undefined) {
+      conditions.push(Prisma.sql`p.visibility_status::text = ${params.visibilityStatus}`);
+    }
+
+    if (params.search) {
+      const keyword = params.search.trim();
+      conditions.push(
+        Prisma.sql`(p.name ILIKE ${`%${keyword}%`} OR ${keyword} = ANY(p.search_tags))`,
+      );
+    }
+
+    if (params.minPrice !== undefined) {
+      conditions.push(Prisma.sql`p.sale_price >= ${params.minPrice}`);
+    }
+
+    if (params.maxPrice !== undefined) {
+      conditions.push(Prisma.sql`p.sale_price <= ${params.maxPrice}`);
+    }
+
+    if (params.productType) {
+      conditions.push(Prisma.sql`p.product_type::text = ${params.productType}`);
+    }
+
+    if (params.productCategoryTypes && params.productCategoryTypes.length > 0) {
+      conditions.push(
+        Prisma.sql`p.product_category_types::text[] && ARRAY[${Prisma.join(params.productCategoryTypes)}]::text[]`,
+      );
+    }
+
+    if (conditions.length === 0) {
+      return Prisma.sql`TRUE`;
+    }
+
+    return Prisma.sql`${Prisma.join(conditions, " AND ")}`;
+  }
+
+  private async getProductIdsByReviewSort(
+    filterSql: Prisma.Sql,
+    sortBy: SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
+    page: number,
+    limit: number,
+  ): Promise<string[]> {
+    const skip = (page - 1) * limit;
+    const orderBySql =
+      sortBy === SortBy.REVIEW_COUNT
+        ? Prisma.sql`COUNT(pr.id) DESC, p.created_at DESC`
+        : Prisma.sql`COALESCE(AVG(pr.rating), 0) DESC, p.created_at DESC`;
+
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+      SELECT p.id
+      FROM products p
+      LEFT JOIN product_reviews pr ON pr.product_id = p.id
+      WHERE ${filterSql}
+      GROUP BY p.id, p.created_at
+      ORDER BY ${orderBySql}
+      LIMIT ${limit}
+      OFFSET ${skip}
+    `);
+
+    return rows.map((row) => row.id);
   }
 
   /**
-   * 공통 필터 조건 추가 (검색어, 가격, 상품 타입)
+   * 공통 필터 조건 추가 (검색어, 가격, 상품 타입, 상품 카테고리 타입)
    */
   private addCommonFilters(
     where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] },
@@ -105,11 +148,13 @@ export class ProductListService {
     minPrice?: number,
     maxPrice?: number,
     productType?: ProductType,
+    productCategoryTypes?: ProductCategoryType[],
   ): void {
     const searchConditions: Prisma.ProductWhereInput[] = [];
     if (search) {
       searchConditions.push(
         { name: { contains: search, mode: Prisma.QueryMode.insensitive } }, // 상품명에서 검색 (대소문자 구분 없음)
+        { searchTags: { has: search } }, // 검색 태그에서 검색 (정확히 일치)
       );
     }
 
@@ -123,6 +168,10 @@ export class ProductListService {
       where.productType = productType;
     }
 
+    if (productCategoryTypes?.length) {
+      where.productCategoryTypes = { hasSome: productCategoryTypes };
+    }
+
     if (searchConditions.length > 0) {
       where.AND = where.AND || [];
       where.AND.push({ OR: searchConditions });
@@ -130,10 +179,21 @@ export class ProductListService {
   }
 
   /**
-   * 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 상품 목록 조회 (사용자용)
+   * 필터링, 정렬, 무한스크롤을 지원합니다.
    */
-  async getProducts(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy, minPrice, maxPrice, storeId, productType } = query;
+  async getProductsForUser(query: GetProductsRequestDto, user?: JwtVerifiedPayload) {
+    const {
+      search,
+      page,
+      limit,
+      sortBy,
+      minPrice,
+      maxPrice,
+      storeId,
+      productType,
+      productCategoryTypes,
+    } = query;
 
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
       visibilityStatus: EnableStatus.ENABLE,
@@ -143,7 +203,7 @@ export class ProductListService {
       where.storeId = storeId;
     }
 
-    this.addCommonFilters(where, search, minPrice, maxPrice, productType);
+    this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
     const totalItems = await this.prisma.product.count({ where });
 
@@ -153,8 +213,25 @@ export class ProductListService {
     let products;
 
     if (needsReviewData) {
-      const allProducts: ProductWithReviewsAndStore[] = await this.prisma.product.findMany({
-        where,
+      const productIds = await this.getProductIdsByReviewSort(
+        this.buildReviewSortFilterSql({
+          onlyVisible: true,
+          storeId,
+          search,
+          minPrice,
+          maxPrice,
+          productType,
+          productCategoryTypes,
+        }),
+        sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
+        page,
+        limit,
+      );
+
+      const productsWithStore = await this.prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+        },
         include: {
           reviews: {
             select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
@@ -165,18 +242,16 @@ export class ProductListService {
         },
       });
 
-      const productsWithStats = this.calculateReviewStats(allProducts);
-      this.sortProductsByReviewStats(productsWithStats, sortBy);
+      const productsById = new Map(productsWithStore.map((product) => [product.id, product]));
+      const orderedProducts = productIds
+        .map((id) => productsById.get(id))
+        .filter((product): product is NonNullable<typeof product> => Boolean(product));
 
-      const skip = (page - 1) * limit;
-      const paginatedProducts = productsWithStats.slice(skip, skip + limit);
-
-      const productIds = paginatedProducts.map((p) => p.id);
       const likedProductIds = user?.sub
         ? await this.getLikedProductIds(user.sub, productIds)
         : new Set<string>();
 
-      products = paginatedProducts.map((product) =>
+      products = orderedProducts.map((product) =>
         ProductMapperUtil.mapToProductResponse(
           product,
           user?.sub ? likedProductIds.has(product.id) : null,
@@ -236,10 +311,10 @@ export class ProductListService {
   }
 
   /**
-   * 판매자용 상품 목록 조회 (필터링, 정렬, 무한스크롤 지원)
+   * 판매자용 상품 목록 조회 (판매자용)
    * 자신이 소유한 스토어의 상품만 조회합니다.
    */
-  async getSellerProducts(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
+  async getProductsForSeller(query: GetSellerProductsRequestDto, user: JwtVerifiedPayload) {
     const {
       search,
       page,
@@ -251,6 +326,7 @@ export class ProductListService {
       salesStatus,
       visibilityStatus,
       productType,
+      productCategoryTypes,
     } = query;
 
     const userStores = await this.prisma.store.findMany({
@@ -279,7 +355,10 @@ export class ProductListService {
 
     if (storeId) {
       if (!userStoreIds.includes(storeId)) {
-        throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
+        LoggerUtil.log(
+          `상품 목록 조회 실패: 스토어 소유권 없음 - userId: ${user.sub}, storeId: ${storeId}`,
+        );
+        throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
       }
       where.storeId = storeId;
     }
@@ -292,7 +371,7 @@ export class ProductListService {
       where.visibilityStatus = visibilityStatus;
     }
 
-    this.addCommonFilters(where, search, minPrice, maxPrice, productType);
+    this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
     const totalItems = await this.prisma.product.count({ where });
 
@@ -302,8 +381,27 @@ export class ProductListService {
     let products;
 
     if (needsReviewData) {
-      const allProducts: ProductWithReviewsAndStore[] = await this.prisma.product.findMany({
-        where,
+      const productIds = await this.getProductIdsByReviewSort(
+        this.buildReviewSortFilterSql({
+          userStoreIds,
+          storeId,
+          salesStatus,
+          visibilityStatus,
+          search,
+          minPrice,
+          maxPrice,
+          productType,
+          productCategoryTypes,
+        }),
+        sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
+        page,
+        limit,
+      );
+
+      const productsWithStore = await this.prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+        },
         include: {
           reviews: {
             select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
@@ -314,16 +412,14 @@ export class ProductListService {
         },
       });
 
-      const productsWithStats = this.calculateReviewStats(allProducts);
-      this.sortProductsByReviewStats(productsWithStats, sortBy);
+      const productsById = new Map(productsWithStore.map((product) => [product.id, product]));
+      const orderedProducts = productIds
+        .map((id) => productsById.get(id))
+        .filter((product): product is NonNullable<typeof product> => Boolean(product));
 
-      const skip = (page - 1) * limit;
-      const paginatedProducts = productsWithStats.slice(skip, skip + limit);
-
-      const productIds = paginatedProducts.map((p) => p.id);
       const likedProductIds = await this.getLikedProductIds(user.sub, productIds);
 
-      products = paginatedProducts.map((product) =>
+      products = orderedProducts.map((product) =>
         ProductMapperUtil.mapToProductResponse(product, likedProductIds.has(product.id)),
       );
     } else {

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { Menu, User, LogOut } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
-import { useLogout } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useLogout } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 
 const drawerWidth = 300;
 
@@ -53,7 +53,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     <div className="flex min-h-screen">
       {/* 헤더 */}
       <header
-        className={`fixed top-0 right-0 z-10 bg-primary text-primary-foreground transition-all duration-300 ${
+        className={`fixed top-0 right-0 z-10 bg-white border-b border-zinc-200 text-zinc-900 transition-all duration-300 ${
           isDrawerOpen && !isMobile ? `left-[${drawerWidth}px]` : "left-0"
         }`}
         style={{
@@ -66,15 +66,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             variant="ghost"
             size="icon"
             onClick={handleDrawerToggle}
-            className="mr-2 text-primary-foreground hover:bg-primary-foreground/10"
+            className="mr-2 text-zinc-700 hover:bg-zinc-100"
           >
             <Menu className="h-6 w-6" />
           </Button>
-          <h1 className="flex-1 text-xl font-semibold">판매자 관리 시스템</h1>
+          <h1 className="flex-1 text-xl font-semibold text-zinc-900">판매자 관리 시스템</h1>
           <Button
             variant="ghost"
             onClick={() => navigate(ROUTES.STORE_CREATE)}
-            className="mr-2 text-primary-foreground hover:bg-primary-foreground/10"
+            className="mr-2 text-zinc-700 hover:bg-zinc-100"
           >
             스토어 만들기
           </Button>
@@ -84,16 +84,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="text-primary-foreground hover:bg-primary-foreground/10"
+                className="text-zinc-700 hover:bg-zinc-100"
               >
                 <User className="h-6 w-6" />
               </Button>
               {isProfileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-popover rounded-md shadow-lg border z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-zinc-200 z-50">
                   <button
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
-                    className="w-full px-4 py-2 text-left text-sm text-foreground hover:bg-accent flex items-center gap-2 rounded-md disabled:opacity-50"
+                    className="w-full px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100 flex items-center gap-2 rounded-md disabled:opacity-50"
                   >
                     <LogOut className="h-4 w-4" />
                     로그아웃

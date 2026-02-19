@@ -6,7 +6,7 @@ import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-respons
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
-import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -34,6 +34,6 @@ export class UserStoreController {
   @SwaggerResponse(200, { dataDto: StoreResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreDetail(@Param("id") id: string, @Request() req: { user?: JwtVerifiedPayload }) {
-    return await this.storeService.getStoreById(id, req.user);
+    return await this.storeService.getStoreByIdForUser(id, req.user);
   }
 }

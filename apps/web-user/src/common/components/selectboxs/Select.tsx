@@ -22,8 +22,11 @@ export interface SelectOption<T = string> {
  *   label="사이즈 선택"
  *   options={[
  *     { value: "", label: "사이즈를 선택해주세요" },
+ *     { value: "도시락", label: "도시락" },
+ *     { value: "미니", label: "미니 (1~2인)" },
  *     { value: "1호", label: "1호 (2~3인)" },
  *     { value: "2호", label: "2호 (4~5인)" },
+ *     { value: "3호", label: "3호 (6~8인)" },
  *   ]}
  * />
  */
