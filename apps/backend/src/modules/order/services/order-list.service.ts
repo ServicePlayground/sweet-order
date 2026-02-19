@@ -125,9 +125,7 @@ export class OrderListService {
       orderBy,
       skip,
       take: limit,
-      include: {
-        orderItems: true,
-      },
+      include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
     });
 
     // DTO로 변환

@@ -136,10 +136,29 @@ export class OrderResponseDto extends PickupAddressDto {
   productId: string;
 
   @ApiProperty({
+    description: "상품명",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.productName,
+  })
+  productName: string;
+
+  @ApiProperty({
+    description: "상품 이미지 URL 목록",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.productImages,
+    type: [String],
+  })
+  productImages: string[];
+
+  @ApiProperty({
     description: "스토어 ID",
     example: SWAGGER_EXAMPLES.ORDER_DATA.storeId,
   })
   storeId: string;
+
+  @ApiProperty({
+    description: "스토어명",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeName,
+  })
+  storeName: string;
 
   @ApiProperty({
     description: "주문 번호",

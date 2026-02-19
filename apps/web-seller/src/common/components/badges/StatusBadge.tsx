@@ -24,9 +24,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   className,
 }) => {
   return (
-    <Badge className={cn("rounded-full px-2 py-0.5 text-xs font-medium", statusBadgeStyles[variant], className)}>
+    <Badge
+      className={cn(
+        "rounded-full px-2 py-0.5 text-xs font-medium",
+        statusBadgeStyles[variant],
+        className,
+      )}
+    >
       {children}
     </Badge>
   );
 };
-

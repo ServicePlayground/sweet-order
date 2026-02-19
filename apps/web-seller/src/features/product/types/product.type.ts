@@ -133,6 +133,7 @@ export interface IGetProductsListParams {
   visibilityStatus?: EnableStatus;
   minPrice?: number;
   maxPrice?: number;
+  productType?: ProductType;
   productCategoryTypes?: ProductCategoryType[];
 }
 

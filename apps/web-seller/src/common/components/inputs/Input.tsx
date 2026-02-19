@@ -12,9 +12,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && (
-          <Label className="block mb-2 text-sm font-medium text-foreground">{label}</Label>
-        )}
+        {label && <Label className="block mb-2 text-sm font-medium text-foreground">{label}</Label>}
         <BaseInput
           ref={ref}
           className={cn(
@@ -24,9 +22,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           {...props}
         />
-        {error && (
-          <p className="mt-1.5 text-xs text-destructive mb-0">{error}</p>
-        )}
+        {error && <p className="mt-1.5 text-xs text-destructive mb-0">{error}</p>}
       </div>
     );
   },

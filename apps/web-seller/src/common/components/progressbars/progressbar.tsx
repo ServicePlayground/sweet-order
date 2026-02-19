@@ -5,9 +5,6 @@ interface Props {
   activeStep: number; // 0-based index
   steps: Array<React.ReactNode>;
   title?: React.ReactNode;
-  alternativeLabel?: boolean;
-  containerSx?: any;
-  stepperProps?: any;
 }
 
 export const ProgressBar: React.FC<Props> = ({ activeStep, steps, title = "" }) => {

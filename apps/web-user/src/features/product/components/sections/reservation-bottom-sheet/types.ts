@@ -23,12 +23,14 @@ export interface ReservationBottomSheetProps {
   price: number;
   cakeTitle: string;
   cakeImageUrl: string;
+  cakeImages?: string[];
   cakeSizeOptions?: CakeSizeOption[];
   cakeFlavorOptions?: CakeFlavorOption[];
   cakeSize?: string;
   productType: ProductType;
   productNoticeProducer?: string;
   productNoticeAddress?: string;
+  storeName: string;
   // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;

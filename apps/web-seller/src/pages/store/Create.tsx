@@ -143,9 +143,13 @@ export const StoreCreatePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-center mb-6">스토어 만들기</h1>
-      <ProgressBar activeStep={currentStep - 1} steps={STEPS} />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">스토어 만들기</h1>
+        <div className="mt-6">
+          <ProgressBar activeStep={currentStep - 1} steps={STEPS} />
+        </div>
+      </div>
 
       <Card>
         <CardContent className="p-6">{renderStep()}</CardContent>

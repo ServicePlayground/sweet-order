@@ -145,11 +145,13 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         price={data.salePrice}
         cakeTitle={data.name}
         cakeImageUrl={data.images[0] ?? ""}
+        cakeImages={data.images}
         cakeSizeOptions={data.cakeSizeOptions}
         cakeFlavorOptions={data.cakeFlavorOptions}
         productType={data.productType}
         productNoticeProducer={data.productNoticeProducer}
         productNoticeAddress={data.productNoticeAddress}
+        storeName={data.storeName}
         pickupAddress={data.pickupAddress}
         pickupRoadAddress={data.pickupRoadAddress}
         pickupDetailAddress={data.pickupDetailAddress}

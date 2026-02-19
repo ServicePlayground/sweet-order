@@ -84,15 +84,13 @@ export class OrderUserListService {
     // 페이지네이션
     const skip = (page - 1) * limit;
 
-    // 주문 조회 (orderItems 포함)
+    // 주문 조회 (orderItems, product 포함)
     const orders = await this.prisma.order.findMany({
       where,
       orderBy,
       skip,
       take: limit,
-      include: {
-        orderItems: true,
-      },
+      include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
     });
 
     // DTO로 변환
