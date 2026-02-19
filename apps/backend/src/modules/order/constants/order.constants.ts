@@ -87,6 +87,8 @@ export const SWAGGER_EXAMPLES = {
     orderNumber: "ORD-20240101-001",
     userId: USER_SWAGGER_EXAMPLES.USER_DATA.id,
     productId: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.id,
+    productName: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.name,
+    productImages: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.images,
     storeId: STORE_SWAGGER_EXAMPLES.ID,
     storeName: STORE_SWAGGER_EXAMPLES.NAME,
     totalQuantity: 2,

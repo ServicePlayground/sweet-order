@@ -18,10 +18,12 @@ export interface CreateOrderItemRequest {
 }
 
 /**
- * 주문 생성 요청
+ * 주문 생성 요청 (주문 시점의 정보 전달)
  */
 export interface CreateOrderRequest {
   productId: string;
+  productName: string;
+  productImages: string[];
   items: CreateOrderItemRequest[];
   totalQuantity: number;
   totalPrice: number;
@@ -74,6 +76,8 @@ export interface OrderResponse {
   id: string;
   userId: string;
   productId: string;
+  productName: string;
+  productImages: string[];
   storeId: string;
   storeName: string;
   orderNumber: string;

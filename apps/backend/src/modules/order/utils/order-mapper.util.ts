@@ -21,6 +21,7 @@ export class OrderMapperUtil {
   /**
    * OrderItems select 필드
    * 주문 조회 시 orderItems를 포함하기 위한 공통 include 필드
+   * (productName, productImages는 Order에 denormalized 저장됨)
    */
   static readonly ORDER_ITEMS_INCLUDE = {
     orderItems: true,
@@ -65,6 +66,8 @@ export class OrderMapperUtil {
       id: order.id,
       userId: order.userId,
       productId: order.productId,
+      productName: order.productName ?? "",
+      productImages: order.productImages ?? [],
       storeId: order.storeId,
       storeName: order.storeName ?? "",
       orderNumber: order.orderNumber,

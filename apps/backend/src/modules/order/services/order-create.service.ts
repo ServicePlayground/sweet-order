@@ -214,6 +214,8 @@ export class OrderCreateService {
   ): Promise<CreateOrderResponseDto> {
     const {
       productId,
+      productName,
+      productImages,
       items,
       totalQuantity,
       totalPrice,
@@ -336,6 +338,8 @@ export class OrderCreateService {
               data: {
                 userId,
                 productId,
+                productName,
+                productImages,
                 storeId: product.storeId,
                 storeName,
                 orderNumber,

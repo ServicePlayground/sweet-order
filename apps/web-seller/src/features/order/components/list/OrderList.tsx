@@ -47,7 +47,7 @@ export function OrderList({ orders }: OrderListProps) {
   return (
     <div className="space-y-2">
       {orders.map((order) => {
-        const firstImage = order.orderItems?.[0]?.imageUrls?.[0];
+        const firstImage = order.productImages?.[0];
         return (
           <div
             key={order.id}
@@ -59,7 +59,7 @@ export function OrderList({ orders }: OrderListProps) {
               {firstImage ? (
                 <img
                   src={firstImage}
-                  alt="주문 상품"
+                  alt={order.productName || "주문 상품"}
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
               ) : (
@@ -73,9 +73,10 @@ export function OrderList({ orders }: OrderListProps) {
             <div className="flex flex-1 items-center justify-between gap-4">
               <div className="flex-1">
                 <div className="mb-1 flex items-center gap-2">
-                  <div className="text-sm font-semibold">{order.orderNumber}</div>
+                  <div className="text-sm font-semibold">{order.productName}</div>
                   {getStatusBadge(order.orderStatus)}
                 </div>
+                <div className="text-sm font-semibold">{order.orderNumber}</div>
                 <div className="text-xs text-muted-foreground">
                   {new Date(order.createdAt).toLocaleString("ko-KR", {
                     year: "numeric",

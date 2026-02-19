@@ -24,6 +24,7 @@ export interface ReservationBottomSheetProps {
   price: number;
   cakeTitle: string;
   cakeImageUrl: string;
+  cakeImages?: string[];
   cakeSizeOptions?: CakeSizeOption[];
   cakeFlavorOptions?: CakeFlavorOption[];
   cakeSize?: string;
