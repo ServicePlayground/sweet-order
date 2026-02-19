@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
 interface BottomSheetProps {
@@ -32,6 +32,24 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
+
+  // 모바일 키보드 높이 감지
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      const heightDiff = window.innerHeight - viewport.height;
+      setKeyboardHeight(heightDiff > 0 ? heightDiff : 0);
+    };
+
+    viewport.addEventListener("resize", handleResize);
+    return () => viewport.removeEventListener("resize", handleResize);
+  }, [isOpen]);
 
   // 바텀시트 열릴 때 스크롤 방지
   useEffect(() => {
@@ -76,7 +94,10 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
 
         {/* Footer - 고정 영역 */}
         {footer && (
-          <div className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white">
+          <div
+            className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white transition-transform duration-200"
+            style={{ transform: keyboardHeight > 0 ? `translateY(${keyboardHeight}px)` : undefined }}
+          >
             {footer}
           </div>
         )}

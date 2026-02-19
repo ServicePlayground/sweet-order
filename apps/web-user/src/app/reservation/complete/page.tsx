@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { ProductType } from "@/apps/web-user/features/product/types/product.type";
 import { Icon } from "@/apps/web-user/common/components/icons";
@@ -52,6 +53,7 @@ const formatDateTime = (dateString: string | null) => {
 };
 
 export default function ReservationCompletePage() {
+  const router = useRouter();
   const [snapshot, setSnapshot] = useState<ReservationSnapshot | null>(null);
   const [openIndexes, setOpenIndexes] = useState<Set<number>>(new Set());
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -83,35 +85,40 @@ export default function ReservationCompletePage() {
         <div className="text-sm text-gray-500 mb-[24px]">예약 정보가 없습니다.</div>
       ) : (
         <div className="absolute bottom-[76px] left-0 right-0 h-[calc(70%-48px)] px-[20px] pt-[56px] bg-white rounded-t-4xl">
-          <div className="h-full overflow-y-auto">
-            <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
-              <Image
-                src={snapshot.cakeImageUrl}
-                alt={snapshot.cakeTitle}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
-              {snapshot.productType === ProductType.BASIC_CAKE ? "예약완료" : "예약신청완료"} 🎉
-            </p>
-            <p className="flex items-center gap-[8px] mb-[20px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-light rounded-xl">
-              <Icon name="warning" width={16} height={16} className="text-blue-sky" />
+          <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
+            <Image
+              src={snapshot.cakeImageUrl}
+              alt={snapshot.cakeTitle}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
+            {snapshot.productType === ProductType.BASIC_CAKE ? "예약완료" : "예약신청완료"} 🎉
+          </p>
+          <div className="pb-[60px] h-[calc(100%-56px)] overflow-y-auto"> 
+            <p className="flex items-center gap-[8px] mb-[28px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-50 rounded-xl">
+              <Icon name="warning" width={16} height={16} className="text-blue-400" />
               예약 확정까지 1-2일 소요될 수 있어요.
             </p>
             <div className="mb-[20px]">
-              <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
+              <div className="flex items-start justify-between mb-[6px] px-[16px] text-sm">
                 <span className="text-gray-500">픽업장소</span>
-                <span className="text-gray-900">
-                  {snapshot.pickupRoadAddress || snapshot.pickupAddress}
+                <span className="text-gray-900 text-end">
+                  {snapshot.productNoticeProducer}<br />
+                  <span className="text-gray-400 text-2sm">{snapshot.productNoticeAddress}</span>
                 </span>
-              </p>
-              <p className="flex items-center justify-between px-[16px] text-sm">
+              </div>
+              <div className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
                 <span className="text-gray-500">결제방식</span>
                 <span className="text-gray-900">현장결제</span>
-              </p>
+              </div>
+              <div className="flex items-center justify-between px-[16px] text-sm">
+                <span className="text-gray-500">총 결제금액</span>
+                <span className="text-gray-900">{snapshot.totalPrice.toLocaleString()}원</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-[12px]">
+            <div className="flex flex-col gap-[20px]">
               {snapshot.items.map((item, index) => {
                 const isOpen = openIndexes.has(index);
                 const itemPrice = snapshot.price + item.sizePrice + item.flavorPrice;
@@ -207,19 +214,22 @@ export default function ReservationCompletePage() {
                 );
               })}
             </div>
-            <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] bg-white">
-              <div className="flex gap-[8px]">
-                <Link href="/store" className="flex-1">
-                  <Button variant="outline">예약 상세보기</Button>
-                </Link>
-                <Link href="/" className="flex-1">
-                  <Button variant="outline">홈으로 가기</Button>
-                </Link>
-              </div>
+          </div>
+          <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] bg-white">
+            <div className="flex gap-[8px]">
+              <Link href="/store" className="flex-1">
+                <Button variant="outline">예약 상세보기</Button>
+              </Link>
+              <Link href="/" className="flex-1">
+                <Button variant="outline">홈으로 가기</Button>
+              </Link>
             </div>
           </div>
         </div>
       )}
+      <button className="absolute top-[14px] right-[20px]" onClick={() => router.push("/")}>
+        <Icon name="close" width={24} height={24} className="text-white" />
+      </button>
     </div>
   );
 }
