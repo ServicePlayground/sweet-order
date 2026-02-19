@@ -75,6 +75,7 @@ export function useReservationBottomSheet({
   // ========================================
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDateChangeModalOpen, setIsDateChangeModalOpen] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
 
   // 파일 업로드 input ref
@@ -115,7 +116,6 @@ export function useReservationBottomSheet({
 
   // 현재 편집 중인 옵션 상태 초기화
   const resetCurrentOptions = () => {
-    setSelectedDate(null);
     setSelectedSize("");
     setSelectedFlavor("");
     setSelectedCream("");
@@ -126,7 +126,7 @@ export function useReservationBottomSheet({
   };
 
   // 캘린더 뷰로 전환하고 임시 날짜/시간 세팅
-  const handleOpenCalendar = () => {
+  const openCalendar = () => {
     setTempSelectedDate(selectedDate);
     if (selectedDate) {
       const time = new Date();
@@ -136,6 +136,28 @@ export function useReservationBottomSheet({
       setTempSelectedTime(null);
     }
     setView("calendar");
+  };
+
+  const handleOpenCalendar = () => {
+    const shouldShowDateChangeModal =
+      (isAddingFromConfirm && orderItems.length > 0) ||
+      (isEditingFromConfirm && orderItems.length > 1);
+    if (shouldShowDateChangeModal) {
+      setIsDateChangeModalOpen(true);
+      return;
+    }
+    openCalendar();
+  };
+
+  // 날짜 변경 확인 모달 → 확인
+  const handleDateChangeConfirm = () => {
+    setIsDateChangeModalOpen(false);
+    openCalendar();
+  };
+
+  // 날짜 변경 확인 모달 → 변경취소
+  const handleDateChangeCancel = () => {
+    setIsDateChangeModalOpen(false);
   };
 
   // 캘린더에서 선택한 날짜/시간 확정
@@ -205,13 +227,32 @@ export function useReservationBottomSheet({
     };
 
     if (editingIndex !== null) {
-      setOrderItems((prev) =>
-        prev.map((item, i) =>
-          i === editingIndex ? { ...newItem, quantity: item.quantity } : item,
-        ),
-      );
+      // 옵션변경 모드에서 날짜가 변경되었으면 기존 orderItems의 날짜도 전부 업데이트
+      if (isEditingFromConfirm && selectedDate) {
+        setOrderItems((prev) =>
+          prev.map((item, i) =>
+            i === editingIndex
+              ? { ...newItem, quantity: item.quantity }
+              : { ...item, date: selectedDate },
+          ),
+        );
+      } else {
+        setOrderItems((prev) =>
+          prev.map((item, i) =>
+            i === editingIndex ? { ...newItem, quantity: item.quantity } : item,
+          ),
+        );
+      }
     } else {
-      setOrderItems((prev) => [...prev, newItem]);
+      // 상품추가 모드에서 날짜가 변경되었으면 기존 orderItems의 날짜도 전부 업데이트
+      if (isAddingFromConfirm && selectedDate) {
+        setOrderItems((prev) => [
+          ...prev.map((item) => ({ ...item, date: selectedDate })),
+          newItem,
+        ]);
+      } else {
+        setOrderItems((prev) => [...prev, newItem]);
+      }
     }
 
     resetCurrentOptions();
@@ -264,6 +305,12 @@ export function useReservationBottomSheet({
   // 새 상품 추가 모드로 전환
   const handleAddNewItem = () => {
     resetCurrentOptions();
+    // 첫 번째 orderItem의 날짜를 유지
+    if (orderItems.length > 0 && orderItems[0].date) {
+      setSelectedDate(orderItems[0].date);
+    } else {
+      setSelectedDate(null);
+    }
     setIsAddingFromConfirm(true);
     setIsEditingFromConfirm(false);
     setView("options");
@@ -368,6 +415,8 @@ export function useReservationBottomSheet({
     setIsCancelModalOpen,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
+    isDateChangeModalOpen,
+    setIsDateChangeModalOpen,
 
     // Computed
     currentOptionPrice,
@@ -376,12 +425,15 @@ export function useReservationBottomSheet({
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
+    isEditingFromConfirm,
     dateSelectionSignal,
     formatDateTime,
 
     // Handlers
     handleOpenCalendar,
     handleCalendarConfirm,
+    handleDateChangeConfirm,
+    handleDateChangeCancel,
     handleCancelClick,
     handleConfirmCancel,
     handleClose,
