@@ -33,22 +33,26 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 모바일 키보드 높이 감지
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  // 모바일 키보드 감지 (visualViewport + focus/blur 병행)
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-
-    const handleResize = () => {
-      const heightDiff = window.innerHeight - viewport.height;
-      setKeyboardHeight(heightDiff > 0 ? heightDiff : 0);
+    const checkKeyboard = () => {
+      const viewport = window.visualViewport;
+      if (viewport) {
+        const heightDiff = window.innerHeight - viewport.height;
+        setIsKeyboardOpen(heightDiff > 50);
+      }
     };
 
-    viewport.addEventListener("resize", handleResize);
-    return () => viewport.removeEventListener("resize", handleResize);
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", checkKeyboard);
+
+    return () => {
+      viewport?.removeEventListener("resize", checkKeyboard);
+    };
   }, [isOpen]);
 
   // 바텀시트 열릴 때 스크롤 방지
@@ -93,7 +97,7 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
         <div className="flex-1 overflow-y-auto">{children}</div>
 
         {/* Footer - 고정 영역 (키보드 열리면 숨김) */}
-        {footer && keyboardHeight === 0 && (
+        {footer && !isKeyboardOpen && (
           <div className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white">
             {footer}
           </div>
