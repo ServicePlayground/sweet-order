@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   Select,
@@ -8,11 +8,15 @@ import {
   SelectValue,
 } from "@/apps/web-seller/common/components/selects/Select";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { useOrderList } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
 import { OrderList } from "@/apps/web-seller/features/order/components/list/OrderList";
 import { OrderSortBy, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
-import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
-import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
+
+const DEBOUNCE_DELAY_MS = 300;
+const LIMIT = 30;
 
 export const StoreDetailOrderListPage: React.FC = () => {
   const { storeId } = useParams();
@@ -22,12 +26,28 @@ export const StoreDetailOrderListPage: React.FC = () => {
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const limit = 30;
 
-  // 필터가 변경되면 페이지를 1로 리셋
+  // 주문 번호 검색 debounce (과도한 API 호출 방지)
+  const debouncedOrderNumber = useDebouncedValue(orderNumber, DEBOUNCE_DELAY_MS);
+
+  // 필터나 정렬이 변경되면 페이지를 1로 리셋
   useEffect(() => {
     setPage(1);
-  }, [orderStatus, orderNumber, startDate, endDate]);
+  }, [orderStatus, debouncedOrderNumber, startDate, endDate, sortBy]);
+
+  const handleResetFilters = useCallback(() => {
+    setPage(1);
+    setOrderStatus(undefined);
+    setOrderNumber("");
+    setStartDate("");
+    setEndDate("");
+  }, []);
+
+  const hasActiveFilters =
+    orderStatus !== undefined ||
+    orderNumber.trim() !== "" ||
+    startDate !== "" ||
+    endDate !== "";
 
   if (!storeId) {
     return (
@@ -39,11 +59,11 @@ export const StoreDetailOrderListPage: React.FC = () => {
 
   const { data, isLoading, isError } = useOrderList({
     page,
-    limit,
+    limit: LIMIT,
     sortBy,
     storeId,
     orderStatus,
-    orderNumber: orderNumber.trim() || undefined,
+    orderNumber: debouncedOrderNumber.trim() || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
   });
@@ -61,10 +81,17 @@ export const StoreDetailOrderListPage: React.FC = () => {
       {/* 필터 및 정렬 */}
       <div className="space-y-4 rounded-lg border bg-card p-4">
         {/* 통계 및 정렬 */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            총 <span className="font-semibold text-foreground">{meta?.totalItems || 0}</span>개의
-            주문
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              총 <span className="font-semibold text-foreground">{meta?.totalItems || 0}</span>개의
+              주문
+            </div>
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={handleResetFilters}>
+                필터 초기화
+              </Button>
+            )}
           </div>
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as OrderSortBy)}>
             <SelectTrigger className="w-[180px]">
@@ -81,6 +108,16 @@ export const StoreDetailOrderListPage: React.FC = () => {
 
         {/* 필터 */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* 주문 번호 검색 */}
+          <div className="space-y-2">
+            <Label>주문 번호</Label>
+            <Input
+              placeholder="주문 번호 검색"
+              value={orderNumber}
+              onChange={(e) => setOrderNumber(e.target.value)}
+            />
+          </div>
+
           {/* 주문 상태 필터 */}
           <div className="space-y-2">
             <Label>주문 상태</Label>
@@ -99,16 +136,6 @@ export const StoreDetailOrderListPage: React.FC = () => {
                 <SelectItem value={OrderStatus.CONFIRMED}>확정됨</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          {/* 주문 번호 검색 */}
-          <div className="space-y-2">
-            <Label>주문 번호</Label>
-            <Input
-              placeholder="주문 번호 검색"
-              value={orderNumber}
-              onChange={(e) => setOrderNumber(e.target.value)}
-            />
           </div>
 
           {/* 시작 날짜 */}

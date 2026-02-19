@@ -12,6 +12,7 @@ import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/I
 import { SelectBox } from "@/apps/web-seller/common/components/selects/SelectBox";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import { ProductCreationCategorySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCategorySection";
 import { ProductCreationSearchTagSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationSearchTagSection";
 
@@ -49,51 +50,63 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
 
   return (
     <div className="grid grid-cols-1 gap-6">
-      <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-          노출 상품명
-        </Label>
-        <Input
-          placeholder=""
-          value={form.name}
-          onChange={onChange("name")}
-          className={errors.name ? "border-destructive" : ""}
-        />
-        {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
-      </div>
-      <div>
-        <SelectBox
-          label="판매 여부"
-          value={form.salesStatus}
-          onChange={(value) => onSalesStatusChange(value as EnableStatus)}
-          options={SALES_STATUS_OPTIONS}
-          error={errors.salesStatus}
-          required
-        />
-      </div>
-      <div>
-        <SelectBox
-          label="노출 여부"
-          value={form.visibilityStatus}
-          onChange={(value) => onVisibilityStatusChange(value as EnableStatus)}
-          options={VISIBILITY_STATUS_OPTIONS}
-          error={errors.visibilityStatus}
-          required
-        />
-      </div>
-      <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">판매가</Label>
-        <Input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          placeholder=""
-          value={form.salePrice === 0 ? "" : form.salePrice.toString()}
-          onChange={onChange("salePrice")}
-          className={errors.salePrice ? "border-destructive" : ""}
-        />
-        {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
-      </div>
+      {/* 상품 기본 정보 (노출 상품명 ~ 판매가) */}
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-2">상품 기본 정보</h2>
+          <div className="border-t mb-6" />
+
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+                노출 상품명
+              </Label>
+              <Input
+                placeholder=""
+                value={form.name}
+                onChange={onChange("name")}
+                className={errors.name ? "border-destructive" : ""}
+              />
+              {errors.name && <p className="text-sm text-destructive mt-1">{errors.name}</p>}
+            </div>
+            <div>
+              <SelectBox
+                label="판매 여부"
+                value={form.salesStatus}
+                onChange={(value) => onSalesStatusChange(value as EnableStatus)}
+                options={SALES_STATUS_OPTIONS}
+                error={errors.salesStatus}
+                required
+              />
+            </div>
+            <div>
+              <SelectBox
+                label="노출 여부"
+                value={form.visibilityStatus}
+                onChange={(value) => onVisibilityStatusChange(value as EnableStatus)}
+                options={VISIBILITY_STATUS_OPTIONS}
+                error={errors.visibilityStatus}
+                required
+              />
+            </div>
+            <div>
+              <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+                판매가
+              </Label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder=""
+                value={form.salePrice === 0 ? "" : form.salePrice.toString()}
+                onChange={onChange("salePrice")}
+                className={errors.salePrice ? "border-destructive" : ""}
+              />
+              {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 카테고리 설정 (중복 선택 가능) */}
       <ProductCreationCategorySection
@@ -109,30 +122,40 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
         disabled={disabled}
       />
 
-      <div>
-        <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
-          상품 대표 이미지
-        </Label>
-        <ImageMultiUpload
-          width={300}
-          height={300}
-          value={mainImage ? [mainImage] : []}
-          onChange={(urls) => onMainImageChange(urls[0] || "")}
-          maxImages={1}
-          enableDragDrop={true}
-        />
-      </div>
-      <div>
-        <Label>추가 이미지</Label>
-        <ImageMultiUpload
-          width={300}
-          height={300}
-          value={additionalImages}
-          onChange={onAdditionalImagesChange}
-          maxImages={7}
-          enableDragDrop={true}
-        />
-      </div>
+      {/* 이미지 등록 */}
+      <Card>
+        <CardContent className="p-6">
+          <h2 className="text-xl font-semibold mb-2">이미지 등록</h2>
+          <div className="border-t mb-6" />
+
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+                상품 대표 이미지
+              </Label>
+              <ImageMultiUpload
+                width={300}
+                height={300}
+                value={mainImage ? [mainImage] : []}
+                onChange={(urls) => onMainImageChange(urls[0] || "")}
+                maxImages={1}
+                enableDragDrop={true}
+              />
+            </div>
+            <div>
+              <Label>추가 이미지</Label>
+              <ImageMultiUpload
+                width={300}
+                height={300}
+                value={additionalImages}
+                onChange={onAdditionalImagesChange}
+                maxImages={7}
+                enableDragDrop={true}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

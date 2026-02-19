@@ -37,6 +37,12 @@ export function useProductList({
   sortBy = SortBy.LATEST,
   storeId,
   search,
+  salesStatus,
+  visibilityStatus,
+  minPrice,
+  maxPrice,
+  productType,
+  productCategoryTypes,
 }: Partial<IGetProductsListParams> & { storeId: string }) {
   const { addAlert } = useAlertStore();
 
@@ -46,6 +52,12 @@ export function useProductList({
       sortBy,
       storeId,
       search,
+      salesStatus,
+      visibilityStatus,
+      minPrice,
+      maxPrice,
+      productType,
+      productCategoryTypes,
     }),
     queryFn: ({ pageParam = 1 }) => {
       const params: IGetProductsListParams = {
@@ -56,6 +68,24 @@ export function useProductList({
       };
       if (search) {
         params.search = search;
+      }
+      if (salesStatus) {
+        params.salesStatus = salesStatus;
+      }
+      if (visibilityStatus) {
+        params.visibilityStatus = visibilityStatus;
+      }
+      if (minPrice !== undefined) {
+        params.minPrice = minPrice;
+      }
+      if (maxPrice !== undefined) {
+        params.maxPrice = maxPrice;
+      }
+      if (productType) {
+        params.productType = productType;
+      }
+      if (productCategoryTypes?.length) {
+        params.productCategoryTypes = productCategoryTypes;
       }
       return productApi.getProducts(params);
     },

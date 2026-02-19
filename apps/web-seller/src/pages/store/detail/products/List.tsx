@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   Select,
@@ -7,16 +7,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/apps/web-seller/common/components/selects/Select";
+import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { useProductList } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { ProductList } from "@/apps/web-seller/features/product/components/list/ProductList";
-import { SortBy, IProductItem } from "@/apps/web-seller/features/product/types/product.type";
+import {
+  SortBy,
+  IProductItem,
+  EnableStatus,
+  ProductType,
+  ProductCategoryType,
+} from "@/apps/web-seller/features/product/types/product.type";
+import { PRODUCT_CATEGORY_GROUPS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
+import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
+
+const DEBOUNCE_DELAY_MS = 300;
 
 export const StoreDetailProductListPage: React.FC = () => {
   const { storeId } = useParams();
   const [sortBy, setSortBy] = useState<SortBy>(SortBy.LATEST);
+  const [search, setSearch] = useState<string>("");
+  const [salesStatus, setSalesStatus] = useState<EnableStatus | undefined>(undefined);
+  const [visibilityStatus, setVisibilityStatus] = useState<EnableStatus | undefined>(undefined);
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [productType, setProductType] = useState<ProductType | undefined>(undefined);
+  const [productCategoryTypes, setProductCategoryTypes] = useState<ProductCategoryType[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // 검색 및 가격 필터 debounce (과도한 API 호출 방지)
+  const debouncedSearch = useDebouncedValue(search, DEBOUNCE_DELAY_MS);
+  const debouncedMinPrice = useDebouncedValue(minPrice, DEBOUNCE_DELAY_MS);
+  const debouncedMaxPrice = useDebouncedValue(maxPrice, DEBOUNCE_DELAY_MS);
+
+  const handleResetFilters = useCallback(() => {
+    setSearch("");
+    setSalesStatus(undefined);
+    setVisibilityStatus(undefined);
+    setMinPrice("");
+    setMaxPrice("");
+    setProductType(undefined);
+    setProductCategoryTypes([]);
+  }, []);
+
+  const hasActiveFilters =
+    search.trim() !== "" ||
+    salesStatus !== undefined ||
+    visibilityStatus !== undefined ||
+    minPrice !== "" ||
+    maxPrice !== "" ||
+    productType !== undefined ||
+    productCategoryTypes.length > 0;
 
   if (!storeId) {
     return (
@@ -29,6 +73,13 @@ export const StoreDetailProductListPage: React.FC = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     storeId,
     sortBy,
+    search: debouncedSearch.trim() || undefined,
+    salesStatus,
+    visibilityStatus,
+    minPrice: debouncedMinPrice ? Number(debouncedMinPrice) : undefined,
+    maxPrice: debouncedMaxPrice ? Number(debouncedMaxPrice) : undefined,
+    productType,
+    productCategoryTypes: productCategoryTypes.length ? productCategoryTypes : undefined,
   });
 
   // 무한 스크롤 훅 사용
@@ -41,6 +92,8 @@ export const StoreDetailProductListPage: React.FC = () => {
 
   // 상품 목록 평탄화 및 중복 제거
   const products = flattenAndDeduplicateInfiniteData<IProductItem>(data);
+  // 전체 개수는 첫 번째 페이지의 meta에서 가져옴 (무한 스크롤)
+  const totalItems = data?.pages?.[0]?.meta?.totalItems || products.length || 0;
 
   return (
     <div className="space-y-6">
@@ -49,22 +102,168 @@ export const StoreDetailProductListPage: React.FC = () => {
         <h1 className="text-3xl font-bold">상품 목록</h1>
       </div>
 
-      {/* 정렬 및 통계 */}
-      <div className="flex items-center justify-between rounded-lg border bg-card p-4">
-        <div className="text-sm text-muted-foreground">
-          총 <span className="font-semibold text-foreground">{products.length || 0}</span>개의 상품
+      {/* 필터 및 정렬 */}
+      <div className="space-y-4 rounded-lg border bg-card p-4">
+        {/* 통계 및 정렬 */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              총 <span className="font-semibold text-foreground">{totalItems}</span>개의 상품
+            </div>
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={handleResetFilters}>
+                필터 초기화
+              </Button>
+            )}
+          </div>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortBy)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="정렬 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={SortBy.LATEST}>최신순</SelectItem>
+              <SelectItem value={SortBy.POPULAR}>인기순</SelectItem>
+              <SelectItem value={SortBy.PRICE_ASC}>가격 낮은순</SelectItem>
+              <SelectItem value={SortBy.PRICE_DESC}>가격 높은순</SelectItem>
+              <SelectItem value={SortBy.REVIEW_COUNT}>후기 많은순</SelectItem>
+              <SelectItem value={SortBy.RATING_AVG}>별점 높은순</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortBy)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="정렬 선택" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={SortBy.LATEST}>최신순</SelectItem>
-            <SelectItem value={SortBy.POPULAR}>인기순</SelectItem>
-            <SelectItem value={SortBy.PRICE_ASC}>가격 낮은순</SelectItem>
-            <SelectItem value={SortBy.PRICE_DESC}>가격 높은순</SelectItem>
-          </SelectContent>
-        </Select>
+
+        {/* 필터 */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {/* 검색 */}
+          <div className="space-y-2">
+            <Label>상품명 검색</Label>
+            <Input
+              placeholder="상품명 검색"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* 상품 타입 */}
+          <div className="space-y-2">
+            <Label>상품 타입</Label>
+            <Select
+              value={productType || "ALL"}
+              onValueChange={(value) =>
+                setProductType(value === "ALL" ? undefined : (value as ProductType))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="상품 타입 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">전체</SelectItem>
+                <SelectItem value={ProductType.BASIC_CAKE}>기본 케이크</SelectItem>
+                <SelectItem value={ProductType.CUSTOM_CAKE}>커스텀 케이크</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 판매 상태 */}
+          <div className="space-y-2">
+            <Label>판매 상태</Label>
+            <Select
+              value={salesStatus || "ALL"}
+              onValueChange={(value) =>
+                setSalesStatus(value === "ALL" ? undefined : (value as EnableStatus))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="상태 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">전체</SelectItem>
+                <SelectItem value={EnableStatus.ENABLE}>판매중</SelectItem>
+                <SelectItem value={EnableStatus.DISABLE}>판매중지</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 노출 상태 */}
+          <div className="space-y-2">
+            <Label>노출 상태</Label>
+            <Select
+              value={visibilityStatus || "ALL"}
+              onValueChange={(value) =>
+                setVisibilityStatus(value === "ALL" ? undefined : (value as EnableStatus))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="상태 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">전체</SelectItem>
+                <SelectItem value={EnableStatus.ENABLE}>노출</SelectItem>
+                <SelectItem value={EnableStatus.DISABLE}>숨김</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 최소 가격 */}
+          <div className="space-y-2">
+            <Label>최소 가격</Label>
+            <Input
+              type="number"
+              placeholder="최소 가격"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+            />
+          </div>
+
+          {/* 최대 가격 */}
+          <div className="space-y-2">
+            <Label>최대 가격</Label>
+            <Input
+              type="number"
+              placeholder="최대 가격"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* 카테고리 필터 (복수 선택) */}
+        <div className="space-y-2">
+          <Label>카테고리 (해당 중 하나라도 포함)</Label>
+          <div className="flex flex-wrap gap-2">
+            {PRODUCT_CATEGORY_GROUPS.flatMap((group) =>
+              group.options.map((opt) => {
+                const isSelected = productCategoryTypes.includes(opt.value);
+                return (
+                  <label
+                    key={opt.value}
+                    className={`
+                      inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm cursor-pointer select-none transition-all duration-150 border
+                      ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary font-medium"
+                          : "border-border bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }
+                    `}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {
+                        if (isSelected) {
+                          setProductCategoryTypes(productCategoryTypes.filter((t) => t !== opt.value));
+                        } else {
+                          setProductCategoryTypes([...productCategoryTypes, opt.value]);
+                        }
+                      }}
+                      className="sr-only"
+                    />
+                    {opt.label}
+                  </label>
+                );
+              }),
+            )}
+          </div>
+        </div>
       </div>
 
       {/* 상품 목록 */}

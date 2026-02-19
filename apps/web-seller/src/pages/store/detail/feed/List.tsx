@@ -30,12 +30,20 @@ export const StoreDetailFeedListPage: React.FC = () => {
 
   // 피드 목록 평탄화 및 중복 제거
   const feeds = flattenAndDeduplicateInfiniteData<IFeed>(data);
+  const totalItems = data?.pages?.[0]?.meta?.totalItems ?? feeds.length ?? 0;
 
   return (
     <div className="space-y-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">피드 목록</h1>
+      </div>
+
+      {/* 통계 카드 (정렬/필터 없음) */}
+      <div className="rounded-lg border bg-card p-4">
+        <div className="text-sm text-muted-foreground">
+          총 <span className="font-semibold text-foreground">{totalItems}</span>개의 피드
+        </div>
       </div>
 
       {/* 피드 목록 */}

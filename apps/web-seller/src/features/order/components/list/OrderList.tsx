@@ -47,12 +47,28 @@ export function OrderList({ orders }: OrderListProps) {
   return (
     <div className="space-y-2">
       {orders.map((order) => {
+        const firstImage = order.orderItems?.[0]?.imageUrls?.[0];
         return (
           <div
             key={order.id}
             onClick={() => handleOrderClick(order.id)}
             className="group flex cursor-pointer items-center gap-4 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md"
           >
+            {/* 주문 상품 이미지 */}
+            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-muted">
+              {firstImage ? (
+                <img
+                  src={firstImage}
+                  alt="주문 상품"
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-xs font-medium text-muted-foreground">
+                  No Image
+                </div>
+              )}
+            </div>
+
             {/* 주문 정보 */}
             <div className="flex flex-1 items-center justify-between gap-4">
               <div className="flex-1">
@@ -60,9 +76,15 @@ export function OrderList({ orders }: OrderListProps) {
                   <div className="text-sm font-semibold">{order.orderNumber}</div>
                   {getStatusBadge(order.orderStatus)}
                 </div>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>주문일: {new Date(order.createdAt).toLocaleDateString("ko-KR")}</span>
-                  <span>수량: {order.totalQuantity}개</span>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(order.createdAt).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
                 </div>
               </div>
               <div className="flex items-center gap-4">

@@ -62,10 +62,15 @@ export function ProductList({ products }: ProductListProps) {
                     </StatusBadge>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>상품번호: {product.id}</span>
-                  <span>좋아요 {product.likeCount}</span>
-                  <span>{new Date(product.createdAt).toLocaleDateString("ko-KR")}</span>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(product.createdAt).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
                 </div>
               </div>
               <div className="text-right">
