@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
 interface BottomSheetProps {
@@ -32,41 +32,6 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  // 모바일 키보드 감지 (터치 디바이스에서 input 포커스 기반)
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    if (!isTouchDevice) return;
-
-    const INPUT_SELECTOR = "input, textarea, [contenteditable]";
-
-    const handleFocusIn = (e: FocusEvent) => {
-      if ((e.target as HTMLElement)?.matches?.(INPUT_SELECTOR)) {
-        setIsKeyboardOpen(true);
-      }
-    };
-
-    const handleFocusOut = () => {
-      // 다른 input으로 포커스 이동하는 경우 대비하여 딜레이 후 확인
-      setTimeout(() => {
-        if (!document.activeElement?.matches(INPUT_SELECTOR)) {
-          setIsKeyboardOpen(false);
-        }
-      }, 300);
-    };
-
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusout", handleFocusOut);
-
-    return () => {
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusout", handleFocusOut);
-    };
-  }, [isOpen]);
 
   // 바텀시트 열릴 때 스크롤 방지
   useEffect(() => {
@@ -109,8 +74,8 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
         {/* Content - 스크롤 가능 영역 */}
         <div className="flex-1 overflow-y-auto">{children}</div>
 
-        {/* Footer - 고정 영역 (키보드 열리면 숨김) */}
-        {footer && !isKeyboardOpen && (
+        {/* Footer - 고정 영역 */}
+        {footer && (
           <div className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white">
             {footer}
           </div>
