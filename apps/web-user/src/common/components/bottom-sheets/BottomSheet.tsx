@@ -33,27 +33,40 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 모바일 키보드 감지 (visualViewport + focus/blur 병행)
+  // 모바일 키보드 감지 (터치 디바이스에서 input 포커스 기반)
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const checkKeyboard = () => {
-      const viewport = window.visualViewport;
-      if (viewport) {
-        const heightDiff = window.innerHeight - viewport.height - viewport.offsetTop;
-        setIsKeyboardOpen(heightDiff > 50);
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) return;
+
+    const INPUT_SELECTOR = "input, textarea, [contenteditable]";
+
+    const handleFocusIn = (e: FocusEvent) => {
+      if ((e.target as HTMLElement)?.matches?.(INPUT_SELECTOR)) {
+        setIsKeyboardOpen(true);
       }
     };
 
-    const viewport = window.visualViewport;
-    viewport?.addEventListener("resize", checkKeyboard);
-    viewport?.addEventListener("scroll", checkKeyboard);
+    const handleFocusOut = (e: FocusEvent) => {
+      if ((e.target as HTMLElement)?.matches?.(INPUT_SELECTOR)) {
+        // 다른 input으로 포커스 이동하는 경우 대비
+        setTimeout(() => {
+          if (!document.activeElement?.matches(INPUT_SELECTOR)) {
+            setIsKeyboardOpen(false);
+          }
+        }, 100);
+      }
+    };
+
+    document.addEventListener("focusin", handleFocusIn);
+    document.addEventListener("focusout", handleFocusOut);
 
     return () => {
-      viewport?.removeEventListener("resize", checkKeyboard);
-      viewport?.removeEventListener("scroll", checkKeyboard);
+      document.removeEventListener("focusin", handleFocusIn);
+      document.removeEventListener("focusout", handleFocusOut);
     };
   }, [isOpen]);
 
