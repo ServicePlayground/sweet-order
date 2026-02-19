@@ -38,22 +38,14 @@ export class OrderUserListService {
     if (type) {
       const now = new Date();
       if (type === OrderType.UPCOMING) {
-        // 픽업 예정: OrderItem의 pickupDate가 현재 시간보다 미래인 주문
-        where.orderItems = {
-          some: {
-            pickupDate: {
-              gte: now,
-            },
-          },
+        // 픽업 예정: Order의 pickupDate가 현재 시간보다 미래인 주문
+        where.pickupDate = {
+          gte: now,
         };
       } else if (type === OrderType.PAST) {
-        // 지난 예약: 모든 OrderItem의 pickupDate가 현재 시간보다 과거인 주문
-        where.orderItems = {
-          every: {
-            pickupDate: {
-              lt: now,
-            },
-          },
+        // 지난 예약: Order의 pickupDate가 현재 시간보다 과거인 주문
+        where.pickupDate = {
+          lt: now,
         };
       }
     }

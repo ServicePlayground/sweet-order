@@ -60,7 +60,6 @@ export enum OrderType {
 const ORDER_ITEM_EXAMPLE = {
   id: "QXZw02vBqVXNQ29c4w9n9ZdH",
   orderId: "QXZw02vBqVXNQ29c4w9n9ZdG", // 주문 ID (관계 필드)
-  pickupDate: new Date("2024-01-15T14:00:00.000Z"),
   // 사이즈 옵션 정보
   sizeId: "size_abcd1234",
   sizeDisplayName: "도시락",
@@ -93,6 +92,7 @@ export const SWAGGER_EXAMPLES = {
     storeName: STORE_SWAGGER_EXAMPLES.NAME,
     totalQuantity: 2,
     totalPrice: 140000,
+    pickupDate: new Date("2024-01-15T14:00:00.000Z"),
     pickupAddress: STORE_SWAGGER_EXAMPLES.ADDRESS,
     pickupRoadAddress: STORE_SWAGGER_EXAMPLES.ROAD_ADDRESS,
     pickupDetailAddress: STORE_SWAGGER_EXAMPLES.DETAIL_ADDRESS,
