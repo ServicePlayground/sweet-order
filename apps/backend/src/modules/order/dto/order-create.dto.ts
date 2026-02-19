@@ -140,6 +140,9 @@ export class CreateOrderItemDto {
  * 여러 개의 주문 항목(items)을 가질 수 있습니다.
  * 각 주문 항목은 서로 다른 옵션 조합(날짜/시간, 사이즈, 맛 등)을 가질 수 있습니다.
  *
+ * 주문 시점의 상품 정보(상품명, 상품 이미지)는 클라이언트에서 전달받아 저장됩니다.
+ * 이는 상품 정보가 변경되어도 주문 시점의 정보를 보존하기 위함입니다.
+ *
  * 예시:
  * - 같은 케이크를 1월 1일 오후 12시에 도시락 사이즈로 주문
  * - 같은 케이크를 1월 1일 오후 2시에 미니 사이즈로 주문
@@ -153,6 +156,24 @@ export class CreateOrderRequestDto extends PickupAddressDto {
   @IsNotEmpty()
   @IsString()
   productId: string;
+
+  @ApiProperty({
+    description: "상품명 (주문 시점의 상품명 보존)",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.productName,
+  })
+  @IsNotEmpty()
+  @IsString()
+  productName: string;
+
+  @ApiProperty({
+    description: "상품 이미지 URL 목록 (주문 시점의 상품 이미지 보존)",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.productImages,
+    type: [String],
+  })
+  @IsNotEmpty()
+  @IsArray()
+  @IsString({ each: true })
+  productImages: string[];
 
   @ApiProperty({
     description: "총 수량",
@@ -173,7 +194,7 @@ export class CreateOrderRequestDto extends PickupAddressDto {
   totalPrice: number;
 
   @ApiProperty({
-    description: "스토어명",
+    description: "스토어명 (주문 시점의 스토어명 보존)",
     example: SWAGGER_EXAMPLES.ORDER_DATA.storeName,
   })
   @IsValidStoreName()

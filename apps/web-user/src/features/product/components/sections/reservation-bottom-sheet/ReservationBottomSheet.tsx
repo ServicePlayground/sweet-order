@@ -18,6 +18,7 @@ export function ReservationBottomSheet({
   price,
   cakeTitle,
   cakeImageUrl,
+  cakeImages = [],
   cakeSizeOptions,
   cakeFlavorOptions,
   productType,
@@ -201,9 +202,12 @@ export function ReservationBottomSheet({
                 }),
               );
 
-              // API 요청 데이터 구성
+              // API 요청 데이터 구성 (주문 시점의 정보 전달)
               const orderRequest: CreateOrderRequest = {
                 productId,
+                productName: cakeTitle,
+                productImages:
+                  cakeImages.length > 0 ? cakeImages : cakeImageUrl ? [cakeImageUrl] : [],
                 totalQuantity,
                 totalPrice,
                 storeName,

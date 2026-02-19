@@ -26,7 +26,6 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
   };
 
   const headerVariant = getHeaderVariant();
-  const hasHeader = headerVariant !== "minimal";
 
   return (
     <AuthProvider>

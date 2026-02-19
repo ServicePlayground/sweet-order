@@ -145,6 +145,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         price={data.salePrice}
         cakeTitle={data.name}
         cakeImageUrl={data.images[0] ?? ""}
+        cakeImages={data.images}
         cakeSizeOptions={data.cakeSizeOptions}
         cakeFlavorOptions={data.cakeFlavorOptions}
         productType={data.productType}

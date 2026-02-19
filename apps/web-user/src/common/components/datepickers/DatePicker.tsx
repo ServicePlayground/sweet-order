@@ -59,7 +59,11 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
     <div className="w-full">
       {label && (
         <div className="mb-[4px]">
-          <label className={`block text-sm font-bold text-gray-900 ${hint ? "pb-[10px]" : "pb-[6px]"}`}>{label}</label>
+          <label
+            className={`block text-sm font-bold text-gray-900 ${hint ? "pb-[10px]" : "pb-[6px]"}`}
+          >
+            {label}
+          </label>
           {hint && <p className="text-xs text-gray-500">{hint}</p>}
         </div>
       )}
