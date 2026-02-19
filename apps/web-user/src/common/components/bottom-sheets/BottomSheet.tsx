@@ -92,14 +92,9 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
         {/* Content - 스크롤 가능 영역 */}
         <div className="flex-1 overflow-y-auto">{children}</div>
 
-        {/* Footer - 고정 영역 */}
-        {footer && (
-          <div
-            className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white transition-transform duration-200"
-            style={{
-              transform: keyboardHeight > 0 ? `translateY(${keyboardHeight}px)` : undefined,
-            }}
-          >
+        {/* Footer - 고정 영역 (키보드 열리면 숨김) */}
+        {footer && keyboardHeight === 0 && (
+          <div className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white">
             {footer}
           </div>
         )}
