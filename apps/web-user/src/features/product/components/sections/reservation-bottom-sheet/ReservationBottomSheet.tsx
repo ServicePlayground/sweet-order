@@ -54,7 +54,6 @@ export function ReservationBottomSheet({
     setIsCancelModalOpen,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
-    currentOptionPrice,
     totalQuantity,
     totalPrice,
     currentOptionPrice,

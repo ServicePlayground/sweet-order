@@ -85,42 +85,49 @@ export default function ReservationCompletePage() {
       )}
 
       <div className="absolute bottom-[76px] left-0 right-0 h-[calc(70%-48px)] px-[20px] pt-[56px] bg-white rounded-t-4xl">
-        <div className="h-full overflow-y-auto">
-          {cakeImageUrl && (
-            <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
-              <Image src={cakeImageUrl} alt={cakeTitle} fill className="object-cover" />
-            </div>
-          )}
-          <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
-            {orderData.orderStatus === OrderStatus.CONFIRMED ? "예약 완료" : "예약신청 완료"} 🎉
-          </p>
+        
+        {cakeImageUrl && (
+          <div className="absolute top-[-72px] left-1/2 -translate-x-1/2 h-[106px] w-[106px] border-[2px] border-white rounded-2xl overflow-hidden">
+            <Image src={cakeImageUrl} alt={cakeTitle} fill className="object-cover" />
+          </div>
+        )}
+        <p className="mb-[28px] text-xl font-bold text-gray-900 text-center">
+          {orderData.orderStatus === OrderStatus.CONFIRMED ? "예약 완료" : "예약신청 완료"} 🎉
+        </p>
+        <div className="pb-[60px] h-[calc(100%-56px)] overflow-y-auto">
           {orderData.orderStatus === OrderStatus.PENDING && (
-            <p className="flex items-center gap-[8px] mb-[20px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-50 rounded-xl">
+            <p className="flex items-center gap-[8px] mb-[28px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-50 rounded-xl">
               <Icon name="warning" width={16} height={16} className="text-blue-400" />
               예약 확정까지 1-2일 소요될 수 있어요.
             </p>
           )}
           <div className="mb-[20px]">
-            <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
+            {/* 픽업날짜 추가 예정 */}
+            {/* <div className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
+              <span className="text-gray-500">픽업날짜</span>
+              <span className="text-gray-900">{formatDateTime(orderData.pickupDate)}</span>
+            </div> */}
+            <div className="relative flex items-start justify-between mb-[24px] px-[16px] text-sm after:content-[''] after:absolute after:bottom-[-12px] after:left-4 after:right-4 after:h-[1px] after:bg-gray-50">
               <span className="text-gray-500">픽업장소</span>
-              <span className="text-gray-900">
-                {orderData.pickupRoadAddress ||
+              <span className="flex flex-col items-end text-gray-900">
+                <span>{orderData.storeName || '스토어명 없음'}</span>
+                <span className="text-gray-400 text-2sm">{orderData.pickupRoadAddress ||
                   orderData.pickupAddress ||
                   productData.pickupRoadAddress ||
-                  productData.pickupAddress}{" "}
-                {orderData.pickupDetailAddress}
+                  productData.pickupAddress}
+                </span>
               </span>
-            </p>
-            <p className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
+            </div>
+            <div className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
               <span className="text-gray-500">결제방식</span>
               <span className="text-gray-900">현장결제</span>
-            </p>
-            <p className="flex items-center justify-between px-[16px] text-sm">
+            </div>
+            <div className="flex items-center justify-between px-[16px] text-sm">
               <span className="text-gray-500">총 결제금액</span>
               <span className="text-gray-900">{orderData.totalPrice.toLocaleString()}원</span>
-            </p>
+            </div>
           </div>
-          <div className="flex flex-col gap-[12px]">
+          <div className="flex flex-col gap-[20px]">
             {orderData.orderItems.map((item, index) => {
               const isOpen = openIndexes.has(index);
               const sizePrice = item.sizePrice || 0;
@@ -217,17 +224,17 @@ export default function ReservationCompletePage() {
                 </div>
               );
             })}
+        </div>
+        <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] max-w-[638px] mx-auto bg-white">
+          <div className="flex gap-[8px]">
+            <Link href={`/store/${orderData.storeId}`} className="flex-1">
+              <Button variant="outline">예약 상세보기</Button>
+            </Link>
+            <Link href="/" className="flex-1">
+              <Button variant="outline">홈으로 가기</Button>
+            </Link>
           </div>
-          <div className="fixed bottom-0 left-0 right-0 px-[20px] py-[12px] bg-white">
-            <div className="flex gap-[8px]">
-              <Link href={`/store/${orderData.storeId}`} className="flex-1">
-                <Button variant="outline">예약 상세보기</Button>
-              </Link>
-              <Link href="/" className="flex-1">
-                <Button variant="outline">홈으로 가기</Button>
-              </Link>
-            </div>
-          </div>
+        </div>
         </div>
       </div>
       <button className="absolute top-[14px] right-[20px]" onClick={() => router.push("/")}>
