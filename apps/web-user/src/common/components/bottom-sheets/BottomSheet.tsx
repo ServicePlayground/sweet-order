@@ -42,16 +42,18 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
     const checkKeyboard = () => {
       const viewport = window.visualViewport;
       if (viewport) {
-        const heightDiff = window.innerHeight - viewport.height;
+        const heightDiff = window.innerHeight - viewport.height - viewport.offsetTop;
         setIsKeyboardOpen(heightDiff > 50);
       }
     };
 
     const viewport = window.visualViewport;
     viewport?.addEventListener("resize", checkKeyboard);
+    viewport?.addEventListener("scroll", checkKeyboard);
 
     return () => {
       viewport?.removeEventListener("resize", checkKeyboard);
+      viewport?.removeEventListener("scroll", checkKeyboard);
     };
   }, [isOpen]);
 

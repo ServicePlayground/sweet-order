@@ -97,7 +97,7 @@ export function ReservationBottomSheet({
       return (
         <div className="px-[20px]">
           <div className="flex items-center justify-between pt-[14px]">
-            <span className="text-sm text-gray-700">총 금액..</span>
+            <span className="text-sm text-gray-700">총 금액.</span>
             <span className="text-xl font-bold text-gray-900">
               {currentOptionPrice.toLocaleString()}원
             </span>
