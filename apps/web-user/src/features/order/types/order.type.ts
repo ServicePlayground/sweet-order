@@ -25,6 +25,7 @@ export interface CreateOrderRequest {
   items: CreateOrderItemRequest[];
   totalQuantity: number;
   totalPrice: number;
+  storeName: string;
   // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
@@ -74,6 +75,7 @@ export interface OrderResponse {
   userId: string;
   productId: string;
   storeId: string;
+  storeName: string;
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;

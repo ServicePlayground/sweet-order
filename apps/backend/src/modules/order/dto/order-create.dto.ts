@@ -13,6 +13,7 @@ import {
 import { Type } from "class-transformer";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
 import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
+import { IsValidStoreName } from "@apps/backend/modules/store/decorators/validators.decorator";
 
 /**
  * 주문 항목 생성 요청 DTO
@@ -170,6 +171,13 @@ export class CreateOrderRequestDto extends PickupAddressDto {
   @IsNumber()
   @Min(0)
   totalPrice: number;
+
+  @ApiProperty({
+    description: "스토어명",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeName,
+  })
+  @IsValidStoreName()
+  storeName: string;
 
   // 픽업장소 정보는 PickupAddressDto 상속
 

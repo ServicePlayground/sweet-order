@@ -88,6 +88,7 @@ export const SWAGGER_EXAMPLES = {
     userId: USER_SWAGGER_EXAMPLES.USER_DATA.id,
     productId: PRODUCT_SWAGGER_EXAMPLES.PRODUCT_DATA.id,
     storeId: STORE_SWAGGER_EXAMPLES.ID,
+    storeName: STORE_SWAGGER_EXAMPLES.NAME,
     totalQuantity: 2,
     totalPrice: 140000,
     pickupAddress: STORE_SWAGGER_EXAMPLES.ADDRESS,

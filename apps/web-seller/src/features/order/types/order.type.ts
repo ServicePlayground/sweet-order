@@ -49,6 +49,7 @@ export interface OrderResponse {
   userId: string;
   productId: string;
   storeId: string;
+  storeName: string;
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;

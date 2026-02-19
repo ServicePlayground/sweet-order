@@ -40,7 +40,7 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
   };
 
   return (
-    <div className="py-4 border-b border-gray-100 last:border-b-0">
+    <div className="mx-[-20px] mb-[20px] px-[20px] pt-[20px] pb-[48px] border-b border-gray-100 last:border-b-0">
       <div className="flex items-center justify-between mb-[12px]">
         <span className="text-sm font-medium text-gray-900">{renderRating(review.rating)}</span>
         <div className="flex items-center gap-[24px]">

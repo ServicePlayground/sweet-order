@@ -60,25 +60,14 @@ export const Calendar: React.FC<CalendarProps> = ({
   const calendarDays = useMemo(() => {
     const days: (Date | null)[] = [];
 
-    // 이전 달의 날짜들
-    const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 0);
-    const daysInPrevMonth = prevMonth.getDate();
-
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      days.push(
-        new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, daysInPrevMonth - i),
-      );
+    // 이전 달 빈 칸
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push(null);
     }
 
     // 현재 달의 날짜들
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
-    }
-
-    // 다음 달의 날짜들 (총 42개 셀을 채우기 위해)
-    const remainingDays = 42 - days.length;
-    for (let i = 1; i <= remainingDays; i++) {
-      days.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, i));
     }
 
     return days;

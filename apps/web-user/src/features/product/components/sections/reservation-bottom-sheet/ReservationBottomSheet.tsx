@@ -21,6 +21,7 @@ export function ReservationBottomSheet({
   cakeSizeOptions,
   cakeFlavorOptions,
   productType,
+  storeName,
   pickupAddress,
   pickupRoadAddress,
   pickupDetailAddress,
@@ -60,10 +61,15 @@ export function ReservationBottomSheet({
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
+    isEditingFromConfirm,
     dateSelectionSignal,
     formatDateTime,
+    isDateChangeModalOpen,
+    setIsDateChangeModalOpen,
     handleOpenCalendar,
     handleCalendarConfirm,
+    handleDateChangeConfirm,
+    handleDateChangeCancel,
     handleCancelClick,
     handleConfirmCancel,
     handleClose,
@@ -200,6 +206,7 @@ export function ReservationBottomSheet({
                 productId,
                 totalQuantity,
                 totalPrice,
+                storeName,
                 // 픽업 정보
                 pickupAddress,
                 pickupRoadAddress,
@@ -247,6 +254,8 @@ export function ReservationBottomSheet({
       handleRemoveImage={handleRemoveImage}
       dateSelectionSignal={dateSelectionSignal}
       productType={productType}
+      isAddingFromConfirm={isAddingFromConfirm && orderItems.length > 0}
+      isEditingFromConfirm={isEditingFromConfirm && orderItems.length > 1}
     />
   );
 
@@ -299,6 +308,19 @@ export function ReservationBottomSheet({
         confirmText="취소"
         cancelText="삭제"
         onCancel={handleConfirmDelete}
+      />
+
+      <Modal
+        isOpen={isDateChangeModalOpen}
+        onClose={() => setIsDateChangeModalOpen(false)}
+        title="픽업 날짜 변경"
+        description="픽업 날짜 변경 시 주문하는 다른 상품들의 픽업 날짜도 함께 변경됩니다."
+        confirmText="변경취소"
+        cancelText="확인"
+        confirmVariant="outline"
+        cancelVariant="primary"
+        onConfirm={handleDateChangeCancel}
+        onCancel={handleDateChangeConfirm}
       />
     </>
   );

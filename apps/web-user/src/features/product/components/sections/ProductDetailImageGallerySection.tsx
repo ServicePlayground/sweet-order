@@ -62,11 +62,11 @@ export function ProductDetailImageGallerySection({
           watchSlidesProgress
           slidesPerView="auto"
           spaceBetween={6}
-          className="mt-[8px] !px-[8px] thumbnail-swiper [&_.swiper-slide-thumb-active>div]:border-2 [&_.swiper-slide-thumb-active>div]:border-primary [&_.swiper-slide-thumb-active>div]:outline-none"
+          className="mt-[8px] !px-[8px] thumbnail-swiper [&_.swiper-slide-thumb-active>div]:outline-none [&_.swiper-slide-thumb-active>div]:after:bg-white/30 [&_.swiper-slide-thumb-active>div]:after:border-2 [&_.swiper-slide-thumb-active>div]:after:border-primary [&_.swiper-slide-thumb-active>div]:after:rounded-xl"
         >
           {images.map((image, index) => (
             <SwiperSlide key={index} className="!w-[60px] cursor-pointer">
-              <div className="w-[60px] h-[60px] relative rounded-xl overflow-hidden">
+              <div className="w-[60px] h-[60px] relative rounded-xl overflow-hidden after:absolute after:inset-0 after:z-10 after:pointer-events-none">
                 <Image
                   src={image}
                   alt={`${productName} - 썸네일 ${index + 1}`}

@@ -3,6 +3,8 @@
 import React, { useEffect } from "react";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 
+type ButtonVariant = "primary" | "secondary" | "outline" | "red";
+
 interface ModalProps {
   /** 모달 열림 상태 */
   isOpen: boolean;
@@ -16,6 +18,10 @@ interface ModalProps {
   confirmText?: string;
   /** 취소 버튼 텍스트 */
   cancelText?: string;
+  /** 확인 버튼 스타일 (기본값: "outline") */
+  confirmVariant?: ButtonVariant;
+  /** 취소 버튼 스타일 (기본값: "red") */
+  cancelVariant?: ButtonVariant;
   /** 확인 버튼 클릭 핸들러 */
   onConfirm?: () => void;
   /** 취소 버튼 클릭 핸들러 */
@@ -44,6 +50,8 @@ export const Modal: React.FC<ModalProps> = ({
   description,
   confirmText = "확인",
   cancelText = "취소",
+  confirmVariant = "outline",
+  cancelVariant = "red",
   onConfirm,
   onCancel,
 }) => {
@@ -91,12 +99,12 @@ export const Modal: React.FC<ModalProps> = ({
 
         <div className="flex gap-[8px] py-[20px]">
           <span className="flex-1">
-            <Button variant="outline" onClick={handleConfirm}>
+            <Button variant={confirmVariant} onClick={handleConfirm}>
               {confirmText}
             </Button>
           </span>
           <span className="flex-1">
-            <Button onClick={handleCancel} variant="red">
+            <Button onClick={handleCancel} variant={cancelVariant}>
               {cancelText}
             </Button>
           </span>

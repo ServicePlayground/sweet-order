@@ -53,7 +53,7 @@ export function Tabs({ tabs, defaultTab }: TabsProps) {
   return (
     <div ref={tabsRef} className="bg-white rounded-xl scroll-mt-[56px]">
       {/* 탭 헤더 */}
-      <div className="flex justify-center border-b border-gray-100 p-0">
+      <div className="flex justify-center border-b border-gray-100 p-0 sticky top-[52px] bg-white z-10">
         {tabs.map((tab) => (
           <button
             key={tab.id}

@@ -66,6 +66,7 @@ export class OrderMapperUtil {
       userId: order.userId,
       productId: order.productId,
       storeId: order.storeId,
+      storeName: order.storeName ?? "",
       orderNumber: order.orderNumber,
       totalQuantity: order.totalQuantity,
       totalPrice: order.totalPrice,

@@ -360,6 +360,7 @@ model Order {
   userId    String @map("user_id") // 사용자 ID
   productId String @map("product_id") // 상품 ID (하나의 주문은 하나의 상품에 대한 주문)
   storeId   String @map("store_id") // 스토어 ID
+  storeName String? @map("store_name") // 스토어명 (주문 시점의 스토어명 보존)
 
   // 비즈니스 필드 - 주문 기본 정보
   orderNumber   String @unique @map("order_number") // 주문 번호 (사용자에게 보여줄 번호, 예: ORD-20240101-001)

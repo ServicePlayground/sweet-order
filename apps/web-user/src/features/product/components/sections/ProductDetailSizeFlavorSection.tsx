@@ -39,7 +39,7 @@ export function ProductDetailSizeFlavorSection({
               <div key={index} className="flex flex-col items-center text-center gap-[9px]">
                 <div className="flex items-center justify-center" style={{ height: maxSize }}>
                   <div
-                    className="relative overflow-hidden rounded-full border-2 border-gray-300 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-0 before:w-full before:border-b-2 before:border-dashed before:border-gray-300"
+                    className="relative overflow-hidden rounded-full border border-gray-300 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-0 before:w-full before:border-b before:border-dashed before:border-gray-300"
                     style={{ width: size, height: size }}
                   />
                 </div>

@@ -26,7 +26,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
   // Product 헤더: 뒤로가기 + 장바구니
   if (variant === "product") {
     return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white max-w-[638px] mx-auto px-5 flex justify-between items-center h-[52px]">
+      <header className="sticky top-0 z-50 bg-white px-5 flex justify-between items-center h-[52px]">
         {/* 뒤로가기 버튼 */}
         <button
           onClick={() => router.back()}
@@ -49,7 +49,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
 
   // Main 헤더 (기본): 로고 + 장바구니
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white max-w-[640px] mx-auto px-5 flex justify-between items-center h-[52px]">
+    <header className="sticky top-0 z-50 bg-white px-5 flex justify-between items-center h-[52px]">
       {/* 로고 */}
       <Link href={PATHS.HOME} className="flex items-center no-underline" aria-label="홈으로 이동">
         <Image

@@ -17,7 +17,7 @@ export function ReservationCalendarView({
   setTempSelectedTime,
 }: ReservationCalendarViewProps) {
   return (
-    <div className="px-[20px] py-[16px] flex flex-col gap-[16px]">
+    <div className="px-[20px] py-[16px] flex flex-col gap-[48px]">
       <Calendar
         selectedDate={tempSelectedDate}
         onDateSelect={setTempSelectedDate}

@@ -38,9 +38,9 @@ export function ReservationConfirmView({
       ) : (
         orderItems.map((item, index) => (
           <div key={index} className="flex flex-col rounded-lg overflow-hidden">
-            <div className="flex items-center gap-[12px] py-[12px] px-[10px] text-sm bg-blue border-b border-gray-100">
-              <div className="flex items-center gap-[2px] font-bold text-blue-dark">
-                <Icon name="takeout" width={16} height={16} className="text-blue-dark" />
+            <div className="flex items-center gap-[12px] py-[12px] px-[10px] text-sm bg-blue-50 border-b border-gray-100">
+              <div className="flex items-center gap-[2px] font-bold text-blue-400">
+                <Icon name="takeout" width={16} height={16} className="text-blue-400" />
                 픽업
               </div>
               <div className="text-sm text-gray-900">{formatDateTime(item.date)}</div>
@@ -48,9 +48,11 @@ export function ReservationConfirmView({
 
             <div className="py-[10px] px-[18px] bg-gray-50">
               <div className="flex pb-[12px] border-b border-gray-100">
-                <div className="flex-1 flex flex-col gap-[4px]">
+                <div className="flex-1 flex flex-col">
                   <div className="text-sm font-bold text-gray-900">{cakeTitle}</div>
-                  <div className="text-sm font-bold text-gray-900">{price.toLocaleString()}원</div>
+                  <div className="text-sm font-bold text-gray-900 mb-[4px]">
+                    {(price + item.sizePrice + item.flavorPrice).toLocaleString()}원
+                  </div>
                   <ul className="text-xs text-gray-700 pl-[18px] list-disc">
                     <li>사이즈 : {item.size}</li>
                     <li>맛 : {item.flavor}</li>
@@ -65,7 +67,7 @@ export function ReservationConfirmView({
               </div>
 
               <div className="flex items-center justify-between pt-[12px]">
-                <span className="w-[73px]">
+                <span>
                   <Button
                     variant="outline"
                     size="sm"
