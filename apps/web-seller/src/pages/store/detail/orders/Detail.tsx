@@ -49,15 +49,11 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
     switch (status) {
       case OrderStatus.PENDING:
         return (
-          <Badge className="bg-yellow-500 px-3 py-1 text-sm font-semibold text-white">
-            대기중
-          </Badge>
+          <Badge className="bg-yellow-500 px-3 py-1 text-sm font-semibold text-white">대기중</Badge>
         );
       case OrderStatus.CONFIRMED:
         return (
-          <Badge className="bg-green-500 px-3 py-1 text-sm font-semibold text-white">
-            확정됨
-          </Badge>
+          <Badge className="bg-green-500 px-3 py-1 text-sm font-semibold text-white">확정됨</Badge>
         );
       default:
         return null;
@@ -86,9 +82,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 스토어명
               </div>
-              <div className="text-base font-medium text-gray-900">
-                {order.storeName || "-"}
-              </div>
+              <div className="text-base font-medium text-gray-900">{order.storeName || "-"}</div>
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -269,9 +263,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                     우편번호
                   </div>
-                  <div className="text-base font-medium text-gray-900">
-                    {order.pickupZonecode}
-                  </div>
+                  <div className="text-base font-medium text-gray-900">{order.pickupZonecode}</div>
                 </div>
               )}
             </div>

@@ -250,7 +250,9 @@ export const StoreDetailProductListPage: React.FC = () => {
                       checked={isSelected}
                       onChange={() => {
                         if (isSelected) {
-                          setProductCategoryTypes(productCategoryTypes.filter((t) => t !== opt.value));
+                          setProductCategoryTypes(
+                            productCategoryTypes.filter((t) => t !== opt.value),
+                          );
                         } else {
                           setProductCategoryTypes([...productCategoryTypes, opt.value]);
                         }

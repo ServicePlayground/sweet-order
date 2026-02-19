@@ -57,7 +57,9 @@ export function ProductList({ products }: ProductListProps) {
                     <StatusBadge variant={product.salesStatus === "ENABLE" ? "success" : "default"}>
                       {product.salesStatus === "ENABLE" ? "판매중" : "판매중지"}
                     </StatusBadge>
-                    <StatusBadge variant={product.visibilityStatus === "ENABLE" ? "info" : "default"}>
+                    <StatusBadge
+                      variant={product.visibilityStatus === "ENABLE" ? "info" : "default"}
+                    >
                       {product.visibilityStatus === "ENABLE" ? "노출" : "숨김"}
                     </StatusBadge>
                   </div>

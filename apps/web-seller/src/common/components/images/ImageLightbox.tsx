@@ -7,11 +7,7 @@ export interface ImageLightboxProps {
 }
 
 /** 이미지 확대 보기 라이트박스 (클릭 시 닫기) */
-export const ImageLightbox: React.FC<ImageLightboxProps> = ({
-  src,
-  alt = "이미지",
-  onClose,
-}) => {
+export const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt = "이미지", onClose }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

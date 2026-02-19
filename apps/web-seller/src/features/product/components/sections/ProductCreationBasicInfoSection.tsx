@@ -102,7 +102,9 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
                 onChange={onChange("salePrice")}
                 className={errors.salePrice ? "border-destructive" : ""}
               />
-              {errors.salePrice && <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>}
+              {errors.salePrice && (
+                <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>
+              )}
             </div>
           </div>
         </CardContent>

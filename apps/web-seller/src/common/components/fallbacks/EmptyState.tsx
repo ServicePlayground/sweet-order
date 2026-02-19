@@ -10,9 +10,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   className,
 }) => {
   return (
-    <div className={`flex items-center justify-center py-12 text-muted-foreground ${className || ""}`}>
+    <div
+      className={`flex items-center justify-center py-12 text-muted-foreground ${className || ""}`}
+    >
       <p>{message}</p>
     </div>
   );
 };
-

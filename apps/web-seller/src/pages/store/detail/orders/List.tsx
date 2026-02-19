@@ -44,10 +44,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
   }, []);
 
   const hasActiveFilters =
-    orderStatus !== undefined ||
-    orderNumber.trim() !== "" ||
-    startDate !== "" ||
-    endDate !== "";
+    orderStatus !== undefined || orderNumber.trim() !== "" || startDate !== "" || endDate !== "";
 
   if (!storeId) {
     return (
