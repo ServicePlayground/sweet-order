@@ -50,15 +50,13 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
       }
     };
 
-    const handleFocusOut = (e: FocusEvent) => {
-      if ((e.target as HTMLElement)?.matches?.(INPUT_SELECTOR)) {
-        // 다른 input으로 포커스 이동하는 경우 대비
-        setTimeout(() => {
-          if (!document.activeElement?.matches(INPUT_SELECTOR)) {
-            setIsKeyboardOpen(false);
-          }
-        }, 100);
-      }
+    const handleFocusOut = () => {
+      // 다른 input으로 포커스 이동하는 경우 대비하여 딜레이 후 확인
+      setTimeout(() => {
+        if (!document.activeElement?.matches(INPUT_SELECTOR)) {
+          setIsKeyboardOpen(false);
+        }
+      }, 300);
     };
 
     document.addEventListener("focusin", handleFocusIn);
