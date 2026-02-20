@@ -23,7 +23,6 @@ export enum OrderSortBy {
  */
 export interface OrderItemResponse {
   id: string;
-  pickupDate: Date;
   sizeId?: string;
   sizeDisplayName?: string;
   sizeLengthCm?: number;
@@ -63,6 +62,7 @@ export interface OrderResponse {
   pickupLatitude: number;
   pickupLongitude: number;
   orderStatus: OrderStatus;
+  pickupDate: Date;
   createdAt: Date;
   updatedAt: Date;
   orderItems: OrderItemResponse[];

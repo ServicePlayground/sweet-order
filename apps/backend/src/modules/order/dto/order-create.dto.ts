@@ -19,14 +19,6 @@ import { IsValidStoreName } from "@apps/backend/modules/store/decorators/validat
  * 주문 항목 생성 요청 DTO
  */
 export class CreateOrderItemDto {
-  @ApiProperty({
-    description: "픽업 날짜 및 시간 (ISO 8601 형식, 필수)",
-    example: SWAGGER_EXAMPLES.ORDER_ITEM.pickupDate,
-  })
-  @IsNotEmpty()
-  @IsDateString()
-  pickupDate: string;
-
   // 사이즈 옵션 정보 (옵션이 없는 상품의 경우 생략 가능)
   @ApiPropertyOptional({
     description: "선택한 사이즈 옵션 ID (사이즈 옵션이 없는 상품의 경우 생략)",
@@ -138,17 +130,22 @@ export class CreateOrderItemDto {
  *
  * 하나의 주문은 하나의 상품(productId)에 대한 주문이지만,
  * 여러 개의 주문 항목(items)을 가질 수 있습니다.
- * 각 주문 항목은 서로 다른 옵션 조합(날짜/시간, 사이즈, 맛 등)을 가질 수 있습니다.
+ * 각 주문 항목은 서로 다른 옵션 조합(사이즈, 맛 등)을 가질 수 있습니다.
+ * 픽업 날짜는 주문 전체에 대해 하나로 고정됩니다.
  *
  * 주문 시점의 상품 정보(상품명, 상품 이미지)는 클라이언트에서 전달받아 저장됩니다.
  * 이는 상품 정보가 변경되어도 주문 시점의 정보를 보존하기 위함입니다.
  *
- * 예시:
- * - 같은 케이크를 1월 1일 오후 12시에 도시락 사이즈로 주문
- * - 같은 케이크를 1월 1일 오후 2시에 미니 사이즈로 주문
- * - 두 항목이 하나의 주문에 포함됨
  */
 export class CreateOrderRequestDto extends PickupAddressDto {
+  @ApiProperty({
+    description: "픽업 날짜 및 시간 (ISO 8601 형식, 필수)",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupDate,
+  })
+  @IsNotEmpty()
+  @IsDateString()
+  pickupDate: string;
+
   @ApiProperty({
     description: "상품 ID (하나의 주문은 하나의 상품에 대한 주문)",
     example: SWAGGER_EXAMPLES.ORDER_DATA.productId,

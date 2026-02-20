@@ -18,6 +18,18 @@ export class ReviewResponseDto {
   productId: string;
 
   @ApiProperty({
+    description: "스토어 ID",
+    example: "store_123456789",
+  })
+  storeId: string;
+
+  @ApiProperty({
+    description: "스토어명",
+    example: "달달한 케이크집",
+  })
+  storeName: string;
+
+  @ApiProperty({
     description: "사용자 ID",
     example: "user_123456789",
   })

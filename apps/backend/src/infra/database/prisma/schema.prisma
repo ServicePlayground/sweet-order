@@ -350,8 +350,7 @@ model StoreFeed {
 // Order model for order management
 // 하나의 주문(Order)은 하나의 상품(productId)에 대한 주문이지만,
 // 여러 개의 주문 항목(OrderItem)을 가질 수 있습니다.
-// 각 OrderItem은 서로 다른 옵션 조합(날짜/시간, 사이즈, 맛 등)을 가질 수 있습니다.
-// 예: 같은 케이크를 다른 날짜/시간에, 다른 사이즈/맛으로 여러 번 주문 가능
+// 각 OrderItem은 서로 다른 옵션 조합(사이즈, 맛 등)을 가질 수 있습니다. 픽업 날짜는 주문 전체에 대해 하나로 고정됩니다.
 model Order {
   // Primary Key
   id String @id @default(cuid())
@@ -370,6 +369,7 @@ model Order {
   totalPrice     Int @map("total_price") // 총 금액
 
   // 비즈니스 필드 - 픽업 정보
+  pickupDate         DateTime? @map("pickup_date") // 픽업 날짜 및 시간 (주문 전체에 대해 하나로 고정)
   pickupAddress      String? @map("pickup_address") // 픽업 주소 (지번 주소, 예: "서울특별시 강남구 역삼동 456-789")
   pickupRoadAddress  String? @map("pickup_road_address") // 픽업 주소 (도로명 주소, 예: "서울특별시 강남구 테헤란로 123")
   pickupDetailAddress String? @map("pickup_detail_address") // 픽업 상세주소 (예: "101호", "지하 1층")
@@ -396,13 +396,14 @@ model Order {
   @@index([productId]) // 상품별 주문 조회
   @@index([orderStatus]) // 주문 상태별 조회
   @@index([orderNumber]) // 주문 번호로 조회
+  @@index([pickupDate]) // 픽업 예정/지난 예약 필터
   @@index([pickupLatitude, pickupLongitude]) // 위치 기반 검색을 위한 인덱스
   @@map("orders")
 }
 
 // OrderItem model for order items
 // 하나의 주문(Order)에 여러 개의 주문 항목(OrderItem)이 포함될 수 있습니다.
-// 각 OrderItem은 독립적인 옵션 조합을 가지며, 서로 다른 날짜/시간, 사이즈, 맛 등을 가질 수 있습니다.
+// 각 OrderItem은 독립적인 옵션 조합을 가지며, 서로 다른 사이즈, 맛 등을 가질 수 있습니다.
 model OrderItem {
   // Primary Key
   id String @id @default(cuid())
@@ -412,7 +413,6 @@ model OrderItem {
 
   // 비즈니스 필드 - 주문 항목 정보
   // 각 OrderItem은 독립적인 옵션 조합을 가집니다
-  pickupDate      DateTime @map("pickup_date") // 픽업 날짜 및 시간 (각 항목마다 다를 수 있음)
   // 사이즈 옵션 정보
   sizeId          String? @map("size_id") // 선택한 사이즈 옵션 ID
   sizeDisplayName String? @map("size_display_name") // 선택한 사이즈 표시명 (예: "도시락", "미니", "1호")

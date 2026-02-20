@@ -134,14 +134,6 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    픽업일시
-                  </div>
-                  <div className="text-base font-medium text-gray-900">
-                    {new Date(item.pickupDate).toLocaleString("ko-KR")}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                     금액
                   </div>
                   <div className="text-lg font-semibold text-gray-900">
@@ -235,13 +227,21 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
       </Card>
 
       {/* 픽업 정보 */}
-      {order.pickupAddress && (
+      {(order.pickupAddress || order.pickupDate) && (
         <Card>
           <CardHeader className="border-b bg-gray-50/50">
             <CardTitle className="text-xl font-semibold text-gray-900">픽업 정보</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  픽업일시
+                </div>
+                <div className="text-base font-medium text-gray-900">
+                  {new Date(order.pickupDate).toLocaleString("ko-KR")}
+                </div>
+              </div>
               <div className="space-y-2 md:col-span-2">
                 <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   주소

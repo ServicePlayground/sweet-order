@@ -46,6 +46,7 @@ export class ReviewUserListService {
         user: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
+        ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
       },
     });
 
