@@ -13,12 +13,6 @@ export class OrderItemResponseDto {
   })
   id: string;
 
-  @ApiProperty({
-    description: "픽업 날짜 및 시간",
-    example: SWAGGER_EXAMPLES.ORDER_ITEM.pickupDate,
-  })
-  pickupDate: Date;
-
   // 사이즈 옵션 정보 (옵션이 없는 상품의 경우 null)
   @ApiPropertyOptional({
     description: "선택한 사이즈 옵션 ID (사이즈 옵션이 없는 상품의 경우 null)",
@@ -177,6 +171,12 @@ export class OrderResponseDto extends PickupAddressDto {
     example: SWAGGER_EXAMPLES.ORDER_DATA.totalPrice,
   })
   totalPrice: number;
+
+  @ApiProperty({
+    description: "픽업 날짜 및 시간",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.pickupDate,
+  })
+  pickupDate: Date;
 
   // 픽업장소 정보는 PickupAddressDto 상속
 

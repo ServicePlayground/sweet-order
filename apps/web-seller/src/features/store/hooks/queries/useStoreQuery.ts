@@ -12,17 +12,19 @@ import { storeQueryKeys } from "../../constants/storeQueryKeys.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 
 // 스토어 목록 조회 쿼리 (무한 스크롤)
-export function useStoreList({ limit = 20 }: Partial<IGetStoresParams> = {}) {
+export function useStoreList({ limit = 100, search, sortBy }: Partial<IGetStoresParams> = {}) {
   const { addAlert } = useAlertStore();
   const { isAuthenticated } = useAuthStore();
 
   const query = useInfiniteQuery<IStoreListResponse>({
-    queryKey: storeQueryKeys.list({ limit }),
+    queryKey: storeQueryKeys.list({ limit, search, sortBy }),
     queryFn: ({ pageParam = 1 }) => {
       const params: IGetStoresRequest = {
         page: pageParam as number,
         limit,
       };
+      if (search !== undefined && search !== "") params.search = search;
+      if (sortBy !== undefined) params.sortBy = sortBy;
       return storeApi.getStoreList(params);
     },
     // 반환된 값은 다음 API 요청의 queryFn의 pageParam으로 전달됩니다.

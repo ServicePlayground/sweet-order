@@ -2,15 +2,18 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
 
 /**
- * User 정보가 포함된 ProductReview 타입
+ * User 및 Product(Store) 정보가 포함된 ProductReview 타입
  */
-type ProductReviewWithUser = Prisma.ProductReviewGetPayload<{
+type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
   include: {
     user: {
       select: {
         nickname: true;
         profileImageUrl: true;
       };
+    };
+    product: {
+      include: { store: { select: { name: true } } };
     };
   };
 }>;
@@ -30,14 +33,28 @@ export class ReviewMapperUtil {
   } as const satisfies Prisma.UserSelect;
 
   /**
+   * Product + Store 정보 include
+   * 후기 조회 시 storeId, storeName을 응답에 포함하기 위한 공통 include
+   */
+  static readonly PRODUCT_STORE_INCLUDE = {
+    product: {
+      include: { store: { select: { name: true } } },
+    },
+  } as const;
+
+  /**
    * Prisma ProductReview 엔티티를 ReviewResponseDto로 변환
-   * @param review - Prisma ProductReview 엔티티 (user 포함)
+   * @param review - Prisma ProductReview 엔티티 (user, product.store 포함)
    * @returns ReviewResponseDto 객체
    */
-  static mapToReviewResponse(review: ProductReviewWithUser): ReviewResponseDto {
+  static mapToReviewResponse(
+    review: ProductReviewWithUserAndProductStore,
+  ): ReviewResponseDto {
     return {
       id: review.id,
       productId: review.productId,
+      storeId: review.product.storeId,
+      storeName: review.product.store.name,
       userId: review.userId,
       rating: review.rating,
       content: review.content,

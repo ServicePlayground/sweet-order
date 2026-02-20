@@ -53,6 +53,7 @@ export class ReviewListService {
         user: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
+        ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
       },
     });
 
@@ -102,6 +103,7 @@ export class ReviewListService {
         user: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
+        ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
       },
     });
 

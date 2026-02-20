@@ -34,7 +34,6 @@ export class OrderMapperUtil {
   static mapToOrderItemResponse(orderItem: OrderItem): OrderItemResponseDto {
     return {
       id: orderItem.id,
-      pickupDate: orderItem.pickupDate,
       // 사이즈 옵션 정보
       sizeId: orderItem.sizeId ?? undefined,
       sizeDisplayName: orderItem.sizeDisplayName ?? undefined,
@@ -74,6 +73,7 @@ export class OrderMapperUtil {
       totalQuantity: order.totalQuantity,
       totalPrice: order.totalPrice,
       // 픽업 정보
+      pickupDate: order.pickupDate ?? new Date(),
       pickupAddress: order.pickupAddress ?? "",
       pickupRoadAddress: order.pickupRoadAddress ?? "",
       pickupDetailAddress: order.pickupDetailAddress ?? "",

@@ -39,6 +39,7 @@ export class ReviewDetailService {
         user: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
+        ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
       },
     });
 
@@ -80,6 +81,7 @@ export class ReviewDetailService {
         user: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
+        ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
       },
     });
 

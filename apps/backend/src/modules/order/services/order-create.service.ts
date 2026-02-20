@@ -185,7 +185,6 @@ export class OrderCreateService {
     const itemPrice = baseSalePrice + (selectedSize?.price ?? 0) + (selectedFlavor?.price ?? 0);
 
     return {
-      pickupDate: new Date(item.pickupDate),
       sizeId: selectedSize?.id ?? null,
       sizeDisplayName: selectedSize?.displayName ?? null,
       sizeLengthCm: selectedSize?.lengthCm ?? null,
@@ -220,6 +219,7 @@ export class OrderCreateService {
       totalQuantity,
       totalPrice,
       storeName,
+      pickupDate,
       pickupAddress,
       pickupRoadAddress,
       pickupDetailAddress = "",
@@ -345,6 +345,7 @@ export class OrderCreateService {
                 orderNumber,
                 totalQuantity,
                 totalPrice,
+                pickupDate: new Date(pickupDate),
                 pickupAddress,
                 pickupRoadAddress,
                 pickupDetailAddress,

@@ -9,9 +9,9 @@ import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-au
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
-  GetUserOrdersRequestDto,
-  UserOrderListResponseDto,
-} from "@apps/backend/modules/order/dto/order-user-list.dto";
+  OrderListResponseDto,
+  OrderListRequestDto,
+} from "@apps/backend/modules/order/dto/order-list.dto";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import {
   GetMyReviewsRequestDto,
@@ -31,7 +31,7 @@ import { createMessageObject } from "@apps/backend/common/utils/message.util";
  */
 @ApiTags("마이페이지")
 @ApiExtraModels(
-  UserOrderListResponseDto,
+  OrderListResponseDto,
   OrderResponseDto,
   MyReviewListResponseDto,
   MyProductLikeListResponseDto,
@@ -48,21 +48,20 @@ export class UserMypageController {
 
   /**
    * 내 주문 목록 조회 API
-   * 자신의 주문 목록을 조회합니다. 픽업 예정/지난 예약을 구분하여 조회할 수 있습니다.
    */
   @Get("orders")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 내 주문 목록 조회",
     description:
-      "자신의 주문 목록을 조회합니다. 픽업 예정/지난 예약을 구분하여 조회할 수 있으며, 필터링, 정렬, 페이지네이션을 지원합니다.",
+      "자신의 주문 목록을 조회합니다. 픽업 예정/지난 예약(type), 스토어/상태/기간/주문번호 필터, 정렬(sortBy), 페이지네이션을 지원합니다.",
   })
-  @SwaggerResponse(200, { dataDto: UserOrderListResponseDto })
+  @SwaggerResponse(200, { dataDto: OrderListResponseDto })
   @SwaggerAuthResponses()
   async getMyOrders(
-    @Query() query: GetUserOrdersRequestDto,
+    @Query() query: OrderListRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
-  ): Promise<UserOrderListResponseDto> {
+  ): Promise<OrderListResponseDto> {
     return await this.orderService.getUserOrdersForUser(query, req.user);
   }
 

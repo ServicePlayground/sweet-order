@@ -19,11 +19,18 @@ export enum OrderSortBy {
 }
 
 /**
+ * 픽업 예정/지난 예약
+ */
+export enum OrderType {
+  UPCOMING = "UPCOMING", // 픽업 예정
+  PAST = "PAST", // 지난 예약
+}
+
+/**
  * 주문 항목 응답
  */
 export interface OrderItemResponse {
   id: string;
-  pickupDate: Date;
   sizeId?: string;
   sizeDisplayName?: string;
   sizeLengthCm?: number;
@@ -63,6 +70,7 @@ export interface OrderResponse {
   pickupLatitude: number;
   pickupLongitude: number;
   orderStatus: OrderStatus;
+  pickupDate: Date;
   createdAt: Date;
   updatedAt: Date;
   orderItems: OrderItemResponse[];
@@ -80,6 +88,8 @@ export interface IGetOrdersListParams {
   startDate?: string; // YYYY-MM-DD
   endDate?: string; // YYYY-MM-DD
   orderNumber?: string;
+  /** 픽업 예정/지난 예약 */
+  type?: OrderType;
 }
 
 /**
