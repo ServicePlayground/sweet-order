@@ -25,6 +25,8 @@ interface DatePickerInputProps {
   onOpen: () => void;
   /** 비활성화 여부 */
   disabled?: boolean;
+  /** 라벨 하단 힌트 텍스트 */
+  hint?: string;
 }
 
 export const DatePickerInput: React.FC<DatePickerInputProps> = ({
@@ -33,6 +35,7 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
   placeholder = "날짜를 선택해주세요",
   onOpen,
   disabled = false,
+  hint,
 }) => {
   const formatDate = (date: Date | null) => {
     if (!date) return placeholder;
@@ -54,7 +57,16 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
 
   return (
     <div className="w-full">
-      {label && <label className="block mb-[10px] text-sm font-bold text-gray-900">{label}</label>}
+      {label && (
+        <div className="mb-[4px]">
+          <label
+            className={`block text-sm font-bold text-gray-900 ${hint ? "pb-[10px]" : "pb-[6px]"}`}
+          >
+            {label}
+          </label>
+          {hint && <p className="text-xs text-gray-500">{hint}</p>}
+        </div>
+      )}
       <button
         type="button"
         onClick={onOpen}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { ProgressBar } from "@/apps/web-seller/common/components/progressbars/progressbar";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { ProgressBar } from "@/apps/web-seller/common/components/progressbars";
 import { BusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { OnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
@@ -12,13 +12,11 @@ import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
 import {
   useGetOnlineTradingCompanyDetail,
   useVerifyBusinessRegistration,
-} from "@/apps/web-seller/features/business/hooks/queries/useBusiness";
-import { useCreateStore } from "@/apps/web-seller/features/store/hooks/queries/useStore";
+} from "@/apps/web-seller/features/business/hooks/mutations/useBusinessMutation";
+import { useCreateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
 import { defaultForm as defaultBusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { defaultForm as defaultOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
 import { defaultForm as defaultStoreForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
-import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
-import { BUSINESS_ERROR_MESSAGES } from "@/apps/web-seller/features/business/constants/business.constant";
 
 interface StepData {
   businessRegistrationForm: IBusinessRegistrationForm;
@@ -33,7 +31,6 @@ export const StoreCreatePage: React.FC = () => {
   const verifyBusinessRegistrationMutation = useVerifyBusinessRegistration();
   const getOnlineTradingCompanyDetailMutation = useGetOnlineTradingCompanyDetail();
   const createStoreMutation = useCreateStore();
-  const { addAlert } = useAlertStore();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [stepData, setStepData] = useState<StepData>({
@@ -62,11 +59,6 @@ export const StoreCreatePage: React.FC = () => {
         businessRegistrationForm: data,
       }));
       handleNextStep();
-    } else {
-      addAlert({
-        severity: "error",
-        message: BUSINESS_ERROR_MESSAGES.BUSINESS_VALIDATION_FAILED,
-      });
     }
   };
 
@@ -81,11 +73,6 @@ export const StoreCreatePage: React.FC = () => {
         onlineTradingCompanyDetailForm: data,
       }));
       handleNextStep();
-    } else {
-      addAlert({
-        severity: "error",
-        message: BUSINESS_ERROR_MESSAGES.ONLINE_TRADING_COMPANY_DETAIL_VALIDATION_FAILED,
-      });
     }
   };
 
@@ -110,6 +97,7 @@ export const StoreCreatePage: React.FC = () => {
       logoImageUrl: data.logoImageUrl,
       address: data.address,
       roadAddress: data.roadAddress,
+      detailAddress: data.detailAddress,
       zonecode: data.zonecode,
       latitude: data.latitude,
       longitude: data.longitude,
@@ -146,6 +134,7 @@ export const StoreCreatePage: React.FC = () => {
             onPrevious={handlePreviousStep}
             initialValue={stepData.storeForm}
             onChange={(data) => setStepData((prev) => ({ ...prev, storeForm: data }))}
+            submitButtonText="등록하기"
           />
         );
       default:
@@ -154,9 +143,13 @@ export const StoreCreatePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">스토어 만들기</h1>
-      <ProgressBar activeStep={currentStep - 1} steps={STEPS} />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">스토어 만들기</h1>
+        <div className="mt-6">
+          <ProgressBar activeStep={currentStep - 1} steps={STEPS} />
+        </div>
+      </div>
 
       <Card>
         <CardContent className="p-6">{renderStep()}</CardContent>

@@ -38,12 +38,28 @@ export enum ProductType {
   CUSTOM_CAKE = "CUSTOM_CAKE", // 커스텀 케이크
 }
 
+/** 상품 카테고리 타입 (복수 선택 가능) */
+export enum ProductCategoryType {
+  BIRTHDAY = "BIRTHDAY", // 생일
+  LOVER = "LOVER", // 연인
+  FRIEND = "FRIEND", // 친구
+  FAMILY = "FAMILY", // 가족
+  ANNIVERSARY = "ANNIVERSARY", // 기념일
+  SAME_DAY_PICKUP = "SAME_DAY_PICKUP", // 당일픽업
+  LETTERING = "LETTERING", // 레터링
+  CHARACTER = "CHARACTER", // 캐릭터
+  SIMPLE = "SIMPLE", // 심플
+  FLOWER = "FLOWER", // 꽃
+  PHOTO = "PHOTO", // 사진
+}
+
 export enum VisibleStatus {
   ENABLE = "ENABLE",
   DISABLE = "DISABLE",
 }
 
 export interface CakeSizeOption {
+  id: string;
   visible: VisibleStatus;
   description: string;
   displayName: string;
@@ -52,6 +68,7 @@ export interface CakeSizeOption {
 }
 
 export interface CakeFlavorOption {
+  id: string;
   visible: VisibleStatus;
   displayName: string;
   price: number;
@@ -79,6 +96,8 @@ export interface Product {
   letteringMaxLength: number;
   imageUploadEnabled: ImageUploadEnabled;
   productType: ProductType;
+  productCategoryTypes: ProductCategoryType[]; // 카테고리 (없거나 여러 개)
+  searchTags: string[]; // 검색 태그 (없거나 여러 개)
   detailDescription?: string;
   productNoticeFoodType: string;
   productNoticeProducer: string;
@@ -100,9 +119,10 @@ export interface Product {
   // 스토어 정보
   storeName: string;
   storeLogoImageUrl?: string | null;
-  // 픽업장소 정보 (스토어 위치 정보)
+  // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
+  pickupDetailAddress?: string;
   pickupZonecode: string;
   pickupLatitude: number;
   pickupLongitude: number;
@@ -127,6 +147,7 @@ export interface ProductListQueryParams {
   maxPrice?: number;
   storeId?: string;
   productType?: ProductType;
+  productCategoryTypes?: ProductCategoryType[];
 }
 
 /**

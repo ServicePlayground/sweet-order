@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { IProductItem } from "@/apps/web-seller/features/product/types/product.type";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
+import { StatusBadge } from "@/apps/web-seller/common/components/badges/StatusBadge";
 
 interface ProductListProps {
   products: IProductItem[];
@@ -17,11 +19,7 @@ export function ProductList({ products }: ProductListProps) {
   };
 
   if (products.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
-        등록된 상품이 없습니다.
-      </div>
-    );
+    return <EmptyState message="등록된 상품이 없습니다." />;
   }
 
   return (
@@ -56,32 +54,25 @@ export function ProductList({ products }: ProductListProps) {
                 <div className="mb-1 flex items-center gap-2">
                   <div className="text-sm font-semibold">{product.name}</div>
                   <div className="flex gap-1">
-                    {/* 판매 상태 배지 */}
-                    {product.salesStatus === "ENABLE" ? (
-                      <span className="rounded-full bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
-                        판매중
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
-                        판매중지
-                      </span>
-                    )}
-                    {/* 노출 상태 배지 */}
-                    {product.visibilityStatus === "ENABLE" ? (
-                      <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-medium text-white">
-                        노출
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-gray-500 px-2 py-0.5 text-xs font-medium text-white">
-                        숨김
-                      </span>
-                    )}
+                    <StatusBadge variant={product.salesStatus === "ENABLE" ? "success" : "default"}>
+                      {product.salesStatus === "ENABLE" ? "판매중" : "판매중지"}
+                    </StatusBadge>
+                    <StatusBadge
+                      variant={product.visibilityStatus === "ENABLE" ? "info" : "default"}
+                    >
+                      {product.visibilityStatus === "ENABLE" ? "노출" : "숨김"}
+                    </StatusBadge>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>상품번호: {product.id}</span>
-                  <span>좋아요 {product.likeCount}</span>
-                  <span>{new Date(product.createdAt).toLocaleDateString("ko-KR")}</span>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(product.createdAt).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
                 </div>
               </div>
               <div className="text-right">

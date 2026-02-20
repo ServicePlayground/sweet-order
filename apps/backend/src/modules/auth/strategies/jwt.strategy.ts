@@ -10,6 +10,7 @@ import {
   AUTH_ERROR_MESSAGES,
   TOKEN_TYPES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * JWT 전략
@@ -35,6 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     const jwtSecret = configService.get<string>("JWT_SECRET");
     if (!jwtSecret) {
+      LoggerUtil.log("JWT_SECRET environment variable is required");
       throw new Error("JWT_SECRET environment variable is required");
     }
 
@@ -83,11 +85,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
       // 1. 토큰 타입 검증: ACCESS 토큰만 허용 (REFRESH 토큰은 별도 처리)
       if (payload.type !== TOKEN_TYPES.ACCESS) {
+        LoggerUtil.log(`JWT 검증 실패: 잘못된 토큰 타입 - type: ${payload.type}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE);
       }
 
       // 2. 필수 필드 검증: 사용자 ID(sub)가 있는지 확인
       if (!payload.sub) {
+        LoggerUtil.log(`JWT 검증 실패: 필수 필드 없음 - payload: ${JSON.stringify(payload)}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING_REQUIRED_INFO);
       }
 
@@ -105,11 +109,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       });
 
       if (!user) {
+        LoggerUtil.log(`JWT 검증 실패: 계정 없음 - userId: ${payload.sub}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
       }
 
       // 4. 사용자 계정 활성화 상태 확인
       if (!user.isActive) {
+        LoggerUtil.log(`JWT 검증 실패: 계정 비활성화 - userId: ${payload.sub}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_INACTIVE);
       }
 
@@ -135,15 +141,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
       // JWT 토큰 만료 에러
       if (error instanceof TokenExpiredError) {
+        LoggerUtil.log(`JWT 검증 실패: 토큰 만료`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED);
       }
 
       // JWT 토큰 형식 오류, 서명 오류 등
       if (error instanceof JsonWebTokenError) {
+        LoggerUtil.log(`JWT 검증 실패: 토큰 형식 오류 - error: ${error.message}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
       }
 
       // 기타 예상치 못한 오류
+      LoggerUtil.log(
+        `JWT 검증 실패: 알 수 없는 에러 - error: ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
     }
   }

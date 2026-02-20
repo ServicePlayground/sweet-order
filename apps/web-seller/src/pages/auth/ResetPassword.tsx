@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { useResetPassword } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useResetPassword } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import PasswordResetForm from "@/apps/web-seller/features/auth/components/forms/PasswordResetForm";
 import {

@@ -36,6 +36,10 @@ export function SwaggerResponse(
             type: "number",
             description: "HTTP 상태 코드",
           },
+          responseId: {
+            type: "string",
+            description: "응답 추적을 위한 고유 ID (형식: timestamp-{success|error}-uuid-hex)",
+          },
           data: dataDto
             ? { $ref: getSchemaPath(dataDto), description: "응답 데이터" }
             : { type: "object", description: "응답 데이터" },
@@ -46,6 +50,9 @@ export function SwaggerResponse(
             data: dataExample,
             timestamp: SWAGGER_EXAMPLES.USER_DATA.createdAt,
             statusCode,
+            responseId: success
+              ? "1735123456789-success-a1b2c3d4-e5f6-7890-abcd-ef1234567890-1a2b3c4d"
+              : "1735123456789-error-a1b2c3d4-e5f6-7890-abcd-ef1234567890-1a2b3c4d",
           },
         }),
       },

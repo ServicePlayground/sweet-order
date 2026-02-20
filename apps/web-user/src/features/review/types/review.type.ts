@@ -15,6 +15,8 @@ export enum ReviewSortBy {
 export interface Review {
   id: string;
   productId: string;
+  storeId: string;
+  storeName: string;
   userId: string;
   rating: number;
   content: string;

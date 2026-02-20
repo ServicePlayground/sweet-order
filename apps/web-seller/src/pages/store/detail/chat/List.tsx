@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useParams } from "react-router-dom";
-import { useChatRoomsByStore } from "@/apps/web-seller/features/chat/hooks/queries/useChat";
+import { useChatRoomsByStore } from "@/apps/web-seller/features/chat/hooks/queries/useChatQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { ChatRoomList } from "@/apps/web-seller/features/chat/components/ChatRoomList";
 import { ChatRoomForSeller } from "@/apps/web-seller/features/chat/types/chat.type";

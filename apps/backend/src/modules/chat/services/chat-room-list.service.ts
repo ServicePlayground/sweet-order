@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
-import { GetChatRoomsRequestDto } from "@apps/backend/modules/chat/dto/chat-request.dto";
 import {
   ChatRoomResponseDto,
   ChatRoomForSellerResponseDto,
-} from "@apps/backend/modules/chat/dto/chat-response.dto";
+} from "@apps/backend/modules/chat/dto/chat-room-list.dto";
+import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { ChatMapperUtil } from "@apps/backend/modules/chat/utils/chat-mapper.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
+import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 
 /**
  * 채팅방 목록 서비스
@@ -18,11 +18,11 @@ export class ChatRoomListService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * 사용자의 채팅방 목록 조회
+   * 사용자의 채팅방 목록 조회 (사용자용)
    */
-  async getChatRoomsByUserId(
+  async getChatRoomsByUserIdForUser(
     userId: string,
-    query: GetChatRoomsRequestDto,
+    query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
     const { page, limit } = query;
 
@@ -63,26 +63,13 @@ export class ChatRoomListService {
   /**
    * 스토어의 채팅방 목록 조회 (판매자용)
    */
-  async getChatRoomsByStoreId(
+  async getChatRoomsByStoreIdForSeller(
     storeId: string,
     userId: string,
-    query: GetChatRoomsRequestDto,
+    query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomForSellerResponseDto[]; meta: any }> {
-    // 스토어 존재 여부 및 소유권 확인
-    const store = await this.prisma.store.findUnique({
-      where: { id: storeId },
-      select: {
-        userId: true,
-      },
-    });
-
-    if (!store) {
-      throw new NotFoundException(CHAT_ERROR_MESSAGES.STORE_NOT_FOUND);
-    }
-
-    if (store.userId !== userId) {
-      throw new UnauthorizedException(CHAT_ERROR_MESSAGES.STORE_NOT_OWNED);
-    }
+    // 스토어 소유권 확인
+    await StoreOwnershipUtil.verifyStoreOwnership(this.prisma, storeId, userId);
 
     const { page, limit } = query;
 

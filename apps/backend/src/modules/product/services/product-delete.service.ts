@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { ProductOwnershipUtil } from "@apps/backend/modules/product/utils/product-ownership.util";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 @Injectable()
 export class ProductDeleteService {
@@ -10,32 +11,21 @@ export class ProductDeleteService {
   /**
    * 상품 삭제 (판매자용)
    */
-  async deleteProduct(id: string, user: JwtVerifiedPayload) {
-    const product = await this.prisma.product.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        store: {
-          select: {
-            userId: true,
-          },
+  async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
+    // 상품 소유권 확인
+    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
+
+    try {
+      await this.prisma.product.delete({
+        where: {
+          id,
         },
-      },
-    });
-
-    if (!product || !product.store) {
-      throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
+      });
+    } catch (error: unknown) {
+      LoggerUtil.log(
+        `상품 삭제 실패: 트랜잭션 에러 - userId: ${user.sub}, productId: ${id}, error: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw error;
     }
-
-    if (product.store.userId !== user.sub) {
-      throw new UnauthorizedException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
-    }
-
-    await this.prisma.product.delete({
-      where: {
-        id,
-      },
-    });
   }
 }

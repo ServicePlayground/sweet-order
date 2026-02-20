@@ -22,8 +22,11 @@ export interface SelectOption<T = string> {
  *   label="사이즈 선택"
  *   options={[
  *     { value: "", label: "사이즈를 선택해주세요" },
+ *     { value: "도시락", label: "도시락" },
+ *     { value: "미니", label: "미니 (1~2인)" },
  *     { value: "1호", label: "1호 (2~3인)" },
  *     { value: "2호", label: "2호 (4~5인)" },
+ *     { value: "3호", label: "3호 (6~8인)" },
  *   ]}
  * />
  */
@@ -115,7 +118,7 @@ export const Select = <T extends string | number = string>({
           aria-label={label || "Select"}
           ref={triggerRef}
           className={`
-            w-full h-[42px] pl-[12px] pr-[42px] text-left text-sm
+            w-full h-[42px] pl-[12px] pr-[36px] text-left text-sm
             border border-gray-100 transition-colors outline-none
             ${isOpen ? "rounded-t-lg border-b-0" : "rounded-lg"}
             ${isOpen && !value ? "bg-gray-50 text-gray-500" : value ? "bg-white text-gray-900" : "bg-white text-gray-500"}
@@ -124,7 +127,12 @@ export const Select = <T extends string | number = string>({
             .trim()
             .replace(/\s+/g, " ")}
         >
-          {displayLabel}
+          <span className="flex items-center justify-between w-full">
+            <span>{displayLabel}</span>
+            {selectedOption?.subLabel && (
+              <span className="text-gray-900">{selectedOption.subLabel}</span>
+            )}
+          </span>
         </button>
         <Icon
           name="selectArrow"
@@ -151,7 +159,7 @@ export const Select = <T extends string | number = string>({
                   className="flex items-center justify-between px-[12px] h-[42px] text-sm cursor-pointer transition-colors text-gray-900"
                 >
                   <span>{option.label}</span>
-                  {option.subLabel && <span className="text-gray-500">{option.subLabel}</span>}
+                  {option.subLabel && <span className="text-gray-900">{option.subLabel}</span>}
                 </li>
               ))}
           </ul>

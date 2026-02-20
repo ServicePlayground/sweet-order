@@ -31,6 +31,8 @@ interface ReservationOptionsViewProps {
   handleRemoveImage: (index: number) => void;
   dateSelectionSignal: number;
   productType: ProductType;
+  isAddingFromConfirm?: boolean;
+  isEditingFromConfirm?: boolean;
 }
 
 export function ReservationOptionsView({
@@ -53,6 +55,8 @@ export function ReservationOptionsView({
   handleRemoveImage,
   dateSelectionSignal,
   productType,
+  isAddingFromConfirm,
+  isEditingFromConfirm,
 }: ReservationOptionsViewProps) {
   const sizeRef = useRef<HTMLDivElement>(null);
   const flavorRef = useRef<HTMLDivElement>(null);
@@ -99,6 +103,11 @@ export function ReservationOptionsView({
         label="픽업날짜 선택"
         placeholder="픽업할 날짜와 시간을 선택해주세요"
         onOpen={handleOpenCalendar}
+        hint={
+          isAddingFromConfirm || isEditingFromConfirm
+            ? "*변경 시 주문하는 모든 상품의 픽업날짜도 함께 변경됩니다."
+            : undefined
+        }
       />
       <div ref={sizeRef}>
         <Select

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/apps/web-seller/common/components/inputs/Input";
 import { Button } from "@/apps/web-seller/common/components/buttons/Button";
-import { useLogin } from "@/apps/web-seller/features/auth/hooks/queries/useAuth";
+import { useLogin } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
 import { isValidPassword, isValidUserId } from "@/apps/web-seller/common/utils/validator.util";
 

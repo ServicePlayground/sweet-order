@@ -15,6 +15,14 @@ export const STORE_SUCCESS_MESSAGES = {
   LIKE_REMOVED: "스토어 좋아요를 취소했습니다.",
 } as const;
 
+/**
+ * 스토어 목록 정렬 enum
+ */
+export enum StoreSortBy {
+  LATEST = "latest", // 최신순(생성일 내림차순)
+  POPULAR = "popular", // 인기순(좋아요 수 내림차순)
+}
+
 export const SWAGGER_EXAMPLES = {
   ID: "QXZw02vBqVXNQ29c4w9n9ZdG",
   NAME: "스위트오더 스토어",
@@ -23,6 +31,7 @@ export const SWAGGER_EXAMPLES = {
   // 주소/위치 정보
   ADDRESS: "서울특별시 강남구 역삼동 456-789",
   ROAD_ADDRESS: "서울특별시 강남구 테헤란로 123",
+  DETAIL_ADDRESS: "101호",
   ZONECODE: "06234",
   LATITUDE: 37.5665,
   LONGITUDE: 126.978,

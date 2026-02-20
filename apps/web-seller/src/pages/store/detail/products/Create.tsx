@@ -5,8 +5,8 @@ import {
   IProductForm,
   ICreateProductRequest,
 } from "@/apps/web-seller/features/product/types/product.type";
-import { useCreateProduct } from "@/apps/web-seller/features/product/hooks/queries/useProduct";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
+import { useCreateProduct } from "@/apps/web-seller/features/product/hooks/mutations/useProductMutation";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export const StoreDetailProductCreatePage: React.FC = () => {
   const { storeId } = useParams();
@@ -31,7 +31,7 @@ export const StoreDetailProductCreatePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h1 className="text-3xl font-bold">상품 등록</h1>
       <Card>
         <CardContent className="p-6">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { OrderItem, ReservationSelection, ViewType } from "./types";
+import { OrderItem, ViewType } from "./types";
 import {
   CakeFlavorOption,
   CakeSizeOption,
@@ -13,7 +13,6 @@ interface UseReservationBottomSheetProps {
   cakeSizeOptions?: CakeSizeOption[];
   cakeFlavorOptions?: CakeFlavorOption[];
   onClose: () => void;
-  onConfirm: (selection: ReservationSelection) => void;
 }
 
 /**
@@ -31,7 +30,6 @@ export function useReservationBottomSheet({
   cakeSizeOptions,
   cakeFlavorOptions,
   onClose,
-  onConfirm,
 }: UseReservationBottomSheetProps) {
   // ========================================
   // 뷰 상태 관리
@@ -77,6 +75,7 @@ export function useReservationBottomSheet({
   // ========================================
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDateChangeModalOpen, setIsDateChangeModalOpen] = useState(false);
   const [deleteTargetIndex, setDeleteTargetIndex] = useState<number | null>(null);
 
   // 파일 업로드 input ref
@@ -117,7 +116,6 @@ export function useReservationBottomSheet({
 
   // 현재 편집 중인 옵션 상태 초기화
   const resetCurrentOptions = () => {
-    setSelectedDate(null);
     setSelectedSize("");
     setSelectedFlavor("");
     setSelectedCream("");
@@ -128,7 +126,7 @@ export function useReservationBottomSheet({
   };
 
   // 캘린더 뷰로 전환하고 임시 날짜/시간 세팅
-  const handleOpenCalendar = () => {
+  const openCalendar = () => {
     setTempSelectedDate(selectedDate);
     if (selectedDate) {
       const time = new Date();
@@ -138,6 +136,28 @@ export function useReservationBottomSheet({
       setTempSelectedTime(null);
     }
     setView("calendar");
+  };
+
+  const handleOpenCalendar = () => {
+    const shouldShowDateChangeModal =
+      (isAddingFromConfirm && orderItems.length > 0) ||
+      (isEditingFromConfirm && orderItems.length > 1);
+    if (shouldShowDateChangeModal) {
+      setIsDateChangeModalOpen(true);
+      return;
+    }
+    openCalendar();
+  };
+
+  // 날짜 변경 확인 모달 → 확인
+  const handleDateChangeConfirm = () => {
+    setIsDateChangeModalOpen(false);
+    openCalendar();
+  };
+
+  // 날짜 변경 확인 모달 → 변경취소
+  const handleDateChangeCancel = () => {
+    setIsDateChangeModalOpen(false);
   };
 
   // 캘린더에서 선택한 날짜/시간 확정
@@ -193,7 +213,6 @@ export function useReservationBottomSheet({
       cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
 
     const newItem: OrderItem = {
-      date: selectedDate,
       size: selectedSize,
       sizePrice,
       flavor: selectedFlavor,
@@ -202,6 +221,8 @@ export function useReservationBottomSheet({
       letteringMessage,
       requestMessage,
       quantity: 1,
+      imageFiles: [...attachedImages], // 현재 선택된 이미지 File 목록 저장
+      imageUrls: imageUrls, // 미리보기용 로컬 URL 목록 저장
     };
 
     if (editingIndex !== null) {
@@ -218,13 +239,6 @@ export function useReservationBottomSheet({
     setIsAddingFromConfirm(false);
     setIsEditingFromConfirm(false);
     setView("confirm");
-  };
-
-  // 최종 확정 처리 (부모로 데이터 전달)
-  const handleFinalConfirm = () => {
-    onConfirm({ items: orderItems });
-    setView("options");
-    setOrderItems([]);
   };
 
   // 주문 수량 증감 처리
@@ -254,12 +268,13 @@ export function useReservationBottomSheet({
   // 특정 상품 편집 모드로 전환
   const handleEditItem = (index: number) => {
     const item = orderItems[index];
-    setSelectedDate(item.date);
     setSelectedSize(item.size);
     setSelectedFlavor(item.flavor);
     setSelectedCream(item.cream);
     setLetteringMessage(item.letteringMessage);
     setRequestMessage(item.requestMessage);
+    // 편집 시 기존 이미지 File 복원
+    setAttachedImages(item.imageFiles || []);
     setEditingIndex(index);
     setIsAddingFromConfirm(false);
     setIsEditingFromConfirm(true);
@@ -321,6 +336,14 @@ export function useReservationBottomSheet({
     0,
   );
 
+  // 현재 선택 중인 옵션의 가격 계산 (options 뷰에서 사용)
+  const currentOptionPrice = useMemo(() => {
+    const sizePrice = cakeSizeOptions?.find((s) => s.displayName === selectedSize)?.price ?? 0;
+    const flavorPrice =
+      cakeFlavorOptions?.find((f) => f.displayName === selectedFlavor)?.price ?? 0;
+    return price + sizePrice + flavorPrice;
+  }, [price, selectedSize, selectedFlavor, cakeSizeOptions, cakeFlavorOptions]);
+
   const isOptionsValid =
     selectedDate &&
     selectedSize &&
@@ -365,24 +388,29 @@ export function useReservationBottomSheet({
     setIsCancelModalOpen,
     isDeleteModalOpen,
     setIsDeleteModalOpen,
+    isDateChangeModalOpen,
+    setIsDateChangeModalOpen,
 
     // Computed
+    currentOptionPrice,
     totalQuantity,
     totalPrice,
     isOptionsValid,
     isCalendarValid,
     isAddingFromConfirm,
+    isEditingFromConfirm,
     dateSelectionSignal,
     formatDateTime,
 
     // Handlers
     handleOpenCalendar,
     handleCalendarConfirm,
+    handleDateChangeConfirm,
+    handleDateChangeCancel,
     handleCancelClick,
     handleConfirmCancel,
     handleClose,
     handleGoToConfirm,
-    handleFinalConfirm,
     handleQuantityChange,
     handleDeleteClick,
     handleConfirmDelete,

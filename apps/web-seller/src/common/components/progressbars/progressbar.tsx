@@ -1,13 +1,10 @@
 import React from "react";
-import { cn } from "@/apps/web-seller/common/lib/utils";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 
 interface Props {
   activeStep: number; // 0-based index
   steps: Array<React.ReactNode>;
   title?: React.ReactNode;
-  alternativeLabel?: boolean;
-  containerSx?: any;
-  stepperProps?: any;
 }
 
 export const ProgressBar: React.FC<Props> = ({ activeStep, steps, title = "" }) => {

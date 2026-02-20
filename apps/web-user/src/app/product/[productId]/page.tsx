@@ -14,10 +14,7 @@ import { Tabs } from "@/apps/web-user/common/components/tabs/Tabs";
 import { ProductDetailSizeFlavorSection } from "@/apps/web-user/features/product/components/sections/ProductDetailSizeFlavorSection";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
-import {
-  ReservationBottomSheet,
-  ReservationSelection,
-} from "@/apps/web-user/features/product/components/sections/reservation-bottom-sheet";
+import { ReservationBottomSheet } from "@/apps/web-user/features/product/components/sections/reservation-bottom-sheet";
 import { ProductType } from "@/apps/web-user/features/product/types/product.type";
 
 interface ProductDetailPageProps {
@@ -58,12 +55,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         onError: () => setIsLiked(false),
       });
     }
-  };
-
-  const handleReservationConfirm = (selection: ReservationSelection) => {
-    // TODO: 예약 처리 로직
-    console.log(selection);
-    setIsBottomSheetOpen(false);
   };
 
   if (isLoading) {
@@ -150,18 +141,24 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       {/* 예약 바텀시트 */}
       <ReservationBottomSheet
         isOpen={isBottomSheetOpen}
+        productId={productId}
         price={data.salePrice}
         cakeTitle={data.name}
         cakeImageUrl={data.images[0] ?? ""}
+        cakeImages={data.images}
         cakeSizeOptions={data.cakeSizeOptions}
         cakeFlavorOptions={data.cakeFlavorOptions}
         productType={data.productType}
         productNoticeProducer={data.productNoticeProducer}
         productNoticeAddress={data.productNoticeAddress}
+        storeName={data.storeName}
         pickupAddress={data.pickupAddress}
         pickupRoadAddress={data.pickupRoadAddress}
+        pickupDetailAddress={data.pickupDetailAddress}
+        pickupZonecode={data.pickupZonecode}
+        pickupLatitude={data.pickupLatitude}
+        pickupLongitude={data.pickupLongitude}
         onClose={() => setIsBottomSheetOpen(false)}
-        onConfirm={handleReservationConfirm}
       />
     </div>
   );

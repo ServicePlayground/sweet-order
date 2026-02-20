@@ -5,6 +5,12 @@ import { LikeProductDetailService } from "@apps/backend/modules/like/services/li
 import { LikeStoreCreateService } from "@apps/backend/modules/like/services/like-store-create.service";
 import { LikeStoreDeleteService } from "@apps/backend/modules/like/services/like-store-delete.service";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
+import { LikeUserListService } from "@apps/backend/modules/like/services/like-user-list.service";
+import {
+  GetMyLikesRequestDto,
+  MyProductLikeListResponseDto,
+  MyStoreLikeListResponseDto,
+} from "@apps/backend/modules/like/dto/like-user-list.dto";
 
 /**
  * 좋아요 서비스
@@ -21,33 +27,44 @@ export class LikeService {
     private readonly likeStoreCreateService: LikeStoreCreateService,
     private readonly likeStoreDeleteService: LikeStoreDeleteService,
     private readonly likeStoreDetailService: LikeStoreDetailService,
+    private readonly likeUserListService: LikeUserListService,
   ) {}
 
   /**
-   * 상품 좋아요 추가
+   * 상품 좋아요 추가 (사용자용)
    */
-  async addProductLike(userId: string, productId: string) {
-    return this.likeProductCreateService.addProductLike(userId, productId);
+  async addProductLikeForUser(userId: string, productId: string) {
+    return this.likeProductCreateService.addProductLikeForUser(userId, productId);
   }
 
   /**
-   * 상품 좋아요 삭제
+   * 상품 좋아요 삭제 (사용자용)
    */
-  async removeProductLike(userId: string, productId: string) {
-    return this.likeProductDeleteService.removeProductLike(userId, productId);
+  async removeProductLikeForUser(userId: string, productId: string) {
+    return this.likeProductDeleteService.removeProductLikeForUser(userId, productId);
   }
 
   /**
-   * 스토어 좋아요 추가
+   * 스토어 좋아요 추가 (사용자용)
    */
-  async addStoreLike(userId: string, storeId: string) {
-    return this.likeStoreCreateService.addStoreLike(userId, storeId);
+  async addStoreLikeForUser(userId: string, storeId: string) {
+    return this.likeStoreCreateService.addStoreLikeForUser(userId, storeId);
   }
 
   /**
-   * 스토어 좋아요 삭제
+   * 스토어 좋아요 삭제 (사용자용)
    */
-  async removeStoreLike(userId: string, storeId: string) {
-    return this.likeStoreDeleteService.removeStoreLike(userId, storeId);
+  async removeStoreLikeForUser(userId: string, storeId: string) {
+    return this.likeStoreDeleteService.removeStoreLikeForUser(userId, storeId);
+  }
+
+  /**
+   * 내가 좋아요한 목록 조회 (사용자용)
+   */
+  async getMyLikesForUser(
+    userId: string,
+    query: GetMyLikesRequestDto,
+  ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
+    return this.likeUserListService.getMyLikesForUser(userId, query);
   }
 }

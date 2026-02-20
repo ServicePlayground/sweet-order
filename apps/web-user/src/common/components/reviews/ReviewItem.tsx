@@ -40,7 +40,7 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
   };
 
   return (
-    <div className="py-4 border-b border-gray-100 last:border-b-0">
+    <div className="mx-[-20px] mb-[20px] px-[20px] pt-[20px] pb-[48px] border-b border-gray-100 last:border-b-0">
       <div className="flex items-center justify-between mb-[12px]">
         <span className="text-sm font-medium text-gray-900">{renderRating(review.rating)}</span>
         <div className="flex items-center gap-[24px]">
@@ -98,7 +98,13 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
           onClick={() => setIsOptionExpanded(!isOptionExpanded)}
           className="absolute right-[16px] top-[12px] flex items-center gap-[2px] text-sm text-gray-500"
         >
-          주문옵션 <Icon name="arrow" width={16} height={16} className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-0" : "rotate-180"}`} />
+          주문옵션{" "}
+          <Icon
+            name="arrow"
+            width={16}
+            height={16}
+            className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-0" : "rotate-180"}`}
+          />
         </button>
         {isOptionExpanded && (
           <p className="text-2sm text-gray-500 mt-[12px]">

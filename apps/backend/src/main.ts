@@ -1,5 +1,5 @@
 import { NestFactory } from "@nestjs/core";
-import { ValidationPipe, Logger } from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule } from "@nestjs/swagger";
 import { ConfigService } from "@nestjs/config";
 import helmet from "helmet";
@@ -17,6 +17,10 @@ import {
   userSwaggerConfig,
 } from "@apps/backend/common/config/swagger.config";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { PrismaService } from "@apps/backend/infra/database/prisma.service";
+import { initializeSentry } from "@apps/backend/common/config/sentry.config";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 /**
  * NestJS 애플리케이션의 진입점
@@ -29,11 +33,17 @@ async function bootstrap(): Promise<void> {
   // 전역 prefix가 Socket.IO 경로에 영향을 주지 않도록 설정
   app.useWebSocketAdapter(new IoAdapter(app));
 
-  // 로깅 인스턴스 생성
-  const logger = new Logger("서버시작");
-
   // ConfigService 인스턴스 생성 (.env 환경 변수에 저장된 설정값들 가져올 수 있음)
   const configService = app.get(ConfigService);
+
+  // LoggerUtil 초기화 (ConfigService 사용해야함)
+  LoggerUtil.initialize(configService);
+
+  // SentryUtil 초기화 (ConfigService 사용해야함)
+  SentryUtil.initialize(configService);
+
+  // Sentry 초기화 (ConfigService 사용해야함)
+  initializeSentry(configService);
 
   // 포트와 환경 변수 가져오기
   const port = configService.get("PORT");
@@ -41,8 +51,35 @@ async function bootstrap(): Promise<void> {
 
   // Health check (CORS 제외, global prefix 제외, interceptor/guard 등 미적용)
   const httpAdapter = app.getHttpAdapter();
-  httpAdapter.getInstance().get("/health", (_req: any, res: any) => {
-    res.status(200).send("OK");
+  httpAdapter.getInstance().get("/health", async (_req: any, res: any) => {
+    try {
+      // PrismaService 가져오기
+      const prismaService = app.get(PrismaService);
+
+      // 데이터베이스 연결 상태 확인
+      const isDbConnected = await prismaService.checkConnection();
+
+      if (!isDbConnected) {
+        return res.status(503).json({
+          status: "unhealthy",
+          database: "disconnected",
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      res.status(200).json({
+        status: "healthy",
+        database: "connected",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: "unhealthy",
+        database: "unknown",
+        error: "Health check failed",
+        timestamp: new Date().toISOString(),
+      });
+    }
   });
 
   // CORS 설정
@@ -73,7 +110,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // HTTP 요청 로깅 - 상용 환경에서는 비활성화
+  // HTTP 요청 로깅 (개발/검증 환경에서만)
   if (nodeEnv !== "production") {
     app.use(morgan("combined"));
   }
@@ -141,11 +178,11 @@ async function bootstrap(): Promise<void> {
   // 서버 시작
   await app.listen(Number(port));
 
-  logger.log(`server is running on port ${port}`);
-  logger.log(`Environment: ${nodeEnv}`);
-  logger.log(`CORS origins: ${configService.get("CORS_ORIGIN")}`);
-  logger.log(`WebSocket Gateway namespace: /chat`);
-  logger.log(`API prefix: ${API_PREFIX}`);
+  LoggerUtil.log(`server is running on port ${port}`);
+  LoggerUtil.log(`Environment: ${nodeEnv}`);
+  LoggerUtil.log(`CORS origins: ${configService.get("CORS_ORIGIN")}`);
+  LoggerUtil.log(`WebSocket Gateway namespace: /chat`);
+  LoggerUtil.log(`API prefix: ${API_PREFIX}`);
 }
 
 bootstrap();

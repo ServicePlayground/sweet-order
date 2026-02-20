@@ -1,13 +1,15 @@
 import { Store } from "@apps/backend/infra/database/prisma/generated/client";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-response.dto";
+import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
  * 스토어 매핑 유틸리티
  * Prisma Store 엔티티를 응답 DTO로 변환하는 공통 로직을 제공합니다.
  */
 export class StoreMapperUtil {
+  private static readonly context = StoreMapperUtil.name;
   /**
    * Product ID와 StoreId select 필드
    * 상품 ID와 스토어 ID를 함께 조회할 때 사용
@@ -41,7 +43,11 @@ export class StoreMapperUtil {
     const isSingle = !Array.isArray(stores);
 
     if (storesArray.length === 0) {
-      return isSingle ? ({} as StoreResponseDto) : [];
+      if (isSingle) {
+        LoggerUtil.log("스토어 매핑 실패: 단일 스토어 매핑 대상이 비어 있습니다.");
+        throw new Error("단일 스토어 매핑 대상이 비어 있습니다.");
+      }
+      return [];
     }
 
     const storeIds = storesArray.map((store) => store.id);
@@ -119,11 +125,13 @@ export class StoreMapperUtil {
         businessSector: store.businessSector,
         businessType: store.businessType,
         permissionManagementNumber: store.permissionManagementNumber,
-        address: store.address,
-        roadAddress: store.roadAddress,
-        zonecode: store.zonecode,
-        latitude: store.latitude,
-        longitude: store.longitude,
+        // 픽업장소
+        address: store.address ?? "",
+        roadAddress: store.roadAddress ?? "",
+        detailAddress: store.detailAddress ?? "",
+        zonecode: store.zonecode ?? "",
+        latitude: store.latitude ?? 0,
+        longitude: store.longitude ?? 0,
         likeCount: store.likeCount,
         averageRating,
         totalReviewCount,

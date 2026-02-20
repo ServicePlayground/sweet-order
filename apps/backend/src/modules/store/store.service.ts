@@ -1,78 +1,73 @@
 import { Injectable } from "@nestjs/common";
-import { StoreCreationService } from "@apps/backend/modules/store/services/store-creation.service";
+import { StoreCreateService } from "@apps/backend/modules/store/services/store-create.service";
 import { StoreListService } from "@apps/backend/modules/store/services/store-list.service";
 import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
+import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-create.dto";
+import { UpdateStoreRequestDto } from "@apps/backend/modules/store/dto/store-update.dto";
 import {
-  CreateStoreRequestDto,
-  UpdateStoreRequestDto,
   GetStoresRequestDto,
-} from "@apps/backend/modules/store/dto/store.request.dto";
+  GetSellerStoresRequestDto,
+} from "@apps/backend/modules/store/dto/store-list.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
  * 스토어 서비스
  *
  * 스토어 관련 기능을 통합하여 제공하는 메인 서비스입니다.
- * StoreCreationService, StoreListService를 조합하여 사용합니다.
+ * StoreCreateService, StoreListService를 조합하여 사용합니다.
  */
 @Injectable()
 export class StoreService {
   constructor(
-    private readonly storeCreationService: StoreCreationService,
+    private readonly storeCreateService: StoreCreateService,
     private readonly storeListService: StoreListService,
     private readonly storeUpdateService: StoreUpdateService,
   ) {}
 
   /**
-   * 스토어 생성 (3단계)
-   * 1단계, 2단계 API를 다시 호출하여 검증하고 스토어를 생성합니다.
+   * 스토어 목록 조회 (사용자용)
    */
-  async createStore(userId: string, createStoreDto: CreateStoreRequestDto) {
-    return await this.storeCreationService.createStore(userId, createStoreDto);
+  async getStoresForUser(query: GetStoresRequestDto, user?: JwtVerifiedPayload) {
+    return await this.storeListService.getStoresForUser(query, user);
   }
 
   /**
-   * 스토어 상세 조회
-   * @param storeId 스토어 ID
-   * @param user 로그인한 사용자 정보 (옵셔널)
-   * @returns 스토어 상세 정보
+   * 스토어 상세 조회 (사용자용)
    */
-  async getStoreById(storeId: string, user?: JwtVerifiedPayload) {
-    return await this.storeListService.getStoreById(storeId, user);
+  async getStoreByIdForUser(storeId: string, user?: JwtVerifiedPayload) {
+    return await this.storeListService.getStoreByIdForUser(storeId, user);
   }
 
   /**
-   * 사용자의 스토어 목록 조회 (판매자용)
-   * @param userId 사용자 ID
-   * @param query 페이지네이션 쿼리 파라미터
-   * @returns 스토어 목록
+   * 내 스토어 목록 조회 (판매자용)
    */
-  async getStoresByUserId(userId: string, query: GetStoresRequestDto) {
-    return await this.storeListService.getStoresByUserId(userId, query);
+  async getStoresByUserIdForSeller(userId: string, query: GetSellerStoresRequestDto) {
+    return await this.storeListService.getStoresByUserIdForSeller(userId, query);
   }
 
   /**
-   * 스토어 상세 조회 (판매자용)
-   * @param storeId 스토어 ID
-   * @param user 인증된 사용자 정보
-   * @returns 스토어 상세 정보
+   * 내 스토어 상세 조회 (판매자용)
    */
   async getStoreByIdForSeller(storeId: string, user: JwtVerifiedPayload) {
     return await this.storeListService.getStoreByIdForSeller(storeId, user);
   }
 
   /**
-   * 스토어 수정 (판매자용)
-   * @param storeId 스토어 ID
-   * @param updateStoreDto 수정할 스토어 정보
-   * @param user 인증된 사용자 정보
-   * @returns 수정된 스토어 ID
+   * 스토어 생성 (판매자용)
+   * 1단계, 2단계 API를 다시 호출하여 검증하고 스토어를 생성합니다.
    */
-  async updateStore(
+  async createStoreForSeller(userId: string, createStoreDto: CreateStoreRequestDto) {
+    return await this.storeCreateService.createStoreForSeller(userId, createStoreDto);
+  }
+
+  /**
+   * 스토어 수정 (판매자용)
+   */
+  async updateStoreForSeller(
     storeId: string,
     updateStoreDto: UpdateStoreRequestDto,
     user: JwtVerifiedPayload,
   ) {
-    return await this.storeUpdateService.updateStore(storeId, updateStoreDto, user);
+    return await this.storeUpdateService.updateStoreForSeller(storeId, updateStoreDto, user);
   }
 }

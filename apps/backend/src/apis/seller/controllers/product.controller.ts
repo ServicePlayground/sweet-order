@@ -15,16 +15,14 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ProductService } from "@apps/backend/modules/product/product.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
+import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   PRODUCT_ERROR_MESSAGES,
   PRODUCT_SUCCESS_MESSAGES,
-  SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/product/constants/product.constants";
-import {
-  ProductListResponseDto,
-  ProductResponseDto,
-} from "@apps/backend/modules/product/dto/product-response.dto";
+import { ProductListResponseDto } from "@apps/backend/modules/product/dto/product-list.dto";
+import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import {
@@ -33,16 +31,26 @@ import {
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   CreateProductRequestDto,
+  CreateProductResponseDto,
+} from "@apps/backend/modules/product/dto/product-create.dto";
+import {
   UpdateProductRequestDto,
-  GetSellerProductsRequestDto,
-} from "@apps/backend/modules/product/dto/product-request.dto";
+  UpdateProductResponseDto,
+} from "@apps/backend/modules/product/dto/product-update.dto";
+import { GetSellerProductsRequestDto } from "@apps/backend/modules/product/dto/product-list.dto";
 
 /**
  * 판매자 상품 컨트롤러
  * 판매자용 상품 관리 API 엔드포인트를 제공합니다.
  */
 @ApiTags("상품")
-@ApiExtraModels(ProductListResponseDto, ProductResponseDto, PaginationMetaResponseDto)
+@ApiExtraModels(
+  CreateProductResponseDto,
+  UpdateProductResponseDto,
+  ProductListResponseDto,
+  ProductResponseDto,
+  PaginationMetaResponseDto,
+)
 @Controller(`${USER_ROLES.SELLER}/products`)
 @Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] }) // SELLER와 ADMIN 역할만 접근 가능
 export class SellerProductController {
@@ -61,30 +69,18 @@ export class SellerProductController {
       "자신이 소유한 스토어의 상품 목록을 조회합니다. 필터링, 정렬, 무한 스크롤을 지원합니다. 로그인한 사용자의 경우 각 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   async getProducts(
     @Query() query: GetSellerProductsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.productService.getSellerProducts(query, req.user);
+    return await this.productService.getProductsForSeller(query, req.user);
   }
 
   /**
@@ -100,26 +96,14 @@ export class SellerProductController {
       "자신이 소유한 스토어의 상품 상세 정보를 조회합니다. 로그인한 사용자의 경우 해당 상품의 좋아요 여부(isLiked)도 함께 반환됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async getProductDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
-    return await this.productService.getSellerProductDetail(id, req.user);
+    return await this.productService.getProductDetailForSeller(id, req.user);
   }
 
   /**
@@ -133,24 +117,12 @@ export class SellerProductController {
     description:
       "판매자가 새로운 상품을 등록합니다. 스토어 소유권을 확인하고 상품 정보를 저장합니다.",
   })
-  @SwaggerResponse(201, { dataExample: { id: SWAGGER_EXAMPLES.PRODUCT_DATA.id } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(201, { dataDto: CreateProductResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   @SwaggerResponse(404, {
@@ -160,7 +132,7 @@ export class SellerProductController {
     @Body() createProductDto: CreateProductRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.productService.createProduct(createProductDto, req.user);
+    return await this.productService.createProductForSeller(createProductDto, req.user);
   }
 
   /**
@@ -173,31 +145,19 @@ export class SellerProductController {
     summary: "(로그인 필요) 상품 수정",
     description: "판매자가 등록한 상품을 수정합니다.",
   })
-  @SwaggerResponse(200, { dataExample: { id: SWAGGER_EXAMPLES.PRODUCT_DATA.id } })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerResponse(200, { dataDto: UpdateProductResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async updateProduct(
     @Param("id") id: string,
     @Body() updateProductDto: UpdateProductRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
-    return await this.productService.updateProduct(id, updateProductDto, req.user);
+    return await this.productService.updateProductForSeller(id, updateProductDto, req.user);
   }
 
   /**
@@ -213,26 +173,14 @@ export class SellerProductController {
   @SwaggerResponse(200, {
     dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(AUTH_ERROR_MESSAGES.UNAUTHORIZED) })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING),
-  })
-  @SwaggerResponse(401, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE),
-  })
-  @SwaggerResponse(401, {
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
-  @SwaggerResponse(401, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async deleteProduct(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
-    await this.productService.deleteProduct(id, req.user);
+    await this.productService.deleteProductForSeller(id, req.user);
     return createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED);
   }
 }

@@ -1,6 +1,6 @@
 import React from "react";
-import { Card, CardContent } from "@/apps/web-seller/common/components/@shadcn-ui/card";
-import { Button } from "@/apps/web-seller/common/components/@shadcn-ui/button";
+import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { TrendingUp, ShoppingCart, Package, DollarSign } from "lucide-react";
 
 const StatCard = ({
@@ -28,8 +28,6 @@ const StatCard = ({
 export const StoreDetailHomePage: React.FC = () => {
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">대시보드</h1>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         <StatCard
           title="총 매출"
