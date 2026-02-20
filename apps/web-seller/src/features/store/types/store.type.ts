@@ -34,11 +34,16 @@ export interface ICreateStoreResponse {
 // 스토어 수정 요청
 export interface IUpdateStoreRequest extends IStoreForm {}
 
+// 스토어 목록 정렬
+export type StoreSortBy = "latest" | "popular";
+
 /**
  * 스토어 목록 조회 쿼리 키용 파라미터 (page 제외)
  */
 export interface IGetStoresParams {
   limit: number;
+  search?: string;
+  sortBy?: StoreSortBy;
 }
 
 /**

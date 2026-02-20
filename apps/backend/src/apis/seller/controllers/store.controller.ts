@@ -34,8 +34,10 @@ import {
 } from "@apps/backend/modules/business/constants/business.contants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
-import { StoreListResponseDto } from "@apps/backend/modules/store/dto/store-list.dto";
-import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
+import {
+  GetSellerStoresRequestDto,
+  StoreListResponseDto,
+} from "@apps/backend/modules/store/dto/store-list.dto";
 import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 
 /**
@@ -127,26 +129,26 @@ export class SellerStoreController {
 
   /**
    * 내 스토어 목록 조회 API
-   * 현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다.
+   * 현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 검색, 정렬, 페이지네이션을 지원합니다.
    */
   @Get("/list")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 내 스토어 목록 조회",
     description:
-      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 페이지네이션을 지원합니다.",
+      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 검색어(스토어명), 정렬, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   @SwaggerAuthResponses()
   async getMyStores(
     @Request() req: { user: JwtVerifiedPayload },
-    @Query() query: PaginationRequestDto,
+    @Query() query: GetSellerStoresRequestDto,
   ) {
     return await this.storeService.getStoresByUserIdForSeller(req.user.sub, query);
   }
 
   /**
-   * 스토어 상세 조회 API
+   * 내 스토어 상세 조회 API
    * 자신이 소유한 스토어만 조회 가능합니다.
    * 로그인한 사용자의 경우 해당 스토어의 좋아요 여부(isLiked)도 함께 반환됩니다.
    */
