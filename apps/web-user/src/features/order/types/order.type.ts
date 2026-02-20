@@ -2,7 +2,6 @@
  * 주문 항목 생성 요청
  */
 export interface CreateOrderItemRequest {
-  pickupDate: string; // ISO 8601 형식
   sizeId?: string;
   sizeDisplayName?: string;
   sizeLengthCm?: number;
@@ -21,6 +20,7 @@ export interface CreateOrderItemRequest {
  * 주문 생성 요청 (주문 시점의 정보 전달)
  */
 export interface CreateOrderRequest {
+  pickupDate: string; // ISO 8601 형식
   productId: string;
   productName: string;
   productImages: string[];
@@ -86,6 +86,7 @@ export interface OrderResponse {
   // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
+  pickupDate: string; // ISO 8601 형식
   pickupDetailAddress?: string;
   pickupZonecode: string;
   pickupLatitude: number;

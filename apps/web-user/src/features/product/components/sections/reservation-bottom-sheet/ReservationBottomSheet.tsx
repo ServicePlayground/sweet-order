@@ -174,7 +174,6 @@ export function ReservationBottomSheet({
                   );
 
                   return {
-                    pickupDate: selectedDate ? selectedDate.toISOString() : "",
                     // 사이즈 옵션 정보 (있는 경우만)
                     ...(sizeOption && {
                       sizeId: sizeOption.id,
@@ -204,6 +203,7 @@ export function ReservationBottomSheet({
 
               // API 요청 데이터 구성 (주문 시점의 정보 전달)
               const orderRequest: CreateOrderRequest = {
+                pickupDate: selectedDate ? selectedDate.toISOString() : "",
                 productId,
                 productName: cakeTitle,
                 productImages:

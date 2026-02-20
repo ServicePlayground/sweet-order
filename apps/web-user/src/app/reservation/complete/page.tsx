@@ -101,11 +101,10 @@ export default function ReservationCompletePage() {
             </p>
           )}
           <div className="mb-[20px]">
-            {/* 픽업날짜 추가 예정 */}
-            {/* <div className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
+            <div className="flex items-center justify-between mb-[6px] px-[16px] text-sm">
               <span className="text-gray-500">픽업날짜</span>
               <span className="text-gray-900">{formatDateTime(orderData.pickupDate)}</span>
-            </div> */}
+            </div>
             <div className="relative flex items-start justify-between mb-[24px] px-[16px] text-sm after:content-[''] after:absolute after:bottom-[-12px] after:left-4 after:right-4 after:h-[1px] after:bg-gray-50">
               <span className="text-gray-500">픽업장소</span>
               <span className="flex flex-col items-end text-gray-900">
@@ -140,17 +139,8 @@ export default function ReservationCompletePage() {
                   ref={(el) => {
                     cardRefs.current[index] = el;
                   }}
-                  className="pt-[12px] border border-gray-100 rounded-lg"
+                  className="border border-gray-100 rounded-lg"
                 >
-                  <span className="inline-flex items-center ml-[12px] px-[6px] py-[4px] text-xs text-gray-700 font-bold bg-gray-50 rounded-lg">
-                    <Icon
-                      name="takeout"
-                      width={16}
-                      height={16}
-                      className="mr-[2px] text-gray-700"
-                    />
-                    픽업 {formatDateTime(item.pickupDate)}
-                  </span>
                   <div className="flex items-center justify-between px-[16px] py-[12px] border-b border-gray-100">
                     <div className="flex flex-col gap-[4px]">
                       <span className="text-xs text-gray-500">예약상품</span>
