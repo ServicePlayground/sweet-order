@@ -1,15 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsString, IsEnum, IsDateString } from "class-validator";
-import { OrderStatus, OrderSortBy } from "@apps/backend/modules/order/constants/order.constants";
+import {
+  OrderStatus,
+  OrderSortBy,
+  OrderType,
+} from "@apps/backend/modules/order/constants/order.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
-import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
+import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 
 /**
- * 판매자용 주문 목록 조회 요청 DTO (페이지네이션)
+ * 주문 목록 조회 요청 DTO (페이지네이션)
  */
-export class GetSellerOrdersRequestDto extends PaginationRequestDto {
+export class OrderListRequestDto extends PaginationRequestDto {
   @ApiProperty({
     description: "정렬",
     enum: OrderSortBy,
@@ -59,10 +63,19 @@ export class GetSellerOrdersRequestDto extends PaginationRequestDto {
   @IsOptional()
   @IsString()
   orderNumber?: string;
+
+  @ApiPropertyOptional({
+    description: "(필터) 픽업 예정/지난 예약",
+    enum: OrderType,
+    example: OrderType.UPCOMING,
+  })
+  @IsOptional()
+  @IsEnum(OrderType)
+  type?: OrderType;
 }
 
 /**
- * 주문 목록 응답 DTO
+ * 주문 목록 조회 응답 DTO (페이지네이션)
  */
 export class OrderListResponseDto {
   @ApiProperty({

@@ -20,8 +20,8 @@ import {
   USER_ROLES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
-  GetSellerOrdersRequestDto,
   OrderListResponseDto,
+  OrderListRequestDto,
 } from "@apps/backend/modules/order/dto/order-list.dto";
 import {
   UpdateOrderStatusRequestDto,
@@ -57,7 +57,7 @@ export class SellerOrderController {
   @ApiOperation({
     summary: "(로그인 필요) 판매자용 주문 목록 조회",
     description:
-      "자신이 소유한 스토어의 주문 목록을 조회합니다. 필터링, 정렬, 페이지네이션을 지원합니다.",
+      "자신이 소유한 스토어의 주문 목록을 조회합니다. 픽업 예정/지난 예약(type), 스토어/상태/기간/주문번호 필터, 정렬(sortBy), 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: OrderListResponseDto })
   @SwaggerAuthResponses()
@@ -68,7 +68,7 @@ export class SellerOrderController {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
   async getOrders(
-    @Query() query: GetSellerOrdersRequestDto,
+    @Query() query: OrderListRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ) {
     return await this.orderService.getOrdersForSeller(query, req.user);

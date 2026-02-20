@@ -20,6 +20,7 @@ export function useOrderList({
   startDate,
   endDate,
   orderNumber,
+  type,
 }: Partial<IGetOrdersListParams> & { page: number; limit: number; sortBy: OrderSortBy }) {
   const { addAlert } = useAlertStore();
 
@@ -33,6 +34,7 @@ export function useOrderList({
       startDate,
       endDate,
       orderNumber,
+      type,
     }),
     queryFn: () => {
       const params: IGetOrdersListParams = {
@@ -54,6 +56,9 @@ export function useOrderList({
       }
       if (orderNumber) {
         params.orderNumber = orderNumber;
+      }
+      if (type) {
+        params.type = type;
       }
       return orderApi.getOrders(params);
     },

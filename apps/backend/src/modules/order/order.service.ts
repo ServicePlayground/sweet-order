@@ -10,13 +10,9 @@ import {
 } from "@apps/backend/modules/order/dto/order-create.dto";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import {
-  GetSellerOrdersRequestDto,
   OrderListResponseDto,
+  OrderListRequestDto,
 } from "@apps/backend/modules/order/dto/order-list.dto";
-import {
-  GetUserOrdersRequestDto,
-  UserOrderListResponseDto,
-} from "@apps/backend/modules/order/dto/order-user-list.dto";
 import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
@@ -57,9 +53,9 @@ export class OrderService {
    * 주문 목록 조회 (사용자용)
    */
   async getUserOrdersForUser(
-    query: GetUserOrdersRequestDto,
+    query: OrderListRequestDto,
     user: JwtVerifiedPayload,
-  ): Promise<UserOrderListResponseDto> {
+  ): Promise<OrderListResponseDto> {
     return this.orderUserListService.getUserOrdersForUser(query, user.sub);
   }
 
@@ -77,7 +73,7 @@ export class OrderService {
    * 주문 목록 조회 (판매자용)
    */
   async getOrdersForSeller(
-    query: GetSellerOrdersRequestDto,
+    query: OrderListRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<OrderListResponseDto> {
     return this.orderListService.getOrdersForSeller(query, user);

@@ -12,7 +12,11 @@ import { BaseButton as Button } from "@/apps/web-seller/common/components/button
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { useOrderList } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
 import { OrderList } from "@/apps/web-seller/features/order/components/list/OrderList";
-import { OrderSortBy, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
+import {
+  OrderSortBy,
+  OrderStatus,
+  OrderType,
+} from "@/apps/web-seller/features/order/types/order.type";
 import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
 
 const DEBOUNCE_DELAY_MS = 300;
@@ -23,6 +27,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<OrderSortBy>(OrderSortBy.LATEST);
   const [orderStatus, setOrderStatus] = useState<OrderStatus | undefined>(undefined);
+  const [type, setType] = useState<OrderType | undefined>(undefined);
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
@@ -33,18 +38,23 @@ export const StoreDetailOrderListPage: React.FC = () => {
   // 필터나 정렬이 변경되면 페이지를 1로 리셋
   useEffect(() => {
     setPage(1);
-  }, [orderStatus, debouncedOrderNumber, startDate, endDate, sortBy]);
+  }, [orderStatus, type, debouncedOrderNumber, startDate, endDate, sortBy]);
 
   const handleResetFilters = useCallback(() => {
     setPage(1);
     setOrderStatus(undefined);
+    setType(undefined);
     setOrderNumber("");
     setStartDate("");
     setEndDate("");
   }, []);
 
   const hasActiveFilters =
-    orderStatus !== undefined || orderNumber.trim() !== "" || startDate !== "" || endDate !== "";
+    orderStatus !== undefined ||
+    type !== undefined ||
+    orderNumber.trim() !== "" ||
+    startDate !== "" ||
+    endDate !== "";
 
   if (!storeId) {
     return (
@@ -60,6 +70,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
     sortBy,
     storeId,
     orderStatus,
+    type,
     orderNumber: debouncedOrderNumber.trim() || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
@@ -131,6 +142,26 @@ export const StoreDetailOrderListPage: React.FC = () => {
                 <SelectItem value="ALL">전체</SelectItem>
                 <SelectItem value={OrderStatus.PENDING}>대기중</SelectItem>
                 <SelectItem value={OrderStatus.CONFIRMED}>확정됨</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 픽업 예정/지난 예약 */}
+          <div className="space-y-2">
+            <Label>픽업 예정/지난 예약</Label>
+            <Select
+              value={type ?? "ALL"}
+              onValueChange={(value) =>
+                setType(value === "ALL" ? undefined : (value as OrderType))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">전체</SelectItem>
+                <SelectItem value={OrderType.UPCOMING}>픽업 예정</SelectItem>
+                <SelectItem value={OrderType.PAST}>지난 예약</SelectItem>
               </SelectContent>
             </Select>
           </div>
