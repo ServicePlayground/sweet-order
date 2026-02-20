@@ -22,6 +22,7 @@ const config: Config = {
         DEFAULT: "4px",
         md: "6px",
         lg: "8px",
+        "2lg": "10px",
         xl: "12px",
         "2xl": "16px",
         "3xl": "24px",

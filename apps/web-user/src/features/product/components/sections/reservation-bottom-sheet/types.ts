@@ -5,7 +5,6 @@ import {
 } from "@/apps/web-user/features/product/types/product.type";
 
 export interface OrderItem {
-  date: Date | null;
   size: string;
   sizePrice: number;
   flavor: string;
