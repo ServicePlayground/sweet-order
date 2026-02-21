@@ -94,20 +94,17 @@ export const ProductCreationForm: React.FC<Props> = ({
     (key: keyof IProductForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (disabled) return;
       const value = e.target.value;
-      let next: IProductForm;
-
-      // 판매가는 숫자만 입력 가능하도록 처리
-      if (key === "salePrice") {
-        const onlyDigits = value.replace(/[^0-9]/g, "");
-        const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-        next = { ...form, [key]: isNaN(num) ? 0 : num };
-      } else {
-        next = { ...form, [key]: value };
-      }
-
+      const next = { ...form, [key]: value };
       setForm(next);
       onChange?.(next);
     };
+
+  const handleSalePriceChange = (value: number) => {
+    if (disabled) return;
+    const next = { ...form, salePrice: value };
+    setForm(next);
+    onChange?.(next);
+  };
 
   const handleSalesStatusChange = (value: EnableStatus) => {
     if (disabled) return;
@@ -165,12 +162,9 @@ export const ProductCreationForm: React.FC<Props> = ({
     onChange?.(next);
   };
 
-  const handleLetteringMaxLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // 숫자만 입력 가능하도록 처리
-    const onlyDigits = value.replace(/[^0-9]/g, "");
-    const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-    const next = { ...form, letteringMaxLength: isNaN(num) ? 0 : num };
+  const handleLetteringMaxLengthChange = (value: number) => {
+    if (disabled) return;
+    const next = { ...form, letteringMaxLength: value };
     setForm(next);
     onChange?.(next);
   };
@@ -261,6 +255,7 @@ export const ProductCreationForm: React.FC<Props> = ({
                 onMainImageChange={handleMainImageChange}
                 onAdditionalImagesChange={handleAdditionalImagesChange}
                 onChange={handleChange}
+                onSalePriceChange={handleSalePriceChange}
                 disabled={disabled}
               />
 
@@ -280,6 +275,7 @@ export const ProductCreationForm: React.FC<Props> = ({
                 onLetteringRequiredChange={handleLetteringRequiredChange}
                 onLetteringMaxLengthChange={handleLetteringMaxLengthChange}
                 onImageUploadEnabledChange={handleImageUploadEnabledChange}
+                disabled={disabled}
               />
             </TabsContent>
 

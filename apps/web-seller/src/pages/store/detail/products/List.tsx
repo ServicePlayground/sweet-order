@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/apps/web-seller/common/components/selects/Select";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberInput";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { useProductList } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
@@ -32,8 +33,8 @@ export const StoreDetailProductListPage: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [salesStatus, setSalesStatus] = useState<EnableStatus | undefined>(undefined);
   const [visibilityStatus, setVisibilityStatus] = useState<EnableStatus | undefined>(undefined);
-  const [minPrice, setMinPrice] = useState<string>("");
-  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [productType, setProductType] = useState<ProductType | undefined>(undefined);
   const [productCategoryTypes, setProductCategoryTypes] = useState<ProductCategoryType[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -47,8 +48,8 @@ export const StoreDetailProductListPage: React.FC = () => {
     setSearch("");
     setSalesStatus(undefined);
     setVisibilityStatus(undefined);
-    setMinPrice("");
-    setMaxPrice("");
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
     setProductType(undefined);
     setProductCategoryTypes([]);
   }, []);
@@ -57,8 +58,8 @@ export const StoreDetailProductListPage: React.FC = () => {
     search.trim() !== "" ||
     salesStatus !== undefined ||
     visibilityStatus !== undefined ||
-    minPrice !== "" ||
-    maxPrice !== "" ||
+    minPrice !== undefined ||
+    maxPrice !== undefined ||
     productType !== undefined ||
     productCategoryTypes.length > 0;
 
@@ -76,8 +77,8 @@ export const StoreDetailProductListPage: React.FC = () => {
     search: debouncedSearch.trim() || undefined,
     salesStatus,
     visibilityStatus,
-    minPrice: debouncedMinPrice ? Number(debouncedMinPrice) : undefined,
-    maxPrice: debouncedMaxPrice ? Number(debouncedMaxPrice) : undefined,
+    minPrice: debouncedMinPrice,
+    maxPrice: debouncedMaxPrice,
     productType,
     productCategoryTypes: productCategoryTypes.length ? productCategoryTypes : undefined,
   });
@@ -206,22 +207,22 @@ export const StoreDetailProductListPage: React.FC = () => {
           {/* 최소 가격 */}
           <div className="space-y-2">
             <Label>최소 가격</Label>
-            <Input
-              type="number"
-              placeholder="최소 가격"
+            <NumberInput
               value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
+              onChange={setMinPrice}
+              placeholder="최소 가격"
+              min={0}
             />
           </div>
 
           {/* 최대 가격 */}
           <div className="space-y-2">
             <Label>최대 가격</Label>
-            <Input
-              type="number"
-              placeholder="최대 가격"
+            <NumberInput
               value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
+              onChange={setMaxPrice}
+              placeholder="최대 가격"
+              min={0}
             />
           </div>
         </div>
