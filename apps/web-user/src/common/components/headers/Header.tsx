@@ -1,13 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
-import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
-import {
-  navigateToLoginPage,
-  logoutFromWebView,
-} from "@/apps/web-user/common/utils/webview.bridge";
+import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { useHeaderStore } from "@/apps/web-user/common/store/header.store";
 
 interface HeaderProps {
   variant?: "main" | "product" | "minimal";
@@ -16,7 +14,7 @@ interface HeaderProps {
 export default function Header({ variant = "main" }: HeaderProps) {
   const router = useRouter();
   const { address } = useUserCurrentLocationStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isHomeSearchVisible } = useHeaderStore();
 
   // 장바구니 버튼 컴포넌트 (공통) - UI만 표시
   const CartButton = () => (
@@ -58,7 +56,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
       {/* 로고 */}
       <button type="button" className="flex items-center justify-center">
         <Icon name="location" width={20} height={20} className="text-primary" />
-        <span className="font-bold text-gray-900">
+        <span className="font-bold text-gray-900 ml-1">
           {address ?? "위치를 불러오는 중..."}
         </span>
         <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-180" />
@@ -66,24 +64,21 @@ export default function Header({ variant = "main" }: HeaderProps) {
 
       {/* 우측 메뉴 */}
       <div className="flex items-center gap-4">
-        {/* 로그인/로그아웃 버튼 (임시) */}
-        {!isAuthenticated ? (
-          <button
-            onClick={navigateToLoginPage}
-            className="px-3 py-1.5 text-xs font-semibold text-white bg-gray-900 border-none rounded-lg cursor-pointer"
-          >
-            로그인(임시 테스트)
-          </button>
-        ) : (
-          <button
-            onClick={logoutFromWebView}
-            className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 border-none rounded-lg cursor-pointer"
-          >
-            로그아웃(임시 테스트)
+        {/* QA 페이지 링크 */}
+        <Link
+          href={PATHS.QA}
+          className="px-3 py-1.5 text-xs font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 rounded-lg"
+        >
+          QA
+        </Link>
+        {/* 검색 아이콘 - 홈 검색바가 가려질 때만 표시 */}
+        {!isHomeSearchVisible && (
+          <button onClick={() => router.push(PATHS.SEARCH)} className="h-6 w-6 flex items-center justify-center">
+            <Icon name="search" width={24} height={24} />
           </button>
         )}
-        {/* 장바구니 아이콘 */}
-        <CartButton />
+        {/* 알람 아이콘 */}
+        <button className="h-6 w-6"><Icon name="alarm" width={24} height={24} /></button>
       </div>
     </header>
   );

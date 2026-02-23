@@ -20,6 +20,7 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
     if (pathname === "/search") return "minimal"; // 검색 페이지에서는 헤더 숨김
     if (pathname?.startsWith("/chat")) return "minimal"; // 채팅 페이지에서는 헤더 숨김
     if (pathname?.startsWith("/reservation")) return "minimal"; // 예약 관련 페이지에서는 헤더 숨김
+    if (pathname === "/qa") return "minimal"; // QA 페이지에서는 헤더 숨김
     if (pathname?.startsWith("/product/")) return "product";
     if (pathname?.startsWith("/store/")) return "product";
     return "main";

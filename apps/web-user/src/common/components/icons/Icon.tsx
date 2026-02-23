@@ -23,6 +23,10 @@ import Quantity from "./icons/quantity.svg";
 import Location from "./icons/location.svg";
 import Search from "./icons/search.svg";
 import Bullet from "./icons/bullet.svg";
+import Alarm from "./icons/alarm.svg";
+import Home from "./icons/home.svg";
+import Map from "./icons/map.svg";
+import Mypage from "./icons/mypage.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -55,6 +59,10 @@ export const iconTypes = {
   location: Location,
   search: Search,
   bullet: Bullet,
+  alarm: Alarm,
+  home: Home,
+  map: Map,
+  mypage: Mypage,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

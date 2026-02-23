@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import BannerSlider from "@/apps/web-user/common/components/sliders/BannerSlider";
 import CakeListSlider from "@/apps/web-user/common/components/sliders/CakeListSlider";
@@ -10,17 +10,17 @@ import { useProductList } from "@/apps/web-user/features/product/hooks/queries/u
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import Link from "next/link";
-import {
-  navigateToLoginPage,
-  logoutFromWebView,
-  requestLocationFromWebView,
-  toExternalAppSchemeUrl,
-} from "@/apps/web-user/common/utils/webview.bridge";
-import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
+import { requestLocationFromWebView } from "@/apps/web-user/common/utils/webview.bridge";
+import { useHeaderStore } from "@/apps/web-user/common/store/header.store";
+import { Icon } from "../common/components/icons";
 
 export default function Home() {
   const router = useRouter();
+  const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState("");
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const searchBarRef = useRef<HTMLDivElement>(null);
+  const { setIsHomeSearchVisible } = useHeaderStore();
 
   const { data: latestData, isLoading: isLatestLoading } = useProductList({
     sortBy: SortBy.LATEST,
@@ -32,6 +32,23 @@ export default function Home() {
     limit: 10,
   });
 
+  useEffect(() => {
+    const el = searchBarRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHomeSearchVisible(entry.isIntersecting),
+      { rootMargin: "-52px 0px 0px 0px", threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [setIsHomeSearchVisible]);
+
+  // 페이지 벗어날 때 초기화
+  useEffect(() => {
+    return () => setIsHomeSearchVisible(true);
+  }, [setIsHomeSearchVisible]);
+
   const handleSearch = (searchValue: string) => {
     if (searchValue.trim()) {
       router.push(`${PATHS.SEARCH}?q=${encodeURIComponent(searchValue.trim())}`);
@@ -41,23 +58,17 @@ export default function Home() {
   const latestProducts: Product[] = latestData?.pages?.[0]?.data?.slice(0, 10) || [];
   const popularProducts: Product[] = popularData?.pages?.[0]?.data?.slice(0, 10) || [];
 
-  const allProducts = [...latestProducts, ...popularProducts];
-  const uniqueStoreIds = [...new Set(allProducts.map((p) => p.storeId).filter(Boolean))];
-
   const handleProductClick = (productId: string) => {
     router.push(PATHS.PRODUCT.DETAIL(productId));
   };
 
   return (
-    <div className="w-full">
-
+    <div className="w-full pb-[110px]">
       {/* 배너 */}
       <BannerSlider />
-
-      {/* 카테고리 */}
       {/* 검색 바 */}
-      <div className="w-full relative -mt-[30px] pt-[20px] pb-[56px] px-[24px] z-10 rounded-4xl bg-white bg-[url('/images/contents/category_bg.png')] bg-bottom bg-no-repeat">
-        <div className="w-full mb-[20px]">
+      <div className="w-full relative -mt-[30px] pt-[20px] pb-[56px] px-[24px] z-10 rounded-t-4xl bg-white bg-[url('/images/contents/category_bg.png')] bg-top bg-no-repeat">
+        <div ref={searchBarRef} className="w-full mb-[20px]">
           <SearchBar
             placeholder="상품을 검색해보세요"
             initialValue={searchTerm}
@@ -65,6 +76,7 @@ export default function Home() {
             onChange={setSearchTerm}
           />
         </div>
+        {/* 카테고리 */}
         <CategoryList />
       </div>
 
@@ -83,140 +95,62 @@ export default function Home() {
         isLoading={isPopularLoading}
         onProductClick={handleProductClick}
       />
+      <ul className="fixed bottom-0 left-0 right-0 bg-white flex items-center h-[60px] border-t border-gray-100">
+        {[
+          { icon: "home", label: "홈", path: PATHS.HOME, ready: true },
+          { icon: "map", label: "지도", path: PATHS.MAP, ready: false },
+          { icon: "favorite", label: "저장", path: PATHS.SAVED, ready: false },
+          { icon: "mypage", label: "MY", path: PATHS.MYPAGE, ready: false },
+        ].map(({ icon, label, path, ready }) => {
+          const isActive = pathname === path;
+          return (
+            <li key={label} className="w-[25%]">
+              {ready ? (
+                <Link
+                  href={path}
+                  className={`flex flex-col items-center justify-center text-2xs font-bold ${isActive ? "text-primary" : "text-gray-400"}`}
+                >
+                  <Icon name={icon as any} width={24} height={24} />
+                  {label}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setShowComingSoon(true)}
+                  className="w-full flex flex-col items-center justify-center text-2xs font-bold text-gray-400"
+                >
+                  <Icon name={icon as any} width={24} height={24} />
+                  {label}
+                </button>
+              )}
+            </li>
+          );
+        })}
+      </ul>
 
-      {/* 스토어 목록 (QA용) */}
-      {uniqueStoreIds.length > 0 && (
-        <div className="mb-[60px]">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            스토어 목록 (QA용)
-          </h2>
-          <div className="flex flex-col gap-3">
-            {uniqueStoreIds.map((storeId) => (
-              <Link
-                key={storeId}
-                href={`/store/${storeId}`}
-                className="p-4 bg-gray-100 rounded-lg text-gray-900 no-underline text-sm font-medium"
-              >
-                🏪 스토어: {storeId}
-              </Link>
-            ))}
+      {/* 준비중 모달 */}
+      {showComingSoon && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
+          onClick={() => setShowComingSoon(false)}
+        >
+          <div
+            className="w-full bg-white rounded-t-3xl px-8 pt-8 pb-12 flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-gray-200 rounded-full mb-2" />
+            <span className="text-6xl">🚧</span>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-xl font-bold text-gray-900">준비중입니다</p>
+              <p className="text-sm text-gray-400 text-center">더 나은 서비스로 곧 찾아올게요!</p>
+            </div>
+            <button
+              onClick={() => setShowComingSoon(false)}
+              className="w-full mt-2 py-4 bg-primary text-white font-bold rounded-2xl"
+            >
+              확인
+            </button>
           </div>
         </div>
-      )}
-      {uniqueStoreIds.length > 0 && <StoreListSection storeIds={uniqueStoreIds} />}
-    </div>
-  );
-}
-
-// 스토어 목록 섹션 컴포넌트
-function StoreListSection({ storeIds }: { storeIds: string[] }) {
-  return (
-    <div style={{ marginBottom: "60px" }}>
-      <h2
-        style={{
-          fontSize: "24px",
-          fontWeight: 700,
-          color: "#111827",
-          marginBottom: "24px",
-        }}
-      >
-        스토어 목록 (QA용)
-      </h2>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-        }}
-      >
-        {storeIds.map((storeId) => (
-          <StoreItem key={storeId} storeId={storeId} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// 스토어 아이템 컴포넌트
-function StoreItem({ storeId }: { storeId: string }) {
-  const { data: store } = useStoreDetail(storeId);
-
-  const handleNaverClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (store) {
-      // 네이버지도 앱 딥링크 (설치되어 있으면 앱으로 바로 이동)
-      const appUrl = `nmap://map?lat=${store.latitude}&lng=${store.longitude}&zoom=15&appname=com.example.sweetorder`;
-      window.location.href = toExternalAppSchemeUrl(appUrl);
-    }
-  };
-
-  const handleKakaoClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (store) {
-      // 카카오맵 앱 딥링크 (설치되어 있으면 앱으로 바로 이동)
-      const appUrl = `kakaomap://look?p=${store.latitude},${store.longitude}`;
-      window.location.href = toExternalAppSchemeUrl(appUrl);
-    }
-  };
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-      }}
-    >
-      <Link
-        href={`/store/${storeId}`}
-        style={{
-          flex: 1,
-          padding: "16px",
-          backgroundColor: "#f3f4f6",
-          borderRadius: "8px",
-          color: "#111827",
-          textDecoration: "none",
-          fontSize: "14px",
-          fontWeight: 500,
-        }}
-      >
-        🏪 스토어: {storeId}
-      </Link>
-      {store && (
-        <>
-          <button
-            onClick={handleNaverClick}
-            style={{
-              padding: "12px 16px",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#ffffff",
-              backgroundColor: "#03C75A",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
-          >
-            네이버
-          </button>
-          <button
-            onClick={handleKakaoClick}
-            style={{
-              padding: "12px 16px",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#000000",
-              backgroundColor: "#FEE500",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-            }}
-          >
-            카카오
-          </button>
-        </>
       )}
     </div>
   );
