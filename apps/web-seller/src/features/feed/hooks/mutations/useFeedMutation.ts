@@ -4,9 +4,9 @@ import { feedApi } from "@/apps/web-seller/features/feed/apis/feed.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import {
-  ICreateFeedRequest,
-  IUpdateFeedRequest,
-} from "@/apps/web-seller/features/feed/types/feed.type";
+  CreateFeedRequestDto,
+  UpdateFeedRequestDto,
+} from "@/apps/web-seller/features/feed/types/feed.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { feedQueryKeys } from "@/apps/web-seller/features/feed/constants/feedQueryKeys.constant";
 
@@ -17,7 +17,7 @@ export function useCreateFeed() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ storeId, request }: { storeId: string; request: ICreateFeedRequest }) =>
+    mutationFn: ({ storeId, request }: { storeId: string; request: CreateFeedRequestDto }) =>
       feedApi.createFeed(storeId, request),
     onSuccess: (_response, variables) => {
       addAlert({
@@ -51,7 +51,7 @@ export function useUpdateFeed() {
     }: {
       storeId: string;
       feedId: string;
-      request: IUpdateFeedRequest;
+      request: UpdateFeedRequestDto;
     }) => feedApi.updateFeed(storeId, feedId, request),
     onSuccess: (_response, variables) => {
       addAlert({

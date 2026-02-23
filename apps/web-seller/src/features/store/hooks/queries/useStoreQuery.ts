@@ -4,22 +4,26 @@ import { storeApi } from "@/apps/web-seller/features/store/apis/store.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import {
-  IGetStoresRequest,
-  IGetStoresParams,
-  IStoreListResponse,
-} from "@/apps/web-seller/features/store/types/store.type";
+  GetSellerStoresRequestDto,
+  StoreListResponseDto,
+} from "@/apps/web-seller/features/store/types/store.dto";
+import type { GetSellerStoresQueryParams } from "@/apps/web-seller/features/store/types/store.ui";
 import { storeQueryKeys } from "../../constants/storeQueryKeys.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 
 // 스토어 목록 조회 쿼리 (무한 스크롤)
-export function useStoreList({ limit = 100, search, sortBy }: Partial<IGetStoresParams> = {}) {
+export function useStoreList({
+  limit = 100,
+  search,
+  sortBy,
+}: Partial<GetSellerStoresQueryParams> = {}) {
   const { addAlert } = useAlertStore();
   const { isAuthenticated } = useAuthStore();
 
-  const query = useInfiniteQuery<IStoreListResponse>({
+  const query = useInfiniteQuery<StoreListResponseDto>({
     queryKey: storeQueryKeys.list({ limit, search, sortBy }),
     queryFn: ({ pageParam = 1 }) => {
-      const params: IGetStoresRequest = {
+      const params: GetSellerStoresRequestDto = {
         page: pageParam as number,
         limit,
       };

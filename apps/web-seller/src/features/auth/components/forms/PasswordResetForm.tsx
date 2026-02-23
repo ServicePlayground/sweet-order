@@ -3,10 +3,10 @@ import { Input } from "@/apps/web-seller/common/components/inputs/Input";
 import { Button } from "@/apps/web-seller/common/components/buttons/Button";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
 import { isValidUserId, isValidPassword } from "@/apps/web-seller/common/utils/validator.util";
-import { ResetPasswordFormData } from "../../types/auth.type";
+import type { ResetPasswordForm } from "@/apps/web-seller/features/auth/types/auth.ui";
 
 interface PasswordResetFormProps {
-  onResetPassword: (data: Omit<ResetPasswordFormData, "phone">) => Promise<void>;
+  onResetPassword: (data: Omit<ResetPasswordForm, "phone">) => Promise<void>;
   isPending?: boolean;
 }
 

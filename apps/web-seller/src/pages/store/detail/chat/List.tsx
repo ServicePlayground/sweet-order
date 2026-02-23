@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useChatRoomsByStore } from "@/apps/web-seller/features/chat/hooks/queries/useChatQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { ChatRoomList } from "@/apps/web-seller/features/chat/components/ChatRoomList";
-import { ChatRoomForSeller } from "@/apps/web-seller/features/chat/types/chat.type";
+import type { ChatRoomForSellerResponseDto } from "@/apps/web-seller/features/chat/types/chat.dto";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 
 export const StoreDetailChatListPage: React.FC = () => {
@@ -30,7 +30,7 @@ export const StoreDetailChatListPage: React.FC = () => {
   });
 
   // 채팅방 목록 평탄화 및 중복 제거
-  const chatRooms = flattenAndDeduplicateInfiniteData<ChatRoomForSeller>(data);
+  const chatRooms = flattenAndDeduplicateInfiniteData<ChatRoomForSellerResponseDto>(data);
 
   return (
     <div className="space-y-6">

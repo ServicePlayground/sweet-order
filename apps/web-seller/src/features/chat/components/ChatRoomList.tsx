@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ChatRoomForSeller } from "@/apps/web-seller/features/chat/types/chat.type";
+import type { ChatRoomForSellerResponseDto } from "@/apps/web-seller/features/chat/types/chat.dto";
 import { formatRelativeTime } from "@/apps/web-seller/common/utils/date.util";
 import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
 
 interface ChatRoomListProps {
-  chatRooms: ChatRoomForSeller[];
+  chatRooms: ChatRoomForSellerResponseDto[];
   storeId: string;
 }
 

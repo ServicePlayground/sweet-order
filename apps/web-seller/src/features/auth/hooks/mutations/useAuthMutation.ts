@@ -6,7 +6,7 @@ import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
-import { PhoneVerificationPurpose } from "@/apps/web-seller/features/auth/types/auth.type";
+import type { PhoneVerificationPurpose } from "@/apps/web-seller/features/auth/types/auth.dto";
 
 // 로그인 뮤테이션
 export function useLogin() {

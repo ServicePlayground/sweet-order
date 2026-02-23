@@ -1,5 +1,5 @@
 import React from "react";
-import { ProductCategoryType } from "@/apps/web-seller/features/product/types/product.type";
+import { ProductCategoryType } from "@/apps/web-seller/features/product/types/product.dto";
 import { PRODUCT_CATEGORY_GROUPS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 

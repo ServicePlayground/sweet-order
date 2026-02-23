@@ -1,39 +1,43 @@
 import {
-  LoginFormData,
-  RegisterFormData,
-  PhoneVerificationData,
-  GoogleRegisterFormData,
-  FindAccountFormData,
-  ResetPasswordFormData,
+  LoginRequestDto,
+  RegisterRequestDto,
+  VerifyPhoneCodeRequestDto,
+  GoogleRegisterRequestDto,
+  FindAccountResponseDto,
+  ResetPasswordRequestDto,
   PhoneVerificationPurpose,
-  TokenResponse,
-  MeResponse,
-} from "@/apps/web-seller/features/auth/types/auth.type";
+  GoogleLoginRequestDto,
+  TokenResponseDto,
+  MeResponseDto,
+} from "@/apps/web-seller/features/auth/types/auth.dto";
 import { userClient } from "@/apps/web-seller/common/config/axios.config";
-import { AvailableResponse, MessageResponse } from "@/apps/web-seller/common/types/api.type";
+import type {
+  AvailableResponseDto,
+  MessageResponseDto,
+} from "@/apps/web-seller/common/types/api.dto";
 
 // 인증 관련 API 함수들
 export const authApi = {
   // 로그인
-  login: async (credentials: LoginFormData): Promise<TokenResponse> => {
+  login: async (credentials: LoginRequestDto): Promise<TokenResponseDto> => {
     const response = await userClient.post("/auth/login", credentials);
     return response.data.data;
   },
 
   // 회원가입
-  register: async (credentials: RegisterFormData): Promise<TokenResponse> => {
+  register: async (credentials: RegisterRequestDto): Promise<TokenResponseDto> => {
     const response = await userClient.post("/auth/register", credentials);
     return response.data.data;
   },
 
   // 현재 사용자 정보 조회 (새로고침 시 사용)
-  me: async (): Promise<MeResponse> => {
+  me: async (): Promise<MeResponseDto> => {
     const response = await userClient.get("/auth/me");
     return response.data.data;
   },
 
   // ID 중복 검사
-  checkUserIdDuplicate: async (userId: string): Promise<AvailableResponse> => {
+  checkUserIdDuplicate: async (userId: string): Promise<AvailableResponseDto> => {
     const response = await userClient.get("/auth/check-user-id", {
       params: { userId },
     });
@@ -44,31 +48,32 @@ export const authApi = {
   sendPhoneVerification: async (
     phone: string,
     purpose: PhoneVerificationPurpose,
-  ): Promise<MessageResponse> => {
+  ): Promise<MessageResponseDto> => {
     const response = await userClient.post("/auth/send-verification-code", { phone, purpose });
     return response.data.data;
   },
 
   // 휴대폰 인증번호 검증
-  verifyPhoneCode: async (data: PhoneVerificationData): Promise<MessageResponse> => {
+  verifyPhoneCode: async (data: VerifyPhoneCodeRequestDto): Promise<MessageResponseDto> => {
     const response = await userClient.post("/auth/verify-phone-code", data);
     return response.data.data;
   },
 
   // 구글 로그인
-  googleLogin: async (code: string): Promise<TokenResponse> => {
-    const response = await userClient.post("/auth/google/login", { code });
+  googleLogin: async (code: string): Promise<TokenResponseDto> => {
+    const requestDto: GoogleLoginRequestDto = { code };
+    const response = await userClient.post("/auth/google/login", requestDto);
     return response.data.data;
   },
 
   // 구글 회원가입
-  googleRegister: async (data: GoogleRegisterFormData): Promise<TokenResponse> => {
+  googleRegister: async (data: GoogleRegisterRequestDto): Promise<TokenResponseDto> => {
     const response = await userClient.post("/auth/google/register", data);
     return response.data.data;
   },
 
   // 계정 찾기
-  findAccount: async (phone: string): Promise<FindAccountFormData> => {
+  findAccount: async (phone: string): Promise<FindAccountResponseDto> => {
     const response = await userClient.get("/auth/find-account", {
       params: { phone },
     });
@@ -76,7 +81,7 @@ export const authApi = {
   },
 
   // 비밀번호 재설정
-  resetPassword: async (data: ResetPasswordFormData): Promise<MessageResponse> => {
+  resetPassword: async (data: ResetPasswordRequestDto): Promise<MessageResponseDto> => {
     const response = await userClient.post("/auth/change-password", data);
     return response.data.data;
   },

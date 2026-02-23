@@ -1,9 +1,6 @@
 import React from "react";
-import {
-  IProductForm,
-  EnableStatus,
-  OptionRequired,
-} from "@/apps/web-seller/features/product/types/product.type";
+import { EnableStatus, OptionRequired } from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import {
   OPTION_REQUIRED_OPTIONS,
   ENABLE_DISABLE_OPTIONS,
@@ -14,8 +11,8 @@ import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export interface ProductCreationLetteringPolicySectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
   onLetteringVisibleChange: (value: EnableStatus) => void;
   onLetteringRequiredChange: (value: OptionRequired) => void;
   onLetteringMaxLengthChange: (value: number) => void;

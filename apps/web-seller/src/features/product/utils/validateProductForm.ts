@@ -1,9 +1,9 @@
-import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 
 export const validateProductForm = (
-  form: IProductForm,
-): Partial<Record<keyof IProductForm, string>> => {
-  const newErrors: Partial<Record<keyof IProductForm, string>> = {};
+  form: ProductForm,
+): Partial<Record<keyof ProductForm, string>> => {
+  const newErrors: Partial<Record<keyof ProductForm, string>> = {};
 
   // 기본 정보 검증 - 대표 이미지 (images 배열의 첫 번째 요소) 필수
   if (!form.images || form.images.length === 0 || !form.images[0]?.trim()) {

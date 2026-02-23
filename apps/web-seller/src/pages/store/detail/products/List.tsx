@@ -16,11 +16,11 @@ import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScr
 import { ProductList } from "@/apps/web-seller/features/product/components/list/ProductList";
 import {
   SortBy,
-  IProductItem,
+  ProductResponseDto,
   EnableStatus,
   ProductType,
   ProductCategoryType,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
 import { PRODUCT_CATEGORY_GROUPS } from "@/apps/web-seller/features/product/constants/product.constant";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
@@ -92,7 +92,7 @@ export const StoreDetailProductListPage: React.FC = () => {
   });
 
   // 상품 목록 평탄화 및 중복 제거
-  const products = flattenAndDeduplicateInfiniteData<IProductItem>(data);
+  const products = flattenAndDeduplicateInfiniteData<ProductResponseDto>(data);
   // 전체 개수는 첫 번째 페이지의 meta에서 가져옴 (무한 스크롤)
   const totalItems = data?.pages?.[0]?.meta?.totalItems || products.length || 0;
 
@@ -207,23 +207,13 @@ export const StoreDetailProductListPage: React.FC = () => {
           {/* 최소 가격 */}
           <div className="space-y-2">
             <Label>최소 가격</Label>
-            <NumberInput
-              value={minPrice}
-              onChange={setMinPrice}
-              placeholder="최소 가격"
-              min={0}
-            />
+            <NumberInput value={minPrice} onChange={setMinPrice} placeholder="최소 가격" min={0} />
           </div>
 
           {/* 최대 가격 */}
           <div className="space-y-2">
             <Label>최대 가격</Label>
-            <NumberInput
-              value={maxPrice}
-              onChange={setMaxPrice}
-              placeholder="최대 가격"
-              min={0}
-            />
+            <NumberInput value={maxPrice} onChange={setMaxPrice} placeholder="최대 가격" min={0} />
           </div>
         </div>
 

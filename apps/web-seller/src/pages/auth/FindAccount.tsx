@@ -4,14 +4,12 @@ import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useFindAccount } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import FindAccountResultForm from "@/apps/web-seller/features/auth/components/forms/FindAccountResultForm";
-import {
-  FindAccountFormData,
-  PHONE_VERIFICATION_PURPOSE,
-} from "@/apps/web-seller/features/auth/types/auth.type";
+import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.dto";
+import type { FindAccountForm } from "@/apps/web-seller/features/auth/types/auth.ui";
 
 export function FindAccountPage() {
   const findAccountMutation = useFindAccount();
-  const [accountInfo, setAccountInfo] = useState<FindAccountFormData | null>(null);
+  const [accountInfo, setAccountInfo] = useState<FindAccountForm | null>(null);
   const [currentStep, setCurrentStep] = useState<"phoneVerification" | "result">(
     "phoneVerification",
   );

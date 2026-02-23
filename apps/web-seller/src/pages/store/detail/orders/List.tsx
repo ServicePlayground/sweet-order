@@ -16,7 +16,7 @@ import {
   OrderSortBy,
   OrderStatus,
   OrderType,
-} from "@/apps/web-seller/features/order/types/order.type";
+} from "@/apps/web-seller/features/order/types/order.dto";
 import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
 
 const DEBOUNCE_DELAY_MS = 300;
@@ -151,9 +151,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
             <Label>픽업 예정/지난 예약</Label>
             <Select
               value={type ?? "ALL"}
-              onValueChange={(value) =>
-                setType(value === "ALL" ? undefined : (value as OrderType))
-              }
+              onValueChange={(value) => setType(value === "ALL" ? undefined : (value as OrderType))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="선택" />

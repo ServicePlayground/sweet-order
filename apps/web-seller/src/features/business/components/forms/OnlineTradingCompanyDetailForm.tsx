@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { IOnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/types/business.type";
+import type { OnlineTradingCompanyDetailFormValues } from "@/apps/web-seller/features/business/types/business.ui";
 import { validatePermissionManagementNumber } from "@/apps/web-seller/features/business/utils/validator.util";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 interface Props {
-  onSubmit: (data: IOnlineTradingCompanyDetailForm) => void;
+  onSubmit: (data: OnlineTradingCompanyDetailFormValues) => void;
   onPrevious?: () => void;
-  initialValue?: IOnlineTradingCompanyDetailForm;
-  onChange?: (data: IOnlineTradingCompanyDetailForm) => void;
+  initialValue?: OnlineTradingCompanyDetailFormValues;
+  onChange?: (data: OnlineTradingCompanyDetailFormValues) => void;
 }
 
-export const defaultForm: IOnlineTradingCompanyDetailForm = {
+export const defaultForm: OnlineTradingCompanyDetailFormValues = {
   prmmiMnno: "", // 인허가관리번호
 };
 
@@ -22,9 +22,11 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
   initialValue,
   onChange,
 }) => {
-  const [form, setForm] = useState<IOnlineTradingCompanyDetailForm>(initialValue || defaultForm);
+  const [form, setForm] = useState<OnlineTradingCompanyDetailFormValues>(
+    initialValue || defaultForm,
+  );
   const [errors, setErrors] = useState<
-    Partial<Record<keyof IOnlineTradingCompanyDetailForm, string>>
+    Partial<Record<keyof OnlineTradingCompanyDetailFormValues, string>>
   >({});
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
   }, [initialValue]);
 
   const validate = () => {
-    const newErrors: Partial<Record<keyof IOnlineTradingCompanyDetailForm, string>> = {};
+    const newErrors: Partial<Record<keyof OnlineTradingCompanyDetailFormValues, string>> = {};
 
     const permissionManagementNumberError = validatePermissionManagementNumber(form.prmmiMnno);
     if (permissionManagementNumberError) {
@@ -47,7 +49,8 @@ export const OnlineTradingCompanyDetailForm: React.FC<Props> = ({
   };
 
   const handleChange =
-    (key: keyof IOnlineTradingCompanyDetailForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (key: keyof OnlineTradingCompanyDetailFormValues) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const next = { ...form, [key]: e.target.value };
       setForm(next);
       onChange?.(next);

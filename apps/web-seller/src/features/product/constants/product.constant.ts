@@ -3,7 +3,7 @@ import {
   OptionRequired,
   CakeSizeDisplayName,
   ProductCategoryType,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
 
 export const SALES_STATUS_OPTIONS = [
   { value: EnableStatus.ENABLE, label: "판매중" },

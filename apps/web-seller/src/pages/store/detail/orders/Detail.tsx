@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useOrderDetail } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
 import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
-import { OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
+import { OrderStatus } from "@/apps/web-seller/features/order/types/order.dto";
 import {
   Card,
   CardContent,

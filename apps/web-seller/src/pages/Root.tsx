@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
-import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
+import type { StoreResponseDto } from "@/apps/web-seller/features/store/types/store.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 
@@ -11,7 +11,7 @@ export const RootPage: React.FC = () => {
   const { data: storeListData } = useStoreList();
   const stores = useMemo(() => {
     if (!storeListData) return [];
-    return flattenAndDeduplicateInfiniteData<IStoreListItem>(storeListData);
+    return flattenAndDeduplicateInfiniteData<StoreResponseDto>(storeListData);
   }, [storeListData]);
 
   useEffect(() => {

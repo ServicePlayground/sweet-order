@@ -4,9 +4,9 @@ import { productApi } from "@/apps/web-seller/features/product/apis/product.api"
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import {
-  ICreateProductRequest,
-  IUpdateProductRequest,
-} from "@/apps/web-seller/features/product/types/product.type";
+  CreateProductRequestDto,
+  UpdateProductRequestDto,
+} from "@/apps/web-seller/features/product/types/product.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { productQueryKeys } from "../../constants/productQueryKeys.constant";
 
@@ -17,7 +17,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: ICreateProductRequest) => productApi.createProduct(request),
+    mutationFn: (request: CreateProductRequestDto) => productApi.createProduct(request),
     onSuccess: (_response, variables) => {
       addAlert({
         severity: "success",
@@ -48,7 +48,7 @@ export function useUpdateProduct() {
       request,
     }: {
       productId: string;
-      request: IUpdateProductRequest;
+      request: UpdateProductRequestDto;
       storeId: string;
     }) => productApi.updateProduct(productId, request),
     onSuccess: (_response, variables) => {

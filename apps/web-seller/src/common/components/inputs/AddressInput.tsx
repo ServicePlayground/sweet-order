@@ -3,12 +3,12 @@ import { BaseButton as Button } from "@/apps/web-seller/common/components/button
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { openAddressSearch } from "@/apps/web-seller/common/utils/kakao-address.util";
-import { IStoreAddress } from "@/apps/web-seller/features/store/types/store.type";
+import type { StoreAddressDto } from "@/apps/web-seller/features/store/types/store.dto";
 
 interface AddressInputProps {
   required?: boolean;
-  value: Omit<IStoreAddress, "detailAddress">;
-  onChange: (data: Omit<IStoreAddress, "detailAddress">) => void;
+  value: Omit<StoreAddressDto, "detailAddress">;
+  onChange: (data: Omit<StoreAddressDto, "detailAddress">) => void;
   error?: string;
 }
 
@@ -30,7 +30,7 @@ export const AddressInput: React.FC<AddressInputProps> = ({
   }, [value]);
 
   const handleAddressSearch = async () => {
-    await openAddressSearch((data: IStoreAddress) => {
+    await openAddressSearch((data: Omit<StoreAddressDto, "detailAddress">) => {
       onChange({
         address: data.address,
         roadAddress: data.roadAddress,

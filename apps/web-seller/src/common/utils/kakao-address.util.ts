@@ -1,4 +1,4 @@
-import { IStoreAddress } from "@/apps/web-seller/features/store/types/store.type";
+import type { StoreAddressDto } from "@/apps/web-seller/features/store/types/store.dto";
 
 // 카카오 키
 const KAKAO_RESTAPI_KEY = import.meta.env.VITE_PUBLIC_KAKAO_RESTAPI_KEY || "";
@@ -75,7 +75,7 @@ export const convertAddressToCoordinates = async (
  * 카카오 "주소로 좌표 변환" API 사용하여 가져온 주소를 통해 좌표를 가져옴
  */
 export const openAddressSearch = async (
-  onComplete: (data: IStoreAddress) => void,
+  onComplete: (data: Omit<StoreAddressDto, "detailAddress">) => void,
 ): Promise<void> => {
   try {
     await loadKakaoAddressScript();
@@ -86,7 +86,7 @@ export const openAddressSearch = async (
 
     new window.daum.Postcode({
       oncomplete: async (data: any) => {
-        const addressData: IStoreAddress = {
+        const addressData: Omit<StoreAddressDto, "detailAddress"> = {
           address: data.jibunAddress || data.address || "", // 지번 주소
           roadAddress: data.roadAddress || "", // 도로명 주소
           zonecode: data.zonecode || "", // 우편번호

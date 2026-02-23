@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMessages } from "@/apps/web-seller/features/chat/hooks/queries/useChatQuery";
 import { useMarkChatRoomAsRead } from "@/apps/web-seller/features/chat/hooks/mutations/useChatMutation";
 import { chatSocketService } from "@/apps/web-seller/features/chat/services/chat-socket.service";
-import { Message } from "@/apps/web-seller/features/chat/types/chat.type";
+import type { ChatMessageResponseDto } from "@/apps/web-seller/features/chat/types/chat.dto";
 import { Send } from "lucide-react";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { Textarea } from "@/apps/web-seller/common/components/textareas/Textarea";
@@ -21,13 +21,17 @@ export const ChatRoom: React.FC = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useMessages(roomId, 50);
-  const [initialAllMessages, setInitialAllMessages] = useState<Message[]>([]); // API를 통해 조회된 메시지 목록
-  const [newAllMessages, setNewAllMessages] = useState<Message[]>([]); // websocket을 통해 수신된 새로운 메시지 목록
-  const allMessages = useMemo(
-    () => [...initialAllMessages, ...newAllMessages],
-    [initialAllMessages, newAllMessages],
+  const [initialAllChatMessageResponseDtos, setInitialAllChatMessageResponseDtos] = useState<
+    ChatMessageResponseDto[]
+  >([]); // API를 통해 조회된 메시지 목록
+  const [newAllChatMessageResponseDtos, setNewAllChatMessageResponseDtos] = useState<
+    ChatMessageResponseDto[]
+  >([]); // websocket을 통해 수신된 새로운 메시지 목록
+  const allChatMessageResponseDtos = useMemo(
+    () => [...initialAllChatMessageResponseDtos, ...newAllChatMessageResponseDtos],
+    [initialAllChatMessageResponseDtos, newAllChatMessageResponseDtos],
   );
-  const [newMessage, setNewMessage] = useState(""); // 새로운 메시지 입력
+  const [newChatMessageResponseDto, setNewChatMessageResponseDto] = useState(""); // 새로운 메시지 입력
   const markAsReadMutation = useMarkChatRoomAsRead();
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -45,16 +49,17 @@ export const ChatRoom: React.FC = () => {
     // 읽음 처리
     markAsReadMutation.mutate(roomId);
 
-    const allMessages = flattenAndDeduplicateInfiniteData<Message>(messagesData);
+    const allChatMessageResponseDtos =
+      flattenAndDeduplicateInfiniteData<ChatMessageResponseDto>(messagesData);
 
     // REST API로 받은 메시지도 필수 필드 검증 및 정규화
-    const validatedMessages = allMessages.map((msg) => ({
+    const validatedChatMessageResponseDtos = allChatMessageResponseDtos.map((msg) => ({
       ...msg,
       createdAt: msg.createdAt instanceof Date ? msg.createdAt : new Date(msg.createdAt),
     }));
 
-    setInitialAllMessages(validatedMessages);
-    setNewAllMessages([]);
+    setInitialAllChatMessageResponseDtos(validatedChatMessageResponseDtos);
+    setNewAllChatMessageResponseDtos([]);
 
     return () => {
       // 채팅방 나갈 때 읽음 처리
@@ -73,21 +78,21 @@ export const ChatRoom: React.FC = () => {
         await chatSocketService.connect();
         await chatSocketService.joinRoom(roomId);
         // 새 메시지 수신 리스너 (상대방이 WebSocket으로 메시지 전송 후 서버에서 자동으로 WebSocket 브로드캐스트하여 여기로 전달됨.)
-        unsubscribe = await chatSocketService.onNewMessage((message: Message) => {
+        unsubscribe = await chatSocketService.onNewMessage((message: ChatMessageResponseDto) => {
           // createdAt이 문자열인 경우 Date 객체로 변환
-          const normalizedMessage: Message = {
+          const normalizedChatMessageResponseDto: ChatMessageResponseDto = {
             ...message,
             createdAt:
               message.createdAt instanceof Date ? message.createdAt : new Date(message.createdAt),
           };
 
           // 중복 메시지 제거: 같은 id를 가진 메시지가 이미 있으면 추가하지 않음
-          setNewAllMessages((prev) => {
-            const isDuplicate = prev.some((msg) => msg.id === normalizedMessage.id);
+          setNewAllChatMessageResponseDtos((prev) => {
+            const isDuplicate = prev.some((msg) => msg.id === normalizedChatMessageResponseDto.id);
             if (isDuplicate) {
               return prev;
             }
-            return [...prev, normalizedMessage];
+            return [...prev, normalizedChatMessageResponseDto];
           });
         });
       } catch (error) {
@@ -105,13 +110,13 @@ export const ChatRoom: React.FC = () => {
     };
   }, [roomId]);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !roomId) return;
+  const handleSendChatMessageResponseDto = async () => {
+    if (!newChatMessageResponseDto.trim() || !roomId) return;
 
     try {
       // WebSocket으로 메시지 전송
-      await chatSocketService.sendMessage(roomId, newMessage);
-      setNewMessage("");
+      await chatSocketService.sendMessage(roomId, newChatMessageResponseDto);
+      setNewChatMessageResponseDto("");
       // 서버에서 메시지를 저장하고 WebSocket으로 브로드캐스트하므로 onNewMessage 리스너를 통해 자동으로 수신됨
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -131,7 +136,7 @@ export const ChatRoom: React.FC = () => {
           <div className="flex items-center justify-center py-12">
             <div className="text-muted-foreground">메시지를 불러오는 중...</div>
           </div>
-        ) : allMessages.length === 0 ? (
+        ) : allChatMessageResponseDtos.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-muted-foreground">메시지가 없습니다.</div>
           </div>
@@ -151,7 +156,7 @@ export const ChatRoom: React.FC = () => {
                 )}
               </div>
             )}
-            {allMessages.map((message) => {
+            {allChatMessageResponseDtos.map((message) => {
               const isStore = message.senderType === "store";
               return (
                 <div
@@ -183,17 +188,23 @@ export const ChatRoom: React.FC = () => {
       <div className="border-t bg-card p-4">
         <div className="flex gap-2">
           <Textarea
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            value={newChatMessageResponseDto}
+            onChange={(e) => setNewChatMessageResponseDto(e.target.value)}
             placeholder="메시지를 입력하세요..."
             className="min-h-[60px] resize-none"
             maxLength={1000}
           />
-          <Button onClick={handleSendMessage} disabled={!newMessage.trim()} className="shrink-0">
+          <Button
+            onClick={handleSendChatMessageResponseDto}
+            disabled={!newChatMessageResponseDto.trim()}
+            className="shrink-0"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">{newMessage.length}/1000</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {newChatMessageResponseDto.length}/1000
+        </p>
       </div>
     </div>
   );

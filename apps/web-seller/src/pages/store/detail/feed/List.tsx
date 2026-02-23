@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useFeedList } from "@/apps/web-seller/features/feed/hooks/queries/useFeedQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
-import { IFeed } from "@/apps/web-seller/features/feed/types/feed.type";
+import type { FeedResponseDto } from "@/apps/web-seller/features/feed/types/feed.dto";
 import { FeedList } from "@/apps/web-seller/features/feed/components/list/FeedList";
 
 export const StoreDetailFeedListPage: React.FC = () => {
@@ -29,7 +29,7 @@ export const StoreDetailFeedListPage: React.FC = () => {
   });
 
   // 피드 목록 평탄화 및 중복 제거
-  const feeds = flattenAndDeduplicateInfiniteData<IFeed>(data);
+  const feeds = flattenAndDeduplicateInfiniteData<FeedResponseDto>(data);
   const totalItems = data?.pages?.[0]?.meta?.totalItems ?? feeds.length ?? 0;
 
   return (

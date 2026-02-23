@@ -3,7 +3,10 @@ import { IsOptional, IsString, IsEnum } from "class-validator";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { StoreResponseDto } from "./store-detail.dto";
-import { StoreSortBy, SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
+import {
+  StoreSortBy,
+  SWAGGER_EXAMPLES,
+} from "@apps/backend/modules/store/constants/store.constants";
 
 /**
  * 스토어 목록 조회 요청 DTO (사용자용)

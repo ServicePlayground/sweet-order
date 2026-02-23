@@ -1,11 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { IProductItem } from "@/apps/web-seller/features/product/types/product.type";
+import type { ProductResponseDto } from "@/apps/web-seller/features/product/types/product.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
 import { StatusBadge } from "@/apps/web-seller/common/components/badges/StatusBadge";
 
 interface ProductListProps {
-  products: IProductItem[];
+  products: ProductResponseDto[];
 }
 
 export function ProductList({ products }: ProductListProps) {

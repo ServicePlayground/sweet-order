@@ -1,9 +1,9 @@
 import React from "react";
 import {
-  IProductForm,
   EnableStatus,
   ProductCategoryType,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import {
   SALES_STATUS_OPTIONS,
   VISIBILITY_STATUS_OPTIONS,
@@ -18,8 +18,8 @@ import { ProductCreationCategorySection } from "@/apps/web-seller/features/produ
 import { ProductCreationSearchTagSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationSearchTagSection";
 
 export interface ProductCreationBasicInfoSectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
   onSalesStatusChange: (value: EnableStatus) => void;
   onVisibilityStatusChange: (value: EnableStatus) => void;
   onProductCategoryTypesChange: (value: ProductCategoryType[]) => void;
@@ -27,7 +27,7 @@ export interface ProductCreationBasicInfoSectionProps {
   onMainImageChange: (url: string) => void;
   onAdditionalImagesChange: (urls: string[]) => void;
   onChange: (
-    key: keyof IProductForm,
+    key: keyof ProductForm,
   ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSalePriceChange: (value: number) => void;
   disabled?: boolean;

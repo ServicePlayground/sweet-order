@@ -1,10 +1,10 @@
 import React from "react";
 import { RichTextEditor } from "@/apps/web-seller/common/components/editors/RichTextEditor";
-import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 
 export interface ProductCreationDetailDescriptionSectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
   onChange: (value: string) => void;
 }
 

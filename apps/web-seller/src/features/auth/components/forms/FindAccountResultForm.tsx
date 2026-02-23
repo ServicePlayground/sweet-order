@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { FindAccountFormData } from "@/apps/web-seller/features/auth/types/auth.type";
+import type { FindAccountForm } from "@/apps/web-seller/features/auth/types/auth.ui";
 
 interface FindAccountResultFormProps {
-  accountInfo: FindAccountFormData;
+  accountInfo: FindAccountForm;
 }
 
 export default function FindAccountResultForm({ accountInfo }: FindAccountResultFormProps) {

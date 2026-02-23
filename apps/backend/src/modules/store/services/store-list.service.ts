@@ -53,7 +53,10 @@ export class StoreListService {
     )) as StoreResponseDto[];
 
     if (user?.sub) {
-      const likedStoreIds = await this.getLikedStoreIds(user.sub, stores.map((s) => s.id));
+      const likedStoreIds = await this.getLikedStoreIds(
+        user.sub,
+        stores.map((s) => s.id),
+      );
       for (const res of storeResponses) {
         res.isLiked = likedStoreIds.has(res.id);
       }
@@ -124,7 +127,10 @@ export class StoreListService {
       this.prisma,
     )) as StoreResponseDto[];
 
-    const likedStoreIds = await this.getLikedStoreIds(userId, stores.map((s) => s.id));
+    const likedStoreIds = await this.getLikedStoreIds(
+      userId,
+      stores.map((s) => s.id),
+    );
     for (const res of storeResponses) {
       res.isLiked = likedStoreIds.has(res.id);
     }

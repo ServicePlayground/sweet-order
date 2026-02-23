@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { IBusinessRegistrationForm } from "@/apps/web-seller/features/business/types/business.type";
+import type { BusinessRegistrationFormValues } from "@/apps/web-seller/features/business/types/business.ui";
 import {
   validateBusinessNo,
   validateRepresentativeName,
@@ -14,12 +14,12 @@ import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberIn
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 interface Props {
-  onSubmit: (data: IBusinessRegistrationForm) => void;
-  initialValue?: IBusinessRegistrationForm;
-  onChange?: (data: IBusinessRegistrationForm) => void;
+  onSubmit: (data: BusinessRegistrationFormValues) => void;
+  initialValue?: BusinessRegistrationFormValues;
+  onChange?: (data: BusinessRegistrationFormValues) => void;
 }
 
-export const defaultForm: IBusinessRegistrationForm = {
+export const defaultForm: BusinessRegistrationFormValues = {
   b_no: "", // 사업자등록번호
   p_nm: "", // 대표자명
   start_dt: "", // 개업일
@@ -35,10 +35,10 @@ const numericStringToValue = (s: string): number | undefined => {
 };
 
 export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
-  const [form, setForm] = useState<IBusinessRegistrationForm>(initialValue || defaultForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof IBusinessRegistrationForm, string>>>(
-    {},
-  );
+  const [form, setForm] = useState<BusinessRegistrationFormValues>(initialValue || defaultForm);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof BusinessRegistrationFormValues, string>>
+  >({});
 
   useEffect(() => {
     if (initialValue) {
@@ -48,7 +48,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
   }, [initialValue]);
 
   const validate = () => {
-    const newErrors: Partial<Record<keyof IBusinessRegistrationForm, string>> = {};
+    const newErrors: Partial<Record<keyof BusinessRegistrationFormValues, string>> = {};
 
     const businessNoError = validateBusinessNo(form.b_no);
     if (businessNoError) {
@@ -80,7 +80,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
   };
 
   const handleChange =
-    (key: keyof IBusinessRegistrationForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (key: keyof BusinessRegistrationFormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       const next = { ...form, [key]: value };
       setForm(next);

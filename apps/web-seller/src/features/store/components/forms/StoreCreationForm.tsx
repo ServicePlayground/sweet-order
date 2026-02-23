@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
+import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui";
 import {
   validateStoreName,
   validateStoreDescription,
@@ -12,14 +12,14 @@ import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { AddressInput } from "@/apps/web-seller/common/components/inputs/AddressInput";
 
 interface Props {
-  onSubmit: (data: IStoreForm) => void;
+  onSubmit: (data: StoreForm) => void;
   onPrevious?: () => void;
-  initialValue?: IStoreForm;
-  onChange?: (data: IStoreForm) => void;
+  initialValue?: StoreForm;
+  onChange?: (data: StoreForm) => void;
   submitButtonText?: string;
 }
 
-export const defaultForm: IStoreForm = {
+export const defaultForm: StoreForm = {
   name: "",
   description: "",
   logoImageUrl: "",
@@ -38,8 +38,8 @@ export const StoreCreationForm: React.FC<Props> = ({
   onChange,
   submitButtonText,
 }) => {
-  const [form, setForm] = useState<IStoreForm>(initialValue || defaultForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof IStoreForm, string>>>({});
+  const [form, setForm] = useState<StoreForm>(initialValue || defaultForm);
+  const [errors, setErrors] = useState<Partial<Record<keyof StoreForm, string>>>({});
 
   useEffect(() => {
     if (initialValue) {
@@ -49,7 +49,7 @@ export const StoreCreationForm: React.FC<Props> = ({
   }, [initialValue]);
 
   const validate = () => {
-    const newErrors: Partial<Record<keyof IStoreForm, string>> = {};
+    const newErrors: Partial<Record<keyof StoreForm, string>> = {};
 
     // 스토어 이름 검증
     const nameError = validateStoreName(form.name);
@@ -72,7 +72,7 @@ export const StoreCreationForm: React.FC<Props> = ({
   };
 
   const handleChange =
-    (key: keyof IStoreForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (key: keyof StoreForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const next = { ...form, [key]: e.target.value };
       setForm(next);
       onChange?.(next);
