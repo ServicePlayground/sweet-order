@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/apps/web-seller/common/components/selects/Select";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import { Trash2, Plus } from "lucide-react";
@@ -194,34 +195,26 @@ export const ProductCreationCakeOptionsSection: React.FC<
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
+                            <NumberInput
+                              value={option.lengthCm}
+                              onChange={(v) =>
+                                handleSizeOptionChange(index, "lengthCm", v ?? 0)
+                              }
                               placeholder="예: 10"
-                              value={option.lengthCm === 0 ? "" : option.lengthCm}
-                              onChange={(e) => {
-                                const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
-                                const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-                                handleSizeOptionChange(index, "lengthCm", num);
-                              }}
+                              min={0}
                               className="w-full"
                             />
                             <span className="text-sm text-muted-foreground">cm</span>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                          <NumberInput
+                            value={option.price}
+                            onChange={(v) =>
+                              handleSizeOptionChange(index, "price", v ?? 0)
+                            }
                             placeholder="예: 30000"
-                            value={option.price === 0 ? "" : option.price}
-                            onChange={(e) => {
-                              const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
-                              const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-                              handleSizeOptionChange(index, "price", num);
-                            }}
+                            min={0}
                             className="w-full"
                           />
                         </td>
@@ -316,17 +309,13 @@ export const ProductCreationCakeOptionsSection: React.FC<
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                          <NumberInput
+                            value={option.price}
+                            onChange={(v) =>
+                              handleFlavorOptionChange(index, "price", v ?? 0)
+                            }
                             placeholder="예: 0"
-                            value={option.price === 0 ? "" : option.price}
-                            onChange={(e) => {
-                              const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
-                              const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-                              handleFlavorOptionChange(index, "price", num);
-                            }}
+                            min={0}
                             className="w-full"
                           />
                         </td>

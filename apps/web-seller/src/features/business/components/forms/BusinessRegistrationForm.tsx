@@ -10,6 +10,7 @@ import {
 } from "@/apps/web-seller/features/business/utils/validator.util";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 interface Props {
@@ -25,6 +26,12 @@ export const defaultForm: IBusinessRegistrationForm = {
   b_nm: "", // 상호
   b_sector: "", // 업태
   b_type: "", // 종목
+};
+
+const numericStringToValue = (s: string): number | undefined => {
+  if (s === "") return undefined;
+  const n = parseInt(s, 10);
+  return Number.isNaN(n) ? undefined : n;
 };
 
 export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialValue, onChange }) => {
@@ -74,13 +81,25 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
 
   const handleChange =
     (key: keyof IBusinessRegistrationForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value;
-      // 숫자만 허용해야 하는 필드들: b_no(사업자등록번호), start_dt(개업일)
-      const value = key === "b_no" || key === "start_dt" ? raw.replace(/\D/g, "") : raw;
+      const value = e.target.value;
       const next = { ...form, [key]: value };
       setForm(next);
       onChange?.(next);
     };
+
+  const handleBNoChange = (v: number | undefined) => {
+    const value = v === undefined ? "" : String(v);
+    const next = { ...form, b_no: value };
+    setForm(next);
+    onChange?.(next);
+  };
+
+  const handleStartDtChange = (v: number | undefined) => {
+    const value = v === undefined ? "" : String(v);
+    const next = { ...form, start_dt: value };
+    setForm(next);
+    onChange?.(next);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,13 +115,11 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
           <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
             사업자등록번호
           </Label>
-          <Input
+          <NumberInput
+            value={numericStringToValue(form.b_no)}
+            onChange={handleBNoChange}
             placeholder="하이픈(-) 없이 10자리 숫자로 입력해주세요."
-            value={form.b_no}
-            onChange={handleChange("b_no")}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={10}
+            min={0}
             className={errors.b_no ? "border-destructive" : ""}
           />
           {errors.b_no && <p className="text-sm text-destructive mt-1">{errors.b_no}</p>}
@@ -122,13 +139,11 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
         </div>
         <div>
           <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">개업일</Label>
-          <Input
+          <NumberInput
+            value={numericStringToValue(form.start_dt)}
+            onChange={handleStartDtChange}
             placeholder="20251030"
-            value={form.start_dt}
-            onChange={handleChange("start_dt")}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={8}
+            min={0}
             className={errors.start_dt ? "border-destructive" : ""}
           />
           {errors.start_dt && <p className="text-sm text-destructive mt-1">{errors.start_dt}</p>}
