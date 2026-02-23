@@ -253,3 +253,47 @@ export function IsValidStoreDescription(validationOptions?: ValidationOptions) {
 export function IsValidDetailAddress(validationOptions?: ValidationOptions) {
   return createValidatorDecorator(new IsValidDetailAddressConstraint(), validationOptions);
 }
+
+/**
+ * 지역(regions) 쿼리 파라미터 유효성 검증 제약 조건
+ * 형식: 미지정/빈값(전지역) 또는 "1depth:2depth" 쌍을 쉼표로 구분
+ */
+@ValidatorConstraint({ name: "isValidRegionsParam", async: false })
+export class IsValidRegionsParamConstraint implements ValidatorConstraintInterface {
+  validate(regions: string | undefined): boolean {
+    const REGIONS_MAX_LENGTH = 500;
+
+    if (regions === undefined || regions === null) return true;
+    if (typeof regions !== "string") return false;
+
+    const trimmed = regions.trim();
+    if (!trimmed) return true;
+
+    if (trimmed.length > REGIONS_MAX_LENGTH) return false;
+    if (trimmed === "전지역") return true;
+
+    const parts = trimmed
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    for (const part of parts) {
+      const colonIndex = part.indexOf(":");
+      if (colonIndex === -1) return false;
+      const depth1 = part.slice(0, colonIndex).trim();
+      const depth2 = part.slice(colonIndex + 1).trim();
+      if (!depth1 || !depth2) return false;
+    }
+    return true;
+  }
+
+  defaultMessage(): string {
+    return "regions는 비어있거나 '전지역', 또는 '1depth:2depth' 쌍을 쉼표로 구분한 형식이어야 합니다. (예: 전지역, 서울:전지역, 서울:강남,경기:수원)";
+  }
+}
+
+/**
+ * 지역(regions) 쿼리 파라미터 유효성 검증 데코레이터
+ */
+export function IsValidRegionsParam(validationOptions?: ValidationOptions) {
+  return createValidatorDecorator(new IsValidRegionsParamConstraint(), validationOptions);
+}

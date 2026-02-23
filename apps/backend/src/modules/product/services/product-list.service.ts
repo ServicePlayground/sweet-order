@@ -16,6 +16,10 @@ import { ProductMapperUtil } from "@apps/backend/modules/product/utils/product-m
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import {
+  parseRegionsParam,
+  buildStoreWhereInputForRegions,
+} from "@apps/backend/modules/store/utils/region-filter.util";
 
 @Injectable()
 export class ProductListService {
@@ -50,6 +54,7 @@ export class ProductListService {
   private buildReviewSortFilterSql(params: {
     onlyVisible?: boolean;
     userStoreIds?: string[];
+    storeIds?: string[];
     storeId?: string;
     salesStatus?: EnableStatus;
     visibilityStatus?: EnableStatus;
@@ -69,7 +74,13 @@ export class ProductListService {
       conditions.push(Prisma.sql`p.store_id IN (${Prisma.join(params.userStoreIds)})`);
     }
 
-    if (params.storeId) {
+    if (params.storeIds !== undefined) {
+      if (params.storeIds.length === 0) {
+        conditions.push(Prisma.sql`FALSE`);
+      } else {
+        conditions.push(Prisma.sql`p.store_id IN (${Prisma.join(params.storeIds)})`);
+      }
+    } else if (params.storeId) {
       conditions.push(Prisma.sql`p.store_id = ${params.storeId}`);
     }
 
@@ -193,13 +204,34 @@ export class ProductListService {
       storeId,
       productType,
       productCategoryTypes,
+      regions,
     } = query;
+
+    let storeIdsFromRegion: string[] | undefined;
+    const parsedRegions = parseRegionsParam(regions);
+    if (parsedRegions) {
+      const regionWhere = buildStoreWhereInputForRegions(parsedRegions);
+      if (!regionWhere) {
+        storeIdsFromRegion = [];
+      } else {
+        const stores = await this.prisma.store.findMany({
+          where: regionWhere,
+          select: { id: true },
+        });
+        const ids = stores.map((s) => s.id);
+        storeIdsFromRegion = storeId
+          ? (ids.includes(storeId) ? [storeId] : [])
+          : ids;
+      }
+    }
 
     const where: Prisma.ProductWhereInput & { AND?: Prisma.ProductWhereInput[] } = {
       visibilityStatus: EnableStatus.ENABLE,
     };
 
-    if (storeId) {
+    if (storeIdsFromRegion !== undefined) {
+      where.storeId = { in: storeIdsFromRegion };
+    } else if (storeId) {
       where.storeId = storeId;
     }
 
@@ -216,7 +248,8 @@ export class ProductListService {
       const productIds = await this.getProductIdsByReviewSort(
         this.buildReviewSortFilterSql({
           onlyVisible: true,
-          storeId,
+          storeIds: storeIdsFromRegion,
+          storeId: storeIdsFromRegion === undefined ? storeId : undefined,
           search,
           minPrice,
           maxPrice,

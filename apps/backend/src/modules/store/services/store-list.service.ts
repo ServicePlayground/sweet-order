@@ -11,6 +11,10 @@ import {
   GetStoresRequestDto,
   GetSellerStoresRequestDto,
 } from "@apps/backend/modules/store/dto/store-list.dto";
+import {
+  parseRegionsParam,
+  buildStoreWhereInputForRegions,
+} from "@apps/backend/modules/store/utils/region-filter.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
@@ -33,8 +37,8 @@ export class StoreListService {
    * 검색(스토어명), 정렬, 페이지네이션을 지원합니다. 로그인 시 각 스토어의 좋아요 여부(isLiked)를 반환합니다.
    */
   async getStoresForUser(query: GetStoresRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy } = query;
-    const where = this.buildStoreWhereForUser(search);
+    const { search, page, limit, sortBy, regions } = query;
+    const where = this.buildStoreWhereForUser(search, regions);
     const orderBy = this.buildStoreOrderBy(sortBy ?? StoreSortBy.LATEST);
 
     const totalItems = await this.prisma.store.count({ where });
@@ -174,10 +178,26 @@ export class StoreListService {
     return storeResponse;
   }
 
-  private buildStoreWhereForUser(search?: string): Prisma.StoreWhereInput {
-    if (!search?.trim()) return {};
-    const keyword = search.trim();
-    return { name: { contains: keyword, mode: "insensitive" } };
+  private buildStoreWhereForUser(
+    search?: string,
+    regions?: string,
+  ): Prisma.StoreWhereInput {
+    const conditions: Prisma.StoreWhereInput[] = [];
+
+    if (search?.trim()) {
+      const keyword = search.trim();
+      conditions.push({ name: { contains: keyword, mode: "insensitive" } });
+    }
+
+    const parsedRegions = parseRegionsParam(regions);
+    const regionWhere = buildStoreWhereInputForRegions(parsedRegions);
+    if (regionWhere) {
+      conditions.push(regionWhere);
+    }
+
+    if (conditions.length === 0) return {};
+    if (conditions.length === 1) return conditions[0];
+    return { AND: conditions };
   }
 
   private buildStoreWhereForSeller(userId: string, search?: string): Prisma.StoreWhereInput {

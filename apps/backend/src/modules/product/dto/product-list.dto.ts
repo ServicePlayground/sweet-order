@@ -4,6 +4,7 @@ import {
   OptionalStringToNumber,
   OptionalStringToArray,
 } from "@apps/backend/common/decorators/transform.decorator";
+import { IsValidRegionsParam } from "@apps/backend/modules/store/decorators/validators.decorator";
 import {
   SortBy,
   EnableStatus,
@@ -17,7 +18,7 @@ import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-reques
 import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 
 /**
- * 상품 목록 조회 요청 DTO (무한 스크롤)
+ * 사용자용 상품 목록 조회 요청 DTO (무한 스크롤)
  */
 export class GetProductsRequestDto extends PaginationRequestDto {
   @ApiProperty({
@@ -80,6 +81,14 @@ export class GetProductsRequestDto extends PaginationRequestDto {
   @IsArray()
   @IsEnum(ProductCategoryType, { each: true })
   productCategoryTypes?: ProductCategoryType[];
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 지역 - 전지역일 때는 미지정 또는 '전지역', '1depth:2depth' 쌍을 쉼표로 구분. 특별시,자치시,광역시,시군구 등 모두 제외한 지역의 단어만 전달합니다. 예시1: 전지역, 예시2: 서울:전지역, 예시3: 서울:전지역,경기:수원, 예시4: 서울:강남,경기:수원",
+    example: "서울:전지역,경기:수원",
+  })
+  @IsValidRegionsParam()
+  regions?: string;
 }
 
 /**
