@@ -45,7 +45,6 @@ export default function QAPage() {
       </div>
 
       <div className="px-5 py-6 flex flex-col gap-6">
-
         {/* 인증 섹션 */}
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
@@ -84,7 +83,9 @@ export default function QAPage() {
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-purple-400" />
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">페이지 이동</h2>
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+              페이지 이동
+            </h2>
           </div>
           <div className="flex flex-col gap-2">
             <Link
@@ -97,19 +98,18 @@ export default function QAPage() {
 
             {/* 스토어 목록 */}
             <div className="flex items-center justify-between px-1 pt-2 pb-1">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">스토어 목록</span>
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                스토어 목록
+              </span>
               <span className="text-xs text-gray-400">{uniqueStoreIds.length}개</span>
             </div>
             {uniqueStoreIds.length === 0 ? (
               <p className="text-xs text-gray-400 text-center py-4">스토어 데이터 없음</p>
             ) : (
-              uniqueStoreIds.map((storeId) => (
-                <StoreItem key={storeId} storeId={storeId} />
-              ))
+              uniqueStoreIds.map((storeId) => <StoreItem key={storeId} storeId={storeId} />)
             )}
           </div>
         </section>
-
       </div>
     </div>
   );

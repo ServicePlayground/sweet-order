@@ -39,10 +39,7 @@ function CakeListItem({ product, onCardClick }: CakeListItemProps) {
   };
 
   return (
-    <div
-      onClick={() => onCardClick(product.id)}
-      className="min-w-[164px] bg-white"
-    >
+    <div onClick={() => onCardClick(product.id)} className="min-w-[164px] bg-white">
       <div className="w-full aspect-square relative overflow-hidden rounded-xl">
         {product.images && product.images.length > 0 ? (
           <Image
@@ -82,21 +79,22 @@ function CakeListItem({ product, onCardClick }: CakeListItemProps) {
             <Icon name="star" width={16} height={16} className="text-yellow-400" />
             {product.averageRating}
           </span>
-          <span 
-            className="relative text-gray-500 after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]"
-          >
+          <span className="relative text-gray-500 after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]">
             {product.totalReviewCount}개 후기
           </span>
         </div>
       </div>
-      <div
-        className="inline-flex items-center gap-1 py-1 px-2 text-2xs font-bold text-gray-700 bg-gray-50 rounded-full max-w-full"
-      >
-        <span>{formatAddress(product.productNoticeAddress)} · {product.productNoticeProducer.length > 10 ? `${product.productNoticeProducer.slice(0, 10)}...` : product.productNoticeProducer}</span>
+      <div className="inline-flex items-center gap-1 py-1 px-2 text-2xs font-bold text-gray-700 bg-gray-50 rounded-full max-w-full">
+        <span>
+          {formatAddress(product.productNoticeAddress)} ·{" "}
+          {product.productNoticeProducer.length > 10
+            ? `${product.productNoticeProducer.slice(0, 10)}...`
+            : product.productNoticeProducer}
+        </span>
         <Icon name="arrow" width={16} height={16} className="text-gray-700 rotate-90" />
-        </div>
       </div>
-    );
+    </div>
+  );
 }
 
 export default function CakeListSlider({
@@ -145,9 +143,7 @@ export default function CakeListSlider({
           <span className="ml-3">상품을 불러오는 중...</span>
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center p-10 text-gray-500 text-sm">
-          등록된 상품이 없습니다.
-        </div>
+        <div className="text-center p-10 text-gray-500 text-sm">등록된 상품이 없습니다.</div>
       ) : (
         <div
           ref={scrollRef}
@@ -158,11 +154,7 @@ export default function CakeListSlider({
           onMouseLeave={handleMouseUp}
         >
           {products.map((product) => (
-            <CakeListItem
-              key={product.id}
-              product={product}
-              onCardClick={handleCardClick}
-            />
+            <CakeListItem key={product.id} product={product} onCardClick={handleCardClick} />
           ))}
           <div className="min-w-[12px] shrink-0" />
         </div>
