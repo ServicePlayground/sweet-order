@@ -32,8 +32,12 @@ export class GetStoresRequestDto extends PaginationRequestDto {
 
   @ApiPropertyOptional({
     description:
-      "(필터) 지역 - 전지역일 때는 미지정 또는 '전지역', '1depth:2depth' 쌍을 쉼표로 구분. 특별시,자치시,광역시,시군구 등 모두 제외한 지역의 단어만 전달합니다. 예시1: 전지역, 예시2: 서울:전지역, 예시3: 서울:전지역,경기:수원, 예시4: 서울:강남,경기:수원",
-    example: "서울:전지역,경기:수원",
+      "(필터) 지역. 해당 파라미터를 비워두면 전국 스토어를 조회합니다." +
+      "GET /store/regions 응답의 depth1·depth2 searchKeywords를 조합해 전달합니다. " +
+      "'depth1키워드:depth2키워드' 쌍을 쉼표로 구분." +
+      "2depth가 복수 키워드(예: 강화·옹진)면 각 searchKeywords마다 한 쌍으로 보냅니다. " +
+      "예시: '전지역', '전지역:전지역', '서울:전지역', '서울:전지역,경기:수원시', '경기:수원시,인천:강화군,인천:옹진군'",
+    example: "서울:전지역,경기:수원시",
   })
   @IsValidRegionsParam()
   regions?: string;

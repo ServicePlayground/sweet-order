@@ -219,9 +219,7 @@ export class ProductListService {
           select: { id: true },
         });
         const ids = stores.map((s) => s.id);
-        storeIdsFromRegion = storeId
-          ? (ids.includes(storeId) ? [storeId] : [])
-          : ids;
+        storeIdsFromRegion = storeId ? (ids.includes(storeId) ? [storeId] : []) : ids;
       }
     }
 
