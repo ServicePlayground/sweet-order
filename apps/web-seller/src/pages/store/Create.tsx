@@ -4,11 +4,11 @@ import { ProgressBar } from "@/apps/web-seller/common/components/progressbars";
 import { BusinessRegistrationForm } from "@/apps/web-seller/features/business/components/forms/BusinessRegistrationForm";
 import { OnlineTradingCompanyDetailForm } from "@/apps/web-seller/features/business/components/forms/OnlineTradingCompanyDetailForm";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
-import {
-  IBusinessRegistrationForm,
-  IOnlineTradingCompanyDetailForm,
-} from "@/apps/web-seller/features/business/types/business.type";
-import { IStoreForm } from "@/apps/web-seller/features/store/types/store.type";
+import type {
+  BusinessRegistrationFormValues,
+  OnlineTradingCompanyDetailFormValues,
+} from "@/apps/web-seller/features/business/types/business.ui";
+import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui";
 import {
   useGetOnlineTradingCompanyDetail,
   useVerifyBusinessRegistration,
@@ -19,9 +19,9 @@ import { defaultForm as defaultOnlineTradingCompanyDetailForm } from "@/apps/web
 import { defaultForm as defaultStoreForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
 
 interface StepData {
-  businessRegistrationForm: IBusinessRegistrationForm;
-  onlineTradingCompanyDetailForm: IOnlineTradingCompanyDetailForm;
-  storeForm: IStoreForm;
+  businessRegistrationForm: BusinessRegistrationFormValues;
+  onlineTradingCompanyDetailForm: OnlineTradingCompanyDetailFormValues;
+  storeForm: StoreForm;
 }
 
 const TOTAL_STEPS = 3;
@@ -51,7 +51,7 @@ export const StoreCreatePage: React.FC = () => {
     }
   };
 
-  const handleSubmitStep1 = async (data: IBusinessRegistrationForm) => {
+  const handleSubmitStep1 = async (data: BusinessRegistrationFormValues) => {
     const response = await verifyBusinessRegistrationMutation.mutateAsync(data);
     if (response.available) {
       setStepData((prev) => ({
@@ -62,7 +62,7 @@ export const StoreCreatePage: React.FC = () => {
     }
   };
 
-  const handleSubmitStep2 = async (data: IOnlineTradingCompanyDetailForm) => {
+  const handleSubmitStep2 = async (data: OnlineTradingCompanyDetailFormValues) => {
     const response = await getOnlineTradingCompanyDetailMutation.mutateAsync({
       brno: stepData.businessRegistrationForm.b_no,
       prmmiMnno: data.prmmiMnno,
@@ -76,7 +76,7 @@ export const StoreCreatePage: React.FC = () => {
     }
   };
 
-  const handleSubmitStep3 = async (data: IStoreForm) => {
+  const handleSubmitStep3 = async (data: StoreForm) => {
     if (!stepData.businessRegistrationForm || !stepData.onlineTradingCompanyDetailForm) {
       return;
     }

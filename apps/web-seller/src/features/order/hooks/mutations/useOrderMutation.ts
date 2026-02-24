@@ -2,9 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { orderApi } from "@/apps/web-seller/features/order/apis/order.api";
 import { orderQueryKeys } from "@/apps/web-seller/features/order/constants/orderQueryKeys.constant";
 import {
-  IUpdateOrderStatusRequest,
-  IUpdateOrderStatusResponse,
-} from "@/apps/web-seller/features/order/types/order.type";
+  UpdateOrderStatusRequestDto,
+  UpdateOrderStatusResponseDto,
+} from "@/apps/web-seller/features/order/types/order.dto";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 
@@ -14,9 +14,9 @@ export function useUpdateOrderStatus() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<
-    IUpdateOrderStatusResponse,
+    UpdateOrderStatusResponseDto,
     Error,
-    { orderId: string; request: IUpdateOrderStatusRequest }
+    { orderId: string; request: UpdateOrderStatusRequestDto }
   >({
     mutationFn: ({ orderId, request }) => orderApi.updateOrderStatus(orderId, request),
     onSuccess: () => {

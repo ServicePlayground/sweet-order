@@ -2,10 +2,10 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { ProductCreationForm } from "@/apps/web-seller/features/product/components/forms/ProductCreationForm";
 import {
-  IProductForm,
-  IUpdateProductRequest,
+  UpdateProductRequestDto,
   EnableStatus,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import { useProductDetail } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
 import {
   useUpdateProduct,
@@ -44,8 +44,8 @@ export const StoreDetailProductDetailPage: React.FC = () => {
     );
   }
 
-  // IProductDetail을 IProductForm으로 변환
-  const productForm: IProductForm = {
+  // ProductResponseDto를 ProductForm으로 변환
+  const productForm: ProductForm = {
     images: product.images || [],
     name: product.name,
     salePrice: product.salePrice,
@@ -59,7 +59,7 @@ export const StoreDetailProductDetailPage: React.FC = () => {
     imageUploadEnabled: product.imageUploadEnabled as any,
     productCategoryTypes: product.productCategoryTypes ?? [],
     searchTags: product.searchTags ?? [],
-    detailDescription: product.detailDescription,
+    detailDescription: product.detailDescription ?? "",
     productNoticeFoodType: product.productNoticeFoodType,
     productNoticeProducer: product.productNoticeProducer,
     productNoticeOrigin: product.productNoticeOrigin,
@@ -76,9 +76,8 @@ export const StoreDetailProductDetailPage: React.FC = () => {
     productNoticeCustomerService: product.productNoticeCustomerService,
   };
 
-  const handleUpdate = async (data: IProductForm) => {
-    // IProductForm을 IUpdateProductRequest로 변환 (변경된 필드만)
-    const request: IUpdateProductRequest = {
+  const handleUpdate = async (data: ProductForm) => {
+    const request: UpdateProductRequestDto = {
       name: data.name,
       images: data.images,
       salePrice: data.salePrice,

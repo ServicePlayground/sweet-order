@@ -5,10 +5,11 @@ import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { productQueryKeys } from "@/apps/web-seller/features/product/constants/productQueryKeys.constant";
 import {
-  ProductListResponse,
-  IGetProductsListParams,
+  ProductListResponseDto,
+  GetSellerProductsRequestDto,
   SortBy,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
+import type { GetSellerProductsQueryParams } from "@/apps/web-seller/features/product/types/product.ui";
 
 // 상품 상세 조회 쿼리
 export function useProductDetail(productId: string) {
@@ -43,10 +44,10 @@ export function useProductList({
   maxPrice,
   productType,
   productCategoryTypes,
-}: Partial<IGetProductsListParams> & { storeId: string }) {
+}: Partial<GetSellerProductsQueryParams> & { storeId: string }) {
   const { addAlert } = useAlertStore();
 
-  const query = useInfiniteQuery<ProductListResponse>({
+  const query = useInfiniteQuery<ProductListResponseDto>({
     queryKey: productQueryKeys.list({
       limit,
       sortBy,
@@ -60,7 +61,7 @@ export function useProductList({
       productCategoryTypes,
     }),
     queryFn: ({ pageParam = 1 }) => {
-      const params: IGetProductsListParams = {
+      const params: GetSellerProductsRequestDto = {
         page: pageParam as number,
         limit,
         sortBy,

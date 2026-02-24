@@ -3,11 +3,12 @@ import { useEffect } from "react";
 import { orderApi } from "@/apps/web-seller/features/order/apis/order.api";
 import { orderQueryKeys } from "@/apps/web-seller/features/order/constants/orderQueryKeys.constant";
 import {
-  OrderListResponse,
-  IGetOrdersListParams,
+  OrderListResponseDto,
   OrderSortBy,
-  OrderResponse,
-} from "@/apps/web-seller/features/order/types/order.type";
+  OrderResponseDto,
+  OrderListRequestDto,
+} from "@/apps/web-seller/features/order/types/order.dto";
+import type { OrderListQueryParams } from "@/apps/web-seller/features/order/types/order.ui";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 
@@ -21,10 +22,10 @@ export function useOrderList({
   endDate,
   orderNumber,
   type,
-}: Partial<IGetOrdersListParams> & { page: number; limit: number; sortBy: OrderSortBy }) {
+}: Partial<OrderListQueryParams> & { page: number; limit: number; sortBy: OrderSortBy }) {
   const { addAlert } = useAlertStore();
 
-  const query = useQuery<OrderListResponse>({
+  const query = useQuery<OrderListResponseDto>({
     queryKey: orderQueryKeys.list({
       page,
       limit,
@@ -37,7 +38,7 @@ export function useOrderList({
       type,
     }),
     queryFn: () => {
-      const params: IGetOrdersListParams = {
+      const params: OrderListRequestDto = {
         page,
         limit,
         sortBy,
@@ -79,7 +80,7 @@ export function useOrderList({
 export function useOrderDetail(orderId: string) {
   const { addAlert } = useAlertStore();
 
-  const query = useQuery<OrderResponse>({
+  const query = useQuery<OrderResponseDto>({
     queryKey: orderQueryKeys.detail(orderId),
     queryFn: () => orderApi.getOrderDetail(orderId),
     enabled: !!orderId,

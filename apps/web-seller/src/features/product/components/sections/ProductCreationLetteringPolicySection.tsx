@@ -1,25 +1,23 @@
 import React from "react";
-import {
-  IProductForm,
-  EnableStatus,
-  OptionRequired,
-} from "@/apps/web-seller/features/product/types/product.type";
+import { EnableStatus, OptionRequired } from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import {
   OPTION_REQUIRED_OPTIONS,
   ENABLE_DISABLE_OPTIONS,
 } from "@/apps/web-seller/features/product/constants/product.constant";
 import { SelectBox } from "@/apps/web-seller/common/components/selects/SelectBox";
-import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 
 export interface ProductCreationLetteringPolicySectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
   onLetteringVisibleChange: (value: EnableStatus) => void;
   onLetteringRequiredChange: (value: OptionRequired) => void;
-  onLetteringMaxLengthChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onLetteringMaxLengthChange: (value: number) => void;
   onImageUploadEnabledChange: (value: EnableStatus) => void;
+  disabled?: boolean;
 }
 
 // 상품 등록 폼 - 레터링 정책 섹션
@@ -32,6 +30,7 @@ export const ProductCreationLetteringPolicySection: React.FC<
   onLetteringRequiredChange,
   onLetteringMaxLengthChange,
   onImageUploadEnabledChange,
+  disabled = false,
 }) => {
   return (
     <Card>
@@ -66,14 +65,13 @@ export const ProductCreationLetteringPolicySection: React.FC<
             <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
               최대 글자 수
             </Label>
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
+            <NumberInput
+              value={form.letteringMaxLength}
+              onChange={(v) => onLetteringMaxLengthChange(v ?? 0)}
               placeholder=""
-              value={form.letteringMaxLength === 0 ? "" : form.letteringMaxLength.toString()}
-              onChange={onLetteringMaxLengthChange}
+              min={0}
               className={errors.letteringMaxLength ? "border-destructive" : ""}
+              disabled={disabled}
             />
             {errors.letteringMaxLength && (
               <p className="text-sm text-destructive mt-1">{errors.letteringMaxLength}</p>

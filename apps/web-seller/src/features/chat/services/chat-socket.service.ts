@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { getAccessToken } from "@/apps/web-seller/common/utils/token.util";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
-import { Message } from "@/apps/web-seller/features/chat/types/chat.type";
+import type { ChatMessageResponseDto } from "@/apps/web-seller/features/chat/types/chat.dto";
 
 const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_DOMAIN;
 
@@ -17,7 +17,7 @@ export class ChatSocketService {
   // 현재 조인된 채팅방 목록 (재연결 시 자동으로 다시 조인하기 위해 추적)
   private joinedRooms: Set<string> = new Set();
   // 메시지 리스너 관리 (재연결 시 자동으로 재바인딩하기 위해 추적)
-  private messageListeners = new Set<(msg: Message) => void>();
+  private messageListeners = new Set<(msg: ChatMessageResponseDto) => void>();
   // 초기 연결 여부 추적 (재연결인지 구분하기 위해)
   private isInitialConnection = true;
   // 상태 복원용 connect 핸들러 등록 여부 추적 (hasListeners 대신 사용)
@@ -290,7 +290,7 @@ export class ChatSocketService {
    * // 컴포넌트 언마운트 시
    * removeListener();
    */
-  async onNewMessage(callback: (message: Message) => void): Promise<() => void> {
+  async onNewMessage(callback: (message: ChatMessageResponseDto) => void): Promise<() => void> {
     // 🔥 리스너를 Set에 추가
     this.messageListeners.add(callback);
 

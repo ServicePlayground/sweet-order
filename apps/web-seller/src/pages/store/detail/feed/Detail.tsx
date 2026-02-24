@@ -5,7 +5,7 @@ import {
   useUpdateFeed,
   useDeleteFeed,
 } from "@/apps/web-seller/features/feed/hooks/mutations/useFeedMutation";
-import { IUpdateFeedRequest } from "@/apps/web-seller/features/feed/types/feed.type";
+import type { UpdateFeedRequestDto } from "@/apps/web-seller/features/feed/types/feed.dto";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
@@ -76,7 +76,7 @@ export const StoreDetailFeedDetailPage: React.FC = () => {
 
     if (!isValid) return;
 
-    const request: IUpdateFeedRequest = {
+    const request: UpdateFeedRequestDto = {
       title: title.trim(),
       content,
     };

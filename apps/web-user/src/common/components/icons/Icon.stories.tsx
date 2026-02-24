@@ -19,6 +19,7 @@ const iconNames = [
   "star",
   "quantity",
   "location",
+  "search",
 ] as const;
 
 const iconFiles: Record<string, string> = {
@@ -40,6 +41,7 @@ const iconFiles: Record<string, string> = {
   star: "star.svg",
   quantity: "quantity.svg",
   location: "location.svg",
+  search: "search.svg",
 };
 
 // 스토리북용 간단한 Icon 표시 컴포넌트

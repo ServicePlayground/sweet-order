@@ -8,13 +8,13 @@ import {
   TabsContent,
 } from "@/apps/web-seller/common/components/tabs/Tabs";
 import {
-  IProductForm,
   EnableStatus,
   OptionRequired,
-  CakeSizeOption,
-  CakeFlavorOption,
+  CakeSizeOptionDto,
+  CakeFlavorOptionDto,
   ProductCategoryType,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import { ProductCreationBasicInfoSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationBasicInfoSection";
 import { ProductCreationCakeOptionsSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCakeOptionsSection";
 import { ProductCreationLetteringPolicySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationLetteringPolicySection";
@@ -23,15 +23,15 @@ import { ProductCreationProductNoticeSection } from "@/apps/web-seller/features/
 import { validateProductForm } from "@/apps/web-seller/features/product/utils/validateProductForm";
 
 interface Props {
-  onSubmit: (data: IProductForm) => void;
-  initialValue?: IProductForm;
-  onChange?: (data: IProductForm) => void;
+  onSubmit: (data: ProductForm) => void;
+  initialValue?: ProductForm;
+  onChange?: (data: ProductForm) => void;
   disabled?: boolean;
   onDelete?: () => void;
   isDeleting?: boolean;
 }
 
-export const defaultForm: IProductForm = {
+export const defaultForm: ProductForm = {
   images: [],
   name: "",
   salePrice: 0,
@@ -70,8 +70,8 @@ export const ProductCreationForm: React.FC<Props> = ({
   onDelete,
   isDeleting = false,
 }) => {
-  const [form, setForm] = useState<IProductForm>(initialValue || defaultForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof IProductForm, string>>>({});
+  const [form, setForm] = useState<ProductForm>(initialValue || defaultForm);
+  const [errors, setErrors] = useState<Partial<Record<keyof ProductForm, string>>>({});
   const [activeTab, setActiveTab] = useState("basic");
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export const ProductCreationForm: React.FC<Props> = ({
 
   const validate = (): {
     isValid: boolean;
-    errors: Partial<Record<keyof IProductForm, string>>;
+    errors: Partial<Record<keyof ProductForm, string>>;
   } => {
     const newErrors = validateProductForm(form);
     setErrors(newErrors);
@@ -91,23 +91,20 @@ export const ProductCreationForm: React.FC<Props> = ({
   };
 
   const handleChange =
-    (key: keyof IProductForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (key: keyof ProductForm) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       if (disabled) return;
       const value = e.target.value;
-      let next: IProductForm;
-
-      // 판매가는 숫자만 입력 가능하도록 처리
-      if (key === "salePrice") {
-        const onlyDigits = value.replace(/[^0-9]/g, "");
-        const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-        next = { ...form, [key]: isNaN(num) ? 0 : num };
-      } else {
-        next = { ...form, [key]: value };
-      }
-
+      const next = { ...form, [key]: value };
       setForm(next);
       onChange?.(next);
     };
+
+  const handleSalePriceChange = (value: number) => {
+    if (disabled) return;
+    const next = { ...form, salePrice: value };
+    setForm(next);
+    onChange?.(next);
+  };
 
   const handleSalesStatusChange = (value: EnableStatus) => {
     if (disabled) return;
@@ -141,13 +138,13 @@ export const ProductCreationForm: React.FC<Props> = ({
     onChange?.(next);
   };
 
-  const handleCakeSizeOptionsChange = (options: CakeSizeOption[]) => {
+  const handleCakeSizeOptionsChange = (options: CakeSizeOptionDto[]) => {
     const next = { ...form, cakeSizeOptions: options };
     setForm(next);
     onChange?.(next);
   };
 
-  const handleCakeFlavorOptionsChange = (options: CakeFlavorOption[]) => {
+  const handleCakeFlavorOptionsChange = (options: CakeFlavorOptionDto[]) => {
     const next = { ...form, cakeFlavorOptions: options };
     setForm(next);
     onChange?.(next);
@@ -165,12 +162,9 @@ export const ProductCreationForm: React.FC<Props> = ({
     onChange?.(next);
   };
 
-  const handleLetteringMaxLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // 숫자만 입력 가능하도록 처리
-    const onlyDigits = value.replace(/[^0-9]/g, "");
-    const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-    const next = { ...form, letteringMaxLength: isNaN(num) ? 0 : num };
+  const handleLetteringMaxLengthChange = (value: number) => {
+    if (disabled) return;
+    const next = { ...form, letteringMaxLength: value };
     setForm(next);
     onChange?.(next);
   };
@@ -261,6 +255,7 @@ export const ProductCreationForm: React.FC<Props> = ({
                 onMainImageChange={handleMainImageChange}
                 onAdditionalImagesChange={handleAdditionalImagesChange}
                 onChange={handleChange}
+                onSalePriceChange={handleSalePriceChange}
                 disabled={disabled}
               />
 
@@ -280,6 +275,7 @@ export const ProductCreationForm: React.FC<Props> = ({
                 onLetteringRequiredChange={handleLetteringRequiredChange}
                 onLetteringMaxLengthChange={handleLetteringMaxLengthChange}
                 onImageUploadEnabledChange={handleImageUploadEnabledChange}
+                disabled={disabled}
               />
             </TabsContent>
 

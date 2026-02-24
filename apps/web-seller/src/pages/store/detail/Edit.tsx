@@ -1,7 +1,8 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
-import { IStoreForm, IUpdateStoreRequest } from "@/apps/web-seller/features/store/types/store.type";
+import type { UpdateStoreRequestDto } from "@/apps/web-seller/features/store/types/store.dto";
+import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui";
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { useUpdateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
@@ -36,8 +37,8 @@ export const StoreDetailEditPage: React.FC = () => {
     );
   }
 
-  // IStoreDetail을 IStoreForm으로 변환
-  const storeForm: IStoreForm = {
+  // StoreResponseDto를 StoreForm으로 변환
+  const storeForm: StoreForm = {
     name: store.name,
     description: store.description || "",
     logoImageUrl: store.logoImageUrl || "",
@@ -49,8 +50,8 @@ export const StoreDetailEditPage: React.FC = () => {
     longitude: store.longitude,
   };
 
-  const handleUpdate = async (data: IStoreForm) => {
-    const request: IUpdateStoreRequest = {
+  const handleUpdate = async (data: StoreForm) => {
+    const request: UpdateStoreRequestDto = {
       name: data.name,
       description: data.description || "",
       logoImageUrl: data.logoImageUrl || "",

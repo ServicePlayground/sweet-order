@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DOMPurify from "isomorphic-dompurify";
 import he from "he";
-import { IFeed } from "@/apps/web-seller/features/feed/types/feed.type";
+import type { FeedResponseDto } from "@/apps/web-seller/features/feed/types/feed.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyState";
 
@@ -13,7 +13,7 @@ function getContentPreview(content: string, maxLength = 80): string {
 }
 
 interface FeedListProps {
-  feeds: IFeed[];
+  feeds: FeedResponseDto[];
 }
 
 export const FeedList: React.FC<FeedListProps> = ({ feeds }) => {

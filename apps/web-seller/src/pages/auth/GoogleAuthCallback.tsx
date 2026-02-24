@@ -5,10 +5,8 @@ import {
   useGoogleRegister,
 } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
-import {
-  GoogleLoginFormData,
-  PHONE_VERIFICATION_PURPOSE,
-} from "@/apps/web-seller/features/auth/types/auth.type";
+import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.dto";
+import type { GoogleRegisterForm } from "@/apps/web-seller/features/auth/types/auth.ui";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
@@ -21,7 +19,9 @@ export function GoogleAuthCallbackPage() {
   const { addAlert } = useAlertStore();
 
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
-  const [googleLoginData, setGoogleLoginData] = useState<GoogleLoginFormData | null>(null);
+  const [googleLoginData, setGoogleLoginData] = useState<Omit<GoogleRegisterForm, "phone"> | null>(
+    null,
+  );
 
   useEffect(() => {
     const code = searchParams.get("code");

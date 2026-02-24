@@ -10,7 +10,7 @@ import {
   isValidPhone,
   isValidVerificationCode,
 } from "@/apps/web-seller/common/utils/validator.util";
-import { PhoneVerificationPurpose } from "@/apps/web-seller/features/auth/types/auth.type";
+import type { PhoneVerificationPurpose } from "@/apps/web-seller/features/auth/types/auth.dto";
 
 interface PhoneVerificationFormProps {
   onVerificationComplete: (phone: string) => void;

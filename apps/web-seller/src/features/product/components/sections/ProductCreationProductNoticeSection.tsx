@@ -1,13 +1,13 @@
 import React from "react";
-import { IProductForm } from "@/apps/web-seller/features/product/types/product.type";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 
 export interface ProductCreationProductNoticeSectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
   onChange: (
-    key: keyof IProductForm,
+    key: keyof ProductForm,
   ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 

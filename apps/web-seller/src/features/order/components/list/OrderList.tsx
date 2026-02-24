@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { OrderResponse, OrderStatus } from "@/apps/web-seller/features/order/types/order.type";
+import { OrderResponseDto, OrderStatus } from "@/apps/web-seller/features/order/types/order.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
@@ -7,7 +7,7 @@ import { EmptyState } from "@/apps/web-seller/common/components/fallbacks/EmptyS
 import { StatusBadge } from "@/apps/web-seller/common/components/badges/StatusBadge";
 
 interface OrderListProps {
-  orders: OrderResponse[];
+  orders: OrderResponseDto[];
 }
 
 export function OrderList({ orders }: OrderListProps) {

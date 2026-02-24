@@ -5,7 +5,7 @@ import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
-import { IStoreListItem } from "@/apps/web-seller/features/store/types/store.type";
+import type { StoreResponseDto } from "@/apps/web-seller/features/store/types/store.dto";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import {
   Select,
@@ -36,7 +36,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const { data: storeListData } = useStoreList();
   const stores = React.useMemo(() => {
     if (!storeListData) return [];
-    return flattenAndDeduplicateInfiniteData<IStoreListItem>(storeListData);
+    return flattenAndDeduplicateInfiniteData<StoreResponseDto>(storeListData);
   }, [storeListData]);
 
   const storeIdFromPath = React.useMemo(() => {

@@ -4,20 +4,20 @@ import { feedApi } from "@/apps/web-seller/features/feed/apis/feed.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import {
-  IGetFeedsRequest,
-  IFeed,
-  IFeedListResponse,
-} from "@/apps/web-seller/features/feed/types/feed.type";
+  FeedListRequestDto,
+  FeedResponseDto,
+  FeedListResponseDto,
+} from "@/apps/web-seller/features/feed/types/feed.dto";
 import { feedQueryKeys } from "@/apps/web-seller/features/feed/constants/feedQueryKeys.constant";
 
 // 피드 목록 조회 (무한 스크롤)
 export function useFeedList(storeId: string, limit: number = 20) {
   const { addAlert } = useAlertStore();
 
-  const query = useInfiniteQuery<IFeedListResponse>({
+  const query = useInfiniteQuery<FeedListResponseDto>({
     queryKey: feedQueryKeys.list({ storeId, limit }),
     queryFn: ({ pageParam = 1 }) => {
-      const params: IGetFeedsRequest = {
+      const params: FeedListRequestDto = {
         page: pageParam as number,
         limit,
       };
@@ -51,7 +51,7 @@ export function useFeedList(storeId: string, limit: number = 20) {
 export function useFeedDetail(storeId: string, feedId: string) {
   const { addAlert } = useAlertStore();
 
-  const query = useQuery<IFeed>({
+  const query = useQuery<FeedResponseDto>({
     queryKey: feedQueryKeys.detail(feedId),
     queryFn: () => feedApi.getFeedDetail(storeId, feedId),
     enabled: !!storeId && !!feedId,

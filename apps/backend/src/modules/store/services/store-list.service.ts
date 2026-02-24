@@ -11,6 +11,12 @@ import {
   GetStoresRequestDto,
   GetSellerStoresRequestDto,
 } from "@apps/backend/modules/store/dto/store-list.dto";
+import {
+  parseRegionsParam,
+  buildStoreWhereInputForRegions,
+  buildStoreWhereForRegionKeywords,
+} from "@apps/backend/modules/store/utils/region-filter.util";
+import { STORE_REGION_DEPTHS } from "@apps/backend/modules/store/constants/store.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
@@ -33,8 +39,8 @@ export class StoreListService {
    * 검색(스토어명), 정렬, 페이지네이션을 지원합니다. 로그인 시 각 스토어의 좋아요 여부(isLiked)를 반환합니다.
    */
   async getStoresForUser(query: GetStoresRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy } = query;
-    const where = this.buildStoreWhereForUser(search);
+    const { search, page, limit, sortBy, regions } = query;
+    const where = this.buildStoreWhereForUser(search, regions);
     const orderBy = this.buildStoreOrderBy(sortBy ?? StoreSortBy.LATEST);
 
     const totalItems = await this.prisma.store.count({ where });
@@ -53,7 +59,10 @@ export class StoreListService {
     )) as StoreResponseDto[];
 
     if (user?.sub) {
-      const likedStoreIds = await this.getLikedStoreIds(user.sub, stores.map((s) => s.id));
+      const likedStoreIds = await this.getLikedStoreIds(
+        user.sub,
+        stores.map((s) => s.id),
+      );
       for (const res of storeResponses) {
         res.isLiked = likedStoreIds.has(res.id);
       }
@@ -124,7 +133,10 @@ export class StoreListService {
       this.prisma,
     )) as StoreResponseDto[];
 
-    const likedStoreIds = await this.getLikedStoreIds(userId, stores.map((s) => s.id));
+    const likedStoreIds = await this.getLikedStoreIds(
+      userId,
+      stores.map((s) => s.id),
+    );
     for (const res of storeResponses) {
       res.isLiked = likedStoreIds.has(res.id);
     }
@@ -168,10 +180,23 @@ export class StoreListService {
     return storeResponse;
   }
 
-  private buildStoreWhereForUser(search?: string): Prisma.StoreWhereInput {
-    if (!search?.trim()) return {};
-    const keyword = search.trim();
-    return { name: { contains: keyword, mode: "insensitive" } };
+  private buildStoreWhereForUser(search?: string, regions?: string): Prisma.StoreWhereInput {
+    const conditions: Prisma.StoreWhereInput[] = [];
+
+    if (search?.trim()) {
+      const keyword = search.trim();
+      conditions.push({ name: { contains: keyword, mode: "insensitive" } });
+    }
+
+    const parsedRegions = parseRegionsParam(regions);
+    const regionWhere = buildStoreWhereInputForRegions(parsedRegions);
+    if (regionWhere) {
+      conditions.push(regionWhere);
+    }
+
+    if (conditions.length === 0) return {};
+    if (conditions.length === 1) return conditions[0];
+    return { AND: conditions };
   }
 
   private buildStoreWhereForSeller(userId: string, search?: string): Prisma.StoreWhereInput {
@@ -193,6 +218,56 @@ export class StoreListService {
       default:
         return { createdAt: "desc" };
     }
+  }
+
+  /**
+   * 지역별 스토어 수 계산
+   * STORE_REGION_DEPTHS 구조를 유지하면서
+   * - 각 2depth 항목에 storeCount를 붙이고
+   * - 각 1depth 항목에는 "전지역"에 해당하는 스토어 수(또는 2depth 합계)를 storeCount로 설정합니다.
+   */
+  async getRegionCounts(): Promise<
+    Array<{
+      depth1: { label: string; searchKeywords: readonly string[]; storeCount: number };
+      depth2: Array<{ label: string; searchKeywords: readonly string[]; storeCount: number }>;
+    }>
+  > {
+    const tasks: Promise<number>[] = [];
+    for (const group of STORE_REGION_DEPTHS) {
+      const depth1Keywords = [...group.depth1.searchKeywords];
+      // depth1의 검색 키워드로 전국 여부 판별 (예: ["전지역"])
+      const isNationwide = depth1Keywords.length === 1 && depth1Keywords[0] === "전지역";
+      for (const d2 of group.depth2) {
+        const depth2Keywords = d2.label === "전지역" ? [] : [...d2.searchKeywords];
+        const where = isNationwide
+          ? {}
+          : buildStoreWhereForRegionKeywords(depth1Keywords, depth2Keywords);
+        tasks.push(this.prisma.store.count({ where }));
+      }
+    }
+    const counts = await Promise.all(tasks);
+    let k = 0;
+
+    return STORE_REGION_DEPTHS.map((group) => {
+      let depth1StoreCount: number | null = null;
+      const depth2WithCounts = group.depth2.map((d2) => {
+        const storeCount = counts[k++];
+        if (d2.label === "전지역") {
+          depth1StoreCount = storeCount;
+        }
+        return { ...d2, storeCount };
+      });
+
+      // "전지역" 항목이 없는 경우(이상 상황)에는 2depth 합계로 보정
+      if (depth1StoreCount === null) {
+        depth1StoreCount = depth2WithCounts.reduce((sum, d2) => sum + d2.storeCount, 0);
+      }
+
+      return {
+        depth1: { ...group.depth1, storeCount: depth1StoreCount },
+        depth2: depth2WithCounts,
+      };
+    });
   }
 
   /**

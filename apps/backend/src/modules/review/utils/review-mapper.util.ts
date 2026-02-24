@@ -47,9 +47,7 @@ export class ReviewMapperUtil {
    * @param review - Prisma ProductReview 엔티티 (user, product.store 포함)
    * @returns ReviewResponseDto 객체
    */
-  static mapToReviewResponse(
-    review: ProductReviewWithUserAndProductStore,
-  ): ReviewResponseDto {
+  static mapToReviewResponse(review: ProductReviewWithUserAndProductStore): ReviewResponseDto {
     return {
       id: review.id,
       productId: review.productId,

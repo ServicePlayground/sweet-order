@@ -6,7 +6,7 @@ import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/a
 import { isValidPassword } from "@/apps/web-seller/common/utils/validator.util";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import UserIdCheckForm from "@/apps/web-seller/features/auth/components/forms/UserIdCheckForm";
-import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.type";
+import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.dto";
 
 export default function RegisterForm() {
   const registerMutation = useRegister();

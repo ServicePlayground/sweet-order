@@ -23,4 +23,16 @@ export const PATHS = {
 
   // 장바구니 관련 경로
   CART: "/cart",
+
+  // 지도 페이지
+  MAP: "/map",
+
+  // 저장 페이지
+  SAVED: "/saved",
+
+  // 마이페이지
+  MYPAGE: "/mypage",
+
+  // QA/테스트 전용 페이지
+  QA: "/qa",
 } as const;

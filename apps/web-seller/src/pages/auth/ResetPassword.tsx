@@ -4,10 +4,8 @@ import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useResetPassword } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import PasswordResetForm from "@/apps/web-seller/features/auth/components/forms/PasswordResetForm";
-import {
-  ResetPasswordFormData,
-  PHONE_VERIFICATION_PURPOSE,
-} from "@/apps/web-seller/features/auth/types/auth.type";
+import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.dto";
+import type { ResetPasswordForm } from "@/apps/web-seller/features/auth/types/auth.ui";
 
 export function ResetPasswordPage() {
   const resetPasswordMutation = useResetPassword();
@@ -24,7 +22,7 @@ export function ResetPasswordPage() {
   };
 
   // 비밀번호 재설정 처리
-  const handleResetPassword = async (data: Omit<ResetPasswordFormData, "phone">) => {
+  const handleResetPassword = async (data: Omit<ResetPasswordForm, "phone">) => {
     await resetPasswordMutation.mutateAsync({
       phone,
       userId: data.userId,

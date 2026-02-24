@@ -1,9 +1,9 @@
 import React from "react";
 import {
-  IProductForm,
   EnableStatus,
   ProductCategoryType,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import {
   SALES_STATUS_OPTIONS,
   VISIBILITY_STATUS_OPTIONS,
@@ -11,14 +11,15 @@ import {
 import { ImageMultiUpload } from "@/apps/web-seller/features/upload/components/ImageMultiUpload";
 import { SelectBox } from "@/apps/web-seller/common/components/selects/SelectBox";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import { ProductCreationCategorySection } from "@/apps/web-seller/features/product/components/sections/ProductCreationCategorySection";
 import { ProductCreationSearchTagSection } from "@/apps/web-seller/features/product/components/sections/ProductCreationSearchTagSection";
 
 export interface ProductCreationBasicInfoSectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
   onSalesStatusChange: (value: EnableStatus) => void;
   onVisibilityStatusChange: (value: EnableStatus) => void;
   onProductCategoryTypesChange: (value: ProductCategoryType[]) => void;
@@ -26,8 +27,9 @@ export interface ProductCreationBasicInfoSectionProps {
   onMainImageChange: (url: string) => void;
   onAdditionalImagesChange: (urls: string[]) => void;
   onChange: (
-    key: keyof IProductForm,
+    key: keyof ProductForm,
   ) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onSalePriceChange: (value: number) => void;
   disabled?: boolean;
 }
 
@@ -42,6 +44,7 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
   onMainImageChange,
   onAdditionalImagesChange,
   onChange,
+  onSalePriceChange,
   disabled = false,
 }) => {
   // images 배열에서 첫 번째 요소를 대표 이미지로, 나머지를 추가 이미지로 분리
@@ -93,14 +96,13 @@ export const ProductCreationBasicInfoSection: React.FC<ProductCreationBasicInfoS
               <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
                 판매가
               </Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
+              <NumberInput
+                value={form.salePrice}
+                onChange={(v) => onSalePriceChange(v ?? 0)}
                 placeholder=""
-                value={form.salePrice === 0 ? "" : form.salePrice.toString()}
-                onChange={onChange("salePrice")}
+                min={0}
                 className={errors.salePrice ? "border-destructive" : ""}
+                disabled={disabled}
               />
               {errors.salePrice && (
                 <p className="text-sm text-destructive mt-1">{errors.salePrice}</p>

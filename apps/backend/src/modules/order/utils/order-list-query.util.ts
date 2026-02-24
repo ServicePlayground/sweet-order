@@ -5,9 +5,7 @@ import { OrderSortBy } from "@apps/backend/modules/order/constants/order.constan
  * 주문 목록 조회 시 공통으로 사용하는 정렬 조건
  * 사용자 마이페이지 주문 목록 / 판매자 주문 목록에서 동일한 정렬 규칙 적용
  */
-export function buildOrderOrderBy(
-  sortBy: OrderSortBy,
-): Prisma.OrderOrderByWithRelationInput[] {
+export function buildOrderOrderBy(sortBy: OrderSortBy): Prisma.OrderOrderByWithRelationInput[] {
   switch (sortBy) {
     case OrderSortBy.LATEST:
       return [{ createdAt: "desc" }];

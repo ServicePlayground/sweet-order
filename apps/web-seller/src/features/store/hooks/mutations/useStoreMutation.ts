@@ -4,9 +4,9 @@ import { storeApi } from "@/apps/web-seller/features/store/apis/store.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import {
-  ICreateStoreRequest,
-  IUpdateStoreRequest,
-} from "@/apps/web-seller/features/store/types/store.type";
+  CreateStoreRequestDto,
+  UpdateStoreRequestDto,
+} from "@/apps/web-seller/features/store/types/store.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { storeQueryKeys } from "@/apps/web-seller/features/store/constants/storeQueryKeys.constant";
 
@@ -17,7 +17,7 @@ export function useCreateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: ICreateStoreRequest) => storeApi.createStore(request),
+    mutationFn: (request: CreateStoreRequestDto) => storeApi.createStore(request),
     onSuccess: (response) => {
       addAlert({
         severity: "success",
@@ -43,7 +43,7 @@ export function useUpdateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ storeId, request }: { storeId: string; request: IUpdateStoreRequest }) =>
+    mutationFn: ({ storeId, request }: { storeId: string; request: UpdateStoreRequestDto }) =>
       storeApi.updateStore(storeId, request),
     onSuccess: (_response, variables) => {
       addAlert({

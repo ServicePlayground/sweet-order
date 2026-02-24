@@ -8,6 +8,7 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
+import { reverseGeocode } from "@/apps/web-user/common/utils/kakao-geocode.util";
 
 // 타입 정의
 declare global {
@@ -95,7 +96,7 @@ export function isWebViewEnvironment(): boolean {
  */
 export function useWebViewBridge() {
   const { setAccessToken, clearAccessToken } = useAuthStore();
-  const { setLocation } = useUserCurrentLocationStore();
+  const { setLocation, setAddress } = useUserCurrentLocationStore();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -126,8 +127,31 @@ export function useWebViewBridge() {
 
       // 전역 상태(Zustand store)에 위치 정보 저장
       setLocation(latNumber, lngNumber);
+
+      // 역지오코딩으로 주소 변환
+      reverseGeocode(latNumber, lngNumber).then((result) => {
+        if (result) setAddress(result);
+      });
     };
-  }, [setAccessToken, clearAccessToken, setLocation]);
+
+    // 환경에 따라 자동으로 위치 요청
+    if (isWebViewEnvironment()) {
+      requestLocationFromWebView();
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation(latitude, longitude);
+          reverseGeocode(latitude, longitude).then((result) => {
+            if (result) setAddress(result);
+          });
+        },
+        (error) => {
+          console.error("브라우저 위치 정보 요청 실패:", error.message);
+        },
+      );
+    }
+  }, [setAccessToken, clearAccessToken, setLocation, setAddress]);
 }
 
 // ============================================================================

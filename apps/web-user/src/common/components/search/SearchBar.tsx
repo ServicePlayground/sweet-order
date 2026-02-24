@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { Icon } from "../icons";
 
 interface SearchBarProps {
   initialValue?: string;
@@ -15,7 +16,7 @@ export function SearchBar({
   initialValue = "",
   onSearch,
   onChange,
-  placeholder = "상품을 검색해보세요",
+  placeholder = "어떤 케이크를 찾으시나요?",
 }: SearchBarProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const router = useRouter();
@@ -47,58 +48,17 @@ export function SearchBar({
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "100%" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          width: "100%",
-          maxWidth: "100%",
-        }}
-      >
+    <form onSubmit={handleSubmit} className="w-full max-w-full">
+      <div className="flex gap-2 w-full h-10 px-4 border border-gray-100 rounded-full text-base bg-white text-gray-900 outline-none shadow-[0px_3px_10px_0px_rgba(0,0,0,0.04)]">
+        <Icon name="search" width={20} height={20} className="text-gray-800" />
         <input
-          type="text"
+          type="search"
+          enterKeyHint="search"
           value={searchTerm}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={placeholder}
-          style={{
-            flex: 1,
-            height: "48px",
-            padding: "0 20px",
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            fontSize: "16px",
-            outline: "none",
-            transition: "border-color 0.2s ease",
-            backgroundColor: "#ffffff",
-            color: "#111827",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = "#007bff";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "#e5e7eb";
-          }}
+          className="flex-1 text-sm bg-transparent outline-none [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
         />
-        <button
-          type="submit"
-          style={{
-            height: "48px",
-            padding: "0 24px",
-            backgroundColor: "#000000",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "12px",
-            fontSize: "16px",
-            fontWeight: 600,
-            cursor: "pointer",
-            transition: "background-color 0.2s ease",
-            whiteSpace: "nowrap",
-          }}
-        >
-          검색
-        </button>
       </div>
     </form>
   );

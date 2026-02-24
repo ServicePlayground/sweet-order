@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import {
-  IProductForm,
   EnableStatus,
-  CakeSizeOption,
-  CakeFlavorOption,
+  CakeSizeOptionDto,
+  CakeFlavorOptionDto,
   CakeSizeDisplayName,
-} from "@/apps/web-seller/features/product/types/product.type";
+} from "@/apps/web-seller/features/product/types/product.dto";
+import type { ProductForm } from "@/apps/web-seller/features/product/types/product.ui";
 import {
   CAKE_SIZE_DISPLAY_NAME_OPTIONS,
   VISIBILITY_STATUS_OPTIONS,
@@ -19,23 +19,24 @@ import {
   SelectValue,
 } from "@/apps/web-seller/common/components/selects/Select";
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
+import { NumberInput } from "@/apps/web-seller/common/components/inputs/NumberInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
 import { Trash2, Plus } from "lucide-react";
 
 export interface ProductCreationCakeOptionsSectionProps {
-  form: IProductForm;
-  errors: Partial<Record<keyof IProductForm, string>>;
-  onCakeSizeOptionsChange: (options: CakeSizeOption[]) => void;
-  onCakeFlavorOptionsChange: (options: CakeFlavorOption[]) => void;
+  form: ProductForm;
+  errors: Partial<Record<keyof ProductForm, string>>;
+  onCakeSizeOptionsChange: (options: CakeSizeOptionDto[]) => void;
+  onCakeFlavorOptionsChange: (options: CakeFlavorOptionDto[]) => void;
 }
 
 // 상품 등록 폼 - 케이크 옵션 섹션
 export const ProductCreationCakeOptionsSection: React.FC<
   ProductCreationCakeOptionsSectionProps
 > = ({ form, onCakeSizeOptionsChange, onCakeFlavorOptionsChange }) => {
-  const [sizeOptions, setSizeOptions] = useState<CakeSizeOption[]>(form.cakeSizeOptions || []);
-  const [flavorOptions, setFlavorOptions] = useState<CakeFlavorOption[]>(
+  const [sizeOptions, setSizeOptions] = useState<CakeSizeOptionDto[]>(form.cakeSizeOptions || []);
+  const [flavorOptions, setFlavorOptions] = useState<CakeFlavorOptionDto[]>(
     form.cakeFlavorOptions || [],
   );
 
@@ -47,7 +48,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
 
   // 사이즈 옵션 추가
   const handleAddSizeOption = () => {
-    const newOption: CakeSizeOption = {
+    const newOption: CakeSizeOptionDto = {
       visible: EnableStatus.ENABLE,
       displayName: CakeSizeDisplayName.DOSIRAK,
       lengthCm: 0,
@@ -69,7 +70,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
   // 사이즈 옵션 변경
   const handleSizeOptionChange = (
     index: number,
-    field: keyof CakeSizeOption,
+    field: keyof CakeSizeOptionDto,
     value: string | EnableStatus | number | CakeSizeDisplayName,
   ) => {
     const updated = sizeOptions.map((option, i) =>
@@ -81,7 +82,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
 
   // 맛 옵션 추가
   const handleAddFlavorOption = () => {
-    const newOption: CakeFlavorOption = {
+    const newOption: CakeFlavorOptionDto = {
       visible: EnableStatus.ENABLE,
       displayName: "",
       price: 0,
@@ -101,7 +102,7 @@ export const ProductCreationCakeOptionsSection: React.FC<
   // 맛 옵션 변경
   const handleFlavorOptionChange = (
     index: number,
-    field: keyof CakeFlavorOption,
+    field: keyof CakeFlavorOptionDto,
     value: string | EnableStatus | number,
   ) => {
     const updated = flavorOptions.map((option, i) =>
@@ -194,34 +195,22 @@ export const ProductCreationCakeOptionsSection: React.FC<
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              pattern="[0-9]*"
+                            <NumberInput
+                              value={option.lengthCm}
+                              onChange={(v) => handleSizeOptionChange(index, "lengthCm", v ?? 0)}
                               placeholder="예: 10"
-                              value={option.lengthCm === 0 ? "" : option.lengthCm}
-                              onChange={(e) => {
-                                const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
-                                const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-                                handleSizeOptionChange(index, "lengthCm", num);
-                              }}
+                              min={0}
                               className="w-full"
                             />
                             <span className="text-sm text-muted-foreground">cm</span>
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                          <NumberInput
+                            value={option.price}
+                            onChange={(v) => handleSizeOptionChange(index, "price", v ?? 0)}
                             placeholder="예: 30000"
-                            value={option.price === 0 ? "" : option.price}
-                            onChange={(e) => {
-                              const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
-                              const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-                              handleSizeOptionChange(index, "price", num);
-                            }}
+                            min={0}
                             className="w-full"
                           />
                         </td>
@@ -316,17 +305,11 @@ export const ProductCreationCakeOptionsSection: React.FC<
                           />
                         </td>
                         <td className="px-4 py-3">
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                          <NumberInput
+                            value={option.price}
+                            onChange={(v) => handleFlavorOptionChange(index, "price", v ?? 0)}
                             placeholder="예: 0"
-                            value={option.price === 0 ? "" : option.price}
-                            onChange={(e) => {
-                              const onlyDigits = e.target.value.replace(/[^0-9]/g, "");
-                              const num = onlyDigits === "" ? 0 : parseInt(onlyDigits, 10);
-                              handleFlavorOptionChange(index, "price", num);
-                            }}
+                            min={0}
                             className="w-full"
                           />
                         </td>
