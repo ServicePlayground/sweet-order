@@ -7,6 +7,7 @@ import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useAddStoreLike";
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
 import { isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 
 // 주소를 구/군/읍/면/리 단위까지만 표시
 function shortenAddress(address: string): string {
@@ -47,6 +48,8 @@ interface StoreDetailIntroSectionProps {
 export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps) {
   const [imageError, setImageError] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isAddressExpanded, setIsAddressExpanded] = useState(false);
+  const [showCopyToast, setShowCopyToast] = useState(false);
   const [distance, setDistance] = useState<number | null>(null);
   const [isLiked, setIsLiked] = useState(store.isLiked ?? false);
 
@@ -94,6 +97,11 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
       },
     );
   }, [calculateAndSetDistance]);
+
+  const handleAddressCopy = () => {
+    navigator.clipboard.writeText(store.roadAddress);
+    setShowCopyToast(true);
+  };
 
   const handleLikeToggle = () => {
     if (isLikeLoading) return;
@@ -174,15 +182,45 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
 
       {/* 위치 정보 */}
       <div className="flex items-center gap-1 mb-[10px]">
-        <Icon name="location" width={16} height={16} className="text-primary-300" />
-        {distance !== null && (
-          <>
-            <span className="text-sm text-gray-900">{formatDistance(distance)}</span>
-            <span className="text-sm text-gray-900">·</span>
-          </>
-        )}
-        <span className="text-sm text-gray-900">{shortenAddress(store.roadAddress)}</span>
+        <button
+          type="button"
+          onClick={isAddressExpanded ? handleAddressCopy : () => setIsAddressExpanded(true)}
+          className="flex items-center gap-1"
+        >
+          <Icon name="location" width={16} height={16} className="text-primary-300" />
+          {distance !== null && (
+            <>
+              <span className="text-sm text-gray-900">{formatDistance(distance)}</span>
+              <span className="text-sm text-gray-900">·</span>
+            </>
+          )}
+          <span className="text-sm text-gray-900">
+            {isAddressExpanded ? store.roadAddress : shortenAddress(store.roadAddress)}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsAddressExpanded((prev) => !prev)}
+          className="flex items-center justify-center ml-[2px]"
+        >
+          <Icon
+            name="arrow"
+            width={16}
+            height={16}
+            className={`text-gray-400 transition-transform ${isAddressExpanded ? "" : "rotate-180"}`}
+          />
+        </button>
       </div>
+
+      {showCopyToast && (
+        <Toast
+          message="주소가 복사됐어요!"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="row"
+          onClose={() => setShowCopyToast(false)}
+        />
+      )}
 
       {/* 설명 */}
       {store.description && (

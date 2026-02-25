@@ -42,6 +42,12 @@ const iconFiles: Record<string, string> = {
   quantity: "quantity.svg",
   location: "location.svg",
   search: "search.svg",
+  bullet: "bullet.svg",
+  alarm: "alarm.svg",
+  home: "home.svg",
+  map: "map.svg",
+  mypage: "mypage.svg",
+  closeCircle: "close_circle.svg",
 };
 
 // 스토리북용 간단한 Icon 표시 컴포넌트
