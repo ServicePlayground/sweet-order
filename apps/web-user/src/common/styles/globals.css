@@ -48,6 +48,9 @@ button {
 input,
 textarea {
   outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
 }
 
 /* ------------------------------ 임시 스타일 ------------------------------ */
