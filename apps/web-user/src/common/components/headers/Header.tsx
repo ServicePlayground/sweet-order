@@ -8,7 +8,7 @@ import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { useHeaderStore } from "@/apps/web-user/common/store/header.store";
 
 interface HeaderProps {
-  variant?: "main" | "product" | "minimal";
+  variant?: "main" | "product" | "minimal" | "search";
 }
 
 export default function Header({ variant = "main" }: HeaderProps) {
@@ -48,6 +48,27 @@ export default function Header({ variant = "main" }: HeaderProps) {
   // Minimal 헤더: 헤더 없음
   if (variant === "minimal") {
     return null;
+  }
+
+  // Search 헤더: 로고 + 취소
+  if (variant === "search") {
+    return (
+      <header className="sticky top-0 left-0 right-0 z-50 bg-white max-w-[638px] mx-auto px-5 flex justify-between items-center h-[46px]">
+        <button type="button" className="flex items-center justify-center">
+          <Icon name="location" width={20} height={20} className="text-primary" />
+          <span className="font-bold text-gray-900 ml-1">
+            {address ?? "위치를 불러오는 중..."}
+          </span>
+          <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-180" />
+        </button>
+        <button
+          onClick={() => router.push(PATHS.HOME)}
+          className="text-sm font-bold text-gray-500 underline"
+        >
+          취소
+        </button>
+      </header>
+    );
   }
 
   // Main 헤더 (기본): 로고 + 장바구니

@@ -6,6 +6,26 @@
  * @example "경기도 수원시 XX동" → "수원"
  * @example "세종특별자치시 XX동" → "세종"
  */
+/**
+ * 주소를 구/군/읍/면/리 단위까지만 표시합니다.
+ * @example "서울특별시 서초구 반포동 123" → "서울특별시 서초구"
+ * @example "경기도 가평군 청평면 XX리" → "경기도 가평군 청평면"
+ */
+export function shortenAddress(address: string): string {
+  const parts = address.split(" ");
+  for (let i = 0; i < parts.length; i++) {
+    if (/[구군읍면리]$/.test(parts[i])) {
+      return parts.slice(0, i + 1).join(" ");
+    }
+  }
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i].endsWith("시")) {
+      return parts.slice(0, i + 1).join(" ");
+    }
+  }
+  return address;
+}
+
 export function formatAddress(address: string): string {
   const tokens = address.split(" ");
 

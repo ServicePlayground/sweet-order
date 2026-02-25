@@ -1,45 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useAddStoreLike";
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
-import { isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
-
-// 주소를 구/군/읍/면/리 단위까지만 표시
-function shortenAddress(address: string): string {
-  const parts = address.split(" ");
-  for (let i = 0; i < parts.length; i++) {
-    if (/[구군읍면리]$/.test(parts[i])) {
-      return parts.slice(0, i + 1).join(" ");
-    }
-  }
-  // 구/군/읍/면/리가 없으면 시까지
-  for (let i = 0; i < parts.length; i++) {
-    if (parts[i].endsWith("시")) {
-      return parts.slice(0, i + 1).join(" ");
-    }
-  }
-  return address;
-}
-
-// Haversine 공식으로 두 좌표 간 거리 계산 (km)
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // 지구 반지름 (km)
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+import { shortenAddress } from "@/apps/web-user/common/utils/address.util";
+import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
+import { calculateDistance, formatDistance } from "@/apps/web-user/common/utils/distance.util";
 
 interface StoreDetailIntroSectionProps {
   store: StoreInfo;
@@ -50,53 +20,17 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
-  const [distance, setDistance] = useState<number | null>(null);
   const [isLiked, setIsLiked] = useState(store.isLiked ?? false);
 
   const { mutate: addLike, isPending: isAddingLike } = useAddStoreLike();
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
   const isLikeLoading = isAddingLike || isRemovingLike;
 
-  // 좌표로 거리 계산
-  const calculateAndSetDistance = useCallback(
-    (latitude: number, longitude: number) => {
-      const dist = calculateDistance(latitude, longitude, store.latitude, store.longitude);
-      setDistance(dist);
-    },
-    [store.latitude, store.longitude],
-  );
-
-  // 현재 위치 가져오기 및 거리 계산
-  useEffect(() => {
-    // 앱 웹뷰 환경인 경우 - 브릿지 사용
-    if (isWebViewEnvironment()) {
-      window.receiveLocation = (latitude: string | number, longitude: string | number) => {
-        const lat = typeof latitude === "string" ? parseFloat(latitude) : latitude;
-        const lng = typeof longitude === "string" ? parseFloat(longitude) : longitude;
-        calculateAndSetDistance(lat, lng);
-      };
-
-      // 앱에 위치 요청
-      if (window.mylocation) {
-        window.mylocation.postMessage("true");
-      }
-
-      return;
-    }
-
-    // 웹 브라우저 환경인 경우 - Geolocation API 사용
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        calculateAndSetDistance(position.coords.latitude, position.coords.longitude);
-      },
-      () => {
-        // 위치 권한 거부 시 거리 표시 안함
-        setDistance(null);
-      },
-    );
-  }, [calculateAndSetDistance]);
+  const userLocation = useUserLocation();
+  const distance =
+    userLocation !== null
+      ? calculateDistance(userLocation.latitude, userLocation.longitude, store.latitude, store.longitude)
+      : null;
 
   const handleAddressCopy = () => {
     navigator.clipboard.writeText(store.roadAddress);
@@ -111,14 +45,6 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
     } else {
       addLike(store.id, { onError: () => setIsLiked(false) });
     }
-  };
-
-  // 거리 포맷팅 (1km 미만이면 m 단위로 표시)
-  const formatDistance = (km: number): string => {
-    if (km < 1) {
-      return `${Math.round(km * 1000)}m`;
-    }
-    return `${km.toFixed(1)}km`;
   };
 
   // 설명 텍스트 줄임 처리
