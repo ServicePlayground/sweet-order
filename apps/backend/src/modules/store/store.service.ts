@@ -25,6 +25,14 @@ export class StoreService {
   ) {}
 
   /**
+   * 스토어 지역 depth 정보 조회 (사용자용)
+   */
+  async getStoreRegions() {
+    const regions = await this.storeListService.getRegionCounts();
+    return { regions };
+  }
+
+  /**
    * 스토어 목록 조회 (사용자용)
    */
   async getStoresForUser(query: GetStoresRequestDto, user?: JwtVerifiedPayload) {

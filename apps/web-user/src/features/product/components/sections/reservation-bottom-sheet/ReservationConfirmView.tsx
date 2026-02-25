@@ -48,7 +48,10 @@ export function ReservationConfirmView({
           </div>
           <div className="flex flex-col gap-[24px] bg-gray-50">
             {orderItems.map((item, index) => (
-              <div key={index} className="relative flex flex-col after:content-[''] after:absolute after:bottom-[-12px] after:left-0 after:w-full after:h-px after:bg-gray-100 last:after:hidden">
+              <div
+                key={index}
+                className="relative flex flex-col after:content-[''] after:absolute after:bottom-[-12px] after:left-0 after:w-full after:h-px after:bg-gray-100 last:after:hidden"
+              >
                 <div className="py-[10px] px-[18px]">
                   <div className="flex pb-[16px]">
                     <div className="flex-1 flex flex-col">
@@ -65,7 +68,11 @@ export function ReservationConfirmView({
                     </div>
 
                     <div className="w-[64px] h-[64px] overflow-hidden shrink-0 rounded-md">
-                      <img src={cakeImageUrl} alt={cakeTitle} className="w-full h-full object-cover" />
+                      <img
+                        src={cakeImageUrl}
+                        alt={cakeTitle}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
 

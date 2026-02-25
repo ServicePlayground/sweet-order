@@ -37,7 +37,7 @@ export default function Home() {
 
     const observer = new IntersectionObserver(
       ([entry]) => setIsHomeSearchVisible(entry.isIntersecting),
-      { rootMargin: "-52px 0px 0px 0px", threshold: 0 }
+      { rootMargin: "-52px 0px 0px 0px", threshold: 0 },
     );
     observer.observe(el);
     return () => observer.disconnect();

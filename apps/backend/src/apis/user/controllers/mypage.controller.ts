@@ -18,10 +18,13 @@ import {
   MyReviewListResponseDto,
 } from "@apps/backend/modules/review/dto/review-user-list.dto";
 import {
-  GetMyLikesRequestDto,
-  MyProductLikeListResponseDto,
-  MyStoreLikeListResponseDto,
-} from "@apps/backend/modules/like/dto/like-user-list.dto";
+  GetStoresRequestDto,
+  StoreListResponseDto,
+} from "@apps/backend/modules/store/dto/store-list.dto";
+import {
+  GetProductsRequestDto,
+  ProductListResponseDto,
+} from "@apps/backend/modules/product/dto/product-list.dto";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 
@@ -34,8 +37,8 @@ import { createMessageObject } from "@apps/backend/common/utils/message.util";
   OrderListResponseDto,
   OrderResponseDto,
   MyReviewListResponseDto,
-  MyProductLikeListResponseDto,
-  MyStoreLikeListResponseDto,
+  StoreListResponseDto,
+  ProductListResponseDto,
 )
 @Controller(`${USER_ROLES.USER}/mypage`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // 인증 필수
@@ -111,23 +114,40 @@ export class UserMypageController {
   }
 
   /**
-   * 내가 좋아요한 목록 조회 API
-   * 자신이 좋아요한 상품 또는 스토어 목록을 조회합니다.
+   * 내가 좋아요한 스토어 목록 조회 API
    */
-  @Get("likes")
+  @Get("likes/stores")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: "(로그인 필요) 내가 좋아요한 목록 조회",
+    summary: "(로그인 필요) 내가 좋아요한 스토어 목록 조회",
     description:
-      "자신이 좋아요한 상품 또는 스토어 목록을 조회합니다. type 파라미터로 상품(PRODUCT) 또는 스토어(STORE)를 구분하여 조회할 수 있습니다. 페이지네이션을 지원합니다.",
+      "자신이 좋아요한 스토어 목록을 조회합니다. 정렬(sortBy), 스토어명 검색(search), 지역(regions) 필터, 페이지네이션을 지원합니다.",
   })
-  @SwaggerResponse(200, { dataDto: MyProductLikeListResponseDto })
-  @SwaggerResponse(200, { dataDto: MyStoreLikeListResponseDto })
+  @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   @SwaggerAuthResponses()
-  async getMyLikes(
-    @Query() query: GetMyLikesRequestDto,
+  async getMyStoreLikes(
+    @Query() query: GetStoresRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
-  ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
-    return await this.likeService.getMyLikesForUser(req.user.sub, query);
+  ): Promise<StoreListResponseDto> {
+    return await this.likeService.getMyStoreLikesForUser(req.user.sub, query);
+  }
+
+  /**
+   * 내가 좋아요한 상품 목록 조회 API
+   */
+  @Get("likes/products")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 내가 좋아요한 상품 목록 조회",
+    description:
+      "자신이 좋아요한 상품 목록을 조회합니다. 정렬(sortBy), 검색/가격/스토어/타입/카테고리/지역 필터, 페이지네이션을 지원합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ProductListResponseDto })
+  @SwaggerAuthResponses()
+  async getMyProductLikes(
+    @Query() query: GetProductsRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<ProductListResponseDto> {
+    return await this.likeService.getMyProductLikesForUser(req.user.sub, query);
   }
 }

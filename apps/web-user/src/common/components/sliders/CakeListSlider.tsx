@@ -11,6 +11,7 @@ interface CakeListSliderProps {
   onProductClick: (productId: string) => void;
 }
 
+
 export default function CakeListSlider({
   title,
   products,
@@ -57,9 +58,7 @@ export default function CakeListSlider({
           <span className="ml-3">상품을 불러오는 중...</span>
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center p-10 text-gray-500 text-sm">
-          등록된 상품이 없습니다.
-        </div>
+        <div className="text-center p-10 text-gray-500 text-sm">등록된 상품이 없습니다.</div>
       ) : (
         <div
           ref={scrollRef}
@@ -70,11 +69,7 @@ export default function CakeListSlider({
           onMouseLeave={handleMouseUp}
         >
           {products.map((product) => (
-            <CakeListItem
-              key={product.id}
-              product={product}
-              onCardClick={handleCardClick}
-            />
+            <CakeListItem key={product.id} product={product} onCardClick={handleCardClick} />
           ))}
           <div className="min-w-[12px] shrink-0" />
         </div>

@@ -77,9 +77,7 @@ export default function Header({ variant = "main" }: HeaderProps) {
       {/* 로고 */}
       <button type="button" className="flex items-center justify-center">
         <Icon name="location" width={20} height={20} className="text-primary" />
-        <span className="font-bold text-gray-900 ml-1">
-          {address ?? "위치를 불러오는 중..."}
-        </span>
+        <span className="font-bold text-gray-900 ml-1">{address ?? "위치를 불러오는 중..."}</span>
         <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-180" />
       </button>
 
@@ -94,12 +92,17 @@ export default function Header({ variant = "main" }: HeaderProps) {
         </Link>
         {/* 검색 아이콘 - 홈 검색바가 가려질 때만 표시 */}
         {!isHomeSearchVisible && (
-          <button onClick={() => router.push(PATHS.SEARCH)} className="h-6 w-6 flex items-center justify-center">
+          <button
+            onClick={() => router.push(PATHS.SEARCH)}
+            className="h-6 w-6 flex items-center justify-center"
+          >
             <Icon name="search" width={24} height={24} />
           </button>
         )}
         {/* 알람 아이콘 */}
-        <button className="h-6 w-6"><Icon name="alarm" width={24} height={24} /></button>
+        <button className="h-6 w-6">
+          <Icon name="alarm" width={24} height={24} />
+        </button>
       </div>
     </header>
   );
