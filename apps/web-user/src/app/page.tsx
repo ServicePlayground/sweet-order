@@ -10,7 +10,6 @@ import { useProductList } from "@/apps/web-user/features/product/hooks/queries/u
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import Link from "next/link";
-import { requestLocationFromWebView } from "@/apps/web-user/common/utils/webview.bridge";
 import { useHeaderStore } from "@/apps/web-user/common/store/header.store";
 import { Icon } from "../common/components/icons";
 
