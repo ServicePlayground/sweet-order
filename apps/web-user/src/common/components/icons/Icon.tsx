@@ -27,6 +27,9 @@ import Alarm from "./icons/alarm.svg";
 import Home from "./icons/home.svg";
 import Map from "./icons/map.svg";
 import Mypage from "./icons/mypage.svg";
+import CloseCircle from "./icons/close_circle.svg";
+import CheckCircle from "./icons/check_circle.svg";
+import AlertCircle from "./icons/alert_circle.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -63,13 +66,16 @@ export const iconTypes = {
   home: Home,
   map: Map,
   mypage: Mypage,
+  closeCircle: CloseCircle,
+  checkCircle: CheckCircle,
+  alertCircle: AlertCircle,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {
   const IconComponent = iconTypes[name];
   return (
     <span className={clsx("inline-flex items-center", className)} {...props}>
-      <IconComponent width={width} height={height} className="h-auto max-w-full" />
+      <IconComponent width={width} height={height} className={clsx("h-auto max-w-full", className)} />
     </span>
   );
 }

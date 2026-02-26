@@ -8,7 +8,10 @@ export async function GET(request: NextRequest) {
   const longitude = searchParams.get("longitude");
 
   if (!latitude || !longitude) {
-    return NextResponse.json({ error: "latitude, longitude 파라미터가 필요합니다." }, { status: 400 });
+    return NextResponse.json(
+      { error: "latitude, longitude 파라미터가 필요합니다." },
+      { status: 400 },
+    );
   }
 
   try {

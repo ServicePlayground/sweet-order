@@ -1,3 +1,12 @@
+export interface StoreListResponse {
+  data: StoreInfo[];
+  meta: {
+    currentPage: number;
+    hasNext: boolean;
+    totalCount: number;
+  };
+}
+
 export interface StoreInfo {
   id: string;
   userId: string;

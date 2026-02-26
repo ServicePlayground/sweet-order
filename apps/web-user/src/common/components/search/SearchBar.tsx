@@ -50,7 +50,7 @@ export function SearchBar({
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-full">
       <div className="flex gap-2 w-full h-10 px-4 border border-gray-100 rounded-full text-base bg-white text-gray-900 outline-none shadow-[0px_3px_10px_0px_rgba(0,0,0,0.04)]">
-        <Icon name="search" width={20} height={20} className="text-gray-800" />
+        <Icon name="search" width={20} height={20} className="text-gray-800 shrink-0" />
         <input
           type="search"
           enterKeyHint="search"

@@ -1,97 +1,53 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
-import { ProductList } from "@/apps/web-user/features/product/components/list/ProductList";
-import { Select } from "@/apps/web-user/common/components/selectboxs/Select";
+import { CakeListItem } from "@/apps/web-user/features/product/components/cards/CakeListItem";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-user/common/utils/pagination.util";
+import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
 interface SearchProductListSectionProps {
   search?: string;
 }
 
 export function SearchProductListSection({ search }: SearchProductListSectionProps) {
-  const [sortBy, setSortBy] = useState<SortBy>(SortBy.POPULAR);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     search: search?.trim() || undefined,
-    sortBy,
+    sortBy: SortBy.POPULAR,
   });
 
-  // 무한 스크롤 훅 사용
-  useInfiniteScroll({
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    loadMoreRef,
-  });
+  useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage, loadMoreRef });
 
-  // 상품 목록 평탄화 및 중복 제거
   const products = flattenAndDeduplicateInfiniteData<Product>(data);
 
-  if (isLoading) {
-    return <></>;
-  }
+  if (isLoading) return <></>;
 
   if (products.length === 0) {
-    return <div>등록된 상품이 없습니다.</div>;
+    return <p className="text-sm text-gray-400 text-center py-10">검색 결과가 없습니다.</p>;
   }
 
   return (
     <>
-      <div
-        style={{
-          marginBottom: "16px",
-          fontSize: "14px",
-          color: "#6b7280",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <span>총 {products.length || 0}개의 상품</span>
-        <Select
-          value={sortBy}
-          onChange={(value) => setSortBy(value as SortBy)}
-          options={[
-            { value: SortBy.LATEST, label: "최신순" },
-            { value: SortBy.PRICE_ASC, label: "가격 낮은순" },
-            { value: SortBy.PRICE_DESC, label: "가격 높은순" },
-            { value: SortBy.POPULAR, label: "인기순" },
-            { value: SortBy.REVIEW_COUNT, label: "후기 많은순" },
-            { value: SortBy.RATING_AVG, label: "별점 높은순" },
-          ]}
-        />
+      <p className="text-sm text-gray-500 py-3 font-bold">총 <span className="text-gray-900">{products.length}</span>개</p>
+      <div className="grid grid-cols-2 gap-x-[7px] gap-y-6">
+        {products.map((product) => (
+          <CakeListItem
+            key={product.id}
+            product={product}
+            onCardClick={(id) => router.push(PATHS.PRODUCT.DETAIL(id))}
+          />
+        ))}
       </div>
-
-      {/* 상품 그리드 */}
-      <ProductList products={products} />
-
-      {/* 무한 스크롤 트리거 */}
       {hasNextPage && (
-        <div
-          ref={loadMoreRef}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "32px",
-            minHeight: "100px",
-          }}
-        >
+        <div ref={loadMoreRef} className="flex justify-center items-center py-8 min-h-[100px]">
           {isFetchingNextPage && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "12px",
-                color: "#6b7280",
-                fontSize: "14px",
-              }}
-            >
+            <div className="flex flex-col items-center gap-3 text-sm text-gray-400">
               <div className="loading-spinner-small" />
               <span>더 많은 상품을 불러오는 중...</span>
             </div>

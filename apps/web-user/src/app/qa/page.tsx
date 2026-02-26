@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
+import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
@@ -15,6 +17,41 @@ import {
 
 export default function QAPage() {
   const { isAuthenticated } = useAuthStore();
+  const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
+  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
+
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationStatus("error");
+      return;
+    }
+    setLocationStatus("loading");
+    setGeocodeResponse(null);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setLocation(latitude, longitude);
+
+        // 원시 API 응답 직접 확인
+        try {
+          const res = await fetch(`/api/geocode?latitude=${latitude}&longitude=${longitude}`);
+          const rawData = await res.json();
+          setGeocodeResponse(JSON.stringify(rawData, null, 2));
+          const result = rawData?.documents?.[0];
+          if (result) setAddress(`${result.region_1depth_name} ${result.region_2depth_name}`);
+        } catch (e) {
+          setGeocodeResponse(`fetch 오류: ${e}`);
+        }
+
+        setLocationStatus("success");
+      },
+      (error) => {
+        console.error("위치 요청 실패:", error.message);
+        setLocationStatus("error");
+      },
+    );
+  };
 
   const { data: latestData } = useProductList({ sortBy: SortBy.LATEST, limit: 10 });
   const { data: popularData } = useProductList({ sortBy: SortBy.POPULAR, limit: 10 });
@@ -45,6 +82,47 @@ export default function QAPage() {
       </div>
 
       <div className="px-5 py-6 flex flex-col gap-6">
+        {/* 위치 섹션 */}
+        <section className="bg-white rounded-2xl p-5 border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400" />
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">위치</h2>
+            </div>
+            <button
+              onClick={handleGetLocation}
+              disabled={locationStatus === "loading"}
+              className="px-4 py-2 text-xs font-bold text-white bg-green-500 rounded-xl hover:bg-green-400 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              {locationStatus === "loading" ? "불러오는 중..." : "현재 위치 가져오기"}
+            </button>
+          </div>
+          <div className="flex flex-col gap-1.5 text-xs text-gray-600">
+            <div className="flex justify-between">
+              <span className="text-gray-400">주소</span>
+              <span className="font-bold text-gray-800">{address ?? "-"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">위도</span>
+              <span>{latitude ?? "-"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">경도</span>
+              <span>{longitude ?? "-"}</span>
+            </div>
+            {locationStatus === "error" && (
+              <p className="text-red-400 text-xs mt-1">위치 권한이 거부됐거나 오류가 발생했습니다.</p>
+            )}
+            {geocodeResponse && (
+              <div className="mt-3">
+                <span className="text-gray-400 block mb-1">/api/geocode 응답</span>
+                <pre className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-[10px] text-gray-700 overflow-x-auto whitespace-pre-wrap break-all">
+                  {geocodeResponse}
+                </pre>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* 인증 섹션 */}
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
@@ -84,7 +162,9 @@ export default function QAPage() {
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-purple-400" />
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">페이지 이동</h2>
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+              페이지 이동
+            </h2>
           </div>
           <div className="flex flex-col gap-2">
             <Link
@@ -97,19 +177,18 @@ export default function QAPage() {
 
             {/* 스토어 목록 */}
             <div className="flex items-center justify-between px-1 pt-2 pb-1">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">스토어 목록</span>
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                스토어 목록
+              </span>
               <span className="text-xs text-gray-400">{uniqueStoreIds.length}개</span>
             </div>
             {uniqueStoreIds.length === 0 ? (
               <p className="text-xs text-gray-400 text-center py-4">스토어 데이터 없음</p>
             ) : (
-              uniqueStoreIds.map((storeId) => (
-                <StoreItem key={storeId} storeId={storeId} />
-              ))
+              uniqueStoreIds.map((storeId) => <StoreItem key={storeId} storeId={storeId} />)
             )}
           </div>
         </section>
-
       </div>
     </div>
   );

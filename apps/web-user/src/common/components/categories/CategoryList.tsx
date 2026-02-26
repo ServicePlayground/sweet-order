@@ -63,43 +63,45 @@ export default function CategoryList() {
   const handleMouseUp = () => setIsDragging(false);
 
   return (
-    <div ref={measureRef}> {/* 너비 측정 전용 */}
-    <div className={isOverflow ? "mx-[-24px]" : ""}>
-      <div
-        ref={scrollRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        className={`flex py-2 overflow-x-auto scrollbar-hide ${
-          isOverflow
-            ? `gap-[10px] pl-[20px] ${isDragging ? "cursor-grabbing" : "cursor-grab"}`
-            : "justify-between px-[20px]"
-        }`}
-      >
-        {MOCK_CATEGORIES.map((category) => (
-          <button
-            key={category.id}
-            type="button"
-            className="flex flex-col items-center gap-[6px] shrink-0"
-          >
-            <div className="w-[59px] h-[59px] rounded-full overflow-hidden bg-[#f5f5f5]">
-              {category.image && (
-                <Image
-                  src={category.image}
-                  alt={category.name}
-                  width={59}
-                  height={59}
-                  className="object-cover w-full h-full"
-                />
-              )}
-            </div>
-            <span className="text-xs text-gray-700 select-none">{category.name}</span>
-          </button>
-        ))}
-        {isOverflow && <div className="min-w-[10px] shrink-0" />}
+    <div ref={measureRef}>
+      {" "}
+      {/* 너비 측정 전용 */}
+      <div className={isOverflow ? "mx-[-24px]" : ""}>
+        <div
+          ref={scrollRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          className={`flex py-2 overflow-x-auto scrollbar-hide ${
+            isOverflow
+              ? `gap-[10px] pl-[20px] ${isDragging ? "cursor-grabbing" : "cursor-grab"}`
+              : "justify-between px-[20px]"
+          }`}
+        >
+          {MOCK_CATEGORIES.map((category) => (
+            <button
+              key={category.id}
+              type="button"
+              className="flex flex-col items-center gap-[6px] shrink-0"
+            >
+              <div className="w-[59px] h-[59px] rounded-full overflow-hidden bg-[#f5f5f5]">
+                {category.image && (
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    width={59}
+                    height={59}
+                    className="object-cover w-full h-full"
+                  />
+                )}
+              </div>
+              <span className="text-xs text-gray-700 select-none">{category.name}</span>
+            </button>
+          ))}
+          {isOverflow && <div className="min-w-[10px] shrink-0" />}
+        </div>
       </div>
-    </div>
     </div>
   );
 }

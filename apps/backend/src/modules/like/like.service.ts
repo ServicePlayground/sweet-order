@@ -7,10 +7,13 @@ import { LikeStoreDeleteService } from "@apps/backend/modules/like/services/like
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
 import { LikeUserListService } from "@apps/backend/modules/like/services/like-user-list.service";
 import {
-  GetMyLikesRequestDto,
-  MyProductLikeListResponseDto,
-  MyStoreLikeListResponseDto,
-} from "@apps/backend/modules/like/dto/like-user-list.dto";
+  GetStoresRequestDto,
+  StoreListResponseDto,
+} from "@apps/backend/modules/store/dto/store-list.dto";
+import {
+  GetProductsRequestDto,
+  ProductListResponseDto,
+} from "@apps/backend/modules/product/dto/product-list.dto";
 
 /**
  * 좋아요 서비스
@@ -59,12 +62,22 @@ export class LikeService {
   }
 
   /**
-   * 내가 좋아요한 목록 조회 (사용자용)
+   * 내가 좋아요한 스토어 목록 조회 (사용자용)
    */
-  async getMyLikesForUser(
+  async getMyStoreLikesForUser(
     userId: string,
-    query: GetMyLikesRequestDto,
-  ): Promise<MyProductLikeListResponseDto | MyStoreLikeListResponseDto> {
-    return this.likeUserListService.getMyLikesForUser(userId, query);
+    query: GetStoresRequestDto,
+  ): Promise<StoreListResponseDto> {
+    return this.likeUserListService.getMyStoreLikesForUser(userId, query);
+  }
+
+  /**
+   * 내가 좋아요한 상품 목록 조회 (사용자용)
+   */
+  async getMyProductLikesForUser(
+    userId: string,
+    query: GetProductsRequestDto,
+  ): Promise<ProductListResponseDto> {
+    return this.likeUserListService.getMyProductLikesForUser(userId, query);
   }
 }
