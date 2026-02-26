@@ -14,12 +14,12 @@ import {
   logoutFromWebView,
   toExternalAppSchemeUrl,
 } from "@/apps/web-user/common/utils/webview.bridge";
-import { reverseGeocode } from "@/apps/web-user/common/utils/kakao-geocode.util";
 
 export default function QAPage() {
   const { isAuthenticated } = useAuthStore();
   const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -27,12 +27,23 @@ export default function QAPage() {
       return;
     }
     setLocationStatus("loading");
+    setGeocodeResponse(null);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         setLocation(latitude, longitude);
-        const result = await reverseGeocode(latitude, longitude);
-        if (result) setAddress(result);
+
+        // 원시 API 응답 직접 확인
+        try {
+          const res = await fetch(`/api/geocode?latitude=${latitude}&longitude=${longitude}`);
+          const rawData = await res.json();
+          setGeocodeResponse(JSON.stringify(rawData, null, 2));
+          const result = rawData?.documents?.[0];
+          if (result) setAddress(`${result.region_1depth_name} ${result.region_2depth_name}`);
+        } catch (e) {
+          setGeocodeResponse(`fetch 오류: ${e}`);
+        }
+
         setLocationStatus("success");
       },
       (error) => {
@@ -101,6 +112,14 @@ export default function QAPage() {
             </div>
             {locationStatus === "error" && (
               <p className="text-red-400 text-xs mt-1">위치 권한이 거부됐거나 오류가 발생했습니다.</p>
+            )}
+            {geocodeResponse && (
+              <div className="mt-3">
+                <span className="text-gray-400 block mb-1">/api/geocode 응답</span>
+                <pre className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-[10px] text-gray-700 overflow-x-auto whitespace-pre-wrap break-all">
+                  {geocodeResponse}
+                </pre>
+              </div>
             )}
           </div>
         </section>
