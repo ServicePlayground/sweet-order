@@ -31,6 +31,7 @@ export default function Header({ variant = "main", title }: HeaderProps) {
   const { data: regionsData } = useStoreRegions();
 
   const [overrideResult, setOverrideResult] = useState<RegionMatchResult | null>(null);
+  const [previousResult, setPreviousResult] = useState<RegionMatchResult | null>(null);
   const [showOpenAlarmToast, setShowOpenAlarmToast] = useState(false);
   const [showRegionSheet, setShowRegionSheet] = useState(false);
   const [inactiveModal, setInactiveModal] = useState<{
@@ -86,7 +87,7 @@ export default function Header({ variant = "main", title }: HeaderProps) {
     }
   }, [matchResult, regionsData, overrideResult]);
 
-  const displayAddress = overrideResult?.label ?? matchResult?.label ?? address ?? null;
+  const displayAddress = overrideResult?.label ?? (inactiveModal.visible ? previousResult?.label : matchResult?.label) ?? address ?? null;
 
   // 배경 클릭 비활성화
   const handleInactiveClose = () => {};
@@ -109,6 +110,8 @@ export default function Header({ variant = "main", title }: HeaderProps) {
   // 우리 동네 오픈알림 (서울 외 지역)
   const handleOutsideConfirm = () => {
     // TODO: 오픈 알림 등록 로직
+    setAddress("서울특별시 강남구");
+    setOverrideResult(null);
     setInactiveModal((prev) => ({ ...prev, visible: false }));
     setTimeout(() => setShowOpenAlarmToast(true), 500);
   };
@@ -216,7 +219,7 @@ export default function Header({ variant = "main", title }: HeaderProps) {
           {/* TODO: 테스트용 - 추후 제거 */}
           <button
             type="button"
-            onClick={() => setAddress("부산광역시 해운대구")}
+            onClick={() => { setPreviousResult(overrideResult ?? matchResult); setOverrideResult(null); setAddress("부산광역시 해운대구"); }}
             className="px-3 py-1.5 text-xs font-bold text-blue-400 bg-blue-400/10 border border-blue-400/30 rounded-lg"
           >
             부산테스트
