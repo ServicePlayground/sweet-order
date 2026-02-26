@@ -75,7 +75,7 @@ export default function Icon({ name, width, height, className, ...props }: IconP
   const IconComponent = iconTypes[name];
   return (
     <span className={clsx("inline-flex items-center", className)} {...props}>
-      <IconComponent width={width} height={height} className={clsx("h-auto max-w-full", className)} />
+      <IconComponent width={width} height={height} className="h-auto max-w-full" /> 
     </span>
   );
 }
