@@ -112,3 +112,25 @@ export function findNearestActiveRegion(
   const first = candidates[0];
   return { label: first.label, storeCount: first.storeCount, depth1Label: first.depth1Label };
 }
+
+/**
+ * RegionMatchResult를 API regions 파라미터 문자열로 변환합니다.
+ * 예) "서울:강남구", "인천:강화군,인천:옹진군"
+ */
+export function buildRegionsParam(result: RegionMatchResult, regions: RegionData[]): string {
+  const depth1Data = regions.find((r) => r.depth1.label === result.depth1Label);
+  if (!depth1Data) return "";
+
+  const depth1Keyword = depth1Data.depth1.searchKeywords[0];
+
+  // depth1만 매칭된 경우 (label === depth1Label) → 해당 지역 전체
+  if (result.label === result.depth1Label) {
+    return `${depth1Keyword}:전지역`;
+  }
+
+  // depth2 매칭된 경우 → depth2의 각 searchKeyword마다 쌍 생성
+  const depth2Data = depth1Data.depth2.find((d) => d.label === result.label);
+  if (!depth2Data) return `${depth1Keyword}:전지역`;
+
+  return depth2Data.searchKeywords.map((kw) => `${depth1Keyword}:${kw}`).join(",");
+}

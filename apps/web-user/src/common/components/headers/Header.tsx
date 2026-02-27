@@ -26,7 +26,7 @@ interface HeaderProps {
 
 export default function Header({ variant = "main", title }: HeaderProps) {
   const router = useRouter();
-  const { address, latitude, longitude, setAddress } = useUserCurrentLocationStore();
+  const { address, latitude, longitude, setAddress, setSelectedRegion } = useUserCurrentLocationStore();
   const { isHomeSearchVisible } = useHeaderStore();
   const { data: regionsData } = useStoreRegions();
 
@@ -87,7 +87,13 @@ export default function Header({ variant = "main", title }: HeaderProps) {
     }
   }, [matchResult, regionsData, overrideResult]);
 
-  const displayAddress = overrideResult?.label ?? (inactiveModal.visible ? previousResult?.label : matchResult?.label) ?? address ?? null;
+  // 유효 지역이 확정될 때마다 전역 store에 동기화 (상품 목록 필터링에 사용)
+  useEffect(() => {
+    const effectiveRegion = overrideResult ?? ((matchResult?.storeCount ?? 0) > 0 ? matchResult : null);
+    setSelectedRegion(effectiveRegion);
+  }, [overrideResult, matchResult, setSelectedRegion]);
+
+  const displayAddress = overrideResult?.label ?? (inactiveModal.visible ? previousResult?.label : matchResult?.label) ?? null;
 
   // 배경 클릭 비활성화
   const handleInactiveClose = () => {};

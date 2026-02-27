@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import BannerSlider from "@/apps/web-user/common/components/sliders/BannerSlider";
@@ -12,6 +12,9 @@ import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import Link from "next/link";
 import { useHeaderStore } from "@/apps/web-user/common/store/header.store";
 import { Icon } from "../common/components/icons";
+import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
+import { useStoreRegions } from "@/apps/web-user/features/store/hooks/queries/useStoreRegions";
+import { buildRegionsParam } from "@/apps/web-user/common/utils/region-match.util";
 
 export default function Home() {
   const router = useRouter();
@@ -20,15 +23,24 @@ export default function Home() {
   const [showComingSoon, setShowComingSoon] = useState(false);
   const searchBarRef = useRef<HTMLDivElement>(null);
   const { setIsHomeSearchVisible } = useHeaderStore();
+  const { selectedRegion } = useUserCurrentLocationStore();
+  const { data: regionsData } = useStoreRegions();
+
+  const regions = useMemo(() => {
+    if (!selectedRegion || !regionsData?.regions) return undefined;
+    return buildRegionsParam(selectedRegion, regionsData.regions) || undefined;
+  }, [selectedRegion, regionsData]);
 
   const { data: latestData, isLoading: isLatestLoading } = useProductList({
     sortBy: SortBy.LATEST,
     limit: 10,
+    regions,
   });
 
   const { data: popularData, isLoading: isPopularLoading } = useProductList({
     sortBy: SortBy.POPULAR,
     limit: 10,
+    regions,
   });
 
   useEffect(() => {
