@@ -71,11 +71,11 @@ const config: Config = {
           400: "#27A55B",
         },
         red: {
-          DEFAULT: "#F23A3E",
           50: "#FEECEC",
           100: "#FCCACB",
           200: "#F99FA1",
           300: "#F67476",
+          400: "#F23A3E",
         },
       },
       keyframes: {

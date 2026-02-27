@@ -18,6 +18,7 @@ import { UserReviewController } from "@apps/backend/apis/user/controllers/review
 import { LikeModule } from "@apps/backend/modules/like/like.module";
 import { UserLikeController } from "@apps/backend/apis/user/controllers/like.controller";
 import { OrderModule } from "@apps/backend/modules/order/order.module";
+import { RecentViewModule } from "@apps/backend/modules/recent-view/recent-view.module";
 
 /**
  * User API 모듈
@@ -36,6 +37,7 @@ import { OrderModule } from "@apps/backend/modules/order/order.module";
     ReviewModule,
     LikeModule,
     OrderModule,
+    RecentViewModule,
   ],
   controllers: [
     UserUploadController,
