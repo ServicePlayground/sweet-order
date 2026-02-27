@@ -30,6 +30,9 @@ import Mypage from "./icons/mypage.svg";
 import CloseCircle from "./icons/close_circle.svg";
 import CheckCircle from "./icons/check_circle.svg";
 import AlertCircle from "./icons/alert_circle.svg";
+import Check from "./icons/check.svg";
+import Reset from "./icons/reset.svg";
+import CurrentLocation from "./icons/current-location.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -69,13 +72,16 @@ export const iconTypes = {
   closeCircle: CloseCircle,
   checkCircle: CheckCircle,
   alertCircle: AlertCircle,
+  check: Check,
+  reset: Reset,
+  currentLocation: CurrentLocation,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {
   const IconComponent = iconTypes[name];
   return (
     <span className={clsx("inline-flex items-center", className)} {...props}>
-      <IconComponent width={width} height={height} className={clsx("h-auto max-w-full", className)} />
+      <IconComponent width={width} height={height} className="h-auto max-w-full" /> 
     </span>
   );
 }

@@ -165,7 +165,7 @@ export const Select = <T extends string | number = string>({
           </ul>
         )}
       </div>
-      {error && <p className="mt-[6px] text-xs text-red-500">{error}</p>}
+      {error && <p className="mt-[6px] text-xs text-red-400">{error}</p>}
     </div>
   );
 };

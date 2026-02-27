@@ -135,9 +135,12 @@ export function useWebViewBridge() {
     };
 
     // 환경에 따라 자동으로 위치 요청
+    const hasStoredRegion = !!localStorage.getItem("sweet-order:selected-region");
+
     if (isWebViewEnvironment()) {
       requestLocationFromWebView();
-    } else if (navigator.geolocation) {
+    } else if (!hasStoredRegion && navigator.geolocation) {
+      // 저장된 지역이 없을 때만 GPS 권한 요청 (최초 진입)
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
@@ -148,6 +151,8 @@ export function useWebViewBridge() {
         },
         (error) => {
           console.error("브라우저 위치 정보 요청 실패:", error.message);
+          // 위치 권한 거부 시 기본값: 강남구
+          setAddress("서울특별시 강남구");
         },
       );
     }
