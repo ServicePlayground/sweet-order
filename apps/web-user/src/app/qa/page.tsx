@@ -174,6 +174,15 @@ export default function QAPage() {
               <span>홈</span>
               <Icon name="arrow" width={16} height={16} className="rotate-90 text-gray-400" />
             </Link>
+            <button
+              onClick={() => {
+                window.location.href = toExternalAppSchemeUrl("supertoss://send");
+              }}
+              className="flex items-center justify-between w-full px-4 py-3 bg-[#0064FF]/10 rounded-xl text-sm text-[#0064FF] hover:bg-[#0064FF]/20 transition-colors text-left"
+            >
+              <span>토스 송금</span>
+              <Icon name="arrow" width={16} height={16} className="rotate-90 text-[#0064FF]" />
+            </button>
 
             {/* 스토어 목록 */}
             <div className="flex items-center justify-between px-1 pt-2 pb-1">
