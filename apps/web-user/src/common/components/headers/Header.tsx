@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useIsFetching } from "@tanstack/react-query";
 import Link from "next/link";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
@@ -33,6 +34,9 @@ export default function Header({ variant = "main", title }: HeaderProps) {
   const [overrideResult, setOverrideResult] = useState<RegionMatchResult | null>(null);
   const [previousResult, setPreviousResult] = useState<RegionMatchResult | null>(null);
   const [showOpenAlarmToast, setShowOpenAlarmToast] = useState(false);
+  const [regionToast, setRegionToast] = useState<"loading" | "done" | null>(null);
+  const isRegionChanging = useRef(false);
+  const productFetching = useIsFetching({ queryKey: ["product", "list"] });
   const [showRegionSheet, setShowRegionSheet] = useState(false);
   const [inactiveModal, setInactiveModal] = useState<{
     visible: boolean;
@@ -92,6 +96,14 @@ export default function Header({ variant = "main", title }: HeaderProps) {
     const effectiveRegion = overrideResult ?? ((matchResult?.storeCount ?? 0) > 0 ? matchResult : null);
     setSelectedRegion(effectiveRegion);
   }, [overrideResult, matchResult, setSelectedRegion]);
+
+  // 지역 변경 후 product 쿼리 refetch 완료 감지
+  useEffect(() => {
+    if (isRegionChanging.current && productFetching === 0) {
+      isRegionChanging.current = false;
+      setRegionToast("done");
+    }
+  }, [productFetching]);
 
   const displayAddress = overrideResult?.label ?? (inactiveModal.visible ? previousResult?.label : matchResult?.label) ?? null;
 
@@ -277,7 +289,35 @@ export default function Header({ variant = "main", title }: HeaderProps) {
           onClose={() => setShowRegionSheet(false)}
           regions={regionsData.regions}
           currentResult={overrideResult ?? matchResult}
-          onSelect={(result) => setOverrideResult(result)}
+          onSelect={(result) => {
+            isRegionChanging.current = true;
+            setRegionToast("loading");
+            setOverrideResult(result);
+          }}
+        />
+      )}
+
+      {regionToast === "loading" && (
+        <Toast
+          message="위치 설정 중.."
+          showSpinner
+          spinnerClassName="text-white"
+          variant="column"
+          position="center"
+          duration={10000}
+          onClose={() => {}}
+        />
+      )}
+
+      {regionToast === "done" && (
+        <Toast
+          message="설정완료"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="column"
+          position="center"
+          duration={1500}
+          onClose={() => setRegionToast(null)}
         />
       )}
 
