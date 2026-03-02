@@ -18,7 +18,9 @@ import {
 export default function QAPage() {
   const { isAuthenticated } = useAuthStore();
   const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
-  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle",
+  );
   const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
 
   const handleGetLocation = () => {
@@ -111,7 +113,9 @@ export default function QAPage() {
               <span>{longitude ?? "-"}</span>
             </div>
             {locationStatus === "error" && (
-              <p className="text-red-400 text-xs mt-1">위치 권한이 거부됐거나 오류가 발생했습니다.</p>
+              <p className="text-red-400 text-xs mt-1">
+                위치 권한이 거부됐거나 오류가 발생했습니다.
+              </p>
             )}
             {geocodeResponse && (
               <div className="mt-3">
@@ -176,7 +180,9 @@ export default function QAPage() {
             </Link>
             <button
               onClick={() => {
-                window.location.href = toExternalAppSchemeUrl("supertoss://send");
+                window.location.href = toExternalAppSchemeUrl(
+                  "supertoss://send?bank=국민&accountNo=1234567890&amount=10000",
+                );
               }}
               className="flex items-center justify-between w-full px-4 py-3 bg-[#0064FF]/10 rounded-xl text-sm text-[#0064FF] hover:bg-[#0064FF]/20 transition-colors text-left"
             >
