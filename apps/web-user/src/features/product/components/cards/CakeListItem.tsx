@@ -78,7 +78,7 @@ export function CakeListItem({ product, onCardClick }: CakeListItemProps) {
         </div>
       </div>
       <div className="inline-flex items-center gap-1 py-1 px-2 text-2xs font-bold text-gray-700 bg-gray-50 rounded-full max-w-full">
-        <span>{formatAddress(product.productNoticeAddress)} · {product.productNoticeProducer.length > 10 ? `${product.productNoticeProducer.slice(0, 10)}...` : product.productNoticeProducer}</span>
+        <span>{formatAddress(product.pickupAddress)} · {product.productNoticeProducer.length > 10 ? `${product.productNoticeProducer.slice(0, 10)}...` : product.productNoticeProducer}</span>
         <Icon name="arrow" width={16} height={16} className="text-gray-700 rotate-90" />
       </div>
     </div>
