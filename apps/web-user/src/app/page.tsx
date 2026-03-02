@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { SearchBar } from "@/apps/web-user/common/components/search/SearchBar";
 import BannerSlider from "@/apps/web-user/common/components/sliders/BannerSlider";
 import CakeListSlider from "@/apps/web-user/common/components/sliders/CakeListSlider";
@@ -9,18 +9,15 @@ import CategoryList from "@/apps/web-user/common/components/categories/CategoryL
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import Link from "next/link";
 import { useHeaderStore } from "@/apps/web-user/common/store/header.store";
-import { Icon } from "../common/components/icons";
+import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNav";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
 import { useStoreRegions } from "@/apps/web-user/features/store/hooks/queries/useStoreRegions";
 import { buildRegionsParam } from "@/apps/web-user/common/utils/region-match.util";
 
 export default function Home() {
   const router = useRouter();
-  const pathname = usePathname();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showComingSoon, setShowComingSoon] = useState(false);
   const searchBarRef = useRef<HTMLDivElement>(null);
   const { setIsHomeSearchVisible } = useHeaderStore();
   const { selectedRegion } = useUserCurrentLocationStore();
@@ -106,63 +103,7 @@ export default function Home() {
         isLoading={isPopularLoading}
         onProductClick={handleProductClick}
       />
-      <ul className="fixed bottom-0 left-0 right-0 bg-white flex items-center h-[60px] border-t border-gray-100">
-        {[
-          { icon: "home", label: "홈", path: PATHS.HOME, ready: true },
-          { icon: "map", label: "지도", path: PATHS.MAP, ready: false },
-          { icon: "favorite", label: "저장", path: PATHS.SAVED, ready: false },
-          { icon: "mypage", label: "MY", path: PATHS.MYPAGE, ready: false },
-        ].map(({ icon, label, path, ready }) => {
-          const isActive = pathname === path;
-          return (
-            <li key={label} className="w-[25%]">
-              {ready ? (
-                <Link
-                  href={path}
-                  className={`flex flex-col items-center justify-center text-2xs font-bold ${isActive ? "text-primary" : "text-gray-400"}`}
-                >
-                  <Icon name={icon as any} width={24} height={24} />
-                  {label}
-                </Link>
-              ) : (
-                <button
-                  onClick={() => setShowComingSoon(true)}
-                  className="w-full flex flex-col items-center justify-center text-2xs font-bold text-gray-400"
-                >
-                  <Icon name={icon as any} width={24} height={24} />
-                  {label}
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* 준비중 모달 */}
-      {showComingSoon && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
-          onClick={() => setShowComingSoon(false)}
-        >
-          <div
-            className="w-full bg-white rounded-t-3xl px-8 pt-8 pb-12 flex flex-col items-center gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-10 h-1 bg-gray-200 rounded-full mb-2" />
-            <span className="text-6xl">🚧</span>
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-xl font-bold text-gray-900">준비중입니다</p>
-              <p className="text-sm text-gray-400 text-center">더 나은 서비스로 곧 찾아올게요!</p>
-            </div>
-            <button
-              onClick={() => setShowComingSoon(false)}
-              className="w-full mt-2 py-4 bg-primary text-white font-bold rounded-2xl"
-            >
-              확인
-            </button>
-          </div>
-        </div>
-      )}
+      <BottomNav />
     </div>
   );
 }
