@@ -30,6 +30,8 @@ interface ModalProps {
   confirmFlex?: number;
   /** 취소 버튼 flex 비율 (기본값: 1) */
   cancelFlex?: number;
+  /** 취소 버튼 숨김 (기본값: false) */
+  hideCancel?: boolean;
 }
 
 /**
@@ -60,6 +62,7 @@ export const Modal: React.FC<ModalProps> = ({
   onCancel,
   confirmFlex = 1,
   cancelFlex = 1,
+  hideCancel = false,
 }) => {
   // ESC 키로 닫기
   useEffect(() => {
@@ -109,11 +112,13 @@ export const Modal: React.FC<ModalProps> = ({
               {confirmText}
             </Button>
           </span>
-          <span style={{ flex: cancelFlex }}>
-            <Button onClick={handleCancel} variant={cancelVariant} className="break-keep leading-[1.2]">
-              {cancelText}
-            </Button>
-          </span>
+          {!hideCancel && (
+            <span style={{ flex: cancelFlex }}>
+              <Button onClick={handleCancel} variant={cancelVariant} className="break-keep leading-[1.2]">
+                {cancelText}
+              </Button>
+            </span>
+          )}
         </div>
       </div>
     </div>

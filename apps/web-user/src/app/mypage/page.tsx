@@ -150,9 +150,8 @@ export default function MypagePage() {
         title="앱을 설치해주세요!"
         description="로그인은 스위트오더 앱에서만 가능합니다."
         confirmText="확인"
-        cancelText="닫기"
         onConfirm={() => setIsAppGuideOpen(false)}
-        onCancel={() => setIsAppGuideOpen(false)}
+        hideCancel
       />
 
       <BottomNav />
