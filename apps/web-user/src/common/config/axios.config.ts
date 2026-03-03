@@ -43,7 +43,8 @@ function isWebViewEnvironment(): boolean {
 
 userClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // TODO: 개발용 임시 토큰 삭제하기
-  if (DEV_ACCESS_TOKEN && !isWebViewEnvironment()) {
+  const { isAuthenticated } = useAuthStore.getState();
+  if (DEV_ACCESS_TOKEN && !isWebViewEnvironment() && isAuthenticated) {
     config.headers.Authorization = `Bearer ${DEV_ACCESS_TOKEN}`;
   }
   return config;
@@ -64,8 +65,10 @@ userClient.interceptors.response.use(
       // Zustand store에서 토큰 제거
       useAuthStore.getState().clearAccessToken();
 
-      // Flutter 앱의 로그아웃 메시지를 전송합니다. Flutter 내에서 토큰을 제거합니다.
-      logoutFromWebView();
+      // Flutter 웹뷰 환경에서만 로그아웃 메시지 전송
+      if (isWebViewEnvironment()) {
+        logoutFromWebView();
+      }
     }
 
     return Promise.reject(error);
