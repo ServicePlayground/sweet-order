@@ -12,11 +12,12 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import {
   navigateToLoginPage,
   logoutFromWebView,
+  isWebViewEnvironment,
   toExternalAppSchemeUrl,
 } from "@/apps/web-user/common/utils/webview.bridge";
 
 export default function QAPage() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, clearAccessToken } = useAuthStore();
   const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
@@ -153,7 +154,13 @@ export default function QAPage() {
               </button>
             ) : (
               <button
-                onClick={logoutFromWebView}
+                onClick={() => {
+                  if (isWebViewEnvironment()) {
+                    logoutFromWebView();
+                  } else {
+                    clearAccessToken();
+                  }
+                }}
                 className="px-4 py-2 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-400 transition-colors"
               >
                 로그아웃
