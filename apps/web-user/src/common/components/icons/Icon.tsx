@@ -33,6 +33,11 @@ import AlertCircle from "./icons/alert_circle.svg";
 import Check from "./icons/check.svg";
 import Reset from "./icons/reset.svg";
 import CurrentLocation from "./icons/current-location.svg";
+import Setting from "./icons/setting.svg";
+import Review from "./icons/review.svg";
+import Recent from "./icons/recent.svg";
+import Saved from "./icons/saved.svg";
+import Reservation from "./icons/reservation.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -75,6 +80,11 @@ export const iconTypes = {
   check: Check,
   reset: Reset,
   currentLocation: CurrentLocation,
+  setting: Setting,
+  review: Review,
+  recent: Recent,
+  saved: Saved,
+  reservation: Reservation,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {
