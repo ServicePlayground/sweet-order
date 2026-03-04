@@ -57,7 +57,7 @@ export function ProductDetailSizeFlavorSection({
                 <span className="text-gray-700">{option.displayName}</span>
                 <span className="ml-auto text-gray-900">{option.description}</span>
                 <span className="relative ml-[24px] w-[70px] text-right text-gray-900 after:absolute after:left-[-12px] after:top-1/2 after:-translate-y-1/2 after:w-[1px] after:h-[8px] after:bg-gray-200 after:content-['']">
-                  + 10,000원
+                  + {option.price.toLocaleString()}원
                 </span>
               </div>
             );
@@ -73,7 +73,7 @@ export function ProductDetailSizeFlavorSection({
               <div key={index} className="flex justify-between text-[13px]">
                 <span className="text-gray-700">{option.displayName}</span>
                 <span className="relative ml-[24px] w-[70px] text-right text-gray-900">
-                  + 10,000원
+                  + {option.price.toLocaleString()}원
                 </span>
               </div>
             );
