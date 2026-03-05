@@ -16,13 +16,20 @@ import {
   toExternalAppSchemeUrl,
 } from "@/apps/web-user/common/utils/webview.bridge";
 
+const QA_STAGING_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWw2MWpzMzIwMDAxMm51dW1ucXFxcHhnIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3MTAwNDk3MiwiZXhwIjoxNzc4NzgwOTcyfQ.VgqTagmvs__TVaCeko2iZih09nacapw_m3q9fDXzFr0";
+
 export default function QAPage() {
-  const { isAuthenticated, clearAccessToken } = useAuthStore();
+  const { isAuthenticated, clearAccessToken, setAccessToken } = useAuthStore();
   const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
   );
   const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
+
+  const handleWebLogin = () => {
+    setAccessToken(QA_STAGING_TOKEN);
+  };
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -133,7 +140,7 @@ export default function QAPage() {
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-blue-400" />
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">인증</h2>
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">App 로그인</h2>
           </div>
 
           <div className="flex items-center justify-between">
@@ -166,6 +173,48 @@ export default function QAPage() {
                 로그아웃
               </button>
             )}
+          </div>
+
+          {/* Web 로그인: 토큰 직접 사용 (앱브릿지와 동일하게 setAccessToken만 호출) */}
+          <div className="mt-5 pt-5 border-t border-gray-200">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+                Web 로그인
+              </h2>
+            </div>
+
+            {/* Staging 영역 */}
+            <div className="mb-5 pb-5 border-b border-gray-100">
+              <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-3">
+                Staging
+              </p>
+              <div className="flex flex-col gap-1.5 text-xs text-gray-600 mb-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Staging ID</span>
+                  <span className="font-bold text-gray-800">user001</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Staging 토큰</span>
+                  <span className="font-mono font-bold text-gray-800">{QA_STAGING_TOKEN}</span>
+                </div>
+              </div>
+              {!isAuthenticated ? (
+                <button
+                  onClick={handleWebLogin}
+                  className="px-4 py-2 text-xs font-bold text-white bg-amber-500 rounded-xl hover:bg-amber-400 transition-colors"
+                >
+                  로그인
+                </button>
+              ) : (
+                <button
+                  onClick={() => clearAccessToken()}
+                  className=" px-4 py-2 text-xs font-bold text-white bg-red-500 rounded-xl hover:bg-red-400 transition-colors"
+                >
+                  로그아웃
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
