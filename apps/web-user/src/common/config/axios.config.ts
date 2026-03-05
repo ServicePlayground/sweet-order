@@ -1,6 +1,5 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
-import { logoutFromWebView } from "@/apps/web-user/common/utils/webview.bridge";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 
@@ -28,29 +27,6 @@ userClient.interceptors.request.use(
   },
 );
 
-// ============================================================================
-// TODO: 개발용 임시 토큰 삭제하기
-// - 삭제 예정 (DEV_ACCESS_TOKEN, isWebViewEnvironment() 함께 삭제)
-// - 웹 브라우저 환경에서만 사용, 웹뷰 환경에서는 사용 안 함
-const DEV_ACCESS_TOKEN = process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN;
-function isWebViewEnvironment(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  const userAgent = window.navigator.userAgent.toLowerCase();
-  return userAgent.includes("wv") || userAgent.includes("webview");
-}
-
-userClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  // TODO: 개발용 임시 토큰 삭제하기
-  const { isAuthenticated } = useAuthStore.getState();
-  if (DEV_ACCESS_TOKEN && !isWebViewEnvironment() && isAuthenticated) {
-    config.headers.Authorization = `Bearer ${DEV_ACCESS_TOKEN}`;
-  }
-  return config;
-});
-// ============================================================================
-
 // 응답 인터셉터
 userClient.interceptors.response.use(
   (response: AxiosResponse) => {
@@ -64,11 +40,6 @@ userClient.interceptors.response.use(
     if (status === 401 && message?.includes("ACCESS_TOKEN_INVALID")) {
       // Zustand store에서 토큰 제거
       useAuthStore.getState().clearAccessToken();
-
-      // Flutter 웹뷰 환경에서만 로그아웃 메시지 전송
-      if (isWebViewEnvironment()) {
-        logoutFromWebView();
-      }
     }
 
     return Promise.reject(error);
