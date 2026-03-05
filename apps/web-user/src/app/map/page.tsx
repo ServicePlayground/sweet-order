@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import Script from "next/script";
 import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNav";
 import { REGION_COORDINATES } from "@/apps/web-user/common/constants/region-coordinates.constant";
@@ -132,10 +132,10 @@ export default function MapPage() {
     );
   };
 
-  // 카카오 지도 스크립트 로드 후, 지도 초기화 및 마커 표시
-  const handleKakaoScriptLoad = () => {
+  const initializeMap = () => {
     if (!window.kakao || !window.kakao.maps) return;
     if (!mapContainerRef.current) return;
+    if (mapInstanceRef.current) return;
 
     const DEFAULT_CENTER = REGION_COORDINATES["서울"]?.["강남구"] ?? {
       lat: 37.5172,
@@ -161,6 +161,19 @@ export default function MapPage() {
       });
     });
   };
+
+  // 카카오 스크립트 로드 콜백 (첫 진입 시)
+  const handleKakaoScriptLoad = () => {
+    initializeMap();
+  };
+
+  // 탭 이동 후 재진입 시, 이미 스크립트가 로드되어 있다면 직접 초기화
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.kakao && window.kakao.maps && !mapInstanceRef.current) {
+      initializeMap();
+    }
+  }, []);
 
   if (!kakaoJavascriptKey) {
     return (
