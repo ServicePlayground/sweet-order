@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY || "";
+const KAKAO_REST_API_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY || "";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
