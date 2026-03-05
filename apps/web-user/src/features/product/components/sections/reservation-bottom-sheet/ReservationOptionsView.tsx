@@ -35,6 +35,7 @@ interface ReservationOptionsViewProps {
   isAddingFromConfirm?: boolean;
   isEditingFromConfirm?: boolean;
   imageUploadEnabled: ImageUploadEnabled;
+  letteringMaxLength: number;
 }
 
 export function ReservationOptionsView({
@@ -60,6 +61,7 @@ export function ReservationOptionsView({
   isAddingFromConfirm,
   isEditingFromConfirm,
   imageUploadEnabled,
+  letteringMaxLength,
 }: ReservationOptionsViewProps) {
   const sizeRef = useRef<HTMLDivElement>(null);
   const flavorRef = useRef<HTMLDivElement>(null);
@@ -150,7 +152,7 @@ export function ReservationOptionsView({
           value={letteringMessage}
           onChange={setLetteringMessage}
           placeholder="가능한 10자 이내로 적어주세요."
-          maxLength={200}
+          maxLength={letteringMaxLength}
           showCount
         />
       </div>

@@ -40,6 +40,7 @@ export interface ReservationBottomSheetProps {
   pickupLatitude: number;
   pickupLongitude: number;
   imageUploadEnabled: ImageUploadEnabled;
+  letteringMaxLength: number;
   onClose: () => void;
 }
 

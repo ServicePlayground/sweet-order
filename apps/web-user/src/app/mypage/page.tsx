@@ -25,7 +25,7 @@ const QUICK_LINKS = [
 export default function MypagePage() {
   const { isAuthenticated, setAccessToken } = useAuthStore();
   const hasHydrated = useAuthHasHydrated();
-  const { data: user, isLoading } = useMe();
+  const { data: user } = useMe();
   const [isAppGuideOpen, setIsAppGuideOpen] = useState(false);
 
   return (

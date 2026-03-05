@@ -55,7 +55,7 @@ export function BottomSheet({ isOpen, onClose, title, children, footer }: Bottom
     >
       <div
         ref={sheetRef}
-        className="fixed bottom-0 left-0 right-0 max-w-[638px] mx-auto h-[80%] bg-white rounded-t-3xl flex flex-col animate-slide-up"
+        className="fixed bottom-0 left-0 right-0 max-w-[638px] mx-auto max-h-[80%] bg-white rounded-t-3xl flex flex-col animate-slide-up"
       >
         {/* Header */}
         <div className="relative h-[64px] border-b border-gray-100">

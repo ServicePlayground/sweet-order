@@ -24,12 +24,14 @@ export function ReservationCalendarView({
         minDate={new Date()}
         className="border-0 shadow-none p-0"
       />
-      <TimePicker
-        selectedTime={tempSelectedTime}
-        onTimeSelect={setTempSelectedTime}
-        interval={30}
-        timeFormat="12h"
-      />
+      <div className="pb-[40px]">
+        <TimePicker
+          selectedTime={tempSelectedTime}
+          onTimeSelect={setTempSelectedTime}
+          interval={30}
+          timeFormat="12h"
+        />
+      </div>
     </div>
   );
 }

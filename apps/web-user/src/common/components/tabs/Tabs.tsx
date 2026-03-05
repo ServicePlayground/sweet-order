@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 export interface Tab {
   id: string;
@@ -15,26 +15,14 @@ export interface TabsProps {
 
 export function Tabs({ tabs, defaultTab }: TabsProps) {
   const [activeTab, setActiveTab] = useState<string>(defaultTab || tabs[0]?.id || "");
-  const tabsHeaderRef = useRef<HTMLDivElement>(null);
-
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
-    if (tabsHeaderRef.current) {
-      const headerOffset = 52;
-      const rect = tabsHeaderRef.current.getBoundingClientRect();
-      const top = window.scrollY + rect.top - headerOffset;
-      window.scrollTo({ top });
-    }
-  };
-
   return (
     <div className="bg-white rounded-xl">
       {/* 탭 헤더 */}
-      <div ref={tabsHeaderRef} className="flex justify-center border-b border-gray-100 p-0 sticky top-[52px] bg-white z-10">
+      <div className="flex justify-center border-b border-gray-100 p-0 sticky top-[52px] bg-white z-10">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => handleTabClick(tab.id)}
+            onClick={() => setActiveTab(tab.id)}
             className="flex-1 h-[44px] flex items-center justify-center text-sm border-0 bg-transparent cursor-pointer transition-all duration-200"
           >
             <span
