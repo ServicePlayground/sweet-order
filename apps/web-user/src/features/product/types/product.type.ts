@@ -148,6 +148,7 @@ export interface ProductListQueryParams {
   storeId?: string;
   productType?: ProductType;
   productCategoryTypes?: ProductCategoryType[];
+  regions?: string;
 }
 
 /**

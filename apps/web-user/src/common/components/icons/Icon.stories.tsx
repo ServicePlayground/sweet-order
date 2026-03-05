@@ -1,62 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import Icon, { iconTypes } from "./Icon";
 
-const iconNames = [
-  "cart",
-  "chevronLeft",
-  "arrow",
-  "favorite",
-  "favoriteFilled",
-  "close",
-  "calendar",
-  "selectArrow",
-  "addPhoto",
-  "removePhoto",
-  "takeout",
-  "trash",
-  "minus",
-  "plus",
-  "warning",
-  "star",
-  "quantity",
-  "location",
-  "search",
-] as const;
+const allIconNames = Object.keys(iconTypes) as Array<keyof typeof iconTypes>;
 
-const iconFiles: Record<string, string> = {
-  cart: "cart.svg",
-  chevronLeft: "chevron-left.svg",
-  arrow: "arrow.svg",
-  favorite: "favorite.svg",
-  favoriteFilled: "favorite-filled.svg",
-  close: "close.svg",
-  calendar: "calendar.svg",
-  selectArrow: "select-arrow.svg",
-  addPhoto: "add-photo.svg",
-  removePhoto: "remove-photo.svg",
-  takeout: "takeout.svg",
-  trash: "trash.svg",
-  minus: "minus.svg",
-  plus: "plus.svg",
-  warning: "warning.svg",
-  star: "star.svg",
-  quantity: "quantity.svg",
-  location: "location.svg",
-  search: "search.svg",
-  bullet: "bullet.svg",
-  alarm: "alarm.svg",
-  home: "home.svg",
-  map: "map.svg",
-  mypage: "mypage.svg",
-  closeCircle: "close_circle.svg",
-};
-
-// 스토리북용 간단한 Icon 표시 컴포넌트
-const IconDisplay = ({ name, size = 24 }: { name: string; size?: number }) => (
-  <img src={`/icons/${iconFiles[name]}`} alt={name} width={size} height={size} />
-);
-
-const meta: Meta = {
+const meta: Meta<typeof Icon> = {
   title: "Common/Icon",
+  component: Icon,
   parameters: {
     layout: "centered",
     docs: {
@@ -65,7 +14,7 @@ const meta: Meta = {
 공통 아이콘 컴포넌트
 
 ## 사용 가능한 아이콘
-${iconNames.map((name) => `- \`${name}\``).join("\n")}
+${allIconNames.map((name) => `- \`${name}\``).join("\n")}
 
 ## 사용 예시
 \`\`\`tsx
@@ -79,17 +28,36 @@ import { Icon } from "@/common/components/icons";
     },
   },
   tags: ["autodocs"],
+  argTypes: {
+    name: {
+      control: "select",
+      options: allIconNames,
+    },
+    width: { control: "number" },
+    height: { control: "number" },
+    className: { control: "text" },
+  },
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Icon>;
+
+// ==================== 단일 아이콘 ====================
+
+export const Default: Story = {
+  args: {
+    name: "cart",
+    width: 24,
+    height: 24,
+  },
+};
 
 // ==================== 모든 아이콘 ====================
 
 export const AllIcons: Story = {
   render: () => (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "24px" }}>
-      {iconNames.map((name) => (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "16px" }}>
+      {allIconNames.map((name) => (
         <div
           key={name}
           style={{
@@ -102,8 +70,8 @@ export const AllIcons: Story = {
             borderRadius: "8px",
           }}
         >
-          <IconDisplay name={name} size={24} />
-          <span style={{ fontSize: "12px", color: "#666" }}>{name}</span>
+          <Icon name={name} width={24} height={24} />
+          <span style={{ fontSize: "11px", color: "#666", textAlign: "center", wordBreak: "break-all" }}>{name}</span>
         </div>
       ))}
     </div>
@@ -114,27 +82,34 @@ export const AllIcons: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-      <div style={{ textAlign: "center" }}>
-        <IconDisplay name="cart" size={16} />
-        <div style={{ fontSize: "10px", marginTop: "4px" }}>16px</div>
-      </div>
-      <div style={{ textAlign: "center" }}>
-        <IconDisplay name="cart" size={20} />
-        <div style={{ fontSize: "10px", marginTop: "4px" }}>20px</div>
-      </div>
-      <div style={{ textAlign: "center" }}>
-        <IconDisplay name="cart" size={24} />
-        <div style={{ fontSize: "10px", marginTop: "4px" }}>24px</div>
-      </div>
-      <div style={{ textAlign: "center" }}>
-        <IconDisplay name="cart" size={32} />
-        <div style={{ fontSize: "10px", marginTop: "4px" }}>32px</div>
-      </div>
-      <div style={{ textAlign: "center" }}>
-        <IconDisplay name="cart" size={48} />
-        <div style={{ fontSize: "10px", marginTop: "4px" }}>48px</div>
-      </div>
+    <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+      {[16, 20, 24, 32, 48].map((size) => (
+        <div key={size} style={{ textAlign: "center" }}>
+          <Icon name="cart" width={size} height={size} />
+          <div style={{ fontSize: "10px", marginTop: "4px" }}>{size}px</div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// ==================== 색상 ====================
+
+export const Colors: Story = {
+  render: () => (
+    <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+      {[
+        { label: "default", className: "" },
+        { label: "primary", className: "text-orange-500" },
+        { label: "gray", className: "text-gray-400" },
+        { label: "red", className: "text-red-500" },
+        { label: "blue", className: "text-blue-500" },
+      ].map(({ label, className }) => (
+        <div key={label} style={{ textAlign: "center" }}>
+          <Icon name="favorite" width={24} height={24} className={className} />
+          <div style={{ fontSize: "10px", marginTop: "4px" }}>{label}</div>
+        </div>
+      ))}
     </div>
   ),
 };
@@ -145,26 +120,22 @@ export const IconList: Story = {
   render: () => (
     <div style={{ padding: "20px" }}>
       <h3 style={{ marginBottom: "16px", fontSize: "16px", fontWeight: "bold" }}>
-        사용 가능한 아이콘 ({iconNames.length}개)
+        사용 가능한 아이콘 ({allIconNames.length}개)
       </h3>
       <table style={{ borderCollapse: "collapse", width: "100%" }}>
         <thead>
           <tr style={{ borderBottom: "2px solid #e5e5e5" }}>
             <th style={{ padding: "8px", textAlign: "left" }}>Icon</th>
             <th style={{ padding: "8px", textAlign: "left" }}>Name</th>
-            <th style={{ padding: "8px", textAlign: "left" }}>File</th>
           </tr>
         </thead>
         <tbody>
-          {iconNames.map((name) => (
+          {allIconNames.map((name) => (
             <tr key={name} style={{ borderBottom: "1px solid #e5e5e5" }}>
               <td style={{ padding: "8px" }}>
-                <IconDisplay name={name} size={24} />
+                <Icon name={name} width={24} height={24} />
               </td>
               <td style={{ padding: "8px", fontFamily: "monospace" }}>{name}</td>
-              <td style={{ padding: "8px", fontFamily: "monospace", color: "#666" }}>
-                {iconFiles[name]}
-              </td>
             </tr>
           ))}
         </tbody>

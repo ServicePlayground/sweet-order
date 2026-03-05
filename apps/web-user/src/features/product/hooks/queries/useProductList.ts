@@ -19,6 +19,7 @@ export function useProductList({
   minPrice,
   maxPrice,
   productType,
+  regions,
 }: Partial<ProductListQueryParams> = {}) {
   const { showAlert } = useAlertStore();
 
@@ -31,6 +32,7 @@ export function useProductList({
       minPrice,
       maxPrice,
       productType,
+      regions,
     }),
     queryFn: ({ pageParam = 1 }) => {
       const params: GetProductsParams = {
@@ -52,6 +54,9 @@ export function useProductList({
       }
       if (productType) {
         params.productType = productType;
+      }
+      if (regions) {
+        params.regions = regions;
       }
       return productApi.getProducts(params);
     },

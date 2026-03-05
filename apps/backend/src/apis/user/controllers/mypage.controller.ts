@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import { ReviewService } from "@apps/backend/modules/review/review.service";
 import { LikeService } from "@apps/backend/modules/like/like.service";
+import { RecentViewService } from "@apps/backend/modules/recent-view/recent-view.service";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
@@ -47,6 +48,7 @@ export class UserMypageController {
     private readonly orderService: OrderService,
     private readonly reviewService: ReviewService,
     private readonly likeService: LikeService,
+    private readonly recentViewService: RecentViewService,
   ) {}
 
   /**
@@ -149,5 +151,27 @@ export class UserMypageController {
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<ProductListResponseDto> {
     return await this.likeService.getMyProductLikesForUser(req.user.sub, query);
+  }
+
+  /**
+   * 최근 본 상품 목록 조회 API
+   */
+  @Get("recent/products")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 최근 본 상품 목록 조회",
+    description:
+      "마이페이지에서 자신이 최근 조회한 상품 목록을 조회합니다. 노출 중인 상품만 포함되며, 조회 시점 기준 최신순, 페이지네이션을 지원합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ProductListResponseDto })
+  @SwaggerAuthResponses()
+  async getRecentViewedProducts(
+    @Query() query: GetProductsRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<ProductListResponseDto> {
+    return await this.recentViewService.getRecentViewedProductsForUser(
+      req.user.sub,
+      query,
+    );
   }
 }

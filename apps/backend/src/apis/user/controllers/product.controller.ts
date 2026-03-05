@@ -1,6 +1,7 @@
 import { Controller, Get, Query, HttpCode, HttpStatus, Param, Request } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { ProductService } from "@apps/backend/modules/product/product.service";
+import { RecentViewService } from "@apps/backend/modules/recent-view/recent-view.service";
 import {
   GetProductsRequestDto,
   ProductListResponseDto,
@@ -37,7 +38,10 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 @Controller(`${USER_ROLES.USER}/products`)
 @Auth({ isOptionalPublic: true }) // 선택적 인증: 토큰이 있으면 검증하고 user 설정, 없으면 통과
 export class UserProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly recentViewService: RecentViewService,
+  ) {}
 
   /**
    * 상품 목록 조회 API (무한 스크롤)
@@ -74,6 +78,10 @@ export class UserProductController {
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async getProductDetail(@Param("id") id: string, @Request() req: { user?: JwtVerifiedPayload }) {
-    return await this.productService.getProductDetailForUser(id, req.user);
+    const result = await this.productService.getProductDetailForUser(id, req.user);
+    if (req.user?.sub) {
+      await this.recentViewService.recordProductView(req.user.sub, id);
+    }
+    return result;
   }
 }

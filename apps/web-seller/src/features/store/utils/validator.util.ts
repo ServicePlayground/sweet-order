@@ -37,9 +37,9 @@ export const validateStoreDescription = (description: string | undefined): strin
     return null;
   }
 
-  // 500자 초과 검증
-  if (description.length > 500) {
-    return "스토어 설명은 500자 이하로 입력해주세요.";
+  // 250자 초과 검증
+  if (description.length > 250) {
+    return "스토어 설명은 250자 이하로 입력해주세요.";
   }
 
   // HTML 태그 검증 (< > 태그가 포함되어 있는지 확인)

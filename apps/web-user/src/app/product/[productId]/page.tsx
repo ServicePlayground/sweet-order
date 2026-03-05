@@ -158,6 +158,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         pickupZonecode={data.pickupZonecode}
         pickupLatitude={data.pickupLatitude}
         pickupLongitude={data.pickupLongitude}
+        imageUploadEnabled={data.imageUploadEnabled}
+        letteringMaxLength={data.letteringMaxLength}
         onClose={() => setIsBottomSheetOpen(false)}
       />
     </div>

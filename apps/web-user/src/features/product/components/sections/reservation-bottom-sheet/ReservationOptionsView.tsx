@@ -9,6 +9,7 @@ import {
   CakeFlavorOption,
   CakeSizeOption,
   ProductType,
+  ImageUploadEnabled,
 } from "@/apps/web-user/features/product/types/product.type";
 
 interface ReservationOptionsViewProps {
@@ -33,6 +34,8 @@ interface ReservationOptionsViewProps {
   productType: ProductType;
   isAddingFromConfirm?: boolean;
   isEditingFromConfirm?: boolean;
+  imageUploadEnabled: ImageUploadEnabled;
+  letteringMaxLength: number;
 }
 
 export function ReservationOptionsView({
@@ -57,6 +60,8 @@ export function ReservationOptionsView({
   productType,
   isAddingFromConfirm,
   isEditingFromConfirm,
+  imageUploadEnabled,
+  letteringMaxLength,
 }: ReservationOptionsViewProps) {
   const sizeRef = useRef<HTMLDivElement>(null);
   const flavorRef = useRef<HTMLDivElement>(null);
@@ -147,61 +152,63 @@ export function ReservationOptionsView({
           value={letteringMessage}
           onChange={setLetteringMessage}
           placeholder="가능한 10자 이내로 적어주세요."
-          maxLength={200}
+          maxLength={letteringMaxLength}
           showCount
         />
       </div>
-      <div className="flex flex-col gap-[6px]">
-        <div className="block mb-[10px] text-sm font-bold text-gray-900">
-          참고사진{" "}
-          {productType === "BASIC_CAKE" && (
-            <span className="font-normal text-gray-300">(선택)</span>
-          )}
-        </div>
-        <div className="flex gap-[6px] overflow-auto w-full">
-          <button
-            type="button"
-            onClick={handleUploadClick}
-            className={`flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-lg h-[100px] ${
-              imageUrls.length === 0 ? "w-full" : "w-[100px] shrink-0"
-            }`}
-          >
-            <Icon name="addPhoto" width={24} height={24} className="mb-[4px] text-gray-300" />
-            <div className="text-sm text-gray-300">
-              {imageUrls.length === 0 ? "참고할 사진을 업로드해주세요" : "사진 업로드"}
-              <br />({imageUrls.length}/5)
-            </div>
-          </button>
-          {imageUrls.map((url, index) => (
-            <div
-              key={`${url}-${index}`}
-              className="relative h-[100px] w-[100px] rounded-lg shrink-0 border border-gray-100"
+      {imageUploadEnabled == "ENABLE" && (
+        <div className="flex flex-col gap-[6px]">
+          <div className="block mb-[10px] text-sm font-bold text-gray-900">
+            참고사진{" "}
+            {productType === "BASIC_CAKE" && (
+              <span className="font-normal text-gray-300">(선택)</span>
+            )}
+          </div>
+          <div className="flex gap-[6px] overflow-auto w-full">
+            <button
+              type="button"
+              onClick={handleUploadClick}
+              className={`flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-lg h-[100px] ${
+                imageUrls.length === 0 ? "w-full" : "w-[100px] shrink-0"
+              }`}
             >
-              <button
-                type="button"
-                aria-label="첨부 이미지 삭제"
-                onClick={() => handleRemoveImage(index)}
-                className="absolute right-[5px] top-[5px]"
+              <Icon name="addPhoto" width={24} height={24} className="mb-[4px] text-gray-300" />
+              <div className="text-sm text-gray-300">
+                {imageUrls.length === 0 ? "참고할 사진을 업로드해주세요" : "사진 업로드"}
+                <br />({imageUrls.length}/3)
+              </div>
+            </button>
+            {imageUrls.map((url, index) => (
+              <div
+                key={`${url}-${index}`}
+                className="relative h-[100px] w-[100px] rounded-lg shrink-0 border border-gray-100"
               >
-                <Icon name="removePhoto" width={20} height={20} />
-              </button>
-              <img
-                src={url}
-                alt="업로드된 이미지 미리보기"
-                className="h-full w-full rounded-lg object-cover"
-              />
-            </div>
-          ))}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileChange}
-            className="hidden"
-          />
+                <button
+                  type="button"
+                  aria-label="첨부 이미지 삭제"
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute right-[5px] top-[5px]"
+                >
+                  <Icon name="removePhoto" width={20} height={20} />
+                </button>
+                <img
+                  src={url}
+                  alt="업로드된 이미지 미리보기"
+                  className="h-full w-full rounded-lg object-cover"
+                />
+              </div>
+            ))}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
         </div>
-      </div>
+      )}
       <TextArea
         label={
           <>

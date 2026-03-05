@@ -44,12 +44,13 @@ model User {
   lastLoginAt DateTime? @map("last_login_at") // 마지막 로그인 시간
 
   // Relations
-  productLikes ProductLike[]
-  storeLikes   StoreLike[]
-  stores       Store[]
-  reviews      ProductReview[]
-  chatRooms    ChatRoom[]
-  orders       Order[]
+  productLikes       ProductLike[]
+  storeLikes         StoreLike[]
+  productRecentViews ProductRecentView[]
+  stores             Store[]
+  reviews            ProductReview[]
+  chatRooms          ChatRoom[]
+  orders             Order[]
 
   @@index([phone])
   @@index([userId])
@@ -126,10 +127,11 @@ model Product {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  store   Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  likes   ProductLike[]
-  reviews ProductReview[]
-  orders  Order[]
+  store       Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  likes       ProductLike[]
+  recentViews ProductRecentView[]
+  reviews     ProductReview[]
+  orders      Order[]
 
   // 인덱스 최적화
   @@index([storeId]) // 스토어별 상품 조회
@@ -213,6 +215,29 @@ model Store {
   @@index([likeCount])
   @@index([latitude, longitude]) // 위치 기반 검색을 위한 인덱스
   @@map("stores")
+}
+
+// Product recent view model
+model ProductRecentView {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // 관계 필드
+  userId    String @map("user_id")    // 사용자 ID
+  productId String @map("product_id") // 상품 ID
+
+  // 시스템 필드
+  viewedAt DateTime @default(now()) @map("viewed_at") // 마지막 조회 시간
+
+  // Relations
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // 인덱스 최적화
+  @@unique([userId, productId])
+  @@index([userId, viewedAt(sort: Desc)])
+  @@index([productId])
+  @@map("product_recent_views")
 }
 
 // Store like model

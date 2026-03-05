@@ -2,6 +2,7 @@ import {
   CakeFlavorOption,
   CakeSizeOption,
   ProductType,
+  ImageUploadEnabled,
 } from "@/apps/web-user/features/product/types/product.type";
 
 export interface OrderItem {
@@ -38,6 +39,8 @@ export interface ReservationBottomSheetProps {
   pickupZonecode: string;
   pickupLatitude: number;
   pickupLongitude: number;
+  imageUploadEnabled: ImageUploadEnabled;
+  letteringMaxLength: number;
   onClose: () => void;
 }
 

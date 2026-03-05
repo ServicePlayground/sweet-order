@@ -301,7 +301,7 @@ export function useReservationBottomSheet({
     if (!files.length) return;
 
     setAttachedImages((prev) => {
-      const remaining = 5 - prev.length;
+      const remaining = 3 - prev.length;
       if (remaining <= 0) return prev;
       return [...prev, ...files.slice(0, remaining)];
     });

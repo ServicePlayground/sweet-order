@@ -29,6 +29,8 @@ export function ReservationBottomSheet({
   pickupZonecode,
   pickupLatitude,
   pickupLongitude,
+  imageUploadEnabled,
+  letteringMaxLength,
   onClose,
 }: ReservationBottomSheetProps) {
   const { mutate: createOrder, isPending: isCreatingOrder } = useCreateOrder();
@@ -260,6 +262,8 @@ export function ReservationBottomSheet({
       productType={productType}
       isAddingFromConfirm={isAddingFromConfirm && orderItems.length > 0}
       isEditingFromConfirm={isEditingFromConfirm && orderItems.length > 1}
+      imageUploadEnabled={imageUploadEnabled}
+      letteringMaxLength={letteringMaxLength}
     />
   );
 
