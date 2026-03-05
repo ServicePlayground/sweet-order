@@ -196,7 +196,9 @@ export default function QAPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Staging 토큰</span>
-                  <span className="font-mono font-bold text-gray-800">{QA_STAGING_TOKEN}</span>
+                  <span className="font-mono font-bold text-gray-800 truncate max-w-[120px] min-w-0">
+                    {QA_STAGING_TOKEN}
+                  </span>
                 </div>
               </div>
               {!isAuthenticated ? (
