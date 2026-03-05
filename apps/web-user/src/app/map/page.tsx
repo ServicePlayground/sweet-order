@@ -106,10 +106,16 @@ export default function MapPage() {
 
           const overlayContent = `
             <div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;">
-              <p class="text-center text-[13px] leading-[1.4] font-bold text-gray-900">
+              <p
+                class="text-center text-[13px] leading-[1.4] font-bold text-gray-900"
+                style="text-shadow: -1px 0px #ffffff, 0px 1px #ffffff, 1px 0px #ffffff, 0px -1px #ffffff;"
+              >
                 ${safeName}
               </p>
-              <p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500">
+              <p
+                class="text-center text-[11px] leading-[1.4] font-bold text-gray-500"
+                style="text-shadow: -1px 0px #ffffff, 0px 1px #ffffff, 1px 0px #ffffff, 0px -1px #ffffff;"
+              > 
                 미입점
               </p>
             </div>
