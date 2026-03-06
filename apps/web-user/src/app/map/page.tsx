@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+/**
+ * 지도 페이지
+ * - 플랫폼 입점 스토어: API 전체 조회 후 마커 표시 (입점)
+ * - 카카오 검색: 주변 "주문제작 케이크" 검색 (미입점, 플랫폼과 겹치면 제외)
+ * - 현재위치: 있으면 중심, 없으면 강남구 / 버튼으로 재요청 가능
+ */
+import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNav";
 import { REGION_COORDINATES } from "@/apps/web-user/common/constants/region-coordinates.constant";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import { storeApi } from "@/apps/web-user/features/store/apis/store.api";
+import type { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 
 declare global {
   interface Window {
@@ -13,43 +21,156 @@ declare global {
   }
 }
 
+/** 현재위치 없을 때 기본 지도 중심 (강남구) */
 const DEFAULT_CENTER = REGION_COORDINATES["서울"]?.["강남구"] ?? {
   lat: 37.5172,
   lng: 127.0473,
 };
+
+/** 오버레이 텍스트 XSS 방지용 이스케이프 */
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export default function MapPage() {
   const kakaoJavascriptKey = process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY;
   const { location: userLocation, refresh: refreshUserLocation } = useUserLocation();
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
 
+  // 지도/마커 ref
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any | null>(null);
   const placesServiceRef = useRef<any | null>(null);
   const markersRef = useRef<any[]>([]);
   const overlaysRef = useRef<any[]>([]);
+  const platformMarkersRef = useRef<any[]>([]);
+  const platformOverlaysRef = useRef<any[]>([]);
+  const platformStoresRef = useRef<StoreInfo[]>([]);
+  // 마커 이미지 (미입점/입점, 기본/포커스)
   const markerImageRef = useRef<any | null>(null);
   const focusedMarkerImageRef = useRef<any | null>(null);
+  const openedMarkerImageRef = useRef<any | null>(null);
+  const openedFocusedMarkerImageRef = useRef<any | null>(null);
   const selectedMarkerRef = useRef<any | null>(null);
-  const isCenteringFromClickRef = useRef(false);
-  const usedUserLocationForCenterRef = useRef(false);
+  const isCenteringFromClickRef = useRef(false); // panTo 시 idle 재검색 방지
+  const usedUserLocationForCenterRef = useRef(false); // 이미 사용자위치로 이동했는지
   const userLocationOverlayRef = useRef<any | null>(null);
 
-  const clearMarkers = () => {
-    markersRef.current.forEach((marker) => {
-      marker.setMap(null);
-    });
+  /** 카카오 검색 마커 제거 + 플랫폼 마커 포커스 해제 (재검색 시 호출) */
+  const clearKakaoMarkers = useCallback(() => {
+    markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
-
-    overlaysRef.current.forEach((overlay) => {
-      overlay.setMap(null);
-    });
+    overlaysRef.current.forEach((overlay) => overlay.setMap(null));
     overlaysRef.current = [];
 
+    if (openedMarkerImageRef.current) {
+      platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
+    }
     selectedMarkerRef.current = null;
+  }, []);
+
+  /** 좌표 키 (겹침 판단용, precision 5=~1m, 4=~10m) */
+  const getPositionKey = (lat: number, lng: number, precision = 5) =>
+    `${Number(lat).toFixed(precision)},${Number(lng).toFixed(precision)}`;
+
+  /** 스토어명 유사도: 한쪽이 다른 쪽을 포함하면 동일 스토어로 간주 */
+  const isNameSimilar = (name1: string, name2: string): boolean => {
+    const n1 = (name1 ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+    const n2 = (name2 ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+    if (!n1 || !n2 || n1.length < 2 || n2.length < 2) return false;
+    return n1.includes(n2) || n2.includes(n1);
   };
 
-  // 사용자 현재위치 표시
+  /** 좌표+스토어명으로 플랫폼 스토어와 중복인지 판단 (카카오 결과 제외용) */
+  const isPlatformStoreDuplicate = useCallback(
+    (lat: number, lng: number, placeName: string) => {
+      return platformStoresRef.current.some((s) => {
+        const coordStrict =
+          getPositionKey(lat, lng, 5) === getPositionKey(s.latitude, s.longitude, 5);
+        const coordNearby =
+          getPositionKey(lat, lng, 4) === getPositionKey(s.latitude, s.longitude, 4);
+
+        if (!coordStrict && !coordNearby) return false;
+
+        return isNameSimilar(placeName, s.name ?? "");
+      });
+    },
+    [],
+  );
+
+  /** 플랫폼 입점 스토어 마커 그리기 */
+  const drawPlatformStoreMarkers = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!window.kakao?.maps || !map) return;
+
+    platformMarkersRef.current.forEach((m) => m.setMap(null));
+    platformMarkersRef.current = [];
+    platformOverlaysRef.current.forEach((o) => o.setMap(null));
+    platformOverlaysRef.current = [];
+
+    if (platformStoresRef.current.length === 0) return;
+
+    if (!openedMarkerImageRef.current) {
+      openedMarkerImageRef.current = new window.kakao.maps.MarkerImage(
+        "/images/contents/map-opened.png",
+        new window.kakao.maps.Size(24, 28),
+        { offset: new window.kakao.maps.Point(12, 28) },
+      );
+    }
+    if (!openedFocusedMarkerImageRef.current) {
+      openedFocusedMarkerImageRef.current = new window.kakao.maps.MarkerImage(
+        "/images/contents/map-opened-focus.png",
+        new window.kakao.maps.Size(35, 40),
+        { offset: new window.kakao.maps.Point(17.5, 40) },
+      );
+    }
+
+    platformStoresRef.current.forEach((store) => {
+      if (store.latitude == null || store.longitude == null) return;
+
+      const position = new window.kakao.maps.LatLng(store.latitude, store.longitude);
+      const marker = new window.kakao.maps.Marker({
+        map,
+        position,
+        image: openedMarkerImageRef.current,
+      });
+      platformMarkersRef.current.push(marker);
+
+      window.kakao.maps.event.addListener(marker, "click", () => {
+        if (markerImageRef.current) {
+          markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
+        }
+        if (openedMarkerImageRef.current) {
+          platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
+        }
+        if (openedFocusedMarkerImageRef.current) {
+          marker.setImage(openedFocusedMarkerImageRef.current);
+          selectedMarkerRef.current = marker;
+        }
+        if (map && typeof map.panTo === "function") {
+          isCenteringFromClickRef.current = true;
+          map.panTo(position);
+        }
+      });
+
+      const safeName = escapeHtml(store.name ?? "");
+      const overlayContent = `
+        <div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;">
+          <p class="text-center text-[13px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #ffffff, 0px 1px #ffffff, 1px 0px #ffffff, 0px -1px #ffffff;">
+            ${safeName}
+          </p>
+        </div>
+      `;
+      const overlay = new window.kakao.maps.CustomOverlay({
+        map,
+        position,
+        yAnchor: 0,
+        content: overlayContent,
+      });
+      platformOverlaysRef.current.push(overlay);
+    });
+  }, []);
+
+  /** 현재위치 마커 표시/제거 (위치 없으면 제거) */
   const updateUserLocationMarker = (location: { latitude: number; longitude: number } | null) => {
     const map = mapInstanceRef.current;
     if (!window.kakao?.maps || !map) return;
@@ -81,7 +202,7 @@ export default function MapPage() {
     userLocationOverlayRef.current = overlay;
   };
 
-  // 키워드 검색으로 주변 베이커리 매장 검색 후, 마커 표시
+  /** 카카오 키워드 검색 → 플랫폼과 겹치지 않는 미입점만 마커 표시 */
   const searchPlaces = (centerLatLng: any) => {
     if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) return;
 
@@ -113,17 +234,21 @@ export default function MapPage() {
       "주문제작 케이크",
       (data: any[], status: string) => {
         if (status !== window.kakao.maps.services.Status.OK || !Array.isArray(data)) {
-          clearMarkers();
+          clearKakaoMarkers();
           return;
         }
 
         const map = mapInstanceRef.current;
         if (!map) return;
 
-        clearMarkers();
+        clearKakaoMarkers();
 
         data.forEach((place) => {
-          const position = new window.kakao.maps.LatLng(Number(place.y), Number(place.x));
+          const placeLat = Number(place.y);
+          const placeLng = Number(place.x);
+          if (isPlatformStoreDuplicate(placeLat, placeLng, place.place_name ?? "")) return;
+
+          const position = new window.kakao.maps.LatLng(placeLat, placeLng);
 
           const marker = new window.kakao.maps.Marker({
             map,
@@ -134,11 +259,11 @@ export default function MapPage() {
           markersRef.current.push(marker);
 
           window.kakao.maps.event.addListener(marker, "click", () => {
-            // 모든 마커를 기본 이미지로 초기화
             if (markerImageRef.current) {
-              markersRef.current.forEach((m) => {
-                m.setImage(markerImageRef.current);
-              });
+              markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
+            }
+            if (openedMarkerImageRef.current) {
+              platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
             }
 
             // 현재 클릭된 마커를 포커스 이미지로 변경
@@ -154,7 +279,7 @@ export default function MapPage() {
             }
           });
 
-          const safeName = place.place_name ?? "";
+          const safeName = escapeHtml(place.place_name ?? "");
 
           const overlayContent = `
             <div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;">
@@ -167,7 +292,7 @@ export default function MapPage() {
               <p
                 class="text-center text-[11px] leading-[1.4] font-bold text-gray-500"
                 style="text-shadow: -1px 0px #ffffff, 0px 1px #ffffff, 1px 0px #ffffff, 0px -1px #ffffff;"
-              > 
+              >
                 미입점
               </p>
             </div>
@@ -190,6 +315,7 @@ export default function MapPage() {
     );
   };
 
+  /** 카카오 지도 초기화 + 플랫폼/카카오 마커 + idle 이벤트 등록 */
   const initializeMap = (center: { lat: number; lng: number }) => {
     if (!window.kakao || !window.kakao.maps) return;
     if (!mapContainerRef.current) return;
@@ -205,6 +331,7 @@ export default function MapPage() {
 
       mapInstanceRef.current = map;
 
+      drawPlatformStoreMarkers();
       searchPlaces(centerLatLng);
       updateUserLocationMarker(userLocation ?? null);
 
@@ -222,7 +349,7 @@ export default function MapPage() {
     });
   };
 
-  // 초기 중심: 현재위치 있으면 사용, 없으면 강남구
+  /** 초기 지도 중심: 현재위치 있으면 사용, 없으면 강남구 */
   const getInitialCenter = (): { lat: number; lng: number } => {
     if (userLocation) {
       usedUserLocationForCenterRef.current = true;
@@ -231,12 +358,11 @@ export default function MapPage() {
     return DEFAULT_CENTER;
   };
 
-  // 카카오 스크립트 로드 콜백 (첫 진입 시)
   const handleKakaoScriptLoad = () => {
     setKakaoLoaded(true);
   };
 
-  // 지도 초기화: 카카오 로드 후 스토어/현재위치 우선, 없으면 강남구
+  /** 지도 초기화: 카카오 로드 후 getInitialCenter로 중심 설정 */
   useEffect(() => {
     if (typeof window === "undefined") return;
     const kakaoReady = kakaoLoaded || (window.kakao && window.kakao.maps);
@@ -246,7 +372,7 @@ export default function MapPage() {
     initializeMap(center);
   }, [kakaoLoaded, userLocation]);
 
-  // useUserLocation이 비동기로 도착한 경우, 현재위치로 이동
+  /** 현재위치가 비동기로 도착한 경우, 지도 중심으로 이동 */
   useEffect(() => {
     if (!userLocation || !mapInstanceRef.current || usedUserLocationForCenterRef.current) return;
 
@@ -263,11 +389,42 @@ export default function MapPage() {
     usedUserLocationForCenterRef.current = true;
   }, [userLocation]);
 
-  // 사용자 위치 파란색 원 표시 (위치 있으면 표시, 없으면 제거)
+  /** 사용자 위치 마커 갱신 (위치 변경 시) */
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     updateUserLocationMarker(userLocation ?? null);
   }, [userLocation]);
+
+  /** 전국 플랫폼 스토어 페이지네이션 조회 후 마커/카카오 검색 갱신 */
+  useEffect(() => {
+    const fetchAllStores = async () => {
+      const allStores: StoreInfo[] = [];
+      let page = 1;
+      const limit = 1000;
+      let hasNext = true;
+
+      while (hasNext) {
+        const result = await storeApi.getList({ page, limit });
+        allStores.push(...result.data);
+        hasNext = result.meta.hasNext;
+        page += 1;
+      }
+
+      return allStores.filter((s) => s.latitude != null && s.longitude != null);
+    };
+
+    fetchAllStores()
+      .then((stores) => {
+        platformStoresRef.current = stores;
+        const map = mapInstanceRef.current;
+        if (map) {
+          drawPlatformStoreMarkers();
+          const center = map.getCenter();
+          searchPlaces(center);
+        }
+      })
+      .catch(() => {});
+  }, [drawPlatformStoreMarkers]);
 
   if (!kakaoJavascriptKey) {
     return (
@@ -285,8 +442,9 @@ export default function MapPage() {
 
   const kakaoSdkUrl = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoJavascriptKey}&libraries=services&autoload=false`;
 
+  /** 현재위치 버튼 클릭: 위치 재요청 후 도착 시 지도 중심 이동 */
   const handleRefreshLocation = () => {
-    usedUserLocationForCenterRef.current = false; // 새 위치 도착 시 지도 이동 허용
+    usedUserLocationForCenterRef.current = false;
     refreshUserLocation();
   };
 
