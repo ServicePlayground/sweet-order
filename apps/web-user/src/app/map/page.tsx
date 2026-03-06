@@ -6,6 +6,8 @@ import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNa
 import { REGION_COORDINATES } from "@/apps/web-user/common/constants/region-coordinates.constant";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
+import { isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
 
 declare global {
   interface Window {
@@ -22,6 +24,7 @@ export default function MapPage() {
   const kakaoJavascriptKey = process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY;
   const { location: userLocation, refresh: refreshUserLocation } = useUserLocation();
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
+  const [locationSourceToast, setLocationSourceToast] = useState<string | null>(null);
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any | null>(null);
@@ -269,6 +272,13 @@ export default function MapPage() {
     updateUserLocationMarker(userLocation ?? null);
   }, [userLocation]);
 
+  // [임시] 위치 소스 확인용 토스트 (앱/웹)
+  useEffect(() => {
+    if (!userLocation) return;
+    const source = isWebViewEnvironment() ? "앱(브릿지)" : "웹(Geolocation)";
+    setLocationSourceToast(`현재 위치: ${source}에서 가져옴`);
+  }, [userLocation]);
+
   if (!kakaoJavascriptKey) {
     return (
       <div className="flex flex-col items-center justify-center h-screen text-sm text-gray-500">
@@ -305,6 +315,13 @@ export default function MapPage() {
       >
         <Icon name="currentLocation" width={20} height={20} className="text-blue-400" />
       </button>
+      {locationSourceToast && (
+        <Toast
+          message={locationSourceToast}
+          duration={3000}
+          onClose={() => setLocationSourceToast(null)}
+        />
+      )}
       <BottomNav />
     </div>
   );
