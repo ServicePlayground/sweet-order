@@ -43,6 +43,10 @@ export interface StoreResponseDto extends StoreAddressDto {
   isLiked?: boolean | null;
   averageRating: number;
   totalReviewCount: number;
+  /** 해당 스토어의 모든 상품 대표이미지 URL 배열 (상품당 1장) */
+  productRepresentativeImageUrls: string[];
+  /** 상품 중 최소 금액 (노출·판매중인 상품만, 없으면 null) */
+  minProductPrice: number | null;
   createdAt: Date;
   updatedAt: Date;
 }

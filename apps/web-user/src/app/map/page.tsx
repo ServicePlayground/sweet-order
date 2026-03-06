@@ -14,6 +14,7 @@ import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { storeApi } from "@/apps/web-user/features/store/apis/store.api";
 import type { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import { MapStoreCard } from "@/apps/web-user/features/store/components/map/MapStoreCard";
 
 declare global {
   interface Window {
@@ -35,6 +36,7 @@ export default function MapPage() {
   const kakaoJavascriptKey = process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY;
   const { location: userLocation, refresh: refreshUserLocation } = useUserLocation();
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
+  const [selectedStore, setSelectedStore] = useState<StoreInfo | null>(null);
 
   // 지도/마커 ref
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -81,21 +83,18 @@ export default function MapPage() {
   };
 
   /** 좌표+스토어명으로 플랫폼 스토어와 중복인지 판단 (카카오 결과 제외용) */
-  const isPlatformStoreDuplicate = useCallback(
-    (lat: number, lng: number, placeName: string) => {
-      return platformStoresRef.current.some((s) => {
-        const coordStrict =
-          getPositionKey(lat, lng, 5) === getPositionKey(s.latitude, s.longitude, 5);
-        const coordNearby =
-          getPositionKey(lat, lng, 4) === getPositionKey(s.latitude, s.longitude, 4);
+  const isPlatformStoreDuplicate = useCallback((lat: number, lng: number, placeName: string) => {
+    return platformStoresRef.current.some((s) => {
+      const coordStrict =
+        getPositionKey(lat, lng, 5) === getPositionKey(s.latitude, s.longitude, 5);
+      const coordNearby =
+        getPositionKey(lat, lng, 4) === getPositionKey(s.latitude, s.longitude, 4);
 
-        if (!coordStrict && !coordNearby) return false;
+      if (!coordStrict && !coordNearby) return false;
 
-        return isNameSimilar(placeName, s.name ?? "");
-      });
-    },
-    [],
-  );
+      return isNameSimilar(placeName, s.name ?? "");
+    });
+  }, []);
 
   /** 플랫폼 입점 스토어 마커 그리기 */
   const drawPlatformStoreMarkers = useCallback(() => {
@@ -150,6 +149,7 @@ export default function MapPage() {
           isCenteringFromClickRef.current = true;
           map.panTo(position);
         }
+        setSelectedStore(store);
       });
 
       const safeName = escapeHtml(store.name ?? "");
@@ -259,6 +259,7 @@ export default function MapPage() {
           markersRef.current.push(marker);
 
           window.kakao.maps.event.addListener(marker, "click", () => {
+            setSelectedStore(null); // 미입점 마커 클릭 시 플랫폼 스토어 카드 닫기
             if (markerImageRef.current) {
               markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
             }
@@ -345,6 +346,11 @@ export default function MapPage() {
 
         const currentCenter = map.getCenter();
         searchPlaces(currentCenter);
+      });
+
+      // 지도 빈 영역 클릭 시 스토어 카드 닫기
+      window.kakao.maps.event.addListener(map, "click", () => {
+        setSelectedStore(null);
       });
     });
   };
@@ -463,6 +469,18 @@ export default function MapPage() {
       >
         <Icon name="currentLocation" width={20} height={20} className="text-blue-400" />
       </button>
+      {selectedStore && (
+        <div
+          className="absolute z-30"
+          style={{
+            left: 16,
+            right: 16,
+            bottom: 92, // 60(바텀 네비 높이) + 32
+          }}
+        >
+          <MapStoreCard store={selectedStore} />
+        </div>
+      )}
       <BottomNav />
     </div>
   );
