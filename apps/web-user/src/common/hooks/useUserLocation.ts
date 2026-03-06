@@ -19,6 +19,18 @@ export function useUserLocation() {
     setLocation({ latitude, longitude });
   }, []);
 
+  const refresh = useCallback(() => {
+    if (isWebViewEnvironment()) {
+      if (window.mylocation) window.mylocation.postMessage("true");
+      return;
+    }
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => handleLocation(pos.coords.latitude, pos.coords.longitude),
+      () => setLocation(null),
+    );
+  }, [handleLocation]);
+
   useEffect(() => {
     if (isWebViewEnvironment()) {
       window.receiveLocation = (lat: string | number, lng: string | number) => {
@@ -38,5 +50,5 @@ export function useUserLocation() {
     );
   }, [handleLocation]);
 
-  return location;
+  return { location, refresh };
 }

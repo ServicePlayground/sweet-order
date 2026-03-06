@@ -25,7 +25,7 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
   const queryClient = useQueryClient();
   const { mutate: addLike } = useAddStoreLike();
   const { mutate: removeLike } = useRemoveStoreLike();
-  const userLocation = useUserLocation();
+  const { location: userLocation } = useUserLocation();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useStoreList({ search });
 
