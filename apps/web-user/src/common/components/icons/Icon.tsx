@@ -40,6 +40,7 @@ import Saved from "./icons/saved.svg";
 import Reservation from "./icons/reservation.svg";
 import List from "./icons/list.svg";
 import Back from "./icons/back.svg";
+import NoData from "./icons/no-data.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -89,13 +90,14 @@ export const iconTypes = {
   reservation: Reservation,
   list: List,
   back: Back,
+  noData: NoData,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {
   const IconComponent = iconTypes[name];
   return (
     <span className={clsx("inline-flex items-center", className)} {...props}>
-      <IconComponent width={width} height={height} className="h-auto max-w-full" /> 
+      <IconComponent width={width} height={height} className="h-auto max-w-full" />
     </span>
   );
 }

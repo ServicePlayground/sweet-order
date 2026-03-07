@@ -26,8 +26,6 @@ interface MapStoreListSectionProps {
   sortBy?: MapListSortBy;
   /** 정렬 변경 콜백 */
   onSortByChange?: (value: MapListSortBy) => void;
-  /** 스토어가 없을 때 표시할 메시지 */
-  emptyMessage?: string;
 }
 
 /** 지도 바텀 시트용 스토어 목록 (옵션에 따라 핸들/정렬·필터/리스트) */
@@ -38,7 +36,6 @@ export function MapStoreListSection({
   userLocation,
   sortBy = "distance",
   onSortByChange,
-  emptyMessage,
 }: MapStoreListSectionProps) {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
@@ -62,7 +59,7 @@ export function MapStoreListSection({
   const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? "거리순";
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col flex-1 min-h-0">
       {!hideHandle && (
         <div className="flex justify-center pt-3 pb-1">
           <div
@@ -73,7 +70,7 @@ export function MapStoreListSection({
         </div>
       )}
 
-      {!hideSortFilter && (
+      {!hideSortFilter && sortedStores.length > 0 && (
         <div
           className="flex items-center justify-between"
           style={{ padding: "12px 20px 24px 20px" }}
@@ -170,11 +167,29 @@ export function MapStoreListSection({
         </div>
       )}
 
-      {/* 스토어 목록: top 0, 나머지 20 12 12 */}
-      <ul className="flex flex-col gap-7" style={{ padding: "0 20px 12px 12px" }}>
+      {/* 스토어 목록: top 0, 좌우 20px, bottom 12px. 비어 있을 때 ul·li가 남은 높이를 채워 세로 중앙 정렬 */}
+      <ul
+        className={`flex flex-col gap-7 ${sortedStores.length === 0 ? "flex-1 min-h-0" : ""}`}
+        style={{ padding: "0 20px 12px 20px" }}
+      >
         {sortedStores.length === 0 ? (
-          <li className="py-10 text-center text-sm text-gray-400">
-            {emptyMessage ?? "이 지도 범위에 스토어가 없습니다."}
+          <li className="flex flex-1 min-h-0 flex-col items-center justify-center">
+            <div
+              className="flex flex-col items-center justify-center"
+              style={{ gap: 20 }}
+            >
+              <Icon name="noData" width={62} height={57} className="shrink-0" />
+              <span
+                style={{
+                  fontWeight: 400,
+                  fontSize: 14,
+                  lineHeight: "140%",
+                  color: "var(--grayscale-gr-700, #6B6B6A)",
+                }}
+              >
+                검색 결과가 없어요
+              </span>
+            </div>
           </li>
         ) : (
           sortedStores.map((store) => (
