@@ -31,6 +31,7 @@ import {
   isStoreNameSimilar,
   getStoresInMapBounds,
   filterStoresWithCoordinates,
+  type MapListSortBy,
 } from "@/apps/web-user/features/store/utils/map.util";
 
 declare global {
@@ -47,6 +48,7 @@ export default function MapPage() {
 
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
   const [selectedStore, setSelectedStore] = useState<StoreInfo | null>(null);
+  const [listSortBy, setListSortBy] = useState<MapListSortBy>("distance");
 
   // ---- Refs: 지도·마커 ----
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -612,8 +614,10 @@ export default function MapPage() {
           <MapStoreListSection
             stores={listSheetStores}
             hideHandle
-            hideSortFilter
+            hideSortFilter={false}
             userLocation={userLocation}
+            sortBy={listSortBy}
+            onSortByChange={setListSortBy}
           />
         )}
       </MapListSheetPanel>

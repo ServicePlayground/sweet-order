@@ -167,20 +167,20 @@ export function MapStoreCardContent({
         {(distance !== null || store.minProductPrice != null) && (
           <div className="flex items-center gap-1">
             {distance !== null && (
-              <>
-                <span
-                  className="font-normal text-gray-700"
-                  style={{ fontSize: 13, lineHeight: "140%" }}
-                >
-                  {formatDistance(distance)}
-                </span>
-                <span
-                  className="font-normal text-gray-700"
-                  style={{ fontSize: 13, lineHeight: "140%" }}
-                >
-                  ·
-                </span>
-              </>
+              <span
+                className="font-normal text-gray-700"
+                style={{ fontSize: 13, lineHeight: "140%" }}
+              >
+                {formatDistance(distance)}
+              </span>
+            )}
+            {distance !== null && store.minProductPrice != null && (
+              <span
+                className="font-normal text-gray-700"
+                style={{ fontSize: 13, lineHeight: "140%" }}
+              >
+                ·
+              </span>
             )}
             {store.minProductPrice != null && (
               <span

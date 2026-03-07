@@ -1,8 +1,18 @@
 "use client";
 
+import { useMemo, useRef, useState, useEffect } from "react";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { MapStoreCardContent } from "./MapStoreCard";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import {
+  type MapListSortBy,
+  sortStoresForMapList,
+} from "@/apps/web-user/features/store/utils/map.util";
+
+const SORT_OPTIONS: { value: MapListSortBy; label: string }[] = [
+  { value: "distance", label: "거리순" },
+  { value: "review", label: "리뷰순" },
+];
 
 interface MapStoreListSectionProps {
   stores: StoreInfo[];
@@ -12,6 +22,12 @@ interface MapStoreListSectionProps {
   hideSortFilter?: boolean;
   /** 목록 내 모든 카드가 동일한 기준으로 거리 표시 (지도 페이지에서 한 번만 조회한 위치) */
   userLocation?: { latitude: number; longitude: number } | null;
+  /** 정렬 기준 (지도 목록에서 사용, 없으면 정렬 UI 비표시) */
+  sortBy?: MapListSortBy;
+  /** 정렬 변경 콜백 */
+  onSortByChange?: (value: MapListSortBy) => void;
+  /** 스토어가 없을 때 표시할 메시지 */
+  emptyMessage?: string;
 }
 
 /** 지도 바텀 시트용 스토어 목록 (옵션에 따라 핸들/정렬·필터/리스트) */
@@ -20,7 +36,31 @@ export function MapStoreListSection({
   hideHandle,
   hideSortFilter,
   userLocation,
+  sortBy = "distance",
+  onSortByChange,
+  emptyMessage,
 }: MapStoreListSectionProps) {
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  const sortedStores = useMemo(
+    () => sortStoresForMapList(stores, sortBy, userLocation ?? null),
+    [stores, sortBy, userLocation],
+  );
+
+  useEffect(() => {
+    if (!sortDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target as Node)) {
+        setSortDropdownOpen(false);
+      }
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, [sortDropdownOpen]);
+
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? "거리순";
+
   return (
     <div className="flex flex-col">
       {!hideHandle && (
@@ -35,47 +75,109 @@ export function MapStoreListSection({
 
       {!hideSortFilter && (
         <div
-          className={`flex items-center justify-between px-4 pb-3 border-b border-gray-100 ${hideHandle ? "pt-2" : ""}`}
+          className="flex items-center justify-between"
+          style={{ padding: "12px 20px 24px 20px" }}
         >
-          <button
-            type="button"
-            className="flex items-center gap-1 text-gray-900 font-bold"
-            style={{ fontSize: 14, lineHeight: "140%" }}
-          >
-            거리순
-            <Icon name="selectArrow" width={16} height={16} className="rotate-180 shrink-0" />
-          </button>
-          <button
-            type="button"
-            className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-100"
-            aria-label="필터"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-gray-700"
+          {onSortByChange ? (
+            <div className="relative" ref={sortDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setSortDropdownOpen((prev) => !prev)}
+                className="flex items-center shrink-0"
+                style={{
+                  gap: 4,
+                  borderRadius: 26,
+                  border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+                  padding: "8px 14px",
+                  background: "var(--grayscale-gr-00, #FFFFFF)",
+                  fontWeight: 400,
+                  fontSize: 14,
+                  lineHeight: "140%",
+                  color: "var(--grayscale-gr-900, #1A1A1A)",
+                }}
+                aria-expanded={sortDropdownOpen}
+                aria-haspopup="listbox"
+                aria-label={`정렬: ${currentSortLabel}`}
+              >
+                {currentSortLabel}
+                <Icon
+                  name="selectArrow"
+                  width={16}
+                  height={16}
+                  className={`shrink-0 transition-transform ${sortDropdownOpen ? "rotate-0" : "rotate-180"}`}
+                />
+              </button>
+              {sortDropdownOpen && (
+                <ul
+                  role="listbox"
+                  className="absolute left-0 top-full z-50 mt-1 overflow-hidden"
+                  style={{
+                    minWidth: 120,
+                    borderRadius: 10,
+                    border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+                    boxShadow: "0px 4px 8px 0px #0000001A",
+                    background: "var(--grayscale-gr-00, #FFFFFF)",
+                  }}
+                >
+                  {SORT_OPTIONS.map((opt, index) => (
+                    <li
+                      key={opt.value}
+                      role="option"
+                      aria-selected={sortBy === opt.value}
+                      style={
+                        index < SORT_OPTIONS.length - 1
+                          ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
+                          : undefined
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSortByChange(opt.value);
+                          setSortDropdownOpen(false);
+                        }}
+                        className="w-full text-left hover:bg-gray-50"
+                        style={{
+                          minWidth: 120,
+                          height: 40,
+                          padding: "10px 14px",
+                          background: "var(--grayscale-gr-00, #FFFFFF)",
+                          fontWeight: 400,
+                          fontSize: 14,
+                          lineHeight: "140%",
+                          color: "var(--grayscale-gr-900, #1A1A1A)",
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <span
+              style={{
+                fontWeight: 400,
+                fontSize: 14,
+                lineHeight: "140%",
+                color: "var(--grayscale-gr-900, #1A1A1A)",
+              }}
             >
-              <circle cx="4" cy="5" r="1.5" fill="currentColor" />
-              <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-              <circle cx="16" cy="15" r="1.5" fill="currentColor" />
-              <line x1="4" y1="5" x2="10" y2="10" stroke="currentColor" strokeWidth="1" />
-              <line x1="10" y1="10" x2="16" y2="15" stroke="currentColor" strokeWidth="1" />
-            </svg>
-          </button>
+              거리순
+            </span>
+          )}
         </div>
       )}
 
-      {/* 스토어 목록: 바깥 padding 12 20 12 12, item 패딩 없음 */}
-      <ul className="flex flex-col gap-7" style={{ padding: "12px 20px 12px 12px" }}>
-        {stores.length === 0 ? (
+      {/* 스토어 목록: top 0, 나머지 20 12 12 */}
+      <ul className="flex flex-col gap-7" style={{ padding: "0 20px 12px 12px" }}>
+        {sortedStores.length === 0 ? (
           <li className="py-10 text-center text-sm text-gray-400">
-            이 지도 범위에 스토어가 없습니다.
+            {emptyMessage ?? "이 지도 범위에 스토어가 없습니다."}
           </li>
         ) : (
-          stores.map((store) => (
+          sortedStores.map((store) => (
             <li key={store.id}>
               <MapStoreCardContent
                 store={store}

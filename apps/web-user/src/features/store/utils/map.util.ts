@@ -1,4 +1,46 @@
 import type { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import { calculateDistance } from "@/apps/web-user/common/utils/distance.util";
+
+/** 지도 목록 정렬 기준 */
+export type MapListSortBy = "distance" | "review";
+
+/**
+ * 지도 목록용 스토어 정렬.
+ * - distance: 현재위치 기준 가까운 순 (위치 없으면 원본 순서)
+ * - review: averageRating 높은 순, 동점이면 totalReviewCount 높은 순
+ */
+export function sortStoresForMapList(
+  stores: StoreInfo[],
+  sortBy: MapListSortBy,
+  userLocation: { latitude: number; longitude: number } | null,
+): StoreInfo[] {
+  if (sortBy === "distance" && userLocation) {
+    return [...stores].sort((a, b) => {
+      const distA = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        a.latitude,
+        a.longitude,
+      );
+      const distB = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        b.latitude,
+        b.longitude,
+      );
+      return distA - distB;
+    });
+  }
+  if (sortBy === "review") {
+    return [...stores].sort((a, b) => {
+      const ratingA = a.averageRating ?? 0;
+      const ratingB = b.averageRating ?? 0;
+      if (ratingB !== ratingA) return ratingB - ratingA;
+      return (b.totalReviewCount ?? 0) - (a.totalReviewCount ?? 0);
+    });
+  }
+  return stores;
+}
 
 /** 지도 오버레이용 텍스트 XSS 방지 이스케이프 */
 export function escapeHtmlForOverlay(str: string): string {
@@ -24,7 +66,12 @@ export function isStoreNameSimilar(name1: string, name2: string): boolean {
 
 /** 지도 bounds 내에 있는 스토어만 필터 (카카오 map.getBounds() 반환값 기준) */
 export function getStoresInMapBounds(map: unknown, stores: StoreInfo[]): StoreInfo[] {
-  const m = map as { getBounds?: () => { getSouthWest?: () => { getLat(): number; getLng(): number }; getNorthEast?: () => { getLat(): number; getLng(): number } } };
+  const m = map as {
+    getBounds?: () => {
+      getSouthWest?: () => { getLat(): number; getLng(): number };
+      getNorthEast?: () => { getLat(): number; getLng(): number };
+    };
+  };
   if (!m?.getBounds) return [];
   const bounds = m.getBounds();
   if (!bounds?.getSouthWest || !bounds?.getNorthEast) return [];
