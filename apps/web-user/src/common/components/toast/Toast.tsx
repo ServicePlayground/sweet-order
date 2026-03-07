@@ -72,13 +72,17 @@ export function Toast({
       {variant === "row" ? (
         <div className="flex items-center gap-[6px] px-[18px] py-4 bg-gray-900/80 backdrop-blur-sm rounded-xl">
           {showSpinner && <Spinner size={20} className={spinnerClassName} />}
-          {!showSpinner && iconName && <Icon name={iconName} width={20} height={20} className={`shrink-0 ${iconClassName}`} />}
+          {!showSpinner && iconName && (
+            <Icon name={iconName} width={20} height={20} className={`shrink-0 ${iconClassName}`} />
+          )}
           <span className="text-sm text-white font-bold min-w-0 break-words">{message}</span>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4 px-[46px] py-[36px] bg-gray-900/80 backdrop-blur-sm rounded-xl">
           {showSpinner && <Spinner size={40} className={spinnerClassName} />}
-          {!showSpinner && iconName && <Icon name={iconName} width={40} height={40} className={iconClassName} />}
+          {!showSpinner && iconName && (
+            <Icon name={iconName} width={40} height={40} className={iconClassName} />
+          )}
           <span className="text-sm text-white font-bold min-w-0 break-words">{message}</span>
         </div>
       )}

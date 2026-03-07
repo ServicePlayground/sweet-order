@@ -31,7 +31,6 @@ export default function SearchPage() {
   const [submittedTerm, setSubmittedTerm] = useState(searchParams.get("q") || "");
   const [activeTab, setActiveTab] = useState<"product" | "store">("product");
 
-
   useEffect(() => {
     const q = searchParams.get("q");
     setSearchTerm(q || "");

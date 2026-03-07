@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsString, IsEnum } from "class-validator";
+import { IsOptional, IsString, IsEnum, IsNumber, Min, IsArray } from "class-validator";
 import { IsValidRegionsParam } from "@apps/backend/modules/store/decorators/validators.decorator";
+import {
+  OptionalStringToNumber,
+  OptionalStringToArray,
+} from "@apps/backend/common/decorators/transform.decorator";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
 import { StoreResponseDto } from "./store-detail.dto";
@@ -8,6 +12,10 @@ import {
   StoreSortBy,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/store/constants/store.constants";
+import {
+  ProductCategoryType,
+  CakeSizeDisplayName,
+} from "@apps/backend/modules/product/constants/product.constants";
 
 /**
  * 사용자용 스토어 목록 조회 요청 DTO
@@ -41,6 +49,56 @@ export class GetStoresRequestDto extends PaginationRequestDto {
   })
   @IsValidRegionsParam()
   regions?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 케이크 사이즈 표시명. 상품 목록·상품 등록의 cakeSizeOptions.displayName과 동일한 CakeSizeDisplayName enum. " +
+      "해당 사이즈 옵션을 가진 상품이 하나라도 있는 스토어만 조회.",
+    enum: CakeSizeDisplayName,
+    isArray: true,
+    example: [CakeSizeDisplayName.DOSIRAK, CakeSizeDisplayName.SIZE_1],
+  })
+  @IsOptional()
+  @OptionalStringToArray()
+  @IsArray()
+  @IsEnum(CakeSizeDisplayName, { each: true })
+  sizes?: CakeSizeDisplayName[];
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 최소 가격. 상품의 salePrice가 이 값 이상인 상품이 하나라도 있는 스토어만 조회 (Product.salePrice >= minPrice)",
+    example: 10000,
+  })
+  @OptionalStringToNumber()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  minPrice?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 최대 가격. 상품의 salePrice가 이 값 이하인 상품이 하나라도 있는 스토어만 조회 (Product.salePrice <= maxPrice). minPrice와 함께 쓰이면 해당 구간 안에 들어오는 상품이 있는 스토어만 반환 (minPrice <= salePrice <= maxPrice)",
+    example: 100000,
+  })
+  @OptionalStringToNumber()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  maxPrice?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 상품 카테고리 유형. 상품 목록 조회(GetProductsRequestDto)와 동일한 ProductCategoryType enum. " +
+      "해당 유형 중 하나라도 가지는 상품이 있는 스토어만 조회 (레터링, 캐릭터 등).",
+    enum: ProductCategoryType,
+    isArray: true,
+    example: [ProductCategoryType.LETTERING, ProductCategoryType.CHARACTER],
+  })
+  @IsOptional()
+  @OptionalStringToArray()
+  @IsArray()
+  @IsEnum(ProductCategoryType, { each: true })
+  productCategoryTypes?: ProductCategoryType[];
 }
 
 /**

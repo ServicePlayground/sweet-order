@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
 import { useStoreList } from "@/apps/web-user/features/store/hooks/queries/useStoreList";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
@@ -22,21 +21,21 @@ interface SearchStoreListSectionProps {
 
 export function SearchStoreListSection({ search }: SearchStoreListSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const { mutate: addLike } = useAddStoreLike();
   const { mutate: removeLike } = useRemoveStoreLike();
-  const userLocation = useUserLocation();
+  const { location: userLocation } = useUserLocation();
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useStoreList({ search });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useStoreList({
+    search,
+  });
 
   const handleLike = (e: React.MouseEvent, store: StoreInfo) => {
     e.preventDefault();
     e.stopPropagation();
-    const onSuccess = () => queryClient.invalidateQueries({ queryKey: ["store", "list"] });
     if (store.isLiked) {
-      removeLike(store.id, { onSuccess });
+      removeLike(store.id);
     } else {
-      addLike(store.id, { onSuccess });
+      addLike(store.id);
     }
   };
 
@@ -52,14 +51,13 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
 
   return (
     <>
-      <p className="text-sm text-gray-500 py-3 font-bold">총 <span className="text-gray-900">{stores.length}</span>개</p>
+      <p className="text-sm text-gray-500 py-3 font-bold">
+        총 <span className="text-gray-900">{stores.length}</span>개
+      </p>
       <ul className="flex flex-col gap-10">
         {stores.map((store) => (
           <li key={store.id}>
-            <Link
-              href={PATHS.STORE.DETAIL(store.id)}
-              className="py-[10px] block bg-white"
-            >
+            <Link href={PATHS.STORE.DETAIL(store.id)} className="py-[10px] block bg-white">
               {/* 스토어 정보 상단 */}
               <div className="flex items-center gap-[11px]">
                 <div className="w-[36px] h-[36px] rounded-full overflow-hidden bg-gray-100 shrink-0">
@@ -83,7 +81,9 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
                       <Icon name="star" width={16} height={16} className="text-yellow-400" />
                       {store.averageRating}
                     </span>
-                    <span className="relative after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]">후기 {store.totalReviewCount}개</span>
+                    <span className="relative after:content-[''] after:absolute after:top-1/2 after:left-[-8px] after:w-[1px] after:h-[8px] after:bg-gray-300 after:transform after:translate-y-[-50%]">
+                      후기 {store.totalReviewCount}개
+                    </span>
                   </div>
                 </div>
                 <button
@@ -101,16 +101,30 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
               </div>
               {/* 위치 */}
               <div className="flex items-center gap-1 mt-3 mb-[10px]">
-                <Icon name="location" width={16} height={16} className="text-primary-300 shrink-0" />
+                <Icon
+                  name="location"
+                  width={16}
+                  height={16}
+                  className="text-primary-300 shrink-0"
+                />
                 {userLocation !== null && (
                   <>
                     <span className="text-sm text-gray-900">
-                      {formatDistance(calculateDistance(userLocation.latitude, userLocation.longitude, store.latitude, store.longitude))}
+                      {formatDistance(
+                        calculateDistance(
+                          userLocation.latitude,
+                          userLocation.longitude,
+                          store.latitude,
+                          store.longitude,
+                        ),
+                      )}
                     </span>
                     <span className="text-sm text-gray-900">·</span>
                   </>
                 )}
-                <span className="text-sm text-gray-900 truncate">{shortenAddress(store.roadAddress)}</span>
+                <span className="text-sm text-gray-900 truncate">
+                  {shortenAddress(store.roadAddress)}
+                </span>
               </div>
             </Link>
           </li>

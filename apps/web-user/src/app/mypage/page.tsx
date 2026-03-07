@@ -8,10 +8,25 @@ import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNa
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { useMe } from "@/apps/web-user/features/user/hooks/queries/useMe";
 import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
-import { navigateToLoginPage, isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+import {
+  navigateToLoginPage,
+  isWebViewEnvironment,
+} from "@/apps/web-user/common/utils/webview.bridge";
 
-function getLoginInfo(user: { googleId: string; googleEmail: string; email: string; kakaoId?: string; naverId?: string }) {
-  if (user.googleId) return <div className="flex items-center gap-[6px]"><span className="px-1 py-0.5 bg-gray-50 text-2xs font-bold rounded-sm">구글</span>{user.googleEmail}</div>;
+function getLoginInfo(user: {
+  googleId: string;
+  googleEmail: string;
+  email: string;
+  kakaoId?: string;
+  naverId?: string;
+}) {
+  if (user.googleId)
+    return (
+      <div className="flex items-center gap-[6px]">
+        <span className="px-1 py-0.5 bg-gray-50 text-2xs font-bold rounded-sm">구글</span>
+        {user.googleEmail}
+      </div>
+    );
   return user.email;
 }
 
@@ -61,7 +76,11 @@ export default function MypagePage() {
             {/* 프로필 이미지 */}
             <div className="w-[44px] h-[44px] rounded-full bg-gray-100 overflow-hidden shrink-0 flex items-center justify-center">
               {user?.profileImageUrl ? (
-                <img src={user.profileImageUrl} alt="프로필" className="w-full h-full object-cover" />
+                <img
+                  src={user.profileImageUrl}
+                  alt="프로필"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <Icon name="mypage" width={44} height={44} className="text-gray-400" />
               )}
@@ -71,12 +90,15 @@ export default function MypagePage() {
             <div className="flex-1">
               <div className="flex flex-col gap-[2px]">
                 <p className="text-base font-bold text-gray-900">{user?.nickname}</p>
-                <div className="text-2sm text-gray-500">
-                  {user ? getLoginInfo(user) : "-"}
-                </div>
+                <div className="text-2sm text-gray-500">{user ? getLoginInfo(user) : "-"}</div>
               </div>
             </div>
-            <button type="button" className="flex items-center justify-center h-[32px] w-[83px] text-xs font-bold text-gray-900 border border-gray-100 rounded-md">프로필 수정</button>
+            <button
+              type="button"
+              className="flex items-center justify-center h-[32px] w-[83px] text-xs font-bold text-gray-900 border border-gray-100 rounded-md"
+            >
+              프로필 수정
+            </button>
           </div>
 
           <ul className="flex py-[10px] mx-5 mb-8 border border-gray-100 rounded-lg">
@@ -85,7 +107,10 @@ export default function MypagePage() {
                 key={icon}
                 className={`relative flex-1 flex justify-center ${index < QUICK_LINKS.length - 1 ? "after:content-[''] after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:h-5 after:w-px after:bg-gray-50" : ""}`}
               >
-                <Link href={href} className="flex flex-col items-center gap-2 py-3 text-gray-900 font-bold text-sm">
+                <Link
+                  href={href}
+                  className="flex flex-col items-center gap-2 py-3 text-gray-900 font-bold text-sm"
+                >
                   <Icon name={icon} width={20} height={20} className="text-gray-900" />
                   {label}
                 </Link>
@@ -121,7 +146,11 @@ export default function MypagePage() {
           { label: "공지사항", href: "/" },
           { label: "Q&A", href: "/" },
         ].map(({ label, href }) => (
-          <Link key={label} href={href} className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <Link
+            key={label}
+            href={href}
+            className="flex items-center justify-between px-5 py-4 border-b border-gray-100"
+          >
             <span className="text-sm font-bold text-gray-900">{label}</span>
             <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-90" />
           </Link>
@@ -137,7 +166,11 @@ export default function MypagePage() {
           { label: "개인정보 처리방침", href: "/" },
           { label: "버전정보", href: "/" },
         ].map(({ label, href }) => (
-          <Link key={label} href={href} className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <Link
+            key={label}
+            href={href}
+            className="flex items-center justify-between px-5 py-4 border-b border-gray-100"
+          >
             <span className="text-sm font-bold text-gray-900">{label}</span>
             <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-90" />
           </Link>

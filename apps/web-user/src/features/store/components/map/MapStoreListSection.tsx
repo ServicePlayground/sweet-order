@@ -1,0 +1,213 @@
+"use client";
+
+import { useMemo, useRef, useState, useEffect } from "react";
+import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import type { StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
+import { MapStoreCardContent } from "./MapStoreCard";
+import { MapStoreListFilter } from "./MapStoreListFilter";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import {
+  type MapListSortBy,
+  sortStoresForMapList,
+} from "@/apps/web-user/features/store/utils/map.util";
+
+const SORT_OPTIONS: { value: MapListSortBy; label: string }[] = [
+  { value: "distance", label: "거리순" },
+  { value: "review", label: "리뷰순" },
+];
+
+const tabButtonStyle = {
+  gap: 4,
+  borderRadius: 26,
+  border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+  padding: "8px 14px",
+  background: "var(--grayscale-gr-00, #FFFFFF)",
+  fontWeight: 400,
+  fontSize: 14,
+  lineHeight: "140%" as const,
+  color: "var(--grayscale-gr-900, #1A1A1A)",
+};
+
+interface MapStoreListSectionProps {
+  stores: StoreInfo[];
+  /** true면 상단 드래그 핸들 숨김 (지도 페이지 인라인 드래그 패널에서 사용) */
+  hideHandle?: boolean;
+  /** true면 정렬/필터 행 숨김 (지도 목록 영역에서 리스트만 표시) */
+  hideSortFilter?: boolean;
+  /** 목록 내 모든 카드가 동일한 기준으로 거리 표시 (지도 페이지에서 한 번만 조회한 위치) */
+  userLocation?: { latitude: number; longitude: number } | null;
+  /** 정렬 기준 (지도 목록에서 사용, 없으면 정렬 UI 비표시) */
+  sortBy?: MapListSortBy;
+  /** 정렬 변경 콜백 */
+  onSortByChange?: (value: MapListSortBy) => void;
+  /** 목록 필터 (사이즈·가격·유형). API 재조회에 사용 */
+  listFilter?: StoreListFilter;
+  /** 필터 적용 콜백 */
+  onListFilterChange?: (filter: StoreListFilter) => void;
+}
+
+/** 지도 바텀 시트용 스토어 목록 (옵션에 따라 핸들/정렬·필터/리스트) */
+export function MapStoreListSection({
+  stores,
+  hideHandle,
+  hideSortFilter,
+  userLocation,
+  sortBy = "distance",
+  onSortByChange,
+  listFilter,
+  onListFilterChange,
+}: MapStoreListSectionProps) {
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  const sortedStores = useMemo(
+    () => sortStoresForMapList(stores, sortBy, userLocation ?? null),
+    [stores, sortBy, userLocation],
+  );
+
+  useEffect(() => {
+    if (!sortDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target as Node)) {
+        setSortDropdownOpen(false);
+      }
+    };
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, [sortDropdownOpen]);
+
+  const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? "거리순";
+
+  return (
+    <div className="flex flex-col flex-1 min-h-0">
+      {!hideHandle && (
+        <div className="flex justify-center pt-3 pb-1">
+          <div
+            className="rounded-full bg-gray-200 shrink-0"
+            style={{ width: 40, height: 4 }}
+            aria-hidden
+          />
+        </div>
+      )}
+
+      {!hideSortFilter && (
+        <div className="flex items-center" style={{ padding: "12px 20px 24px 20px", gap: 12 }}>
+          {onSortByChange ? (
+            <div className="relative shrink-0" ref={sortDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setSortDropdownOpen((prev) => !prev)}
+                className="flex items-center shrink-0"
+                style={tabButtonStyle}
+                aria-expanded={sortDropdownOpen}
+                aria-haspopup="listbox"
+                aria-label={`정렬: ${currentSortLabel}`}
+              >
+                {currentSortLabel}
+                <Icon
+                  name="selectArrow"
+                  width={16}
+                  height={16}
+                  className={`shrink-0 transition-transform ${sortDropdownOpen ? "rotate-0" : "rotate-180"}`}
+                />
+              </button>
+              {sortDropdownOpen && (
+                <ul
+                  role="listbox"
+                  className="absolute left-0 top-full z-50 mt-1 overflow-hidden"
+                  style={{
+                    minWidth: 120,
+                    borderRadius: 10,
+                    border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+                    boxShadow: "0px 4px 8px 0px #0000001A",
+                    background: "var(--grayscale-gr-00, #FFFFFF)",
+                  }}
+                >
+                  {SORT_OPTIONS.map((opt, index) => (
+                    <li
+                      key={opt.value}
+                      role="option"
+                      aria-selected={sortBy === opt.value}
+                      style={
+                        index < SORT_OPTIONS.length - 1
+                          ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
+                          : undefined
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSortByChange(opt.value);
+                          setSortDropdownOpen(false);
+                        }}
+                        className="w-full text-left hover:bg-gray-50"
+                        style={{
+                          minWidth: 120,
+                          height: 40,
+                          padding: "10px 14px",
+                          background: "var(--grayscale-gr-00, #FFFFFF)",
+                          fontWeight: 400,
+                          fontSize: 14,
+                          lineHeight: "140%",
+                          color: "var(--grayscale-gr-900, #1A1A1A)",
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <span style={tabButtonStyle}>거리순</span>
+          )}
+
+          {onListFilterChange && (
+            <>
+              <Icon name="line1" width={1} height={12} className="shrink-0" aria-hidden />
+              <MapStoreListFilter listFilter={listFilter} onListFilterChange={onListFilterChange} />
+            </>
+          )}
+        </div>
+      )}
+
+      {/* 스토어 목록: top 0, 좌우 20px, bottom 12px. 비어 있을 때 ul·li가 남은 높이를 채워 세로 중앙 정렬 */}
+      <ul
+        className={`flex flex-col gap-7 ${sortedStores.length === 0 ? "flex-1 min-h-0" : ""}`}
+        style={{ padding: "0 20px 12px 20px" }}
+      >
+        {sortedStores.length === 0 ? (
+          <li className="flex flex-1 min-h-0 flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center" style={{ gap: 20 }}>
+              <Icon name="noData" width={62} height={57} className="shrink-0" />
+              <span
+                style={{
+                  fontWeight: 400,
+                  fontSize: 14,
+                  lineHeight: "140%",
+                  color: "var(--grayscale-gr-700, #6B6B6A)",
+                }}
+              >
+                검색 결과가 없어요
+              </span>
+            </div>
+          </li>
+        ) : (
+          sortedStores.map((store) => (
+            <li key={store.id}>
+              <MapStoreCardContent
+                store={store}
+                userLocation={userLocation ?? null}
+                variant="list"
+                imageWidth={120}
+                imageHeight={90}
+                imageGap={4}
+              />
+            </li>
+          ))
+        )}
+      </ul>
+    </div>
+  );
+}
