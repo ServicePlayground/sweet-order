@@ -52,19 +52,19 @@ export default function MapPage() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any | null>(null);
   const placesServiceRef = useRef<any | null>(null);
-  const markersRef = useRef<any[]>([]);
-  const overlaysRef = useRef<any[]>([]);
-  const platformMarkersRef = useRef<any[]>([]);
-  const platformOverlaysRef = useRef<any[]>([]);
-  const platformStoresRef = useRef<StoreInfo[]>([]);
-  const searchStoresRef = useRef<StoreInfo[] | null>(null);
+  const markersRef = useRef<any[]>([]); // 카카오 키워드 검색(미입점) 마커
+  const overlaysRef = useRef<any[]>([]); // 미입점 마커 이름 오버레이
+  const platformMarkersRef = useRef<any[]>([]); // 플랫폼 입점 스토어 마커
+  const platformOverlaysRef = useRef<any[]>([]); // 플랫폼 스토어 이름 오버레이
+  const platformStoresRef = useRef<StoreInfo[]>([]); // API 전체 스토어 캐시
+  const searchStoresRef = useRef<StoreInfo[] | null>(null); // null=검색아님, []=검색결과0개, [...]=검색결과
   const markerImageRef = useRef<any | null>(null);
   const focusedMarkerImageRef = useRef<any | null>(null);
   const openedMarkerImageRef = useRef<any | null>(null);
   const openedFocusedMarkerImageRef = useRef<any | null>(null);
   const selectedMarkerRef = useRef<any | null>(null);
-  const isCenteringFromClickRef = useRef(false);
-  const usedUserLocationForCenterRef = useRef(false);
+  const isCenteringFromClickRef = useRef(false); // 마커 클릭으로 panTo 한 직후 idle에서 재처리 방지
+  const usedUserLocationForCenterRef = useRef(false); // 이미 현재위치로 중심 잡았는지
   const userLocationOverlayRef = useRef<any | null>(null);
 
   // 목록에 쓸 스토어: 검색 모드면 검색 결과 중 지도 범위 내, 아니면 지도 범위 내 플랫폼 스토어
@@ -76,7 +76,7 @@ export default function MapPage() {
     return getStoresInMapBounds(map, source);
   }, []);
 
-  const listSheet = useMapListSheet(getStoresForList);
+  const listSheet = useMapListSheet(getStoresForList); // 하단 목록 시트(드래그 패널) 상태
 
   const {
     listSheetStores,
@@ -100,6 +100,7 @@ export default function MapPage() {
     return getStoresInMapBounds(map, platformStoresRef.current);
   }, []);
 
+  /** 카카오 검색 장소가 플랫폼 스토어와 같은 위치/이름이면 미입점 마커에서 제외 */
   const isPlatformStoreDuplicate = useCallback((lat: number, lng: number, placeName: string) => {
     return platformStoresRef.current.some((s) => {
       const samePos =
@@ -110,6 +111,7 @@ export default function MapPage() {
     });
   }, []);
 
+  /** 미입점(카카오 키워드 검색) 마커·오버레이만 제거, 플랫폼 마커는 유지 */
   const clearKakaoMarkers = useCallback(() => {
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
@@ -121,6 +123,7 @@ export default function MapPage() {
     selectedMarkerRef.current = null;
   }, []);
 
+  /** 검색 모드면 검색 결과 전체, 아니면 현재 지도 bounds 내 플랫폼 스토어만 마커로 그림 */
   const drawPlatformStoreMarkers = useCallback(() => {
     const map = mapInstanceRef.current;
     if (!window.kakao?.maps || !map) return;
@@ -185,6 +188,7 @@ export default function MapPage() {
     });
   }, [getStoresToShow]);
 
+  /** 현재위치 오버레이(점) 표시/제거 */
   const updateUserLocationMarker = useCallback(
     (location: { latitude: number; longitude: number } | null) => {
       const map = mapInstanceRef.current;
@@ -207,6 +211,7 @@ export default function MapPage() {
     [],
   );
 
+  /** 카카오 키워드 검색으로 주변 미입점(주문제작 케이크) 마커 표시. 검색 모드일 때는 호출하지 않음. */
   const searchPlaces = useCallback(
     (centerLatLng: any) => {
       if (!window.kakao?.maps?.services) return;
@@ -280,6 +285,7 @@ export default function MapPage() {
     [clearKakaoMarkers, isPlatformStoreDuplicate],
   );
 
+  /** 지도 최초 중심: 현재위치 있으면 그곳, 없으면 강남구 */
   const getInitialCenter = useCallback((): { lat: number; lng: number } => {
     if (userLocation) {
       usedUserLocationForCenterRef.current = true;
@@ -288,6 +294,10 @@ export default function MapPage() {
     return DEFAULT_MAP_CENTER;
   }, [userLocation]);
 
+  /**
+   * 카카오 지도 생성 및 이벤트 등록.
+   * isSearchMode: true면 미입점 검색(searchPlaces) 호출 안 함, 기존 카카오 마커 제거.
+   */
   const initializeMap = useCallback(
     (center: { lat: number; lng: number }, isSearchMode: boolean) => {
       if (!window.kakao?.maps || !mapContainerRef.current || mapInstanceRef.current) return;
@@ -303,6 +313,7 @@ export default function MapPage() {
         if (!isSearchMode) searchPlaces(new window.kakao.maps.LatLng(center.lat, center.lng));
         updateUserLocationMarker(userLocation ?? null);
 
+        // 지도 이동/줌 종료 시: 마커 갱신, 목록 패널이 열려 있으면 범위 내 스토어로 목록 갱신
         window.kakao.maps.event.addListener(map, "idle", () => {
           if (isCenteringFromClickRef.current) {
             isCenteringFromClickRef.current = false;
@@ -313,6 +324,7 @@ export default function MapPage() {
           if (listSheetPanelOffsetRef.current > 0) {
             setListSheetStores(getStoresForList());
           }
+          // 검색 모드가 아니고, 현재 보이는 범위에 스토어가 없으면 목록 패널 접기
           if (
             searchStoresRef.current === null &&
             getStoresForList().length === 0 &&
@@ -327,7 +339,7 @@ export default function MapPage() {
           if (listSheetPanelOffsetRef.current > 0) closeListSheet();
         });
 
-        // 검색 결과가 이미 있으면(지도 생성 전 fetch 완료) bounds·패널 적용
+        // URL 검색으로 진입한 경우: 지도 생성 시점에 이미 검색 결과가 있으면 bounds/중심·목록 패널 적용
         const stores = searchStoresRef.current;
         if (stores !== null) {
           if (stores.length > 0 && window.kakao.maps.LatLngBounds) {
@@ -366,6 +378,7 @@ export default function MapPage() {
   );
 
   // ---- Effects ----
+  // 카카오 스크립트 로드 후 지도 1회 생성. searchQuery 있으면 검색 모드로 생성(미입점 마커 없음)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const ready = kakaoLoaded || (window.kakao && window.kakao.maps);
@@ -373,7 +386,7 @@ export default function MapPage() {
     initializeMap(getInitialCenter(), !!searchQuery);
   }, [kakaoLoaded, userLocation, searchQuery, getInitialCenter, initializeMap]);
 
-  // 검색 모드가 아닐 때만 현재위치로 지도 이동 (검색 후 현재위치로 덮어쓰기 방지)
+  // 검색 모드가 아닐 때만: 현재위치 획득 시 지도 중심을 현재위치로 이동 (검색 후 덮어쓰기 방지)
   useEffect(() => {
     if (
       searchQuery ||
@@ -391,11 +404,13 @@ export default function MapPage() {
     usedUserLocationForCenterRef.current = true;
   }, [userLocation, searchQuery, searchPlaces]);
 
+  // 현재위치 변경 시 지도 위 현재위치 마커(점) 갱신
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     updateUserLocationMarker(userLocation ?? null);
   }, [userLocation, updateUserLocationMarker]);
 
+  // 플랫폼 스토어 전체 조회 후 캐시. 지도 있으면 마커 그리기, 검색 모드가 아니면 미입점 검색
   useEffect(() => {
     const fetchAll = async () => {
       const list: StoreInfo[] = [];
@@ -422,6 +437,7 @@ export default function MapPage() {
       .catch(() => {});
   }, [drawPlatformStoreMarkers, searchPlaces]);
 
+  // URL ?q= 검색: 스토어 검색 API 호출 후 마커·bounds·목록 패널 처리. 결과 0개여도 패널 열고 중심은 현재위치/강남구
   useEffect(() => {
     if (!searchQuery) {
       searchStoresRef.current = null;
@@ -438,7 +454,7 @@ export default function MapPage() {
         searchStoresRef.current = stores;
         const map = mapInstanceRef.current;
         if (!map || !window.kakao?.maps) return;
-        clearKakaoMarkers();
+        clearKakaoMarkers(); // 검색 모드 진입 시 기존 미입점 마커 제거
         drawPlatformStoreMarkers();
         if (stores.length > 0) {
           const bounds = new window.kakao.maps.LatLngBounds();
@@ -447,6 +463,7 @@ export default function MapPage() {
           );
           map.setBounds(bounds, MAP_BOUNDS_PADDING);
         } else {
+          // 검색 결과 0개: 지도 중심만 현재위치 또는 강남구로
           const center = userLocation
             ? new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude)
             : new window.kakao.maps.LatLng(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
@@ -476,6 +493,7 @@ export default function MapPage() {
   ]);
 
   // ---- Handlers ----
+  /** 내 위치 버튼: 현재위치 재요청 후 다음 effect에서 지도 중심 이동 */
   const handleRefreshLocation = () => {
     usedUserLocationForCenterRef.current = false;
     refreshUserLocation();
@@ -498,6 +516,7 @@ export default function MapPage() {
     listSheetHandlePointerDown(e.clientY);
   };
 
+  // 목록 패널 드래그 시 창 밖에서 마우스 움직임/버튼 놓기 처리
   useEffect(() => {
     if (!isListSheetPanelDragging) return;
     const onMove = (e: MouseEvent) => listSheetHandlePointerMove(e.clientY);
