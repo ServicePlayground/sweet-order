@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNav";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
 const RECENT_SEARCHES_KEY = "recentSearches";
@@ -129,8 +128,6 @@ export default function MapSearchPage() {
           )}
         </form>
       </div>
-
-      <BottomNav />
     </div>
   );
 }
