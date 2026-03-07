@@ -18,7 +18,7 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
   const getHeaderConfig = (): { variant: "main" | "product" | "minimal" | "search" | "back-title"; title?: string } => {
     if (pathname === "/") return { variant: "main" };
     if (pathname === "/search") return { variant: "search" };
-    if (pathname === "/map") return { variant: "minimal" };
+    if (pathname === "/map" || pathname === "/map/search") return { variant: "minimal" };
     if (pathname?.startsWith("/chat")) return { variant: "minimal" };
     if (pathname?.startsWith("/reservation")) return { variant: "minimal" };
     if (pathname === "/alarm") return { variant: "back-title", title: "알림" };

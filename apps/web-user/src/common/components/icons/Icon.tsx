@@ -39,6 +39,7 @@ import Recent from "./icons/recent.svg";
 import Saved from "./icons/saved.svg";
 import Reservation from "./icons/reservation.svg";
 import List from "./icons/list.svg";
+import Back from "./icons/back.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -87,6 +88,7 @@ export const iconTypes = {
   saved: Saved,
   reservation: Reservation,
   list: List,
+  back: Back,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

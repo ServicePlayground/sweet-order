@@ -26,6 +26,7 @@ export const PATHS = {
 
   // 지도 페이지
   MAP: "/map",
+  MAP_SEARCH: "/map/search",
 
   // 저장 페이지
   SAVED: "/saved",
