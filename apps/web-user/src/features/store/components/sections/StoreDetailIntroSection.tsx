@@ -29,7 +29,12 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   const { location: userLocation } = useUserLocation();
   const distance =
     userLocation !== null
-      ? calculateDistance(userLocation.latitude, userLocation.longitude, store.latitude, store.longitude)
+      ? calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          store.latitude,
+          store.longitude,
+        )
       : null;
 
   const handleAddressCopy = () => {

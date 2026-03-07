@@ -43,8 +43,17 @@ export class LikeUserListService {
     userId: string,
     query: GetStoresRequestDto,
   ): Promise<StoreListResponseDto> {
-    const { page, limit, sortBy, search, regions, sizes, minPrice, maxPrice, productCategoryTypes } =
-      query;
+    const {
+      page,
+      limit,
+      sortBy,
+      search,
+      regions,
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+    } = query;
 
     const baseStoreWhere = this.buildStoreWhereForLiked(search, regions);
     const productFilterWhere = await this.buildStoreWhereProductFilterForLiked({

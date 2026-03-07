@@ -91,10 +91,7 @@ export function MapStoreListSection({
       )}
 
       {!hideSortFilter && (
-        <div
-          className="flex items-center"
-          style={{ padding: "12px 20px 24px 20px", gap: 12 }}
-        >
+        <div className="flex items-center" style={{ padding: "12px 20px 24px 20px", gap: 12 }}>
           {onSortByChange ? (
             <div className="relative shrink-0" ref={sortDropdownRef}>
               <button

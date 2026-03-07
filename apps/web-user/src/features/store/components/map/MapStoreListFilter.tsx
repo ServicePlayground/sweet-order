@@ -168,8 +168,7 @@ export function MapStoreListFilter({ listFilter, onListFilterChange }: MapStoreL
 
   const active = hasActiveFilter(listFilter);
   const hasSizes = (listFilter?.sizes?.length ?? 0) > 0;
-  const hasPrice =
-    listFilter?.minPrice != null || listFilter?.maxPrice != null;
+  const hasPrice = listFilter?.minPrice != null || listFilter?.maxPrice != null;
   const hasCategories = (listFilter?.productCategoryTypes?.length ?? 0) > 0;
 
   const handleRemoveSizes = () => {
@@ -233,7 +232,9 @@ export function MapStoreListFilter({ listFilter, onListFilterChange }: MapStoreL
                 style={{ gap: 4, padding: "0 14px" }}
                 aria-label="사이즈 필터 제거"
               >
-                <span className="flex items-center truncate">{getSizesTagLabel(listFilter.sizes)}</span>
+                <span className="flex items-center truncate">
+                  {getSizesTagLabel(listFilter.sizes)}
+                </span>
                 <Icon name="close3" width={16} height={16} className="shrink-0" />
               </button>
             )}

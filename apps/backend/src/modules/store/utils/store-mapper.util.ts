@@ -137,8 +137,7 @@ export class StoreMapperUtil {
         .filter((url): url is string => !!url);
 
       const saleablePrices = storeSaleablePrices.get(store.id) ?? [];
-      const minProductPrice =
-        saleablePrices.length > 0 ? Math.min(...saleablePrices) : null;
+      const minProductPrice = saleablePrices.length > 0 ? Math.min(...saleablePrices) : null;
 
       return {
         id: store.id,

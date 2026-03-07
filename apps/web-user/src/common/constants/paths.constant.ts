@@ -35,7 +35,7 @@ export const PATHS = {
   MYPAGE: "/mypage",
 
   // 알람 페이지
-  ALARM: "/alarm", 
+  ALARM: "/alarm",
 
   // QA/테스트 전용 페이지
   QA: "/qa",

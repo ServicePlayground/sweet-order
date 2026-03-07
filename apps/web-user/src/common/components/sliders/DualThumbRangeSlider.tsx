@@ -155,12 +155,7 @@ export function DualThumbRangeSlider({
         <span className={styles.label} style={{ left: `${thumbLeftPercent(valueMax)}%` }}>
           {formatLabel(valueMax)}
         </span>
-        <div
-          ref={trackRef}
-          className="relative h-6 w-full"
-          role="group"
-          aria-label={ariaLabel}
-        >
+        <div ref={trackRef} className="relative h-6 w-full" role="group" aria-label={ariaLabel}>
           <div
             className="absolute left-0 right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-[var(--grayscale-gr-50,#F5F5F5)]"
             aria-hidden

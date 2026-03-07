@@ -11,7 +11,6 @@ interface CakeListSliderProps {
   onProductClick: (productId: string) => void;
 }
 
-
 export default function CakeListSlider({
   title,
   products,

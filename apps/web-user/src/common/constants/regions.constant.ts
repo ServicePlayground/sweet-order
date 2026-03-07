@@ -180,9 +180,7 @@ export const REGIONS: Region[] = [
   {
     label: "세종",
     value: "세종특별자치시",
-    children: [
-      { label: "세종 전지역", values: [] },
-    ],
+    children: [{ label: "세종 전지역", values: [] }],
   },
   {
     label: "경기",

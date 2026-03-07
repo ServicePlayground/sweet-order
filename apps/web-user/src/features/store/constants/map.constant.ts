@@ -2,8 +2,10 @@ import { REGION_COORDINATES } from "@/apps/web-user/common/constants/region-coor
 import { ProductCategoryType } from "@/apps/web-user/features/product/types/product.type";
 
 /** 지도 기본 중심 (현재위치 없을 때, 강남구) */
-export const DEFAULT_MAP_CENTER =
-  REGION_COORDINATES["서울"]?.["강남구"] ?? { lat: 37.5172, lng: 127.0473 };
+export const DEFAULT_MAP_CENTER = REGION_COORDINATES["서울"]?.["강남구"] ?? {
+  lat: 37.5172,
+  lng: 127.0473,
+};
 
 /** 목록 패널 핸들 높이(px) */
 export const LIST_SHEET_HANDLE_HEIGHT = 32;

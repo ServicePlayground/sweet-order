@@ -43,8 +43,17 @@ export class StoreListService {
    * 검색(스토어명), 정렬, 페이지네이션을 지원합니다. 로그인 시 각 스토어의 좋아요 여부(isLiked)를 반환합니다.
    */
   async getStoresForUser(query: GetStoresRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy, regions, sizes, minPrice, maxPrice, productCategoryTypes } =
-      query;
+    const {
+      search,
+      page,
+      limit,
+      sortBy,
+      regions,
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+    } = query;
     const where = await this.buildStoreWhereForUser({
       search,
       regions,

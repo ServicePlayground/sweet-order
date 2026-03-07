@@ -70,7 +70,15 @@ type Story = StoryObj<typeof Toast>;
 function ToastDemo(props: Omit<React.ComponentProps<typeof Toast>, "onClose">) {
   const [show, setShow] = useState(false);
   return (
-    <div style={{ width: 300, height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div
+      style={{
+        width: 300,
+        height: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <button
         onClick={() => setShow(true)}
         style={{

@@ -169,9 +169,6 @@ export class UserMypageController {
     @Query() query: GetProductsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<ProductListResponseDto> {
-    return await this.recentViewService.getRecentViewedProductsForUser(
-      req.user.sub,
-      query,
-    );
+    return await this.recentViewService.getRecentViewedProductsForUser(req.user.sub, query);
   }
 }
