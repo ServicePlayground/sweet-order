@@ -686,7 +686,12 @@ export default function MapPage() {
         {/* 목록 영역: 열렸을 때 스토어 리스트만 표시 (제목/닫기/필터 없음) */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col">
           {listSheetPanelOffset > 0 && (
-            <MapStoreListSection stores={listSheetStores} hideHandle hideSortFilter />
+            <MapStoreListSection
+              stores={listSheetStores}
+              hideHandle
+              hideSortFilter
+              userLocation={userLocation}
+            />
           )}
         </div>
       </div>

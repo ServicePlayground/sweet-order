@@ -16,38 +16,38 @@ const DEFAULT_IMAGE_WIDTH = 134;
 const DEFAULT_IMAGE_HEIGHT = 100;
 const DEFAULT_IMAGE_GAP = 6;
 
-interface MapStoreCardProps {
+/** 목록용: useUserLocation 호출 없이 userLocation을 props로만 받음 */
+export interface MapStoreCardContentProps {
   store: StoreInfo;
-  /** 목록 영역용: 이미지 120x90, gap 4. 미주입 시 마커 클릭 카드용 기본값 */
+  userLocation: { latitude: number; longitude: number } | null;
   imageWidth?: number;
   imageHeight?: number;
   imageGap?: number;
-  /** 'list'면 카드 그림자 없이 구분선만 (목록 내 아이템용) */
   variant?: "card" | "list";
 }
 
-export function MapStoreCard({
+export function MapStoreCardContent({
   store,
+  userLocation,
   imageWidth = DEFAULT_IMAGE_WIDTH,
   imageHeight = DEFAULT_IMAGE_HEIGHT,
   imageGap = DEFAULT_IMAGE_GAP,
   variant = "card",
-}: MapStoreCardProps) {
+}: MapStoreCardContentProps) {
   const [isLiked, setIsLiked] = useState(store.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(store.likeCount);
   const queryClient = useQueryClient();
+  const { mutate: addLike, isPending: isAddingLike } = useAddStoreLike();
+  const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
+  const isLikeLoading = isAddingLike || isRemovingLike;
 
   useEffect(() => {
     setIsLiked(store.isLiked ?? false);
     setLikeCount(store.likeCount);
   }, [store.id, store.isLiked, store.likeCount]);
-  const { mutate: addLike, isPending: isAddingLike } = useAddStoreLike();
-  const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
-  const isLikeLoading = isAddingLike || isRemovingLike;
 
-  const { location: userLocation } = useUserLocation();
   const distance =
-    userLocation !== null
+    userLocation !== null && store.latitude != null && store.longitude != null
       ? calculateDistance(
           userLocation.latitude,
           userLocation.longitude,
@@ -93,7 +93,6 @@ export function MapStoreCard({
             }),
       }}
     >
-      {/* 상품 대표이미지 캐러셀 */}
       {productImages.length > 0 && (
         <div
           className="flex overflow-x-auto scrollbar-hide"
@@ -127,7 +126,6 @@ export function MapStoreCard({
         </div>
       )}
 
-      {/* 스토어 정보 */}
       <div>
         {productImages.length === 0 && <div className="pt-2" />}
         <div className="flex items-center justify-between gap-2">
@@ -199,5 +197,34 @@ export function MapStoreCard({
         )}
       </div>
     </Link>
+  );
+}
+
+/** 마커 클릭 시 단일 카드용: useUserLocation 호출 후 MapStoreCardContent 렌더 */
+interface MapStoreCardProps {
+  store: StoreInfo;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageGap?: number;
+  variant?: "card" | "list";
+}
+
+export function MapStoreCard({
+  store,
+  imageWidth = DEFAULT_IMAGE_WIDTH,
+  imageHeight = DEFAULT_IMAGE_HEIGHT,
+  imageGap = DEFAULT_IMAGE_GAP,
+  variant = "card",
+}: MapStoreCardProps) {
+  const { location: userLocation } = useUserLocation();
+  return (
+    <MapStoreCardContent
+      store={store}
+      userLocation={userLocation ?? null}
+      imageWidth={imageWidth}
+      imageHeight={imageHeight}
+      imageGap={imageGap}
+      variant={variant}
+    />
   );
 }

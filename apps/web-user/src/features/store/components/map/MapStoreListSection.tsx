@@ -1,7 +1,7 @@
 "use client";
 
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
-import { MapStoreCard } from "./MapStoreCard";
+import { MapStoreCardContent } from "./MapStoreCard";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
 interface MapStoreListSectionProps {
@@ -10,6 +10,8 @@ interface MapStoreListSectionProps {
   hideHandle?: boolean;
   /** true면 정렬/필터 행 숨김 (지도 목록 영역에서 리스트만 표시) */
   hideSortFilter?: boolean;
+  /** 목록 내 모든 카드가 동일한 기준으로 거리 표시 (지도 페이지에서 한 번만 조회한 위치) */
+  userLocation?: { latitude: number; longitude: number } | null;
 }
 
 /** 지도 바텀 시트용 스토어 목록 (옵션에 따라 핸들/정렬·필터/리스트) */
@@ -17,6 +19,7 @@ export function MapStoreListSection({
   stores,
   hideHandle,
   hideSortFilter,
+  userLocation,
 }: MapStoreListSectionProps) {
   return (
     <div className="flex flex-col">
@@ -75,8 +78,9 @@ export function MapStoreListSection({
         ) : (
           stores.map((store) => (
             <li key={store.id}>
-              <MapStoreCard
+              <MapStoreCardContent
                 store={store}
+                userLocation={userLocation ?? null}
                 variant="list"
                 imageWidth={120}
                 imageHeight={90}
