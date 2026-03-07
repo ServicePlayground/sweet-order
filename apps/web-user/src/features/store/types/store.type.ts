@@ -1,3 +1,5 @@
+import type { ProductCategoryType } from "@/apps/web-user/features/product/types/product.type";
+
 export interface StoreListResponse {
   data: StoreInfo[];
   meta: {
@@ -5,6 +7,22 @@ export interface StoreListResponse {
     hasNext: boolean;
     totalCount: number;
   };
+}
+
+/** 스토어 목록 필터 */
+export interface StoreListFilter {
+  /** 케이크 사이즈 표시명: 도시락, 미니, 1호, 2호, 3호 */
+  sizes?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  productCategoryTypes?: ProductCategoryType[];
+}
+
+/** 스토어 목록 조회 API 요청 파라미터 */
+export interface StoreListParams extends StoreListFilter {
+  page: number;
+  limit: number;
+  search?: string;
 }
 
 export interface StoreInfo {

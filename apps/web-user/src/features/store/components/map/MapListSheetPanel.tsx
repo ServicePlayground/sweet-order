@@ -25,11 +25,10 @@ export function MapListSheetPanel({
 }: MapListSheetPanelProps) {
   return (
     <div
-      className="fixed left-0 right-0 bottom-[60px] z-40 flex flex-col max-w-[638px] mx-auto overflow-hidden"
+      className="fixed left-0 right-0 bottom-[60px] z-50 flex flex-col max-w-[638px] mx-auto overflow-hidden"
       style={{
         height: LIST_SHEET_HANDLE_HEIGHT + offset,
         transition: isDragging ? "none" : "height 0.25s ease-out",
-        boxShadow: "0px 4px 16px 0px #00000029",
         background: "#FFFFFF",
         borderRadius: "20px 20px 0 0",
       }}

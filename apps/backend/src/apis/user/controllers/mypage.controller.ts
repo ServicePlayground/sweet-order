@@ -123,7 +123,7 @@ export class UserMypageController {
   @ApiOperation({
     summary: "(로그인 필요) 내가 좋아요한 스토어 목록 조회",
     description:
-      "자신이 좋아요한 스토어 목록을 조회합니다. 정렬(sortBy), 스토어명 검색(search), 지역(regions) 필터, 페이지네이션을 지원합니다.",
+      "자신이 좋아요한 스토어 목록을 조회합니다. 정렬(sortBy), 스토어명 검색(search), 지역(regions), 상품 필터(sizes, minPrice, maxPrice, productCategoryTypes), 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   @SwaggerAuthResponses()

@@ -5,6 +5,10 @@ import {
   STORE_ERROR_MESSAGES,
   StoreSortBy,
 } from "@apps/backend/modules/store/constants/store.constants";
+import {
+  EnableStatus,
+  ProductCategoryType,
+} from "@apps/backend/modules/product/constants/product.constants";
 import { StoreMapperUtil } from "@apps/backend/modules/store/utils/store-mapper.util";
 import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import {
@@ -39,8 +43,16 @@ export class StoreListService {
    * 검색(스토어명), 정렬, 페이지네이션을 지원합니다. 로그인 시 각 스토어의 좋아요 여부(isLiked)를 반환합니다.
    */
   async getStoresForUser(query: GetStoresRequestDto, user?: JwtVerifiedPayload) {
-    const { search, page, limit, sortBy, regions } = query;
-    const where = this.buildStoreWhereForUser(search, regions);
+    const { search, page, limit, sortBy, regions, sizes, minPrice, maxPrice, productCategoryTypes } =
+      query;
+    const where = await this.buildStoreWhereForUser({
+      search,
+      regions,
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+    });
     const orderBy = this.buildStoreOrderBy(sortBy ?? StoreSortBy.LATEST);
 
     const totalItems = await this.prisma.store.count({ where });
@@ -111,11 +123,21 @@ export class StoreListService {
 
   /**
    * 내 스토어 목록 조회 (판매자용)
-   * 검색(스토어명), 정렬, 페이지네이션을 지원합니다.
+   * 검색(스토어명), 정렬, 페이지네이션, 상품 필터(sizes, minPrice, maxPrice, productCategoryTypes)를 지원합니다.
    */
   async getStoresByUserIdForSeller(userId: string, query: GetSellerStoresRequestDto) {
-    const { search, page, limit, sortBy } = query;
-    const where = this.buildStoreWhereForSeller(userId, search);
+    const { search, page, limit, sortBy, sizes, minPrice, maxPrice, productCategoryTypes } = query;
+    const baseWhere = this.buildStoreWhereForSeller(userId, search);
+    const productFilterWhere = await this.buildStoreWhereProductFilter({
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+    });
+    const where: Prisma.StoreWhereInput =
+      Object.keys(productFilterWhere).length > 0
+        ? { AND: [baseWhere, productFilterWhere] }
+        : baseWhere;
     const orderBy = this.buildStoreOrderBy(sortBy ?? StoreSortBy.LATEST);
 
     const totalItems = await this.prisma.store.count({ where });
@@ -180,23 +202,107 @@ export class StoreListService {
     return storeResponse;
   }
 
-  private buildStoreWhereForUser(search?: string, regions?: string): Prisma.StoreWhereInput {
+  private async buildStoreWhereForUser(params: {
+    search?: string;
+    regions?: string;
+    sizes?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    productCategoryTypes?: ProductCategoryType[];
+  }): Promise<Prisma.StoreWhereInput> {
     const conditions: Prisma.StoreWhereInput[] = [];
 
-    if (search?.trim()) {
-      const keyword = search.trim();
+    if (params.search?.trim()) {
+      const keyword = params.search.trim();
       conditions.push({ name: { contains: keyword, mode: "insensitive" } });
     }
 
-    const parsedRegions = parseRegionsParam(regions);
+    const parsedRegions = parseRegionsParam(params.regions);
     const regionWhere = buildStoreWhereInputForRegions(parsedRegions);
     if (regionWhere) {
       conditions.push(regionWhere);
     }
 
+    const productFilterWhere = await this.buildStoreWhereProductFilter({
+      sizes: params.sizes,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
+      productCategoryTypes: params.productCategoryTypes,
+    });
+    if (Object.keys(productFilterWhere).length > 0) {
+      conditions.push(productFilterWhere);
+    }
+
     if (conditions.length === 0) return {};
     if (conditions.length === 1) return conditions[0];
     return { AND: conditions };
+  }
+
+  /**
+   * 상품 필터만 적용한 스토어 where 조건 (sizes, minPrice, maxPrice, productCategoryTypes).
+   * 스토어 목록(사용자/판매자), 마이페이지 좋아요 스토어 목록 등에서 공통 사용.
+   */
+  private async buildStoreWhereProductFilter(params: {
+    sizes?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    productCategoryTypes?: ProductCategoryType[];
+  }): Promise<Prisma.StoreWhereInput> {
+    const hasProductFilter =
+      (params.sizes?.length ?? 0) > 0 ||
+      params.minPrice != null ||
+      params.maxPrice != null ||
+      (params.productCategoryTypes?.length ?? 0) > 0;
+    if (!hasProductFilter) return {};
+
+    const conditions: Prisma.StoreWhereInput[] = [];
+
+    if (params.sizes && params.sizes.length > 0) {
+      const storeIdsFromSize = await this.getStoreIdsWithProductSizes(params.sizes);
+      if (storeIdsFromSize.length === 0) return { id: "never" };
+      conditions.push({ id: { in: storeIdsFromSize } });
+    }
+
+    const productSome: Prisma.ProductWhereInput = {
+      visibilityStatus: EnableStatus.ENABLE,
+      salesStatus: EnableStatus.ENABLE,
+    };
+    if (params.minPrice != null || params.maxPrice != null) {
+      productSome.salePrice = {};
+      if (params.minPrice != null) {
+        (productSome.salePrice as Prisma.IntFilter).gte = params.minPrice;
+      }
+      if (params.maxPrice != null) {
+        (productSome.salePrice as Prisma.IntFilter).lte = params.maxPrice;
+      }
+    }
+    if (params.productCategoryTypes && params.productCategoryTypes.length > 0) {
+      productSome.productCategoryTypes = { hasSome: params.productCategoryTypes };
+    }
+    conditions.push({ products: { some: productSome } });
+
+    return conditions.length === 1 ? conditions[0]! : { AND: conditions };
+  }
+
+  /**
+   * 케이크 사이즈 옵션(도시락, 미니, 1호 등)을 가진 상품이 하나라도 있는 스토어 ID 목록 조회
+   */
+  private async getStoreIdsWithProductSizes(sizes: string[]): Promise<string[]> {
+    if (sizes.length === 0) return [];
+    const result = await this.prisma.$queryRaw<Array<{ store_id: string }>>(
+      Prisma.sql`
+        SELECT DISTINCT p.store_id
+        FROM products p
+        WHERE p.visibility_status = ${EnableStatus.ENABLE}
+          AND p.sales_status = ${EnableStatus.ENABLE}
+          AND p.cake_size_options IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(p.cake_size_options::jsonb) AS elem
+            WHERE elem->>'displayName' IN (${Prisma.join(sizes)})
+          )
+      `,
+    );
+    return result.map((r) => r.store_id);
   }
 
   private buildStoreWhereForSeller(userId: string, search?: string): Prisma.StoreWhereInput {

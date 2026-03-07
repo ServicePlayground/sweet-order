@@ -14,7 +14,7 @@ import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNa
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { storeApi } from "@/apps/web-user/features/store/apis/store.api";
-import type { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import type { StoreInfo, StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
 import { MapStoreCard } from "@/apps/web-user/features/store/components/map/MapStoreCard";
 import { MapStoreListSection } from "@/apps/web-user/features/store/components/map/MapStoreListSection";
 import { MapTopSearchBar } from "@/apps/web-user/features/store/components/map/MapTopSearchBar";
@@ -49,6 +49,7 @@ export default function MapPage() {
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
   const [selectedStore, setSelectedStore] = useState<StoreInfo | null>(null);
   const [listSortBy, setListSortBy] = useState<MapListSortBy>("distance");
+  const [listFilter, setListFilter] = useState<StoreListFilter>({});
 
   // ---- Refs: 지도·마커 ----
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -419,8 +420,14 @@ export default function MapPage() {
       let page = 1;
       const limit = 1000;
       let hasNext = true;
+      const filterParams: StoreListFilter = {};
+      if (listFilter.sizes?.length) filterParams.sizes = listFilter.sizes;
+      if (listFilter.minPrice != null) filterParams.minPrice = listFilter.minPrice;
+      if (listFilter.maxPrice != null) filterParams.maxPrice = listFilter.maxPrice;
+      if (listFilter.productCategoryTypes?.length)
+        filterParams.productCategoryTypes = listFilter.productCategoryTypes;
       while (hasNext) {
-        const res = await storeApi.getList({ page, limit });
+        const res = await storeApi.getList({ page, limit, ...filterParams });
         list.push(...res.data);
         hasNext = res.meta.hasNext;
         page += 1;
@@ -435,9 +442,13 @@ export default function MapPage() {
           drawPlatformStoreMarkers();
           if (searchStoresRef.current === null) searchPlaces(map.getCenter());
         }
+        // 목록 패널이 열려 있을 때 필터 변경 시 목록 즉시 반영
+        if (listSheetPanelOffsetRef.current > 0) {
+          setListSheetStores(getStoresForList());
+        }
       })
       .catch(() => {});
-  }, [drawPlatformStoreMarkers, searchPlaces]);
+  }, [drawPlatformStoreMarkers, searchPlaces, listFilter, getStoresForList, setListSheetStores]);
 
   // URL ?q= 검색: 스토어 검색 API 호출 후 마커·bounds·목록 패널 처리. 결과 0개여도 패널 열고 중심은 현재위치/강남구
   useEffect(() => {
@@ -450,7 +461,18 @@ export default function MapPage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await storeApi.getList({ search: searchQuery, page: 1, limit: 100 });
+        const filterParams: StoreListFilter = {};
+        if (listFilter.sizes?.length) filterParams.sizes = listFilter.sizes;
+        if (listFilter.minPrice != null) filterParams.minPrice = listFilter.minPrice;
+        if (listFilter.maxPrice != null) filterParams.maxPrice = listFilter.maxPrice;
+        if (listFilter.productCategoryTypes?.length)
+          filterParams.productCategoryTypes = listFilter.productCategoryTypes;
+        const res = await storeApi.getList({
+          search: searchQuery,
+          page: 1,
+          limit: 1000,
+          ...filterParams,
+        });
         const stores = filterStoresWithCoordinates(res.data ?? []);
         if (cancelled) return;
         searchStoresRef.current = stores;
@@ -485,6 +507,7 @@ export default function MapPage() {
     };
   }, [
     searchQuery,
+    listFilter,
     userLocation,
     clearKakaoMarkers,
     drawPlatformStoreMarkers,
@@ -618,6 +641,8 @@ export default function MapPage() {
             userLocation={userLocation}
             sortBy={listSortBy}
             onSortByChange={setListSortBy}
+            listFilter={listFilter}
+            onListFilterChange={setListFilter}
           />
         )}
       </MapListSheetPanel>

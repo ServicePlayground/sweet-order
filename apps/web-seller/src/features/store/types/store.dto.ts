@@ -10,6 +10,10 @@ import {
   BusinessValidationRequestDto,
   OnlineTradingCompanyDetailRequestDto,
 } from "@/apps/web-seller/features/business/types/business.dto";
+import type {
+  CakeSizeDisplayName,
+  ProductCategoryType,
+} from "@/apps/web-seller/features/product/types/product.dto";
 
 export enum StoreSortBy {
   LATEST = "latest",
@@ -80,6 +84,14 @@ export interface GetSellerStoresRequestDto {
   limit: number;
   search?: string;
   sortBy?: StoreSortBy;
+  /** 상품 필터: 사이즈(도시락, 미니, 1호 등). 상품 cakeSizeOptions.displayName과 동일한 CakeSizeDisplayName enum */
+  sizes?: CakeSizeDisplayName[];
+  /** 상품 필터: 최소 가격 */
+  minPrice?: number;
+  /** 상품 필터: 최대 가격 */
+  maxPrice?: number;
+  /** 상품 필터: 유형(캐릭터, 레터링 등). 상품 목록 조회와 동일한 ProductCategoryType enum */
+  productCategoryTypes?: ProductCategoryType[];
 }
 
 export type StoreListResponseDto = ListResponseDto<StoreResponseDto>;

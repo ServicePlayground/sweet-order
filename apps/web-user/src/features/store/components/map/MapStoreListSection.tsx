@@ -2,7 +2,9 @@
 
 import { useMemo, useRef, useState, useEffect } from "react";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import type { StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
 import { MapStoreCardContent } from "./MapStoreCard";
+import { MapStoreListFilter } from "./MapStoreListFilter";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import {
   type MapListSortBy,
@@ -13,6 +15,18 @@ const SORT_OPTIONS: { value: MapListSortBy; label: string }[] = [
   { value: "distance", label: "거리순" },
   { value: "review", label: "리뷰순" },
 ];
+
+const tabButtonStyle = {
+  gap: 4,
+  borderRadius: 26,
+  border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+  padding: "8px 14px",
+  background: "var(--grayscale-gr-00, #FFFFFF)",
+  fontWeight: 400,
+  fontSize: 14,
+  lineHeight: "140%" as const,
+  color: "var(--grayscale-gr-900, #1A1A1A)",
+};
 
 interface MapStoreListSectionProps {
   stores: StoreInfo[];
@@ -26,6 +40,10 @@ interface MapStoreListSectionProps {
   sortBy?: MapListSortBy;
   /** 정렬 변경 콜백 */
   onSortByChange?: (value: MapListSortBy) => void;
+  /** 목록 필터 (사이즈·가격·유형). API 재조회에 사용 */
+  listFilter?: StoreListFilter;
+  /** 필터 적용 콜백 */
+  onListFilterChange?: (filter: StoreListFilter) => void;
 }
 
 /** 지도 바텀 시트용 스토어 목록 (옵션에 따라 핸들/정렬·필터/리스트) */
@@ -36,6 +54,8 @@ export function MapStoreListSection({
   userLocation,
   sortBy = "distance",
   onSortByChange,
+  listFilter,
+  onListFilterChange,
 }: MapStoreListSectionProps) {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
@@ -70,28 +90,18 @@ export function MapStoreListSection({
         </div>
       )}
 
-      {!hideSortFilter && sortedStores.length > 0 && (
+      {!hideSortFilter && (
         <div
-          className="flex items-center justify-between"
-          style={{ padding: "12px 20px 24px 20px" }}
+          className="flex items-center"
+          style={{ padding: "12px 20px 24px 20px", gap: 12 }}
         >
           {onSortByChange ? (
-            <div className="relative" ref={sortDropdownRef}>
+            <div className="relative shrink-0" ref={sortDropdownRef}>
               <button
                 type="button"
                 onClick={() => setSortDropdownOpen((prev) => !prev)}
                 className="flex items-center shrink-0"
-                style={{
-                  gap: 4,
-                  borderRadius: 26,
-                  border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
-                  padding: "8px 14px",
-                  background: "var(--grayscale-gr-00, #FFFFFF)",
-                  fontWeight: 400,
-                  fontSize: 14,
-                  lineHeight: "140%",
-                  color: "var(--grayscale-gr-900, #1A1A1A)",
-                }}
+                style={tabButtonStyle}
                 aria-expanded={sortDropdownOpen}
                 aria-haspopup="listbox"
                 aria-label={`정렬: ${currentSortLabel}`}
@@ -153,16 +163,14 @@ export function MapStoreListSection({
               )}
             </div>
           ) : (
-            <span
-              style={{
-                fontWeight: 400,
-                fontSize: 14,
-                lineHeight: "140%",
-                color: "var(--grayscale-gr-900, #1A1A1A)",
-              }}
-            >
-              거리순
-            </span>
+            <span style={tabButtonStyle}>거리순</span>
+          )}
+
+          {onListFilterChange && (
+            <>
+              <Icon name="line1" width={1} height={12} className="shrink-0" aria-hidden />
+              <MapStoreListFilter listFilter={listFilter} onListFilterChange={onListFilterChange} />
+            </>
           )}
         </div>
       )}
@@ -174,10 +182,7 @@ export function MapStoreListSection({
       >
         {sortedStores.length === 0 ? (
           <li className="flex flex-1 min-h-0 flex-col items-center justify-center">
-            <div
-              className="flex flex-col items-center justify-center"
-              style={{ gap: 20 }}
-            >
+            <div className="flex flex-col items-center justify-center" style={{ gap: 20 }}>
               <Icon name="noData" width={62} height={57} className="shrink-0" />
               <span
                 style={{
