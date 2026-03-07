@@ -90,6 +90,7 @@ export default function MapPage() {
     listSheetPanelOffsetRef,
     listSheetPanelMaxOffsetRef,
     getListSheetMaxOffset,
+    getListSheetMiddleOffset,
     openListSheet,
     closeListSheet,
     handlePointerDown: listSheetHandlePointerDown,
@@ -359,10 +360,10 @@ export default function MapPage() {
             map.setCenter(center);
           }
           setListSheetStores(getStoresForList());
-          const maxOff = getListSheetMaxOffset();
-          listSheetPanelMaxOffsetRef.current = maxOff;
-          listSheetPanelOffsetRef.current = maxOff;
-          setListSheetPanelOffset(maxOff);
+          const middleOff = getListSheetMiddleOffset();
+          listSheetPanelMaxOffsetRef.current = getListSheetMaxOffset();
+          listSheetPanelOffsetRef.current = middleOff;
+          setListSheetPanelOffset(middleOff);
         }
       });
     },
@@ -374,6 +375,7 @@ export default function MapPage() {
       userLocation,
       closeListSheet,
       getListSheetMaxOffset,
+      getListSheetMiddleOffset,
       getStoresForList,
       setListSheetStores,
       setListSheetPanelOffset,
@@ -494,10 +496,10 @@ export default function MapPage() {
           map.setCenter(center);
         }
         setListSheetStores(getStoresForList());
-        const maxOff = getListSheetMaxOffset();
-        listSheetPanelMaxOffsetRef.current = maxOff;
-        listSheetPanelOffsetRef.current = maxOff;
-        setListSheetPanelOffset(maxOff);
+        const middleOff = getListSheetMiddleOffset();
+        listSheetPanelMaxOffsetRef.current = getListSheetMaxOffset();
+        listSheetPanelOffsetRef.current = middleOff;
+        setListSheetPanelOffset(middleOff);
       } catch {
         searchStoresRef.current = null;
       }
@@ -512,6 +514,7 @@ export default function MapPage() {
     clearKakaoMarkers,
     drawPlatformStoreMarkers,
     getListSheetMaxOffset,
+    getListSheetMiddleOffset,
     getStoresForList,
     setListSheetStores,
     setListSheetPanelOffset,

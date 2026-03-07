@@ -10,11 +10,11 @@ export const DEFAULT_MAP_CENTER = REGION_COORDINATES["서울"]?.["강남구"] ??
 /** 목록 패널 핸들 높이(px) */
 export const LIST_SHEET_HANDLE_HEIGHT = 32;
 
-/** 목록 패널 열림 시 화면 높이 대비 비율 (0.45 = 45vh) */
-export const LIST_SHEET_OPEN_RATIO = 0.45;
+/** 하단 네비 영역 높이(px) - 패널이 채우는 최대 높이 계산용 */
+export const LIST_SHEET_BOTTOM_NAV_HEIGHT = 60;
 
-/** 드래그 후 스냅 기준: 이 값 이상이면 풀 오픈, 미만이면 접힘 */
-export const LIST_SHEET_SNAP_THRESHOLD = 120;
+/** 목록 패널 중간단계: 화면 높이 대비 비율 (0.45 = 45vh) */
+export const LIST_SHEET_OPEN_RATIO = 0.45;
 
 /** 지도 bounds 패딩(px) - 검색 결과 전체가 보이도록 할 때 */
 export const MAP_BOUNDS_PADDING = 80;
