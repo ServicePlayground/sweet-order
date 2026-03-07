@@ -15,6 +15,7 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import { storeApi } from "@/apps/web-user/features/store/apis/store.api";
 import type { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { MapStoreCard } from "@/apps/web-user/features/store/components/map/MapStoreCard";
+import { MapStoreListSection } from "@/apps/web-user/features/store/components/map/MapStoreListSection";
 
 declare global {
   interface Window {
@@ -37,6 +38,10 @@ export default function MapPage() {
   const { location: userLocation, refresh: refreshUserLocation } = useUserLocation();
   const [kakaoLoaded, setKakaoLoaded] = useState(false);
   const [selectedStore, setSelectedStore] = useState<StoreInfo | null>(null);
+  const [listSheetStores, setListSheetStores] = useState<StoreInfo[]>([]);
+  /** 드래그 패널 높이 오프셋(px). 0=접힌 상태, 버튼/드래그로 열면 동일 높이(70vh-32) */
+  const [listSheetPanelOffset, setListSheetPanelOffset] = useState(0);
+  const [isListSheetPanelDragging, setIsListSheetPanelDragging] = useState(false);
 
   // 지도/마커 ref
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -56,6 +61,11 @@ export default function MapPage() {
   const isCenteringFromClickRef = useRef(false); // panTo 시 idle 재검색 방지
   const usedUserLocationForCenterRef = useRef(false); // 이미 사용자위치로 이동했는지
   const userLocationOverlayRef = useRef<any | null>(null);
+  // 목록 시트 드래그 관련 ref
+  const listSheetDragStartYRef = useRef<number | null>(null);
+  const listSheetDragStartOffsetRef = useRef<number>(0);
+  const listSheetPanelMaxOffsetRef = useRef<number>(400);
+  const listSheetPanelOffsetRef = useRef<number>(0);
 
   /** 카카오 검색 마커 제거 + 플랫폼 마커 포커스 해제 (재검색 시 호출) */
   const clearKakaoMarkers = useCallback(() => {
@@ -96,7 +106,24 @@ export default function MapPage() {
     });
   }, []);
 
-  /** 플랫폼 입점 스토어 마커 그리기 */
+  /** 현재 지도 bounds 안에 있는 플랫폼 스토어만 반환 (마커·목록 공통). min/max로 범위 계산해 API 반환 순서에 안전하게 대응 */
+  const getStoresInBounds = useCallback((map: any): StoreInfo[] => {
+    if (!map || !window.kakao?.maps) return [];
+    const bounds = map.getBounds();
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    const minLat = Math.min(sw.getLat(), ne.getLat());
+    const maxLat = Math.max(sw.getLat(), ne.getLat());
+    const minLng = Math.min(sw.getLng(), ne.getLng());
+    const maxLng = Math.max(sw.getLng(), ne.getLng());
+    return platformStoresRef.current.filter((store) => {
+      if (store.latitude == null || store.longitude == null) return false;
+      const { latitude: lat, longitude: lng } = store;
+      return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
+    });
+  }, []);
+
+  /** 플랫폼 입점 스토어 마커 그리기 (현재 지도 범위 내 스토어만 표시) */
   const drawPlatformStoreMarkers = useCallback(() => {
     const map = mapInstanceRef.current;
     if (!window.kakao?.maps || !map) return;
@@ -106,7 +133,10 @@ export default function MapPage() {
     platformOverlaysRef.current.forEach((o) => o.setMap(null));
     platformOverlaysRef.current = [];
 
-    if (platformStoresRef.current.length === 0) return;
+    const storesInBounds = getStoresInBounds(map);
+    if (storesInBounds.length === 0) {
+      return;
+    }
 
     if (!openedMarkerImageRef.current) {
       openedMarkerImageRef.current = new window.kakao.maps.MarkerImage(
@@ -123,7 +153,7 @@ export default function MapPage() {
       );
     }
 
-    platformStoresRef.current.forEach((store) => {
+    storesInBounds.forEach((store) => {
       if (store.latitude == null || store.longitude == null) return;
 
       const position = new window.kakao.maps.LatLng(store.latitude, store.longitude);
@@ -168,7 +198,7 @@ export default function MapPage() {
       });
       platformOverlaysRef.current.push(overlay);
     });
-  }, []);
+  }, [getStoresInBounds]);
 
   /** 현재위치 마커 표시/제거 (위치 없으면 제거) */
   const updateUserLocationMarker = (location: { latitude: number; longitude: number } | null) => {
@@ -336,7 +366,7 @@ export default function MapPage() {
       searchPlaces(centerLatLng);
       updateUserLocationMarker(userLocation ?? null);
 
-      // 지도 이동/줌 변경 시 마커 재검색
+      // 지도 이동/줌 변경 시: 범위 내 플랫폼 마커 재표시 + 카카오 검색 + 목록 패널 닫기
       window.kakao.maps.event.addListener(map, "idle", () => {
         // 마커 클릭으로 인한 center 이동이면 한 번은 재검색을 건너뜀
         if (isCenteringFromClickRef.current) {
@@ -344,13 +374,23 @@ export default function MapPage() {
           return;
         }
 
+        drawPlatformStoreMarkers();
         const currentCenter = map.getCenter();
         searchPlaces(currentCenter);
+        // 지도 이동/줌 후 목록 패널이 열려 있으면 닫기
+        if (listSheetPanelOffsetRef.current > 0) {
+          listSheetPanelOffsetRef.current = 0;
+          setListSheetPanelOffset(0);
+        }
       });
 
-      // 지도 빈 영역 클릭 시 스토어 카드 닫기
+      // 지도 영역 클릭 시: 스토어 카드 닫기 + 목록 패널 닫기
       window.kakao.maps.event.addListener(map, "click", () => {
         setSelectedStore(null);
+        if (listSheetPanelOffsetRef.current > 0) {
+          listSheetPanelOffsetRef.current = 0;
+          setListSheetPanelOffset(0);
+        }
       });
     });
   };
@@ -454,6 +494,103 @@ export default function MapPage() {
     refreshUserLocation();
   };
 
+  /** 목록 보기 버튼: 드래그 패널과 동일한 목록·동일 높이로 열기 (딤 없음, 네비 위 기준) */
+  const handleOpenListSheet = () => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const inBounds = getStoresInBounds(map);
+    setListSheetStores(inBounds);
+    const maxOff = getListSheetMaxOffset();
+    listSheetPanelMaxOffsetRef.current = maxOff;
+    listSheetPanelOffsetRef.current = maxOff;
+    setListSheetPanelOffset(maxOff);
+  };
+
+  const LIST_SHEET_HANDLE_HEIGHT = 32;
+  const SNAP_THRESHOLD = 120;
+
+  /** 목록 패널 열림 높이: 70vh, 네비(60px) 위 기준. 패널 전체 = 70vh이므로 오프셋 = 70vh - 핸들높이 */
+  const getListSheetMaxOffset = () => {
+    if (typeof window === "undefined") return 400;
+    const vh70 = window.innerHeight * 0.7;
+    return Math.round(vh70 - LIST_SHEET_HANDLE_HEIGHT);
+  };
+
+  /** 네비 위 드래그 핸들: 터치/마우스 시작 — 목록 데이터 로드, 드래그 추적 */
+  const handleListSheetHandlePointerDown = (clientY: number) => {
+    listSheetPanelMaxOffsetRef.current = getListSheetMaxOffset();
+    listSheetDragStartYRef.current = clientY;
+    listSheetDragStartOffsetRef.current = listSheetPanelOffset;
+    setIsListSheetPanelDragging(true);
+    const map = mapInstanceRef.current;
+    if (map) {
+      const inBounds = getStoresInBounds(map);
+      setListSheetStores(inBounds);
+    }
+  };
+
+  /** 네비 위 드래그 핸들: 이동 — 오프셋을 손가락/커서에 맞춰 갱신 */
+  const handleListSheetHandlePointerMove = (clientY: number) => {
+    const startY = listSheetDragStartYRef.current;
+    if (startY == null) return;
+    const maxOff = listSheetPanelMaxOffsetRef.current;
+    const startOff = listSheetDragStartOffsetRef.current;
+    const deltaY = startY - clientY;
+    const next = Math.max(0, Math.min(maxOff, startOff + deltaY));
+    listSheetPanelOffsetRef.current = next;
+    setListSheetPanelOffset(next);
+  };
+
+  /** 네비 위 드래그 핸들: 종료 — 스냅(접힘 or 풀 오픈) */
+  const handleListSheetHandlePointerUp = () => {
+    listSheetDragStartYRef.current = null;
+    setIsListSheetPanelDragging(false);
+    const maxOff = listSheetPanelMaxOffsetRef.current;
+    const current = listSheetPanelOffsetRef.current;
+    if (current >= SNAP_THRESHOLD) {
+      setListSheetPanelOffset(maxOff);
+      listSheetPanelOffsetRef.current = maxOff;
+    } else {
+      setListSheetPanelOffset(0);
+      listSheetPanelOffsetRef.current = 0;
+    }
+  };
+
+  const handleListSheetTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    handleListSheetHandlePointerDown(e.touches[0].clientY);
+  };
+  const handleListSheetTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    handleListSheetHandlePointerMove(e.touches[0].clientY);
+  };
+  const handleListSheetTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    handleListSheetHandlePointerUp();
+  };
+  const handleListSheetMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleListSheetHandlePointerDown(e.clientY);
+  };
+
+  /** ref와 state 동기화 (스냅 후 등) */
+  useEffect(() => {
+    listSheetPanelOffsetRef.current = listSheetPanelOffset;
+  }, [listSheetPanelOffset]);
+
+  useEffect(() => {
+    if (!isListSheetPanelDragging) return;
+    const onMouseMove = (e: MouseEvent) => handleListSheetHandlePointerMove(e.clientY);
+    const onMouseUp = () => handleListSheetHandlePointerUp();
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [isListSheetPanelDragging]);
+
   return (
     <div className="relative w-full h-screen">
       <Script src={kakaoSdkUrl} strategy="afterInteractive" onLoad={handleKakaoScriptLoad} />
@@ -463,24 +600,97 @@ export default function MapPage() {
       <button
         type="button"
         onClick={handleRefreshLocation}
-        className="absolute right-[15px] bottom-20 z-10 flex h-10 w-10 items-center justify-center rounded-[26px] border border-[#EBEBEA] bg-white p-2.5"
+        className="absolute right-[15px] bottom-32 z-10 flex h-10 w-10 items-center justify-center rounded-[26px] border border-[#EBEBEA] bg-white p-2.5"
         style={{ boxShadow: "0px 2px 10px 0px #0000000A" }}
         aria-label="내 위치로 이동"
       >
         <Icon name="currentLocation" width={20} height={20} className="text-blue-400" />
       </button>
+
+      {/* 목록 보기 버튼: 하단 중앙, 바텀 시트 오픈 */}
+      <button
+        type="button"
+        onClick={handleOpenListSheet}
+        className="absolute left-1/2 -translate-x-1/2 z-10 flex items-center justify-center bg-white"
+        style={{
+          bottom: 110,
+          borderRadius: 26,
+          border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+          padding: "8px 14px",
+          boxShadow: "0px 2px 10px 0px #0000000A",
+        }}
+        aria-label="목록 보기"
+      >
+        <span className="inline-flex items-center justify-center gap-1 leading-none">
+          <span
+            className="inline-flex shrink-0 items-center justify-center text-gray-900"
+            style={{ width: 16, height: 16 }}
+          >
+            <Icon name="list" width={16} height={16} className="block" />
+          </span>
+          <span
+            className="text-gray-900 block"
+            style={{
+              fontWeight: 400,
+              fontSize: 14,
+              lineHeight: 1.4,
+              paddingTop: 1,
+            }}
+          >
+            목록 보기
+          </span>
+        </span>
+      </button>
+
       {selectedStore && (
         <div
           className="absolute z-30"
           style={{
             left: 16,
             right: 16,
-            bottom: 92, // 60(바텀 네비 높이) + 32
+            bottom: 120, // 네비(60) + 드래그패널(32) + 여백
           }}
         >
           <MapStoreCard store={selectedStore} />
         </div>
       )}
+      {/* 목록 패널: 네비(60px) 위 기준, 버튼/드래그 모두 동일 패널·동일 높이(70vh)·딤 없음 */}
+      <div
+        className="fixed left-0 right-0 bottom-[60px] z-40 flex flex-col max-w-[638px] mx-auto overflow-hidden"
+        style={{
+          height: LIST_SHEET_HANDLE_HEIGHT + listSheetPanelOffset,
+          transition: isListSheetPanelDragging ? "none" : "height 0.25s ease-out",
+          boxShadow: "0px 4px 16px 0px #00000029",
+          background: "#FFFFFF",
+          borderRadius: "20px 20px 0 0",
+        }}
+        aria-label="목록 패널"
+      >
+        {/* 드래그 핸들: 56x6 바, 세로 중앙 */}
+        <div
+          role="presentation"
+          className="shrink-0 flex h-8 items-center justify-center cursor-grab active:cursor-grabbing touch-none py-[13px]"
+          onTouchStart={handleListSheetTouchStart}
+          onTouchMove={handleListSheetTouchMove}
+          onTouchEnd={handleListSheetTouchEnd}
+          onTouchCancel={handleListSheetTouchEnd}
+          onMouseDown={handleListSheetMouseDown}
+          style={{ touchAction: "none" }}
+        >
+          <div
+            className="rounded-full bg-gray-200 shrink-0"
+            style={{ width: 56, height: 6 }}
+            aria-hidden
+          />
+        </div>
+        {/* 목록 영역: 열렸을 때 스토어 리스트만 표시 (제목/닫기/필터 없음) */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col">
+          {listSheetPanelOffset > 0 && (
+            <MapStoreListSection stores={listSheetStores} hideHandle hideSortFilter />
+          )}
+        </div>
+      </div>
+
       <BottomNav />
     </div>
   );

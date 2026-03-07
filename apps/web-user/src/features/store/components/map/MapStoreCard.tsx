@@ -12,11 +12,27 @@ import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/u
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
 import { useQueryClient } from "@tanstack/react-query";
 
+const DEFAULT_IMAGE_WIDTH = 134;
+const DEFAULT_IMAGE_HEIGHT = 100;
+const DEFAULT_IMAGE_GAP = 6;
+
 interface MapStoreCardProps {
   store: StoreInfo;
+  /** 목록 영역용: 이미지 120x90, gap 4. 미주입 시 마커 클릭 카드용 기본값 */
+  imageWidth?: number;
+  imageHeight?: number;
+  imageGap?: number;
+  /** 'list'면 카드 그림자 없이 구분선만 (목록 내 아이템용) */
+  variant?: "card" | "list";
 }
 
-export function MapStoreCard({ store }: MapStoreCardProps) {
+export function MapStoreCard({
+  store,
+  imageWidth = DEFAULT_IMAGE_WIDTH,
+  imageHeight = DEFAULT_IMAGE_HEIGHT,
+  imageGap = DEFAULT_IMAGE_GAP,
+  variant = "card",
+}: MapStoreCardProps) {
   const [isLiked, setIsLiked] = useState(store.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(store.likeCount);
   const queryClient = useQueryClient();
@@ -60,35 +76,49 @@ export function MapStoreCard({ store }: MapStoreCardProps) {
   };
 
   const productImages = store.productRepresentativeImageUrls ?? [];
+  const isList = variant === "list";
 
   return (
     <Link
       href={PATHS.STORE.DETAIL(store.id)}
       className="block overflow-hidden"
       style={{
-        boxShadow: "0px 4px 16px 0px #00000029",
-        background: "#FFFFFF",
-        borderRadius: 16,
-        padding: "12px 12px 16px 12px",
+        ...(isList
+          ? { background: "#FFFFFF" }
+          : {
+              boxShadow: "0px 4px 16px 0px #00000029",
+              background: "#FFFFFF",
+              borderRadius: 16,
+              padding: "12px 12px 16px 12px",
+            }),
       }}
     >
       {/* 상품 대표이미지 캐러셀 */}
       {productImages.length > 0 && (
         <div
           className="flex overflow-x-auto scrollbar-hide"
-          style={{ scrollSnapType: "x mandatory", gap: 6, marginBottom: 14 }}
+          style={{
+            scrollSnapType: "x mandatory",
+            gap: imageGap,
+            marginBottom: 14,
+          }}
         >
           {productImages.map((url, index) => (
             <div
               key={`${store.id}-img-${index}`}
               className="flex-shrink-0 overflow-hidden bg-gray-100"
-              style={{ scrollSnapAlign: "start", width: 134, height: 100, borderRadius: 10 }}
+              style={{
+                scrollSnapAlign: "start",
+                width: imageWidth,
+                height: imageHeight,
+                borderRadius: 10,
+              }}
             >
               <Image
                 src={url}
                 alt={`${store.name} 상품 ${index + 1}`}
-                width={134}
-                height={100}
+                width={imageWidth}
+                height={imageHeight}
                 className="w-full h-full object-cover"
                 unoptimized
               />
