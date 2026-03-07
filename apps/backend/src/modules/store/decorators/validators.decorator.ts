@@ -28,8 +28,8 @@ export class IsValidLogoImageUrlConstraint implements ValidatorConstraintInterfa
       return false;
     }
 
-    // 허용된 이미지 확장자 검증 (.jpg, .png, .webp)
-    const allowedExtensions = [".jpg", ".png", ".webp"];
+    // 허용된 이미지 확장자 검증 (.jpg, .jpeg, .png, .webp)
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
     const urlLower = trimmed.toLowerCase();
 
     // URL에서 확장자 추출 (쿼리 파라미터 이전까지)
@@ -58,7 +58,7 @@ export class IsValidLogoImageUrlConstraint implements ValidatorConstraintInterfa
       return "이미지 파일 확장자가 필요합니다.";
     }
     if (this.errorType === "확장자오류") {
-      return "jpg, png, webp 형식의 이미지만 사용할 수 있습니다.";
+      return "jpg, jpeg, png, webp 형식의 이미지만 사용할 수 있습니다.";
     }
     return "올바른 이미지 URL 형식이 아닙니다.";
   }
