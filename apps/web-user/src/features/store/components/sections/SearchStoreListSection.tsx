@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
 import { useStoreList } from "@/apps/web-user/features/store/hooks/queries/useStoreList";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
@@ -22,7 +21,6 @@ interface SearchStoreListSectionProps {
 
 export function SearchStoreListSection({ search }: SearchStoreListSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const { mutate: addLike } = useAddStoreLike();
   const { mutate: removeLike } = useRemoveStoreLike();
   const { location: userLocation } = useUserLocation();
@@ -32,11 +30,10 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
   const handleLike = (e: React.MouseEvent, store: StoreInfo) => {
     e.preventDefault();
     e.stopPropagation();
-    const onSuccess = () => queryClient.invalidateQueries({ queryKey: ["store", "list"] });
     if (store.isLiked) {
-      removeLike(store.id, { onSuccess });
+      removeLike(store.id);
     } else {
-      addLike(store.id, { onSuccess });
+      addLike(store.id);
     }
   };
 

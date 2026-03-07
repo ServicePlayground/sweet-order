@@ -10,7 +10,6 @@ import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { calculateDistance, formatDistance } from "@/apps/web-user/common/utils/distance.util";
 import { useAddStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useAddStoreLike";
 import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutations/useRemoveStoreLike";
-import { useQueryClient } from "@tanstack/react-query";
 
 const DEFAULT_IMAGE_WIDTH = 134;
 const DEFAULT_IMAGE_HEIGHT = 100;
@@ -36,7 +35,6 @@ export function MapStoreCardContent({
 }: MapStoreCardContentProps) {
   const [isLiked, setIsLiked] = useState(store.isLiked ?? false);
   const [likeCount, setLikeCount] = useState(store.likeCount);
-  const queryClient = useQueryClient();
   const { mutate: addLike, isPending: isAddingLike } = useAddStoreLike();
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
   const isLikeLoading = isAddingLike || isRemovingLike;
@@ -63,15 +61,14 @@ export function MapStoreCardContent({
     const nextLiked = !isLiked;
     setIsLiked(nextLiked);
     setLikeCount((prev) => (nextLiked ? prev + 1 : prev - 1));
-    const onSuccess = () => queryClient.invalidateQueries({ queryKey: ["store", "list"] });
     const onError = () => {
       setIsLiked(!nextLiked);
       setLikeCount(store.likeCount);
     };
     if (isLiked) {
-      removeLike(store.id, { onSuccess, onError });
+      removeLike(store.id, { onError });
     } else {
-      addLike(store.id, { onSuccess, onError });
+      addLike(store.id, { onError });
     }
   };
 
