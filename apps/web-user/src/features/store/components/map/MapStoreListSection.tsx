@@ -34,7 +34,9 @@ export function MapStoreListSection({
       )}
 
       {!hideSortFilter && (
-        <div className={`flex items-center justify-between px-4 pb-3 border-b border-gray-100 ${hideHandle ? "pt-2" : ""}`}>
+        <div
+          className={`flex items-center justify-between px-4 pb-3 border-b border-gray-100 ${hideHandle ? "pt-2" : ""}`}
+        >
           <button
             type="button"
             className="flex items-center gap-1 text-gray-900 font-bold"
@@ -67,10 +69,7 @@ export function MapStoreListSection({
       )}
 
       {/* 스토어 목록: 바깥 padding 12 20 12 12, item 패딩 없음 */}
-      <ul
-        className="flex flex-col gap-7"
-        style={{ padding: "12px 20px 12px 12px" }}
-      >
+      <ul className="flex flex-col gap-7" style={{ padding: "12px 20px 12px 12px" }}>
         {stores.length === 0 ? (
           <li className="py-10 text-center text-sm text-gray-400">
             이 지도 범위에 스토어가 없습니다.

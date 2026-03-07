@@ -67,12 +67,13 @@ export default function MapPage() {
   const usedUserLocationForCenterRef = useRef(false);
   const userLocationOverlayRef = useRef<any | null>(null);
 
-  // 목록에 쓸 스토어: 검색 모드면 검색 결과, 아니면 현재 지도 범위 내 플랫폼 스토어
+  // 목록에 쓸 스토어: 검색 모드면 검색 결과 중 지도 범위 내, 아니면 지도 범위 내 플랫폼 스토어
   const getStoresForList = useCallback((): StoreInfo[] => {
-    if (searchStoresRef.current?.length) return searchStoresRef.current;
     const map = mapInstanceRef.current;
     if (!map) return [];
-    return getStoresInMapBounds(map, platformStoresRef.current);
+    const source =
+      searchStoresRef.current !== null ? searchStoresRef.current : platformStoresRef.current;
+    return getStoresInMapBounds(map, source);
   }, []);
 
   const listSheet = useMapListSheet(getStoresForList);
@@ -93,14 +94,11 @@ export default function MapPage() {
     handlePointerUp: listSheetHandlePointerUp,
   } = listSheet;
 
-  // ---- 지도 범위 내 스토어 (마커/목록 소스) ----
-  const getStoresToShow = useCallback(
-    (map: any): StoreInfo[] => {
-      if (searchStoresRef.current?.length) return searchStoresRef.current;
-      return getStoresInMapBounds(map, platformStoresRef.current);
-    },
-    [],
-  );
+  // ---- 지도 범위 내 스토어 (마커 표시용): 검색 모드면 검색 결과만, 아니면 지도 범위 내 플랫폼 스토어
+  const getStoresToShow = useCallback((map: any): StoreInfo[] => {
+    if (searchStoresRef.current !== null) return searchStoresRef.current;
+    return getStoresInMapBounds(map, platformStoresRef.current);
+  }, []);
 
   const isPlatformStoreDuplicate = useCallback((lat: number, lng: number, placeName: string) => {
     return platformStoresRef.current.some((s) => {
@@ -161,8 +159,10 @@ export default function MapPage() {
       platformMarkersRef.current.push(marker);
 
       window.kakao.maps.event.addListener(marker, "click", () => {
-        if (markerImageRef.current) markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
-        if (openedMarkerImageRef.current) platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
+        if (markerImageRef.current)
+          markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
+        if (openedMarkerImageRef.current)
+          platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
         if (openedFocusedMarkerImageRef.current) {
           marker.setImage(openedFocusedMarkerImageRef.current);
           selectedMarkerRef.current = marker;
@@ -198,7 +198,8 @@ export default function MapPage() {
       userLocationOverlayRef.current = new window.kakao.maps.CustomOverlay({
         map,
         position,
-        content: '<img src="/images/contents/map-current-position.png" alt="현재 위치" style="width:34px;height:34px;pointer-events:none;display:block" />',
+        content:
+          '<img src="/images/contents/map-current-position.png" alt="현재 위치" style="width:34px;height:34px;pointer-events:none;display:block" />',
         yAnchor: 0.5,
         xAnchor: 0.5,
       });
@@ -209,7 +210,8 @@ export default function MapPage() {
   const searchPlaces = useCallback(
     (centerLatLng: any) => {
       if (!window.kakao?.maps?.services) return;
-      if (!placesServiceRef.current) placesServiceRef.current = new window.kakao.maps.services.Places();
+      if (!placesServiceRef.current)
+        placesServiceRef.current = new window.kakao.maps.services.Places();
       if (!markerImageRef.current) {
         markerImageRef.current = new window.kakao.maps.MarkerImage(
           "/images/contents/map-unopened.png",
@@ -248,8 +250,10 @@ export default function MapPage() {
             markersRef.current.push(marker);
             window.kakao.maps.event.addListener(marker, "click", () => {
               setSelectedStore(null);
-              if (markerImageRef.current) markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
-              if (openedMarkerImageRef.current) platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
+              if (markerImageRef.current)
+                markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
+              if (openedMarkerImageRef.current)
+                platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
               if (focusedMarkerImageRef.current) {
                 marker.setImage(focusedMarkerImageRef.current);
                 selectedMarkerRef.current = marker;
@@ -285,7 +289,7 @@ export default function MapPage() {
   }, [userLocation]);
 
   const initializeMap = useCallback(
-    (center: { lat: number; lng: number }) => {
+    (center: { lat: number; lng: number }, isSearchMode: boolean) => {
       if (!window.kakao?.maps || !mapContainerRef.current || mapInstanceRef.current) return;
       window.kakao.maps.load(() => {
         const map = new window.kakao.maps.Map(mapContainerRef.current, {
@@ -294,8 +298,9 @@ export default function MapPage() {
         });
         mapInstanceRef.current = map;
 
+        if (isSearchMode) clearKakaoMarkers();
         drawPlatformStoreMarkers();
-        searchPlaces(new window.kakao.maps.LatLng(center.lat, center.lng));
+        if (!isSearchMode) searchPlaces(new window.kakao.maps.LatLng(center.lat, center.lng));
         updateUserLocationMarker(userLocation ?? null);
 
         window.kakao.maps.event.addListener(map, "idle", () => {
@@ -304,8 +309,15 @@ export default function MapPage() {
             return;
           }
           drawPlatformStoreMarkers();
-          if (!searchStoresRef.current?.length) searchPlaces(map.getCenter());
-          if (!searchStoresRef.current?.length && listSheetPanelOffsetRef.current > 0) {
+          if (searchStoresRef.current === null) searchPlaces(map.getCenter());
+          if (listSheetPanelOffsetRef.current > 0) {
+            setListSheetStores(getStoresForList());
+          }
+          if (
+            searchStoresRef.current === null &&
+            getStoresForList().length === 0 &&
+            listSheetPanelOffsetRef.current > 0
+          ) {
             closeListSheet();
           }
         });
@@ -317,11 +329,21 @@ export default function MapPage() {
 
         // 검색 결과가 이미 있으면(지도 생성 전 fetch 완료) bounds·패널 적용
         const stores = searchStoresRef.current;
-        if (stores?.length && window.kakao.maps.LatLngBounds) {
-          const bounds = new window.kakao.maps.LatLngBounds();
-          stores.forEach((s) => bounds.extend(new window.kakao.maps.LatLng(s.latitude!, s.longitude!)));
-          map.setBounds(bounds, MAP_BOUNDS_PADDING);
-          setListSheetStores(stores);
+        if (stores !== null) {
+          if (stores.length > 0 && window.kakao.maps.LatLngBounds) {
+            const bounds = new window.kakao.maps.LatLngBounds();
+            stores.forEach((s) =>
+              bounds.extend(new window.kakao.maps.LatLng(s.latitude!, s.longitude!)),
+            );
+            map.setBounds(bounds, MAP_BOUNDS_PADDING);
+          } else if (stores.length === 0) {
+            const center =
+              userLocation != null
+                ? new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude)
+                : new window.kakao.maps.LatLng(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
+            map.setCenter(center);
+          }
+          setListSheetStores(getStoresForList());
           const maxOff = getListSheetMaxOffset();
           listSheetPanelMaxOffsetRef.current = maxOff;
           listSheetPanelOffsetRef.current = maxOff;
@@ -330,12 +352,14 @@ export default function MapPage() {
       });
     },
     [
+      clearKakaoMarkers,
       drawPlatformStoreMarkers,
       searchPlaces,
       updateUserLocationMarker,
       userLocation,
       closeListSheet,
       getListSheetMaxOffset,
+      getStoresForList,
       setListSheetStores,
       setListSheetPanelOffset,
     ],
@@ -346,19 +370,26 @@ export default function MapPage() {
     if (typeof window === "undefined") return;
     const ready = kakaoLoaded || (window.kakao && window.kakao.maps);
     if (!ready || mapInstanceRef.current) return;
-    initializeMap(getInitialCenter());
-  }, [kakaoLoaded, userLocation, getInitialCenter, initializeMap]);
+    initializeMap(getInitialCenter(), !!searchQuery);
+  }, [kakaoLoaded, userLocation, searchQuery, getInitialCenter, initializeMap]);
 
+  // 검색 모드가 아닐 때만 현재위치로 지도 이동 (검색 후 현재위치로 덮어쓰기 방지)
   useEffect(() => {
-    if (!userLocation || !mapInstanceRef.current || usedUserLocationForCenterRef.current) return;
+    if (
+      searchQuery ||
+      !userLocation ||
+      !mapInstanceRef.current ||
+      usedUserLocationForCenterRef.current
+    )
+      return;
     const map = mapInstanceRef.current;
     if (map.panTo) {
       isCenteringFromClickRef.current = true;
       map.panTo(new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude));
-      searchPlaces(map.getCenter());
+      if (searchStoresRef.current === null) searchPlaces(map.getCenter());
     }
     usedUserLocationForCenterRef.current = true;
-  }, [userLocation, searchPlaces]);
+  }, [userLocation, searchQuery, searchPlaces]);
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
@@ -385,7 +416,7 @@ export default function MapPage() {
         const map = mapInstanceRef.current;
         if (map) {
           drawPlatformStoreMarkers();
-          if (!searchStoresRef.current?.length) searchPlaces(map.getCenter());
+          if (searchStoresRef.current === null) searchPlaces(map.getCenter());
         }
       })
       .catch(() => {});
@@ -407,13 +438,21 @@ export default function MapPage() {
         searchStoresRef.current = stores;
         const map = mapInstanceRef.current;
         if (!map || !window.kakao?.maps) return;
+        clearKakaoMarkers();
         drawPlatformStoreMarkers();
         if (stores.length > 0) {
           const bounds = new window.kakao.maps.LatLngBounds();
-          stores.forEach((s) => bounds.extend(new window.kakao.maps.LatLng(s.latitude, s.longitude)));
+          stores.forEach((s) =>
+            bounds.extend(new window.kakao.maps.LatLng(s.latitude, s.longitude)),
+          );
           map.setBounds(bounds, MAP_BOUNDS_PADDING);
+        } else {
+          const center = userLocation
+            ? new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude)
+            : new window.kakao.maps.LatLng(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
+          map.setCenter(center);
         }
-        setListSheetStores(stores);
+        setListSheetStores(getStoresForList());
         const maxOff = getListSheetMaxOffset();
         listSheetPanelMaxOffsetRef.current = maxOff;
         listSheetPanelOffsetRef.current = maxOff;
@@ -425,7 +464,16 @@ export default function MapPage() {
     return () => {
       cancelled = true;
     };
-  }, [searchQuery, drawPlatformStoreMarkers, getListSheetMaxOffset, setListSheetStores, setListSheetPanelOffset]);
+  }, [
+    searchQuery,
+    userLocation,
+    clearKakaoMarkers,
+    drawPlatformStoreMarkers,
+    getListSheetMaxOffset,
+    getStoresForList,
+    setListSheetStores,
+    setListSheetPanelOffset,
+  ]);
 
   // ---- Handlers ----
   const handleRefreshLocation = () => {
@@ -512,10 +560,16 @@ export default function MapPage() {
         aria-label="목록 보기"
       >
         <span className="inline-flex items-center justify-center gap-1 leading-none">
-          <span className="inline-flex shrink-0 items-center justify-center text-gray-900" style={{ width: 16, height: 16 }}>
+          <span
+            className="inline-flex shrink-0 items-center justify-center text-gray-900"
+            style={{ width: 16, height: 16 }}
+          >
             <Icon name="list" width={16} height={16} className="block" />
           </span>
-          <span className="text-gray-900 block" style={{ fontWeight: 400, fontSize: 14, lineHeight: 1.4, paddingTop: 1 }}>
+          <span
+            className="text-gray-900 block"
+            style={{ fontWeight: 400, fontSize: 14, lineHeight: 1.4, paddingTop: 1 }}
+          >
             목록 보기
           </span>
         </span>
