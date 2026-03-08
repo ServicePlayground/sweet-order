@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import type { StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
 import { MapStoreCardContent } from "./MapStoreCard";
@@ -58,7 +59,10 @@ export function MapStoreListSection({
   onListFilterChange,
 }: MapStoreListSectionProps) {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [sortDropdownRect, setSortDropdownRect] = useState<{ top: number; left: number } | null>(null);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
+  const sortDropdownListRef = useRef<HTMLDivElement>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
 
   const sortedStores = useMemo(
     () => sortStoresForMapList(stores, sortBy, userLocation ?? null),
@@ -67,13 +71,22 @@ export function MapStoreListSection({
 
   useEffect(() => {
     if (!sortDropdownOpen) return;
+    const el = sortButtonRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setSortDropdownRect({ left: rect.left, top: rect.bottom + 4 });
+    }
     const handleClickOutside = (e: MouseEvent) => {
-      if (sortDropdownRef.current && !sortDropdownRef.current.contains(e.target as Node)) {
-        setSortDropdownOpen(false);
-      }
+      const target = e.target as Node;
+      const inTrigger = sortDropdownRef.current?.contains(target);
+      const inList = sortDropdownListRef.current?.contains(target);
+      if (!inTrigger && !inList) setSortDropdownOpen(false);
     };
     window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+      setSortDropdownRect(null);
+    };
   }, [sortDropdownOpen]);
 
   const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label ?? "거리순";
@@ -93,18 +106,23 @@ export function MapStoreListSection({
       {!hideSortFilter && (
         <div
           className="min-w-0 shrink-0 overflow-x-auto overflow-y-visible"
-          style={{
-            padding: "12px 20px 24px 20px",
-            WebkitOverflowScrolling: "touch",
-          }}
+          style={{ WebkitOverflowScrolling: "touch" }}
         >
+          {/* 패딩을 스크롤되는 쪽에 두어, 스크롤 끝에서도 오른쪽 20px가 보이도록 함 */}
           <div
             className="flex items-center flex-nowrap"
-            style={{ gap: 12, minWidth: "min-content", paddingRight: 20 }}
+            style={{
+              gap: 12,
+              minWidth: "min-content",
+              padding: "12px 20px 24px 20px",
+              width: "max-content",
+              boxSizing: "content-box",
+            }}
           >
             {onSortByChange ? (
-              <div className="relative shrink-0" ref={sortDropdownRef}>
+              <div className="shrink-0" ref={sortDropdownRef}>
                 <button
+                  ref={sortButtonRef}
                   type="button"
                   onClick={() => setSortDropdownOpen((prev) => !prev)}
                   className="flex items-center shrink-0"
@@ -121,53 +139,61 @@ export function MapStoreListSection({
                     className={`shrink-0 transition-transform ${sortDropdownOpen ? "rotate-0" : "rotate-180"}`}
                   />
                 </button>
-                {sortDropdownOpen && (
-                  <ul
-                    role="listbox"
-                    className="absolute left-0 top-full z-50 mt-1 overflow-hidden"
-                    style={{
-                      minWidth: 120,
-                      borderRadius: 10,
-                      border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
-                      boxShadow: "0px 4px 8px 0px #0000001A",
-                      background: "var(--grayscale-gr-00, #FFFFFF)",
-                    }}
-                  >
-                    {SORT_OPTIONS.map((opt, index) => (
-                      <li
-                        key={opt.value}
-                        role="option"
-                        aria-selected={sortBy === opt.value}
-                        style={
-                          index < SORT_OPTIONS.length - 1
-                            ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
-                            : undefined
-                        }
+                {sortDropdownOpen &&
+                  sortDropdownRect &&
+                  typeof document !== "undefined" &&
+                  createPortal(
+                    <div ref={sortDropdownListRef}>
+                      <ul
+                        role="listbox"
+                        className="fixed z-[9999] overflow-hidden"
+                        style={{
+                          left: sortDropdownRect.left,
+                          top: sortDropdownRect.top,
+                          minWidth: 120,
+                          borderRadius: 10,
+                          border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+                          boxShadow: "0px 4px 8px 0px #0000001A",
+                          background: "var(--grayscale-gr-00, #FFFFFF)",
+                        }}
                       >
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onSortByChange(opt.value);
-                            setSortDropdownOpen(false);
-                          }}
-                          className="w-full text-left hover:bg-gray-50"
-                          style={{
-                            minWidth: 120,
-                            height: 40,
-                            padding: "10px 14px",
-                            background: "var(--grayscale-gr-00, #FFFFFF)",
-                            fontWeight: 400,
-                            fontSize: 14,
-                            lineHeight: "140%",
-                            color: "var(--grayscale-gr-900, #1A1A1A)",
-                          }}
+                      {SORT_OPTIONS.map((opt, index) => (
+                        <li
+                          key={opt.value}
+                          role="option"
+                          aria-selected={sortBy === opt.value}
+                          style={
+                            index < SORT_OPTIONS.length - 1
+                              ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
+                              : undefined
+                          }
                         >
-                          {opt.label}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onSortByChange(opt.value);
+                              setSortDropdownOpen(false);
+                            }}
+                            className="w-full text-left hover:bg-gray-50"
+                            style={{
+                              minWidth: 120,
+                              height: 40,
+                              padding: "10px 14px",
+                              background: "var(--grayscale-gr-00, #FFFFFF)",
+                              fontWeight: 400,
+                              fontSize: 14,
+                              lineHeight: "140%",
+                              color: "var(--grayscale-gr-900, #1A1A1A)",
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        </li>
+                      ))}
+                      </ul>
+                    </div>,
+                    document.body,
+                  )}
               </div>
             ) : (
               <span style={tabButtonStyle}>거리순</span>
