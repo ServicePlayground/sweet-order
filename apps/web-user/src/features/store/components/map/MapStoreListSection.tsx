@@ -100,7 +100,7 @@ export function MapStoreListSection({
         >
           <div
             className="flex items-center flex-nowrap"
-            style={{ gap: 12, minWidth: "min-content" }}
+            style={{ gap: 12, minWidth: "min-content", paddingRight: 20 }}
           >
           {onSortByChange ? (
             <div className="relative shrink-0" ref={sortDropdownRef}>
