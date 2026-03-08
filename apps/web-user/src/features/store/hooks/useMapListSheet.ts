@@ -10,11 +10,8 @@ import {
 
 /** 스냅 단계: 없음(0) / 중간 / 꽉채우기 */
 function getSnapPoints() {
-  if (typeof window === "undefined")
-    return { closed: 0, middle: 400, full: 600 };
-  const middle = Math.round(
-    window.innerHeight * LIST_SHEET_OPEN_RATIO - LIST_SHEET_HANDLE_HEIGHT,
-  );
+  if (typeof window === "undefined") return { closed: 0, middle: 400, full: 600 };
+  const middle = Math.round(window.innerHeight * LIST_SHEET_OPEN_RATIO - LIST_SHEET_HANDLE_HEIGHT);
   const full = Math.round(
     window.innerHeight - LIST_SHEET_BOTTOM_NAV_HEIGHT - LIST_SHEET_HANDLE_HEIGHT,
   );
@@ -36,10 +33,7 @@ function nearestAmong(current: number, candidates: number[]): number {
 }
 
 /** 드래그 시작 시 스냅 단계(오프셋 값) + 손 뗐을 때 위치로 스냅할 값 결정 */
-function resolveSnap(
-  current: number,
-  snapAtPointerDown: number,
-): number {
+function resolveSnap(current: number, snapAtPointerDown: number): number {
   const { closed, middle, full } = getSnapPoints();
   // 꽉채운 상태에서 아래로 조금이라도 내렸으면 → 중간/없음 중 가까운 쪽으로
   if (snapAtPointerDown === full && current < full) {

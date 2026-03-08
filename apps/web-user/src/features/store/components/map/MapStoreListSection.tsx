@@ -102,83 +102,86 @@ export function MapStoreListSection({
             className="flex items-center flex-nowrap"
             style={{ gap: 12, minWidth: "min-content", paddingRight: 20 }}
           >
-          {onSortByChange ? (
-            <div className="relative shrink-0" ref={sortDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setSortDropdownOpen((prev) => !prev)}
-                className="flex items-center shrink-0"
-                style={tabButtonStyle}
-                aria-expanded={sortDropdownOpen}
-                aria-haspopup="listbox"
-                aria-label={`정렬: ${currentSortLabel}`}
-              >
-                {currentSortLabel}
-                <Icon
-                  name="selectArrow"
-                  width={16}
-                  height={16}
-                  className={`shrink-0 transition-transform ${sortDropdownOpen ? "rotate-0" : "rotate-180"}`}
-                />
-              </button>
-              {sortDropdownOpen && (
-                <ul
-                  role="listbox"
-                  className="absolute left-0 top-full z-50 mt-1 overflow-hidden"
-                  style={{
-                    minWidth: 120,
-                    borderRadius: 10,
-                    border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
-                    boxShadow: "0px 4px 8px 0px #0000001A",
-                    background: "var(--grayscale-gr-00, #FFFFFF)",
-                  }}
+            {onSortByChange ? (
+              <div className="relative shrink-0" ref={sortDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setSortDropdownOpen((prev) => !prev)}
+                  className="flex items-center shrink-0"
+                  style={tabButtonStyle}
+                  aria-expanded={sortDropdownOpen}
+                  aria-haspopup="listbox"
+                  aria-label={`정렬: ${currentSortLabel}`}
                 >
-                  {SORT_OPTIONS.map((opt, index) => (
-                    <li
-                      key={opt.value}
-                      role="option"
-                      aria-selected={sortBy === opt.value}
-                      style={
-                        index < SORT_OPTIONS.length - 1
-                          ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
-                          : undefined
-                      }
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onSortByChange(opt.value);
-                          setSortDropdownOpen(false);
-                        }}
-                        className="w-full text-left hover:bg-gray-50"
-                        style={{
-                          minWidth: 120,
-                          height: 40,
-                          padding: "10px 14px",
-                          background: "var(--grayscale-gr-00, #FFFFFF)",
-                          fontWeight: 400,
-                          fontSize: 14,
-                          lineHeight: "140%",
-                          color: "var(--grayscale-gr-900, #1A1A1A)",
-                        }}
+                  {currentSortLabel}
+                  <Icon
+                    name="selectArrow"
+                    width={16}
+                    height={16}
+                    className={`shrink-0 transition-transform ${sortDropdownOpen ? "rotate-0" : "rotate-180"}`}
+                  />
+                </button>
+                {sortDropdownOpen && (
+                  <ul
+                    role="listbox"
+                    className="absolute left-0 top-full z-50 mt-1 overflow-hidden"
+                    style={{
+                      minWidth: 120,
+                      borderRadius: 10,
+                      border: "1px solid var(--grayscale-gr-100, #EBEBEA)",
+                      boxShadow: "0px 4px 8px 0px #0000001A",
+                      background: "var(--grayscale-gr-00, #FFFFFF)",
+                    }}
+                  >
+                    {SORT_OPTIONS.map((opt, index) => (
+                      <li
+                        key={opt.value}
+                        role="option"
+                        aria-selected={sortBy === opt.value}
+                        style={
+                          index < SORT_OPTIONS.length - 1
+                            ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
+                            : undefined
+                        }
                       >
-                        {opt.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ) : (
-            <span style={tabButtonStyle}>거리순</span>
-          )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSortByChange(opt.value);
+                            setSortDropdownOpen(false);
+                          }}
+                          className="w-full text-left hover:bg-gray-50"
+                          style={{
+                            minWidth: 120,
+                            height: 40,
+                            padding: "10px 14px",
+                            background: "var(--grayscale-gr-00, #FFFFFF)",
+                            fontWeight: 400,
+                            fontSize: 14,
+                            lineHeight: "140%",
+                            color: "var(--grayscale-gr-900, #1A1A1A)",
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : (
+              <span style={tabButtonStyle}>거리순</span>
+            )}
 
-          {onListFilterChange && (
-            <>
-              <Icon name="line1" width={1} height={12} className="shrink-0" aria-hidden />
-              <MapStoreListFilter listFilter={listFilter} onListFilterChange={onListFilterChange} />
-            </>
-          )}
+            {onListFilterChange && (
+              <>
+                <Icon name="line1" width={1} height={12} className="shrink-0" aria-hidden />
+                <MapStoreListFilter
+                  listFilter={listFilter}
+                  onListFilterChange={onListFilterChange}
+                />
+              </>
+            )}
           </div>
         </div>
       )}
