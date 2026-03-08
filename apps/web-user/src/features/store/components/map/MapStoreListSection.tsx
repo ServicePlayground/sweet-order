@@ -91,7 +91,17 @@ export function MapStoreListSection({
       )}
 
       {!hideSortFilter && (
-        <div className="flex items-center" style={{ padding: "12px 20px 24px 20px", gap: 12 }}>
+        <div
+          className="min-w-0 shrink-0 overflow-x-auto overflow-y-visible"
+          style={{
+            padding: "12px 20px 24px 20px",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          <div
+            className="flex items-center flex-nowrap"
+            style={{ gap: 12, minWidth: "min-content" }}
+          >
           {onSortByChange ? (
             <div className="relative shrink-0" ref={sortDropdownRef}>
               <button
@@ -169,12 +179,13 @@ export function MapStoreListSection({
               <MapStoreListFilter listFilter={listFilter} onListFilterChange={onListFilterChange} />
             </>
           )}
+          </div>
         </div>
       )}
 
-      {/* 스토어 목록: top 0, 좌우 20px, bottom 12px. 비어 있을 때 ul·li가 남은 높이를 채워 세로 중앙 정렬 */}
+      {/* 스토어 목록: 상단 영역 overflow와 무관하게 컨테이너 너비만 사용 */}
       <ul
-        className={`flex flex-col gap-7 ${sortedStores.length === 0 ? "flex-1 min-h-0" : ""}`}
+        className={`flex min-w-0 flex-col gap-7 ${sortedStores.length === 0 ? "flex-1 min-h-0" : ""}`}
         style={{ padding: "0 20px 12px 20px" }}
       >
         {sortedStores.length === 0 ? (

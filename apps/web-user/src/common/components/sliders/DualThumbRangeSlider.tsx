@@ -109,6 +109,19 @@ export function DualThumbRangeSlider({
     [valueMin, valueMax, thumbLeftPercent],
   );
 
+  const applyValueAt = useCallback(
+    (clientX: number) => {
+      if (activeThumbRef.current === null) return;
+      const value = clientXToValue(clientX);
+      if (activeThumbRef.current === "min") {
+        onMinChange(Math.max(min, Math.min(value, valueMax)));
+      } else {
+        onMaxChange(Math.max(valueMin, Math.min(value, max)));
+      }
+    },
+    [min, max, valueMin, valueMax, clientXToValue, onMinChange, onMaxChange],
+  );
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       e.preventDefault();
@@ -128,19 +141,44 @@ export function DualThumbRangeSlider({
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (activeThumbRef.current === null) return;
-      const value = clientXToValue(e.clientX);
-      if (activeThumbRef.current === "min") {
-        onMinChange(Math.max(min, Math.min(value, valueMax)));
-      } else {
-        onMaxChange(Math.max(valueMin, Math.min(value, max)));
-      }
+      applyValueAt(e.clientX);
     },
-    [min, max, valueMin, valueMax, clientXToValue, onMinChange, onMaxChange],
+    [applyValueAt],
   );
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     activeThumbRef.current = null;
     (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const clientX = e.touches[0]!.clientX;
+      const thumb = getThumbAt(clientX);
+      activeThumbRef.current = thumb;
+      const value = clientXToValue(clientX);
+      if (thumb === "min") {
+        onMinChange(Math.min(value, valueMax));
+      } else {
+        onMaxChange(Math.max(value, valueMin));
+      }
+    },
+    [valueMin, valueMax, getThumbAt, clientXToValue, onMinChange, onMaxChange],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length !== 1 || activeThumbRef.current === null) return;
+      e.preventDefault();
+      applyValueAt(e.touches[0]!.clientX);
+    },
+    [applyValueAt],
+  );
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.changedTouches.length !== 1) return;
+    activeThumbRef.current = null;
   }, []);
 
   const fillLeft = ((valueMin - min) / (max - min)) * 100;
@@ -194,13 +232,18 @@ export function DualThumbRangeSlider({
             tabIndex={-1}
           />
           <div
-            className="absolute inset-0 z-[3] cursor-pointer"
+            className="absolute inset-0 z-[3] cursor-pointer touch-none"
+            style={{ touchAction: "none" }}
             aria-hidden
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerUp}
             onPointerCancel={handlePointerUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
           />
         </div>
       </div>
