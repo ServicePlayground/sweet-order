@@ -69,6 +69,7 @@ export default function MapPage() {
   const isCenteringFromClickRef = useRef(false); // 마커 클릭으로 panTo 한 직후 idle에서 재처리 방지
   const usedUserLocationForCenterRef = useRef(false); // 이미 현재위치로 중심 잡았는지
   const userLocationOverlayRef = useRef<any | null>(null);
+  const userLocationRef = useRef<{ latitude: number; longitude: number } | null>(null); // load 콜백에서 최신 위치 참조용
 
   // 목록에 쓸 스토어: 검색 모드면 검색 결과 중 지도 범위 내, 아니면 지도 범위 내 플랫폼 스토어
   const getStoresForList = useCallback((): StoreInfo[] => {
@@ -315,7 +316,8 @@ export default function MapPage() {
         if (isSearchMode) clearKakaoMarkers();
         drawPlatformStoreMarkers();
         if (!isSearchMode) searchPlaces(new window.kakao.maps.LatLng(center.lat, center.lng));
-        updateUserLocationMarker(userLocation ?? null);
+        // load 콜백은 비동기라 클로저의 userLocation이 null일 수 있음 → ref로 최신 위치 사용
+        updateUserLocationMarker(userLocationRef.current ?? null);
 
         // 지도 이동/줌 종료 시: 마커 갱신, 목록 패널이 열려 있으면 범위 내 스토어로 목록 갱신
         window.kakao.maps.event.addListener(map, "idle", () => {
@@ -353,9 +355,10 @@ export default function MapPage() {
             );
             map.setBounds(bounds, MAP_BOUNDS_PADDING);
           } else if (stores.length === 0) {
+            const loc = userLocationRef.current;
             const center =
-              userLocation != null
-                ? new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude)
+              loc != null
+                ? new window.kakao.maps.LatLng(loc.latitude, loc.longitude)
                 : new window.kakao.maps.LatLng(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
             map.setCenter(center);
           }
@@ -383,6 +386,11 @@ export default function MapPage() {
   );
 
   // ---- Effects ----
+  // userLocation 변경 시 ref 동기화 (kakao.maps.load 콜백 등 비동기에서 최신 값 사용)
+  useEffect(() => {
+    userLocationRef.current = userLocation ?? null;
+  }, [userLocation]);
+
   // 카카오 스크립트 로드 후 지도 1회 생성. searchQuery 있으면 검색 모드로 생성(미입점 마커 없음)
   useEffect(() => {
     if (typeof window === "undefined") return;
