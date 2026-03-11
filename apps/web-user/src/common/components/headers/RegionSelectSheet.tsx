@@ -12,7 +12,10 @@ import {
 } from "@/apps/web-user/common/utils/region-match.util";
 import { RegionData } from "@/apps/web-user/features/store/types/region.type";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
-import { requestLocationFromWebView, isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+import {
+  requestLocationFromWebView,
+  isWebViewEnvironment,
+} from "@/apps/web-user/common/utils/webview.bridge";
 import { reverseGeocode } from "@/apps/web-user/common/utils/kakao-geocode.util";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
@@ -47,10 +50,13 @@ export function RegionSelectSheet({
   });
 
   const [selectedDepth1, setSelectedDepth1] = useState(
-    currentResult?.depth1Label ?? listableRegions[0]?.depth1.label ?? ""
+    currentResult?.depth1Label ?? listableRegions[0]?.depth1.label ?? "",
   );
   const [checkedLabels, setCheckedLabels] = useState<Set<string>>(new Set());
-  const [initialState, setInitialState] = useState<{ depth1: string; labels: Set<string> }>({ depth1: "", labels: new Set() });
+  const [initialState, setInitialState] = useState<{ depth1: string; labels: Set<string> }>({
+    depth1: "",
+    labels: new Set(),
+  });
 
   // 시트가 열릴 때 초기 상태 세팅
   useEffect(() => {
@@ -59,11 +65,15 @@ export function RegionSelectSheet({
     setSelectedDepth1(initialDepth1);
 
     const region = listableRegions.find((r) => r.depth1.label === initialDepth1);
-    const activeItems = region?.depth2.filter((d) => d.label !== "전지역" && d.storeCount > 0) ?? [];
+    const activeItems =
+      region?.depth2.filter((d) => d.label !== "전지역" && d.storeCount > 0) ?? [];
 
     let initialLabels: Set<string>;
     if (currentResult?.depth1Label === initialDepth1) {
-      if (currentResult.label === currentResult.depth1Label || currentResult.label === `${currentResult.depth1Label} 전지역`) {
+      if (
+        currentResult.label === currentResult.depth1Label ||
+        currentResult.label === `${currentResult.depth1Label} 전지역`
+      ) {
         initialLabels = new Set(activeItems.map((d) => d.label));
       } else {
         initialLabels = new Set([currentResult.label]);
@@ -79,7 +89,9 @@ export function RegionSelectSheet({
   // 스크롤 방지
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   // 위치 대기 중 address가 업데이트되면 자동으로 매칭 처리
@@ -108,7 +120,12 @@ export function RegionSelectSheet({
       const nearest = findNearestActiveRegion(regions, result.depth1Label, latitude, longitude);
       setInactiveModal({ visible: true, type: "seoul", currentLabel: result.label, nearest });
     } else {
-      setInactiveModal({ visible: true, type: "outside", currentLabel: result.depth1Label, nearest: null });
+      setInactiveModal({
+        visible: true,
+        type: "outside",
+        currentLabel: result.depth1Label,
+        nearest: null,
+      });
     }
   };
 
@@ -178,7 +195,11 @@ export function RegionSelectSheet({
     }
     if (isAllChecked) {
       const totalStoreCount = currentActiveItems.reduce((sum, d) => sum + d.storeCount, 0);
-      onSelect({ label: `${selectedDepth1} 전지역`, storeCount: totalStoreCount, depth1Label: selectedDepth1 });
+      onSelect({
+        label: `${selectedDepth1} 전지역`,
+        storeCount: totalStoreCount,
+        depth1Label: selectedDepth1,
+      });
     } else if (checkedLabels.size === 1) {
       const label = Array.from(checkedLabels)[0];
       const item = currentActiveItems.find((d) => d.label === label)!;
@@ -261,9 +282,7 @@ export function RegionSelectSheet({
                     onClick={() => handleDepth1Change(region.depth1.label)}
                     className={clsx(
                       "w-full px-6 h-[52px] text-sm text-left text-gray-900 transition-colors flex items-center justify-between gap-1 border-b border-gray-100",
-                      isSelected
-                        ? "bg-white font-bold"
-                        : "font-medium"
+                      isSelected ? "bg-white font-bold" : "font-medium",
                     )}
                   >
                     <span className="truncate">{region.depth1.label}</span>
@@ -284,7 +303,9 @@ export function RegionSelectSheet({
                   className="w-full flex items-center justify-between px-6 h-[52px] text-sm text-gray-900 font-bold transition-colors"
                 >
                   <span>전지역</span>
-                  {isAllChecked && <Icon name="check" width={16} height={16} className="text-red-400" />}
+                  {isAllChecked && (
+                    <Icon name="check" width={16} height={16} className="text-red-400" />
+                  )}
                 </button>
               )}
 
@@ -298,7 +319,9 @@ export function RegionSelectSheet({
                     className="w-full flex items-center justify-between px-6 h-[52px] text-sm text-gray-900 font-bold transition-colors"
                   >
                     <span>{item.label}</span>
-                    {isChecked && <Icon name="check" width={16} height={16} className="text-red-400" />}
+                    {isChecked && (
+                      <Icon name="check" width={16} height={16} className="text-red-400" />
+                    )}
                   </button>
                 );
               })}
@@ -308,7 +331,14 @@ export function RegionSelectSheet({
           {/* 푸터 */}
           <div className="shrink-0 px-5 py-4 border-t border-gray-100 flex gap-2">
             <span style={{ flex: 3 }}>
-              <Button variant="outline" onClick={() => { setSelectedDepth1(initialState.depth1); setCheckedLabels(new Set(initialState.labels)); }} className="flex items-center justify-center gap-[6px]">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedDepth1(initialState.depth1);
+                  setCheckedLabels(new Set(initialState.labels));
+                }}
+                className="flex items-center justify-center gap-[6px]"
+              >
                 <Icon name="reset" width={20} height={20} className="text-gray-900" />
                 초기화
               </Button>

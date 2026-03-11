@@ -10,9 +10,9 @@ export function useRemoveStoreLike() {
 
   return useMutation({
     mutationFn: (storeId: string) => likeApi.removeStoreLike(storeId),
-    onSuccess: (_, storeId) => {
-      // 스토어 상세 쿼리 무효화 (좋아요 개수 업데이트)
-      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(storeId) });
+    onSuccess: () => {
+      // 스토어 관련 쿼리 전체 무효화 (목록/상세/마이페이지 등 isLiked, likeCount 반영)
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
     },
     onError: (error) => {
       showAlert({

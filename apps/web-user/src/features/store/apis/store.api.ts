@@ -1,10 +1,14 @@
 import { userClient } from "@/apps/web-user/common/config/axios.config";
-import { StoreInfo, StoreListResponse } from "@/apps/web-user/features/store/types/store.type";
+import {
+  StoreInfo,
+  StoreListResponse,
+  type StoreListParams,
+} from "@/apps/web-user/features/store/types/store.type";
 import { StoreRegionsResponse } from "@/apps/web-user/features/store/types/region.type";
 
 export const storeApi = {
   // 스토어 목록 조회
-  getList: async (params: { search?: string; page: number; limit: number }): Promise<StoreListResponse> => {
+  getList: async (params: StoreListParams): Promise<StoreListResponse> => {
     const response = await userClient.get("/store", { params });
     return response.data.data;
   },

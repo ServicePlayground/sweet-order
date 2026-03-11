@@ -13,7 +13,9 @@ export default function AlarmPage() {
     <div className="flex flex-col min-h-[calc(100vh-52px)]">
       {/* TODO: 테스트용 토글 - API 연결 후 제거 */}
       <div className="flex flex-col items-center py-2 gap-1">
-        <span className="text-[10px] text-yellow-500 font-bold">테스트용 토글버튼 · API 연결 후 제거예정</span>
+        <span className="text-[10px] text-yellow-500 font-bold">
+          테스트용 토글버튼 · API 연결 후 제거예정
+        </span>
         <button
           type="button"
           onClick={() => setShowAlarms((prev) => !prev)}

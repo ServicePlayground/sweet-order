@@ -70,19 +70,15 @@ export class RecentViewService {
     const productIds = products.map((p: ProductWithReviewsAndStore) => p.id);
     const likedIds = await this.getLikedProductIds(userId, productIds);
 
-    const data: ProductResponseDto[] = products.map(
-      (product: ProductWithReviewsAndStore) =>
-        ProductMapperUtil.mapToProductResponse(product, likedIds.has(product.id)),
+    const data: ProductResponseDto[] = products.map((product: ProductWithReviewsAndStore) =>
+      ProductMapperUtil.mapToProductResponse(product, likedIds.has(product.id)),
     );
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
     return { data, meta };
   }
 
-  private async getLikedProductIds(
-    userId: string,
-    productIds: string[],
-  ): Promise<Set<string>> {
+  private async getLikedProductIds(userId: string, productIds: string[]): Promise<Set<string>> {
     if (productIds.length === 0) return new Set<string>();
     const likes = await this.prisma.productLike.findMany({
       where: { userId, productId: { in: productIds } },

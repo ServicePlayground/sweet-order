@@ -279,7 +279,7 @@ export default function QAPage() {
             <button
               onClick={() => {
                 window.location.href = toExternalAppSchemeUrl(
-                  "supertoss://send?bank=국민&accountNo=1234567890&amount=10000",
+                  "supertoss://send?bank=농협&accountNo=3521047093883&amount=10000",
                 );
               }}
               className="flex items-center justify-between w-full px-4 py-3 bg-[#0064FF]/10 rounded-xl text-sm text-[#0064FF] hover:bg-[#0064FF]/20 transition-colors text-left"

@@ -3,6 +3,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { EnableStatus } from "@apps/backend/modules/product/constants/product.constants";
 
 /**
  * 스토어 매핑 유틸리티
@@ -11,12 +12,16 @@ import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 export class StoreMapperUtil {
   private static readonly context = StoreMapperUtil.name;
   /**
-   * Product ID와 StoreId select 필드
-   * 상품 ID와 스토어 ID를 함께 조회할 때 사용
+   * Product ID, StoreId, images, salePrice, visibilityStatus, salesStatus select 필드
+   * 상품 ID, 스토어 ID, 대표이미지(images[0]), 최소금액 계산용
    */
   static readonly PRODUCT_ID_WITH_STORE_ID_SELECT = {
     id: true,
     storeId: true,
+    images: true,
+    salePrice: true,
+    visibilityStatus: true,
+    salesStatus: true,
   } as const satisfies Prisma.ProductSelect;
 
   /**
@@ -62,13 +67,28 @@ export class StoreMapperUtil {
       select: StoreMapperUtil.PRODUCT_ID_WITH_STORE_ID_SELECT,
     });
 
-    // 스토어별 상품 ID 그룹화
+    // 스토어별 상품 ID 그룹화 + 상품별 대표이미지(images[0]) + 스토어별 최소금액
     const productsByStoreId = new Map<string, string[]>();
+    const productRepresentativeImage = new Map<string, string>();
+    const storeSaleablePrices = new Map<string, number[]>();
     for (const product of allProducts) {
       if (!productsByStoreId.has(product.storeId)) {
         productsByStoreId.set(product.storeId, []);
       }
       productsByStoreId.get(product.storeId)!.push(product.id);
+      const firstImage = product.images?.[0];
+      if (firstImage) {
+        productRepresentativeImage.set(product.id, firstImage);
+      }
+      if (
+        product.visibilityStatus === EnableStatus.ENABLE &&
+        product.salesStatus === EnableStatus.ENABLE
+      ) {
+        if (!storeSaleablePrices.has(product.storeId)) {
+          storeSaleablePrices.set(product.storeId, []);
+        }
+        storeSaleablePrices.get(product.storeId)!.push(product.salePrice);
+      }
     }
 
     // 모든 상품 ID 수집
@@ -93,7 +113,7 @@ export class StoreMapperUtil {
       reviewsByProductId.get(review.productId)!.push({ rating: review.rating });
     }
 
-    // 스토어별 후기 통계 계산
+    // 스토어별 후기 통계 계산 + 상품 대표이미지 배열
     const results = storesArray.map((store) => {
       const productIds = productsByStoreId.get(store.id) || [];
       const reviews: Array<{ rating: number }> = [];
@@ -111,6 +131,13 @@ export class StoreMapperUtil {
         const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
         averageRating = Math.round((totalRating / totalReviewCount) * 10) / 10; // 소수점 첫째자리까지
       }
+
+      const productRepresentativeImageUrls = productIds
+        .map((id) => productRepresentativeImage.get(id))
+        .filter((url): url is string => !!url);
+
+      const saleablePrices = storeSaleablePrices.get(store.id) ?? [];
+      const minProductPrice = saleablePrices.length > 0 ? Math.min(...saleablePrices) : null;
 
       return {
         id: store.id,
@@ -135,6 +162,8 @@ export class StoreMapperUtil {
         likeCount: store.likeCount,
         averageRating,
         totalReviewCount,
+        productRepresentativeImageUrls,
+        minProductPrice,
         createdAt: store.createdAt,
         updatedAt: store.updatedAt,
       };

@@ -108,13 +108,21 @@ export const Modal: React.FC<ModalProps> = ({
 
         <div className="flex gap-[8px] py-[20px]">
           <span style={{ flex: confirmFlex }}>
-            <Button variant={confirmVariant} onClick={handleConfirm} className="break-keep leading-[1.2]">
+            <Button
+              variant={confirmVariant}
+              onClick={handleConfirm}
+              className="break-keep leading-[1.2]"
+            >
               {confirmText}
             </Button>
           </span>
           {!hideCancel && (
             <span style={{ flex: cancelFlex }}>
-              <Button onClick={handleCancel} variant={cancelVariant} className="break-keep leading-[1.2]">
+              <Button
+                onClick={handleCancel}
+                variant={cancelVariant}
+                className="break-keep leading-[1.2]"
+              >
                 {cancelText}
               </Button>
             </span>
