@@ -33,7 +33,7 @@ export function ReviewItem({ review, onImageClick }: ReviewItemProps) {
     const roundedRating = Math.round(rating);
     return (
       <span className="flex items-center gap-[2px]">
-        <Icon name="star" width={18} height={18} className="text-[#F7CE45]" />
+        <Icon name="star" width={18} height={18} className="text-yellow-400" />
         <span className="font-bold text-gray-900">{roundedRating}</span>
       </span>
     );

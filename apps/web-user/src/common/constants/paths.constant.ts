@@ -33,6 +33,7 @@ export const PATHS = {
 
   // 마이페이지
   MYPAGE: "/mypage",
+  MY_REVIEWS: "/mypage/reviews",
 
   // 알람 페이지
   ALARM: "/alarm",

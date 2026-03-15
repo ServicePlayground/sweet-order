@@ -4,4 +4,5 @@
 export const orderQueryKeys = {
   all: ["orders"] as const,
   detail: (orderId: string) => [...orderQueryKeys.all, "detail", orderId] as const,
+  mypage: () => [...orderQueryKeys.all, "mypage"] as const,
 };

@@ -65,9 +65,9 @@ export function Toast({
 
   return (
     <div
-      className={`fixed left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-40px)] z-50 transition-opacity duration-300 ${
+      className={`fixed left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-40px)] z-50 transition-all duration-300 ease-out ${
         position === "center" ? "top-1/2 -translate-y-1/2" : "bottom-[100px]"
-      } ${visible ? "opacity-100" : "opacity-0"}`}
+      } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
     >
       {variant === "row" ? (
         <div className="flex items-center gap-[6px] px-[18px] py-4 bg-gray-900/80 backdrop-blur-sm rounded-xl">

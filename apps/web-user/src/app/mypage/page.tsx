@@ -8,10 +8,8 @@ import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNa
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { useMe } from "@/apps/web-user/features/user/hooks/queries/useMe";
 import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
-import {
-  navigateToLoginPage,
-  isWebViewEnvironment,
-} from "@/apps/web-user/common/utils/webview.bridge";
+import { navigateToLoginPage, isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+import { UpcomingOrderCard } from "@/apps/web-user/features/order/components/UpcomingOrderCard";
 
 function getLoginInfo(user: {
   googleId: string;
@@ -32,7 +30,7 @@ function getLoginInfo(user: {
 
 const QUICK_LINKS = [
   { icon: "reservation", label: "내 예약", href: "/" },
-  { icon: "review", label: "내 후기", href: "/" },
+  { icon: "review", label: "내 후기", href: PATHS.MY_REVIEWS },
   { icon: "saved", label: "저장", href: "/" },
   { icon: "recent", label: "최근 본", href: "/" },
 ] as const;
@@ -100,6 +98,8 @@ export default function MypagePage() {
               프로필 수정
             </button>
           </div>
+
+          {/* <UpcomingOrderCard /> */}
 
           <ul className="flex py-[10px] mx-5 mb-8 border border-gray-100 rounded-lg">
             {QUICK_LINKS.map(({ icon, label, href }, index) => (

@@ -21,7 +21,20 @@ export function ConfirmAlert() {
 
   if (!confirm.isOpen) return null;
 
+  const keyframes = `
+    @keyframes confirmBackdropIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes confirmSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+
   return (
+    <>
+    <style>{keyframes}</style>
     <div
       style={{
         position: "fixed",
@@ -34,8 +47,7 @@ export function ConfirmAlert() {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 9999,
-        opacity: 1,
-        transition: "opacity 0.3s ease",
+        animation: "confirmBackdropIn 0.3s ease",
       }}
       onClick={handleCancel}
     >
@@ -48,6 +60,7 @@ export function ConfirmAlert() {
           maxWidth: "400px",
           width: "90%",
           textAlign: "center",
+          animation: "confirmSlideUp 0.3s ease-out",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -115,5 +128,6 @@ export function ConfirmAlert() {
         </div>
       </div>
     </div>
+    </>
   );
 }

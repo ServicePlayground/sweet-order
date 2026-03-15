@@ -248,7 +248,7 @@ export const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({
           {/* 별점, 날짜, 닉네임 */}
           <div className="flex items-center justify-between gap-3 mb-3">
             <span className="flex items-center gap-[2px]">
-              <Icon name="star" width={18} height={18} className="text-[#F7CE45]" />
+              <Icon name="star" width={18} height={18} className="text-yellow-400" />
               <span className="font-bold text-white">{roundedRating}</span>
             </span>
             <div className="flex items-center gap-[24px] text-sm text-gray-300">

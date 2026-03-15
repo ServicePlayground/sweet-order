@@ -11,6 +11,17 @@ export function Alert() {
 
   if (!alert.isOpen) return null;
 
+  const keyframes = `
+    @keyframes alertBackdropIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes alertSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+
   const getTitleColor = () => {
     switch (alert.type) {
       case "error":
@@ -42,6 +53,8 @@ export function Alert() {
   };
 
   return (
+    <>
+    <style>{keyframes}</style>
     <div
       style={{
         position: "fixed",
@@ -54,8 +67,7 @@ export function Alert() {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 9999,
-        opacity: 1,
-        transition: "opacity 0.3s ease",
+        animation: "alertBackdropIn 0.3s ease",
       }}
       onClick={handleClose}
     >
@@ -68,6 +80,7 @@ export function Alert() {
           maxWidth: "400px",
           width: "90%",
           textAlign: "center",
+          animation: "alertSlideUp 0.3s ease-out",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -116,5 +129,6 @@ export function Alert() {
         </div>
       </div>
     </div>
+    </>
   );
 }

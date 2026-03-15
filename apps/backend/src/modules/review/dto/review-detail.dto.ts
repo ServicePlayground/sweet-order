@@ -81,3 +81,27 @@ export class ReviewResponseDto {
   })
   updatedAt: Date;
 }
+
+/**
+ * 내가 작성한 후기 응답 DTO (상품 정보 포함)
+ */
+export class MyReviewResponseDto extends ReviewResponseDto {
+  @ApiProperty({
+    description: "상품명",
+    example: "해피퍼피 생일케이크",
+  })
+  productName: string;
+
+  @ApiProperty({
+    description: "상품 판매가격",
+    example: 35000,
+  })
+  productPrice: number;
+
+  @ApiProperty({
+    description: "상품 대표 이미지 URL",
+    example: "https://example.com/product-image.jpg",
+    nullable: true,
+  })
+  productImageUrl: string | null;
+}

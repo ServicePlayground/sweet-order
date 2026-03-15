@@ -77,6 +77,9 @@ const config: Config = {
           300: "#F67476",
           400: "#F23A3E",
         },
+        yellow: {
+          400: "#FFC83B",
+        },
       },
       keyframes: {
         "accordion-down": {

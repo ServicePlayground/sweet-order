@@ -5,4 +5,6 @@ export const reviewQueryKeys = {
     ["review", "product", productId, page, limit, sortBy] as const,
   storeReviews: (storeId: string, page: number, limit: number, sortBy: ReviewSortBy) =>
     ["review", "store", storeId, page, limit, sortBy] as const,
+  myReviews: (page: number, limit: number, sortBy: ReviewSortBy) =>
+    ["review", "my", page, limit, sortBy] as const,
 } as const;
