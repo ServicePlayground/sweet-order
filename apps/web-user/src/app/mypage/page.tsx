@@ -9,7 +9,6 @@ import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { useMe } from "@/apps/web-user/features/user/hooks/queries/useMe";
 import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
 import { navigateToLoginPage, isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
-import { UpcomingOrderCard } from "@/apps/web-user/features/order/components/UpcomingOrderCard";
 
 function getLoginInfo(user: {
   googleId: string;

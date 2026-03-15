@@ -12,7 +12,7 @@ import { useConfirmStore } from "@/apps/web-user/common/store/confirm.store";
 import type { Review, MyReview } from "@/apps/web-user/features/review/types/review.type";
 
 export default function MyReviewsPage() {
-  const [sortBy, setSortBy] = useState<ReviewSortBy>(ReviewSortBy.LATEST);
+  const [sortBy] = useState<ReviewSortBy>(ReviewSortBy.LATEST);
   const { data } = useMyReviews({ sortBy });
   const { mutate: deleteReview } = useDeleteMyReview();
   const { showConfirm } = useConfirmStore();

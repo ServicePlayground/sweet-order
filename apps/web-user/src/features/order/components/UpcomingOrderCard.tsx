@@ -48,6 +48,7 @@ function openNavigation(lat: number, lng: number, name: string) {
   window.open(`https://map.kakao.com/link/to/${encodedName},${lat},${lng}`, "_blank");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function OrderCard({ order, showTimeline }: { order: OrderResponse; showTimeline: boolean }) {
   const dday = getDday(order.pickupDate);
   const ddayText = formatDday(dday);
