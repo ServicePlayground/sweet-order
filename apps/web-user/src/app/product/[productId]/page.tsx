@@ -16,6 +16,7 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { ReservationBottomSheet } from "@/apps/web-user/features/product/components/sections/reservation-bottom-sheet";
 import { ProductType } from "@/apps/web-user/features/product/types/product.type";
+import { ProductDetailSkeleton } from "@/apps/web-user/common/components/skeleton/ProductDetailSkeleton";
 
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
@@ -58,7 +59,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   };
 
   if (isLoading) {
-    return <></>;
+    return <ProductDetailSkeleton />;
   }
 
   if (!data) {

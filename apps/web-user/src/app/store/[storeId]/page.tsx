@@ -8,6 +8,7 @@ import { StoreDetailProductListSection } from "@/apps/web-user/features/store/co
 import { StoreDetailReviewSection } from "@/apps/web-user/features/store/components/sections/StoreDetailReviewSection";
 import { StoreDetailFeedSection } from "@/apps/web-user/features/store/components/sections/StoreDetailFeedSection";
 import { Tabs } from "@/apps/web-user/common/components/tabs/Tabs";
+import { StoreDetailSkeleton } from "@/apps/web-user/common/components/skeleton/StoreDetailSkeleton";
 
 interface StoreDetailPageProps {
   params: Promise<{ storeId: string }>;
@@ -22,7 +23,7 @@ export default function StoreDetailPage({ params }: StoreDetailPageProps) {
   const productCount = productData?.pages[0]?.meta.totalItems ?? 0;
 
   if (isLoading) {
-    return <></>;
+    return <StoreDetailSkeleton />;
   }
 
   if (!data) {

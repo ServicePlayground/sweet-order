@@ -29,11 +29,14 @@ export const PATHS = {
   MAP_SEARCH: "/map/search",
 
   // 저장 페이지
-  SAVED: "/saved",
+  SAVED: "/mypage/saved",
 
   // 마이페이지
   MYPAGE: "/mypage",
   MY_REVIEWS: "/mypage/reviews",
+  RECENT: "/mypage/recent",
+  NOTICE: "/mypage/notice",
+  QNA: "/mypage/qna",
 
   // 알람 페이지
   ALARM: "/alarm",

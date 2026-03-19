@@ -49,6 +49,7 @@ import Filter from "./icons/filter.svg";
 import FilterActive from "./icons/filter-active.svg";
 import Line1 from "./icons/line1.svg";
 import Handle from "./icons/handle.svg";
+import Sort from "./icons/sort.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -107,6 +108,7 @@ export const iconTypes = {
   filterActive: FilterActive,
   line1: Line1,
   handle: Handle,
+  sort: Sort,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

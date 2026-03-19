@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { SearchProductListSection } from "@/apps/web-user/features/product/components/sections/SearchProductListSection";
 import { SearchStoreListSection } from "@/apps/web-user/features/store/components/sections/SearchStoreListSection";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import { SearchFilterSheet } from "@/apps/web-user/features/search/components/SearchFilterSheet";
 
 const RECENT_SEARCHES_KEY = "recentSearches";
 const MAX_RECENT = 10;
@@ -30,6 +31,7 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [submittedTerm, setSubmittedTerm] = useState(searchParams.get("q") || "");
   const [activeTab, setActiveTab] = useState<"product" | "store">("product");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const q = searchParams.get("q");
@@ -77,23 +79,32 @@ export default function SearchPage() {
       {/* 탭 + 검색 결과 */}
       {isSearching && (
         <>
-          <div className="flex gap-[12px] py-[16px] px-[20px]">
-            {[
-              { key: "product", label: "상품" },
-              { key: "store", label: "스토어" },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key as "product" | "store")}
-                className={`flex-1 h-[36px] text-sm border rounded-full ${
-                  activeTab === key
-                    ? "text-primary bg-primary-50 border-primary-100"
-                    : "text-gray-400 bg-white border-gray-100"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="flex items-center gap-[24px] py-[16px] px-[20px]">
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(true)}
+              className="flex items-center justify-center w-[36px] h-[36px] shrink-0 border border-gray-100 rounded-full"
+            >
+              <Icon name="sort" width={20} height={20} className="text-gray-500" />
+            </button>
+            <div className="flex flex-1 items-center gap-[12px] py-[16px]">
+              {[
+                { key: "product", label: "상품" },
+                { key: "store", label: "스토어" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key as "product" | "store")}
+                  className={`flex-1 h-[36px] text-sm border rounded-full ${
+                    activeTab === key
+                      ? "text-primary bg-primary-50 border-primary-100"
+                      : "text-gray-400 bg-white border-gray-100"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="px-5">
             {activeTab === "product" ? (
@@ -104,6 +115,8 @@ export default function SearchPage() {
           </div>
         </>
       )}
+
+      <SearchFilterSheet isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
     </div>
   );
 }

@@ -30,8 +30,8 @@ function getLoginInfo(user: {
 const QUICK_LINKS = [
   { icon: "reservation", label: "내 예약", href: "/" },
   { icon: "review", label: "내 후기", href: PATHS.MY_REVIEWS },
-  { icon: "saved", label: "저장", href: "/" },
-  { icon: "recent", label: "최근 본", href: "/" },
+  { icon: "saved", label: "저장", href: PATHS.SAVED },
+  { icon: "recent", label: "최근 본", href: PATHS.RECENT },
 ] as const;
 
 export default function MypagePage() {
@@ -142,8 +142,8 @@ export default function MypagePage() {
       <section>
         <p className="px-5 py-2 text-xs text-gray-500">고객 서비스</p>
         {[
-          { label: "공지사항", href: "/" },
-          { label: "Q&A", href: "/" },
+          { label: "공지사항", href: PATHS.NOTICE },
+          { label: "Q&A", href: PATHS.QNA },
         ].map(({ label, href }) => (
           <Link
             key={label}
