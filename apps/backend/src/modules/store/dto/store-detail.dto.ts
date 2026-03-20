@@ -108,6 +108,23 @@ export class StoreResponseDto extends StoreAddressDto {
   totalReviewCount: number;
 
   @ApiProperty({
+    description: "해당 스토어의 모든 상품 대표이미지 URL 배열 (상품당 1장)",
+    type: [String],
+    example: [
+      "https://s3.ap-northeast-1.amazonaws.com/sweetorder-uploads/uploads/product1.png",
+      "https://s3.ap-northeast-1.amazonaws.com/sweetorder-uploads/uploads/product2.png",
+    ],
+  })
+  productRepresentativeImageUrls: string[];
+
+  @ApiPropertyOptional({
+    description: "해당 스토어 상품 중 최소 금액 (노출·판매중인 상품만, 없으면 null)",
+    example: 25000,
+    nullable: true,
+  })
+  minProductPrice?: number | null;
+
+  @ApiProperty({
     description: "생성일시",
     example: SWAGGER_EXAMPLES.CREATED_AT,
   })

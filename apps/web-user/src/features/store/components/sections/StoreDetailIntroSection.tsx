@@ -26,10 +26,15 @@ export function StoreDetailIntroSection({ store }: StoreDetailIntroSectionProps)
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveStoreLike();
   const isLikeLoading = isAddingLike || isRemovingLike;
 
-  const userLocation = useUserLocation();
+  const { location: userLocation } = useUserLocation();
   const distance =
     userLocation !== null
-      ? calculateDistance(userLocation.latitude, userLocation.longitude, store.latitude, store.longitude)
+      ? calculateDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          store.latitude,
+          store.longitude,
+        )
       : null;
 
   const handleAddressCopy = () => {

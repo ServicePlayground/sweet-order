@@ -11,15 +11,16 @@ export interface RegionMatchResult {
 /**
  * 역지오코딩 주소를 API regions와 매칭하여 결과를 반환합니다.
  */
-export function matchAddressToRegion(address: string, regions: RegionData[]): RegionMatchResult | null {
+export function matchAddressToRegion(
+  address: string,
+  regions: RegionData[],
+): RegionMatchResult | null {
   if (!address) return null;
 
   for (const region of regions) {
     const depth1 = region.depth1;
 
-    const depth1Matched = depth1.searchKeywords.some((keyword) =>
-      address.includes(keyword),
-    );
+    const depth1Matched = depth1.searchKeywords.some((keyword) => address.includes(keyword));
 
     if (!depth1Matched) continue;
 
@@ -27,9 +28,7 @@ export function matchAddressToRegion(address: string, regions: RegionData[]): Re
     for (const depth2 of region.depth2) {
       if (depth2.label === "전지역") continue;
 
-      const depth2Matched = depth2.searchKeywords.some((keyword) =>
-        address.includes(keyword),
-      );
+      const depth2Matched = depth2.searchKeywords.some((keyword) => address.includes(keyword));
 
       if (depth2Matched) {
         return { label: depth2.label, storeCount: depth2.storeCount, depth1Label: depth1.label };
@@ -78,7 +77,10 @@ export function findNearestActiveRegion(
     }
 
     // depth2 중 활성이 없으면 depth1 자체 확인
-    if (region.depth1.storeCount > 0 && candidates.every((c) => c.depth1Label !== region.depth1.label)) {
+    if (
+      region.depth1.storeCount > 0 &&
+      candidates.every((c) => c.depth1Label !== region.depth1.label)
+    ) {
       const depth1FirstCoords = depth1Coords ? Object.values(depth1Coords)[0] : null;
       if (depth1FirstCoords) {
         candidates.push({
@@ -102,12 +104,21 @@ export function findNearestActiveRegion(
       return distA - distB;
     });
     const nearest = candidates[0];
-    return { label: nearest.label, storeCount: nearest.storeCount, depth1Label: nearest.depth1Label };
+    return {
+      label: nearest.label,
+      storeCount: nearest.storeCount,
+      depth1Label: nearest.depth1Label,
+    };
   }
 
   // GPS 없으면 같은 depth1 우선, 그 다음 리스트 순서
   const sameDep1 = candidates.find((c) => c.depth1Label === currentDepth1Label);
-  if (sameDep1) return { label: sameDep1.label, storeCount: sameDep1.storeCount, depth1Label: sameDep1.depth1Label };
+  if (sameDep1)
+    return {
+      label: sameDep1.label,
+      storeCount: sameDep1.storeCount,
+      depth1Label: sameDep1.depth1Label,
+    };
 
   const first = candidates[0];
   return { label: first.label, storeCount: first.storeCount, depth1Label: first.depth1Label };

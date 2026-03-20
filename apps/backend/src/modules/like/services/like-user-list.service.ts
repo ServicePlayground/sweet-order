@@ -37,15 +37,35 @@ export class LikeUserListService {
 
   /**
    * 내가 좋아요한 스토어 목록 조회 (사용자용)
-   * 정렬(sortBy), 검색(스토어명), 지역 필터, 페이지네이션을 지원합니다.
+   * 정렬(sortBy), 검색(스토어명), 지역·상품 필터(sizes, minPrice, maxPrice, productCategoryTypes), 페이지네이션을 지원합니다.
    */
   async getMyStoreLikesForUser(
     userId: string,
     query: GetStoresRequestDto,
   ): Promise<StoreListResponseDto> {
-    const { page, limit, sortBy, search, regions } = query;
+    const {
+      page,
+      limit,
+      sortBy,
+      search,
+      regions,
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+    } = query;
 
-    const storeWhere = this.buildStoreWhereForLiked(search, regions);
+    const baseStoreWhere = this.buildStoreWhereForLiked(search, regions);
+    const productFilterWhere = await this.buildStoreWhereProductFilterForLiked({
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+    });
+    const storeWhere: Prisma.StoreWhereInput =
+      Object.keys(productFilterWhere).length > 0
+        ? { AND: [baseStoreWhere, productFilterWhere] }
+        : baseStoreWhere;
     const orderBy = this.buildStoreOrderByForRelation(sortBy ?? StoreSortBy.LATEST);
 
     const where: Prisma.StoreLikeWhereInput = {
@@ -203,6 +223,74 @@ export class LikeUserListService {
     if (conditions.length === 0) return {};
     if (conditions.length === 1) return conditions[0];
     return { AND: conditions };
+  }
+
+  /**
+   * 스토어 좋아요 목록용 상품 필터 where (sizes, minPrice, maxPrice, productCategoryTypes).
+   * 스토어 목록 조회(StoreListService)와 동일한 조건: 해당 상품이 하나라도 있는 스토어만.
+   */
+  private async buildStoreWhereProductFilterForLiked(params: {
+    sizes?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    productCategoryTypes?: ProductCategoryType[];
+  }): Promise<Prisma.StoreWhereInput> {
+    const hasProductFilter =
+      (params.sizes?.length ?? 0) > 0 ||
+      params.minPrice != null ||
+      params.maxPrice != null ||
+      (params.productCategoryTypes?.length ?? 0) > 0;
+    if (!hasProductFilter) return {};
+
+    const conditions: Prisma.StoreWhereInput[] = [];
+
+    if (params.sizes && params.sizes.length > 0) {
+      const storeIdsFromSize = await this.getStoreIdsWithProductSizes(params.sizes);
+      if (storeIdsFromSize.length === 0) return { id: "never" };
+      conditions.push({ id: { in: storeIdsFromSize } });
+    }
+
+    const productSome: Prisma.ProductWhereInput = {
+      visibilityStatus: EnableStatus.ENABLE,
+      salesStatus: EnableStatus.ENABLE,
+    };
+    if (params.minPrice != null || params.maxPrice != null) {
+      productSome.salePrice = {};
+      if (params.minPrice != null) {
+        (productSome.salePrice as Prisma.IntFilter).gte = params.minPrice;
+      }
+      if (params.maxPrice != null) {
+        (productSome.salePrice as Prisma.IntFilter).lte = params.maxPrice;
+      }
+    }
+    if (params.productCategoryTypes && params.productCategoryTypes.length > 0) {
+      productSome.productCategoryTypes = { hasSome: params.productCategoryTypes };
+    }
+    conditions.push({ products: { some: productSome } });
+
+    return conditions.length === 1 ? conditions[0]! : { AND: conditions };
+  }
+
+  /**
+   * 케이크 사이즈 옵션(도시락, 미니, 1호 등)을 가진 상품이 하나라도 있는 스토어 ID 목록 조회.
+   * StoreListService.getStoreIdsWithProductSizes와 동일 로직 (순환 참조 회피를 위해 여기서 구현).
+   */
+  private async getStoreIdsWithProductSizes(sizes: string[]): Promise<string[]> {
+    if (sizes.length === 0) return [];
+    const result = await this.prisma.$queryRaw<Array<{ store_id: string }>>(
+      Prisma.sql`
+        SELECT DISTINCT p.store_id
+        FROM products p
+        WHERE p.visibility_status = ${EnableStatus.ENABLE}
+          AND p.sales_status = ${EnableStatus.ENABLE}
+          AND p.cake_size_options IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(p.cake_size_options::jsonb) AS elem
+            WHERE elem->>'displayName' IN (${Prisma.join(sizes)})
+          )
+      `,
+    );
+    return result.map((r) => r.store_id);
   }
 
   /**

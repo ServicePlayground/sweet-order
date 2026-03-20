@@ -6,6 +6,7 @@ import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScrol
 import { ChatRoomList } from "@/apps/web-user/features/chat/components/ChatRoomList";
 import { ChatRoom } from "@/apps/web-user/features/chat/types/chat.type";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-user/common/utils/pagination.util";
+import { ChatListSkeleton } from "@/apps/web-user/common/components/skeleton/ChatListSkeleton";
 
 export default function ChatListPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -31,9 +32,7 @@ export default function ChatListPage() {
 
       {/* 채팅방 목록 */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">채팅방을 불러오는 중...</div>
-        </div>
+        <ChatListSkeleton />
       ) : (
         <>
           <ChatRoomList chatRooms={chatRooms} />

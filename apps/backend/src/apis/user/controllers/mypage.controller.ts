@@ -1,4 +1,13 @@
-import { Controller, Get, Query, Param, Request, HttpCode, HttpStatus } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Delete,
+  Query,
+  Param,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import { ReviewService } from "@apps/backend/modules/review/review.service";
@@ -18,6 +27,8 @@ import {
   GetMyReviewsRequestDto,
   MyReviewListResponseDto,
 } from "@apps/backend/modules/review/dto/review-user-list.dto";
+import { ReviewDeleteResponseDto } from "@apps/backend/modules/review/dto/review-delete.dto";
+import { REVIEW_ERROR_MESSAGES } from "@apps/backend/modules/review/constants/review.constants";
 import {
   GetStoresRequestDto,
   StoreListResponseDto,
@@ -38,6 +49,7 @@ import { createMessageObject } from "@apps/backend/common/utils/message.util";
   OrderListResponseDto,
   OrderResponseDto,
   MyReviewListResponseDto,
+  ReviewDeleteResponseDto,
   StoreListResponseDto,
   ProductListResponseDto,
 )
@@ -116,6 +128,31 @@ export class UserMypageController {
   }
 
   /**
+   * 내 후기 삭제 API
+   * 자신이 작성한 후기만 삭제할 수 있습니다.
+   */
+  @Delete("reviews/:reviewId")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 내가 작성한 후기 삭제",
+    description: "자신이 작성한 후기를 삭제합니다. 본인 후기만 삭제할 수 있습니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ReviewDeleteResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_FORBIDDEN),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND),
+  })
+  async deleteMyReview(
+    @Param("reviewId") reviewId: string,
+    @Request() req: { user: JwtVerifiedPayload },
+  ) {
+    return await this.reviewService.deleteMyReviewForUser(req.user.sub, reviewId);
+  }
+
+  /**
    * 내가 좋아요한 스토어 목록 조회 API
    */
   @Get("likes/stores")
@@ -123,7 +160,7 @@ export class UserMypageController {
   @ApiOperation({
     summary: "(로그인 필요) 내가 좋아요한 스토어 목록 조회",
     description:
-      "자신이 좋아요한 스토어 목록을 조회합니다. 정렬(sortBy), 스토어명 검색(search), 지역(regions) 필터, 페이지네이션을 지원합니다.",
+      "자신이 좋아요한 스토어 목록을 조회합니다. 정렬(sortBy), 스토어명 검색(search), 지역(regions), 상품 필터(sizes, minPrice, maxPrice, productCategoryTypes), 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   @SwaggerAuthResponses()
@@ -169,9 +206,6 @@ export class UserMypageController {
     @Query() query: GetProductsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<ProductListResponseDto> {
-    return await this.recentViewService.getRecentViewedProductsForUser(
-      req.user.sub,
-      query,
-    );
+    return await this.recentViewService.getRecentViewedProductsForUser(req.user.sub, query);
   }
 }

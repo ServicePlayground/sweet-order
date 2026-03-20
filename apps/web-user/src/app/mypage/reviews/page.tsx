@@ -1,0 +1,97 @@
+"use client";
+
+import { useState } from "react";
+import Header from "@/apps/web-user/common/components/headers/Header";
+import { ReviewSortBy } from "@/apps/web-user/features/review/types/review.type";
+import { useMyReviews } from "@/apps/web-user/features/review/hooks/queries/useMyReviews";
+import { useDeleteMyReview } from "@/apps/web-user/features/review/hooks/mutations/useDeleteMyReview";
+import { MyReviewItem } from "@/apps/web-user/features/review/components/MyReviewItem";
+import { ReviewDetailModal } from "@/apps/web-user/features/product/components/modals/ReviewDetailModal";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
+import { Modal } from "@/apps/web-user/common/components/modals/Modal";
+import { MyReviewsSkeleton } from "@/apps/web-user/common/components/skeleton/MyReviewsSkeleton";
+import type { Review, MyReview } from "@/apps/web-user/features/review/types/review.type";
+
+export default function MyReviewsPage() {
+  const [sortBy] = useState<ReviewSortBy>(ReviewSortBy.LATEST);
+  const { data } = useMyReviews({ sortBy });
+  const { mutate: deleteReview } = useDeleteMyReview();
+
+  const reviews = data?.data ?? [];
+  const totalCount = data?.meta?.totalItems ?? 0;
+
+  const [isReviewDetailModalOpen, setIsReviewDetailModalOpen] = useState(false);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | undefined>(undefined);
+  const [modalReviews, setModalReviews] = useState<Review[]>([]);
+  const [showDeleteToast, setShowDeleteToast] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  const handleImageClick = (review: MyReview) => {
+    setSelectedReviewId(review.id);
+    setModalReviews([review]);
+    setIsReviewDetailModalOpen(true);
+  };
+
+  const handleDelete = (reviewId: string) => {
+    setDeleteTargetId(reviewId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteTargetId) return;
+    setIsDeleteModalOpen(false);
+    deleteReview(deleteTargetId, {
+      onSuccess: () => setShowDeleteToast(true),
+    });
+  };
+
+  return (
+    <div>
+      <Header variant="back-title" title={`내 후기${data ? ` ${totalCount}` : ""}`} />
+
+      {/* 후기 목록 */}
+      <div className="px-5">
+        {!data ? <MyReviewsSkeleton /> : reviews.length > 0 ? (
+          reviews.map((review) => (
+            <MyReviewItem
+              key={review.id}
+              review={review}
+              onDelete={handleDelete}
+              onImageClick={handleImageClick}
+            />
+          ))
+        ) : (
+          <p className="text-sm text-gray-500 py-10 text-center">작성한 후기가 없습니다.</p>
+        )}
+      </div>
+
+      {/* 후기 이미지 상세 모달 */}
+      <ReviewDetailModal
+        isOpen={isReviewDetailModalOpen}
+        onClose={() => setIsReviewDetailModalOpen(false)}
+        reviews={modalReviews}
+        initialReviewId={selectedReviewId}
+      />
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="삭제 이후 다시 작성할 수 없습니다."
+        description="후기를 삭제하시겠습니까?"
+        confirmText="취소"
+        cancelText="삭제"
+        onCancel={handleConfirmDelete}
+      />
+
+      {showDeleteToast && (
+        <Toast
+          message="후기가 삭제되었습니다!"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          onClose={() => setShowDeleteToast(false)}
+        />
+      )}
+    </div>
+  );
+}

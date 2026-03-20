@@ -136,7 +136,7 @@ export class SellerStoreController {
   @ApiOperation({
     summary: "(로그인 필요) 내 스토어 목록 조회",
     description:
-      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 검색어(스토어명), 정렬, 페이지네이션을 지원합니다.",
+      "현재 로그인한 사용자가 등록한 모든 스토어 목록을 조회합니다. 검색어(스토어명), 정렬, 상품 필터(sizes, minPrice, maxPrice, productCategoryTypes), 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: StoreListResponseDto })
   @SwaggerAuthResponses()

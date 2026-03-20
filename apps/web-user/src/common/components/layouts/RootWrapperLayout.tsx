@@ -15,13 +15,18 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
   const pathname = usePathname();
 
   // pathname에 따라 헤더 설정 결정
-  const getHeaderConfig = (): { variant: "main" | "product" | "minimal" | "search" | "back-title"; title?: string } => {
+  const getHeaderConfig = (): {
+    variant: "main" | "product" | "minimal" | "search" | "back-title";
+    title?: string;
+  } => {
     if (pathname === "/") return { variant: "main" };
     if (pathname === "/search") return { variant: "search" };
+    if (pathname === "/map" || pathname === "/map/search") return { variant: "minimal" };
     if (pathname?.startsWith("/chat")) return { variant: "minimal" };
     if (pathname?.startsWith("/reservation")) return { variant: "minimal" };
     if (pathname === "/alarm") return { variant: "back-title", title: "알림" };
     if (pathname === "/qa") return { variant: "minimal" };
+    if (pathname?.startsWith("/mypage/")) return { variant: "minimal" };
     if (pathname === "/mypage") return { variant: "minimal" };
     if (pathname?.startsWith("/product/")) return { variant: "product" };
     if (pathname?.startsWith("/store/")) return { variant: "product" };

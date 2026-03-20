@@ -1,4 +1,22 @@
 /**
+ * 페이지네이션 메타 정보
+ */
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * 마이페이지 주문 목록 응답
+ */
+export interface MyOrdersResponse {
+  data: OrderResponse[];
+  meta: PaginationMeta;
+}
+
+/**
  * 주문 항목 생성 요청
  */
 export interface CreateOrderItemRequest {

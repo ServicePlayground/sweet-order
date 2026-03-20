@@ -28,10 +28,27 @@ export interface Review {
 }
 
 /**
+ * 내 후기 정보 (상품 정보 포함)
+ */
+export interface MyReview extends Review {
+  productName: string;
+  productPrice: number;
+  productImageUrl: string | null;
+}
+
+/**
  * 후기 목록 응답
  */
 export interface ReviewListResponse {
   data: Review[];
+  meta: PaginationMeta;
+}
+
+/**
+ * 내 후기 목록 응답
+ */
+export interface MyReviewListResponse {
+  data: MyReview[];
   meta: PaginationMeta;
 }
 

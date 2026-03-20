@@ -50,7 +50,7 @@ export class ReviewUserListService {
       },
     });
 
-    const data = reviews.map((review) => ReviewMapperUtil.mapToReviewResponse(review));
+    const data = reviews.map((review) => ReviewMapperUtil.mapToMyReviewResponse(review));
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
 

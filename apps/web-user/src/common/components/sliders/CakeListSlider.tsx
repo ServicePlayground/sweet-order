@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Product } from "@/apps/web-user/features/product/types/product.type";
 import { CakeListItem } from "@/apps/web-user/features/product/components/cards/CakeListItem";
+import { Skeleton, SkeletonText } from "@/apps/web-user/common/components/skeleton";
 
 interface CakeListSliderProps {
   title: string;
@@ -10,7 +11,6 @@ interface CakeListSliderProps {
   isLoading: boolean;
   onProductClick: (productId: string) => void;
 }
-
 
 export default function CakeListSlider({
   title,
@@ -53,9 +53,17 @@ export default function CakeListSlider({
     <div className="pb-9">
       <h2 className="px-[20px] py-[10px] text-xl font-bold text-gray-900 mb-6">{title}</h2>
       {isLoading ? (
-        <div className="flex justify-center items-center p-10 text-gray-500 text-sm">
-          <div className="loading-spinner-small" />
-          <span className="ml-3">상품을 불러오는 중...</span>
+        <div className="flex gap-[8px] overflow-hidden pl-[20px]">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="min-w-[140px]">
+              <Skeleton className="w-[140px] h-[140px] rounded-xl" />
+              <div className="mt-2 space-y-1.5">
+                <SkeletonText className="w-16" />
+                <SkeletonText className="w-24" />
+                <SkeletonText className="w-20" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : products.length === 0 ? (
         <div className="text-center p-10 text-gray-500 text-sm">등록된 상품이 없습니다.</div>

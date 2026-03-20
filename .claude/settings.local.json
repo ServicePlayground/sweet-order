@@ -6,7 +6,11 @@
       "Bash(yarn remove:*)",
       "Bash(yarn dlx:*)",
       "Bash(npx shadcn@latest add:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(yarn web-user:storybook:*)",
+      "Bash(lsof:*)",
+      "Bash(yarn info:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

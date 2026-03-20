@@ -11,8 +11,7 @@ export function useStoreList({ search, limit = 20 }: { search?: string; limit?: 
 
   const query = useInfiniteQuery<StoreListResponse>({
     queryKey: storeQueryKeys.list({ search }),
-    queryFn: ({ pageParam = 1 }) =>
-      storeApi.getList({ search, page: pageParam as number, limit }),
+    queryFn: ({ pageParam = 1 }) => storeApi.getList({ search, page: pageParam as number, limit }),
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasNext ? lastPage.meta.currentPage + 1 : undefined,
     initialPageParam: 1,

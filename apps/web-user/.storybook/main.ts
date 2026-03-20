@@ -27,7 +27,7 @@ const config: StorybookConfig = {
     config.plugins = config.plugins || [];
     config.plugins.push(
       svgr({
-        include: "**/*.svg",
+        include: /\.svg(\?.*)?$/,
         svgrOptions: {
           exportType: "default",
           icon: true,

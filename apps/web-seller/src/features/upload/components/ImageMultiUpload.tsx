@@ -24,7 +24,7 @@ export interface ImageMultiUploadProps {
 export const ImageMultiUpload: React.FC<ImageMultiUploadProps> = ({
   value = [],
   onChange,
-  accept = [".jpg", ".png", ".webp"].join(","),
+  accept = [".jpg", ".jpeg", ".png", ".webp"].join(","),
   maxSize = 10 * 1024 * 1024, // 10MB
   maxImages = 10,
   width,

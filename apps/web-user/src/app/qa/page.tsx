@@ -23,7 +23,7 @@ const QA_WEB_USERS = {
   DEV: {
     id: "user001",
     token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWw5Z2NzZWMwMDAwMXk5bzFwYWtzemo1IiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3MTEwMDQyOSwiZXhwIjoxNzc4ODc2NDI5fQ.etzLWP7ZffPGGl6hL1MF6cr51EeWb1gzJMf6i8_v52Q",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW0zYXNmNncwMDAwazdxODNrdHg5dmxxIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3Mjg2NDQ4MywiZXhwIjoxNzgwNjQwNDgzfQ.Y8M8Ar7pr36n5ky_ffiI22okDojV9zJjgyJhB_F8Obo",
   },
 } as const;
 
@@ -279,7 +279,7 @@ export default function QAPage() {
             <button
               onClick={() => {
                 window.location.href = toExternalAppSchemeUrl(
-                  "supertoss://send?bank=국민&accountNo=1234567890&amount=10000",
+                  "supertoss://send?bank=농협&accountNo=3521047093883&amount=10000",
                 );
               }}
               className="flex items-center justify-between w-full px-4 py-3 bg-[#0064FF]/10 rounded-xl text-sm text-[#0064FF] hover:bg-[#0064FF]/20 transition-colors text-left"

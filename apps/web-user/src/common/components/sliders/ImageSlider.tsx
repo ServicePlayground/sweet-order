@@ -21,6 +21,8 @@ interface ImageSliderProps {
   onImageClick?: (image: SliderImage, index: number) => void;
   /** 컨테이너 className */
   className?: string;
+  /** 상위 패딩을 무시하고 디바이스 끝까지 스크롤 (px) */
+  edgeToEdge?: number;
 }
 
 /**
@@ -41,13 +43,26 @@ export const ImageSlider: React.FC<ImageSliderProps> = ({
   gap = 8,
   onImageClick,
   className = "",
+  edgeToEdge,
 }) => {
   if (!images || images.length === 0) {
     return null;
   }
 
+  const edgeStyle = edgeToEdge
+    ? {
+        marginLeft: `-${edgeToEdge}px`,
+        marginRight: `-${edgeToEdge}px`,
+        paddingLeft: `${edgeToEdge}px`,
+        paddingRight: `${edgeToEdge}px`,
+      }
+    : {};
+
   return (
-    <div className={`flex overflow-x-auto scrollbar-hide ${className}`} style={{ gap: `${gap}px` }}>
+    <div
+      className={`flex overflow-x-auto scrollbar-hide ${className}`}
+      style={{ gap: `${gap}px`, ...edgeStyle }}
+    >
       {images.map((image, index) => (
         <button
           key={image.id}

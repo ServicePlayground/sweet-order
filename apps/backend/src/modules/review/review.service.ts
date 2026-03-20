@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ReviewListService } from "@apps/backend/modules/review/services/review-list.service";
 import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
 import { ReviewUserListService } from "@apps/backend/modules/review/services/review-user-list.service";
+import { ReviewDeleteService } from "@apps/backend/modules/review/services/review-delete.service";
 import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-list.dto";
 import {
   GetMyReviewsRequestDto,
@@ -20,6 +21,7 @@ export class ReviewService {
     private readonly reviewListService: ReviewListService,
     private readonly reviewDetailService: ReviewDetailService,
     private readonly reviewUserListService: ReviewUserListService,
+    private readonly reviewDeleteService: ReviewDeleteService,
   ) {}
 
   /**
@@ -58,5 +60,13 @@ export class ReviewService {
     query: GetMyReviewsRequestDto,
   ): Promise<MyReviewListResponseDto> {
     return this.reviewUserListService.getMyReviewsForUser(userId, query);
+  }
+
+  /**
+   * 내 후기 삭제 (사용자용)
+   * 본인이 작성한 후기만 삭제할 수 있습니다.
+   */
+  async deleteMyReviewForUser(userId: string, reviewId: string) {
+    return this.reviewDeleteService.deleteMyReviewForUser(userId, reviewId);
   }
 }

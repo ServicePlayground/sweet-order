@@ -71,7 +71,11 @@ export const AllIcons: Story = {
           }}
         >
           <Icon name={name} width={24} height={24} />
-          <span style={{ fontSize: "11px", color: "#666", textAlign: "center", wordBreak: "break-all" }}>{name}</span>
+          <span
+            style={{ fontSize: "11px", color: "#666", textAlign: "center", wordBreak: "break-all" }}
+          >
+            {name}
+          </span>
         </div>
       ))}
     </div>

@@ -9,6 +9,8 @@ import FavoriteFilled from "./icons/favorite-filled.svg";
 import FavoriteShadow from "./icons/favoriteShadow.svg";
 import FavoriteShadowFilled from "./icons/favoriteShadowFilled.svg";
 import Close from "./icons/close.svg";
+import Close2 from "./icons/close2.svg";
+import Close3 from "./icons/close3.svg";
 import Calendar from "./icons/calendar.svg";
 import SelectArrow from "./icons/select-arrow.svg";
 import AddPhoto from "./icons/add-photo.svg";
@@ -31,6 +33,8 @@ import CloseCircle from "./icons/close_circle.svg";
 import CheckCircle from "./icons/check_circle.svg";
 import AlertCircle from "./icons/alert_circle.svg";
 import Check from "./icons/check.svg";
+import CheckboxSmallDefault from "./icons/checkbox-small-default.svg";
+import CheckboxSmallSelected from "./icons/checkbox-small-selected.svg";
 import Reset from "./icons/reset.svg";
 import CurrentLocation from "./icons/current-location.svg";
 import Setting from "./icons/setting.svg";
@@ -38,6 +42,14 @@ import Review from "./icons/review.svg";
 import Recent from "./icons/recent.svg";
 import Saved from "./icons/saved.svg";
 import Reservation from "./icons/reservation.svg";
+import List from "./icons/list.svg";
+import Back from "./icons/back.svg";
+import NoData from "./icons/no-data.svg";
+import Filter from "./icons/filter.svg";
+import FilterActive from "./icons/filter-active.svg";
+import Line1 from "./icons/line1.svg";
+import Handle from "./icons/handle.svg";
+import Sort from "./icons/sort.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -56,6 +68,8 @@ export const iconTypes = {
   favoriteShadow: FavoriteShadow,
   favoriteShadowFilled: FavoriteShadowFilled,
   close: Close,
+  close2: Close2,
+  close3: Close3,
   calendar: Calendar,
   selectArrow: SelectArrow,
   addPhoto: AddPhoto,
@@ -78,6 +92,8 @@ export const iconTypes = {
   checkCircle: CheckCircle,
   alertCircle: AlertCircle,
   check: Check,
+  checkboxSmallDefault: CheckboxSmallDefault,
+  checkboxSmallSelected: CheckboxSmallSelected,
   reset: Reset,
   currentLocation: CurrentLocation,
   setting: Setting,
@@ -85,13 +101,21 @@ export const iconTypes = {
   recent: Recent,
   saved: Saved,
   reservation: Reservation,
+  list: List,
+  back: Back,
+  noData: NoData,
+  filter: Filter,
+  filterActive: FilterActive,
+  line1: Line1,
+  handle: Handle,
+  sort: Sort,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {
   const IconComponent = iconTypes[name];
   return (
     <span className={clsx("inline-flex items-center", className)} {...props}>
-      <IconComponent width={width} height={height} className="h-auto max-w-full" /> 
+      <IconComponent width={width} height={height} className="h-auto max-w-full" />
     </span>
   );
 }

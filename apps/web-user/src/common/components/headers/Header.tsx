@@ -27,7 +27,8 @@ interface HeaderProps {
 
 export default function Header({ variant = "main", title }: HeaderProps) {
   const router = useRouter();
-  const { address, latitude, longitude, setAddress, setSelectedRegion } = useUserCurrentLocationStore();
+  const { address, latitude, longitude, setAddress, setSelectedRegion } =
+    useUserCurrentLocationStore();
   const { isHomeSearchVisible } = useHeaderStore();
   const { data: regionsData } = useStoreRegions();
 
@@ -83,17 +84,33 @@ export default function Header({ variant = "main", title }: HeaderProps) {
     if (matchResult.storeCount === 0) {
       const isSeoul = matchResult.depth1Label === "서울";
       if (isSeoul) {
-        const nearest = findNearestActiveRegion(regionsData.regions, matchResult.depth1Label, latitude, longitude);
-        setInactiveModal({ visible: true, type: "seoul", currentLabel: matchResult.label, nearest });
+        const nearest = findNearestActiveRegion(
+          regionsData.regions,
+          matchResult.depth1Label,
+          latitude,
+          longitude,
+        );
+        setInactiveModal({
+          visible: true,
+          type: "seoul",
+          currentLabel: matchResult.label,
+          nearest,
+        });
       } else {
-        setInactiveModal({ visible: true, type: "outside", currentLabel: matchResult.depth1Label, nearest: null });
+        setInactiveModal({
+          visible: true,
+          type: "outside",
+          currentLabel: matchResult.depth1Label,
+          nearest: null,
+        });
       }
     }
   }, [matchResult, regionsData, overrideResult]);
 
   // 유효 지역이 확정될 때마다 전역 store에 동기화 (상품 목록 필터링에 사용)
   useEffect(() => {
-    const effectiveRegion = overrideResult ?? ((matchResult?.storeCount ?? 0) > 0 ? matchResult : null);
+    const effectiveRegion =
+      overrideResult ?? ((matchResult?.storeCount ?? 0) > 0 ? matchResult : null);
     setSelectedRegion(effectiveRegion);
   }, [overrideResult, matchResult, setSelectedRegion]);
 
@@ -105,7 +122,10 @@ export default function Header({ variant = "main", title }: HeaderProps) {
     }
   }, [productFetching]);
 
-  const displayAddress = overrideResult?.label ?? (inactiveModal.visible ? previousResult?.label : matchResult?.label) ?? null;
+  const displayAddress =
+    overrideResult?.label ??
+    (inactiveModal.visible ? previousResult?.label : matchResult?.label) ??
+    null;
 
   // 배경 클릭 비활성화
   const handleInactiveClose = () => {};
@@ -162,7 +182,9 @@ export default function Header({ variant = "main", title }: HeaderProps) {
       className="flex items-center justify-center"
     >
       <Icon name="location" width={20} height={20} className="text-primary" />
-      <span className="font-bold text-gray-900 ml-1">{displayAddress ?? "위치를 불러오는 중..."}</span>
+      <span className="font-bold text-gray-900 ml-1">
+        {displayAddress ?? "위치를 불러오는 중..."}
+      </span>
       <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-180" />
     </button>
   );
@@ -237,7 +259,11 @@ export default function Header({ variant = "main", title }: HeaderProps) {
           {/* TODO: 테스트용 - 추후 제거 */}
           <button
             type="button"
-            onClick={() => { setPreviousResult(overrideResult ?? matchResult); setOverrideResult(null); setAddress("부산광역시 해운대구"); }}
+            onClick={() => {
+              setPreviousResult(overrideResult ?? matchResult);
+              setOverrideResult(null);
+              setAddress("부산광역시 해운대구");
+            }}
             className="px-3 py-1.5 text-xs font-bold text-blue-400 bg-blue-400/10 border border-blue-400/30 rounded-lg"
           >
             부산테스트

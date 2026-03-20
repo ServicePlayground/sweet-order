@@ -2,6 +2,7 @@ import { userClient } from "@/apps/web-user/common/config/axios.config";
 import {
   Review,
   ReviewListResponse,
+  MyReviewListResponse,
   GetProductReviewsParams,
   GetStoreReviewsParams,
 } from "@/apps/web-user/features/review/types/review.type";
@@ -29,5 +30,20 @@ export const reviewApi = {
   getStoreReview: async (storeId: string, reviewId: string): Promise<Review> => {
     const response = await userClient.get(`/review/store/${storeId}/${reviewId}`);
     return response.data.data;
+  },
+
+  // 내가 작성한 후기 목록 조회
+  getMyReviews: async (params: {
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+  }): Promise<MyReviewListResponse> => {
+    const response = await userClient.get(`/mypage/reviews`, { params });
+    return response.data.data;
+  },
+
+  // 내가 작성한 후기 삭제
+  deleteMyReview: async (reviewId: string): Promise<void> => {
+    await userClient.delete(`/mypage/reviews/${reviewId}`);
   },
 };

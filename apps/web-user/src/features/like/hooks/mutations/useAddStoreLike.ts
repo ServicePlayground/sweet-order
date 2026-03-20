@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { likeApi } from "@/apps/web-user/features/like/apis/like.api";
 import { storeQueryKeys } from "@/apps/web-user/features/store/constants/storeQueryKeys.constant";
+import { likeQueryKeys } from "@/apps/web-user/features/like/constants/likeQueryKeys.constant";
 import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 
@@ -10,9 +11,9 @@ export function useAddStoreLike() {
 
   return useMutation({
     mutationFn: (storeId: string) => likeApi.addStoreLike(storeId),
-    onSuccess: (_, storeId) => {
-      // 스토어 상세 쿼리 무효화 (좋아요 개수 업데이트)
-      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(storeId) });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: likeQueryKeys.likedStores() });
     },
     onError: (error) => {
       showAlert({
