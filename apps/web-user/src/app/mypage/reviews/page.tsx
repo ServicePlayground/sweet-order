@@ -52,7 +52,9 @@ export default function MyReviewsPage() {
 
       {/* 후기 목록 */}
       <div className="px-5">
-        {!data ? <MyReviewsSkeleton /> : reviews.length > 0 ? (
+        {!data ? (
+          <MyReviewsSkeleton />
+        ) : reviews.length > 0 ? (
           reviews.map((review) => (
             <MyReviewItem
               key={review.id}

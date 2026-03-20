@@ -106,7 +106,9 @@ function OrderCard({ order, showTimeline }: { order: OrderResponse; showTimeline
         </Link>
         <button
           type="button"
-          onClick={() => openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName)}
+          onClick={() =>
+            openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName)
+          }
           className="flex-1 h-[32px] flex items-center justify-center gap-0.5 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white"
         >
           <Icon name="map" width={16} height={16} className="text-gray-700" />
@@ -126,7 +128,10 @@ export function UpcomingOrderCard() {
   const isMultiple = orders.length > 1;
 
   return (
-    <section className="mx-5 mb-4 rounded-xl overflow-hidden border border-primary-100" style={{ background: "linear-gradient(180deg, #FFEFEB 0%, #FFFFFF 30%)" }}>
+    <section
+      className="mx-5 mb-4 rounded-xl overflow-hidden border border-primary-100"
+      style={{ background: "linear-gradient(180deg, #FFEFEB 0%, #FFFFFF 30%)" }}
+    >
       <div className="py-4 px-[18px]">
         {/* 헤더 */}
         <div className="flex items-center gap-2">
@@ -142,7 +147,6 @@ export function UpcomingOrderCard() {
         {/* {orders.map((order) => (
           <OrderCard key={order.id} order={order} showTimeline={isMultiple} />
         ))} */}
-        
       </div>
     </section>
   );

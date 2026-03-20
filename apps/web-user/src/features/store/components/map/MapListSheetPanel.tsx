@@ -53,23 +53,20 @@ export function MapListSheetPanel({
   }, []);
 
   /** 목록 영역 터치: 스크롤 가능하면 스크롤, 맨 위·짧은 목록이면 시트와 동일하게 드래그 */
-  const onContentTouchStart = useCallback(
-    (e: React.TouchEvent) => {
-      const el = scrollRef.current;
-      if (!el) return;
-      const startScrollTop = el.scrollTop;
-      if (startScrollTop > 0) {
-        contentGestureRef.current = { mode: "scroll", startY: e.touches[0].clientY, startScrollTop };
-        return;
-      }
-      contentGestureRef.current = {
-        mode: "undecided",
-        startY: e.touches[0].clientY,
-        startScrollTop: 0,
-      };
-    },
-    [],
-  );
+  const onContentTouchStart = useCallback((e: React.TouchEvent) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const startScrollTop = el.scrollTop;
+    if (startScrollTop > 0) {
+      contentGestureRef.current = { mode: "scroll", startY: e.touches[0].clientY, startScrollTop };
+      return;
+    }
+    contentGestureRef.current = {
+      mode: "undecided",
+      startY: e.touches[0].clientY,
+      startScrollTop: 0,
+    };
+  }, []);
 
   const onContentTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -137,8 +134,7 @@ export function MapListSheetPanel({
 
       const startY = e.clientY;
       const startScrollTop = el.scrollTop;
-      let mode: ContentGestureMode =
-        startScrollTop > 0 ? "scroll" : "undecided";
+      let mode: ContentGestureMode = startScrollTop > 0 ? "scroll" : "undecided";
 
       const cleanup = () => {
         window.removeEventListener("mousemove", onMove);
