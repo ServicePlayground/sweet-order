@@ -1,4 +1,4 @@
-import { PrismaClient, ProductCategoryType } from "./generated/client";
+import { PrismaClient, ProductCategoryType, StoreBankName } from "./generated/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -56,6 +56,9 @@ const SEED_STORES = {
     BUSINESS_SECTOR: "도매 및 소매업",
     BUSINESS_TYPE: "전자상거래 소매 중개업",
     PERMISSION_MANAGEMENT_NUMBER: "2021-서울강동-0422",
+    BANK_ACCOUNT_NUMBER: "1103021234567",
+    BANK_NAME: StoreBankName.KB_KOOKMIN,
+    ACCOUNT_HOLDER_NAME: "홍길동",
     LIKE_COUNT: 15,
     CREATED_AT: new Date("2024-01-15T10:30:00Z"),
     UPDATED_AT: new Date("2024-01-15T10:30:00Z"),
@@ -77,6 +80,9 @@ const SEED_STORES = {
     BUSINESS_SECTOR: "도매 및 소매업",
     BUSINESS_TYPE: "전자상거래 소매 중개업",
     PERMISSION_MANAGEMENT_NUMBER: "2021-서울강동-0423",
+    BANK_ACCOUNT_NUMBER: "1002-345-678901",
+    BANK_NAME: StoreBankName.SHINHAN,
+    ACCOUNT_HOLDER_NAME: "홍길동",
     LIKE_COUNT: 8,
     CREATED_AT: new Date("2024-01-16T10:30:00Z"),
     UPDATED_AT: new Date("2024-01-16T10:30:00Z"),
@@ -390,6 +396,9 @@ async function upsertStores(users: Awaited<ReturnType<typeof upsertSeedUsers>>) 
         businessSector: SEED_STORES.STORE1.BUSINESS_SECTOR,
         businessType: SEED_STORES.STORE1.BUSINESS_TYPE,
         permissionManagementNumber: SEED_STORES.STORE1.PERMISSION_MANAGEMENT_NUMBER,
+        bankAccountNumber: SEED_STORES.STORE1.BANK_ACCOUNT_NUMBER,
+        bankName: SEED_STORES.STORE1.BANK_NAME,
+        accountHolderName: SEED_STORES.STORE1.ACCOUNT_HOLDER_NAME,
         likeCount: SEED_STORES.STORE1.LIKE_COUNT,
         createdAt: SEED_STORES.STORE1.CREATED_AT,
         updatedAt: SEED_STORES.STORE1.UPDATED_AT,
@@ -429,6 +438,9 @@ async function upsertStores(users: Awaited<ReturnType<typeof upsertSeedUsers>>) 
         businessSector: SEED_STORES.STORE2.BUSINESS_SECTOR,
         businessType: SEED_STORES.STORE2.BUSINESS_TYPE,
         permissionManagementNumber: SEED_STORES.STORE2.PERMISSION_MANAGEMENT_NUMBER,
+        bankAccountNumber: SEED_STORES.STORE2.BANK_ACCOUNT_NUMBER,
+        bankName: SEED_STORES.STORE2.BANK_NAME,
+        accountHolderName: SEED_STORES.STORE2.ACCOUNT_HOLDER_NAME,
         likeCount: SEED_STORES.STORE2.LIKE_COUNT,
         createdAt: SEED_STORES.STORE2.CREATED_AT,
         updatedAt: SEED_STORES.STORE2.UPDATED_AT,

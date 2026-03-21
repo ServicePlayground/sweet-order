@@ -20,6 +20,33 @@ export enum StoreSortBy {
   POPULAR = "popular",
 }
 
+/** 정산 계좌 은행 코드 (백엔드·Prisma StoreBankName과 동일) */
+export enum StoreBankName {
+  NH_NONGHYUP = "NH_NONGHYUP",
+  KAKAO_BANK = "KAKAO_BANK",
+  KB_KOOKMIN = "KB_KOOKMIN",
+  TOSS_BANK = "TOSS_BANK",
+  SHINHAN = "SHINHAN",
+  WOORI = "WOORI",
+  IBK = "IBK",
+  HANA = "HANA",
+  SAEMAEUL = "SAEMAEUL",
+  BUSAN = "BUSAN",
+  IM_BANK_DAEGU = "IM_BANK_DAEGU",
+  K_BANK = "K_BANK",
+  SINHYEOP = "SINHYEOP",
+  POST_OFFICE = "POST_OFFICE",
+  SC_JEIL = "SC_JEIL",
+  KYONGNAM = "KYONGNAM",
+  GWANGJU = "GWANGJU",
+  SUHYUP = "SUHYUP",
+  JEONBUK = "JEONBUK",
+  SAVINGS_BANK = "SAVINGS_BANK",
+  JEJU = "JEJU",
+  CITI = "CITI",
+  KDB = "KDB",
+}
+
 /** 주소 정보 (백엔드 StoreAddressDto) */
 export interface StoreAddressDto {
   address: string;
@@ -43,6 +70,12 @@ export interface StoreResponseDto extends StoreAddressDto {
   businessSector: string;
   businessType: string;
   permissionManagementNumber: string;
+  /** 정산 계좌번호 */
+  bankAccountNumber?: string | null;
+  /** 정산 계좌 은행 코드 */
+  bankName?: StoreBankName | null;
+  /** 정산 계좌 예금주명 */
+  accountHolderName?: string | null;
   likeCount: number;
   isLiked?: boolean | null;
   averageRating: number;
@@ -62,6 +95,9 @@ export interface CreateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
   logoImageUrl?: string;
+  bankAccountNumber: string;
+  bankName: StoreBankName;
+  accountHolderName: string;
 }
 
 export interface CreateStoreResponseDto {
@@ -72,6 +108,9 @@ export interface UpdateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
   logoImageUrl?: string;
+  bankAccountNumber: string;
+  bankName: StoreBankName;
+  accountHolderName: string;
 }
 
 export interface UpdateStoreResponseDto {

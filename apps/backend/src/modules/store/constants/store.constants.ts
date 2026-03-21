@@ -1,3 +1,10 @@
+/**
+ * prisma 중복 방지
+ */
+// 정산 계좌 은행
+import { StoreBankName } from "@apps/backend/infra/database/prisma/generated/client";
+export { StoreBankName };
+
 export const STORE_ERROR_MESSAGES = {
   BUSINESS_REGISTRATION_NUMBER_MISMATCH:
     "1단계(사업자등록번호 진위확인)와 2단계(통신판매사업자 등록상세 조회)의 사업자등록번호가 일치하지 않습니다.",
@@ -35,6 +42,9 @@ export const SWAGGER_EXAMPLES = {
   ZONECODE: "06234",
   LATITUDE: 37.5665,
   LONGITUDE: 126.978,
+  BANK_ACCOUNT_NUMBER: "110-302-1234567",
+  BANK_NAME: StoreBankName.KB_KOOKMIN,
+  ACCOUNT_HOLDER_NAME: "홍길동",
 };
 
 /**

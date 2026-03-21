@@ -142,9 +142,6 @@ export class StoreMapperUtil {
       return {
         id: store.id,
         userId: store.userId,
-        logoImageUrl: store.logoImageUrl ?? undefined,
-        name: store.name,
-        description: store.description ?? undefined,
         businessNo: store.businessNo,
         representativeName: store.representativeName,
         openingDate: store.openingDate,
@@ -152,6 +149,10 @@ export class StoreMapperUtil {
         businessSector: store.businessSector,
         businessType: store.businessType,
         permissionManagementNumber: store.permissionManagementNumber,
+        // 기본 정보
+        logoImageUrl: store.logoImageUrl ?? undefined,
+        name: store.name,
+        description: store.description ?? undefined,
         // 픽업장소
         address: store.address ?? "",
         roadAddress: store.roadAddress ?? "",
@@ -159,6 +160,11 @@ export class StoreMapperUtil {
         zonecode: store.zonecode ?? "",
         latitude: store.latitude ?? 0,
         longitude: store.longitude ?? 0,
+        // 정산 계좌 정보
+        bankAccountNumber: store.bankAccountNumber ?? undefined,
+        bankName: store.bankName ?? undefined,
+        accountHolderName: store.accountHolderName ?? undefined,
+        // 기타
         likeCount: store.likeCount,
         averageRating,
         totalReviewCount,

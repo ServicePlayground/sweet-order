@@ -196,6 +196,11 @@ model Store {
   // 비즈니스 필드 - 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
   permissionManagementNumber String @map("permission_management_number") // 인허가관리번호 (통신판매사업자 신고번호)
 
+  // 비즈니스 필드 - 정산 계좌
+  bankAccountNumber String?         @map("bank_account_number") // 계좌번호
+  bankName          StoreBankName? @map("bank_name") // 은행 코드
+  accountHolderName String?         @map("account_holder_name") // 예금주명
+
   // 시스템 필드
   likeCount Int      @default(0) @map("like_count") // 좋아요 개수
   createdAt DateTime @default(now()) @map("created_at")
@@ -514,4 +519,31 @@ enum MessageSenderType {
 enum OrderStatus {
   PENDING    // 대기중 (예약신청)
   CONFIRMED  // 확정됨 (예약확정)
+}
+
+/// 정산 계좌 은행 (API·DB 공통 코드값)
+enum StoreBankName {
+  NH_NONGHYUP // NH농협
+  KAKAO_BANK // 카카오뱅크
+  KB_KOOKMIN // KB국민
+  TOSS_BANK // 토스뱅크
+  SHINHAN // 신한
+  WOORI // 우리
+  IBK // IBK기업
+  HANA // 하나
+  SAEMAEUL // 새마을
+  BUSAN // 부산
+  IM_BANK_DAEGU // iM뱅크(대구)
+  K_BANK // 케이뱅크
+  SINHYEOP // 신협
+  POST_OFFICE // 우체국
+  SC_JEIL // SC제일
+  KYONGNAM // 경남
+  GWANGJU // 광주
+  SUHYUP // 수협
+  JEONBUK // 전북
+  SAVINGS_BANK // 저축은행
+  JEJU // 제주
+  CITI // 씨티
+  KDB // KDB산업
 }
