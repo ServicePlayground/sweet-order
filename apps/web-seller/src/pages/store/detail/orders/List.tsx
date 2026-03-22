@@ -17,6 +17,7 @@ import {
   OrderStatus,
   OrderType,
 } from "@/apps/web-seller/features/order/types/order.dto";
+import { ORDER_STATUS_FILTER_OPTIONS } from "@/apps/web-seller/features/order/utils/order-status-ui.util";
 import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
 
 const DEBOUNCE_DELAY_MS = 300;
@@ -140,8 +141,11 @@ export const StoreDetailOrderListPage: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">전체</SelectItem>
-                <SelectItem value={OrderStatus.PENDING}>대기중</SelectItem>
-                <SelectItem value={OrderStatus.CONFIRMED}>확정됨</SelectItem>
+                {ORDER_STATUS_FILTER_OPTIONS.map(({ value, label }) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

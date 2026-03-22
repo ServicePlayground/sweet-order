@@ -5,6 +5,7 @@ import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.d
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
 
 /**
  * 주문 상세조회 서비스
@@ -12,7 +13,10 @@ import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
  */
 @Injectable()
 export class OrderDetailService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly orderAutomationService: OrderAutomationService,
+  ) {}
 
   /**
    * 주문 상세조회 (사용자용)
@@ -23,6 +27,8 @@ export class OrderDetailService {
   async getOrderByIdForUser(orderId: string, userId: string): Promise<OrderResponseDto> {
     // 주문 소유권 확인
     await OrderOwnershipUtil.verifyOrderUserOwnership(this.prisma, orderId, userId);
+
+    await this.orderAutomationService.syncOrderLifecycleById(orderId);
 
     // 주문 항목 정보 포함하여 조회
     const order = await this.prisma.order.findUnique({
@@ -48,6 +54,8 @@ export class OrderDetailService {
   async getOrderByIdForSeller(orderId: string, userId: string): Promise<OrderResponseDto> {
     // 주문 소유권 확인
     await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId);
+
+    await this.orderAutomationService.syncOrderLifecycleById(orderId);
 
     // 주문 항목 정보 포함하여 조회
     const order = await this.prisma.order.findUnique({

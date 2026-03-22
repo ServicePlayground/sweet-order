@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
 import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
+import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
 
 /**
  * 주문 항목 응답 DTO
@@ -186,6 +187,63 @@ export class OrderResponseDto extends PickupAddressDto {
     example: SWAGGER_EXAMPLES.ORDER_DATA.orderStatus,
   })
   orderStatus: OrderStatus;
+
+  @ApiPropertyOptional({
+    description:
+      "입금 전 사용자 취소 시 입력한 사유. 자동 만료 취소·판매자 취소 등에서는 null일 수 있음",
+    example: "일정 변경",
+    nullable: true,
+  })
+  userCancelReason: string | null;
+
+  @ApiPropertyOptional({
+    description: "판매자가 입금대기에서 예약 취소(취소완료) 시 입력한 사유. 해당 없으면 null",
+    example: "재고 부족",
+    nullable: true,
+  })
+  sellerCancelReason: string | null;
+
+  @ApiPropertyOptional({
+    description: "판매자가 픽업대기에서 노쇼 처리 시 입력한 사유. 해당 없으면 null",
+    example: "픽업 시간 경과 후 연락 불가",
+    nullable: true,
+  })
+  sellerNoShowReason: string | null;
+
+  @ApiPropertyOptional({
+    description:
+      "입금 이후 사용자가 취소·환불 요청 API로 전환할 때 입력한 사유. 판매자가 직접 취소환불대기로 바꾼 경우는 `sellerCancelRefundPendingReason`을 봅니다.",
+    example: "일정 변경",
+    nullable: true,
+  })
+  refundRequestReason: string | null;
+
+  @ApiPropertyOptional({
+    description:
+      "판매자가 취소환불대기로 전환할 때 입력한 사유. 사용자 취소·환불 요청 사유(`refundRequestReason`)와 별도 필드입니다.",
+    example: "고객 요청에 따른 환불 진행",
+    nullable: true,
+  })
+  sellerCancelRefundPendingReason: string | null;
+
+  @ApiPropertyOptional({
+    description: "환불받을 은행 (취소·환불 요청 시). 해당 없으면 null",
+    enum: StoreBankName,
+    nullable: true,
+  })
+  refundBankName: StoreBankName | null;
+
+  @ApiPropertyOptional({
+    description: "환불 계좌번호. 해당 없으면 null",
+    nullable: true,
+  })
+  refundBankAccountNumber: string | null;
+
+  @ApiPropertyOptional({
+    description: "환불 예금주명. 해당 없으면 null",
+    nullable: true,
+  })
+  refundAccountHolderName: string | null;
 
   @ApiProperty({
     description: "생성일시",

@@ -26,7 +26,7 @@ import {
 import {
   UpdateOrderStatusRequestDto,
   UpdateOrderStatusResponseDto,
-} from "@apps/backend/modules/order/dto/order-update.dto";
+} from "@apps/backend/modules/order/dto/order-seller-action.dto";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
@@ -107,11 +107,23 @@ export class SellerOrderController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 주문 상태 변경",
-    description: "자신이 소유한 스토어의 주문 상태를 변경합니다.",
+    description:
+      "예약확정·픽업완료·노쇼·취소완료·취소환불대기·취소환불완료 중 하나로 변경할 수 있습니다. 예약확정은 입금대기·입금완료에서만 가능합니다. 픽업완료는 픽업대기에서만 가능합니다. 취소완료는 입금대기에서만 가능하며 sellerCancelReason 필수입니다. 취소환불대기는 입금 이후(입금완료·예약확정·픽업대기)에서 설정 가능하며 sellerCancelRefundPendingReason 필수입니다(사용자 취소·환불 요청 시 저장되는 refundRequestReason과 별도). 취소환불완료는 취소환불대기에서만 가능합니다. 노쇼는 픽업대기에서만 가능하며 sellerNoShowReason 필수입니다. 동일 상태 요청은 불가합니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
   @SwaggerResponse(400, {
-    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.CANNOT_REVERT_CONFIRMED),
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.INVALID_STATUS_TRANSITION),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.SELLER_CANCEL_REASON_REQUIRED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.SELLER_NO_SHOW_REASON_REQUIRED),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(
+      ORDER_ERROR_MESSAGES.SELLER_CANCEL_REFUND_PENDING_REASON_REQUIRED,
+    ),
   })
   @SwaggerAuthResponses()
   @SwaggerResponse(403, {

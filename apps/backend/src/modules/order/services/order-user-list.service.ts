@@ -10,6 +10,7 @@ import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.
 import { buildOrderOrderBy } from "@apps/backend/modules/order/utils/order-list-query.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
+import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
 
 /**
  * 사용자용 주문 목록 조회 서비스
@@ -17,7 +18,10 @@ import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.d
  */
 @Injectable()
 export class OrderUserListService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly orderAutomationService: OrderAutomationService,
+  ) {}
 
   /**
    * 사용자용 주문 목록 조회 (사용자용)
@@ -71,13 +75,17 @@ export class OrderUserListService {
     const orderBy = buildOrderOrderBy(sortBy);
     const skip = (page - 1) * limit;
 
-    const orders = await this.prisma.order.findMany({
+    const listFindArgs = {
       where,
       orderBy,
       skip,
       take: limit,
       include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
-    });
+    } satisfies Prisma.OrderFindManyArgs;
+
+    let orders = await this.prisma.order.findMany(listFindArgs);
+    await this.orderAutomationService.syncOrderLifecycleForIds(orders.map((o) => o.id));
+    orders = await this.prisma.order.findMany(listFindArgs);
 
     const data: OrderResponseDto[] = orders.map((order) =>
       OrderMapperUtil.mapToOrderResponse(order),

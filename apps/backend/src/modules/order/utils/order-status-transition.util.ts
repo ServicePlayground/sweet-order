@@ -1,0 +1,95 @@
+import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
+
+/**
+ * 판매자 PATCH로 설정 가능한 목표 상태
+ */
+export const SELLER_SETTABLE_ORDER_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.CONFIRMED,
+  OrderStatus.PICKUP_COMPLETED,
+  OrderStatus.NO_SHOW,
+  OrderStatus.CANCEL_COMPLETED,
+  OrderStatus.CANCEL_REFUND_PENDING,
+  OrderStatus.CANCEL_REFUND_COMPLETED,
+]);
+
+/** 예약확정(CONFIRMED)으로 바꿀 때만 허용되는 현재 상태 */
+export const SELLER_CONFIRMED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.PAYMENT_PENDING,
+  OrderStatus.PAYMENT_COMPLETED,
+]);
+
+/** 픽업완료(PICKUP_COMPLETED)로 바꿀 때만 허용되는 현재 상태 */
+export const SELLER_PICKUP_COMPLETED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.PICKUP_PENDING,
+]);
+
+/** 노쇼 — 픽업대기(고객 미수령)에서만 판매자가 설정 */
+export const SELLER_NO_SHOW_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.PICKUP_PENDING,
+]);
+
+/** 취소완료 — 판매자가 입금대기에서만 예약 취소 */
+export const SELLER_CANCEL_COMPLETED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.PAYMENT_PENDING,
+]);
+
+/** 취소환불대기 — 입금 이후 플로우(사용자 취소·환불 요청 또는 판매자 PATCH). 판매자 전환 시 사유는 `sellerCancelRefundPendingReason` */
+export const SELLER_CANCEL_REFUND_PENDING_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set(
+  [OrderStatus.PAYMENT_COMPLETED, OrderStatus.CONFIRMED, OrderStatus.PICKUP_PENDING],
+);
+
+/** 취소환불완료 — 취소환불대기에서만 */
+export const SELLER_CANCEL_REFUND_COMPLETED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> =
+  new Set([OrderStatus.CANCEL_REFUND_PENDING]);
+
+/** 사용자가 취소환불대기(취소·환불 요청)로 갈 수 있는 상태 (입금 완료 이후) */
+export const USER_CANCEL_REFUND_REQUEST_SOURCE_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.PAYMENT_COMPLETED,
+  OrderStatus.CONFIRMED,
+  OrderStatus.PICKUP_PENDING,
+]);
+
+export function isSellerSettableOrderStatus(status: OrderStatus): boolean {
+  return SELLER_SETTABLE_ORDER_STATUSES.has(status);
+}
+
+/**
+ * 판매자 상태 변경 허용 여부.
+ * 취소완료·노쇼·취소환불대기(판매자 전환) 시 사유는 서비스 레이어에서 `sellerCancelReason`·`sellerNoShowReason`·`sellerCancelRefundPendingReason`으로 검증합니다.
+ */
+export function isSellerTransitionAllowed(from: OrderStatus, to: OrderStatus): boolean {
+  if (!isSellerSettableOrderStatus(to)) {
+    return false;
+  }
+  if (to === OrderStatus.CONFIRMED && !SELLER_CONFIRMED_ALLOWED_FROM_STATUSES.has(from)) {
+    return false;
+  }
+  if (
+    to === OrderStatus.PICKUP_COMPLETED &&
+    !SELLER_PICKUP_COMPLETED_ALLOWED_FROM_STATUSES.has(from)
+  ) {
+    return false;
+  }
+  if (to === OrderStatus.NO_SHOW && !SELLER_NO_SHOW_ALLOWED_FROM_STATUSES.has(from)) {
+    return false;
+  }
+  if (
+    to === OrderStatus.CANCEL_COMPLETED &&
+    !SELLER_CANCEL_COMPLETED_ALLOWED_FROM_STATUSES.has(from)
+  ) {
+    return false;
+  }
+  if (
+    to === OrderStatus.CANCEL_REFUND_PENDING &&
+    !SELLER_CANCEL_REFUND_PENDING_ALLOWED_FROM_STATUSES.has(from)
+  ) {
+    return false;
+  }
+  if (
+    to === OrderStatus.CANCEL_REFUND_COMPLETED &&
+    !SELLER_CANCEL_REFUND_COMPLETED_ALLOWED_FROM_STATUSES.has(from)
+  ) {
+    return false;
+  }
+  return true;
+}

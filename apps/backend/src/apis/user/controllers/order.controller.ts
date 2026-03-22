@@ -1,4 +1,14 @@
-import { Controller, Post, Get, Body, Param, HttpCode, HttpStatus, Request } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Request,
+} from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiExtraModels } from "@nestjs/swagger";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import {
@@ -10,6 +20,11 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
+import { UpdateOrderStatusResponseDto } from "@apps/backend/modules/order/dto/order-seller-action.dto";
+import {
+  CancelOrderBeforePaymentRequestDto,
+  RequestCancelRefundRequestDto,
+} from "@apps/backend/modules/order/dto/order-user-action.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
@@ -19,7 +34,13 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
  * 사용자 주문 관리 API 엔드포인트를 제공합니다.
  */
 @ApiTags("주문")
-@ApiExtraModels(CreateOrderResponseDto, OrderResponseDto)
+@ApiExtraModels(
+  CreateOrderResponseDto,
+  OrderResponseDto,
+  UpdateOrderStatusResponseDto,
+  CancelOrderBeforePaymentRequestDto,
+  RequestCancelRefundRequestDto,
+)
 @Controller(`${USER_ROLES.USER}/orders`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // 인증 필수
 export class UserOrderController {
@@ -61,6 +82,96 @@ export class UserOrderController {
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<CreateOrderResponseDto> {
     return await this.orderService.createOrderForUser(createOrderDto, req.user);
+  }
+
+  /**
+   * 입금완료 처리 (사용자)
+   * 입금대기 상태에서만 가능합니다. 생성 시각 기준 12시간이 지나면 자동 취소됩니다.
+   */
+  @Patch(":id/payment-complete")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 입금완료 처리",
+    description:
+      "입금대기(PAYMENT_PENDING) 주문을 입금완료(PAYMENT_COMPLETED)로 변경합니다. 입금 유효 시간(주문 생성 후 12시간)이 지난 경우 처리할 수 없습니다.",
+  })
+  @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PAYMENT_PENDING_EXPIRED),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  })
+  async markPaymentComplete(
+    @Param("id") id: string,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<UpdateOrderStatusResponseDto> {
+    return await this.orderService.markOrderPaymentCompletedForUser(id, req.user);
+  }
+
+  /**
+   * 입금 전 예약 취소 (사용자)
+   */
+  @Patch(":id/cancel-before-payment")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 입금 전 예약 취소",
+    description:
+      "입금대기(PAYMENT_PENDING) 주문을 취소완료(CANCEL_COMPLETED)로 변경합니다. 취소 사유를 함께 저장합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  })
+  async cancelBeforePayment(
+    @Param("id") id: string,
+    @Body() dto: CancelOrderBeforePaymentRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<UpdateOrderStatusResponseDto> {
+    return await this.orderService.cancelOrderBeforePaymentForUser(id, req.user, dto);
+  }
+
+  /**
+   * 환불 요청 (사용자)
+   */
+  @Patch(":id/refund-request")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 취소·환불 요청",
+    description:
+      "입금완료·예약확정·픽업대기 상태에서 취소·환불을 요청하면 취소환불대기(CANCEL_REFUND_PENDING)로 변경됩니다. 요청 시 취소 사유와 환불받을 계좌(은행·계좌번호·예금주)를 함께 보냅니다. 이후 판매자가 취소환불완료(CANCEL_REFUND_COMPLETED)로 처리합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  })
+  async requestRefund(
+    @Param("id") id: string,
+    @Body() dto: RequestCancelRefundRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<UpdateOrderStatusResponseDto> {
+    return await this.orderService.requestOrderRefundForUser(id, req.user, dto);
   }
 
   /**

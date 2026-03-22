@@ -9,11 +9,10 @@ import {
   ORDER_ERROR_MESSAGES,
   OrderStatus,
 } from "@apps/backend/modules/order/constants/order.constants";
-import {
-  EnableStatus,
-  ProductType,
-} from "@apps/backend/modules/product/constants/product.constants";
+import { EnableStatus } from "@apps/backend/modules/product/constants/product.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/order-lifecycle-hook.service";
+import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
 
 /**
  * 주문 생성 서비스
@@ -21,7 +20,10 @@ import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
  */
 @Injectable()
 export class OrderCreateService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly orderLifecycleHookService: OrderLifecycleHookService,
+  ) {}
 
   private parseSizeOptions(options: unknown): Array<{
     id: string;
@@ -302,7 +304,7 @@ export class OrderCreateService {
 
     while (retryCount < maxRetries) {
       try {
-        return await this.prisma.$transaction(
+        const created = await this.prisma.$transaction(
           async (tx) => {
             // 주문 번호 생성 (예: ORD-20240101-001)
             const now = new Date();
@@ -326,13 +328,8 @@ export class OrderCreateService {
             const sequence = String(todayOrderCount + 1 + retryCount).padStart(3, "0");
             const orderNumber = `ORD-${dateStr}-${sequence}`;
 
-            // 상품 타입에 따라 주문 상태 결정
-            // 일반 케이크(BASIC_CAKE): 예약확정(CONFIRMED)
-            // 주문제작 케이크(CUSTOM_CAKE): 예약중(PENDING)
-            const orderStatus =
-              product.productType === ProductType.BASIC_CAKE
-                ? OrderStatus.CONFIRMED
-                : OrderStatus.PENDING;
+            // 모든 상품: 예약신청 직후 입금대기
+            const orderStatus = OrderStatus.PAYMENT_PENDING;
 
             const order = await tx.order.create({
               data: {
@@ -370,6 +367,16 @@ export class OrderCreateService {
             timeout: 10000, // 타임아웃 (10초)
           },
         );
+
+        // 주문 생성 후 상태 전환 후처리
+        this.orderLifecycleHookService.afterOrderStatusTransition({
+          orderId: created.id,
+          fromStatus: null,
+          toStatus: OrderStatus.PAYMENT_PENDING,
+          source: ORDER_STATUS_TRANSITION_SOURCE.ORDER_CREATE,
+        });
+
+        return created;
       } catch (error: any) {
         // 주문 번호 중복 에러인 경우 재시도
         if (error?.code === "P2002") {

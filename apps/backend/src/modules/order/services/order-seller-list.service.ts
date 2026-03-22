@@ -15,17 +15,21 @@ import {
   OrderType,
 } from "@apps/backend/modules/order/constants/order.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
 
 /**
- * 주문 목록 조회 서비스
- * 판매자용 주문 목록 조회 관련 로직을 담당합니다.
+ * 판매자용 주문 목록 조회 서비스
+ * (`OrderUserListService`와 대응)
  */
 @Injectable()
-export class OrderListService {
-  constructor(private readonly prisma: PrismaService) {}
+export class OrderSellerListService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly orderAutomationService: OrderAutomationService,
+  ) {}
 
   /**
-   * 판매자용 주문 목록 조회 (판매자용)
+   * 판매자용 주문 목록 조회
    * 자신이 소유한 스토어의 주문만 조회합니다.
    */
   async getOrdersForSeller(
@@ -116,14 +120,17 @@ export class OrderListService {
     // 페이지네이션
     const skip = (page - 1) * limit;
 
-    // 주문 조회
-    const orders = await this.prisma.order.findMany({
+    const listFindArgs = {
       where,
       orderBy,
       skip,
       take: limit,
       include: OrderMapperUtil.ORDER_ITEMS_INCLUDE,
-    });
+    } satisfies Prisma.OrderFindManyArgs;
+
+    let orders = await this.prisma.order.findMany(listFindArgs);
+    await this.orderAutomationService.syncOrderLifecycleForIds(orders.map((o) => o.id));
+    orders = await this.prisma.order.findMany(listFindArgs);
 
     // DTO로 변환
     const data: OrderResponseDto[] = orders.map((order) =>
