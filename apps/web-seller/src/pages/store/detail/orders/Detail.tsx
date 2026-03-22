@@ -26,6 +26,7 @@ import {
   getOrderStatusSellerHint,
   ORDER_STATUS_FLOW_LINES_FOR_SELLER,
 } from "@/apps/web-seller/features/order/utils/order-status-seller-guide.util";
+import { PaymentPendingCountdown } from "@/apps/web-seller/features/order/components/detail/PaymentPendingCountdown";
 
 type ReasonTarget =
   | OrderStatus.CANCEL_COMPLETED
@@ -135,6 +136,9 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
                 {getOrderStatusSellerHint(status)}
               </p>
             </div>
+            {status === OrderStatus.PAYMENT_PENDING && (
+              <PaymentPendingCountdown createdAt={order.createdAt} />
+            )}
           </div>
 
           <details className="rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm">
