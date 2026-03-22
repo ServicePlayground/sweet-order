@@ -1,7 +1,10 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
-import type { UpdateStoreRequestDto } from "@/apps/web-seller/features/store/types/store.dto";
+import type {
+  StoreBankName,
+  UpdateStoreRequestDto,
+} from "@/apps/web-seller/features/store/types/store.dto";
 import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui";
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { useUpdateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
@@ -42,6 +45,9 @@ export const StoreDetailEditPage: React.FC = () => {
     name: store.name,
     description: store.description || "",
     logoImageUrl: store.logoImageUrl || "",
+    bankAccountNumber: store.bankAccountNumber ?? "",
+    bankName: (store.bankName ?? "") as StoreBankName | "",
+    accountHolderName: store.accountHolderName ?? "",
     address: store.address,
     roadAddress: store.roadAddress,
     detailAddress: store.detailAddress,
@@ -55,6 +61,9 @@ export const StoreDetailEditPage: React.FC = () => {
       name: data.name,
       description: data.description || "",
       logoImageUrl: data.logoImageUrl || "",
+      bankAccountNumber: data.bankAccountNumber.trim(),
+      bankName: data.bankName as StoreBankName,
+      accountHolderName: data.accountHolderName.trim(),
       address: data.address,
       roadAddress: data.roadAddress,
       detailAddress: data.detailAddress,

@@ -34,7 +34,7 @@ export class OrderListRequestDto extends PaginationRequestDto {
   @ApiPropertyOptional({
     description: "(필터) 주문 상태",
     enum: OrderStatus,
-    example: OrderStatus.PENDING,
+    example: OrderStatus.PAYMENT_PENDING,
   })
   @IsOptional()
   @IsEnum(OrderStatus)

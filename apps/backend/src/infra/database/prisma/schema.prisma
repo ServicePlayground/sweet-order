@@ -196,6 +196,11 @@ model Store {
   // 비즈니스 필드 - 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
   permissionManagementNumber String @map("permission_management_number") // 인허가관리번호 (통신판매사업자 신고번호)
 
+  // 비즈니스 필드 - 정산 계좌
+  bankAccountNumber String?         @map("bank_account_number") // 계좌번호
+  bankName          StoreBankName? @map("bank_name") // 은행 코드
+  accountHolderName String?         @map("account_holder_name") // 예금주명
+
   // 시스템 필드
   likeCount Int      @default(0) @map("like_count") // 좋아요 개수
   createdAt DateTime @default(now()) @map("created_at")
@@ -403,7 +408,21 @@ model Order {
   pickupLongitude    Float? @map("pickup_longitude") // 픽업 장소 경도
 
   // 비즈니스 필드 - 주문 상태
-  orderStatus OrderStatus @default(PENDING) @map("order_status") // 주문 상태
+  orderStatus OrderStatus @default(PAYMENT_PENDING) @map("order_status") // 주문 상태
+  /** 입금 전 사용자 취소 시 입력한 사유 (자동 만료 취소 등은 null) */
+  userCancelReason String? @map("user_cancel_reason") @db.Text
+  /** 판매자가 입금대기에서 예약 취소(취소완료) 시 입력한 사유 */
+  sellerCancelReason String? @map("seller_cancel_reason") @db.Text
+  /** 판매자가 픽업대기에서 노쇼 처리 시 입력한 사유 */
+  sellerNoShowReason String? @map("seller_no_show_reason") @db.Text
+  /** 판매자가 취소환불대기로 전환할 때 입력한 사유 (사용자 요청 사유 `refundRequestReason`과 별도) */
+  sellerCancelRefundPendingReason String? @map("seller_cancel_refund_pending_reason") @db.Text
+  /** 입금 이후 사용자 취소·환불 요청 시 사유 */
+  refundRequestReason String? @map("refund_request_reason") @db.Text
+  /** 환불 받을 은행 (스토어 정산 계좌와 동일 `StoreBankName`) */
+  refundBankName StoreBankName? @map("refund_bank_name")
+  refundBankAccountNumber String? @map("refund_bank_account_number")
+  refundAccountHolderName String? @map("refund_account_holder_name")
 
   // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
@@ -512,6 +531,40 @@ enum MessageSenderType {
 }
 
 enum OrderStatus {
-  PENDING    // 대기중 (예약신청)
-  CONFIRMED  // 확정됨 (예약확정)
+  PAYMENT_PENDING // 입금대기
+  PAYMENT_COMPLETED // 입금완료
+  CONFIRMED // 예약확정
+  PICKUP_PENDING // 픽업대기
+  PICKUP_COMPLETED // 픽업완료
+  CANCEL_COMPLETED // 취소완료
+  CANCEL_REFUND_PENDING // 취소환불대기
+  CANCEL_REFUND_COMPLETED // 취소환불완료
+  NO_SHOW // 노쇼
+}
+
+/// 정산 계좌 은행 (API·DB 공통 코드값)
+enum StoreBankName {
+  NH_NONGHYUP // NH농협
+  KAKAO_BANK // 카카오뱅크
+  KB_KOOKMIN // KB국민
+  TOSS_BANK // 토스뱅크
+  SHINHAN // 신한
+  WOORI // 우리
+  IBK // IBK기업
+  HANA // 하나
+  SAEMAEUL // 새마을
+  BUSAN // 부산
+  IM_BANK_DAEGU // iM뱅크(대구)
+  K_BANK // 케이뱅크
+  SINHYEOP // 신협
+  POST_OFFICE // 우체국
+  SC_JEIL // SC제일
+  KYONGNAM // 경남
+  GWANGJU // 광주
+  SUHYUP // 수협
+  JEONBUK // 전북
+  SAVINGS_BANK // 저축은행
+  JEJU // 제주
+  CITI // 씨티
+  KDB // KDB산업
 }

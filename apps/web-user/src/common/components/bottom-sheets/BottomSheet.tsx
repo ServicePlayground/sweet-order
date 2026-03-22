@@ -13,7 +13,14 @@ interface BottomSheetProps {
   maxHeight?: string;
 }
 
-export function BottomSheet({ isOpen, onClose, title, children, footer, maxHeight = "80%" }: BottomSheetProps) {
+export function BottomSheet({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footer,
+  maxHeight = "80%",
+}: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
   // 바깥 영역 클릭 시 닫기

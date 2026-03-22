@@ -209,6 +209,86 @@ export class IsValidDetailAddressConstraint implements ValidatorConstraintInterf
 }
 
 /**
+ * 정산 계좌번호 유효성 검증 (숫자, 하이픈, 공백 허용, 4~30자)
+ */
+@ValidatorConstraint({ name: "isValidBankAccountNumber", async: false })
+export class IsValidBankAccountNumberConstraint implements ValidatorConstraintInterface {
+  private errorType: string = "";
+
+  validate(value: string): boolean {
+    if (!value || !value.trim()) {
+      this.errorType = "미입력";
+      return false;
+    }
+    const trimmed = value.trim();
+    if (trimmed.length < 4 || trimmed.length > 30) {
+      this.errorType = "길이";
+      return false;
+    }
+    if (!/^[0-9\- ]+$/.test(trimmed)) {
+      this.errorType = "형식";
+      return false;
+    }
+    this.errorType = "";
+    return true;
+  }
+
+  defaultMessage(): string {
+    if (this.errorType === "미입력") {
+      return "계좌번호를 입력해주세요.";
+    }
+    if (this.errorType === "길이") {
+      return "계좌번호는 4자 이상 30자 이하여야 합니다.";
+    }
+    if (this.errorType === "형식") {
+      return "계좌번호는 숫자, 하이픈(-), 공백만 사용할 수 있습니다.";
+    }
+    return "계좌번호를 확인해주세요.";
+  }
+}
+
+/**
+ * 예금주명 유효성 검증 (한글·영문·숫자·공백, 2~30자)
+ */
+@ValidatorConstraint({ name: "isValidAccountHolderName", async: false })
+export class IsValidAccountHolderNameConstraint implements ValidatorConstraintInterface {
+  private errorType: string = "";
+
+  validate(value: string): boolean {
+    const pattern = /^[가-힣a-zA-Z0-9\s]+$/;
+
+    if (!value || !value.trim()) {
+      this.errorType = "미입력";
+      return false;
+    }
+    const trimmed = value.trim();
+    if (trimmed.length < 2 || trimmed.length > 30) {
+      this.errorType = "길이";
+      return false;
+    }
+    if (!pattern.test(trimmed)) {
+      this.errorType = "문자";
+      return false;
+    }
+    this.errorType = "";
+    return true;
+  }
+
+  defaultMessage(): string {
+    if (this.errorType === "미입력") {
+      return "예금주명을 입력해주세요.";
+    }
+    if (this.errorType === "길이") {
+      return "예금주명은 2자 이상 30자 이하여야 합니다.";
+    }
+    if (this.errorType === "문자") {
+      return "예금주명은 한글, 영문, 숫자만 사용할 수 있습니다.";
+    }
+    return "예금주명을 확인해주세요.";
+  }
+}
+
+/**
  * 공통 데코레이터 팩토리 함수
  */
 function createValidatorDecorator(
@@ -252,6 +332,14 @@ export function IsValidStoreDescription(validationOptions?: ValidationOptions) {
  */
 export function IsValidDetailAddress(validationOptions?: ValidationOptions) {
   return createValidatorDecorator(new IsValidDetailAddressConstraint(), validationOptions);
+}
+
+export function IsValidBankAccountNumber(validationOptions?: ValidationOptions) {
+  return createValidatorDecorator(new IsValidBankAccountNumberConstraint(), validationOptions);
+}
+
+export function IsValidAccountHolderName(validationOptions?: ValidationOptions) {
+  return createValidatorDecorator(new IsValidAccountHolderNameConstraint(), validationOptions);
 }
 
 /**

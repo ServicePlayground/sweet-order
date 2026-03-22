@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useOrderDetail } from "@/apps/web-seller/features/order/hooks/queries/useOrderQuery";
 import { useUpdateOrderStatus } from "@/apps/web-seller/features/order/hooks/mutations/useOrderMutation";
-import { OrderStatus } from "@/apps/web-seller/features/order/types/order.dto";
+import {
+  OrderStatus,
+  type UpdateOrderStatusRequestDto,
+} from "@/apps/web-seller/features/order/types/order.dto";
 import {
   Card,
   CardContent,
@@ -10,14 +13,34 @@ import {
   CardTitle,
 } from "@/apps/web-seller/common/components/cards/Card";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
-import { Badge } from "@/apps/web-seller/common/components/badges/Badge";
 import { ImageLightbox } from "@/apps/web-seller/common/components/images/ImageLightbox";
+import { Textarea } from "@/apps/web-seller/common/components/textareas/Textarea";
+import { Label } from "@/apps/web-seller/common/components/labels/Label";
+import { isSellerTransitionAllowed } from "@/apps/web-seller/features/order/utils/order-seller-transition.util";
+import {
+  getOrderStatusBadgeVariant,
+  getOrderStatusLabel,
+} from "@/apps/web-seller/features/order/utils/order-status-ui.util";
+import { StatusBadge } from "@/apps/web-seller/common/components/badges/StatusBadge";
+import {
+  getOrderStatusSellerHint,
+  ORDER_STATUS_FLOW_LINES_FOR_SELLER,
+} from "@/apps/web-seller/features/order/utils/order-status-seller-guide.util";
+import { PaymentPendingCountdown } from "@/apps/web-seller/features/order/components/detail/PaymentPendingCountdown";
+
+type ReasonTarget =
+  | OrderStatus.CANCEL_COMPLETED
+  | OrderStatus.NO_SHOW
+  | OrderStatus.CANCEL_REFUND_PENDING
+  | null;
 
 export const StoreDetailOrderDetailPage: React.FC = () => {
   const { storeId, orderId } = useParams<{ storeId: string; orderId: string }>();
   const { data: order, isLoading } = useOrderDetail(orderId || "");
   const updateOrderStatusMutation = useUpdateOrderStatus();
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [reasonTarget, setReasonTarget] = useState<ReasonTarget>(null);
+  const [reasonText, setReasonText] = useState("");
 
   if (!storeId || !orderId) {
     return (
@@ -45,31 +68,198 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
     );
   }
 
-  const getStatusBadge = (status: OrderStatus) => {
-    switch (status) {
-      case OrderStatus.PENDING:
-        return (
-          <Badge className="bg-yellow-500 px-3 py-1 text-sm font-semibold text-white">대기중</Badge>
-        );
-      case OrderStatus.CONFIRMED:
-        return (
-          <Badge className="bg-green-500 px-3 py-1 text-sm font-semibold text-white">확정됨</Badge>
-        );
-      default:
-        return null;
+  const status = order.orderStatus;
+  const variant = getOrderStatusBadgeVariant(status);
+
+  const submitReason = () => {
+    if (!reasonTarget || !orderId) return;
+    const trimmed = reasonText.trim();
+    if (!trimmed) return;
+    const request: UpdateOrderStatusRequestDto = {
+      orderStatus: reasonTarget,
+    };
+    if (reasonTarget === OrderStatus.CANCEL_COMPLETED) {
+      request.sellerCancelReason = trimmed;
+    } else if (reasonTarget === OrderStatus.NO_SHOW) {
+      request.sellerNoShowReason = trimmed;
+    } else if (reasonTarget === OrderStatus.CANCEL_REFUND_PENDING) {
+      request.sellerCancelRefundPendingReason = trimmed;
     }
+    updateOrderStatusMutation.mutate(
+      { orderId, request },
+      {
+        onSuccess: () => {
+          setReasonTarget(null);
+          setReasonText("");
+        },
+      },
+    );
   };
 
-  const handleConfirmOrder = () => {
-    updateOrderStatusMutation.mutate({
-      orderId: order.id,
-      request: { orderStatus: OrderStatus.CONFIRMED },
-    });
+  const cancelReasonFlow = () => {
+    setReasonTarget(null);
+    setReasonText("");
   };
+
+  const startReason = (target: Exclude<ReasonTarget, null>) => {
+    setReasonTarget(target);
+    setReasonText("");
+  };
+
+  const hasNotes =
+    order.userCancelReason ||
+    order.sellerCancelReason ||
+    order.sellerNoShowReason ||
+    order.refundRequestReason ||
+    order.sellerCancelRefundPendingReason ||
+    order.refundBankName;
 
   return (
     <div className="space-y-6 pb-8">
       <h1 className="text-3xl font-bold text-gray-900">주문 상세</h1>
+
+      {/* 상태 변경 (목록에서는 불가 — 상세에서만 처리) */}
+      <Card>
+        <CardHeader className="border-b bg-gray-50/50">
+          <CardTitle className="text-xl font-semibold text-gray-900">상태 변경</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 pt-6">
+          <div className="rounded-lg border border-blue-100 bg-blue-50/60 px-4 py-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-blue-800">
+              현재 상태 안내
+            </div>
+            <div className="mt-2 flex flex-wrap items-start gap-2">
+              <StatusBadge variant={variant} className="shrink-0">
+                {getOrderStatusLabel(status)}
+              </StatusBadge>
+              <p className="min-w-0 flex-1 text-sm leading-relaxed text-gray-800">
+                {getOrderStatusSellerHint(status)}
+              </p>
+            </div>
+            {status === OrderStatus.PAYMENT_PENDING && (
+              <PaymentPendingCountdown createdAt={order.createdAt} />
+            )}
+          </div>
+
+          <details className="rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-3 text-sm">
+            <summary className="cursor-pointer font-semibold text-gray-800 select-none">
+              주문 상태 전체 흐름 (참고)
+            </summary>
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-gray-600">
+              {ORDER_STATUS_FLOW_LINES_FOR_SELLER.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </details>
+
+          {reasonTarget && (
+            <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50/80 p-4">
+              <Label>
+                {reasonTarget === OrderStatus.CANCEL_COMPLETED && "예약 취소 사유 (필수)"}
+                {reasonTarget === OrderStatus.NO_SHOW && "노쇼 사유 (필수)"}
+                {reasonTarget === OrderStatus.CANCEL_REFUND_PENDING &&
+                  "취소환불대기 전환 사유 (필수)"}
+              </Label>
+              <Textarea
+                value={reasonText}
+                onChange={(e) => setReasonText(e.target.value)}
+                placeholder="사유를 입력해 주세요."
+                rows={4}
+                className="bg-white"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={submitReason}
+                  disabled={updateOrderStatusMutation.isPending || !reasonText.trim()}
+                >
+                  {updateOrderStatusMutation.isPending ? "처리 중..." : "확인"}
+                </Button>
+                <Button type="button" variant="outline" onClick={cancelReasonFlow}>
+                  취소
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!reasonTarget && (
+            <div className="flex flex-wrap gap-2">
+              {isSellerTransitionAllowed(status, OrderStatus.CONFIRMED) && (
+                <Button
+                  onClick={() =>
+                    updateOrderStatusMutation.mutate({
+                      orderId: order.id,
+                      request: { orderStatus: OrderStatus.CONFIRMED },
+                    })
+                  }
+                  disabled={updateOrderStatusMutation.isPending}
+                >
+                  {updateOrderStatusMutation.isPending ? "처리 중..." : "예약 확정"}
+                </Button>
+              )}
+              {isSellerTransitionAllowed(status, OrderStatus.CANCEL_COMPLETED) && (
+                <Button
+                  variant="destructive"
+                  onClick={() => startReason(OrderStatus.CANCEL_COMPLETED)}
+                >
+                  예약 취소
+                </Button>
+              )}
+              {isSellerTransitionAllowed(status, OrderStatus.PICKUP_COMPLETED) && (
+                <Button
+                  onClick={() =>
+                    updateOrderStatusMutation.mutate({
+                      orderId: order.id,
+                      request: { orderStatus: OrderStatus.PICKUP_COMPLETED },
+                    })
+                  }
+                  disabled={updateOrderStatusMutation.isPending}
+                >
+                  픽업 완료
+                </Button>
+              )}
+              {isSellerTransitionAllowed(status, OrderStatus.NO_SHOW) && (
+                <Button variant="destructive" onClick={() => startReason(OrderStatus.NO_SHOW)}>
+                  노쇼 처리
+                </Button>
+              )}
+              {isSellerTransitionAllowed(status, OrderStatus.CANCEL_REFUND_PENDING) && (
+                <Button
+                  variant="outline"
+                  onClick={() => startReason(OrderStatus.CANCEL_REFUND_PENDING)}
+                >
+                  취소환불대기로 변경
+                </Button>
+              )}
+              {isSellerTransitionAllowed(status, OrderStatus.CANCEL_REFUND_COMPLETED) && (
+                <Button
+                  onClick={() =>
+                    updateOrderStatusMutation.mutate({
+                      orderId: order.id,
+                      request: { orderStatus: OrderStatus.CANCEL_REFUND_COMPLETED },
+                    })
+                  }
+                  disabled={updateOrderStatusMutation.isPending}
+                >
+                  취소환불 완료
+                </Button>
+              )}
+            </div>
+          )}
+
+          {!reasonTarget &&
+            !isSellerTransitionAllowed(status, OrderStatus.CONFIRMED) &&
+            !isSellerTransitionAllowed(status, OrderStatus.CANCEL_COMPLETED) &&
+            !isSellerTransitionAllowed(status, OrderStatus.PICKUP_COMPLETED) &&
+            !isSellerTransitionAllowed(status, OrderStatus.NO_SHOW) &&
+            !isSellerTransitionAllowed(status, OrderStatus.CANCEL_REFUND_PENDING) &&
+            !isSellerTransitionAllowed(status, OrderStatus.CANCEL_REFUND_COMPLETED) && (
+              <p className="text-sm text-gray-600">
+                현재 상태에서는 변경할 수 있는 작업이 없습니다.
+              </p>
+            )}
+        </CardContent>
+      </Card>
 
       {/* 주문 기본 정보 */}
       <Card>
@@ -94,7 +284,9 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 주문 상태
               </div>
-              <div className="mt-1">{getStatusBadge(order.orderStatus)}</div>
+              <div className="mt-1">
+                <StatusBadge variant={variant}>{getOrderStatusLabel(status)}</StatusBadge>
+              </div>
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -121,6 +313,68 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {hasNotes && (
+        <Card>
+          <CardHeader className="border-b bg-gray-50/50">
+            <CardTitle className="text-xl font-semibold text-gray-900">취소·환불·사유</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-6 text-sm">
+            {order.userCancelReason && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500">고객 입금 전 취소 사유</div>
+                <p className="mt-1 whitespace-pre-wrap text-gray-900">{order.userCancelReason}</p>
+              </div>
+            )}
+            {order.sellerCancelReason && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500">판매자 예약 취소 사유</div>
+                <p className="mt-1 whitespace-pre-wrap text-gray-900">{order.sellerCancelReason}</p>
+              </div>
+            )}
+            {order.sellerNoShowReason && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500">노쇼 사유</div>
+                <p className="mt-1 whitespace-pre-wrap text-gray-900">{order.sellerNoShowReason}</p>
+              </div>
+            )}
+            {order.refundRequestReason && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500">고객 취소·환불 요청 사유</div>
+                <p className="mt-1 whitespace-pre-wrap text-gray-900">
+                  {order.refundRequestReason}
+                </p>
+              </div>
+            )}
+            {order.sellerCancelRefundPendingReason && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500">
+                  판매자 취소환불대기 전환 사유
+                </div>
+                <p className="mt-1 whitespace-pre-wrap text-gray-900">
+                  {order.sellerCancelRefundPendingReason}
+                </p>
+              </div>
+            )}
+            {(order.refundBankName ||
+              order.refundBankAccountNumber ||
+              order.refundAccountHolderName) && (
+              <div>
+                <div className="text-xs font-semibold text-gray-500">환불 계좌 (고객 요청 시)</div>
+                <p className="mt-1 text-gray-900">
+                  {[
+                    order.refundBankName,
+                    order.refundBankAccountNumber,
+                    order.refundAccountHolderName,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 주문 항목 */}
       <Card>
@@ -267,24 +521,15 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
+            {status === OrderStatus.CONFIRMED && (
+              <p className="text-sm text-gray-600">
+                픽업 당일이 되면 상태가 자동으로 &quot;픽업대기&quot;로 바뀝니다.
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {/* 예약 확정 버튼 */}
-      {order.orderStatus === OrderStatus.PENDING && (
-        <div className="flex justify-center border-t border-gray-200 pt-6">
-          <Button
-            onClick={handleConfirmOrder}
-            disabled={updateOrderStatusMutation.isPending}
-            className="min-w-[200px] px-8 py-3 text-base font-semibold"
-          >
-            {updateOrderStatusMutation.isPending ? "확정 중..." : "예약 확정"}
-          </Button>
-        </div>
-      )}
-
-      {/* 이미지 확대 모달 */}
       {lightboxImage && (
         <ImageLightbox
           src={lightboxImage}

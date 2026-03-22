@@ -16,8 +16,13 @@ export const ORDER_ERROR_MESSAGES = {
   INVALID_ORDER_ITEMS: "주문 항목이 올바르지 않습니다.",
   INVALID_TOTAL_QUANTITY: "총 수량이 올바르지 않습니다.",
   INVALID_TOTAL_PRICE: "총 금액이 올바르지 않습니다.",
-  CANNOT_REVERT_CONFIRMED: "이미 확정된 주문은 대기 상태로 변경할 수 없습니다.",
+  INVALID_STATUS_TRANSITION: "현재 주문 상태에서 요청한 상태로 변경할 수 없습니다.",
   SAME_STATUS: "이미 해당 상태입니다.",
+  PAYMENT_PENDING_EXPIRED: "입금 가능 시간이 지나 예약이 취소되었습니다.",
+  INVALID_USER_ORDER_ACTION: "지금 이 주문에 대해 수행할 수 없는 작업입니다.",
+  SELLER_CANCEL_REASON_REQUIRED: "예약 취소(취소완료) 시 취소 사유를 입력해 주세요.",
+  SELLER_NO_SHOW_REASON_REQUIRED: "노쇼 처리 시 노쇼 사유를 입력해 주세요.",
+  SELLER_CANCEL_REFUND_PENDING_REASON_REQUIRED: "취소환불대기로 변경할 때 사유를 입력해 주세요.",
   ORDER_CREATE_FAILED: "주문 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
 } as const;
 
@@ -32,8 +37,15 @@ export const ORDER_SUCCESS_MESSAGES = {
  * 주문 상태 enum
  */
 export enum OrderStatus {
-  PENDING = "PENDING", // 대기중 (예약신청)
-  CONFIRMED = "CONFIRMED", // 확정됨 (예약확정)
+  PAYMENT_PENDING = "PAYMENT_PENDING", // 입금대기
+  PAYMENT_COMPLETED = "PAYMENT_COMPLETED", // 입금완료
+  CONFIRMED = "CONFIRMED", // 예약확정
+  PICKUP_PENDING = "PICKUP_PENDING", // 픽업대기
+  PICKUP_COMPLETED = "PICKUP_COMPLETED", // 픽업완료
+  CANCEL_COMPLETED = "CANCEL_COMPLETED", // 취소완료
+  CANCEL_REFUND_PENDING = "CANCEL_REFUND_PENDING", // 취소환불대기
+  CANCEL_REFUND_COMPLETED = "CANCEL_REFUND_COMPLETED", // 취소환불완료
+  NO_SHOW = "NO_SHOW", // 노쇼
 }
 
 /**
@@ -99,7 +111,15 @@ export const SWAGGER_EXAMPLES = {
     pickupZonecode: STORE_SWAGGER_EXAMPLES.ZONECODE,
     pickupLatitude: STORE_SWAGGER_EXAMPLES.LATITUDE,
     pickupLongitude: STORE_SWAGGER_EXAMPLES.LONGITUDE,
-    orderStatus: OrderStatus.PENDING,
+    orderStatus: OrderStatus.PAYMENT_PENDING,
+    userCancelReason: null as null,
+    sellerCancelReason: null as null,
+    sellerNoShowReason: null as null,
+    refundRequestReason: null as null,
+    refundBankName: null as null,
+    refundBankAccountNumber: null as null,
+    refundAccountHolderName: null as null,
+    sellerCancelRefundPendingReason: null as null,
     orderItems: [ORDER_ITEM_EXAMPLE],
     createdAt: new Date("2024-01-01T12:00:00.000Z"),
     updatedAt: new Date("2024-01-01T12:00:00.000Z"),

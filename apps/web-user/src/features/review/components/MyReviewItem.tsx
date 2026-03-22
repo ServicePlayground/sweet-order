@@ -40,10 +40,7 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
     <div className="pt-6 pb-12 border-b border-gray-100 last:border-b-0">
       {/* 스토어명 + 삭제 */}
       <div className="flex items-center justify-between mb-1">
-        <Link
-          href={PATHS.STORE.DETAIL(review.storeId)}
-          className="flex items-center gap-0.5"
-        >
+        <Link href={PATHS.STORE.DETAIL(review.storeId)} className="flex items-center gap-0.5">
           <span className="text-sm font-bold text-gray-900">{review.storeName}</span>
           <Icon name="arrow" width={20} height={20} className="text-gray-900 rotate-90" />
         </Link>
@@ -130,9 +127,7 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
           />
         </button>
         {isOptionExpanded && (
-          <p className="text-2sm text-gray-500 mt-3">
-            {/* TODO: 주문 옵션 데이터 연동 */}
-          </p>
+          <p className="text-2sm text-gray-500 mt-3">{/* TODO: 주문 옵션 데이터 연동 */}</p>
         )}
       </div>
 

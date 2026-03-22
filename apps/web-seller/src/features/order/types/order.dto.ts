@@ -8,8 +8,15 @@
 import type { ListResponseDto } from "@/apps/web-seller/common/types/api.dto";
 
 export enum OrderStatus {
-  PENDING = "PENDING",
+  PAYMENT_PENDING = "PAYMENT_PENDING",
+  PAYMENT_COMPLETED = "PAYMENT_COMPLETED",
   CONFIRMED = "CONFIRMED",
+  PICKUP_PENDING = "PICKUP_PENDING",
+  PICKUP_COMPLETED = "PICKUP_COMPLETED",
+  CANCEL_COMPLETED = "CANCEL_COMPLETED",
+  CANCEL_REFUND_PENDING = "CANCEL_REFUND_PENDING",
+  CANCEL_REFUND_COMPLETED = "CANCEL_REFUND_COMPLETED",
+  NO_SHOW = "NO_SHOW",
 }
 
 export enum OrderSortBy {
@@ -62,6 +69,14 @@ export interface OrderResponseDto {
   pickupLongitude: number;
   orderStatus: OrderStatus;
   pickupDate: Date;
+  userCancelReason?: string | null;
+  sellerCancelReason?: string | null;
+  sellerNoShowReason?: string | null;
+  refundRequestReason?: string | null;
+  sellerCancelRefundPendingReason?: string | null;
+  refundBankName?: string | null;
+  refundBankAccountNumber?: string | null;
+  refundAccountHolderName?: string | null;
   createdAt: Date;
   updatedAt: Date;
   orderItems: OrderItemResponseDto[];
@@ -85,6 +100,9 @@ export type OrderListResponseDto = ListResponseDto<OrderResponseDto>;
 
 export interface UpdateOrderStatusRequestDto {
   orderStatus: OrderStatus;
+  sellerCancelReason?: string;
+  sellerNoShowReason?: string;
+  sellerCancelRefundPendingReason?: string;
 }
 
 export interface UpdateOrderStatusResponseDto {

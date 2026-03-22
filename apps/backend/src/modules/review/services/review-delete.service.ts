@@ -34,9 +34,7 @@ export class ReviewDeleteService {
     }
 
     if (review.userId !== userId) {
-      LoggerUtil.log(
-        `후기 삭제 실패: 본인 후기가 아님 - userId: ${userId}, reviewId: ${reviewId}`,
-      );
+      LoggerUtil.log(`후기 삭제 실패: 본인 후기가 아님 - userId: ${userId}, reviewId: ${reviewId}`);
       throw new ForbiddenException(REVIEW_ERROR_MESSAGES.REVIEW_FORBIDDEN);
     }
 
