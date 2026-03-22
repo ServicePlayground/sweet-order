@@ -34,6 +34,7 @@ type ProductWithStore = Prisma.ProductGetPayload<{
 export type ProductWithReviewsAndStore = Prisma.ProductGetPayload<{
   include: {
     reviews: {
+      where: { deletedAt: null };
       select: {
         rating: true;
       };
@@ -88,6 +89,12 @@ export class ProductMapperUtil {
   static readonly REVIEWS_RATING_SELECT_ONLY = {
     rating: true,
   } as const satisfies Prisma.ProductReviewSelect;
+
+  /** 상품 평균 별점·개수 집계용 후기 include (소프트 삭제 제외) */
+  static readonly REVIEWS_INCLUDE_FOR_STATS = {
+    where: { deletedAt: null },
+    select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
+  } as const;
 
   /**
    * Prisma Product 엔티티를 ProductResponseDto로 변환

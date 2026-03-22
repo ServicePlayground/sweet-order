@@ -3,17 +3,24 @@ import { ReviewListService } from "@apps/backend/modules/review/services/review-
 import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
 import { ReviewUserListService } from "@apps/backend/modules/review/services/review-user-list.service";
 import { ReviewDeleteService } from "@apps/backend/modules/review/services/review-delete.service";
+import { ReviewCreateService } from "@apps/backend/modules/review/services/review-create.service";
+import { CreateMyReviewRequestDto } from "@apps/backend/modules/review/dto/review-create.dto";
+import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
 import { GetReviewsRequestDto } from "@apps/backend/modules/review/dto/review-list.dto";
 import {
   GetMyReviewsRequestDto,
   MyReviewListResponseDto,
 } from "@apps/backend/modules/review/dto/review-user-list.dto";
+import { ReviewWritableListService } from "@apps/backend/modules/review/services/review-writable-list.service";
+import {
+  GetWritableReviewOrdersRequestDto,
+  WritableReviewOrdersListResponseDto,
+} from "@apps/backend/modules/review/dto/review-writable-list.dto";
 
 /**
  * 후기 서비스
  *
- * 모든 후기 관련 기능을 통합하여 제공하는 메인 서비스입니다.
- * ReviewDataService를 조합하여 사용합니다.
+ * 목록·상세·작성·삭제·마이페이지 전용 조회 등 후기 유스케이스를 하위 서비스에 위임합니다.
  */
 @Injectable()
 export class ReviewService {
@@ -22,6 +29,8 @@ export class ReviewService {
     private readonly reviewDetailService: ReviewDetailService,
     private readonly reviewUserListService: ReviewUserListService,
     private readonly reviewDeleteService: ReviewDeleteService,
+    private readonly reviewCreateService: ReviewCreateService,
+    private readonly reviewWritableListService: ReviewWritableListService,
   ) {}
 
   /**
@@ -53,6 +62,16 @@ export class ReviewService {
   }
 
   /**
+   * 픽업 완료 주문 기준 후기 작성 (사용자용)
+   */
+  async createMyReviewForUser(
+    userId: string,
+    dto: CreateMyReviewRequestDto,
+  ): Promise<ReviewResponseDto> {
+    return this.reviewCreateService.createMyReviewFromOrder(userId, dto);
+  }
+
+  /**
    * 내가 작성한 후기 목록 조회 (사용자용)
    */
   async getMyReviewsForUser(
@@ -60,6 +79,23 @@ export class ReviewService {
     query: GetMyReviewsRequestDto,
   ): Promise<MyReviewListResponseDto> {
     return this.reviewUserListService.getMyReviewsForUser(userId, query);
+  }
+
+  /**
+   * 내가 작성한 후기 단건 조회 (사용자용·마이페이지)
+   */
+  async getMyReviewDetailForUser(userId: string, reviewId: string): Promise<ReviewResponseDto> {
+    return this.reviewDetailService.getMyReviewDetailForUser(userId, reviewId);
+  }
+
+  /**
+   * 작성 가능한 후기 대상 주문 목록 (사용자용·마이페이지)
+   */
+  async getWritableReviewOrdersForUser(
+    userId: string,
+    query: GetWritableReviewOrdersRequestDto,
+  ): Promise<WritableReviewOrdersListResponseDto> {
+    return this.reviewWritableListService.getWritableOrdersForUser(userId, query);
   }
 
   /**

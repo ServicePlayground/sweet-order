@@ -100,6 +100,7 @@ export class StoreMapperUtil {
         productId: {
           in: allProductIds,
         },
+        deletedAt: null,
       },
       select: StoreMapperUtil.REVIEW_RATING_WITH_PRODUCT_ID_SELECT,
     });

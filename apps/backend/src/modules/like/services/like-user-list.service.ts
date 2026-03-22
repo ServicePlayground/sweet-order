@@ -184,11 +184,7 @@ export class LikeUserListService {
                 longitude: true,
               },
             },
-            reviews: {
-              select: {
-                rating: true,
-              },
-            },
+            reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           },
         },
       },

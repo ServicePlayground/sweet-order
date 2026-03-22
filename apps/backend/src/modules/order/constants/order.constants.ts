@@ -49,6 +49,20 @@ export enum OrderStatus {
 }
 
 /**
+ * 사용자 주문 화면에서 후기 관련 UI 분기용
+ */
+export enum OrderMyReviewUiStatus {
+  /** 픽업 완료 전·취소 등 후기 작성/조회 UI 대상 아님 */
+  NOT_AVAILABLE = "NOT_AVAILABLE",
+  /** 픽업 완료·미작성·삭제로 재작성 불가 아님 → 후기 작성 가능 */
+  WRITABLE = "WRITABLE",
+  /** 주문에 연결된 후기 존재 → 작성 후기 보기 이동용 */
+  WRITTEN = "WRITTEN",
+  /** 연결 후기 삭제로 동일 주문 재작성 불가 */
+  WITHDRAWN = "WITHDRAWN",
+}
+
+/**
  * 주문 정렬 타입 enum
  */
 export enum OrderSortBy {
@@ -123,6 +137,8 @@ export const SWAGGER_EXAMPLES = {
     orderItems: [ORDER_ITEM_EXAMPLE],
     createdAt: new Date("2024-01-01T12:00:00.000Z"),
     updatedAt: new Date("2024-01-01T12:00:00.000Z"),
+    myReviewUiStatus: OrderMyReviewUiStatus.NOT_AVAILABLE,
+    linkedProductReviewId: null as null,
   },
   ORDER_ITEM: ORDER_ITEM_EXAMPLE,
 } as const;

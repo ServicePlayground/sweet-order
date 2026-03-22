@@ -4,6 +4,8 @@ import { ReviewListService } from "@apps/backend/modules/review/services/review-
 import { ReviewDetailService } from "@apps/backend/modules/review/services/review-detail.service";
 import { ReviewUserListService } from "@apps/backend/modules/review/services/review-user-list.service";
 import { ReviewDeleteService } from "@apps/backend/modules/review/services/review-delete.service";
+import { ReviewCreateService } from "@apps/backend/modules/review/services/review-create.service";
+import { ReviewWritableListService } from "@apps/backend/modules/review/services/review-writable-list.service";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
 
 /**
@@ -17,6 +19,8 @@ import { DatabaseModule } from "@apps/backend/infra/database/database.module";
     ReviewDetailService,
     ReviewUserListService,
     ReviewDeleteService,
+    ReviewCreateService,
+    ReviewWritableListService,
   ],
   exports: [ReviewService],
 })

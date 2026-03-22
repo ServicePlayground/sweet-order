@@ -59,7 +59,7 @@ export class RecentViewService {
       include: {
         product: {
           include: {
-            reviews: { select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY },
+            reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
             store: { select: ProductMapperUtil.STORE_INFO_SELECT },
           },
         },

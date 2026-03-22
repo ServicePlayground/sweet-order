@@ -1,11 +1,9 @@
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
-import {
-  ReviewResponseDto,
-  MyReviewResponseDto,
-} from "@apps/backend/modules/review/dto/review-detail.dto";
+import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
+import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
 
 /**
- * User 및 Product(Store) 정보가 포함된 ProductReview 타입
+ * User · Product(Store) · Order(항목 포함) 정보가 포함된 ProductReview 타입
  */
 type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
   include: {
@@ -17,6 +15,17 @@ type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
     };
     product: {
       include: { store: { select: { name: true } } };
+    };
+    order: {
+      include: {
+        orderItems: true;
+        review: {
+          select: {
+            id: true;
+            deletedAt: true;
+          };
+        };
+      };
     };
   };
 }>;
@@ -46,6 +55,20 @@ export class ReviewMapperUtil {
   } as const;
 
   /**
+   * 후기 응답에 주문 내역을 붙이기 위한 include (주문과 연결된 행만 order가 채워짐)
+   */
+  static readonly REVIEW_ORDER_INCLUDE = {
+    order: {
+      include: {
+        orderItems: true,
+        review: {
+          select: { id: true, deletedAt: true },
+        },
+      },
+    },
+  } as const;
+
+  /**
    * Prisma ProductReview 엔티티를 ReviewResponseDto로 변환
    * @param review - Prisma ProductReview 엔티티 (user, product.store 포함)
    * @returns ReviewResponseDto 객체
@@ -57,6 +80,8 @@ export class ReviewMapperUtil {
       storeId: review.product.storeId,
       storeName: review.product.store.name,
       userId: review.userId,
+      orderId: review.orderId ?? null,
+      order: review.order ? OrderMapperUtil.mapToOrderResponse(review.order) : null,
       rating: review.rating,
       content: review.content,
       imageUrls: review.imageUrls,
@@ -64,18 +89,6 @@ export class ReviewMapperUtil {
       userProfileImageUrl: review.user.profileImageUrl,
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
-    };
-  }
-
-  /**
-   * Prisma ProductReview 엔티티를 MyReviewResponseDto로 변환 (상품 정보 포함)
-   */
-  static mapToMyReviewResponse(review: ProductReviewWithUserAndProductStore): MyReviewResponseDto {
-    return {
-      ...ReviewMapperUtil.mapToReviewResponse(review),
-      productName: review.product.name,
-      productPrice: review.product.salePrice,
-      productImageUrl: review.product.images[0] ?? null,
     };
   }
 }

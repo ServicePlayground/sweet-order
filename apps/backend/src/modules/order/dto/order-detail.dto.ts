@@ -1,5 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
+import {
+  OrderMyReviewUiStatus,
+  OrderStatus,
+} from "@apps/backend/modules/order/constants/order.constants";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
 import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
 import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
@@ -262,4 +265,20 @@ export class OrderResponseDto extends PickupAddressDto {
     type: [OrderItemResponseDto],
   })
   orderItems: OrderItemResponseDto[];
+
+  @ApiProperty({
+    description:
+      "사용자 앱 후기 UI 분기: 작성 가능 / 작성 완료(후기 보기) / 삭제로 재작성 불가 / 해당 없음(픽업 전·취소 등)",
+    enum: OrderMyReviewUiStatus,
+    example: OrderMyReviewUiStatus.NOT_AVAILABLE,
+  })
+  myReviewUiStatus: OrderMyReviewUiStatus;
+
+  @ApiProperty({
+    description:
+      "`myReviewUiStatus`가 WRITTEN일 때만 값 있음. 상품 후기 상세·내 후기 목록 등으로 이동할 때 사용",
+    example: "clx_review_example_id",
+    nullable: true,
+  })
+  linkedProductReviewId: string | null;
 }

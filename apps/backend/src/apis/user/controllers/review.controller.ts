@@ -11,6 +11,10 @@ import {
   ReviewListResponseDto,
 } from "@apps/backend/modules/review/dto/review-list.dto";
 import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
+import {
+  OrderItemResponseDto,
+  OrderResponseDto,
+} from "@apps/backend/modules/order/dto/order-detail.dto";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 
@@ -18,7 +22,7 @@ import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/stor
  * 후기 관련 컨트롤러
  */
 @ApiTags("후기")
-@ApiExtraModels(ReviewListResponseDto, ReviewResponseDto)
+@ApiExtraModels(ReviewListResponseDto, ReviewResponseDto, OrderResponseDto, OrderItemResponseDto)
 @Controller(`${USER_ROLES.USER}/review`)
 @Auth({ isPublic: true })
 export class UserReviewController {

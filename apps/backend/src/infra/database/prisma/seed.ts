@@ -589,7 +589,7 @@ async function seedProductReviews(
   for (const product of products) {
     // 해당 상품의 리뷰 개수 확인
     const productReviewCount = await prisma.productReview.count({
-      where: { productId: product.id },
+      where: { productId: product.id, deletedAt: null },
     });
 
     // 리뷰가 1개 이상이면 건너뛰기

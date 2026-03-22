@@ -139,7 +139,7 @@ export class ProductListService {
     const rows = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
       SELECT p.id
       FROM products p
-      LEFT JOIN product_reviews pr ON pr.product_id = p.id
+      LEFT JOIN product_reviews pr ON pr.product_id = p.id AND pr.deleted_at IS NULL
       WHERE ${filterSql}
       GROUP BY p.id, p.created_at
       ORDER BY ${orderBySql}
@@ -264,9 +264,7 @@ export class ProductListService {
           id: { in: productIds },
         },
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },
@@ -313,9 +311,7 @@ export class ProductListService {
         skip,
         take: limit,
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },
@@ -434,9 +430,7 @@ export class ProductListService {
           id: { in: productIds },
         },
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },
@@ -478,9 +472,7 @@ export class ProductListService {
         skip,
         take: limit,
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },

@@ -3,14 +3,18 @@ import {
   OrderItemResponseDto,
   OrderResponseDto,
 } from "@apps/backend/modules/order/dto/order-detail.dto";
-import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
+import {
+  OrderMyReviewUiStatus,
+  OrderStatus,
+} from "@apps/backend/modules/order/constants/order.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
- * Prisma Order 엔티티 타입 (orderItems 포함)
+ * Prisma Order 엔티티 타입 (orderItems·연결 후기 id 포함)
  */
 type OrderWithItems = Order & {
   orderItems: OrderItem[];
+  review: { id: string; deletedAt: Date | null } | null;
 };
 
 /**
@@ -25,12 +29,49 @@ export class OrderMapperUtil {
    */
   static readonly ORDER_ITEMS_INCLUDE = {
     orderItems: true,
+    review: {
+      select: { id: true, deletedAt: true },
+    },
   } as const satisfies Prisma.OrderInclude;
+
+  /**
+   * 주문 상태·연결 후기(소프트 삭제 포함)로 사용자 후기 UI 상태 계산
+   */
+  static reviewUiFromOrder(
+    order: Pick<Order, "orderStatus"> & {
+      review: { id: string; deletedAt: Date | null } | null;
+    },
+  ): Pick<OrderResponseDto, "myReviewUiStatus" | "linkedProductReviewId"> {
+    if (order.orderStatus !== OrderStatus.PICKUP_COMPLETED) {
+      return {
+        myReviewUiStatus: OrderMyReviewUiStatus.NOT_AVAILABLE,
+        linkedProductReviewId: null,
+      };
+    }
+    if (order.review) {
+      if (order.review.deletedAt != null) {
+        return {
+          myReviewUiStatus: OrderMyReviewUiStatus.WITHDRAWN,
+          linkedProductReviewId: null,
+        };
+      }
+      return {
+        myReviewUiStatus: OrderMyReviewUiStatus.WRITTEN,
+        linkedProductReviewId: order.review.id,
+      };
+    }
+    return {
+      myReviewUiStatus: OrderMyReviewUiStatus.WRITABLE,
+      linkedProductReviewId: null,
+    };
+  }
+
   /**
    * Prisma OrderItem 엔티티를 OrderItemResponseDto로 변환
    * @param orderItem - Prisma OrderItem 엔티티
    * @returns OrderItemResponseDto 객체
    */
+
   static mapToOrderItemResponse(orderItem: OrderItem): OrderItemResponseDto {
     return {
       id: orderItem.id,
@@ -92,6 +133,7 @@ export class OrderMapperUtil {
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       orderItems: order.orderItems.map((item) => this.mapToOrderItemResponse(item)),
+      ...this.reviewUiFromOrder(order),
     } satisfies OrderResponseDto;
   }
 }

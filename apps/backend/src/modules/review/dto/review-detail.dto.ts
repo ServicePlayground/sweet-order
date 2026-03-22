@@ -1,5 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
+import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
 
 /**
  * 후기 응답 DTO
@@ -34,6 +35,14 @@ export class ReviewResponseDto {
     example: "user_123456789",
   })
   userId: string;
+
+  @ApiProperty({
+    description:
+      "연결된 주문 ID (DB `product_reviews.order_id`). 마이페이지에서 주문 기준으로 작성한 후기만 값이 있고, 시드·기존 후기 등은 null",
+    example: "QXZw02vBqVXNQ29c4w9n9ZdG",
+    nullable: true,
+  })
+  orderId: string | null;
 
   @ApiProperty({
     description: "별점 (0.0 ~ 5.0)",
@@ -80,28 +89,12 @@ export class ReviewResponseDto {
     example: new Date("2024-01-20T14:25:00.000Z"),
   })
   updatedAt: Date;
-}
 
-/**
- * 내가 작성한 후기 응답 DTO (상품 정보 포함)
- */
-export class MyReviewResponseDto extends ReviewResponseDto {
-  @ApiProperty({
-    description: "상품명",
-    example: "해피퍼피 생일케이크",
-  })
-  productName: string;
-
-  @ApiProperty({
-    description: "상품 판매가격",
-    example: 35000,
-  })
-  productPrice: number;
-
-  @ApiProperty({
-    description: "상품 대표 이미지 URL",
-    example: "https://example.com/product-image.jpg",
+  @ApiPropertyOptional({
+    description:
+      "연결된 주문 내역 전체(주문 항목·픽업 정보·상태 등). 주문과 연결된 후기만 값이 있고, 시드·기존 후기는 null",
+    type: () => OrderResponseDto,
     nullable: true,
   })
-  productImageUrl: string | null;
+  order: OrderResponseDto | null;
 }

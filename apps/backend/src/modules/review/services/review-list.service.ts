@@ -8,6 +8,7 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { PRODUCT_REVIEW_ACTIVE_FILTER } from "@apps/backend/modules/review/constants/review-query.constant";
 
 /**
  * 후기 목록 조회 서비스
@@ -36,6 +37,7 @@ export class ReviewListService {
 
     const where: Prisma.ProductReviewWhereInput = {
       productId,
+      ...PRODUCT_REVIEW_ACTIVE_FILTER,
     };
 
     const orderBy = this.getOrderBy(sortBy);
@@ -54,6 +56,7 @@ export class ReviewListService {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
+        ...ReviewMapperUtil.REVIEW_ORDER_INCLUDE,
       },
     });
 
@@ -86,6 +89,7 @@ export class ReviewListService {
       product: {
         storeId,
       },
+      ...PRODUCT_REVIEW_ACTIVE_FILTER,
     };
 
     const orderBy = this.getOrderBy(sortBy);
@@ -104,6 +108,7 @@ export class ReviewListService {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
+        ...ReviewMapperUtil.REVIEW_ORDER_INCLUDE,
       },
     });
 
