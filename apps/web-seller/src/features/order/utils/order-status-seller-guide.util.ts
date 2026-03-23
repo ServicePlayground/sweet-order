@@ -15,7 +15,7 @@ export const ORDER_STATUS_SELLER_FLOW_LINE_BY_STATUS: Record<OrderStatus, string
   [OrderStatus.PICKUP_PENDING]:
     "픽업대기: 예약확정 상태였고, 픽업일이 한국 시간 달력상 당일이 되어 시스템이 자동 전환한 단계입니다. 고객 픽업이 끝나면 픽업 완료, 미수령이면 노쇼, 환불 절차가 필요하면 취소환불대기로 처리할 수 있어요.",
   [OrderStatus.PICKUP_COMPLETED]:
-    "픽업완료: 픽업대기 상태일 때 판매자가 ‘픽업 완료’로 처리한 종료 상태입니다. 픽업 완료처리를 해야 사용자 리뷰 작성이 가능해요.",
+    "픽업완료: 예약확정 또는 픽업대기 상태일 때 판매자가 ‘픽업 완료’로 처리한 종료 상태입니다. 픽업 완료처리를 해야 사용자 리뷰 작성이 가능해요.",
   [OrderStatus.NO_SHOW]:
     "노쇼: 픽업대기 상태일 때 고객이 픽업하지 않은 경우, 판매자가 ‘노쇼’로 처리한 종료 상태입니다.",
   [OrderStatus.CANCEL_COMPLETED]:

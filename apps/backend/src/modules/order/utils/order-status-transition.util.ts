@@ -20,6 +20,7 @@ export const SELLER_CONFIRMED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = 
 
 /** 픽업완료(PICKUP_COMPLETED)로 바꿀 때만 허용되는 현재 상태 */
 export const SELLER_PICKUP_COMPLETED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.CONFIRMED,
   OrderStatus.PICKUP_PENDING,
 ]);
 

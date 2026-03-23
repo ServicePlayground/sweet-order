@@ -14,7 +14,10 @@ const CONFIRMED_FROM = new Set<OrderStatus>([
   OrderStatus.PAYMENT_COMPLETED,
 ]);
 
-const PICKUP_COMPLETED_FROM = new Set<OrderStatus>([OrderStatus.PICKUP_PENDING]);
+const PICKUP_COMPLETED_FROM = new Set<OrderStatus>([
+  OrderStatus.CONFIRMED,
+  OrderStatus.PICKUP_PENDING,
+]);
 const NO_SHOW_FROM = new Set<OrderStatus>([OrderStatus.PICKUP_PENDING]);
 const CANCEL_COMPLETED_FROM = new Set<OrderStatus>([OrderStatus.PAYMENT_PENDING]);
 const CANCEL_REFUND_PENDING_FROM = new Set<OrderStatus>([
