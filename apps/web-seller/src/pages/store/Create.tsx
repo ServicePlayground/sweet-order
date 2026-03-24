@@ -96,6 +96,8 @@ export const StoreCreatePage: React.FC = () => {
       name: data.name,
       description: data.description,
       logoImageUrl: data.logoImageUrl,
+      kakaoChannelId: data.kakaoChannelId?.trim(),
+      instagramId: data.instagramId?.trim(),
       bankAccountNumber: data.bankAccountNumber.trim(),
       bankName: data.bankName as StoreBankName,
       accountHolderName: data.accountHolderName.trim(),

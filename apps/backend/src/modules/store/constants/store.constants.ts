@@ -45,6 +45,8 @@ export const SWAGGER_EXAMPLES = {
   BANK_ACCOUNT_NUMBER: "110-302-1234567",
   BANK_NAME: StoreBankName.KB_KOOKMIN,
   ACCOUNT_HOLDER_NAME: "홍길동",
+  KAKAO_CHANNEL_ID: "sweetorder_channel",
+  INSTAGRAM_ID: "sweetorder_official",
 };
 
 /**

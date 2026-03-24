@@ -42,6 +42,18 @@ export class StoreResponseDto extends StoreAddressDto {
   })
   description?: string | null;
 
+  @ApiPropertyOptional({
+    description: "카카오채널 ID",
+    example: SWAGGER_EXAMPLES.KAKAO_CHANNEL_ID,
+  })
+  kakaoChannelId?: string | null;
+
+  @ApiPropertyOptional({
+    description: "인스타그램 ID",
+    example: SWAGGER_EXAMPLES.INSTAGRAM_ID,
+  })
+  instagramId?: string | null;
+
   @ApiProperty({
     description: "사업자등록번호",
     example: BUSINESS_SWAGGER_EXAMPLES.B_NO,

@@ -13,6 +13,9 @@ export interface StoreForm extends StoreAddressDto {
   bankAccountNumber: string;
   bankName: StoreBankName | "";
   accountHolderName: string;
+  /** 채널 정보 */
+  kakaoChannelId?: string;
+  instagramId?: string;
 }
 
 /** 쿼리 키/옵션용 (page 제외, 클라이언트 전용) */

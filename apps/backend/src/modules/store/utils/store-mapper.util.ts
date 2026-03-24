@@ -154,6 +154,7 @@ export class StoreMapperUtil {
         logoImageUrl: store.logoImageUrl ?? undefined,
         name: store.name,
         description: store.description ?? undefined,
+
         // 픽업장소
         address: store.address ?? "",
         roadAddress: store.roadAddress ?? "",
@@ -165,6 +166,9 @@ export class StoreMapperUtil {
         bankAccountNumber: store.bankAccountNumber ?? undefined,
         bankName: store.bankName ?? undefined,
         accountHolderName: store.accountHolderName ?? undefined,
+        // 채널 정보
+        kakaoChannelId: store.kakaoChannelId ?? undefined,
+        instagramId: store.instagramId ?? undefined,
         // 기타
         likeCount: store.likeCount,
         averageRating,

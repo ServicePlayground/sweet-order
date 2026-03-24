@@ -201,6 +201,10 @@ model Store {
   bankName          StoreBankName? @map("bank_name") // 은행 코드
   accountHolderName String?         @map("account_holder_name") // 예금주명
 
+  // 비즈니스 필드 - 채널 정보
+  kakaoChannelId String? @map("kakao_channel_id") // 카카오채널 ID
+  instagramId    String? @map("instagram_id") // 인스타그램 ID
+
   // 시스템 필드
   likeCount Int      @default(0) @map("like_count") // 좋아요 개수
   createdAt DateTime @default(now()) @map("created_at")

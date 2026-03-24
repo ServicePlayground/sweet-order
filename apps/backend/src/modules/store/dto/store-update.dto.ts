@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 import {
   IsValidStoreName,
   IsValidStoreDescription,
@@ -40,6 +40,22 @@ export class UpdateStoreRequestDto extends StoreAddressDto {
   })
   @IsValidStoreDescription()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: "카카오채널 ID",
+    example: SWAGGER_EXAMPLES.KAKAO_CHANNEL_ID,
+  })
+  @IsOptional()
+  @IsString()
+  kakaoChannelId?: string;
+
+  @ApiPropertyOptional({
+    description: "인스타그램 ID",
+    example: SWAGGER_EXAMPLES.INSTAGRAM_ID,
+  })
+  @IsOptional()
+  @IsString()
+  instagramId?: string;
 
   @ApiProperty({
     description: "정산 계좌번호 (숫자, 하이픈, 공백)",

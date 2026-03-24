@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { ValidateNested, IsEnum } from "class-validator";
+import { ValidateNested, IsEnum, IsOptional, IsString } from "class-validator";
 import {
   BusinessValidationRequestDto,
   OnlineTradingCompanyDetailRequestDto,
@@ -65,6 +65,24 @@ export class CreateStoreRequestDto extends StoreAddressDto {
   })
   @IsValidStoreDescription()
   description?: string;
+
+  @ApiProperty({
+    description: "카카오채널 ID",
+    example: SWAGGER_EXAMPLES.KAKAO_CHANNEL_ID,
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  kakaoChannelId?: string;
+
+  @ApiProperty({
+    description: "인스타그램 ID",
+    example: SWAGGER_EXAMPLES.INSTAGRAM_ID,
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  instagramId?: string;
 
   @ApiProperty({
     description: "정산 계좌번호 (숫자, 하이픈, 공백)",

@@ -29,6 +29,8 @@ export const defaultForm: StoreForm = {
   name: "",
   description: "",
   logoImageUrl: "",
+  kakaoChannelId: "",
+  instagramId: "",
   bankAccountNumber: "",
   bankName: "",
   accountHolderName: "",
@@ -158,6 +160,43 @@ export const StoreCreationForm: React.FC<Props> = ({
                 {errors.description && (
                   <p className="text-sm text-destructive mt-1">{errors.description}</p>
                 )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-2">채널 정보</h2>
+            <div className="border-t mb-6" />
+
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <Label>카카오채널 ID</Label>
+                <Input
+                  placeholder="sweetorder_channel"
+                  value={form.kakaoChannelId || ""}
+                  onChange={handleChange("kakaoChannelId")}
+                />
+                <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                  <p className="text-xs font-medium text-amber-900">입력 안내</p>
+                  <p className="mt-1 text-xs text-amber-800">
+                    카카오비즈니스 파트너센터 &gt; 전체메뉴 &gt; 링크 공유 &gt; 채널 URL에 나오는
+                    마지막 ID만 입력해주세요.
+                  </p>
+                  <p className="mt-1 text-xs text-amber-800">
+                    예: <span className="font-mono">http://pf.kakao.com/_xeaCon</span> 인 경우{" "}
+                    <span className="font-mono">_xeaCon</span>
+                  </p>
+                </div>
+              </div>
+              <div>
+                <Label>인스타그램 ID</Label>
+                <Input
+                  placeholder="sweetorder_official"
+                  value={form.instagramId || ""}
+                  onChange={handleChange("instagramId")}
+                />
               </div>
             </div>
           </CardContent>

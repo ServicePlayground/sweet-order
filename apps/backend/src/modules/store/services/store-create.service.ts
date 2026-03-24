@@ -84,6 +84,9 @@ export class StoreCreateService {
               bankAccountNumber: createStoreDto.bankAccountNumber.trim(),
               bankName: createStoreDto.bankName,
               accountHolderName: createStoreDto.accountHolderName.trim(),
+              // 채널 정보
+              kakaoChannelId: createStoreDto.kakaoChannelId?.trim(),
+              instagramId: createStoreDto.instagramId?.trim(),
             },
           });
 

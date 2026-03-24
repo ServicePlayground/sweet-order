@@ -63,6 +63,8 @@ export interface StoreResponseDto extends StoreAddressDto {
   logoImageUrl?: string | null;
   name: string;
   description?: string | null;
+  kakaoChannelId?: string | null;
+  instagramId?: string | null;
   businessNo: string;
   representativeName: string;
   openingDate: string;
@@ -95,6 +97,8 @@ export interface CreateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
   logoImageUrl?: string;
+  kakaoChannelId?: string;
+  instagramId?: string;
   bankAccountNumber: string;
   bankName: StoreBankName;
   accountHolderName: string;
@@ -108,6 +112,8 @@ export interface UpdateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
   logoImageUrl?: string;
+  kakaoChannelId?: string;
+  instagramId?: string;
   bankAccountNumber: string;
   bankName: StoreBankName;
   accountHolderName: string;
