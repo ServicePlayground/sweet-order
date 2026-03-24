@@ -523,7 +523,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             </div>
             {status === OrderStatus.CONFIRMED && (
               <p className="text-sm text-gray-600">
-                픽업 당일이 되면 상태가 자동으로 &quot;픽업대기&quot;로 바뀝니다.
+                픽업 예정 시각이 되면 상태가 자동으로 &quot;픽업대기&quot;로 바뀝니다.
               </p>
             )}
           </CardContent>

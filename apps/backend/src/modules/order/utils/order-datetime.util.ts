@@ -1,5 +1,5 @@
 /**
- * 주문 자동 전환용 날짜·시간 유틸 (픽업 당일: Asia/Seoul 달력 기준)
+ * 주문 자동 전환용 날짜·시간 유틸
  */
 export const PAYMENT_PENDING_VALIDITY_MS = 12 * 60 * 60 * 1000;
 
@@ -11,10 +11,8 @@ export function isPaymentPendingWindowExpired(createdAt: Date, now: Date): boole
 }
 
 /**
- * 동일 달력 일자 여부 확인
+ * 픽업대기 자동 전환 시점 도달 여부 확인
  */
-export function isSameCalendarDayKst(a: Date, b: Date): boolean {
-  const da = a.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
-  const db = b.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
-  return da === db;
+export function isPickupPendingDue(pickupDate: Date, now: Date): boolean {
+  return now.getTime() >= pickupDate.getTime();
 }

@@ -2,8 +2,8 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
 import {
+  isPickupPendingDue,
   isPaymentPendingWindowExpired,
-  isSameCalendarDayKst,
   PAYMENT_PENDING_VALIDITY_MS,
 } from "@apps/backend/modules/order/utils/order-datetime.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
@@ -11,7 +11,7 @@ import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/
 import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
 
 /**
- * 입금대기 만료, 픽업 당일 자동 전환 등 주문 상태 자동화
+ * 입금대기 만료, 픽업 시각 도달 자동 전환 등 주문 상태 자동화
  */
 @Injectable()
 export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
@@ -35,9 +35,9 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * 단일 주문에 대해 만료·픽업당일 규칙을 즉시 적용 (최신 상태 보장)
+   * 단일 주문에 대해 만료·픽업 전환 규칙을 즉시 적용 (최신 상태 보장)
    * 만료 규칙: 입금대기 상태에서 12시간이 지난 주문을 취소완료로 전환합니다.
-   * 픽업당일 규칙: 예약확정 상태에서 픽업 당일인 주문을 픽업대기로 전환합니다.
+   * 픽업 규칙: 예약확정 상태에서 픽업 시각이 도달했거나 지난 주문을 픽업대기로 전환합니다.
    */
   async syncOrderLifecycleById(orderId: string): Promise<void> {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
@@ -70,7 +70,7 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (order.orderStatus === OrderStatus.CONFIRMED && order.pickupDate) {
-      if (isSameCalendarDayKst(order.pickupDate, now)) {
+      if (isPickupPendingDue(order.pickupDate, now)) {
         const { count } = await this.prisma.order.updateMany({
           where: {
             id: orderId,
@@ -127,17 +127,17 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      // sync의 `CONFIRMED && pickupDate && isSameCalendarDayKst`와 동일
+      // sync의 `CONFIRMED && pickupDate && isPickupPendingDue`와 동일
       const confirmedWithPickup = await this.prisma.order.findMany({
         where: {
           orderStatus: OrderStatus.CONFIRMED,
-          pickupDate: { not: null },
+          pickupDate: { lte: now },
         },
         select: { id: true, pickupDate: true },
       });
 
       for (const row of confirmedWithPickup) {
-        if (!row.pickupDate || !isSameCalendarDayKst(row.pickupDate, now)) {
+        if (!row.pickupDate || !isPickupPendingDue(row.pickupDate, now)) {
           continue;
         }
         // `syncOrderLifecycleById`와 경합해도 훅은 실제 전환이 1건만 일어났을 때만 발화

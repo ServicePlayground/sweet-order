@@ -1,6 +1,6 @@
 /**
  * 판매자용 주문 상태 안내 문구.
- * 입금 12시간·픽업 당일 자동 전환 등은 백엔드 `order-automation`·`order-datetime.util` 규칙과 맞춥니다.
+ * 입금 12시간·픽업 시각 도달 자동 전환 등은 백엔드 `order-automation`·`order-datetime.util` 규칙과 맞춥니다.
  */
 import { OrderStatus } from "@/apps/web-seller/features/order/types/order.dto";
 
@@ -11,9 +11,9 @@ export const ORDER_STATUS_SELLER_FLOW_LINE_BY_STATUS: Record<OrderStatus, string
   [OrderStatus.PAYMENT_COMPLETED]:
     "입금완료: 입금대기 상태일 때 고객이 ‘입금 완료’ 처리를 한 단계입니다. 판매자는 여기서 예약 확정으로 넘기면 됩니다. 취소시에는 취소환불대기로 넘어갈 수 있어요.",
   [OrderStatus.CONFIRMED]:
-    "예약확정: 입금대기 또는 입금완료 상태일 때 판매자가 ‘예약 확정’으로 바꾼 단계입니다. 제작·픽업 준비를 하시면 되고, 픽업일은 한국 시간(Asia/Seoul) 달력 기준 당일이 되면 시스템이 자동으로 픽업대기로 바꿉니다.",
+    "예약확정: 입금대기 또는 입금완료 상태일 때 판매자가 ‘예약 확정’으로 바꾼 단계입니다. 제작·픽업 준비를 하시면 되고, 픽업 예정 시각이 도달했거나 지나면 시스템이 자동으로 픽업대기로 바꿉니다.",
   [OrderStatus.PICKUP_PENDING]:
-    "픽업대기: 예약확정 상태였고, 픽업일이 한국 시간 달력상 당일이 되어 시스템이 자동 전환한 단계입니다. 고객 픽업이 끝나면 픽업 완료, 미수령이면 노쇼, 환불 절차가 필요하면 취소환불대기로 처리할 수 있어요.",
+    "픽업대기: 예약확정 상태였고, 픽업 예정 시각이 도달했거나 지나 시스템이 자동 전환한 단계입니다. 고객 픽업이 끝나면 픽업 완료, 미수령이면 노쇼, 환불 절차가 필요하면 취소환불대기로 처리할 수 있어요.",
   [OrderStatus.PICKUP_COMPLETED]:
     "픽업완료: 예약확정 또는 픽업대기 상태일 때 판매자가 ‘픽업 완료’로 처리한 종료 상태입니다. 픽업 완료처리를 해야 사용자 리뷰 작성이 가능해요.",
   [OrderStatus.NO_SHOW]:
