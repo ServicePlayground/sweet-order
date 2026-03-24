@@ -10,6 +10,7 @@ export enum SortBy {
   POPULAR = "popular", // 인기순(좋아요 수 내림차순)
   REVIEW_COUNT = "review_count", // 후기 많은 순(후기 수 내림차순)
   RATING_AVG = "rating_avg", // 별점 높은 순(평균 별점 내림차순)
+  DISTANCE = "distance", // 거리순(스토어 픽업 좌표 기준, latitude·longitude 필요)
 }
 
 export enum SalesStatus {

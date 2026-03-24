@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, Store } from "@apps/backend/infra/database/prisma/generated/client";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   STORE_ERROR_MESSAGES,
@@ -26,6 +26,7 @@ import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.u
 import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like-store-detail.service";
 import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 
 /**
  * 스토어 목록 조회 서비스
@@ -53,6 +54,8 @@ export class StoreListService {
       minPrice,
       maxPrice,
       productCategoryTypes,
+      latitude,
+      longitude,
     } = query;
     const where = await this.buildStoreWhereForUser({
       search,
@@ -62,17 +65,46 @@ export class StoreListService {
       maxPrice,
       productCategoryTypes,
     });
-    const orderBy = this.buildStoreOrderBy(sortBy ?? StoreSortBy.LATEST);
+    const sort = sortBy ?? StoreSortBy.LATEST;
+
+    if (sort === StoreSortBy.DISTANCE) {
+      if (latitude === undefined || longitude === undefined) {
+        throw new BadRequestException(PRODUCT_ERROR_MESSAGES.DISTANCE_SORT_REQUIRES_COORDINATES);
+      }
+    }
 
     const totalItems = await this.prisma.store.count({ where });
-    const skip = (page - 1) * limit;
 
-    const stores = await this.prisma.store.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-    });
+    let stores: Store[];
+
+    if (sort === StoreSortBy.RATING_AVG || sort === StoreSortBy.DISTANCE) {
+      const allMatching = await this.prisma.store.findMany({ where, select: { id: true } });
+      const idList = allMatching.map((s) => s.id);
+      if (idList.length === 0) {
+        stores = [];
+      } else if (sort === StoreSortBy.RATING_AVG) {
+        const orderedIds = await this.getStoreIdsOrderedByRating(idList, page, limit);
+        stores = await this.fetchStoresOrderedByIds(orderedIds);
+      } else {
+        const orderedIds = await this.getStoreIdsOrderedByDistance(
+          idList,
+          page,
+          limit,
+          latitude!,
+          longitude!,
+        );
+        stores = await this.fetchStoresOrderedByIds(orderedIds);
+      }
+    } else {
+      const orderBy = this.buildStoreOrderBy(sort);
+      const skip = (page - 1) * limit;
+      stores = await this.prisma.store.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      });
+    }
 
     const storeResponses = (await StoreMapperUtil.mapToStoreResponse(
       stores,
@@ -135,7 +167,18 @@ export class StoreListService {
    * 검색(스토어명), 정렬, 페이지네이션, 상품 필터(sizes, minPrice, maxPrice, productCategoryTypes)를 지원합니다.
    */
   async getStoresByUserIdForSeller(userId: string, query: GetSellerStoresRequestDto) {
-    const { search, page, limit, sortBy, sizes, minPrice, maxPrice, productCategoryTypes } = query;
+    const {
+      search,
+      page,
+      limit,
+      sortBy,
+      sizes,
+      minPrice,
+      maxPrice,
+      productCategoryTypes,
+      latitude,
+      longitude,
+    } = query;
     const baseWhere = this.buildStoreWhereForSeller(userId, search);
     const productFilterWhere = await this.buildStoreWhereProductFilter({
       sizes,
@@ -147,17 +190,46 @@ export class StoreListService {
       Object.keys(productFilterWhere).length > 0
         ? { AND: [baseWhere, productFilterWhere] }
         : baseWhere;
-    const orderBy = this.buildStoreOrderBy(sortBy ?? StoreSortBy.LATEST);
+    const sort = sortBy ?? StoreSortBy.LATEST;
+
+    if (sort === StoreSortBy.DISTANCE) {
+      if (latitude === undefined || longitude === undefined) {
+        throw new BadRequestException(PRODUCT_ERROR_MESSAGES.DISTANCE_SORT_REQUIRES_COORDINATES);
+      }
+    }
 
     const totalItems = await this.prisma.store.count({ where });
-    const skip = (page - 1) * limit;
 
-    const stores = await this.prisma.store.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-    });
+    let stores: Store[];
+
+    if (sort === StoreSortBy.RATING_AVG || sort === StoreSortBy.DISTANCE) {
+      const allMatching = await this.prisma.store.findMany({ where, select: { id: true } });
+      const idList = allMatching.map((s) => s.id);
+      if (idList.length === 0) {
+        stores = [];
+      } else if (sort === StoreSortBy.RATING_AVG) {
+        const orderedIds = await this.getStoreIdsOrderedByRating(idList, page, limit);
+        stores = await this.fetchStoresOrderedByIds(orderedIds);
+      } else {
+        const orderedIds = await this.getStoreIdsOrderedByDistance(
+          idList,
+          page,
+          limit,
+          latitude!,
+          longitude!,
+        );
+        stores = await this.fetchStoresOrderedByIds(orderedIds);
+      }
+    } else {
+      const orderBy = this.buildStoreOrderBy(sort);
+      const skip = (page - 1) * limit;
+      stores = await this.prisma.store.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      });
+    }
 
     const storeResponses = (await StoreMapperUtil.mapToStoreResponse(
       stores,
@@ -333,6 +405,76 @@ export class StoreListService {
       default:
         return { createdAt: "desc" };
     }
+  }
+
+  /** 필터에 맞는 스토어 id 목록을 평균 별점 내림차순으로 페이지네이션 */
+  private async getStoreIdsOrderedByRating(
+    storeIds: string[],
+    page: number,
+    limit: number,
+  ): Promise<string[]> {
+    if (storeIds.length === 0) return [];
+    const skip = (page - 1) * limit;
+    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(
+      Prisma.sql`
+        SELECT s.id
+        FROM stores s
+        LEFT JOIN products p ON p.store_id = s.id
+        LEFT JOIN product_reviews pr ON pr.product_id = p.id AND pr.deleted_at IS NULL
+        WHERE s.id IN (${Prisma.join(storeIds)})
+        GROUP BY s.id, s.created_at
+        ORDER BY COALESCE(AVG(pr.rating), 0) DESC, s.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${skip}
+      `,
+    );
+    return rows.map((r) => r.id);
+  }
+
+  /** 필터에 맞는 스토어 id 목록을 기준점까지 구면 거리(근사, m) 오름차순으로 페이지네이션. 좌표 없는 스토어는 뒤로 */
+  private async getStoreIdsOrderedByDistance(
+    storeIds: string[],
+    page: number,
+    limit: number,
+    userLat: number,
+    userLng: number,
+  ): Promise<string[]> {
+    if (storeIds.length === 0) return [];
+    const skip = (page - 1) * limit;
+    const rows = await this.prisma.$queryRaw<Array<{ id: string }>>(
+      Prisma.sql`
+        SELECT s.id
+        FROM stores s
+        WHERE s.id IN (${Prisma.join(storeIds)})
+        ORDER BY
+          CASE WHEN s.latitude IS NULL OR s.longitude IS NULL THEN 1 ELSE 0 END ASC,
+          (
+            6371000 * acos(
+              LEAST(
+                1::double precision,
+                GREATEST(
+                  -1::double precision,
+                  cos(radians(${userLat})) * cos(radians(s.latitude)) * cos(radians(s.longitude) - radians(${userLng})) +
+                  sin(radians(${userLat})) * sin(radians(s.latitude))
+                )
+              )
+            )
+          ) ASC NULLS LAST,
+          s.created_at DESC
+        LIMIT ${limit}
+        OFFSET ${skip}
+      `,
+    );
+    return rows.map((r) => r.id);
+  }
+
+  private async fetchStoresOrderedByIds(orderedIds: string[]): Promise<Store[]> {
+    if (orderedIds.length === 0) return [];
+    const stores = await this.prisma.store.findMany({
+      where: { id: { in: orderedIds } },
+    });
+    const map = new Map(stores.map((s) => [s.id, s]));
+    return orderedIds.map((id) => map.get(id)).filter((s): s is Store => s !== undefined);
   }
 
   /**

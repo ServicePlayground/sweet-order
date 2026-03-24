@@ -28,6 +28,8 @@ export const STORE_SUCCESS_MESSAGES = {
 export enum StoreSortBy {
   LATEST = "latest", // 최신순(생성일 내림차순)
   POPULAR = "popular", // 인기순(좋아요 수 내림차순)
+  RATING_AVG = "rating_avg", // 별점순(스토어 소속 상품 리뷰 평균 별점 내림차순)
+  DISTANCE = "distance", // 거리순(스토어 좌표 기준, 클라이언트 위도·경도 필요)
 }
 
 export const SWAGGER_EXAMPLES = {

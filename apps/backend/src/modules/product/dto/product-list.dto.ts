@@ -1,5 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsString, IsEnum, IsNumber, Min, IsArray, IsNotEmpty } from "class-validator";
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  Max,
+  IsArray,
+  IsNotEmpty,
+  ValidateIf,
+} from "class-validator";
 import {
   OptionalStringToNumber,
   OptionalStringToArray,
@@ -12,7 +22,9 @@ import {
   ProductCategoryType,
   CakeSizeDisplayName,
 } from "@apps/backend/modules/product/constants/product.constants";
-import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
+import {
+  SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES,
+} from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
@@ -108,6 +120,30 @@ export class GetProductsRequestDto extends PaginationRequestDto {
   })
   @IsValidRegionsParam()
   regions?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 위도(클라이언트 위치 등).",
+    example: STORE_SWAGGER_EXAMPLES.LATITUDE,
+  })
+  @ValidateIf((o) => o.sortBy === SortBy.DISTANCE)
+  @OptionalStringToNumber()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 경도(클라이언트 위치 등).",
+    example: STORE_SWAGGER_EXAMPLES.LONGITUDE,
+  })
+  @ValidateIf((o) => o.sortBy === SortBy.DISTANCE)
+  @OptionalStringToNumber()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 }
 
 /**

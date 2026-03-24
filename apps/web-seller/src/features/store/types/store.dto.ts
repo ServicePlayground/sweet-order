@@ -18,6 +18,8 @@ import type {
 export enum StoreSortBy {
   LATEST = "latest",
   POPULAR = "popular",
+  RATING_AVG = "rating_avg",
+  DISTANCE = "distance",
 }
 
 /** 정산 계좌 은행 코드 (백엔드·Prisma StoreBankName과 동일) */
@@ -137,6 +139,10 @@ export interface GetSellerStoresRequestDto {
   maxPrice?: number;
   /** 상품 필터: 유형(캐릭터, 레터링 등). 상품 목록 조회와 동일한 ProductCategoryType enum */
   productCategoryTypes?: ProductCategoryType[];
+  /** 거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 위도 */
+  latitude?: number;
+  /** 거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 경도 */
+  longitude?: number;
 }
 
 export type StoreListResponseDto = ListResponseDto<StoreResponseDto>;
