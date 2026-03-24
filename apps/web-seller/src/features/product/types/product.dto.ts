@@ -166,6 +166,7 @@ export interface GetSellerProductsRequestDto {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
+  sizes?: CakeSizeDisplayName[];
   storeId?: string;
   productType?: ProductType;
   productCategoryTypes?: ProductCategoryType[];

@@ -38,6 +38,7 @@ export function useProductList({
   sortBy = SortBy.LATEST,
   storeId,
   search,
+  sizes,
   salesStatus,
   visibilityStatus,
   minPrice,
@@ -53,6 +54,7 @@ export function useProductList({
       sortBy,
       storeId,
       search,
+      sizes,
       salesStatus,
       visibilityStatus,
       minPrice,
@@ -69,6 +71,9 @@ export function useProductList({
       };
       if (search) {
         params.search = search;
+      }
+      if (sizes?.length) {
+        params.sizes = sizes;
       }
       if (salesStatus) {
         params.salesStatus = salesStatus;

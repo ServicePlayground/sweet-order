@@ -63,6 +63,7 @@ export class ProductListService {
     maxPrice?: number;
     productType?: ProductType;
     productCategoryTypes?: ProductCategoryType[];
+    sizes?: string[];
   }): Prisma.Sql {
     const conditions: Prisma.Sql[] = [];
 
@@ -117,11 +118,39 @@ export class ProductListService {
       );
     }
 
+    if (params.sizes && params.sizes.length > 0) {
+      conditions.push(
+        Prisma.sql`p.cake_size_options IS NOT NULL AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements(p.cake_size_options::jsonb) AS elem
+          WHERE elem->>'displayName' IN (${Prisma.join(params.sizes)})
+        )`,
+      );
+    }
+
     if (conditions.length === 0) {
       return Prisma.sql`TRUE`;
     }
 
     return Prisma.sql`${Prisma.join(conditions, " AND ")}`;
+  }
+
+  /**
+   * cakeSizeOptions.displayName이 지정된 사이즈 중 하나와 일치하는 상품 ID 목록 (스토어 목록의 사이즈 필터와 동일한 JSONB 조건)
+   */
+  private async getProductIdsMatchingCakeSizes(sizes: string[]): Promise<string[]> {
+    if (sizes.length === 0) return [];
+    const result = await this.prisma.$queryRaw<Array<{ id: string }>>(
+      Prisma.sql`
+        SELECT DISTINCT p.id
+        FROM products p
+        WHERE p.cake_size_options IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(p.cake_size_options::jsonb) AS elem
+            WHERE elem->>'displayName' IN (${Prisma.join(sizes)})
+          )
+      `,
+    );
+    return result.map((r) => r.id);
   }
 
   private async getProductIdsByReviewSort(
@@ -205,6 +234,7 @@ export class ProductListService {
       productType,
       productCategoryTypes,
       regions,
+      sizes,
     } = query;
 
     let storeIdsFromRegion: string[] | undefined;
@@ -235,6 +265,16 @@ export class ProductListService {
 
     this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
+    if (sizes?.length) {
+      const sizeIds = await this.getProductIdsMatchingCakeSizes(sizes);
+      where.AND = where.AND || [];
+      if (sizeIds.length === 0) {
+        where.AND.push({ id: "never" });
+      } else {
+        where.AND.push({ id: { in: sizeIds } });
+      }
+    }
+
     const totalItems = await this.prisma.product.count({ where });
 
     const needsReviewData = sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
@@ -253,6 +293,7 @@ export class ProductListService {
           maxPrice,
           productType,
           productCategoryTypes,
+          sizes,
         }),
         sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
         page,
@@ -354,6 +395,7 @@ export class ProductListService {
       visibilityStatus,
       productType,
       productCategoryTypes,
+      sizes,
     } = query;
 
     const userStores = await this.prisma.store.findMany({
@@ -400,6 +442,16 @@ export class ProductListService {
 
     this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
+    if (sizes?.length) {
+      const sizeIds = await this.getProductIdsMatchingCakeSizes(sizes);
+      where.AND = where.AND || [];
+      if (sizeIds.length === 0) {
+        where.AND.push({ id: "never" });
+      } else {
+        where.AND.push({ id: { in: sizeIds } });
+      }
+    }
+
     const totalItems = await this.prisma.product.count({ where });
 
     const needsReviewData = sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
@@ -419,6 +471,7 @@ export class ProductListService {
           maxPrice,
           productType,
           productCategoryTypes,
+          sizes,
         }),
         sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
         page,

@@ -20,8 +20,12 @@ import {
   EnableStatus,
   ProductType,
   ProductCategoryType,
+  CakeSizeDisplayName,
 } from "@/apps/web-seller/features/product/types/product.dto";
-import { PRODUCT_CATEGORY_GROUPS } from "@/apps/web-seller/features/product/constants/product.constant";
+import {
+  PRODUCT_CATEGORY_GROUPS,
+  CAKE_SIZE_DISPLAY_NAME_OPTIONS,
+} from "@/apps/web-seller/features/product/constants/product.constant";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
 
@@ -37,6 +41,7 @@ export const StoreDetailProductListPage: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [productType, setProductType] = useState<ProductType | undefined>(undefined);
   const [productCategoryTypes, setProductCategoryTypes] = useState<ProductCategoryType[]>([]);
+  const [sizes, setSizes] = useState<CakeSizeDisplayName[]>([]);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // 검색 및 가격 필터 debounce (과도한 API 호출 방지)
@@ -52,6 +57,7 @@ export const StoreDetailProductListPage: React.FC = () => {
     setMaxPrice(undefined);
     setProductType(undefined);
     setProductCategoryTypes([]);
+    setSizes([]);
   }, []);
 
   const hasActiveFilters =
@@ -61,7 +67,8 @@ export const StoreDetailProductListPage: React.FC = () => {
     minPrice !== undefined ||
     maxPrice !== undefined ||
     productType !== undefined ||
-    productCategoryTypes.length > 0;
+    productCategoryTypes.length > 0 ||
+    sizes.length > 0;
 
   if (!storeId) {
     return (
@@ -81,6 +88,7 @@ export const StoreDetailProductListPage: React.FC = () => {
     maxPrice: debouncedMaxPrice,
     productType,
     productCategoryTypes: productCategoryTypes.length ? productCategoryTypes : undefined,
+    sizes: sizes.length ? sizes : undefined,
   });
 
   // 무한 스크롤 훅 사용
@@ -214,6 +222,43 @@ export const StoreDetailProductListPage: React.FC = () => {
           <div className="space-y-2">
             <Label>최대 가격</Label>
             <NumberInput value={maxPrice} onChange={setMaxPrice} placeholder="최대 가격" min={0} />
+          </div>
+        </div>
+
+        {/* 케이크 사이즈 필터 (복수 선택) */}
+        <div className="space-y-2">
+          <Label>케이크 사이즈 (해당 중 하나라도 포함)</Label>
+          <div className="flex flex-wrap gap-2">
+            {CAKE_SIZE_DISPLAY_NAME_OPTIONS.map((opt) => {
+              const isSelected = sizes.includes(opt.value);
+              return (
+                <label
+                  key={opt.value}
+                  className={`
+                      inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm cursor-pointer select-none transition-all duration-150 border
+                      ${
+                        isSelected
+                          ? "border-primary bg-primary/10 text-primary font-medium"
+                          : "border-border bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }
+                    `}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => {
+                      if (isSelected) {
+                        setSizes(sizes.filter((s) => s !== opt.value));
+                      } else {
+                        setSizes([...sizes, opt.value]);
+                      }
+                    }}
+                    className="sr-only"
+                  />
+                  {opt.label}
+                </label>
+              );
+            })}
           </div>
         </div>
 

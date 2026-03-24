@@ -10,6 +10,7 @@ import {
   EnableStatus,
   ProductType,
   ProductCategoryType,
+  CakeSizeDisplayName,
 } from "@apps/backend/modules/product/constants/product.constants";
 import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
@@ -81,6 +82,20 @@ export class GetProductsRequestDto extends PaginationRequestDto {
   @IsArray()
   @IsEnum(ProductCategoryType, { each: true })
   productCategoryTypes?: ProductCategoryType[];
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 케이크 사이즈 표시명. 스토어 목록 조회(GetStoresRequestDto)와 동일한 CakeSizeDisplayName enum. " +
+      "cakeSizeOptions.displayName이 해당 값 중 하나인 상품만 조회.",
+    enum: CakeSizeDisplayName,
+    isArray: true,
+    example: [CakeSizeDisplayName.DOSIRAK, CakeSizeDisplayName.SIZE_1],
+  })
+  @IsOptional()
+  @OptionalStringToArray()
+  @IsArray()
+  @IsEnum(CakeSizeDisplayName, { each: true })
+  sizes?: CakeSizeDisplayName[];
 
   @ApiPropertyOptional({
     description:
