@@ -48,6 +48,7 @@ import {
   GetProductsRequestDto,
   ProductListResponseDto,
 } from "@apps/backend/modules/product/dto/product-list.dto";
+import { GetRecentViewedProductsRequestDto } from "@apps/backend/modules/recent-view/dto/recent-view-list.dto";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 
@@ -291,12 +292,12 @@ export class UserMypageController {
   @ApiOperation({
     summary: "(로그인 필요) 최근 본 상품 목록 조회",
     description:
-      "마이페이지에서 자신이 최근 조회한 상품 목록을 조회합니다. 노출 중인 상품만 포함되며, 조회 시점 기준 최신순, 페이지네이션을 지원합니다.",
+      "마이페이지에서 자신이 최근 조회한 상품 목록을 조회합니다. 노출 중인 상품만 포함되며, 조회 시점 기준 최근본순, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
   @SwaggerAuthResponses()
   async getRecentViewedProducts(
-    @Query() query: GetProductsRequestDto,
+    @Query() query: GetRecentViewedProductsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<ProductListResponseDto> {
     return await this.recentViewService.getRecentViewedProductsForUser(req.user.sub, query);

@@ -6,11 +6,11 @@ import {
   ProductWithReviewsAndStore,
 } from "@apps/backend/modules/product/utils/product-mapper.util";
 import {
-  GetProductsRequestDto,
   ProductListResponseDto,
 } from "@apps/backend/modules/product/dto/product-list.dto";
 import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
+import { GetRecentViewedProductsRequestDto } from "@apps/backend/modules/recent-view/dto/recent-view-list.dto";
 
 /**
  * 최근 본 상품 서비스
@@ -40,7 +40,7 @@ export class RecentViewService {
    */
   async getRecentViewedProductsForUser(
     userId: string,
-    query: GetProductsRequestDto,
+    query: GetRecentViewedProductsRequestDto,
   ): Promise<ProductListResponseDto> {
     const { page, limit } = query;
     const where = {
@@ -53,7 +53,8 @@ export class RecentViewService {
 
     const views = await this.prisma.productRecentView.findMany({
       where,
-      orderBy: { viewedAt: "desc" },
+      // 최근 본 시각 우선, 동률 시 안정적인 페이지네이션을 위한 보조 정렬
+      orderBy: [{ viewedAt: "desc" }, { productId: "desc" }],
       skip,
       take: limit,
       include: {
