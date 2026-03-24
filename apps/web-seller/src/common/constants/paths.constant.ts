@@ -4,8 +4,9 @@ import { StoreDetailHomePage } from "@/apps/web-seller/pages/store/detail/Home";
 import { StoreDetailProductListPage } from "@/apps/web-seller/pages/store/detail/products/List";
 import { StoreDetailProductCreatePage } from "@/apps/web-seller/pages/store/detail/products/Create";
 import { StoreDetailProductDetailPage } from "@/apps/web-seller/pages/store/detail/products/Detail";
-import { StoreDetailChatListPage } from "@/apps/web-seller/pages/store/detail/chat/List";
-import { StoreDetailChatRoomPage } from "@/apps/web-seller/pages/store/detail/chat/Room";
+// 채팅 노출 시 복구
+// import { StoreDetailChatListPage } from "@/apps/web-seller/pages/store/detail/chat/List";
+// import { StoreDetailChatRoomPage } from "@/apps/web-seller/pages/store/detail/chat/Room";
 import { StoreDetailEditPage } from "@/apps/web-seller/pages/store/detail/Edit";
 import { StoreDetailFeedListPage } from "@/apps/web-seller/pages/store/detail/feed/List";
 import { StoreDetailFeedCreatePage } from "@/apps/web-seller/pages/store/detail/feed/Create";
@@ -29,8 +30,9 @@ export const ROUTES = {
   STORE_DETAIL_PRODUCTS_CREATE: (storeId: string) => `/stores/${storeId}/products/create`,
   STORE_DETAIL_PRODUCTS_DETAIL: (storeId: string, productId: string) =>
     `/stores/${storeId}/products/${productId}`,
-  STORE_DETAIL_CHAT_LIST: (storeId: string) => `/stores/${storeId}/chat`,
-  STORE_DETAIL_CHAT_ROOM: (storeId: string, roomId: string) => `/stores/${storeId}/chat/${roomId}`,
+  // STORE_DETAIL_CHAT_LIST: (storeId: string) => `/stores/${storeId}/chat`,
+  // STORE_DETAIL_CHAT_ROOM: (storeId: string, roomId: string) =>
+  //   `/stores/${storeId}/chat/${roomId}`,
   STORE_DETAIL_FEED_LIST: (storeId: string) => `/stores/${storeId}/feed`,
   STORE_DETAIL_FEED_CREATE: (storeId: string) => `/stores/${storeId}/feed/create`,
   STORE_DETAIL_FEED_DETAIL: (storeId: string, feedId: string) =>
@@ -73,11 +75,11 @@ export const ADMIN_ROUTE_CONFIG = [
     path: ROUTES.STORE_DETAIL_PRODUCTS_DETAIL(":storeId", ":productId"),
     element: StoreDetailProductDetailPage,
   },
-  { path: ROUTES.STORE_DETAIL_CHAT_LIST(":storeId"), element: StoreDetailChatListPage },
-  {
-    path: ROUTES.STORE_DETAIL_CHAT_ROOM(":storeId", ":roomId"),
-    element: StoreDetailChatRoomPage,
-  },
+  // { path: ROUTES.STORE_DETAIL_CHAT_LIST(":storeId"), element: StoreDetailChatListPage },
+  // {
+  //   path: ROUTES.STORE_DETAIL_CHAT_ROOM(":storeId", ":roomId"),
+  //   element: StoreDetailChatRoomPage,
+  // },
   { path: ROUTES.STORE_DETAIL_FEED_LIST(":storeId"), element: StoreDetailFeedListPage },
   { path: ROUTES.STORE_DETAIL_FEED_CREATE(":storeId"), element: StoreDetailFeedCreatePage },
   {
