@@ -22,9 +22,7 @@ import {
   ProductCategoryType,
   CakeSizeDisplayName,
 } from "@apps/backend/modules/product/constants/product.constants";
-import {
-  SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES,
-} from "@apps/backend/modules/store/constants/store.constants";
+import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as PRODUCT_SWAGGER_EXAMPLES } from "@apps/backend/modules/product/constants/product.constants";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-request.dto";
@@ -122,8 +120,7 @@ export class GetProductsRequestDto extends PaginationRequestDto {
   regions?: string;
 
   @ApiPropertyOptional({
-    description:
-      "거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 위도(클라이언트 위치 등).",
+    description: "거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 위도(클라이언트 위치 등).",
     example: STORE_SWAGGER_EXAMPLES.LATITUDE,
   })
   @ValidateIf((o) => o.sortBy === SortBy.DISTANCE)
@@ -134,8 +131,7 @@ export class GetProductsRequestDto extends PaginationRequestDto {
   latitude?: number;
 
   @ApiPropertyOptional({
-    description:
-      "거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 경도(클라이언트 위치 등).",
+    description: "거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 경도(클라이언트 위치 등).",
     example: STORE_SWAGGER_EXAMPLES.LONGITUDE,
   })
   @ValidateIf((o) => o.sortBy === SortBy.DISTANCE)

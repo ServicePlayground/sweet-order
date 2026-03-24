@@ -5,9 +5,7 @@ import {
   ProductMapperUtil,
   ProductWithReviewsAndStore,
 } from "@apps/backend/modules/product/utils/product-mapper.util";
-import {
-  ProductListResponseDto,
-} from "@apps/backend/modules/product/dto/product-list.dto";
+import { ProductListResponseDto } from "@apps/backend/modules/product/dto/product-list.dto";
 import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { GetRecentViewedProductsRequestDto } from "@apps/backend/modules/recent-view/dto/recent-view-list.dto";

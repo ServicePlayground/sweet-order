@@ -337,13 +337,7 @@ export class ProductListService {
       });
 
       const productIds = needsDistanceSort
-        ? await this.getProductIdsByDistanceSort(
-            filterSql,
-            latitude!,
-            longitude!,
-            page,
-            limit,
-          )
+        ? await this.getProductIdsByDistanceSort(filterSql, latitude!, longitude!, page, limit)
         : await this.getProductIdsByReviewSort(
             filterSql,
             sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
@@ -532,13 +526,7 @@ export class ProductListService {
       });
 
       const productIds = needsDistanceSort
-        ? await this.getProductIdsByDistanceSort(
-            filterSql,
-            latitude!,
-            longitude!,
-            page,
-            limit,
-          )
+        ? await this.getProductIdsByDistanceSort(filterSql, latitude!, longitude!, page, limit)
         : await this.getProductIdsByReviewSort(
             filterSql,
             sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,

@@ -152,9 +152,7 @@ export class LikeUserListService {
     );
 
     const effectiveSortBy =
-      sortBy === SortBy.REVIEW_COUNT ||
-      sortBy === SortBy.RATING_AVG ||
-      sortBy === SortBy.DISTANCE
+      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG || sortBy === SortBy.DISTANCE
         ? SortBy.POPULAR
         : sortBy;
     const orderBy = this.buildProductOrderByForRelation(effectiveSortBy);

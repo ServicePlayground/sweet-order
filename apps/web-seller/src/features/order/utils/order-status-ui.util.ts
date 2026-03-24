@@ -45,7 +45,10 @@ export const ORDER_STATUS_FILTER_OPTIONS: { value: OrderStatus; label: string }[
   { value: OrderStatus.PICKUP_PENDING, label: LABELS[OrderStatus.PICKUP_PENDING] },
   { value: OrderStatus.PICKUP_COMPLETED, label: LABELS[OrderStatus.PICKUP_COMPLETED] },
   { value: OrderStatus.CANCEL_REFUND_PENDING, label: LABELS[OrderStatus.CANCEL_REFUND_PENDING] },
-  { value: OrderStatus.CANCEL_REFUND_COMPLETED, label: LABELS[OrderStatus.CANCEL_REFUND_COMPLETED] },
+  {
+    value: OrderStatus.CANCEL_REFUND_COMPLETED,
+    label: LABELS[OrderStatus.CANCEL_REFUND_COMPLETED],
+  },
   { value: OrderStatus.CANCEL_COMPLETED, label: LABELS[OrderStatus.CANCEL_COMPLETED] },
   { value: OrderStatus.NO_SHOW, label: LABELS[OrderStatus.NO_SHOW] },
 ];
