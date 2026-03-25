@@ -58,6 +58,9 @@ export interface OrderResponseDto {
   productImages: string[];
   storeId: string;
   storeName: string;
+  storeBankName?: string | null;
+  storeBankAccountNumber?: string | null;
+  storeAccountHolderName?: string | null;
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;

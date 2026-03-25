@@ -7,6 +7,7 @@ import {
   OrderMyReviewUiStatus,
   OrderStatus,
 } from "@apps/backend/modules/order/constants/order.constants";
+import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 
 /**
@@ -15,6 +16,11 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 type OrderWithItems = Order & {
   orderItems: OrderItem[];
   review: { id: string; deletedAt: Date | null } | null;
+  store: {
+    bankAccountNumber: string | null;
+    bankName: StoreBankName | null;
+    accountHolderName: string | null;
+  };
 };
 
 /**
@@ -31,6 +37,13 @@ export class OrderMapperUtil {
     orderItems: true,
     review: {
       select: { id: true, deletedAt: true },
+    },
+    store: {
+      select: {
+        bankAccountNumber: true,
+        bankName: true,
+        accountHolderName: true,
+      },
     },
   } as const satisfies Prisma.OrderInclude;
 
@@ -110,6 +123,9 @@ export class OrderMapperUtil {
       productImages: order.productImages ?? [],
       storeId: order.storeId,
       storeName: order.storeName ?? "",
+      storeBankName: order.store.bankName ?? null,
+      storeBankAccountNumber: order.store.bankAccountNumber ?? null,
+      storeAccountHolderName: order.store.accountHolderName ?? null,
       orderNumber: order.orderNumber,
       totalQuantity: order.totalQuantity,
       totalPrice: order.totalPrice,

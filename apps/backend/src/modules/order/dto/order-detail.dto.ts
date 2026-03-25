@@ -158,6 +158,25 @@ export class OrderResponseDto extends PickupAddressDto {
   })
   storeName: string;
 
+  @ApiPropertyOptional({
+    description: "스토어 정산 계좌 은행 코드 (스토어에 미등록 시 null)",
+    enum: StoreBankName,
+    nullable: true,
+  })
+  storeBankName: StoreBankName | null;
+
+  @ApiPropertyOptional({
+    description: "스토어 정산 계좌번호 (스토어에 미등록 시 null)",
+    nullable: true,
+  })
+  storeBankAccountNumber: string | null;
+
+  @ApiPropertyOptional({
+    description: "스토어 정산 계좌 예금주명 (스토어에 미등록 시 null)",
+    nullable: true,
+  })
+  storeAccountHolderName: string | null;
+
   @ApiProperty({
     description: "주문 번호",
     example: SWAGGER_EXAMPLES.ORDER_DATA.orderNumber,

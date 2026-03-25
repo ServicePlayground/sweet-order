@@ -25,6 +25,13 @@ type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
             deletedAt: true;
           };
         };
+        store: {
+          select: {
+            bankAccountNumber: true;
+            bankName: true;
+            accountHolderName: true;
+          };
+        };
       };
     };
   };
@@ -63,6 +70,13 @@ export class ReviewMapperUtil {
         orderItems: true,
         review: {
           select: { id: true, deletedAt: true },
+        },
+        store: {
+          select: {
+            bankAccountNumber: true,
+            bankName: true,
+            accountHolderName: true,
+          },
         },
       },
     },
