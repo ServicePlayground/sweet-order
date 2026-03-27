@@ -9,6 +9,8 @@ const CONTENT_SHEET_DRAG_THRESHOLD = 8;
 interface MapListSheetPanelProps {
   /** 패널 오프셋(px). 0이면 핸들만 보임 */
   offset: number;
+  /** true면 최상단까지 펼친 상태(상단 모서리 직각) */
+  expandedToTop?: boolean;
   isDragging: boolean;
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
@@ -25,6 +27,7 @@ type ContentGestureMode = "undecided" | "sheet" | "scroll";
 
 export function MapListSheetPanel({
   offset,
+  expandedToTop = false,
   isDragging,
   onTouchStart,
   onTouchMove,
@@ -195,7 +198,7 @@ export function MapListSheetPanel({
         height: LIST_SHEET_HANDLE_HEIGHT + offset,
         transition: isDragging ? "none" : "height 0.25s ease-out",
         background: "#FFFFFF",
-        borderRadius: "20px 20px 0 0",
+        borderRadius: expandedToTop && !isDragging ? 0 : "20px 20px 0 0",
       }}
       aria-label="목록 패널"
     >

@@ -633,6 +633,9 @@ export default function MapPage() {
 
       <MapListSheetPanel
         offset={listSheetPanelOffset}
+        expandedToTop={
+          listSheetPanelOffset > 0 && listSheetPanelOffset >= getListSheetMaxOffset() - 1
+        }
         isDragging={isListSheetPanelDragging}
         onTouchStart={handleListSheetTouchStart}
         onTouchMove={handleListSheetTouchMove}
