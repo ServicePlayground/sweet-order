@@ -46,3 +46,14 @@ export const ORDER_STATUS_FLOW_LINES_FOR_SELLER: readonly string[] = [
 export function getOrderStatusSellerHint(status: OrderStatus): string {
   return ORDER_STATUS_SELLER_FLOW_LINE_BY_STATUS[status] ?? "";
 }
+
+/**
+ * 안내 문장에서 맨 앞 `상태명: ` 접두를 제거한 본문.
+ * 배지로 상태명을 표시할 때 중복을 피하기 위해 사용합니다.
+ */
+export function getOrderStatusSellerHintBody(status: OrderStatus): string {
+  const full = ORDER_STATUS_SELLER_FLOW_LINE_BY_STATUS[status] ?? "";
+  const idx = full.indexOf(": ");
+  if (idx === -1) return full.trim();
+  return full.slice(idx + 2).trim();
+}
