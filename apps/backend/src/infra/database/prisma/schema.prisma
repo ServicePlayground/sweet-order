@@ -418,7 +418,9 @@ model Order {
   pickupLongitude    Float? @map("pickup_longitude") // 픽업 장소 경도
 
   // 비즈니스 필드 - 주문 상태
-  orderStatus OrderStatus @default(PAYMENT_PENDING) @map("order_status") // 주문 상태
+  orderStatus OrderStatus @default(RESERVATION_REQUESTED) @map("order_status") // 주문 상태
+  /** 입금대기로 전환된 시각(입금 12시간 유효 기준). 예약신청만 있을 때는 null */
+  paymentPendingAt DateTime? @map("payment_pending_at")
   /** 입금 전 사용자 취소 시 입력한 사유 (자동 만료 취소 등은 null) */
   userCancelReason String? @map("user_cancel_reason") @db.Text
   /** 판매자가 입금대기에서 예약 취소(취소완료) 시 입력한 사유 */
@@ -542,6 +544,7 @@ enum MessageSenderType {
 }
 
 enum OrderStatus {
+  RESERVATION_REQUESTED // 예약신청
   PAYMENT_PENDING // 입금대기
   PAYMENT_COMPLETED // 입금완료
   CONFIRMED // 예약확정

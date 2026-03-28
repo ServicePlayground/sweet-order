@@ -5,6 +5,7 @@ import { OrderSellerListService } from "@apps/backend/modules/order/services/ord
 import { OrderSellerActionService } from "@apps/backend/modules/order/services/order-seller-action.service";
 import { OrderUserListService } from "@apps/backend/modules/order/services/order-user-list.service";
 import { OrderUserActionService } from "@apps/backend/modules/order/services/order-user-action.service";
+import { OrderUserReservationEditService } from "@apps/backend/modules/order/services/order-user-reservation-edit.service";
 import {
   CreateOrderRequestDto,
   CreateOrderResponseDto,
@@ -19,6 +20,10 @@ import {
   CancelOrderBeforePaymentRequestDto,
   RequestCancelRefundRequestDto,
 } from "@apps/backend/modules/order/dto/order-user-action.dto";
+import {
+  UpdateReservationOrderItemsRequestDto,
+  UpdateReservationPickupDateRequestDto,
+} from "@apps/backend/modules/order/dto/order-user-reservation-edit.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -36,6 +41,7 @@ export class OrderService {
     private readonly orderSellerActionService: OrderSellerActionService,
     private readonly orderUserListService: OrderUserListService,
     private readonly orderUserActionService: OrderUserActionService,
+    private readonly orderUserReservationEditService: OrderUserReservationEditService,
   ) {}
 
   /**
@@ -120,5 +126,23 @@ export class OrderService {
     dto: RequestCancelRefundRequestDto,
   ): Promise<{ id: string }> {
     return this.orderUserActionService.requestRefund(orderId, user.sub, dto);
+  }
+
+  /** 예약신청 단계 픽업일 변경 (사용자) */
+  async updateReservationPickupDateForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+    dto: UpdateReservationPickupDateRequestDto,
+  ): Promise<{ id: string }> {
+    return this.orderUserReservationEditService.updatePickupDate(orderId, user.sub, dto);
+  }
+
+  /** 예약신청 단계 주문 항목(옵션) 변경 (사용자) */
+  async updateReservationOrderItemsForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+    dto: UpdateReservationOrderItemsRequestDto,
+  ): Promise<{ id: string }> {
+    return this.orderUserReservationEditService.updateOrderItems(orderId, user.sub, dto);
   }
 }

@@ -8,8 +8,9 @@ import {
   ORDER_DETAIL_SECTION_LABEL,
 } from "@/apps/web-seller/features/order/components/detail/order-detail-section.styles";
 
-/** 일반 진행선(입금 → 픽업완료) — 시각적 단계 표시용 */
+/** 일반 진행선(예약신청 → 픽업완료) — 시각적 단계 표시용 */
 const MAIN_FLOW: readonly OrderStatus[] = [
+  OrderStatus.RESERVATION_REQUESTED,
   OrderStatus.PAYMENT_PENDING,
   OrderStatus.PAYMENT_COMPLETED,
   OrderStatus.CONFIRMED,
@@ -28,7 +29,7 @@ export interface OrderStatusFlowStepperProps {
 }
 
 /**
- * 주문 상태의 일반 진행 흐름(입금~픽업완료)을 가로 스텝으로 표시합니다.
+ * 주문 상태의 일반 진행 흐름(예약신청~픽업완료)을 가로 스텝으로 표시합니다.
  */
 export const OrderStatusFlowStepper: React.FC<OrderStatusFlowStepperProps> = ({
   status,

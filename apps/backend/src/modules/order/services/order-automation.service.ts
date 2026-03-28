@@ -4,6 +4,7 @@ import { OrderStatus } from "@apps/backend/modules/order/constants/order.constan
 import {
   isPickupPendingDue,
   isPaymentPendingWindowExpired,
+  paymentPendingWindowStart,
   PAYMENT_PENDING_VALIDITY_MS,
 } from "@apps/backend/modules/order/utils/order-datetime.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
@@ -36,7 +37,7 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * 단일 주문에 대해 만료·픽업 전환 규칙을 즉시 적용 (최신 상태 보장)
-   * 만료 규칙: 입금대기 상태에서 12시간이 지난 주문을 취소완료로 전환합니다.
+   * 만료 규칙: 입금대기 상태에서 입금대기 진입 시각(`paymentPendingAt`, 레거시는 `createdAt`) 기준 12시간이 지난 주문을 취소완료로 전환합니다. 예약신청 단계는 자동 만료하지 않습니다.
    * 픽업 규칙: 예약확정 상태에서 픽업 시각이 도달했거나 지난 주문을 픽업대기로 전환합니다.
    */
   async syncOrderLifecycleById(orderId: string): Promise<void> {
@@ -47,13 +48,17 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
     const now = new Date();
 
     if (order.orderStatus === OrderStatus.PAYMENT_PENDING) {
-      if (isPaymentPendingWindowExpired(order.createdAt, now)) {
-        const expireCreatedBefore = new Date(now.getTime() - PAYMENT_PENDING_VALIDITY_MS);
+      const windowStart = paymentPendingWindowStart(order.paymentPendingAt, order.createdAt);
+      if (isPaymentPendingWindowExpired(windowStart, now)) {
+        const expireAnchorBefore = new Date(now.getTime() - PAYMENT_PENDING_VALIDITY_MS);
         const { count } = await this.prisma.order.updateMany({
           where: {
             id: orderId,
             orderStatus: OrderStatus.PAYMENT_PENDING,
-            createdAt: { lte: expireCreatedBefore },
+            OR: [
+              { paymentPendingAt: { lte: expireAnchorBefore } },
+              { AND: [{ paymentPendingAt: null }, { createdAt: { lte: expireAnchorBefore } }] },
+            ],
           },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },
         });
@@ -97,23 +102,28 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
   async runBatchTransitions(): Promise<void> {
     try {
       const now = new Date();
-      const expireCreatedBefore = new Date(now.getTime() - PAYMENT_PENDING_VALIDITY_MS);
+      const expireAnchorBefore = new Date(now.getTime() - PAYMENT_PENDING_VALIDITY_MS);
 
       const paymentExpiredCandidates = await this.prisma.order.findMany({
         where: {
           orderStatus: OrderStatus.PAYMENT_PENDING,
-          createdAt: { lte: expireCreatedBefore },
+          OR: [
+            { paymentPendingAt: { lte: expireAnchorBefore } },
+            { AND: [{ paymentPendingAt: null }, { createdAt: { lte: expireAnchorBefore } }] },
+          ],
         },
         select: { id: true },
       });
 
       for (const { id } of paymentExpiredCandidates) {
-        // findMany 직후 상태가 바뀌었을 수 있어, 갱신 시 동일 조건으로 한 번 더 좁힘 + count로 실제 반영 여부 확인
         const { count } = await this.prisma.order.updateMany({
           where: {
             id,
             orderStatus: OrderStatus.PAYMENT_PENDING,
-            createdAt: { lte: expireCreatedBefore },
+            OR: [
+              { paymentPendingAt: { lte: expireAnchorBefore } },
+              { AND: [{ paymentPendingAt: null }, { createdAt: { lte: expireAnchorBefore } }] },
+            ],
           },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },
         });

@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
-  CreateOrderItemDto,
   CreateOrderRequestDto,
   CreateOrderResponseDto,
 } from "@apps/backend/modules/order/dto/order-create.dto";
@@ -9,10 +8,15 @@ import {
   ORDER_ERROR_MESSAGES,
   OrderStatus,
 } from "@apps/backend/modules/order/constants/order.constants";
-import { EnableStatus } from "@apps/backend/modules/product/constants/product.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { EnableStatus } from "@apps/backend/modules/product/constants/product.constants";
 import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/order-lifecycle-hook.service";
 import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
+import {
+  parseFlavorOptions,
+  parseSizeOptions,
+  validateAndNormalizeOrderItem,
+} from "@apps/backend/modules/order/utils/order-item-normalize.util";
 
 /**
  * 주문 생성 서비스
@@ -24,184 +28,6 @@ export class OrderCreateService {
     private readonly prisma: PrismaService,
     private readonly orderLifecycleHookService: OrderLifecycleHookService,
   ) {}
-
-  private parseSizeOptions(options: unknown): Array<{
-    id: string;
-    visible: EnableStatus;
-    displayName: string;
-    lengthCm?: number;
-    description?: string;
-    price: number;
-  }> {
-    if (!Array.isArray(options)) {
-      return [];
-    }
-
-    return options
-      .map((option) => {
-        if (!option || typeof option !== "object") {
-          return null;
-        }
-
-        const candidate = option as Record<string, unknown>;
-        if (
-          typeof candidate.id !== "string" ||
-          typeof candidate.visible !== "string" ||
-          typeof candidate.displayName !== "string" ||
-          typeof candidate.price !== "number"
-        ) {
-          return null;
-        }
-
-        return {
-          id: candidate.id,
-          visible: candidate.visible as EnableStatus,
-          displayName: candidate.displayName,
-          lengthCm: typeof candidate.lengthCm === "number" ? candidate.lengthCm : undefined,
-          description:
-            typeof candidate.description === "string" ? candidate.description : undefined,
-          price: candidate.price,
-        };
-      })
-      .filter((option): option is NonNullable<typeof option> => option !== null);
-  }
-
-  private parseFlavorOptions(options: unknown): Array<{
-    id: string;
-    visible: EnableStatus;
-    displayName: string;
-    price: number;
-  }> {
-    if (!Array.isArray(options)) {
-      return [];
-    }
-
-    return options
-      .map((option) => {
-        if (!option || typeof option !== "object") {
-          return null;
-        }
-
-        const candidate = option as Record<string, unknown>;
-        if (
-          typeof candidate.id !== "string" ||
-          typeof candidate.visible !== "string" ||
-          typeof candidate.displayName !== "string" ||
-          typeof candidate.price !== "number"
-        ) {
-          return null;
-        }
-
-        return {
-          id: candidate.id,
-          visible: candidate.visible as EnableStatus,
-          displayName: candidate.displayName,
-          price: candidate.price,
-        };
-      })
-      .filter((option): option is NonNullable<typeof option> => option !== null);
-  }
-
-  private validateAndNormalizeItem(
-    item: CreateOrderItemDto,
-    sizeOptionMap: Map<
-      string,
-      {
-        id: string;
-        visible: EnableStatus;
-        displayName: string;
-        lengthCm?: number;
-        description?: string;
-        price: number;
-      }
-    >,
-    flavorOptionMap: Map<
-      string,
-      {
-        id: string;
-        visible: EnableStatus;
-        displayName: string;
-        price: number;
-      }
-    >,
-    baseSalePrice: number,
-  ) {
-    const hasSizePayload =
-      item.sizeDisplayName !== undefined ||
-      item.sizeLengthCm !== undefined ||
-      item.sizeDescription !== undefined ||
-      item.sizePrice !== undefined;
-    const hasFlavorPayload = item.flavorDisplayName !== undefined || item.flavorPrice !== undefined;
-
-    let selectedSize: {
-      id: string;
-      displayName: string;
-      lengthCm?: number;
-      description?: string;
-      price: number;
-    } | null = null;
-
-    if (item.sizeId) {
-      const matchedSize = sizeOptionMap.get(item.sizeId);
-      if (!matchedSize || matchedSize.visible !== EnableStatus.ENABLE) {
-        LoggerUtil.log(
-          `주문 항목 검증 실패: 유효하지 않은 사이즈 옵션 - sizeId: ${item.sizeId}, visible: ${matchedSize?.visible}`,
-        );
-        throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
-      }
-      selectedSize = {
-        id: matchedSize.id,
-        displayName: matchedSize.displayName,
-        lengthCm: matchedSize.lengthCm,
-        description: matchedSize.description,
-        price: matchedSize.price,
-      };
-    } else if (hasSizePayload) {
-      LoggerUtil.log(
-        `주문 항목 검증 실패: sizeId 없이 사이즈 정보 제공 - hasSizePayload: ${hasSizePayload}`,
-      );
-      throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
-    }
-
-    let selectedFlavor: { id: string; displayName: string; price: number } | null = null;
-    if (item.flavorId) {
-      const matchedFlavor = flavorOptionMap.get(item.flavorId);
-      if (!matchedFlavor || matchedFlavor.visible !== EnableStatus.ENABLE) {
-        LoggerUtil.log(
-          `주문 항목 검증 실패: 유효하지 않은 맛 옵션 - flavorId: ${item.flavorId}, visible: ${matchedFlavor?.visible}`,
-        );
-        throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
-      }
-      selectedFlavor = {
-        id: matchedFlavor.id,
-        displayName: matchedFlavor.displayName,
-        price: matchedFlavor.price,
-      };
-    } else if (hasFlavorPayload) {
-      LoggerUtil.log(
-        `주문 항목 검증 실패: flavorId 없이 맛 정보 제공 - hasFlavorPayload: ${hasFlavorPayload}`,
-      );
-      throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_ORDER_ITEMS);
-    }
-
-    const itemPrice = baseSalePrice + (selectedSize?.price ?? 0) + (selectedFlavor?.price ?? 0);
-
-    return {
-      sizeId: selectedSize?.id ?? null,
-      sizeDisplayName: selectedSize?.displayName ?? null,
-      sizeLengthCm: selectedSize?.lengthCm ?? null,
-      sizeDescription: selectedSize?.description ?? null,
-      sizePrice: selectedSize?.price ?? null,
-      flavorId: selectedFlavor?.id ?? null,
-      flavorDisplayName: selectedFlavor?.displayName ?? null,
-      flavorPrice: selectedFlavor?.price ?? null,
-      letteringMessage: item.letteringMessage ?? null,
-      requestMessage: item.requestMessage ?? null,
-      quantity: item.quantity,
-      itemPrice,
-      imageUrls: item.imageUrls ?? [],
-    };
-  }
 
   /**
    * 주문 생성 (사용자용)
@@ -275,13 +101,13 @@ export class OrderCreateService {
     }
 
     const sizeOptionMap = new Map(
-      this.parseSizeOptions(product.cakeSizeOptions).map((option) => [option.id, option]),
+      parseSizeOptions(product.cakeSizeOptions).map((option) => [option.id, option]),
     );
     const flavorOptionMap = new Map(
-      this.parseFlavorOptions(product.cakeFlavorOptions).map((option) => [option.id, option]),
+      parseFlavorOptions(product.cakeFlavorOptions).map((option) => [option.id, option]),
     );
     const normalizedItems = items.map((item) =>
-      this.validateAndNormalizeItem(item, sizeOptionMap, flavorOptionMap, product.salePrice),
+      validateAndNormalizeOrderItem(item, sizeOptionMap, flavorOptionMap, product.salePrice),
     );
 
     // 총 금액 검증 (서버 기준 옵션 가격으로 계산)
@@ -328,8 +154,8 @@ export class OrderCreateService {
             const sequence = String(todayOrderCount + 1 + retryCount).padStart(3, "0");
             const orderNumber = `ORD-${dateStr}-${sequence}`;
 
-            // 모든 상품: 예약신청 직후 입금대기
-            const orderStatus = OrderStatus.PAYMENT_PENDING;
+            // 모든 상품: 예약신청 → 판매자 확인 후 입금대기
+            const orderStatus = OrderStatus.RESERVATION_REQUESTED;
 
             const order = await tx.order.create({
               data: {
@@ -372,7 +198,7 @@ export class OrderCreateService {
         this.orderLifecycleHookService.afterOrderStatusTransition({
           orderId: created.id,
           fromStatus: null,
-          toStatus: OrderStatus.PAYMENT_PENDING,
+          toStatus: OrderStatus.RESERVATION_REQUESTED,
           source: ORDER_STATUS_TRANSITION_SOURCE.ORDER_CREATE,
         });
 

@@ -8,6 +8,7 @@
 import type { ListResponseDto } from "@/apps/web-seller/common/types/api.dto";
 
 export enum OrderStatus {
+  RESERVATION_REQUESTED = "RESERVATION_REQUESTED",
   PAYMENT_PENDING = "PAYMENT_PENDING",
   PAYMENT_COMPLETED = "PAYMENT_COMPLETED",
   CONFIRMED = "CONFIRMED",
@@ -71,6 +72,8 @@ export interface OrderResponseDto {
   pickupLatitude: number;
   pickupLongitude: number;
   orderStatus: OrderStatus;
+  /** 입금대기 진입 시각(입금 12시간 기준). 예약신청 단계에서는 null */
+  paymentPendingAt?: Date | string | null;
   pickupDate: Date;
   userCancelReason?: string | null;
   sellerCancelReason?: string | null;

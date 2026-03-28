@@ -37,6 +37,7 @@ export const ORDER_SUCCESS_MESSAGES = {
  * 주문 상태 enum
  */
 export enum OrderStatus {
+  RESERVATION_REQUESTED = "RESERVATION_REQUESTED", // 예약신청
   PAYMENT_PENDING = "PAYMENT_PENDING", // 입금대기
   PAYMENT_COMPLETED = "PAYMENT_COMPLETED", // 입금완료
   CONFIRMED = "CONFIRMED", // 예약확정
@@ -128,7 +129,8 @@ export const SWAGGER_EXAMPLES = {
     pickupZonecode: STORE_SWAGGER_EXAMPLES.ZONECODE,
     pickupLatitude: STORE_SWAGGER_EXAMPLES.LATITUDE,
     pickupLongitude: STORE_SWAGGER_EXAMPLES.LONGITUDE,
-    orderStatus: OrderStatus.PAYMENT_PENDING,
+    orderStatus: OrderStatus.RESERVATION_REQUESTED,
+    paymentPendingAt: null as null,
     userCancelReason: null as null,
     sellerCancelReason: null as null,
     sellerNoShowReason: null as null,

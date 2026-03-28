@@ -211,6 +211,12 @@ export class OrderResponseDto extends PickupAddressDto {
   orderStatus: OrderStatus;
 
   @ApiPropertyOptional({
+    description: "입금대기로 전환된 시각. 입금 12시간 유효 기준 시작점(예약신청 단계에서는 null)",
+    nullable: true,
+  })
+  paymentPendingAt: Date | null;
+
+  @ApiPropertyOptional({
     description:
       "입금 전 사용자 취소 시 입력한 사유. 자동 만료 취소·판매자 취소 등에서는 null일 수 있음",
     example: "일정 변경",

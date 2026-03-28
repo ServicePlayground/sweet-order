@@ -2,6 +2,7 @@ import type { StatusBadgeVariant } from "@/apps/web-seller/common/components/bad
 import { OrderStatus } from "@/apps/web-seller/features/order/types/order.dto";
 
 const LABELS: Record<OrderStatus, string> = {
+  [OrderStatus.RESERVATION_REQUESTED]: "예약신청",
   [OrderStatus.PAYMENT_PENDING]: "입금대기",
   [OrderStatus.PAYMENT_COMPLETED]: "입금완료",
   [OrderStatus.CONFIRMED]: "예약확정",
@@ -19,6 +20,8 @@ export function getOrderStatusLabel(status: OrderStatus): string {
 
 export function getOrderStatusBadgeVariant(status: OrderStatus): StatusBadgeVariant {
   switch (status) {
+    case OrderStatus.RESERVATION_REQUESTED:
+      return "info";
     case OrderStatus.PAYMENT_PENDING:
       return "warning";
     case OrderStatus.PAYMENT_COMPLETED:
@@ -39,6 +42,7 @@ export function getOrderStatusBadgeVariant(status: OrderStatus): StatusBadgeVari
 
 /** 목록·필터용: 전체 상태 옵션 */
 export const ORDER_STATUS_FILTER_OPTIONS: { value: OrderStatus; label: string }[] = [
+  { value: OrderStatus.RESERVATION_REQUESTED, label: LABELS[OrderStatus.RESERVATION_REQUESTED] },
   { value: OrderStatus.PAYMENT_PENDING, label: LABELS[OrderStatus.PAYMENT_PENDING] },
   { value: OrderStatus.PAYMENT_COMPLETED, label: LABELS[OrderStatus.PAYMENT_COMPLETED] },
   { value: OrderStatus.CONFIRMED, label: LABELS[OrderStatus.CONFIRMED] },

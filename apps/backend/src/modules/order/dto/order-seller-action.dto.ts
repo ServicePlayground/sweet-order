@@ -13,9 +13,9 @@ import {
 export class UpdateOrderStatusRequestDto {
   @ApiProperty({
     description:
-      "변경할 주문 상태. 예약확정·픽업완료·취소완료·취소환불대기·취소환불완료·노쇼 등 전환 규칙은 API 설명 및 `isSellerTransitionAllowed`를 따릅니다.",
+      "변경할 주문 상태. 입금대기(예약신청에서만)·예약확정(입금대기·입금완료)·픽업완료·취소완료·취소환불대기·취소환불완료·노쇼 등 전환 규칙은 API 설명 및 `isSellerTransitionAllowed`를 따릅니다.",
     enum: OrderStatus,
-    example: OrderStatus.CONFIRMED,
+    example: OrderStatus.PAYMENT_PENDING,
   })
   @IsNotEmpty()
   @IsEnum(OrderStatus)
@@ -23,7 +23,7 @@ export class UpdateOrderStatusRequestDto {
 
   @ApiPropertyOptional({
     description:
-      "취소완료(CANCEL_COMPLETED)로 변경할 때 필수. 판매자 예약 취소 사유(입금대기에서만 해당 전환 가능).",
+      "취소완료(CANCEL_COMPLETED)로 변경할 때 필수. 판매자 예약 취소 사유(예약신청·입금대기에서만 해당 전환 가능).",
     maxLength: 2000,
   })
   @ValidateIf((o: UpdateOrderStatusRequestDto) => o.orderStatus === OrderStatus.CANCEL_COMPLETED)

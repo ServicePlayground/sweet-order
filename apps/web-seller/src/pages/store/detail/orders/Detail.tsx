@@ -147,6 +147,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
     order.sellerCancelRefundPendingReason ||
     order.refundBankName;
 
+  const showAcceptReservation = isSellerTransitionAllowed(status, OrderStatus.PAYMENT_PENDING);
   const showConfirm = isSellerTransitionAllowed(status, OrderStatus.CONFIRMED);
   const showPickupDone = isSellerTransitionAllowed(status, OrderStatus.PICKUP_COMPLETED);
   const showRefundDone = isSellerTransitionAllowed(status, OrderStatus.CANCEL_REFUND_COMPLETED);
@@ -154,9 +155,12 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
   const showNoShow = isSellerTransitionAllowed(status, OrderStatus.NO_SHOW);
   const showRefundPending = isSellerTransitionAllowed(status, OrderStatus.CANCEL_REFUND_PENDING);
 
+  const paymentWindowStart = order.paymentPendingAt ?? order.createdAt;
+
   const hasAnyActions =
     !reasonTarget &&
-    (showConfirm ||
+    (showAcceptReservation ||
+      showConfirm ||
       showPickupDone ||
       showRefundDone ||
       showCancelOrder ||
@@ -168,8 +172,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">주문 상세</h1>
         <p className="mt-1 text-sm text-gray-500">
-          주문번호{" "}
-          <span className="font-mono font-medium text-gray-700">{order.orderNumber}</span>
+          주문번호 <span className="font-mono font-medium text-gray-700">{order.orderNumber}</span>
         </p>
       </div>
 
@@ -221,7 +224,7 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             {status === OrderStatus.PAYMENT_PENDING && (
               <div className="border-t border-slate-100 bg-slate-50/50">
                 <div className={ORDER_DETAIL_SECTION_BODY_COMPACT}>
-                  <PaymentPendingCountdown createdAt={order.createdAt} />
+                  <PaymentPendingCountdown windowStartAt={paymentWindowStart} />
                 </div>
               </div>
             )}
@@ -269,6 +272,20 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
               </div>
               <div className={ORDER_DETAIL_SECTION_BODY}>
                 <div className="flex w-full flex-wrap gap-2.5">
+                  {showAcceptReservation && (
+                    <Button
+                      className={ORDER_ACTION_BTN_CLASS}
+                      onClick={() =>
+                        updateOrderStatusMutation.mutate({
+                          orderId: order.id,
+                          request: { orderStatus: OrderStatus.PAYMENT_PENDING },
+                        })
+                      }
+                      disabled={updateOrderStatusMutation.isPending}
+                    >
+                      {updateOrderStatusMutation.isPending ? "처리 중..." : "예약 확인"}
+                    </Button>
+                  )}
                   {showConfirm && (
                     <Button
                       className={ORDER_ACTION_BTN_CLASS}
@@ -611,9 +628,11 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
                 </div>
               )}
             </div>
-            {status === OrderStatus.CONFIRMED && (
+            {(status === OrderStatus.CONFIRMED || status === OrderStatus.PAYMENT_COMPLETED) && (
               <p className="text-sm text-gray-600">
-                픽업 예정 시각이 되면 상태가 자동으로 &quot;픽업대기&quot;로 바뀝니다.
+                {status === OrderStatus.PAYMENT_COMPLETED
+                  ? "고객 입금이 완료되었습니다. 예약 확정을 진행한 뒤, 픽업 예정 시각이 되면 상태가 자동으로 ‘픽업대기’로 바뀝니다."
+                  : "픽업 예정 시각이 되면 상태가 자동으로 ‘픽업대기’로 바뀝니다."}
               </p>
             )}
           </CardContent>

@@ -6,8 +6,14 @@ import {
 } from "@apps/backend/modules/order/constants/order.constants";
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
 import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
-import { isPaymentPendingWindowExpired } from "@apps/backend/modules/order/utils/order-datetime.util";
-import { USER_CANCEL_REFUND_REQUEST_SOURCE_STATUSES } from "@apps/backend/modules/order/utils/order-status-transition.util";
+import {
+  isPaymentPendingWindowExpired,
+  paymentPendingWindowStart,
+} from "@apps/backend/modules/order/utils/order-datetime.util";
+import {
+  ORDER_PRE_PAYMENT_WINDOW_STATUSES,
+  USER_CANCEL_REFUND_REQUEST_SOURCE_STATUSES,
+} from "@apps/backend/modules/order/utils/order-status-transition.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/order-lifecycle-hook.service";
 import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
@@ -30,7 +36,7 @@ export class OrderUserActionService {
   ) {}
 
   /**
-   * 사용자가 입금을 완료했다고 표시합니다. `PAYMENT_PENDING` → `PAYMENT_COMPLETED`.
+   * 사용자가 입금을 완료했다고 표시합니다. `PAYMENT_PENDING` → `PAYMENT_COMPLETED` (예약신청 단계에서는 불가).
    * 소유권 검증 → `syncOrderLifecycleById` → 조회 → 검증 → 갱신 → 훅 순서입니다.
    */
   async markPaymentCompleted(orderId: string, userId: string): Promise<{ id: string }> {
@@ -39,7 +45,7 @@ export class OrderUserActionService {
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderStatus: true, createdAt: true },
+      select: { orderStatus: true, createdAt: true, paymentPendingAt: true },
     });
     if (!order) {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
@@ -47,10 +53,14 @@ export class OrderUserActionService {
 
     const now = new Date();
     const current = order.orderStatus as OrderStatus;
-    const expired = isPaymentPendingWindowExpired(order.createdAt, now);
 
-    if (expired) {
-      if (current === OrderStatus.PAYMENT_PENDING) {
+    if (current === OrderStatus.CANCEL_COMPLETED) {
+      throw new BadRequestException(ORDER_ERROR_MESSAGES.PAYMENT_PENDING_EXPIRED);
+    }
+
+    if (current === OrderStatus.PAYMENT_PENDING) {
+      const windowStart = paymentPendingWindowStart(order.paymentPendingAt, order.createdAt);
+      if (isPaymentPendingWindowExpired(windowStart, now)) {
         await this.prisma.order.update({
           where: { id: orderId },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },
@@ -63,13 +73,6 @@ export class OrderUserActionService {
         });
         throw new BadRequestException(ORDER_ERROR_MESSAGES.PAYMENT_PENDING_EXPIRED);
       }
-      if (current === OrderStatus.CANCEL_COMPLETED) {
-        throw new BadRequestException(ORDER_ERROR_MESSAGES.PAYMENT_PENDING_EXPIRED);
-      }
-      LoggerUtil.log(
-        `입금완료 처리 실패: 만료 시점에 입금대기·취소완료 외 상태 - orderId: ${orderId}, status: ${current}`,
-      );
-      throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION);
     }
 
     if (current !== OrderStatus.PAYMENT_PENDING) {
@@ -91,7 +94,7 @@ export class OrderUserActionService {
   }
 
   /**
-   * 입금 전 사용자 취소. `PAYMENT_PENDING` → `CANCEL_COMPLETED`.
+   * 입금 전 사용자 취소. `RESERVATION_REQUESTED` 또는 `PAYMENT_PENDING` → `CANCEL_COMPLETED`.
    * 소유권 검증 → `syncOrderLifecycleById` → 조회 → 검증 → 갱신 → 훅 순서입니다.
    */
   async cancelBeforePayment(
@@ -107,7 +110,8 @@ export class OrderUserActionService {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    if (order.orderStatus !== OrderStatus.PAYMENT_PENDING) {
+    const beforeCancel = order.orderStatus as OrderStatus;
+    if (!ORDER_PRE_PAYMENT_WINDOW_STATUSES.has(beforeCancel)) {
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION);
     }
 
@@ -120,7 +124,7 @@ export class OrderUserActionService {
     });
     this.orderLifecycleHookService.afterOrderStatusTransition({
       orderId,
-      fromStatus: OrderStatus.PAYMENT_PENDING,
+      fromStatus: beforeCancel,
       toStatus: OrderStatus.CANCEL_COMPLETED,
       source: ORDER_STATUS_TRANSITION_SOURCE.USER_ACTION,
     });

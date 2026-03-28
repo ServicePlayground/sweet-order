@@ -6,16 +6,17 @@ function pad2(n: number) {
 }
 
 interface PaymentPendingCountdownProps {
-  createdAt: Date | string;
+  /** 입금 12시간 시계 기준 시각 (서버 `paymentPendingAt`, 레거시는 주문 `createdAt`) */
+  windowStartAt: Date | string;
 }
 
 /**
- * 입금대기 주문: 주문 생성 시각 기준 12시간 남은 시간을 1초 단위로 표시
+ * 입금대기 주문: 입금대기 진입 시각 기준 12시간 남은 시간을 1초 단위로 표시
  */
-export function PaymentPendingCountdown({ createdAt }: PaymentPendingCountdownProps) {
+export function PaymentPendingCountdown({ windowStartAt }: PaymentPendingCountdownProps) {
   const deadlineMs = useMemo(
-    () => new Date(createdAt).getTime() + PAYMENT_PENDING_VALIDITY_MS,
-    [createdAt],
+    () => new Date(windowStartAt).getTime() + PAYMENT_PENDING_VALIDITY_MS,
+    [windowStartAt],
   );
 
   const [, setTick] = useState(0);
@@ -33,7 +34,9 @@ export function PaymentPendingCountdown({ createdAt }: PaymentPendingCountdownPr
 
   return (
     <div className="mt-3 rounded-md border border-amber-200 bg-amber-50/90 px-3 py-2.5 text-sm">
-      <div className="font-semibold text-amber-900">입금 유효 시간 (주문 시각 기준 +12시간)</div>
+      <div className="font-semibold text-amber-900">
+        입금 유효 시간 (입금대기 진입 시각 기준 +12시간)
+      </div>
       {expired ? (
         <p className="mt-1 leading-relaxed text-amber-900">
           유효 시간이 지났습니다. 서버에서는 자동으로 취소완료 처리될 수 있어요. 화면이 맞지 않으면

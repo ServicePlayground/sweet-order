@@ -29,7 +29,7 @@ export class OrderSellerActionService {
    * 주문 상태 변경 (판매자용)
    * 자신이 소유한 스토어의 주문만 상태 변경 가능합니다.
    *
-   * 예약확정·픽업완료·노쇼·취소완료·취소환불대기·취소환불완료 중 하나입니다.
+   * 입금대기(예약 확인)·예약확정·픽업완료·노쇼·취소완료·취소환불대기·취소환불완료 중 하나입니다.
    * isSellerTransitionAllowed 규칙을 따릅니다.
    *
    * @param orderId - 주문 ID
@@ -99,6 +99,9 @@ export class OrderSellerActionService {
     }
 
     const data: Prisma.OrderUpdateInput = { orderStatus };
+    if (orderStatus === OrderStatus.PAYMENT_PENDING) {
+      data.paymentPendingAt = new Date();
+    }
     if (orderStatus === OrderStatus.CANCEL_COMPLETED && updateDto.sellerCancelReason) {
       data.sellerCancelReason = updateDto.sellerCancelReason.trim();
     }

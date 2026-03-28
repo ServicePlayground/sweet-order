@@ -4,6 +4,7 @@ import { OrderStatus } from "@apps/backend/modules/order/constants/order.constan
  * 판매자 PATCH로 설정 가능한 목표 상태
  */
 export const SELLER_SETTABLE_ORDER_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.PAYMENT_PENDING,
   OrderStatus.CONFIRMED,
   OrderStatus.PICKUP_COMPLETED,
   OrderStatus.NO_SHOW,
@@ -12,7 +13,12 @@ export const SELLER_SETTABLE_ORDER_STATUSES: ReadonlySet<OrderStatus> = new Set(
   OrderStatus.CANCEL_REFUND_COMPLETED,
 ]);
 
-/** 예약확정(CONFIRMED)으로 바꿀 때만 허용되는 현재 상태 */
+/** 입금대기(PAYMENT_PENDING) — 판매자가 예약신청(RESERVATION_REQUESTED)을 확인한 뒤에만 설정 */
+export const SELLER_PAYMENT_PENDING_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.RESERVATION_REQUESTED,
+]);
+
+/** 예약확정(CONFIRMED) — 입금대기(입금 전 확정) 또는 입금완료 후 */
 export const SELLER_CONFIRMED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
   OrderStatus.PAYMENT_PENDING,
   OrderStatus.PAYMENT_COMPLETED,
@@ -29,8 +35,9 @@ export const SELLER_NO_SHOW_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = ne
   OrderStatus.PICKUP_PENDING,
 ]);
 
-/** 취소완료 — 판매자가 입금대기에서만 예약 취소 */
+/** 취소완료 — 판매자가 예약신청·입금대기에서 예약 취소 */
 export const SELLER_CANCEL_COMPLETED_ALLOWED_FROM_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.RESERVATION_REQUESTED,
   OrderStatus.PAYMENT_PENDING,
 ]);
 
@@ -50,6 +57,17 @@ export const USER_CANCEL_REFUND_REQUEST_SOURCE_STATUSES: ReadonlySet<OrderStatus
   OrderStatus.PICKUP_PENDING,
 ]);
 
+/** 입금 전 사용자 취소 가능 상태 (예약신청·입금대기) */
+export const ORDER_PRE_PAYMENT_WINDOW_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.RESERVATION_REQUESTED,
+  OrderStatus.PAYMENT_PENDING,
+]);
+
+/** 예약신청 단계에서만 사용자가 픽업일·주문 항목(옵션)을 수정할 수 있음 */
+export const RESERVATION_USER_EDIT_ALLOWED_STATUSES: ReadonlySet<OrderStatus> = new Set([
+  OrderStatus.RESERVATION_REQUESTED,
+]);
+
 export function isSellerSettableOrderStatus(status: OrderStatus): boolean {
   return SELLER_SETTABLE_ORDER_STATUSES.has(status);
 }
@@ -60,6 +78,12 @@ export function isSellerSettableOrderStatus(status: OrderStatus): boolean {
  */
 export function isSellerTransitionAllowed(from: OrderStatus, to: OrderStatus): boolean {
   if (!isSellerSettableOrderStatus(to)) {
+    return false;
+  }
+  if (
+    to === OrderStatus.PAYMENT_PENDING &&
+    !SELLER_PAYMENT_PENDING_ALLOWED_FROM_STATUSES.has(from)
+  ) {
     return false;
   }
   if (to === OrderStatus.CONFIRMED && !SELLER_CONFIRMED_ALLOWED_FROM_STATUSES.has(from)) {
