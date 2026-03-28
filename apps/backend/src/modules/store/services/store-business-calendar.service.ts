@@ -1,0 +1,159 @@
+import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { PrismaService } from "@apps/backend/infra/database/prisma.service";
+import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { ORDER_STATUSES_BLOCKING_STORE_BUSINESS_CALENDAR_CHANGE } from "@apps/backend/modules/store/constants/store-business-calendar.constants";
+import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
+import {
+  StoreBusinessCalendarDto,
+  UpdateStoreBusinessCalendarResponseDto,
+} from "@apps/backend/modules/store/dto/store-business-calendar.dto";
+import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
+import { isStoreBusinessFullDayWindow } from "@apps/backend/modules/store/constants/store-business-calendar.constants";
+import {
+  businessCalendarStateFromStoreRow,
+  parseHalfHourTimeToMinutes,
+  pickupFitsBusinessCalendarState,
+  type StoreBusinessCalendarState,
+} from "@apps/backend/modules/store/utils/store-business-calendar.util";
+
+/**
+ * 스토어 영업 캘린더(정기 휴무·표준 시간·일별 예외) 갱신.
+ * 픽업 예약이 걸린 슬롯과 맞지 않으면 거절한다.
+ */
+@Injectable()
+export class StoreBusinessCalendarService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async updateForSeller(
+    storeId: string,
+    dto: StoreBusinessCalendarDto,
+    user: JwtVerifiedPayload,
+  ): Promise<UpdateStoreBusinessCalendarResponseDto> {
+    await StoreOwnershipUtil.verifyStoreOwnership(this.prisma, storeId, user.sub);
+
+    this.validateTimeRanges(dto);
+
+    const proposedState = this.dtoToState(dto);
+
+    const conflicting = await this.findConflictingPickupOrders(storeId, proposedState);
+    if (conflicting.length > 0) {
+      LoggerUtil.log(
+        `영업 캘린더 변경 충돌 - storeId: ${storeId}, orderNumbers: ${conflicting.map((c) => c.orderNumber).join(",")}`,
+      );
+      throw new ConflictException({
+        message: STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_CONFLICTS_WITH_EXISTING_PICKUP,
+        conflictingOrderNumbers: conflicting.map((c) => c.orderNumber),
+      });
+    }
+
+    const normalizedOverrides = this.normalizeOverridesFromDto(dto.dayOverrides);
+
+    await this.prisma.store.update({
+      where: { id: storeId },
+      data: {
+        weeklyClosedWeekdays: [...new Set(dto.weeklyClosedWeekdays)].sort((a, b) => a - b),
+        standardOpenTime: dto.standardOpenTime,
+        standardCloseTime: dto.standardCloseTime,
+        businessCalendarOverrides: normalizedOverrides as unknown as Prisma.InputJsonValue,
+      },
+    });
+
+    const updated = await this.prisma.store.findUniqueOrThrow({ where: { id: storeId } });
+    const state = businessCalendarStateFromStoreRow(updated);
+    return { businessCalendar: this.stateToResponseDto(state) };
+  }
+
+  private dtoToState(dto: StoreBusinessCalendarDto): StoreBusinessCalendarState {
+    return {
+      weeklyClosedWeekdays: [...new Set(dto.weeklyClosedWeekdays)].sort((a, b) => a - b),
+      standardOpenTime: dto.standardOpenTime,
+      standardCloseTime: dto.standardCloseTime,
+      dayOverrides: this.normalizeOverridesFromDto(dto.dayOverrides),
+    };
+  }
+
+  private normalizeOverridesFromDto(
+    dayOverrides: StoreBusinessCalendarDto["dayOverrides"],
+  ): { date: string; isOpen: boolean; openTime?: string; closeTime?: string }[] {
+    const map = new Map<
+      string,
+      { date: string; isOpen: boolean; openTime?: string; closeTime?: string }
+    >();
+    for (const o of dayOverrides) {
+      map.set(o.date, {
+        date: o.date,
+        isOpen: o.isOpen,
+        openTime: o.openTime,
+        closeTime: o.closeTime,
+      });
+    }
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([, v]) => v);
+  }
+
+  private stateToResponseDto(state: StoreBusinessCalendarState): StoreBusinessCalendarDto {
+    return {
+      weeklyClosedWeekdays: state.weeklyClosedWeekdays,
+      standardOpenTime: state.standardOpenTime,
+      standardCloseTime: state.standardCloseTime,
+      dayOverrides: state.dayOverrides.map((o) => ({
+        date: o.date,
+        isOpen: o.isOpen,
+        openTime: o.openTime,
+        closeTime: o.closeTime,
+      })),
+    };
+  }
+
+  private validateTimeRanges(dto: StoreBusinessCalendarDto) {
+    const so = parseHalfHourTimeToMinutes(dto.standardOpenTime);
+    const sc = parseHalfHourTimeToMinutes(dto.standardCloseTime);
+    const standardFullDay = isStoreBusinessFullDayWindow(
+      dto.standardOpenTime,
+      dto.standardCloseTime,
+    );
+    if (!standardFullDay && so >= sc) {
+      throw new BadRequestException(STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_STANDARD_TIME_ORDER);
+    }
+    for (const o of dto.dayOverrides) {
+      if (o.isOpen) {
+        if (!o.openTime || !o.closeTime) {
+          throw new BadRequestException(
+            STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_OVERRIDE_OPEN_REQUIRES_TIMES,
+          );
+        }
+        const overrideFullDay = isStoreBusinessFullDayWindow(o.openTime, o.closeTime);
+        if (
+          !overrideFullDay &&
+          parseHalfHourTimeToMinutes(o.openTime) >= parseHalfHourTimeToMinutes(o.closeTime)
+        ) {
+          throw new BadRequestException(STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_OVERRIDE_TIME_ORDER);
+        }
+      }
+    }
+  }
+
+  private async findConflictingPickupOrders(
+    storeId: string,
+    proposed: StoreBusinessCalendarState,
+  ): Promise<{ orderNumber: string }[]> {
+    const orders = await this.prisma.order.findMany({
+      where: {
+        storeId,
+        orderStatus: { in: [...ORDER_STATUSES_BLOCKING_STORE_BUSINESS_CALENDAR_CHANGE] },
+        pickupDate: { not: null },
+      },
+      select: { orderNumber: true, pickupDate: true },
+    });
+
+    const bad: { orderNumber: string }[] = [];
+    for (const row of orders) {
+      if (!row.pickupDate) continue;
+      if (!pickupFitsBusinessCalendarState(row.pickupDate, proposed)) {
+        bad.push({ orderNumber: row.orderNumber });
+      }
+    }
+    return bad;
+  }
+}

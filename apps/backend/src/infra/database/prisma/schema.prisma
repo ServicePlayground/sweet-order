@@ -205,6 +205,16 @@ model Store {
   kakaoChannelId String? @map("kakao_channel_id") // 카카오채널 ID
   instagramId    String? @map("instagram_id") // 인스타그램 ID
 
+  // 비즈니스 필드 - 영업 캘린더 (판매자 설정, Asia/Seoul 기준)
+  /** 정기 휴무 요일 (0=일 … 6=토, 프론트 Date.getDay()와 동일) */
+  weeklyClosedWeekdays Int[] @default([]) @map("weekly_closed_weekdays")
+  /** 표준 영업 시작 HH:mm (30분 단위). 00:00+00:00이면 하루 전체 영업 */
+  standardOpenTime  String @default("00:00") @map("standard_open_time") @db.VarChar(5)
+  /** 표준 영업 종료 HH:mm. 00:00+00:00이면 하루 전체, 그 외는 픽업 [시작, 종료) */
+  standardCloseTime String @default("00:00") @map("standard_close_time") @db.VarChar(5)
+  /** 날짜별 예외 [{ date: "YYYY-MM-DD", isOpen, openTime?, closeTime? }] */
+  businessCalendarOverrides Json @default("[]") @map("business_calendar_overrides")
+
   // 시스템 필드
   likeCount Int      @default(0) @map("like_count") // 좋아요 개수
   createdAt DateTime @default(now()) @map("created_at")

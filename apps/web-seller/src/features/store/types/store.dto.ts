@@ -88,8 +88,30 @@ export interface StoreResponseDto extends StoreAddressDto {
   productRepresentativeImageUrls: string[];
   /** 상품 중 최소 금액 (노출·판매중인 상품만, 없으면 null) */
   minProductPrice: number | null;
+  /** 영업 캘린더 (백엔드 StoreResponseDto.businessCalendar, 구버전 API는 생략될 수 있음) */
+  businessCalendar?: StoreBusinessCalendarDto;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** 날짜별 영업 예외 (백엔드 StoreBusinessDayOverrideDto) */
+export interface StoreBusinessDayOverrideDto {
+  date: string;
+  isOpen: boolean;
+  openTime?: string;
+  closeTime?: string;
+}
+
+/** 영업 캘린더 (백엔드 StoreBusinessCalendarDto) */
+export interface StoreBusinessCalendarDto {
+  weeklyClosedWeekdays: number[];
+  standardOpenTime: string;
+  standardCloseTime: string;
+  dayOverrides: StoreBusinessDayOverrideDto[];
+}
+
+export interface UpdateStoreBusinessCalendarResponseDto {
+  businessCalendar: StoreBusinessCalendarDto;
 }
 
 /** 스토어 생성 요청 (3단계: 사업자진위 + 통신판매 + 스토어정보) */

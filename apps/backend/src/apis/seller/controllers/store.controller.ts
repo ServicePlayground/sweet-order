@@ -39,6 +39,10 @@ import {
   StoreListResponseDto,
 } from "@apps/backend/modules/store/dto/store-list.dto";
 import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
+import {
+  StoreBusinessCalendarDto,
+  UpdateStoreBusinessCalendarResponseDto,
+} from "@apps/backend/modules/store/dto/store-business-calendar.dto";
 
 /**
  * 스토어 관련 컨트롤러
@@ -49,6 +53,8 @@ import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.d
   UpdateStoreResponseDto,
   StoreListResponseDto,
   StoreResponseDto,
+  StoreBusinessCalendarDto,
+  UpdateStoreBusinessCalendarResponseDto,
 )
 @Controller(`${USER_ROLES.SELLER}/store`)
 @Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // USER, SELLER, ADMIN 모두 접근 가능
@@ -168,6 +174,42 @@ export class SellerStoreController {
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     return await this.storeService.getStoreByIdForSeller(id, req.user);
+  }
+
+  /**
+   * 스토어 영업 캘린더 수정 API
+   * 정기 휴무·표준 영업 시간·날짜별 예외를 저장합니다.
+   * 예약신청·입금대기·입금완료·예약확정·픽업대기 상태이면서 기존 픽업 시각이 새 설정과 맞지 않으면 409로 거절됩니다.
+   */
+  @Put(":id/business-calendar")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 스토어 영업 캘린더 수정",
+    description:
+      "정기 휴무 요일(0=일…6=토), 표준 영업 시간(HH:mm, 30분 단위), 날짜별 예외를 저장합니다. 픽업 시각은 Asia/Seoul 기준. 표준(또는 일별 영업)이 00:00~00:00이면 하루 전체(모든 시각)로 해석하고, 그 외에는 종료 시각은 픽업 구간 상한(미포함)입니다.",
+  })
+  @SwaggerResponse(200, { dataDto: UpdateStoreBusinessCalendarResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_STANDARD_TIME_ORDER),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+  })
+  @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
+  @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
+  @SwaggerResponse(409, {
+    dataExample: {
+      message: STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_CONFLICTS_WITH_EXISTING_PICKUP,
+      conflictingOrderNumbers: ["ORD-20260328-0001"],
+    },
+  })
+  async updateBusinessCalendar(
+    @Param("id") id: string,
+    @Body() body: StoreBusinessCalendarDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ) {
+    return await this.storeService.updateBusinessCalendarForSeller(id, body, req.user);
   }
 
   /**

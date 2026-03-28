@@ -6,14 +6,14 @@ import {
 } from "@apps/backend/modules/order/dto/order-list.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
-import { buildOrderOrderBy } from "@apps/backend/modules/order/utils/order-list-query.util";
+import {
+  buildOrderOrderBy,
+  mergeOrderPickupDateConditions,
+} from "@apps/backend/modules/order/utils/order-list-query.util";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
-import {
-  ORDER_ERROR_MESSAGES,
-  OrderType,
-} from "@apps/backend/modules/order/constants/order.constants";
+import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
 
@@ -36,8 +36,19 @@ export class OrderSellerListService {
     query: OrderListRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<OrderListResponseDto> {
-    const { page, limit, sortBy, storeId, orderStatus, startDate, endDate, orderNumber, type } =
-      query;
+    const {
+      page,
+      limit,
+      sortBy,
+      storeId,
+      orderStatus,
+      startDate,
+      endDate,
+      orderNumber,
+      type,
+      pickupStartDate,
+      pickupEndDate,
+    } = query;
 
     // 사용자가 소유한 스토어 목록 조회
     const userStores = await this.prisma.store.findMany({
@@ -102,17 +113,11 @@ export class OrderSellerListService {
       };
     }
 
-    // 픽업 예정/지난 예약 필터 (픽업 일시와 현재 시각 비교)
-    if (type) {
-      const now = new Date();
-      if (type === OrderType.UPCOMING) {
-        // 픽업 예정: 픽업 일시 >= 현재 → 아직 픽업 시점이 지나지 않음
-        where.pickupDate = { gte: now };
-      } else if (type === OrderType.PAST) {
-        // 지난 예약: 픽업 일시 < 현재 → 픽업 시점이 이미 지남
-        where.pickupDate = { lt: now };
-      }
-    }
+    mergeOrderPickupDateConditions(where, {
+      type,
+      pickupStartDate,
+      pickupEndDate,
+    });
 
     const totalItems = await this.prisma.order.count({ where });
     const orderBy = buildOrderOrderBy(sortBy);

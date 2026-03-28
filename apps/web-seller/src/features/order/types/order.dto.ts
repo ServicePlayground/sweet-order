@@ -99,6 +99,10 @@ export interface OrderListRequestDto {
   endDate?: string;
   orderNumber?: string;
   type?: OrderType;
+  /** YYYY-MM-DD, Asia/Seoul 달력 (백엔드 pickupStartDate) */
+  pickupStartDate?: string;
+  /** YYYY-MM-DD, Asia/Seoul 달력 (백엔드 pickupEndDate) */
+  pickupEndDate?: string;
 }
 
 /** 주문 목록 조회 응답 */

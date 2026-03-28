@@ -4,6 +4,10 @@ import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.d
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { EnableStatus } from "@apps/backend/modules/product/constants/product.constants";
+import {
+  businessCalendarStateFromStoreRow,
+  toStoreBusinessCalendarApiShape,
+} from "@apps/backend/modules/store/utils/store-business-calendar.util";
 
 /**
  * 스토어 매핑 유틸리티
@@ -140,6 +144,10 @@ export class StoreMapperUtil {
       const saleablePrices = storeSaleablePrices.get(store.id) ?? [];
       const minProductPrice = saleablePrices.length > 0 ? Math.min(...saleablePrices) : null;
 
+      const businessCalendar = toStoreBusinessCalendarApiShape(
+        businessCalendarStateFromStoreRow(store),
+      );
+
       return {
         id: store.id,
         userId: store.userId,
@@ -175,6 +183,7 @@ export class StoreMapperUtil {
         totalReviewCount,
         productRepresentativeImageUrls,
         minProductPrice,
+        businessCalendar,
         createdAt: store.createdAt,
         updatedAt: store.updatedAt,
       };

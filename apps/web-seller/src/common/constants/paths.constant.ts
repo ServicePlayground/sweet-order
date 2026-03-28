@@ -8,6 +8,7 @@ import { StoreDetailProductDetailPage } from "@/apps/web-seller/pages/store/deta
 // import { StoreDetailChatListPage } from "@/apps/web-seller/pages/store/detail/chat/List";
 // import { StoreDetailChatRoomPage } from "@/apps/web-seller/pages/store/detail/chat/Room";
 import { StoreDetailEditPage } from "@/apps/web-seller/pages/store/detail/Edit";
+import { StoreDetailCalendarPage } from "@/apps/web-seller/pages/store/detail/Calendar";
 import { StoreDetailFeedListPage } from "@/apps/web-seller/pages/store/detail/feed/List";
 import { StoreDetailFeedCreatePage } from "@/apps/web-seller/pages/store/detail/feed/Create";
 import { StoreDetailFeedDetailPage } from "@/apps/web-seller/pages/store/detail/feed/Detail";
@@ -41,6 +42,7 @@ export const ROUTES = {
   STORE_DETAIL_ORDERS_DETAIL: (storeId: string, orderId: string) =>
     `/stores/${storeId}/orders/${orderId}`,
   STORE_DETAIL_EDIT: (storeId: string) => `/stores/${storeId}/edit`,
+  STORE_DETAIL_CALENDAR: (storeId: string) => `/stores/${storeId}/calendar`,
   // 인증 관련 경로
   AUTH: {
     LOGIN: "/auth/login",
@@ -92,4 +94,5 @@ export const ADMIN_ROUTE_CONFIG = [
     element: StoreDetailOrderDetailPage,
   },
   { path: ROUTES.STORE_DETAIL_EDIT(":storeId"), element: StoreDetailEditPage },
+  { path: ROUTES.STORE_DETAIL_CALENDAR(":storeId"), element: StoreDetailCalendarPage },
 ] as const;

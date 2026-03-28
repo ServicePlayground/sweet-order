@@ -3,6 +3,8 @@ import {
   CreateStoreRequestDto,
   CreateStoreResponseDto,
   StoreResponseDto,
+  StoreBusinessCalendarDto,
+  UpdateStoreBusinessCalendarResponseDto,
   UpdateStoreRequestDto,
   UpdateStoreResponseDto,
   GetSellerStoresRequestDto,
@@ -34,6 +36,14 @@ export const storeApi = {
     request: UpdateStoreRequestDto,
   ): Promise<UpdateStoreResponseDto> => {
     const response = await sellerClient.put(`/store/${storeId}`, request);
+    return response.data.data;
+  },
+
+  updateBusinessCalendar: async (
+    storeId: string,
+    request: StoreBusinessCalendarDto,
+  ): Promise<UpdateStoreBusinessCalendarResponseDto> => {
+    const response = await sellerClient.put(`/store/${storeId}/business-calendar`, request);
     return response.data.data;
   },
 };

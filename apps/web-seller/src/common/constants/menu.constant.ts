@@ -35,7 +35,10 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
     {
       text: "스토어",
       icon: React.createElement(Store, { className: "w-5 h-5" }),
-      children: [{ text: "스토어 수정", path: ROUTES.STORE_DETAIL_EDIT(storeId) }],
+      children: [
+        { text: "스토어 수정", path: ROUTES.STORE_DETAIL_EDIT(storeId) },
+        { text: "스토어 캘린더", path: ROUTES.STORE_DETAIL_CALENDAR(storeId) },
+      ],
     },
     {
       text: "상품",
