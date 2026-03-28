@@ -101,7 +101,7 @@ export default function QnaPage() {
             <p className="px-5 py-2 text-xs text-gray-500">{section.category}</p>
             <ul>
               {section.items.map((item) => (
-                <li key={item.id} className="border-b border-gray-100">
+                <li key={item.id} className={expandedId === item.id ? "" : "border-b border-gray-100"}>
                   <button
                     type="button"
                     onClick={() => handleToggle(item.id)}
@@ -118,8 +118,8 @@ export default function QnaPage() {
                     />
                   </button>
                   {expandedId === item.id && (
-                    <div className="pb-5 px-5">
-                      <p className="text-sm text-gray-700 leading-[160%] whitespace-pre-line">
+                    <div className="px-5">
+                      <p className="px-3 py-4 text-sm text-gray-900 bg-gray-50 rounded-lg leading-[160%] whitespace-pre-line">
                         {item.answer}
                       </p>
                     </div>

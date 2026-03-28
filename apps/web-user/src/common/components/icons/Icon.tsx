@@ -50,6 +50,10 @@ import FilterActive from "./icons/filter-active.svg";
 import Line1 from "./icons/line1.svg";
 import Handle from "./icons/handle.svg";
 import Sort from "./icons/sort.svg";
+import ReviewFill from "./icons/review_fill.svg";
+import Pencil from "./icons/pencil.svg";
+import ReviewQna from "./icons/review_qna.svg";
+import Copy from "./icons/copy.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -109,6 +113,10 @@ export const iconTypes = {
   line1: Line1,
   handle: Handle,
   sort: Sort,
+  reviewFill: ReviewFill,
+  pencil: Pencil,
+  reviewQna: ReviewQna,
+  copy: Copy,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

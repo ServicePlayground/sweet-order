@@ -11,14 +11,20 @@ import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { MyReviewsSkeleton } from "@/apps/web-user/common/components/skeleton/MyReviewsSkeleton";
 import type { Review, MyReview } from "@/apps/web-user/features/review/types/review.type";
+import Link from "next/link";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { useWritableReviews } from "@/apps/web-user/features/review/hooks/queries/useWritableReviews";
 
 export default function MyReviewsPage() {
   const [sortBy] = useState<ReviewSortBy>(ReviewSortBy.LATEST);
   const { data } = useMyReviews({ sortBy });
   const { mutate: deleteReview } = useDeleteMyReview();
+  const { data: writableData } = useWritableReviews();
 
   const reviews = data?.data ?? [];
   const totalCount = data?.meta?.totalItems ?? 0;
+  const writableCount = writableData?.meta?.totalItems ?? 0;
 
   const [isReviewDetailModalOpen, setIsReviewDetailModalOpen] = useState(false);
   const [selectedReviewId, setSelectedReviewId] = useState<string | undefined>(undefined);
@@ -49,6 +55,13 @@ export default function MyReviewsPage() {
   return (
     <div>
       <Header variant="back-title" title={`내 후기${data ? ` ${totalCount}` : ""}`} />
+      <div className="px-5 py-3">
+        <Link href={PATHS.REVIEW_LIST} className="flex items-center gap-1.5 border border-primary-100 bg-primary-50 rounded-2xl text-primary py-3.5 px-4">
+          <Icon name="reviewFill" width={20} height={20} className="text-primary" />
+          <span className="text-sm font-bold">작성 가능 후기 {writableCount}개</span>
+          <Icon name="arrow" width={20} height={20} className="text-primary rotate-90 ml-auto" />
+        </Link>
+      </div>
 
       {/* 후기 목록 */}
       <div className="px-5">

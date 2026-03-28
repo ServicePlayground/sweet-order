@@ -3,7 +3,8 @@
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
-import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
+import { SortBy, Product, ProductCategoryType } from "@/apps/web-user/features/product/types/product.type";
+import type { MapListSortBy } from "@/apps/web-user/features/store/utils/map.util";
 import { CakeListItem } from "@/apps/web-user/features/product/components/cards/CakeListItem";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-user/common/utils/pagination.util";
@@ -11,15 +12,32 @@ import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
 interface SearchProductListSectionProps {
   search?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  productCategoryTypes?: ProductCategoryType[];
+  sortBy?: MapListSortBy;
 }
 
-export function SearchProductListSection({ search }: SearchProductListSectionProps) {
+function toProductSortBy(sortBy: MapListSortBy): SortBy {
+  return sortBy === "review" ? SortBy.RATING_AVG : SortBy.POPULAR;
+}
+
+export function SearchProductListSection({
+  search,
+  minPrice,
+  maxPrice,
+  productCategoryTypes,
+  sortBy = "distance",
+}: SearchProductListSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useProductList({
     search: search?.trim() || undefined,
-    sortBy: SortBy.POPULAR,
+    sortBy: toProductSortBy(sortBy),
+    minPrice,
+    maxPrice,
+    productCategoryTypes,
   });
 
   useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage, loadMoreRef });

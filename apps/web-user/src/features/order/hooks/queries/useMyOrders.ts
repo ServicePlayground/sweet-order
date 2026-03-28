@@ -4,12 +4,14 @@ import { orderQueryKeys } from "@/apps/web-user/features/order/constants/orderQu
 import { MyOrdersResponse } from "@/apps/web-user/features/order/types/order.type";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 
-export function useMyOrders() {
+export function useMyOrders(params?: {
+  type?: "UPCOMING" | "PAST";
+}) {
   const { isAuthenticated } = useAuthStore();
 
   return useQuery<MyOrdersResponse>({
-    queryKey: orderQueryKeys.mypage(),
-    queryFn: orderApi.getMyOrders,
+    queryKey: orderQueryKeys.mypage(params?.type),
+    queryFn: () => orderApi.getMyOrders(params),
     enabled: isAuthenticated,
   });
 }

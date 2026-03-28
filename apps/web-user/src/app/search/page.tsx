@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { SearchProductListSection } from "@/apps/web-user/features/product/components/sections/SearchProductListSection";
 import { SearchStoreListSection } from "@/apps/web-user/features/store/components/sections/SearchStoreListSection";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { SearchFilterSheet } from "@/apps/web-user/features/search/components/SearchFilterSheet";
+import { SearchFilterSheet, type SearchSortBy } from "@/apps/web-user/features/search/components/SearchFilterSheet";
+import type { StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
 
 const RECENT_SEARCHES_KEY = "recentSearches";
 const MAX_RECENT = 10;
@@ -32,6 +33,8 @@ export default function SearchPage() {
   const [submittedTerm, setSubmittedTerm] = useState(searchParams.get("q") || "");
   const [activeTab, setActiveTab] = useState<"product" | "store">("product");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [listFilter, setListFilter] = useState<StoreListFilter>({});
+  const [sortBy, setSortBy] = useState<SearchSortBy>("distance");
 
   useEffect(() => {
     const q = searchParams.get("q");
@@ -108,15 +111,28 @@ export default function SearchPage() {
           </div>
           <div className="px-5">
             {activeTab === "product" ? (
-              <SearchProductListSection search={submittedTerm} />
+              <SearchProductListSection
+                search={submittedTerm}
+                minPrice={listFilter.minPrice}
+                maxPrice={listFilter.maxPrice}
+                productCategoryTypes={listFilter.productCategoryTypes}
+                sortBy={sortBy}
+              />
             ) : (
-              <SearchStoreListSection search={submittedTerm} />
+              <SearchStoreListSection search={submittedTerm} filter={listFilter} sortBy={sortBy} />
             )}
           </div>
         </>
       )}
 
-      <SearchFilterSheet isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+      <SearchFilterSheet
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        filter={listFilter}
+        onFilterChange={setListFilter}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+      />
     </div>
   );
 }
