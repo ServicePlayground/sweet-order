@@ -1,5 +1,7 @@
-import type { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import type { StoreBusinessCalendar, StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { calculateDistance } from "@/apps/web-user/common/utils/distance.util";
+import { MAP_MARKER_LABEL_TEXT_SHADOW } from "@/apps/web-user/features/store/constants/map.constant";
+import { isStoreOpenForPickupNow } from "@/apps/web-user/features/store/utils/store-business-calendar.util";
 
 /** 지도 목록 정렬 기준 */
 export type MapListSortBy = "distance" | "review";
@@ -40,6 +42,19 @@ export function sortStoresForMapList(
     });
   }
   return stores;
+}
+
+/** 플랫폼 스토어 마커 라벨 아래 영업 상태 HTML (픽업/예약가능 · 마감) */
+export function buildMapPlatformStoreStatusOverlayHtml(
+  calendar: StoreBusinessCalendar | undefined,
+): string {
+  if (!calendar) return "";
+  const open = isStoreOpenForPickupNow(calendar);
+  const s = MAP_MARKER_LABEL_TEXT_SHADOW;
+  if (open) {
+    return `<p class="text-center text-[11px] leading-[1.4] font-bold" style="color:#009BF5;text-shadow:${s}">픽업/예약가능</p>`;
+  }
+  return `<p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow:${s}">마감</p>`;
 }
 
 /** 지도 오버레이용 텍스트 XSS 방지 이스케이프 */

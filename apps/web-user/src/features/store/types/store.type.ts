@@ -1,5 +1,20 @@
 import type { ProductCategoryType } from "@/apps/web-user/features/product/types/product.type";
 
+/** 영업 캘린더 (백엔드 StoreBusinessCalendarDto와 동일) */
+export interface StoreBusinessDayOverride {
+  date: string;
+  isOpen: boolean;
+  openTime?: string;
+  closeTime?: string;
+}
+
+export interface StoreBusinessCalendar {
+  weeklyClosedWeekdays: number[];
+  standardOpenTime: string;
+  standardCloseTime: string;
+  dayOverrides: StoreBusinessDayOverride[];
+}
+
 export interface StoreListResponse {
   data: StoreInfo[];
   meta: {
@@ -57,6 +72,8 @@ export interface StoreInfo {
   productRepresentativeImageUrls: string[];
   // 상품 중 최소 금액 (노출·판매중인 상품만, 없으면 null)
   minProductPrice: number | null;
+  /** 영업 캘린더 (스토어 목록·상세 API) */
+  businessCalendar?: StoreBusinessCalendar;
   createdAt: Date;
   updatedAt: Date;
 }

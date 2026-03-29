@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import type { StoreBusinessCalendar, StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import { isStoreOpenForPickupNow } from "@/apps/web-user/features/store/utils/store-business-calendar.util";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { calculateDistance, formatDistance } from "@/apps/web-user/common/utils/distance.util";
@@ -14,6 +15,49 @@ import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutation
 const DEFAULT_IMAGE_WIDTH = 134;
 const DEFAULT_IMAGE_HEIGHT = 100;
 const DEFAULT_IMAGE_GAP = 6;
+
+const MAP_STORE_BADGE_TEXT = {
+  fontWeight: 700,
+  fontSize: 11,
+  lineHeight: "140%" as const,
+  padding: "2px 4px",
+  borderRadius: 4,
+};
+
+function MapStoreBusinessBadge({ calendar }: { calendar: StoreBusinessCalendar }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((n) => n + 1), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const open = isStoreOpenForPickupNow(calendar);
+  if (open) {
+    return (
+      <span
+        className="shrink-0 whitespace-nowrap"
+        style={{
+          ...MAP_STORE_BADGE_TEXT,
+          background: "#EBF8FF",
+          color: "#009BF5",
+        }}
+      >
+        픽업/예약 가능
+      </span>
+    );
+  }
+  return (
+    <span
+      className="shrink-0 whitespace-nowrap"
+      style={{
+        ...MAP_STORE_BADGE_TEXT,
+        background: "#F5F5F5",
+        color: "#82817D",
+      }}
+    >
+      마감
+    </span>
+  );
+}
 
 /** 목록용: useUserLocation 호출 없이 userLocation을 props로만 받음 */
 export interface MapStoreCardContentProps {
@@ -125,13 +169,18 @@ export function MapStoreCardContent({
 
       <div>
         {productImages.length === 0 && <div className="pt-2" />}
-        <div className="flex items-center justify-between gap-2">
-          <h3
-            className="font-bold truncate flex-1 min-w-0 text-gray-900"
-            style={{ fontSize: 16, lineHeight: "140%", marginBottom: 6 }}
-          >
-            {store.name}
-          </h3>
+        <div className="flex items-center justify-between gap-2" style={{ marginBottom: 6 }}>
+          <div className="flex min-w-0 flex-1 items-center" style={{ gap: 4 }}>
+            <h3
+              className="min-w-0 shrink grow-0 truncate font-bold text-gray-900"
+              style={{ fontSize: 16, lineHeight: "140%" }}
+            >
+              {store.name}
+            </h3>
+            {store.businessCalendar ? (
+              <MapStoreBusinessBadge calendar={store.businessCalendar} />
+            ) : null}
+          </div>
           <button
             type="button"
             onClick={handleLikeToggle}

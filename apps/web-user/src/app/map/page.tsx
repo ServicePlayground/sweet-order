@@ -24,6 +24,7 @@ import {
   DEFAULT_MAP_CENTER,
   MAP_BOUNDS_PADDING,
   KAKAO_PLACES_KEYWORD,
+  MAP_MARKER_LABEL_TEXT_SHADOW,
 } from "@/apps/web-user/features/store/constants/map.constant";
 import {
   escapeHtmlForOverlay,
@@ -31,6 +32,7 @@ import {
   isStoreNameSimilar,
   getStoresInMapBounds,
   filterStoresWithCoordinates,
+  buildMapPlatformStoreStatusOverlayHtml,
   type MapListSortBy,
 } from "@/apps/web-user/features/store/utils/map.util";
 
@@ -183,15 +185,27 @@ export default function MapPage() {
       });
 
       const safeName = escapeHtmlForOverlay(store.name ?? "");
+      const statusHtml = buildMapPlatformStoreStatusOverlayHtml(store.businessCalendar);
       const overlay = new window.kakao.maps.CustomOverlay({
         map,
         position,
         yAnchor: 0,
-        content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p></div>`,
+        content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow:${MAP_MARKER_LABEL_TEXT_SHADOW}">${safeName}</p>${statusHtml}</div>`,
       });
       platformOverlaysRef.current.push(overlay);
     });
   }, [getStoresToShow]);
+
+  const drawPlatformStoreMarkersRef = useRef(drawPlatformStoreMarkers);
+  drawPlatformStoreMarkersRef.current = drawPlatformStoreMarkers;
+
+  /** 영업 상태 라벨이 시간 경과에 맞게 갱신되도록 1분마다 플랫폼 마커·오버레이 재생성 */
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      drawPlatformStoreMarkersRef.current();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   /** 현재위치 오버레이(점) 표시/제거 */
   const updateUserLocationMarker = useCallback(
@@ -279,7 +293,7 @@ export default function MapPage() {
                 map,
                 position,
                 yAnchor: 0,
-                content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p><p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">미입점</p></div>`,
+                content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow:${MAP_MARKER_LABEL_TEXT_SHADOW}">${safeName}</p><p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow:${MAP_MARKER_LABEL_TEXT_SHADOW}">미입점</p></div>`,
               }),
             );
           });
