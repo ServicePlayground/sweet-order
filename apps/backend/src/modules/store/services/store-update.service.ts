@@ -4,6 +4,7 @@ import { UpdateStoreRequestDto } from "@apps/backend/modules/store/dto/store-upd
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
 
 /**
  * 스토어 수정 서비스
@@ -33,6 +34,8 @@ export class StoreUpdateService {
     const updateData: {
       logoImageUrl?: string;
       description?: string;
+      kakaoChannelId?: string;
+      instagramId?: string;
       name: string;
       address: string;
       roadAddress: string;
@@ -40,6 +43,9 @@ export class StoreUpdateService {
       zonecode: string;
       latitude: number;
       longitude: number;
+      bankAccountNumber: string;
+      bankName: StoreBankName;
+      accountHolderName: string;
     } = {
       // 필수 필드
       name: updateStoreDto.name,
@@ -49,6 +55,9 @@ export class StoreUpdateService {
       zonecode: updateStoreDto.zonecode,
       latitude: updateStoreDto.latitude,
       longitude: updateStoreDto.longitude,
+      bankAccountNumber: updateStoreDto.bankAccountNumber.trim(),
+      bankName: updateStoreDto.bankName,
+      accountHolderName: updateStoreDto.accountHolderName.trim(),
     };
 
     // 선택적 필드: 값이 제공된 경우에만 업데이트
@@ -57,6 +66,12 @@ export class StoreUpdateService {
     }
     if (updateStoreDto.description !== undefined) {
       updateData.description = updateStoreDto.description;
+    }
+    if (updateStoreDto.kakaoChannelId !== undefined) {
+      updateData.kakaoChannelId = updateStoreDto.kakaoChannelId.trim();
+    }
+    if (updateStoreDto.instagramId !== undefined) {
+      updateData.instagramId = updateStoreDto.instagramId.trim();
     }
 
     try {

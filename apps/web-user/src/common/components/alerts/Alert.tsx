@@ -54,81 +54,81 @@ export function Alert() {
 
   return (
     <>
-    <style>{keyframes}</style>
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        animation: "alertBackdropIn 0.3s ease",
-      }}
-      onClick={handleClose}
-    >
+      <style>{keyframes}</style>
       <div
         style={{
-          backgroundColor: "white",
-          padding: "32px",
-          borderRadius: "12px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-          maxWidth: "400px",
-          width: "90%",
-          textAlign: "center",
-          animation: "alertSlideUp 0.3s ease-out",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          animation: "alertBackdropIn 0.3s ease",
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={handleClose}
       >
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: "600",
-            marginBottom: "12px",
-            color: getTitleColor(),
-          }}
-        >
-          {alert.title}
-        </h2>
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#666",
-            marginBottom: "24px",
-            lineHeight: "1.5",
-          }}
-        >
-          {alert.message}
-        </p>
         <div
           style={{
-            display: "flex",
-            gap: "12px",
-            justifyContent: "center",
+            backgroundColor: "white",
+            padding: "32px",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            maxWidth: "400px",
+            width: "90%",
+            textAlign: "center",
+            animation: "alertSlideUp 0.3s ease-out",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <button
-            onClick={handleClose}
+          <h2
             style={{
-              backgroundColor: getButtonColor(),
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "6px",
-              fontSize: "14px",
-              fontWeight: "500",
-              cursor: "pointer",
+              fontSize: "20px",
+              fontWeight: "600",
+              marginBottom: "12px",
+              color: getTitleColor(),
             }}
           >
-            확인
-          </button>
+            {alert.title}
+          </h2>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#666",
+              marginBottom: "24px",
+              lineHeight: "1.5",
+            }}
+          >
+            {alert.message}
+          </p>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              justifyContent: "center",
+            }}
+          >
+            <button
+              onClick={handleClose}
+              style={{
+                backgroundColor: getButtonColor(),
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+              }}
+            >
+              확인
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

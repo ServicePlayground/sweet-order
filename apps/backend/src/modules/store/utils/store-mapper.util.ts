@@ -4,6 +4,10 @@ import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.d
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { EnableStatus } from "@apps/backend/modules/product/constants/product.constants";
+import {
+  businessCalendarStateFromStoreRow,
+  toStoreBusinessCalendarApiShape,
+} from "@apps/backend/modules/store/utils/store-business-calendar.util";
 
 /**
  * 스토어 매핑 유틸리티
@@ -100,6 +104,7 @@ export class StoreMapperUtil {
         productId: {
           in: allProductIds,
         },
+        deletedAt: null,
       },
       select: StoreMapperUtil.REVIEW_RATING_WITH_PRODUCT_ID_SELECT,
     });
@@ -139,12 +144,13 @@ export class StoreMapperUtil {
       const saleablePrices = storeSaleablePrices.get(store.id) ?? [];
       const minProductPrice = saleablePrices.length > 0 ? Math.min(...saleablePrices) : null;
 
+      const businessCalendar = toStoreBusinessCalendarApiShape(
+        businessCalendarStateFromStoreRow(store),
+      );
+
       return {
         id: store.id,
         userId: store.userId,
-        logoImageUrl: store.logoImageUrl ?? undefined,
-        name: store.name,
-        description: store.description ?? undefined,
         businessNo: store.businessNo,
         representativeName: store.representativeName,
         openingDate: store.openingDate,
@@ -152,6 +158,11 @@ export class StoreMapperUtil {
         businessSector: store.businessSector,
         businessType: store.businessType,
         permissionManagementNumber: store.permissionManagementNumber,
+        // 기본 정보
+        logoImageUrl: store.logoImageUrl ?? undefined,
+        name: store.name,
+        description: store.description ?? undefined,
+
         // 픽업장소
         address: store.address ?? "",
         roadAddress: store.roadAddress ?? "",
@@ -159,11 +170,20 @@ export class StoreMapperUtil {
         zonecode: store.zonecode ?? "",
         latitude: store.latitude ?? 0,
         longitude: store.longitude ?? 0,
+        // 정산 계좌 정보
+        bankAccountNumber: store.bankAccountNumber ?? undefined,
+        bankName: store.bankName ?? undefined,
+        accountHolderName: store.accountHolderName ?? undefined,
+        // 채널 정보
+        kakaoChannelId: store.kakaoChannelId ?? undefined,
+        instagramId: store.instagramId ?? undefined,
+        // 기타
         likeCount: store.likeCount,
         averageRating,
         totalReviewCount,
         productRepresentativeImageUrls,
         minProductPrice,
+        businessCalendar,
         createdAt: store.createdAt,
         updatedAt: store.updatedAt,
       };

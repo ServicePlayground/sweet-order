@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsEnum, IsDateString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsEnum, IsDateString, Matches } from "class-validator";
+
+const YMD_DATE_STRING = /^\d{4}-\d{2}-\d{2}$/;
 import {
   OrderStatus,
   OrderSortBy,
@@ -34,7 +36,7 @@ export class OrderListRequestDto extends PaginationRequestDto {
   @ApiPropertyOptional({
     description: "(필터) 주문 상태",
     enum: OrderStatus,
-    example: OrderStatus.PENDING,
+    example: OrderStatus.RESERVATION_REQUESTED,
   })
   @IsOptional()
   @IsEnum(OrderStatus)
@@ -72,6 +74,23 @@ export class OrderListRequestDto extends PaginationRequestDto {
   @IsOptional()
   @IsEnum(OrderType)
   type?: OrderType;
+
+  @ApiPropertyOptional({
+    description: "(필터) 픽업 예정일 시작 (YYYY-MM-DD, Asia/Seoul 달력 기준 해당일 00:00 KST 이상)",
+    example: "2024-03-01",
+  })
+  @IsOptional()
+  @Matches(YMD_DATE_STRING, { message: "pickupStartDate must be YYYY-MM-DD" })
+  pickupStartDate?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 픽업 예정일 종료 (YYYY-MM-DD, Asia/Seoul 달력 기준 해당일 23:59:59.999 KST 이하)",
+    example: "2024-03-31",
+  })
+  @IsOptional()
+  @Matches(YMD_DATE_STRING, { message: "pickupEndDate must be YYYY-MM-DD" })
+  pickupEndDate?: string;
 }
 
 /**

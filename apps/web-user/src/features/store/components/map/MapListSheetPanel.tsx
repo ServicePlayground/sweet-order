@@ -1,28 +1,196 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useCallback, useRef } from "react";
 import { LIST_SHEET_HANDLE_HEIGHT } from "@/apps/web-user/features/store/constants/map.constant";
+
+/** 목록 영역에서 시트 드래그로 인식하기 전 최소 이동(px) */
+const CONTENT_SHEET_DRAG_THRESHOLD = 8;
 
 interface MapListSheetPanelProps {
   /** 패널 오프셋(px). 0이면 핸들만 보임 */
   offset: number;
+  /** true면 최상단까지 펼친 상태(상단 모서리 직각) */
+  expandedToTop?: boolean;
   isDragging: boolean;
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
   onMouseDown: (e: React.MouseEvent) => void;
+  /** 시트 드래그(핸들·목록 공통) — 목록은 스크롤과 구분 후 호출 */
+  sheetPointerDown: (clientY: number) => void;
+  sheetPointerMove: (clientY: number) => void;
+  sheetPointerUp: () => void;
   children: ReactNode;
 }
 
+type ContentGestureMode = "undecided" | "sheet" | "scroll";
+
 export function MapListSheetPanel({
   offset,
+  expandedToTop = false,
   isDragging,
   onTouchStart,
   onTouchMove,
   onTouchEnd,
   onMouseDown,
+  sheetPointerDown,
+  sheetPointerMove,
+  sheetPointerUp,
   children,
 }: MapListSheetPanelProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const contentGestureRef = useRef<{
+    mode: ContentGestureMode;
+    startY: number;
+    startScrollTop: number;
+  } | null>(null);
+
+  const resetContentGesture = useCallback(() => {
+    contentGestureRef.current = null;
+    const el = scrollRef.current;
+    if (el) el.style.touchAction = "";
+  }, []);
+
+  const canScrollListVertically = useCallback((el: HTMLDivElement) => {
+    return el.scrollHeight > el.clientHeight + 1;
+  }, []);
+
+  /** 목록 영역 터치: 스크롤 가능하면 스크롤, 맨 위·짧은 목록이면 시트와 동일하게 드래그 */
+  const onContentTouchStart = useCallback((e: React.TouchEvent) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const startScrollTop = el.scrollTop;
+    if (startScrollTop > 0) {
+      contentGestureRef.current = { mode: "scroll", startY: e.touches[0].clientY, startScrollTop };
+      return;
+    }
+    contentGestureRef.current = {
+      mode: "undecided",
+      startY: e.touches[0].clientY,
+      startScrollTop: 0,
+    };
+  }, []);
+
+  const onContentTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      const g = contentGestureRef.current;
+      const el = scrollRef.current;
+      if (!g || !el) return;
+
+      if (g.mode === "sheet") {
+        e.preventDefault();
+        sheetPointerMove(e.touches[0].clientY);
+        return;
+      }
+      if (g.mode === "scroll") return;
+
+      const st = el.scrollTop;
+      if (st > 0) {
+        g.mode = "scroll";
+        return;
+      }
+
+      const clientY = e.touches[0].clientY;
+      const dy = clientY - g.startY;
+      if (Math.abs(dy) < CONTENT_SHEET_DRAG_THRESHOLD) return;
+
+      if (dy < 0) {
+        g.mode = "sheet";
+        el.style.touchAction = "none";
+        e.preventDefault();
+        sheetPointerDown(g.startY);
+        sheetPointerMove(clientY);
+        return;
+      }
+
+      if (canScrollListVertically(el)) {
+        g.mode = "scroll";
+        return;
+      }
+
+      g.mode = "sheet";
+      el.style.touchAction = "none";
+      e.preventDefault();
+      sheetPointerDown(g.startY);
+      sheetPointerMove(clientY);
+    },
+    [canScrollListVertically, sheetPointerDown, sheetPointerMove],
+  );
+
+  const onContentTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const g = contentGestureRef.current;
+      if (g?.mode === "sheet") {
+        e.preventDefault();
+        sheetPointerUp();
+      }
+      resetContentGesture();
+    },
+    [resetContentGesture, sheetPointerUp],
+  );
+
+  const onContentMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return;
+      const el = scrollRef.current;
+      if (!el) return;
+
+      const startY = e.clientY;
+      const startScrollTop = el.scrollTop;
+      let mode: ContentGestureMode = startScrollTop > 0 ? "scroll" : "undecided";
+
+      const cleanup = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        el.style.touchAction = "";
+      };
+
+      const onUp = () => {
+        if (mode === "sheet") sheetPointerUp();
+        cleanup();
+      };
+
+      const onMove = (moveEvent: MouseEvent) => {
+        if (mode === "sheet") {
+          sheetPointerMove(moveEvent.clientY);
+          return;
+        }
+        if (mode === "scroll") return;
+
+        const st = el.scrollTop;
+        if (st > 0) {
+          mode = "scroll";
+          return;
+        }
+
+        const dy = moveEvent.clientY - startY;
+        if (Math.abs(dy) < CONTENT_SHEET_DRAG_THRESHOLD) return;
+
+        if (dy < 0) {
+          mode = "sheet";
+          el.style.touchAction = "none";
+          sheetPointerDown(startY);
+          sheetPointerMove(moveEvent.clientY);
+          return;
+        }
+
+        if (canScrollListVertically(el)) {
+          mode = "scroll";
+          return;
+        }
+
+        mode = "sheet";
+        el.style.touchAction = "none";
+        sheetPointerDown(startY);
+        sheetPointerMove(moveEvent.clientY);
+      };
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [canScrollListVertically, sheetPointerDown, sheetPointerMove, sheetPointerUp],
+  );
+
   return (
     <div
       className="fixed left-0 right-0 bottom-[60px] z-50 flex flex-col max-w-[638px] mx-auto overflow-hidden"
@@ -30,7 +198,7 @@ export function MapListSheetPanel({
         height: LIST_SHEET_HANDLE_HEIGHT + offset,
         transition: isDragging ? "none" : "height 0.25s ease-out",
         background: "#FFFFFF",
-        borderRadius: "20px 20px 0 0",
+        borderRadius: expandedToTop && !isDragging ? 0 : "20px 20px 0 0",
       }}
       aria-label="목록 패널"
     >
@@ -50,7 +218,16 @@ export function MapListSheetPanel({
           aria-hidden
         />
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col">
+      <div
+        ref={scrollRef}
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col cursor-grab active:cursor-grabbing"
+        style={{ WebkitOverflowScrolling: "touch" }}
+        onTouchStart={onContentTouchStart}
+        onTouchMove={onContentTouchMove}
+        onTouchEnd={onContentTouchEnd}
+        onTouchCancel={onContentTouchEnd}
+        onMouseDown={onContentMouseDown}
+      >
         {children}
       </div>
     </div>

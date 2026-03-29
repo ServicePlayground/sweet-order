@@ -18,6 +18,35 @@ import type {
 export enum StoreSortBy {
   LATEST = "latest",
   POPULAR = "popular",
+  RATING_AVG = "rating_avg",
+  DISTANCE = "distance",
+}
+
+/** 정산 계좌 은행 코드 (백엔드·Prisma StoreBankName과 동일) */
+export enum StoreBankName {
+  NH_NONGHYUP = "NH_NONGHYUP",
+  KAKAO_BANK = "KAKAO_BANK",
+  KB_KOOKMIN = "KB_KOOKMIN",
+  TOSS_BANK = "TOSS_BANK",
+  SHINHAN = "SHINHAN",
+  WOORI = "WOORI",
+  IBK = "IBK",
+  HANA = "HANA",
+  SAEMAEUL = "SAEMAEUL",
+  BUSAN = "BUSAN",
+  IM_BANK_DAEGU = "IM_BANK_DAEGU",
+  K_BANK = "K_BANK",
+  SINHYEOP = "SINHYEOP",
+  POST_OFFICE = "POST_OFFICE",
+  SC_JEIL = "SC_JEIL",
+  KYONGNAM = "KYONGNAM",
+  GWANGJU = "GWANGJU",
+  SUHYUP = "SUHYUP",
+  JEONBUK = "JEONBUK",
+  SAVINGS_BANK = "SAVINGS_BANK",
+  JEJU = "JEJU",
+  CITI = "CITI",
+  KDB = "KDB",
 }
 
 /** 주소 정보 (백엔드 StoreAddressDto) */
@@ -36,6 +65,8 @@ export interface StoreResponseDto extends StoreAddressDto {
   logoImageUrl?: string | null;
   name: string;
   description?: string | null;
+  kakaoChannelId?: string | null;
+  instagramId?: string | null;
   businessNo: string;
   representativeName: string;
   openingDate: string;
@@ -43,6 +74,12 @@ export interface StoreResponseDto extends StoreAddressDto {
   businessSector: string;
   businessType: string;
   permissionManagementNumber: string;
+  /** 정산 계좌번호 */
+  bankAccountNumber?: string | null;
+  /** 정산 계좌 은행 코드 */
+  bankName?: StoreBankName | null;
+  /** 정산 계좌 예금주명 */
+  accountHolderName?: string | null;
   likeCount: number;
   isLiked?: boolean | null;
   averageRating: number;
@@ -51,8 +88,30 @@ export interface StoreResponseDto extends StoreAddressDto {
   productRepresentativeImageUrls: string[];
   /** 상품 중 최소 금액 (노출·판매중인 상품만, 없으면 null) */
   minProductPrice: number | null;
+  /** 영업 캘린더 (백엔드 StoreResponseDto.businessCalendar, 구버전 API는 생략될 수 있음) */
+  businessCalendar?: StoreBusinessCalendarDto;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/** 날짜별 영업 예외 (백엔드 StoreBusinessDayOverrideDto) */
+export interface StoreBusinessDayOverrideDto {
+  date: string;
+  isOpen: boolean;
+  openTime?: string;
+  closeTime?: string;
+}
+
+/** 영업 캘린더 (백엔드 StoreBusinessCalendarDto) */
+export interface StoreBusinessCalendarDto {
+  weeklyClosedWeekdays: number[];
+  standardOpenTime: string;
+  standardCloseTime: string;
+  dayOverrides: StoreBusinessDayOverrideDto[];
+}
+
+export interface UpdateStoreBusinessCalendarResponseDto {
+  businessCalendar: StoreBusinessCalendarDto;
 }
 
 /** 스토어 생성 요청 (3단계: 사업자진위 + 통신판매 + 스토어정보) */
@@ -62,6 +121,11 @@ export interface CreateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
   logoImageUrl?: string;
+  kakaoChannelId?: string;
+  instagramId?: string;
+  bankAccountNumber: string;
+  bankName: StoreBankName;
+  accountHolderName: string;
 }
 
 export interface CreateStoreResponseDto {
@@ -72,6 +136,11 @@ export interface UpdateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
   logoImageUrl?: string;
+  kakaoChannelId?: string;
+  instagramId?: string;
+  bankAccountNumber: string;
+  bankName: StoreBankName;
+  accountHolderName: string;
 }
 
 export interface UpdateStoreResponseDto {
@@ -92,6 +161,10 @@ export interface GetSellerStoresRequestDto {
   maxPrice?: number;
   /** 상품 필터: 유형(캐릭터, 레터링 등). 상품 목록 조회와 동일한 ProductCategoryType enum */
   productCategoryTypes?: ProductCategoryType[];
+  /** 거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 위도 */
+  latitude?: number;
+  /** 거리순 정렬(sortBy=distance)일 때 필수. 기준점 WGS84 경도 */
+  longitude?: number;
 }
 
 export type StoreListResponseDto = ListResponseDto<StoreResponseDto>;

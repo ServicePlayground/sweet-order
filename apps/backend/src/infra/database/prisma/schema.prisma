@@ -196,6 +196,25 @@ model Store {
   // 비즈니스 필드 - 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
   permissionManagementNumber String @map("permission_management_number") // 인허가관리번호 (통신판매사업자 신고번호)
 
+  // 비즈니스 필드 - 정산 계좌
+  bankAccountNumber String?         @map("bank_account_number") // 계좌번호
+  bankName          StoreBankName? @map("bank_name") // 은행 코드
+  accountHolderName String?         @map("account_holder_name") // 예금주명
+
+  // 비즈니스 필드 - 채널 정보
+  kakaoChannelId String? @map("kakao_channel_id") // 카카오채널 ID
+  instagramId    String? @map("instagram_id") // 인스타그램 ID
+
+  // 비즈니스 필드 - 영업 캘린더 (판매자 설정, Asia/Seoul 기준)
+  /** 정기 휴무 요일 (0=일 … 6=토, 프론트 Date.getDay()와 동일) */
+  weeklyClosedWeekdays Int[] @default([]) @map("weekly_closed_weekdays")
+  /** 표준 영업 시작 HH:mm (30분 단위). 00:00+00:00이면 하루 전체 영업 */
+  standardOpenTime  String @default("00:00") @map("standard_open_time") @db.VarChar(5)
+  /** 표준 영업 종료 HH:mm. 00:00+00:00이면 하루 전체, 그 외는 픽업 [시작, 종료) */
+  standardCloseTime String @default("00:00") @map("standard_close_time") @db.VarChar(5)
+  /** 날짜별 예외 [{ date: "YYYY-MM-DD", isOpen, openTime?, closeTime? }] */
+  businessCalendarOverrides Json @default("[]") @map("business_calendar_overrides")
+
   // 시스템 필드
   likeCount Int      @default(0) @map("like_count") // 좋아요 개수
   createdAt DateTime @default(now()) @map("created_at")
@@ -270,11 +289,16 @@ model ProductReview {
   // 관계 필드
   productId String @map("product_id") // 상품 ID
   userId    String @map("user_id") // 사용자 ID
+  /** 마이페이지에서 주문 기준으로 작성한 후기인 경우 연결 (주문당 최대 1건) */
+  orderId   String? @unique @map("order_id") // 주문 ID
 
   // 비즈니스 필드
   rating    Float // 별점 (0.0 ~ 5.0)
   content   String // 후기 내용
   imageUrls String[] @default([]) @map("image_urls") // 후기 이미지 URL 목록
+
+  /** 사용자 삭제 시각. null이면 노출 대상(주문 재작성 불가는 이 행이 orderId를 유지한 채로 남는 것으로 표현) */
+  deletedAt DateTime? @map("deleted_at")
 
   // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
@@ -283,6 +307,7 @@ model ProductReview {
   // Relations
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   // 인덱스 최적화
   @@index([productId, createdAt(sort: Desc)]) // 상품별 후기 목록 조회 최적화 (최신순)
@@ -403,7 +428,23 @@ model Order {
   pickupLongitude    Float? @map("pickup_longitude") // 픽업 장소 경도
 
   // 비즈니스 필드 - 주문 상태
-  orderStatus OrderStatus @default(PENDING) @map("order_status") // 주문 상태
+  orderStatus OrderStatus @default(RESERVATION_REQUESTED) @map("order_status") // 주문 상태
+  /** 입금대기로 전환된 시각(입금 12시간 유효 기준). 예약신청만 있을 때는 null */
+  paymentPendingAt DateTime? @map("payment_pending_at")
+  /** 입금 전 사용자 취소 시 입력한 사유 (자동 만료 취소 등은 null) */
+  userCancelReason String? @map("user_cancel_reason") @db.Text
+  /** 판매자가 입금대기에서 예약 취소(취소완료) 시 입력한 사유 */
+  sellerCancelReason String? @map("seller_cancel_reason") @db.Text
+  /** 판매자가 픽업대기에서 노쇼 처리 시 입력한 사유 */
+  sellerNoShowReason String? @map("seller_no_show_reason") @db.Text
+  /** 판매자가 취소환불대기로 전환할 때 입력한 사유 (사용자 요청 사유 `refundRequestReason`과 별도) */
+  sellerCancelRefundPendingReason String? @map("seller_cancel_refund_pending_reason") @db.Text
+  /** 입금 이후 사용자 취소·환불 요청 시 사유 */
+  refundRequestReason String? @map("refund_request_reason") @db.Text
+  /** 환불 받을 은행 (스토어 정산 계좌와 동일 `StoreBankName`) */
+  refundBankName StoreBankName? @map("refund_bank_name")
+  refundBankAccountNumber String? @map("refund_bank_account_number")
+  refundAccountHolderName String? @map("refund_account_holder_name")
 
   // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
@@ -414,6 +455,7 @@ model Order {
   product  Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
   store    Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
+  review     ProductReview?
 
   // 인덱스 최적화
   @@index([userId, createdAt(sort: Desc)]) // 사용자별 주문 목록 조회 최적화 (최신순)
@@ -512,6 +554,41 @@ enum MessageSenderType {
 }
 
 enum OrderStatus {
-  PENDING    // 대기중 (예약신청)
-  CONFIRMED  // 확정됨 (예약확정)
+  RESERVATION_REQUESTED // 예약신청
+  PAYMENT_PENDING // 입금대기
+  PAYMENT_COMPLETED // 입금완료
+  CONFIRMED // 예약확정
+  PICKUP_PENDING // 픽업대기
+  PICKUP_COMPLETED // 픽업완료
+  CANCEL_COMPLETED // 취소완료
+  CANCEL_REFUND_PENDING // 취소환불대기
+  CANCEL_REFUND_COMPLETED // 취소환불완료
+  NO_SHOW // 노쇼
+}
+
+/// 정산 계좌 은행 (API·DB 공통 코드값)
+enum StoreBankName {
+  NH_NONGHYUP // NH농협
+  KAKAO_BANK // 카카오뱅크
+  KB_KOOKMIN // KB국민
+  TOSS_BANK // 토스뱅크
+  SHINHAN // 신한
+  WOORI // 우리
+  IBK // IBK기업
+  HANA // 하나
+  SAEMAEUL // 새마을
+  BUSAN // 부산
+  IM_BANK_DAEGU // iM뱅크(대구)
+  K_BANK // 케이뱅크
+  SINHYEOP // 신협
+  POST_OFFICE // 우체국
+  SC_JEIL // SC제일
+  KYONGNAM // 경남
+  GWANGJU // 광주
+  SUHYUP // 수협
+  JEONBUK // 전북
+  SAVINGS_BANK // 저축은행
+  JEJU // 제주
+  CITI // 씨티
+  KDB // KDB산업
 }

@@ -8,6 +8,7 @@ import { ReviewSortBy } from "@apps/backend/modules/review/constants/review.cons
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { calculatePaginationMeta } from "@apps/backend/common/utils/pagination.util";
 import { ReviewMapperUtil } from "@apps/backend/modules/review/utils/review-mapper.util";
+import { PRODUCT_REVIEW_ACTIVE_FILTER } from "@apps/backend/modules/review/constants/review-query.constant";
 
 /**
  * 내가 작성한 후기 목록 조회 서비스
@@ -29,6 +30,7 @@ export class ReviewUserListService {
 
     const where: Prisma.ProductReviewWhereInput = {
       userId,
+      ...PRODUCT_REVIEW_ACTIVE_FILTER,
     };
 
     const orderBy = this.getOrderBy(sortBy);
@@ -47,10 +49,11 @@ export class ReviewUserListService {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
+        ...ReviewMapperUtil.REVIEW_ORDER_INCLUDE,
       },
     });
 
-    const data = reviews.map((review) => ReviewMapperUtil.mapToMyReviewResponse(review));
+    const data = reviews.map((review) => ReviewMapperUtil.mapToReviewResponse(review));
 
     const meta = calculatePaginationMeta(page, limit, totalItems);
 

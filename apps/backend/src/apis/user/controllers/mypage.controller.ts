@@ -1,9 +1,11 @@
 import {
   Controller,
   Get,
+  Post,
   Delete,
   Query,
   Param,
+  Body,
   Request,
   HttpCode,
   HttpStatus,
@@ -22,12 +24,21 @@ import {
   OrderListResponseDto,
   OrderListRequestDto,
 } from "@apps/backend/modules/order/dto/order-list.dto";
-import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.dto";
+import {
+  OrderItemResponseDto,
+  OrderResponseDto,
+} from "@apps/backend/modules/order/dto/order-detail.dto";
 import {
   GetMyReviewsRequestDto,
   MyReviewListResponseDto,
 } from "@apps/backend/modules/review/dto/review-user-list.dto";
+import {
+  GetWritableReviewOrdersRequestDto,
+  WritableReviewOrdersListResponseDto,
+} from "@apps/backend/modules/review/dto/review-writable-list.dto";
 import { ReviewDeleteResponseDto } from "@apps/backend/modules/review/dto/review-delete.dto";
+import { CreateMyReviewRequestDto } from "@apps/backend/modules/review/dto/review-create.dto";
+import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
 import { REVIEW_ERROR_MESSAGES } from "@apps/backend/modules/review/constants/review.constants";
 import {
   GetStoresRequestDto,
@@ -37,6 +48,7 @@ import {
   GetProductsRequestDto,
   ProductListResponseDto,
 } from "@apps/backend/modules/product/dto/product-list.dto";
+import { GetRecentViewedProductsRequestDto } from "@apps/backend/modules/recent-view/dto/recent-view-list.dto";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 
@@ -48,8 +60,13 @@ import { createMessageObject } from "@apps/backend/common/utils/message.util";
 @ApiExtraModels(
   OrderListResponseDto,
   OrderResponseDto,
+  OrderItemResponseDto,
   MyReviewListResponseDto,
+  WritableReviewOrdersListResponseDto,
+  GetWritableReviewOrdersRequestDto,
   ReviewDeleteResponseDto,
+  ReviewResponseDto,
+  CreateMyReviewRequestDto,
   StoreListResponseDto,
   ProductListResponseDto,
 )
@@ -109,6 +126,25 @@ export class UserMypageController {
   }
 
   /**
+   * 작성 가능한 후기 대상 주문 목록 조회 API
+   */
+  @Get("reviews/writable")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 작성 가능한 후기 대상 주문 목록",
+    description:
+      "픽업 완료이면서 아직 후기가 없는 본인 주문만 반환합니다. 해당 주문에 연결된 후기를 삭제한 경우(재작성 불가)에는 목록에 포함되지 않습니다.",
+  })
+  @SwaggerResponse(200, { dataDto: WritableReviewOrdersListResponseDto })
+  @SwaggerAuthResponses()
+  async getWritableReviewOrders(
+    @Query() query: GetWritableReviewOrdersRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<WritableReviewOrdersListResponseDto> {
+    return await this.reviewService.getWritableReviewOrdersForUser(req.user.sub, query);
+  }
+
+  /**
    * 내가 작성한 후기 목록 조회 API
    * 자신이 작성한 후기 목록을 조회합니다.
    */
@@ -128,6 +164,63 @@ export class UserMypageController {
   }
 
   /**
+   * 내가 작성한 후기 단건 조회 API
+   */
+  @Get("reviews/:reviewId")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 내가 작성한 후기 상세 조회",
+    description:
+      "본인이 작성한 활성 후기(소프트 삭제 제외) 한 건을 조회합니다. 연결된 주문·상품·스토어 정보는 `ReviewResponseDto`와 동일합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ReviewResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_NOT_FOUND),
+  })
+  async getMyReviewById(
+    @Param("reviewId") reviewId: string,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<ReviewResponseDto> {
+    return await this.reviewService.getMyReviewDetailForUser(req.user.sub, reviewId);
+  }
+
+  /**
+   * 내 후기 작성 API
+   * 픽업 완료된 본인 주문에 대해 후기를 등록합니다. 주문당 1회만 작성할 수 있습니다.
+   */
+  @Post("reviews")
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "(로그인 필요) 내 후기 작성",
+    description:
+      "픽업 완료(PICKUP_COMPLETED) 상태인 본인 주문을 기준으로 상품 후기를 작성합니다. 동일 주문으로는 한 번만 작성 가능하며, 해당 주문의 후기를 삭제한 뒤에는 다시 작성할 수 없습니다.",
+  })
+  @SwaggerResponse(201, { dataDto: ReviewResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_ORDER_NOT_ELIGIBLE),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_REVOKED_CANNOT_REWRITE),
+  })
+  @SwaggerResponse(403, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
+  })
+  @SwaggerResponse(404, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.NOT_FOUND),
+  })
+  @SwaggerResponse(409, {
+    dataExample: createMessageObject(REVIEW_ERROR_MESSAGES.REVIEW_ALREADY_WRITTEN),
+  })
+  async createMyReview(
+    @Body() body: CreateMyReviewRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<ReviewResponseDto> {
+    return await this.reviewService.createMyReviewForUser(req.user.sub, body);
+  }
+
+  /**
    * 내 후기 삭제 API
    * 자신이 작성한 후기만 삭제할 수 있습니다.
    */
@@ -135,7 +228,8 @@ export class UserMypageController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 내가 작성한 후기 삭제",
-    description: "자신이 작성한 후기를 삭제합니다. 본인 후기만 삭제할 수 있습니다.",
+    description:
+      "자신이 작성한 후기를 삭제합니다. 주문과 연결된 후기인 경우, 삭제 후 동일 주문으로 후기를 다시 작성할 수 없으며 작성 가능 목록에서도 제외됩니다.",
   })
   @SwaggerResponse(200, { dataDto: ReviewDeleteResponseDto })
   @SwaggerAuthResponses()
@@ -198,12 +292,12 @@ export class UserMypageController {
   @ApiOperation({
     summary: "(로그인 필요) 최근 본 상품 목록 조회",
     description:
-      "마이페이지에서 자신이 최근 조회한 상품 목록을 조회합니다. 노출 중인 상품만 포함되며, 조회 시점 기준 최신순, 페이지네이션을 지원합니다.",
+      "마이페이지에서 자신이 최근 조회한 상품 목록을 조회합니다. 노출 중인 상품만 포함되며, 조회 시점 기준 최근본순, 페이지네이션을 지원합니다.",
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
   @SwaggerAuthResponses()
   async getRecentViewedProducts(
-    @Query() query: GetProductsRequestDto,
+    @Query() query: GetRecentViewedProductsRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<ProductListResponseDto> {
     return await this.recentViewService.getRecentViewedProductsForUser(req.user.sub, query);

@@ -28,9 +28,7 @@ export class ProductDetailService {
         id,
       },
       include: {
-        reviews: {
-          select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-        },
+        reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
         store: {
           select: ProductMapperUtil.STORE_INFO_SELECT,
         },
@@ -76,9 +74,7 @@ export class ProductDetailService {
     const productWithReviews = await this.prisma.product.findUnique({
       where: { id },
       include: {
-        reviews: {
-          select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-        },
+        reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
         store: {
           select: ProductMapperUtil.STORE_INFO_WITH_USER_ID_SELECT,
         },

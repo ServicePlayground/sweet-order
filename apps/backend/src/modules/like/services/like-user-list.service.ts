@@ -106,7 +106,7 @@ export class LikeUserListService {
   /**
    * 내가 좋아요한 상품 목록 조회 (사용자용)
    * 정렬(sortBy), 검색, 가격/스토어/타입/카테고리/지역 필터, 페이지네이션을 지원합니다.
-   * REVIEW_COUNT, RATING_AVG 정렬은 인기순(좋아요 수)으로 대체합니다.
+   * REVIEW_COUNT, RATING_AVG, DISTANCE 정렬은 relation orderBy 제약으로 인기순(좋아요 수)으로 대체합니다.
    */
   async getMyProductLikesForUser(
     userId: string,
@@ -152,7 +152,9 @@ export class LikeUserListService {
     );
 
     const effectiveSortBy =
-      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG ? SortBy.POPULAR : sortBy;
+      sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG || sortBy === SortBy.DISTANCE
+        ? SortBy.POPULAR
+        : sortBy;
     const orderBy = this.buildProductOrderByForRelation(effectiveSortBy);
 
     const where: Prisma.ProductLikeWhereInput = {
@@ -184,11 +186,7 @@ export class LikeUserListService {
                 longitude: true,
               },
             },
-            reviews: {
-              select: {
-                rating: true,
-              },
-            },
+            reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           },
         },
       },
@@ -300,6 +298,10 @@ export class LikeUserListService {
     switch (sortBy) {
       case StoreSortBy.POPULAR:
         return { likeCount: "desc" };
+      case StoreSortBy.RATING_AVG:
+      case StoreSortBy.DISTANCE:
+        // relation orderBy로는 별점·거리 정렬 불가 → 최신순에 근사
+        return { createdAt: "desc" };
       case StoreSortBy.LATEST:
       default:
         return { createdAt: "desc" };

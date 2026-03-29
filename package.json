@@ -46,6 +46,7 @@
     "typescript": "5.5.4"
   },
   "resolutions": {
-    "@types/passport": "1.0.17"
+    "@types/passport": "1.0.17",
+    "fast-xml-parser": "5.5.7"
   }
 }

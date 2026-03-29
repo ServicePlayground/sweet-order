@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   GetProductsRequestDto,
@@ -63,6 +63,7 @@ export class ProductListService {
     maxPrice?: number;
     productType?: ProductType;
     productCategoryTypes?: ProductCategoryType[];
+    sizes?: string[];
   }): Prisma.Sql {
     const conditions: Prisma.Sql[] = [];
 
@@ -117,11 +118,39 @@ export class ProductListService {
       );
     }
 
+    if (params.sizes && params.sizes.length > 0) {
+      conditions.push(
+        Prisma.sql`p.cake_size_options IS NOT NULL AND EXISTS (
+          SELECT 1 FROM jsonb_array_elements(p.cake_size_options::jsonb) AS elem
+          WHERE elem->>'displayName' IN (${Prisma.join(params.sizes)})
+        )`,
+      );
+    }
+
     if (conditions.length === 0) {
       return Prisma.sql`TRUE`;
     }
 
     return Prisma.sql`${Prisma.join(conditions, " AND ")}`;
+  }
+
+  /**
+   * cakeSizeOptions.displayName이 지정된 사이즈 중 하나와 일치하는 상품 ID 목록 (스토어 목록의 사이즈 필터와 동일한 JSONB 조건)
+   */
+  private async getProductIdsMatchingCakeSizes(sizes: string[]): Promise<string[]> {
+    if (sizes.length === 0) return [];
+    const result = await this.prisma.$queryRaw<Array<{ id: string }>>(
+      Prisma.sql`
+        SELECT DISTINCT p.id
+        FROM products p
+        WHERE p.cake_size_options IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM jsonb_array_elements(p.cake_size_options::jsonb) AS elem
+            WHERE elem->>'displayName' IN (${Prisma.join(sizes)})
+          )
+      `,
+    );
+    return result.map((r) => r.id);
   }
 
   private async getProductIdsByReviewSort(
@@ -139,7 +168,7 @@ export class ProductListService {
     const rows = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
       SELECT p.id
       FROM products p
-      LEFT JOIN product_reviews pr ON pr.product_id = p.id
+      LEFT JOIN product_reviews pr ON pr.product_id = p.id AND pr.deleted_at IS NULL
       WHERE ${filterSql}
       GROUP BY p.id, p.created_at
       ORDER BY ${orderBySql}
@@ -147,6 +176,40 @@ export class ProductListService {
       OFFSET ${skip}
     `);
 
+    return rows.map((row) => row.id);
+  }
+
+  private async getProductIdsByDistanceSort(
+    filterSql: Prisma.Sql,
+    userLat: number,
+    userLng: number,
+    page: number,
+    limit: number,
+  ): Promise<string[]> {
+    const skip = (page - 1) * limit;
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+      SELECT p.id
+      FROM products p
+      INNER JOIN stores st ON st.id = p.store_id
+      WHERE ${filterSql}
+      ORDER BY
+        CASE WHEN st.latitude IS NULL OR st.longitude IS NULL THEN 1 ELSE 0 END ASC,
+        (
+          6371000 * acos(
+            LEAST(
+              1::double precision,
+              GREATEST(
+                -1::double precision,
+                cos(radians(${userLat})) * cos(radians(st.latitude)) * cos(radians(st.longitude) - radians(${userLng})) +
+                sin(radians(${userLat})) * sin(radians(st.latitude))
+              )
+            )
+          )
+        ) ASC NULLS LAST,
+        p.created_at DESC
+      LIMIT ${limit}
+      OFFSET ${skip}
+    `);
     return rows.map((row) => row.id);
   }
 
@@ -205,6 +268,9 @@ export class ProductListService {
       productType,
       productCategoryTypes,
       regions,
+      sizes,
+      latitude,
+      longitude,
     } = query;
 
     let storeIdsFromRegion: string[] | undefined;
@@ -235,38 +301,56 @@ export class ProductListService {
 
     this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
+    if (sizes?.length) {
+      const sizeIds = await this.getProductIdsMatchingCakeSizes(sizes);
+      where.AND = where.AND || [];
+      if (sizeIds.length === 0) {
+        where.AND.push({ id: "never" });
+      } else {
+        where.AND.push({ id: { in: sizeIds } });
+      }
+    }
+
     const totalItems = await this.prisma.product.count({ where });
 
     const needsReviewData = sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
+    const needsDistanceSort = sortBy === SortBy.DISTANCE;
+
+    if (needsDistanceSort && (latitude === undefined || longitude === undefined)) {
+      throw new BadRequestException(PRODUCT_ERROR_MESSAGES.DISTANCE_SORT_REQUIRES_COORDINATES);
+    }
 
     let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
     let products;
 
-    if (needsReviewData) {
-      const productIds = await this.getProductIdsByReviewSort(
-        this.buildReviewSortFilterSql({
-          onlyVisible: true,
-          storeIds: storeIdsFromRegion,
-          storeId: storeIdsFromRegion === undefined ? storeId : undefined,
-          search,
-          minPrice,
-          maxPrice,
-          productType,
-          productCategoryTypes,
-        }),
-        sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
-        page,
-        limit,
-      );
+    if (needsReviewData || needsDistanceSort) {
+      const filterSql = this.buildReviewSortFilterSql({
+        onlyVisible: true,
+        storeIds: storeIdsFromRegion,
+        storeId: storeIdsFromRegion === undefined ? storeId : undefined,
+        search,
+        minPrice,
+        maxPrice,
+        productType,
+        productCategoryTypes,
+        sizes,
+      });
+
+      const productIds = needsDistanceSort
+        ? await this.getProductIdsByDistanceSort(filterSql, latitude!, longitude!, page, limit)
+        : await this.getProductIdsByReviewSort(
+            filterSql,
+            sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
+            page,
+            limit,
+          );
 
       const productsWithStore = await this.prisma.product.findMany({
         where: {
           id: { in: productIds },
         },
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },
@@ -313,9 +397,7 @@ export class ProductListService {
         skip,
         take: limit,
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },
@@ -358,6 +440,9 @@ export class ProductListService {
       visibilityStatus,
       productType,
       productCategoryTypes,
+      sizes,
+      latitude,
+      longitude,
     } = query;
 
     const userStores = await this.prisma.store.findMany({
@@ -404,39 +489,57 @@ export class ProductListService {
 
     this.addCommonFilters(where, search, minPrice, maxPrice, productType, productCategoryTypes);
 
+    if (sizes?.length) {
+      const sizeIds = await this.getProductIdsMatchingCakeSizes(sizes);
+      where.AND = where.AND || [];
+      if (sizeIds.length === 0) {
+        where.AND.push({ id: "never" });
+      } else {
+        where.AND.push({ id: { in: sizeIds } });
+      }
+    }
+
     const totalItems = await this.prisma.product.count({ where });
 
     const needsReviewData = sortBy === SortBy.REVIEW_COUNT || sortBy === SortBy.RATING_AVG;
+    const needsDistanceSort = sortBy === SortBy.DISTANCE;
+
+    if (needsDistanceSort && (latitude === undefined || longitude === undefined)) {
+      throw new BadRequestException(PRODUCT_ERROR_MESSAGES.DISTANCE_SORT_REQUIRES_COORDINATES);
+    }
 
     let orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
     let products;
 
-    if (needsReviewData) {
-      const productIds = await this.getProductIdsByReviewSort(
-        this.buildReviewSortFilterSql({
-          userStoreIds,
-          storeId,
-          salesStatus,
-          visibilityStatus,
-          search,
-          minPrice,
-          maxPrice,
-          productType,
-          productCategoryTypes,
-        }),
-        sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
-        page,
-        limit,
-      );
+    if (needsReviewData || needsDistanceSort) {
+      const filterSql = this.buildReviewSortFilterSql({
+        userStoreIds,
+        storeId,
+        salesStatus,
+        visibilityStatus,
+        search,
+        minPrice,
+        maxPrice,
+        productType,
+        productCategoryTypes,
+        sizes,
+      });
+
+      const productIds = needsDistanceSort
+        ? await this.getProductIdsByDistanceSort(filterSql, latitude!, longitude!, page, limit)
+        : await this.getProductIdsByReviewSort(
+            filterSql,
+            sortBy as SortBy.REVIEW_COUNT | SortBy.RATING_AVG,
+            page,
+            limit,
+          );
 
       const productsWithStore = await this.prisma.product.findMany({
         where: {
           id: { in: productIds },
         },
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },
@@ -478,9 +581,7 @@ export class ProductListService {
         skip,
         take: limit,
         include: {
-          reviews: {
-            select: ProductMapperUtil.REVIEWS_RATING_SELECT_ONLY,
-          },
+          reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           store: {
             select: ProductMapperUtil.STORE_INFO_SELECT,
           },

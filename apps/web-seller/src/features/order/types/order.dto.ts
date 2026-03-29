@@ -8,8 +8,16 @@
 import type { ListResponseDto } from "@/apps/web-seller/common/types/api.dto";
 
 export enum OrderStatus {
-  PENDING = "PENDING",
+  RESERVATION_REQUESTED = "RESERVATION_REQUESTED",
+  PAYMENT_PENDING = "PAYMENT_PENDING",
+  PAYMENT_COMPLETED = "PAYMENT_COMPLETED",
   CONFIRMED = "CONFIRMED",
+  PICKUP_PENDING = "PICKUP_PENDING",
+  PICKUP_COMPLETED = "PICKUP_COMPLETED",
+  CANCEL_COMPLETED = "CANCEL_COMPLETED",
+  CANCEL_REFUND_PENDING = "CANCEL_REFUND_PENDING",
+  CANCEL_REFUND_COMPLETED = "CANCEL_REFUND_COMPLETED",
+  NO_SHOW = "NO_SHOW",
 }
 
 export enum OrderSortBy {
@@ -51,6 +59,9 @@ export interface OrderResponseDto {
   productImages: string[];
   storeId: string;
   storeName: string;
+  storeBankName?: string | null;
+  storeBankAccountNumber?: string | null;
+  storeAccountHolderName?: string | null;
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;
@@ -61,7 +72,17 @@ export interface OrderResponseDto {
   pickupLatitude: number;
   pickupLongitude: number;
   orderStatus: OrderStatus;
+  /** 입금대기 진입 시각(입금 12시간 기준). 예약신청 단계에서는 null */
+  paymentPendingAt?: Date | string | null;
   pickupDate: Date;
+  userCancelReason?: string | null;
+  sellerCancelReason?: string | null;
+  sellerNoShowReason?: string | null;
+  refundRequestReason?: string | null;
+  sellerCancelRefundPendingReason?: string | null;
+  refundBankName?: string | null;
+  refundBankAccountNumber?: string | null;
+  refundAccountHolderName?: string | null;
   createdAt: Date;
   updatedAt: Date;
   orderItems: OrderItemResponseDto[];
@@ -78,6 +99,10 @@ export interface OrderListRequestDto {
   endDate?: string;
   orderNumber?: string;
   type?: OrderType;
+  /** YYYY-MM-DD, Asia/Seoul 달력 (백엔드 pickupStartDate) */
+  pickupStartDate?: string;
+  /** YYYY-MM-DD, Asia/Seoul 달력 (백엔드 pickupEndDate) */
+  pickupEndDate?: string;
 }
 
 /** 주문 목록 조회 응답 */
@@ -85,6 +110,9 @@ export type OrderListResponseDto = ListResponseDto<OrderResponseDto>;
 
 export interface UpdateOrderStatusRequestDto {
   orderStatus: OrderStatus;
+  sellerCancelReason?: string;
+  sellerNoShowReason?: string;
+  sellerCancelRefundPendingReason?: string;
 }
 
 export interface UpdateOrderStatusResponseDto {

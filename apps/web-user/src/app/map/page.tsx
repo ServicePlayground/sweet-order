@@ -144,8 +144,8 @@ export default function MapPage() {
     if (!openedMarkerImageRef.current) {
       openedMarkerImageRef.current = new window.kakao.maps.MarkerImage(
         "/images/contents/map-opened.png",
-        new window.kakao.maps.Size(24, 28),
-        { offset: new window.kakao.maps.Point(12, 28) },
+        new window.kakao.maps.Size(32, 37),
+        { offset: new window.kakao.maps.Point(16, 37) },
       );
     }
     if (!openedFocusedMarkerImageRef.current) {
@@ -187,7 +187,7 @@ export default function MapPage() {
         map,
         position,
         yAnchor: 0,
-        content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[13px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p></div>`,
+        content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p></div>`,
       });
       platformOverlaysRef.current.push(overlay);
     });
@@ -225,8 +225,8 @@ export default function MapPage() {
       if (!markerImageRef.current) {
         markerImageRef.current = new window.kakao.maps.MarkerImage(
           "/images/contents/map-unopened.png",
-          new window.kakao.maps.Size(24, 28),
-          { offset: new window.kakao.maps.Point(12, 28) },
+          new window.kakao.maps.Size(32, 37),
+          { offset: new window.kakao.maps.Point(16, 37) },
         );
       }
       if (!focusedMarkerImageRef.current) {
@@ -279,7 +279,7 @@ export default function MapPage() {
                 map,
                 position,
                 yAnchor: 0,
-                content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[13px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p><p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">미입점</p></div>`,
+                content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p><p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">미입점</p></div>`,
               }),
             );
           });
@@ -550,20 +550,15 @@ export default function MapPage() {
   const handleListSheetMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     listSheetHandlePointerDown(e.clientY);
-  };
-
-  // 목록 패널 드래그 시 창 밖에서 마우스 움직임/버튼 놓기 처리
-  useEffect(() => {
-    if (!isListSheetPanelDragging) return;
-    const onMove = (e: MouseEvent) => listSheetHandlePointerMove(e.clientY);
-    const onUp = () => listSheetHandlePointerUp();
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-    return () => {
+    const onMove = (ev: MouseEvent) => listSheetHandlePointerMove(ev.clientY);
+    const onUp = () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
+      listSheetHandlePointerUp();
     };
-  }, [isListSheetPanelDragging, listSheetHandlePointerMove, listSheetHandlePointerUp]);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
 
   // ---- Render ----
   if (!kakaoJavascriptKey) {
@@ -638,11 +633,17 @@ export default function MapPage() {
 
       <MapListSheetPanel
         offset={listSheetPanelOffset}
+        expandedToTop={
+          listSheetPanelOffset > 0 && listSheetPanelOffset >= getListSheetMaxOffset() - 1
+        }
         isDragging={isListSheetPanelDragging}
         onTouchStart={handleListSheetTouchStart}
         onTouchMove={handleListSheetTouchMove}
         onTouchEnd={handleListSheetTouchEnd}
         onMouseDown={handleListSheetMouseDown}
+        sheetPointerDown={listSheetHandlePointerDown}
+        sheetPointerMove={listSheetHandlePointerMove}
+        sheetPointerUp={listSheetHandlePointerUp}
       >
         {listSheetPanelOffset > 0 && (
           <MapStoreListSection

@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { StoreCreateService } from "@apps/backend/modules/store/services/store-create.service";
 import { StoreListService } from "@apps/backend/modules/store/services/store-list.service";
 import { StoreUpdateService } from "@apps/backend/modules/store/services/store-update.service";
+import { StoreBusinessCalendarService } from "@apps/backend/modules/store/services/store-business-calendar.service";
+import { StoreBusinessCalendarDto } from "@apps/backend/modules/store/dto/store-business-calendar.dto";
 import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-create.dto";
 import { UpdateStoreRequestDto } from "@apps/backend/modules/store/dto/store-update.dto";
 import {
@@ -22,6 +24,7 @@ export class StoreService {
     private readonly storeCreateService: StoreCreateService,
     private readonly storeListService: StoreListService,
     private readonly storeUpdateService: StoreUpdateService,
+    private readonly storeBusinessCalendarService: StoreBusinessCalendarService,
   ) {}
 
   /**
@@ -77,5 +80,16 @@ export class StoreService {
     user: JwtVerifiedPayload,
   ) {
     return await this.storeUpdateService.updateStoreForSeller(storeId, updateStoreDto, user);
+  }
+
+  /**
+   * 스토어 영업 캘린더 수정 (판매자용)
+   */
+  async updateBusinessCalendarForSeller(
+    storeId: string,
+    dto: StoreBusinessCalendarDto,
+    user: JwtVerifiedPayload,
+  ) {
+    return await this.storeBusinessCalendarService.updateForSeller(storeId, dto, user);
   }
 }

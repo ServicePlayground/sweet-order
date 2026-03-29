@@ -5,6 +5,7 @@ import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import {
   CreateStoreRequestDto,
+  StoreBusinessCalendarDto,
   UpdateStoreRequestDto,
 } from "@/apps/web-seller/features/store/types/store.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
@@ -58,6 +59,45 @@ export function useUpdateStore() {
       addAlert({
         severity: "error",
         message: getApiMessage.error(error),
+      });
+    },
+  });
+}
+
+/** 스토어 영업 캘린더 저장 (PUT /store/:id/business-calendar) */
+export function useUpdateStoreBusinessCalendar() {
+  const { addAlert } = useAlertStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ storeId, request }: { storeId: string; request: StoreBusinessCalendarDto }) =>
+      storeApi.updateBusinessCalendar(storeId, request),
+    onSuccess: (_data, variables) => {
+      addAlert({
+        severity: "success",
+        message: "영업 캘린더가 저장되었습니다.",
+      });
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.detail(variables.storeId) });
+      queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
+    },
+    onError: (error: unknown) => {
+      const ax = error as {
+        response?: {
+          status?: number;
+          data?: { data?: { message?: string; conflictingOrderNumbers?: string[] } };
+        };
+      };
+      const status = ax.response?.status;
+      const data = ax.response?.data?.data;
+      const nums = data?.conflictingOrderNumbers;
+      // 409 + conflictingOrderNumbers: StoreCalendarPage에서 모달로 안내
+      if (status === 409 && nums?.length) {
+        return;
+      }
+      const msg = data?.message ?? getApiMessage.error(error);
+      addAlert({
+        severity: "error",
+        message: msg,
       });
     },
   });

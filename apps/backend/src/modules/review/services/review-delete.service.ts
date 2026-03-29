@@ -23,10 +23,10 @@ export class ReviewDeleteService {
   async deleteMyReviewForUser(userId: string, reviewId: string) {
     const review = await this.prisma.productReview.findUnique({
       where: { id: reviewId },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, deletedAt: true },
     });
 
-    if (!review) {
+    if (!review || review.deletedAt != null) {
       LoggerUtil.log(
         `후기 삭제 실패: 후기를 찾을 수 없음 - userId: ${userId}, reviewId: ${reviewId}`,
       );
@@ -34,14 +34,13 @@ export class ReviewDeleteService {
     }
 
     if (review.userId !== userId) {
-      LoggerUtil.log(
-        `후기 삭제 실패: 본인 후기가 아님 - userId: ${userId}, reviewId: ${reviewId}`,
-      );
+      LoggerUtil.log(`후기 삭제 실패: 본인 후기가 아님 - userId: ${userId}, reviewId: ${reviewId}`);
       throw new ForbiddenException(REVIEW_ERROR_MESSAGES.REVIEW_FORBIDDEN);
     }
 
-    await this.prisma.productReview.delete({
+    await this.prisma.productReview.update({
       where: { id: reviewId },
+      data: { deletedAt: new Date() },
     });
 
     return { message: REVIEW_SUCCESS_MESSAGES.REVIEW_DELETED };

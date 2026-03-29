@@ -94,7 +94,7 @@ export default function ReservationCompletePage() {
           {orderData.orderStatus === OrderStatus.CONFIRMED ? "예약 완료" : "예약신청 완료"} 🎉
         </p>
         <div className="pb-[60px] h-[calc(100%-56px)] overflow-y-auto">
-          {orderData.orderStatus === OrderStatus.PENDING && (
+          {orderData.orderStatus === OrderStatus.RESERVATION_REQUESTED && (
             <p className="flex items-center gap-[8px] mb-[28px] py-[10px] px-[12px] text-sm text-gray-900 bg-blue-50 rounded-xl">
               <Icon name="warning" width={16} height={16} className="text-blue-400" />
               예약 확정까지 1-2일 소요될 수 있어요.

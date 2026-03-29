@@ -56,7 +56,20 @@ export class StoreCreateService {
           const store = await tx.store.create({
             data: {
               userId,
-              // 스토어 정보
+              // 사업자 정보 (1단계 - 사용자 입력값만 저장, 사업자등록번호는 정규화하여 저장)
+              businessNo: normalizedBusinessNo,
+              representativeName: createStoreDto.businessValidation.p_nm,
+              openingDate: createStoreDto.businessValidation.start_dt,
+              businessName: createStoreDto.businessValidation.b_nm,
+              businessSector: createStoreDto.businessValidation.b_sector,
+              businessType: createStoreDto.businessValidation.b_type,
+
+              // 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
+              permissionManagementNumber: createStoreDto.onlineTradingCompanyDetail.prmmiMnno,
+              // 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
+              // 필요시 외부 API를 호출하여 최신 상태 조회
+
+              // 스토어 정보 (3단계)
               logoImageUrl: createStoreDto.logoImageUrl,
               name: createStoreDto.name,
               description: createStoreDto.description,
@@ -67,17 +80,13 @@ export class StoreCreateService {
               zonecode: createStoreDto.zonecode,
               latitude: createStoreDto.latitude,
               longitude: createStoreDto.longitude,
-              // 사업자 정보 (1단계 - 사용자 입력값만 저장, 사업자등록번호는 정규화하여 저장)
-              businessNo: normalizedBusinessNo,
-              representativeName: createStoreDto.businessValidation.p_nm,
-              openingDate: createStoreDto.businessValidation.start_dt,
-              businessName: createStoreDto.businessValidation.b_nm,
-              businessSector: createStoreDto.businessValidation.b_sector,
-              businessType: createStoreDto.businessValidation.b_type,
-              // 통신판매사업자 정보 (2단계 - 사용자 입력값만 저장)
-              permissionManagementNumber: createStoreDto.onlineTradingCompanyDetail.prmmiMnno,
-              // 응답 값(businessStatus, taxType, onlineTradingCompanyDetail 등)은 저장하지 않음
-              // 필요시 외부 API를 호출하여 최신 상태 조회
+              // 정산 계좌 정보
+              bankAccountNumber: createStoreDto.bankAccountNumber.trim(),
+              bankName: createStoreDto.bankName,
+              accountHolderName: createStoreDto.accountHolderName.trim(),
+              // 채널 정보
+              kakaoChannelId: createStoreDto.kakaoChannelId?.trim(),
+              instagramId: createStoreDto.instagramId?.trim(),
             },
           });
 

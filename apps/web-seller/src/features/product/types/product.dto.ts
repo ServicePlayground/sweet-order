@@ -51,6 +51,7 @@ export enum SortBy {
   POPULAR = "popular",
   REVIEW_COUNT = "review_count",
   RATING_AVG = "rating_avg",
+  DISTANCE = "distance",
 }
 
 /** 케이크 사이즈 옵션 (생성/수정 요청·응답 공용, id는 응답에서 필수) */
@@ -166,11 +167,16 @@ export interface GetSellerProductsRequestDto {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
+  sizes?: CakeSizeDisplayName[];
   storeId?: string;
   productType?: ProductType;
   productCategoryTypes?: ProductCategoryType[];
   salesStatus?: EnableStatus;
   visibilityStatus?: EnableStatus;
+  /** 거리순 정렬(sortBy=distance)일 때 필수 */
+  latitude?: number;
+  /** 거리순 정렬(sortBy=distance)일 때 필수 */
+  longitude?: number;
 }
 
 export type ProductListResponseDto = ListResponseDto<ProductResponseDto>;

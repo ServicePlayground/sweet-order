@@ -59,7 +59,9 @@ export function MapStoreListSection({
   onListFilterChange,
 }: MapStoreListSectionProps) {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const [sortDropdownRect, setSortDropdownRect] = useState<{ top: number; left: number } | null>(null);
+  const [sortDropdownRect, setSortDropdownRect] = useState<{ top: number; left: number } | null>(
+    null,
+  );
   const sortDropdownRef = useRef<HTMLDivElement>(null);
   const sortDropdownListRef = useRef<HTMLDivElement>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
@@ -157,39 +159,39 @@ export function MapStoreListSection({
                           background: "var(--grayscale-gr-00, #FFFFFF)",
                         }}
                       >
-                      {SORT_OPTIONS.map((opt, index) => (
-                        <li
-                          key={opt.value}
-                          role="option"
-                          aria-selected={sortBy === opt.value}
-                          style={
-                            index < SORT_OPTIONS.length - 1
-                              ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
-                              : undefined
-                          }
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onSortByChange(opt.value);
-                              setSortDropdownOpen(false);
-                            }}
-                            className="w-full text-left hover:bg-gray-50"
-                            style={{
-                              minWidth: 120,
-                              height: 40,
-                              padding: "10px 14px",
-                              background: "var(--grayscale-gr-00, #FFFFFF)",
-                              fontWeight: 400,
-                              fontSize: 14,
-                              lineHeight: "140%",
-                              color: "var(--grayscale-gr-900, #1A1A1A)",
-                            }}
+                        {SORT_OPTIONS.map((opt, index) => (
+                          <li
+                            key={opt.value}
+                            role="option"
+                            aria-selected={sortBy === opt.value}
+                            style={
+                              index < SORT_OPTIONS.length - 1
+                                ? { borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)" }
+                                : undefined
+                            }
                           >
-                            {opt.label}
-                          </button>
-                        </li>
-                      ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onSortByChange(opt.value);
+                                setSortDropdownOpen(false);
+                              }}
+                              className="w-full text-left hover:bg-gray-50"
+                              style={{
+                                minWidth: 120,
+                                height: 40,
+                                padding: "10px 14px",
+                                background: "var(--grayscale-gr-00, #FFFFFF)",
+                                fontWeight: 400,
+                                fontSize: 14,
+                                lineHeight: "140%",
+                                color: "var(--grayscale-gr-900, #1A1A1A)",
+                              }}
+                            >
+                              {opt.label}
+                            </button>
+                          </li>
+                        ))}
                       </ul>
                     </div>,
                     document.body,

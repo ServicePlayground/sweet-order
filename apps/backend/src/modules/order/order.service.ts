@@ -1,9 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { OrderCreateService } from "@apps/backend/modules/order/services/order-create.service";
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
-import { OrderListService } from "@apps/backend/modules/order/services/order-list.service";
-import { OrderUpdateService } from "@apps/backend/modules/order/services/order-update.service";
+import { OrderSellerListService } from "@apps/backend/modules/order/services/order-seller-list.service";
+import { OrderSellerActionService } from "@apps/backend/modules/order/services/order-seller-action.service";
 import { OrderUserListService } from "@apps/backend/modules/order/services/order-user-list.service";
+import { OrderUserActionService } from "@apps/backend/modules/order/services/order-user-action.service";
+import { OrderUserReservationEditService } from "@apps/backend/modules/order/services/order-user-reservation-edit.service";
 import {
   CreateOrderRequestDto,
   CreateOrderResponseDto,
@@ -13,7 +15,15 @@ import {
   OrderListResponseDto,
   OrderListRequestDto,
 } from "@apps/backend/modules/order/dto/order-list.dto";
-import { UpdateOrderStatusRequestDto } from "@apps/backend/modules/order/dto/order-update.dto";
+import { UpdateOrderStatusRequestDto } from "./dto/order-seller-action.dto";
+import {
+  CancelOrderBeforePaymentRequestDto,
+  RequestCancelRefundRequestDto,
+} from "@apps/backend/modules/order/dto/order-user-action.dto";
+import {
+  UpdateReservationOrderItemsRequestDto,
+  UpdateReservationPickupDateRequestDto,
+} from "@apps/backend/modules/order/dto/order-user-reservation-edit.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
 /**
@@ -27,9 +37,11 @@ export class OrderService {
   constructor(
     private readonly orderCreateService: OrderCreateService,
     private readonly orderDetailService: OrderDetailService,
-    private readonly orderListService: OrderListService,
-    private readonly orderUpdateService: OrderUpdateService,
+    private readonly orderSellerListService: OrderSellerListService,
+    private readonly orderSellerActionService: OrderSellerActionService,
     private readonly orderUserListService: OrderUserListService,
+    private readonly orderUserActionService: OrderUserActionService,
+    private readonly orderUserReservationEditService: OrderUserReservationEditService,
   ) {}
 
   /**
@@ -76,7 +88,7 @@ export class OrderService {
     query: OrderListRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<OrderListResponseDto> {
-    return this.orderListService.getOrdersForSeller(query, user);
+    return this.orderSellerListService.getOrdersForSeller(query, user);
   }
 
   /**
@@ -87,6 +99,50 @@ export class OrderService {
     updateDto: UpdateOrderStatusRequestDto,
     user: JwtVerifiedPayload,
   ): Promise<{ id: string }> {
-    return this.orderUpdateService.updateOrderStatusForSeller(orderId, updateDto, user.sub);
+    return this.orderSellerActionService.updateOrderStatusForSeller(orderId, updateDto, user.sub);
+  }
+
+  /** 입금완료 처리 (사용자) */
+  async markOrderPaymentCompletedForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+  ): Promise<{ id: string }> {
+    return this.orderUserActionService.markPaymentCompleted(orderId, user.sub);
+  }
+
+  /** 입금 전 예약 취소 (사용자) */
+  async cancelOrderBeforePaymentForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+    dto: CancelOrderBeforePaymentRequestDto,
+  ): Promise<{ id: string }> {
+    return this.orderUserActionService.cancelBeforePayment(orderId, user.sub, dto);
+  }
+
+  /** 입금 후 취소환불 요청 (사용자) */
+  async requestOrderRefundForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+    dto: RequestCancelRefundRequestDto,
+  ): Promise<{ id: string }> {
+    return this.orderUserActionService.requestRefund(orderId, user.sub, dto);
+  }
+
+  /** 예약신청 단계 픽업일 변경 (사용자) */
+  async updateReservationPickupDateForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+    dto: UpdateReservationPickupDateRequestDto,
+  ): Promise<{ id: string }> {
+    return this.orderUserReservationEditService.updatePickupDate(orderId, user.sub, dto);
+  }
+
+  /** 예약신청 단계 주문 항목(옵션) 변경 (사용자) */
+  async updateReservationOrderItemsForUser(
+    orderId: string,
+    user: JwtVerifiedPayload,
+    dto: UpdateReservationOrderItemsRequestDto,
+  ): Promise<{ id: string }> {
+    return this.orderUserReservationEditService.updateOrderItems(orderId, user.sub, dto);
   }
 }

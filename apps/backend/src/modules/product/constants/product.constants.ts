@@ -12,6 +12,9 @@ export const PRODUCT_ERROR_MESSAGES = {
   PRODUCT_OUT_OF_STOCK: "품절된 상품입니다.",
   PRODUCT_NOT_AVAILABLE: "구매할 수 없는 상품입니다.",
   REVIEW_NOT_FOUND: "후기를 찾을 수 없습니다.",
+  /** 거리순 정렬 시 클라이언트 기준 위도·경도 미전달 */
+  DISTANCE_SORT_REQUIRES_COORDINATES:
+    "거리순 정렬에는 latitude와 longitude 쿼리 파라미터가 필요합니다.",
 } as const;
 
 /**
@@ -35,6 +38,7 @@ export enum SortBy {
   POPULAR = "popular", // 인기순(좋아요 수 내림차순)
   REVIEW_COUNT = "review_count", // 후기 많은 순(후기 수 내림차순)
   RATING_AVG = "rating_avg", // 별점 높은 순(평균 별점 내림차순)
+  DISTANCE = "distance", // 거리순(스토어 픽업 좌표 기준, 클라이언트 위도·경도 필요)
 }
 
 /**

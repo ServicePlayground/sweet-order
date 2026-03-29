@@ -8,7 +8,13 @@ import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNa
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { useMe } from "@/apps/web-user/features/user/hooks/queries/useMe";
 import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
-import { navigateToLoginPage, isWebViewEnvironment } from "@/apps/web-user/common/utils/webview.bridge";
+import {
+  navigateToLoginPage,
+  isWebViewEnvironment,
+} from "@/apps/web-user/common/utils/webview.bridge";
+import { UpcomingOrderCard } from "../../features/order/components/UpcomingOrderCard";
+import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
+import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
 
 function getLoginInfo(user: {
   googleId: string;
@@ -39,9 +45,14 @@ export default function MypagePage() {
   const hasHydrated = useAuthHasHydrated();
   const { data: user } = useMe();
   const [isAppGuideOpen, setIsAppGuideOpen] = useState(false);
+  const { data: ordersData } = useMyOrders({ type: "UPCOMING" });
+  const upcomingCount =
+    ordersData?.data?.filter(
+      (o) => o.orderStatus === OrderStatus.CONFIRMED || o.orderStatus === OrderStatus.PICKUP_PENDING,
+    ).length ?? 0;
 
   return (
-    <div className="min-h-[calc(100vh-60px)]">
+    <div className="pb-[60px]">
       {/* 헤더 */}
       <header className="sticky top-0 z-50 bg-white px-5 flex justify-between items-center h-[56px]">
         <h1 className="text-xl font-bold text-gray-900">My</h1>
@@ -98,7 +109,7 @@ export default function MypagePage() {
             </button>
           </div>
 
-          {/* <UpcomingOrderCard /> */}
+          <UpcomingOrderCard />
 
           <ul className="flex py-[10px] mx-5 mb-8 border border-gray-100 rounded-lg">
             {QUICK_LINKS.map(({ icon, label, href }, index) => (
@@ -108,9 +119,16 @@ export default function MypagePage() {
               >
                 <Link
                   href={href}
-                  className="flex flex-col items-center gap-2 py-3 text-gray-900 font-bold text-sm"
+                  className="relative flex flex-col items-center gap-2 py-3 text-gray-900 font-bold text-sm"
                 >
-                  <Icon name={icon} width={20} height={20} className="text-gray-900" />
+                  <div className="relative">
+                    <Icon name={icon} width={20} height={20} className="text-gray-900" />
+                    {icon === "reservation" && upcomingCount > 0 && (
+                      <span className="absolute -top-[6px] -right-[8px] min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold px-1">
+                        {upcomingCount}
+                      </span>
+                    )}
+                  </div>
                   {label}
                 </Link>
               </li>
@@ -157,7 +175,7 @@ export default function MypagePage() {
       </section>
 
       {/* 기타 */}
-      <section className="mt-8">
+      <section className="mt-8 pb-[60px]">
         <p className="px-5 py-2 text-xs text-gray-500">기타</p>
         {[
           { label: "서비스 이용약관", href: "/" },

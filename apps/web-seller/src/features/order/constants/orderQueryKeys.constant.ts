@@ -10,4 +10,7 @@ export const orderQueryKeys = {
     ["order", "list", params] as const,
   details: () => ["order", "detail"] as const,
   detail: (orderId: string) => ["order", "detail", orderId] as const,
+  /** 스토어 캘린더용: 스토어 + 선택한 픽업일(YYYY-MM-DD)별 주문 */
+  calendarByStore: (storeId: string, pickupDayKey: string | null) =>
+    ["order", "calendar-by-store", storeId, pickupDayKey] as const,
 } as const;

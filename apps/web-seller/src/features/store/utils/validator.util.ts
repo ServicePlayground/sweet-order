@@ -74,3 +74,38 @@ export const validateDetailAddress = (detailAddress: string): string | null => {
 
   return null;
 };
+
+/**
+ * 정산 계좌번호 유효성 검증
+ */
+export const validateBankAccountNumber = (value: string): string | null => {
+  if (!value || !value.trim()) {
+    return "계좌번호를 입력해주세요.";
+  }
+  const trimmed = value.trim();
+  if (trimmed.length < 4 || trimmed.length > 30) {
+    return "계좌번호는 4자 이상 30자 이하여야 합니다.";
+  }
+  if (!/^[0-9\- ]+$/.test(trimmed)) {
+    return "계좌번호는 숫자, 하이픈(-), 공백만 사용할 수 있습니다.";
+  }
+  return null;
+};
+
+/**
+ * 예금주명 유효성 검증
+ */
+export const validateAccountHolderName = (value: string): string | null => {
+  if (!value || !value.trim()) {
+    return "예금주명을 입력해주세요.";
+  }
+  const trimmed = value.trim();
+  if (trimmed.length < 2 || trimmed.length > 30) {
+    return "예금주명은 2자 이상 30자 이하여야 합니다.";
+  }
+  const pattern = /^[가-힣a-zA-Z0-9\s]+$/;
+  if (!pattern.test(trimmed)) {
+    return "예금주명은 한글, 영문, 숫자만 사용할 수 있습니다.";
+  }
+  return null;
+};

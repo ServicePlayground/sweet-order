@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useStoreList } from "@/apps/web-user/features/store/hooks/queries/useStoreList";
-import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import { StoreInfo, StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-user/common/utils/pagination.util";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
@@ -14,12 +14,15 @@ import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutation
 import { shortenAddress } from "@/apps/web-user/common/utils/address.util";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { calculateDistance, formatDistance } from "@/apps/web-user/common/utils/distance.util";
+import { sortStoresForMapList, type MapListSortBy } from "@/apps/web-user/features/store/utils/map.util";
 
 interface SearchStoreListSectionProps {
   search?: string;
+  filter?: StoreListFilter;
+  sortBy?: MapListSortBy;
 }
 
-export function SearchStoreListSection({ search }: SearchStoreListSectionProps) {
+export function SearchStoreListSection({ search, filter, sortBy = "distance" }: SearchStoreListSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { mutate: addLike } = useAddStoreLike();
   const { mutate: removeLike } = useRemoveStoreLike();
@@ -27,6 +30,8 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useStoreList({
     search,
+    ...filter,
+    sortBy: "popular",
   });
 
   const handleLike = (e: React.MouseEvent, store: StoreInfo) => {
@@ -41,7 +46,11 @@ export function SearchStoreListSection({ search }: SearchStoreListSectionProps) 
 
   useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage, loadMoreRef });
 
-  const stores = flattenAndDeduplicateInfiniteData<StoreInfo>(data);
+  const rawStores = flattenAndDeduplicateInfiniteData<StoreInfo>(data);
+  const stores = useMemo(
+    () => sortBy === "review" ? sortStoresForMapList(rawStores, "review", userLocation ?? null) : rawStores,
+    [rawStores, sortBy, userLocation],
+  );
 
   if (isLoading) return <></>;
 

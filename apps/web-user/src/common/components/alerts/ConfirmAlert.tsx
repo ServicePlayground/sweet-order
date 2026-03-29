@@ -34,100 +34,100 @@ export function ConfirmAlert() {
 
   return (
     <>
-    <style>{keyframes}</style>
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        animation: "confirmBackdropIn 0.3s ease",
-      }}
-      onClick={handleCancel}
-    >
+      <style>{keyframes}</style>
       <div
         style={{
-          backgroundColor: "white",
-          padding: "32px",
-          borderRadius: "12px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-          maxWidth: "400px",
-          width: "90%",
-          textAlign: "center",
-          animation: "confirmSlideUp 0.3s ease-out",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          animation: "confirmBackdropIn 0.3s ease",
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={handleCancel}
       >
-        {confirm.title && (
-          <h2
-            style={{
-              fontSize: "20px",
-              fontWeight: "600",
-              marginBottom: "12px",
-              color: "#111827",
-            }}
-          >
-            {confirm.title}
-          </h2>
-        )}
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#666",
-            marginBottom: "24px",
-            lineHeight: "1.5",
-          }}
-        >
-          {confirm.message}
-        </p>
         <div
           style={{
-            display: "flex",
-            gap: "12px",
-            justifyContent: "center",
+            backgroundColor: "white",
+            padding: "32px",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            maxWidth: "400px",
+            width: "90%",
+            textAlign: "center",
+            animation: "confirmSlideUp 0.3s ease-out",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <button
-            onClick={handleCancel}
+          {confirm.title && (
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: "600",
+                marginBottom: "12px",
+                color: "#111827",
+              }}
+            >
+              {confirm.title}
+            </h2>
+          )}
+          <p
             style={{
-              backgroundColor: "#6b7280",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "6px",
               fontSize: "14px",
-              fontWeight: "500",
-              cursor: "pointer",
-              flex: 1,
+              color: "#666",
+              marginBottom: "24px",
+              lineHeight: "1.5",
             }}
           >
-            취소
-          </button>
-          <button
-            onClick={handleConfirm}
+            {confirm.message}
+          </p>
+          <div
             style={{
-              backgroundColor: "#ef4444",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "6px",
-              fontSize: "14px",
-              fontWeight: "500",
-              cursor: "pointer",
-              flex: 1,
+              display: "flex",
+              gap: "12px",
+              justifyContent: "center",
             }}
           >
-            확인
-          </button>
+            <button
+              onClick={handleCancel}
+              style={{
+                backgroundColor: "#6b7280",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                flex: 1,
+              }}
+            >
+              취소
+            </button>
+            <button
+              onClick={handleConfirm}
+              style={{
+                backgroundColor: "#ef4444",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                flex: 1,
+              }}
+            >
+              확인
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

@@ -3,9 +3,13 @@ import { DatabaseModule } from "@apps/backend/infra/database/database.module";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import { OrderCreateService } from "@apps/backend/modules/order/services/order-create.service";
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
-import { OrderListService } from "@apps/backend/modules/order/services/order-list.service";
-import { OrderUpdateService } from "@apps/backend/modules/order/services/order-update.service";
+import { OrderSellerListService } from "@apps/backend/modules/order/services/order-seller-list.service";
+import { OrderSellerActionService } from "@apps/backend/modules/order/services/order-seller-action.service";
 import { OrderUserListService } from "@apps/backend/modules/order/services/order-user-list.service";
+import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
+import { OrderUserActionService } from "@apps/backend/modules/order/services/order-user-action.service";
+import { OrderUserReservationEditService } from "@apps/backend/modules/order/services/order-user-reservation-edit.service";
+import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/order-lifecycle-hook.service";
 
 /**
  * 주문 모듈
@@ -14,12 +18,16 @@ import { OrderUserListService } from "@apps/backend/modules/order/services/order
 @Module({
   imports: [DatabaseModule],
   providers: [
-    OrderService,
+    OrderLifecycleHookService,
+    OrderAutomationService,
     OrderCreateService,
     OrderDetailService,
-    OrderListService,
-    OrderUpdateService,
+    OrderSellerListService,
+    OrderSellerActionService,
+    OrderUserActionService,
+    OrderUserReservationEditService,
     OrderUserListService,
+    OrderService,
   ],
   exports: [OrderService],
 })
