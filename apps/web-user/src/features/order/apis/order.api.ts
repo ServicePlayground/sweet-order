@@ -17,10 +17,19 @@ export const orderApi = {
     return response.data.data;
   },
   // 마이페이지 주문 목록 조회
-  getMyOrders: async (): Promise<MyOrdersResponse> => {
+  getMyOrders: async (params?: {
+    type?: "UPCOMING" | "PAST";
+    sortBy?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<MyOrdersResponse> => {
     const response = await userClient.get("/mypage/orders", {
-      params: { sortBy: "LATEST", page: 1, limit: 10 },
+      params: { sortBy: "LATEST", page: 1, limit: 10, ...params },
     });
     return response.data.data;
+  },
+  // 입금완료 처리
+  paymentComplete: async (orderId: string): Promise<void> => {
+    await userClient.patch(`/orders/${orderId}/payment-complete`);
   },
 };

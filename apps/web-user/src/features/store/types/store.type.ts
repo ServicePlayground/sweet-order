@@ -38,6 +38,7 @@ export interface StoreListParams extends StoreListFilter {
   page: number;
   limit: number;
   search?: string;
+  sortBy?: string;
 }
 
 export interface StoreInfo {

@@ -110,7 +110,7 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
           </span>
           <div className="flex flex-col text-sm text-gray-900">
             <p>{review.productName}</p>
-            <p>{formatPrice(review.productPrice)}</p>
+            {review.productPrice != null && <p>{formatPrice(review.productPrice)}</p>}
           </div>
         </div>
         <button
@@ -118,7 +118,7 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
           onClick={() => setIsOptionExpanded(!isOptionExpanded)}
           className="absolute right-4 top-3 flex items-center gap-[2px] text-sm text-gray-500"
         >
-          주문옵션{" "}
+          주문옵션
           <Icon
             name="arrow"
             width={16}
@@ -127,7 +127,7 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
           />
         </button>
         {isOptionExpanded && (
-          <p className="text-2sm text-gray-500 mt-3">{/* TODO: 주문 옵션 데이터 연동 */}</p>
+          <p className="text-2sm text-gray-500 mt-3"></p>
         )}
       </div>
 

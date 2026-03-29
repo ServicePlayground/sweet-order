@@ -73,6 +73,68 @@ export interface GetStoreReviewsParams {
 }
 
 /**
+ * 작성 가능한 후기 주문 응답
+ */
+export interface WritableReviewOrder {
+  id: string;
+  userId: string;
+  productId: string;
+  productName: string;
+  productImages: string[];
+  storeId: string;
+  storeName: string;
+  orderNumber: string;
+  totalQuantity: number;
+  totalPrice: number;
+  pickupDate: string;
+  pickupAddress: string;
+  pickupRoadAddress: string;
+  pickupDetailAddress?: string;
+  pickupZonecode: string;
+  pickupLatitude: number;
+  pickupLongitude: number;
+  createdAt: string;
+  updatedAt: string;
+  orderItems: WritableReviewOrderItem[];
+  myReviewUiStatus: string;
+  linkedProductReviewId: string | null;
+}
+
+export interface WritableReviewOrderItem {
+  id: string;
+  sizeId?: string;
+  sizeDisplayName?: string;
+  sizeLengthCm?: number;
+  sizeDescription?: string;
+  sizePrice?: number;
+  flavorId?: string;
+  flavorDisplayName?: string;
+  flavorPrice?: number;
+  letteringMessage?: string;
+  requestMessage?: string;
+  quantity: number;
+  itemPrice: number;
+  imageUrls: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WritableReviewListResponse {
+  data: WritableReviewOrder[];
+  meta: PaginationMeta;
+}
+
+/**
+ * 후기 작성 요청
+ */
+export interface CreateReviewRequest {
+  orderId: string;
+  rating: number;
+  content: string;
+  imageUrls: string[];
+}
+
+/**
  * @deprecated Use GetProductReviewsParams instead
  */
 export interface GetReviewsParams {

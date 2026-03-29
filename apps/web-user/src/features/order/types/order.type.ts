@@ -59,8 +59,16 @@ export interface CreateOrderRequest {
  * 주문 상태 enum
  */
 export enum OrderStatus {
-  PENDING = "PENDING", // 대기중 (예약신청)
-  CONFIRMED = "CONFIRMED", // 확정됨 (예약확정)
+  RESERVATION_REQUESTED = "RESERVATION_REQUESTED", // 예약신청
+  PAYMENT_PENDING = "PAYMENT_PENDING", // 입금대기
+  PAYMENT_COMPLETED = "PAYMENT_COMPLETED", // 입금완료
+  CONFIRMED = "CONFIRMED", // 예약확정
+  PICKUP_PENDING = "PICKUP_PENDING", // 픽업대기
+  PICKUP_COMPLETED = "PICKUP_COMPLETED", // 픽업완료
+  CANCEL_COMPLETED = "CANCEL_COMPLETED", // 취소완료
+  CANCEL_REFUND_PENDING = "CANCEL_REFUND_PENDING", // 취소/환불 대기
+  CANCEL_REFUND_COMPLETED = "CANCEL_REFUND_COMPLETED", // 취소/환불 완료
+  NO_SHOW = "NO_SHOW", // 노쇼
 }
 
 /**
@@ -109,7 +117,12 @@ export interface OrderResponse {
   pickupZonecode: string;
   pickupLatitude: number;
   pickupLongitude: number;
+  paymentPendingAt?: string;
   orderStatus: OrderStatus;
+  // 스토어 정산 계좌 (입금대기 시 표시)
+  storeBankName?: string | null;
+  storeBankAccountNumber?: string | null;
+  storeAccountHolderName?: string | null;
   createdAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   updatedAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   orderItems: OrderItemResponse[];
