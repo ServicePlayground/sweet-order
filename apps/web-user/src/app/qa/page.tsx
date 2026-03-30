@@ -23,7 +23,7 @@ const QA_WEB_USERS = {
   DEV: {
     id: "user001",
     token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW0zYXNmNncwMDAwazdxODNrdHg5dmxxIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3Mjg2NDQ4MywiZXhwIjoxNzgwNjQwNDgzfQ.Y8M8Ar7pr36n5ky_ffiI22okDojV9zJjgyJhB_F8Obo",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW5jY2lpZWgwMDAwMXlna25lNmtidHdnIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3NDgyNDIyMywiZXhwIjoxNzgyNjAwMjIzfQ.B7hUhlggA_Er67SbNfFmFA_PwZC_MXIUvrCp_XljmaU",
   },
 } as const;
 

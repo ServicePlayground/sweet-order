@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
+import { NotificationModule } from "@apps/backend/modules/notification/notification.module";
 import { OrderService } from "@apps/backend/modules/order/order.service";
 import { OrderCreateService } from "@apps/backend/modules/order/services/order-create.service";
 import { OrderDetailService } from "@apps/backend/modules/order/services/order-detail.service";
@@ -16,7 +17,7 @@ import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/
  * 주문 관련 기능을 제공합니다.
  */
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, NotificationModule],
   providers: [
     OrderLifecycleHookService,
     OrderAutomationService,

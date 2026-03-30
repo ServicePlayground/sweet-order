@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/apps/web-seller/common/components/selects/Select";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import { useSellerNotifications } from "@/apps/web-seller/features/notification/components/providers/SellerNotificationProvider";
 
 interface AdminSidebarProps {
   isMobile: boolean;
@@ -48,6 +49,9 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     () => (storeIdFromPath ? stores.some((s) => s.id === storeIdFromPath) : false),
     [storeIdFromPath, stores],
   );
+  const sellerNotif = useSellerNotifications();
+  const unreadNotifCount = sellerNotif?.unreadCount ?? 0;
+
   const menuItems = React.useMemo(() => {
     // 1) 스토어 범위 경로 + 유효한 storeId일 때만 스토어 메뉴 노출
     if (isStoreScopedPath && isValidStoreId) {
@@ -149,6 +153,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         <span className="flex-shrink-0 w-5 h-5 text-inherit">{item.icon}</span>
                       )}
                       <span className="flex-1 text-left">{item.text}</span>
+                      {item.text === "알림" && unreadNotifCount > 0 ? (
+                        <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-semibold text-white tabular-nums">
+                          {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
+                        </span>
+                      ) : null}
                     </button>
 
                     {hasChildren && (

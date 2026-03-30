@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Package, Store, FileText, ShoppingCart } from "lucide-react";
+import { Home, Package, Store, FileText, ShoppingCart, Bell } from "lucide-react";
 import { ROUTES } from "./paths.constant";
 
 export interface MenuChildItem {
@@ -41,6 +41,14 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
       ],
     },
     {
+      text: "피드",
+      icon: React.createElement(FileText, { className: "w-5 h-5" }),
+      children: [
+        { text: "피드 목록", path: ROUTES.STORE_DETAIL_FEED_LIST(storeId) },
+        { text: "피드 등록", path: ROUTES.STORE_DETAIL_FEED_CREATE(storeId) },
+      ],
+    },
+    {
       text: "상품",
       icon: React.createElement(Package, { className: "w-5 h-5" }),
       children: [
@@ -54,11 +62,11 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
       children: [{ text: "주문 목록", path: ROUTES.STORE_DETAIL_ORDERS_LIST(storeId) }],
     },
     {
-      text: "피드",
-      icon: React.createElement(FileText, { className: "w-5 h-5" }),
+      text: "알림",
+      icon: React.createElement(Bell, { className: "w-5 h-5" }),
       children: [
-        { text: "피드 목록", path: ROUTES.STORE_DETAIL_FEED_LIST(storeId) },
-        { text: "피드 등록", path: ROUTES.STORE_DETAIL_FEED_CREATE(storeId) },
+        { text: "알림 목록", path: ROUTES.STORE_DETAIL_NOTIFICATIONS_LIST(storeId) },
+        { text: "알림 설정", path: ROUTES.STORE_DETAIL_NOTIFICATIONS_SETTINGS(storeId) },
       ],
     },
     // {
