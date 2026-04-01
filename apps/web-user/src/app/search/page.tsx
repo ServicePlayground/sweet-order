@@ -5,7 +5,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { SearchProductListSection } from "@/apps/web-user/features/product/components/sections/SearchProductListSection";
 import { SearchStoreListSection } from "@/apps/web-user/features/store/components/sections/SearchStoreListSection";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { SearchFilterSheet, type SearchSortBy } from "@/apps/web-user/features/search/components/SearchFilterSheet";
+import {
+  SearchFilterSheet,
+  type SearchSortBy,
+} from "@/apps/web-user/features/search/components/SearchFilterSheet";
 import type { StoreListFilter } from "@/apps/web-user/features/store/types/store.type";
 
 const RECENT_SEARCHES_KEY = "recentSearches";

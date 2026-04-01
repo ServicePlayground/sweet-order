@@ -126,9 +126,7 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
             className={`text-gray-500 transition-transform ${isOptionExpanded ? "rotate-0" : "rotate-180"}`}
           />
         </button>
-        {isOptionExpanded && (
-          <p className="text-2sm text-gray-500 mt-3"></p>
-        )}
+        {isOptionExpanded && <p className="text-2sm text-gray-500 mt-3"></p>}
       </div>
 
       {/* 리뷰 이미지 */}

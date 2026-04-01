@@ -10,8 +10,10 @@ import { SellerChatController } from "./controllers/chat.controller";
 import { FeedModule } from "@apps/backend/modules/feed/feed.module";
 import { SellerFeedController } from "./controllers/feed.controller";
 import { OrderModule } from "@apps/backend/modules/order/order.module";
+import { StatisticsModule } from "@apps/backend/modules/statistics/statistics.module";
 import { NotificationModule } from "@apps/backend/modules/notification/notification.module";
 import { SellerOrderController } from "./controllers/order.controller";
+import { SellerStatisticsController } from "./controllers/statistics.controller";
 import { SellerNotificationController } from "./controllers/notification.controller";
 
 /**
@@ -27,6 +29,7 @@ import { SellerNotificationController } from "./controllers/notification.control
     ChatModule,
     FeedModule,
     OrderModule,
+    StatisticsModule,
     NotificationModule,
   ],
   controllers: [
@@ -36,6 +39,7 @@ import { SellerNotificationController } from "./controllers/notification.control
     SellerChatController,
     SellerFeedController,
     SellerOrderController,
+    SellerStatisticsController,
     SellerNotificationController,
   ],
 })

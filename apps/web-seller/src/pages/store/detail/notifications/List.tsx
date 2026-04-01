@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/apps/web-seller/common/components/tabs/Tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/apps/web-seller/common/components/tabs/Tabs";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
 import { useSellerNotificationsRequired } from "@/apps/web-seller/features/notification/components/providers/SellerNotificationProvider";
@@ -48,13 +53,18 @@ function NotificationListCard(props: {
                     <Bell className="h-5 w-5" strokeWidth={2} aria-hidden />
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
-                    <span className="block text-base font-medium leading-snug text-foreground">{n.title}</span>
+                    <span className="block text-base font-medium leading-snug text-foreground">
+                      {n.title}
+                    </span>
                     <p className="text-sm text-muted-foreground">{n.body}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(n.createdAt).toLocaleString("ko-KR")}
                     </p>
                   </div>
-                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground/70" strokeWidth={2} />
+                  <ChevronRight
+                    className="h-5 w-5 shrink-0 text-muted-foreground/70"
+                    strokeWidth={2}
+                  />
                 </button>
               </li>
             ))}

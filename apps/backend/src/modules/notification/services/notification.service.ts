@@ -158,7 +158,10 @@ export class NotificationService {
   /**
    * 스토어 단위 판매자 알림 설정을 조회합니다. 없으면 기본값으로 생성(upsert)합니다.
    */
-  async getOrCreatePreferenceSellerWeb(userId: string, storeId: string): Promise<NotificationPreferenceDto> {
+  async getOrCreatePreferenceSellerWeb(
+    userId: string,
+    storeId: string,
+  ): Promise<NotificationPreferenceDto> {
     await this.assertStoreOwnedByUser(storeId, userId);
     const row = await this.prisma.userNotificationPreference.upsert({
       where: {

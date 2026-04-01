@@ -101,7 +101,10 @@ export default function QnaPage() {
             <p className="px-5 py-2 text-xs text-gray-500">{section.category}</p>
             <ul>
               {section.items.map((item) => (
-                <li key={item.id} className={expandedId === item.id ? "" : "border-b border-gray-100"}>
+                <li
+                  key={item.id}
+                  className={expandedId === item.id ? "" : "border-b border-gray-100"}
+                >
                   <button
                     type="button"
                     onClick={() => handleToggle(item.id)}

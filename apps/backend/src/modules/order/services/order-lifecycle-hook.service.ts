@@ -10,7 +10,9 @@ import { NotificationOrderDispatchService } from "@apps/backend/modules/notifica
  */
 @Injectable()
 export class OrderLifecycleHookService {
-  constructor(private readonly notificationOrderDispatchService: NotificationOrderDispatchService) {}
+  constructor(
+    private readonly notificationOrderDispatchService: NotificationOrderDispatchService,
+  ) {}
 
   afterOrderStatusTransition(payload: OrderStatusTransitionPayload): void {
     void this.dispatchAsync(payload);

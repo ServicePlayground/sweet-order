@@ -14,7 +14,10 @@ import { useRemoveStoreLike } from "@/apps/web-user/features/like/hooks/mutation
 import { shortenAddress } from "@/apps/web-user/common/utils/address.util";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { calculateDistance, formatDistance } from "@/apps/web-user/common/utils/distance.util";
-import { sortStoresForMapList, type MapListSortBy } from "@/apps/web-user/features/store/utils/map.util";
+import {
+  sortStoresForMapList,
+  type MapListSortBy,
+} from "@/apps/web-user/features/store/utils/map.util";
 
 interface SearchStoreListSectionProps {
   search?: string;
@@ -22,7 +25,11 @@ interface SearchStoreListSectionProps {
   sortBy?: MapListSortBy;
 }
 
-export function SearchStoreListSection({ search, filter, sortBy = "distance" }: SearchStoreListSectionProps) {
+export function SearchStoreListSection({
+  search,
+  filter,
+  sortBy = "distance",
+}: SearchStoreListSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { mutate: addLike } = useAddStoreLike();
   const { mutate: removeLike } = useRemoveStoreLike();
@@ -48,7 +55,10 @@ export function SearchStoreListSection({ search, filter, sortBy = "distance" }: 
 
   const rawStores = flattenAndDeduplicateInfiniteData<StoreInfo>(data);
   const stores = useMemo(
-    () => sortBy === "review" ? sortStoresForMapList(rawStores, "review", userLocation ?? null) : rawStores,
+    () =>
+      sortBy === "review"
+        ? sortStoresForMapList(rawStores, "review", userLocation ?? null)
+        : rawStores,
     [rawStores, sortBy, userLocation],
   );
 

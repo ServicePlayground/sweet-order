@@ -55,7 +55,8 @@ export const SellerNotificationProvider: React.FC<{
   const unreadQuery = useNotificationUnreadCount(storeId);
   const prefsQuery = useNotificationPreferences(storeId);
 
-  const settings: SellerNotificationSettings = prefsQuery.data ?? DEFAULT_SELLER_NOTIFICATION_SETTINGS;
+  const settings: SellerNotificationSettings =
+    prefsQuery.data ?? DEFAULT_SELLER_NOTIFICATION_SETTINGS;
 
   // --- 읽음·설정 변경 (invalidate는 각 mutation 훅에서 처리) ---
   const updatePrefsMutation = useUpdateNotificationPreferences(storeId);
@@ -75,8 +76,9 @@ export const SellerNotificationProvider: React.FC<{
         }
         // 캐시에 prefs가 없으면 기본값으로 동작 (설정 페이지 미방문 등)
         const prefs =
-          queryClient.getQueryData<SellerNotificationSettings>(notificationQueryKeys.prefs(storeId)) ??
-          DEFAULT_SELLER_NOTIFICATION_SETTINGS;
+          queryClient.getQueryData<SellerNotificationSettings>(
+            notificationQueryKeys.prefs(storeId),
+          ) ?? DEFAULT_SELLER_NOTIFICATION_SETTINGS;
         if (!prefs.orderNotificationsEnabled) {
           return;
         }
@@ -128,11 +130,22 @@ export const SellerNotificationProvider: React.FC<{
       markRead,
       markAllRead,
     }),
-    [storeId, items, settings, unreadCount, listQuery.isLoading, setSettings, markRead, markAllRead],
+    [
+      storeId,
+      items,
+      settings,
+      unreadCount,
+      listQuery.isLoading,
+      setSettings,
+      markRead,
+      markAllRead,
+    ],
   );
 
   return (
-    <SellerNotificationContext.Provider value={value}>{children}</SellerNotificationContext.Provider>
+    <SellerNotificationContext.Provider value={value}>
+      {children}
+    </SellerNotificationContext.Provider>
   );
 };
 
@@ -145,7 +158,9 @@ export function useSellerNotifications(): SellerNotificationContextValue | null 
 export function useSellerNotificationsRequired(): SellerNotificationContextValue {
   const ctx = useContext(SellerNotificationContext);
   if (!ctx) {
-    throw new Error("useSellerNotificationsRequired는 SellerNotificationProvider 안에서만 사용하세요.");
+    throw new Error(
+      "useSellerNotificationsRequired는 SellerNotificationProvider 안에서만 사용하세요.",
+    );
   }
   return ctx;
 }

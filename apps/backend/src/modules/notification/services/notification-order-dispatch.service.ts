@@ -43,7 +43,10 @@ export class NotificationOrderDispatchService {
 
       const sellerUserId = order.store.userId;
       // 3) 스토어별 판매자 알림 설정 (미수신이면 저장·푸시 모두 생략)
-      const prefs = await this.notificationService.getOrCreatePreferenceSellerWeb(sellerUserId, order.storeId);
+      const prefs = await this.notificationService.getOrCreatePreferenceSellerWeb(
+        sellerUserId,
+        order.storeId,
+      );
       if (!prefs.orderNotificationsEnabled) {
         return;
       }
@@ -65,5 +68,4 @@ export class NotificationOrderDispatchService {
       );
     }
   }
-
 }

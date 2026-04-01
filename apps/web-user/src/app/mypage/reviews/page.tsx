@@ -56,7 +56,10 @@ export default function MyReviewsPage() {
     <div>
       <Header variant="back-title" title={`내 후기${data ? ` ${totalCount}` : ""}`} />
       <div className="px-5 py-3">
-        <Link href={PATHS.REVIEW_LIST} className="flex items-center gap-1.5 border border-primary-100 bg-primary-50 rounded-2xl text-primary py-3.5 px-4">
+        <Link
+          href={PATHS.REVIEW_LIST}
+          className="flex items-center gap-1.5 border border-primary-100 bg-primary-50 rounded-2xl text-primary py-3.5 px-4"
+        >
           <Icon name="reviewFill" width={20} height={20} className="text-primary" />
           <span className="text-sm font-bold">작성 가능 후기 {writableCount}개</span>
           <Icon name="arrow" width={20} height={20} className="text-primary rotate-90 ml-auto" />

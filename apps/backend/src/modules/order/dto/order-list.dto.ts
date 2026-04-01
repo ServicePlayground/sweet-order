@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsEnum, IsDateString, Matches } from "class-validator";
-
-const YMD_DATE_STRING = /^\d{4}-\d{2}-\d{2}$/;
+import { IsNotEmpty, IsOptional, IsString, IsEnum, IsDateString } from "class-validator";
+import { IsYmdDateString } from "@apps/backend/common/decorators/date-query.decorator";
 import {
   OrderStatus,
   OrderSortBy,
@@ -80,7 +79,7 @@ export class OrderListRequestDto extends PaginationRequestDto {
     example: "2024-03-01",
   })
   @IsOptional()
-  @Matches(YMD_DATE_STRING, { message: "pickupStartDate must be YYYY-MM-DD" })
+  @IsYmdDateString()
   pickupStartDate?: string;
 
   @ApiPropertyOptional({
@@ -89,7 +88,7 @@ export class OrderListRequestDto extends PaginationRequestDto {
     example: "2024-03-31",
   })
   @IsOptional()
-  @Matches(YMD_DATE_STRING, { message: "pickupEndDate must be YYYY-MM-DD" })
+  @IsYmdDateString()
   pickupEndDate?: string;
 }
 

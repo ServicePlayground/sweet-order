@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Package, Store, FileText, ShoppingCart, Bell } from "lucide-react";
+import { Home, Package, Store, FileText, ShoppingCart, Bell, BarChart3 } from "lucide-react";
 import { ROUTES } from "./paths.constant";
 
 export interface MenuChildItem {
@@ -60,6 +60,11 @@ export function getMenuItems(storeId: string | null): MenuItem[] {
       text: "주문",
       icon: React.createElement(ShoppingCart, { className: "w-5 h-5" }),
       children: [{ text: "주문 목록", path: ROUTES.STORE_DETAIL_ORDERS_LIST(storeId) }],
+    },
+    {
+      text: "통계",
+      icon: React.createElement(BarChart3, { className: "w-5 h-5" }),
+      children: [{ text: "주문 통계", path: ROUTES.STORE_DETAIL_STATISTICS_ORDERS(storeId) }],
     },
     {
       text: "알림",

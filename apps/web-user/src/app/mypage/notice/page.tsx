@@ -63,7 +63,10 @@ export default function NoticePage() {
       <Header variant="back-title" title="공지사항" />
       <ul className="pt-4">
         {DUMMY_NOTICES.map((notice) => (
-          <li key={notice.id} className={expandedId === notice.id ? "" : "border-b border-gray-100"}>
+          <li
+            key={notice.id}
+            className={expandedId === notice.id ? "" : "border-b border-gray-100"}
+          >
             <button
               type="button"
               onClick={() => handleToggle(notice.id)}

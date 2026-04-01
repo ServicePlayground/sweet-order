@@ -4,7 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import type { StoreBusinessCalendar, StoreInfo } from "@/apps/web-user/features/store/types/store.type";
+import type {
+  StoreBusinessCalendar,
+  StoreInfo,
+} from "@/apps/web-user/features/store/types/store.type";
 import { isStoreOpenForPickupNow } from "@/apps/web-user/features/store/utils/store-business-calendar.util";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
