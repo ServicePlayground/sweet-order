@@ -61,7 +61,7 @@ export class UserOrderController {
   @ApiOperation({
     summary: "(로그인 필요) 주문 생성",
     description:
-      "상품을 주문합니다. 상품의 판매 상태와 노출 상태를 확인하고, 주문 항목의 수량과 금액을 검증한 후 주문을 생성합니다. 생성된 주문 ID만 반환합니다.",
+      "상품을 주문합니다. 상품의 판매 상태와 노출 상태를 확인하고, 주문 항목의 수량과 금액을 검증한 후 주문을 생성합니다. 픽업 일시는 스토어 영업 캘린더(정기 휴무·표준 영업시간·일별 예외)에 맞아야 합니다. 생성된 주문 ID만 반환합니다.",
   })
   @SwaggerResponse(201, { dataDto: CreateOrderResponseDto })
   @SwaggerResponse(400, {
@@ -78,6 +78,9 @@ export class UserOrderController {
   })
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PICKUP_OUTSIDE_STORE_BUSINESS_HOURS),
   })
   @SwaggerAuthResponses()
   @SwaggerResponse(404, {
@@ -159,12 +162,15 @@ export class UserOrderController {
   @ApiOperation({
     summary: "(로그인 필요) 예약신청 단계 픽업 일시 변경",
     description:
-      "주문 상태가 예약신청(RESERVATION_REQUESTED)일 때만 픽업 날짜·시간을 변경합니다. 입금대기 이후에는 변경할 수 없습니다.",
+      "주문 상태가 예약신청(RESERVATION_REQUESTED)일 때만 픽업 날짜·시간을 변경합니다. 변경할 픽업 일시는 스토어 영업 캘린더에 맞아야 합니다. 입금대기 이후에는 변경할 수 없습니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
   @SwaggerAuthResponses()
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PICKUP_OUTSIDE_STORE_BUSINESS_HOURS),
   })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
@@ -188,7 +194,7 @@ export class UserOrderController {
   @ApiOperation({
     summary: "(로그인 필요) 예약신청 단계 주문 항목(옵션) 변경",
     description:
-      "주문 상태가 예약신청(RESERVATION_REQUESTED)일 때만 주문 항목 전체를 교체합니다. 요청 본문은 주문 생성 API의 items·totalQuantity·totalPrice와 동일한 검증 규칙을 따릅니다. 당시 주문의 상품 기준으로 옵션 ID·가격이 재검증됩니다. 검증은 주문 시점 스냅샷이 아니라 DB에 저장된 상품의 현재 옵션·가격을 따르므로, 주문 이후 판매자가 옵션을 비활성화·삭제·가격 변경한 경우에는 기존에 고른 조합으로는 요청이 거절될 수 있습니다.",
+      "주문 상태가 예약신청(RESERVATION_REQUESTED)일 때만 주문 항목 전체를 교체합니다. 요청 본문은 주문 생성 API의 items·totalQuantity·totalPrice와 동일한 검증 규칙을 따릅니다. 당시 주문의 상품 기준으로 옵션 ID·가격이 재검증됩니다. 검증은 주문 시점 스냅샷이 아니라 DB에 저장된 상품의 현재 옵션·가격을 따르므로, 주문 이후 판매자가 옵션을 비활성화·삭제·가격 변경한 경우에는 기존에 고른 조합으로는 요청이 거절될 수 있습니다. 주문에 설정된 픽업 일시가 현재 스토어 영업 캘린더에 맞지 않으면 거절됩니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
   @SwaggerAuthResponses()
@@ -209,6 +215,9 @@ export class UserOrderController {
   })
   @SwaggerResponse(400, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PRODUCT_NOT_AVAILABLE),
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(ORDER_ERROR_MESSAGES.PICKUP_OUTSIDE_STORE_BUSINESS_HOURS),
   })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
