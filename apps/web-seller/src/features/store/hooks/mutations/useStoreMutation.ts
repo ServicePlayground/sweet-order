@@ -81,23 +81,9 @@ export function useUpdateStoreBusinessCalendar() {
       queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
     },
     onError: (error: unknown) => {
-      const ax = error as {
-        response?: {
-          status?: number;
-          data?: { data?: { message?: string; conflictingOrderNumbers?: string[] } };
-        };
-      };
-      const status = ax.response?.status;
-      const data = ax.response?.data?.data;
-      const nums = data?.conflictingOrderNumbers;
-      // 409 + conflictingOrderNumbers: StoreCalendarPage에서 모달로 안내
-      if (status === 409 && nums?.length) {
-        return;
-      }
-      const msg = data?.message ?? getApiMessage.error(error);
       addAlert({
         severity: "error",
-        message: msg,
+        message: getApiMessage.error(error),
       });
     },
   });

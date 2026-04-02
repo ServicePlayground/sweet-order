@@ -179,7 +179,6 @@ export class SellerStoreController {
   /**
    * 스토어 영업 캘린더 수정 API
    * 정기 휴무·표준 영업 시간·날짜별 예외를 저장합니다.
-   * 예약신청·입금대기·입금완료·예약확정·픽업대기 상태이면서 기존 픽업 시각이 새 설정과 맞지 않으면 409로 거절됩니다.
    */
   @Put(":id/business-calendar")
   @HttpCode(HttpStatus.OK)
@@ -198,12 +197,6 @@ export class SellerStoreController {
   })
   @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
-  @SwaggerResponse(409, {
-    dataExample: {
-      message: STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_CONFLICTS_WITH_EXISTING_PICKUP,
-      conflictingOrderNumbers: ["ORD-20260328-0001"],
-    },
-  })
   async updateBusinessCalendar(
     @Param("id") id: string,
     @Body() body: StoreBusinessCalendarDto,

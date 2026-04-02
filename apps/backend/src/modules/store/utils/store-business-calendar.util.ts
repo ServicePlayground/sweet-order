@@ -93,7 +93,7 @@ export function isValidHalfHourHhmm(value: string): boolean {
 
 /**
  * 제안된 영업 설정 하에서 해당 픽업 시각이 ‘영업·슬롯 가능’이면 true.
- * 휴무이거나 시간 밖이면 false (변경 시 기존 예약과 충돌).
+ * 휴무이거나 시간 밖이면 false.
  */
 export function pickupFitsBusinessCalendarState(
   pickupUtc: Date,

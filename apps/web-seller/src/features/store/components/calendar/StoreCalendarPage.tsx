@@ -46,8 +46,6 @@ import {
   type DayOverride,
   WEEKDAY_LABELS_KO,
 } from "@/apps/web-seller/features/store/utils/store-calendar.util";
-import { getBusinessCalendarConflictOrderCount } from "@/apps/web-seller/features/store/utils/store-business-calendar-conflict.util";
-
 const HALF_HOUR_OPTIONS = buildHalfHourTimeOptions();
 
 function startOfMonth(d: Date): Date {
@@ -152,9 +150,6 @@ export const StoreCalendarPage: React.FC = () => {
   const [draftStart, setDraftStart] = React.useState("00:00");
   const [draftEnd, setDraftEnd] = React.useState("00:00");
 
-  const [reservationConflictOpen, setReservationConflictOpen] = React.useState(false);
-  const [reservationConflictCount, setReservationConflictCount] = React.useState(0);
-
   const weeklyOff = weeklyOffDays;
 
   const hydrateKeyRef = React.useRef<string | null>(null);
@@ -209,17 +204,7 @@ export const StoreCalendarPage: React.FC = () => {
         nextStandardEnd,
         nextOverrides,
       );
-      try {
-        await updateCalendar.mutateAsync({ storeId, request: dto });
-      } catch (e) {
-        const n = getBusinessCalendarConflictOrderCount(e);
-        if (n != null) {
-          setReservationConflictCount(n);
-          setReservationConflictOpen(true);
-          return;
-        }
-        throw e;
-      }
+      await updateCalendar.mutateAsync({ storeId, request: dto });
     },
     [storeId, updateCalendar],
   );
@@ -596,10 +581,7 @@ export const StoreCalendarPage: React.FC = () => {
 
                     <div className="space-y-3">
                       <Label className="text-base font-medium">영업 여부</Label>
-                      <p className="text-sm text-muted-foreground">
-                        저장 시 서버에 반영됩니다. 기존 픽업 예약과 맞지 않으면 저장이 거절될 수
-                        있습니다.
-                      </p>
+                      <p className="text-sm text-muted-foreground">저장 시 서버에 반영됩니다.</p>
                       <div className="flex gap-4">
                         <label className="flex cursor-pointer items-center gap-2 text-base">
                           <input
@@ -629,8 +611,7 @@ export const StoreCalendarPage: React.FC = () => {
                     <div className="space-y-3">
                       <Label className="text-base font-medium">오늘의 영업 시간</Label>
                       <p className="text-sm text-muted-foreground">
-                        00:00~00:00은 전일 영업으로 해석됩니다. 변경 후 기존 확정 예약과 맞지 않으면
-                        저장이 거절되며 안내가 표시됩니다.
+                        00:00~00:00은 전일 영업으로 해석됩니다.
                       </p>
                       <div
                         className={`flex flex-wrap items-end gap-3 ${!draftOpen ? "opacity-40 pointer-events-none" : ""}`}
@@ -699,30 +680,6 @@ export const StoreCalendarPage: React.FC = () => {
           </div>
         </TabsContent>
       </Tabs>
-
-      {reservationConflictOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="reservation-conflict-title"
-        >
-          <div className="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-            <h2 id="reservation-conflict-title" className="text-lg font-semibold">
-              저장할 수 없습니다
-            </h2>
-            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-              변경하려는 영업시간 외에 확정된 예약이 {reservationConflictCount}건 있습니다. 기존
-              예약을 먼저 변경해 주세요.
-            </p>
-            <div className="mt-6 flex justify-end">
-              <Button type="button" onClick={() => setReservationConflictOpen(false)}>
-                확인
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

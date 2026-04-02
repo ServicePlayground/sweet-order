@@ -1,9 +1,7 @@
-import { BadRequestException, ConflictException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { ORDER_STATUSES_BLOCKING_STORE_BUSINESS_CALENDAR_CHANGE } from "@apps/backend/modules/store/constants/store-business-calendar.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import {
   StoreBusinessCalendarDto,
@@ -14,13 +12,11 @@ import { isStoreBusinessFullDayWindow } from "@apps/backend/modules/store/consta
 import {
   businessCalendarStateFromStoreRow,
   parseHalfHourTimeToMinutes,
-  pickupFitsBusinessCalendarState,
   type StoreBusinessCalendarState,
 } from "@apps/backend/modules/store/utils/store-business-calendar.util";
 
 /**
  * 스토어 영업 캘린더(정기 휴무·표준 시간·일별 예외) 갱신.
- * 픽업 예약이 걸린 슬롯과 맞지 않으면 거절한다.
  */
 @Injectable()
 export class StoreBusinessCalendarService {
@@ -34,19 +30,6 @@ export class StoreBusinessCalendarService {
     await StoreOwnershipUtil.verifyStoreOwnership(this.prisma, storeId, user.sub);
 
     this.validateTimeRanges(dto);
-
-    const proposedState = this.dtoToState(dto);
-
-    const conflicting = await this.findConflictingPickupOrders(storeId, proposedState);
-    if (conflicting.length > 0) {
-      LoggerUtil.log(
-        `영업 캘린더 변경 충돌 - storeId: ${storeId}, orderNumbers: ${conflicting.map((c) => c.orderNumber).join(",")}`,
-      );
-      throw new ConflictException({
-        message: STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_CONFLICTS_WITH_EXISTING_PICKUP,
-        conflictingOrderNumbers: conflicting.map((c) => c.orderNumber),
-      });
-    }
 
     const normalizedOverrides = this.normalizeOverridesFromDto(dto.dayOverrides);
 
@@ -132,28 +115,5 @@ export class StoreBusinessCalendarService {
         }
       }
     }
-  }
-
-  private async findConflictingPickupOrders(
-    storeId: string,
-    proposed: StoreBusinessCalendarState,
-  ): Promise<{ orderNumber: string }[]> {
-    const orders = await this.prisma.order.findMany({
-      where: {
-        storeId,
-        orderStatus: { in: [...ORDER_STATUSES_BLOCKING_STORE_BUSINESS_CALENDAR_CHANGE] },
-        pickupDate: { not: null },
-      },
-      select: { orderNumber: true, pickupDate: true },
-    });
-
-    const bad: { orderNumber: string }[] = [];
-    for (const row of orders) {
-      if (!row.pickupDate) continue;
-      if (!pickupFitsBusinessCalendarState(row.pickupDate, proposed)) {
-        bad.push({ orderNumber: row.orderNumber });
-      }
-    }
-    return bad;
   }
 }
