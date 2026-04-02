@@ -77,11 +77,6 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
   );
 
   const emptyHint = "해당 기간에 집계된 데이터가 없습니다.";
-  /** API `includedOrderStatuses`를 안내 문구에 그대로 노출 */
-  const includedStatusesLabel =
-    data?.includedOrderStatuses?.length && data.includedOrderStatuses.length > 0
-      ? data.includedOrderStatuses.join(", ")
-      : null;
 
   return (
     <div className="space-y-7">
