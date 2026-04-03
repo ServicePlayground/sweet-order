@@ -76,6 +76,93 @@ function isMinuteWithinHalfHourWindow(
 }
 
 /**
+ * 캘린더에서 고른 날(로컬 연·월·일)을 서울 12:00에 해당하는 instant로 고정해 요일·dateKey를 안정적으로 맞춤.
+ */
+export function anchorCalendarDateToSeoulNoonInstant(selectedCalendarDate: Date): Date {
+  const y = selectedCalendarDate.getFullYear();
+  const m = selectedCalendarDate.getMonth();
+  const d = selectedCalendarDate.getDate();
+  return new Date(Date.UTC(y, m, d, 12 - 9, 0, 0, 0));
+}
+
+/** 지도 오전: 서울 00:00~12:00 미만 / 오후: 12:00~24:00 미만 (백엔드와 동일) */
+const MAP_MORNING_SLOT_START_MIN = 0;
+const MAP_MORNING_SLOT_END_MIN = 12 * 60;
+const MAP_AFTERNOON_SLOT_START_MIN = 12 * 60;
+const MAP_AFTERNOON_SLOT_END_MIN = 24 * 60;
+
+function openMinuteIntervalsOverlap(
+  a0: number,
+  a1: number,
+  b0: number,
+  b1: number,
+): boolean {
+  return Math.max(a0, b0) < Math.min(a1, b1);
+}
+
+/**
+ * 선택한 캘린더 날짜의 서울 달력 기준 유효 영업 구간(분).무면 null.
+ */
+export function getEffectiveSeoulDayOpenMinuteRange(
+  calendar: StoreBusinessCalendar,
+  selectedCalendarDate: Date,
+): { openMin: number; closeMin: number } | null {
+  const anchor = anchorCalendarDateToSeoulNoonInstant(selectedCalendarDate);
+  const { dateKey, weekday } = getSeoulWallClockForPickup(anchor);
+
+  const override = calendar.dayOverrides.find((o) => o.date === dateKey);
+  if (override) {
+    if (!override.isOpen) return null;
+    if (!override.openTime || !override.closeTime) return null;
+    if (isStoreBusinessFullDayWindow(override.openTime, override.closeTime)) {
+      return { openMin: 0, closeMin: 24 * 60 };
+    }
+    return {
+      openMin: parseHalfHourTimeToMinutes(override.openTime),
+      closeMin: parseHalfHourTimeToMinutes(override.closeTime),
+    };
+  }
+
+  if (calendar.weeklyClosedWeekdays.includes(weekday)) {
+    return null;
+  }
+
+  if (isStoreBusinessFullDayWindow(calendar.standardOpenTime, calendar.standardCloseTime)) {
+    return { openMin: 0, closeMin: 24 * 60 };
+  }
+  return {
+    openMin: parseHalfHourTimeToMinutes(calendar.standardOpenTime),
+    closeMin: parseHalfHourTimeToMinutes(calendar.standardCloseTime),
+  };
+}
+
+/**
+ * 지도 오전·오후 필터: 해당 서울 반나절과 영업 구간이 겹치면 true.
+ */
+export function storeCalendarOverlapsMapPickupHalfDay(
+  calendar: StoreBusinessCalendar,
+  selectedCalendarDate: Date,
+  slot: "morning" | "afternoon",
+): boolean {
+  const range = getEffectiveSeoulDayOpenMinuteRange(calendar, selectedCalendarDate);
+  if (!range) return false;
+  if (slot === "morning") {
+    return openMinuteIntervalsOverlap(
+      range.openMin,
+      range.closeMin,
+      MAP_MORNING_SLOT_START_MIN,
+      MAP_MORNING_SLOT_END_MIN,
+    );
+  }
+  return openMinuteIntervalsOverlap(
+    range.openMin,
+    range.closeMin,
+    MAP_AFTERNOON_SLOT_START_MIN,
+    MAP_AFTERNOON_SLOT_END_MIN,
+  );
+}
+
+/**
  * 현재 시각(UTC) 기준 Asia/Seoul에서 해당 스토어가 픽업/예약 가능한 영업 창 안이면 true.
  * (백엔드 pickupFitsBusinessCalendarState와 동일 규칙)
  */
@@ -101,4 +188,28 @@ export function isStoreOpenForPickupNow(
     calendar.standardOpenTime,
     calendar.standardCloseTime,
   );
+}
+
+/**
+ * 해당 서울 달력 날짜에 영업(휴무 아님, 임시휴무 아님, 영업 시간대 정의됨)이면 true.
+ * 지도 "하루종일" 필터용.
+ */
+export function isStoreOpenOnSeoulCalendarDay(
+  calendar: StoreBusinessCalendar,
+  selectedCalendarDate: Date,
+): boolean {
+  const anchor = anchorCalendarDateToSeoulNoonInstant(selectedCalendarDate);
+  const { dateKey, weekday } = getSeoulWallClockForPickup(anchor);
+
+  const override = calendar.dayOverrides.find((o) => o.date === dateKey);
+  if (override) {
+    if (!override.isOpen) return false;
+    return Boolean(override.openTime && override.closeTime);
+  }
+
+  if (calendar.weeklyClosedWeekdays.includes(weekday)) {
+    return false;
+  }
+
+  return Boolean(calendar.standardOpenTime && calendar.standardCloseTime);
 }

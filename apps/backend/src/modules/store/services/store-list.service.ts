@@ -4,6 +4,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import {
   STORE_ERROR_MESSAGES,
   StoreSortBy,
+  StoreMapPickupPeriodKind,
 } from "@apps/backend/modules/store/constants/store.constants";
 import {
   EnableStatus,
@@ -27,6 +28,7 @@ import { LikeStoreDetailService } from "@apps/backend/modules/like/services/like
 import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
+import { storeRowMatchesMapPickupFilter } from "@apps/backend/modules/store/utils/store-business-calendar.util";
 
 /**
  * 스토어 목록 조회 서비스
@@ -56,8 +58,17 @@ export class StoreListService {
       productCategoryTypes,
       latitude,
       longitude,
+      pickupFilterDate,
+      pickupFilterPeriod,
     } = query;
-    const where = await this.buildStoreWhereForUser({
+
+    const hasPickupDate = Boolean(pickupFilterDate?.trim());
+    const hasPickupPeriod = pickupFilterPeriod != null;
+    if (hasPickupDate !== hasPickupPeriod) {
+      throw new BadRequestException(STORE_ERROR_MESSAGES.PICKUP_FILTER_DATE_PERIOD_PAIR);
+    }
+
+    const baseWhere = await this.buildStoreWhereForUser({
       search,
       regions,
       sizes,
@@ -65,6 +76,11 @@ export class StoreListService {
       maxPrice,
       productCategoryTypes,
     });
+    const { where, totalItems: pickupTotalItems } = await this.narrowStoreWhereByMapPickupFilter(
+      baseWhere,
+      pickupFilterDate?.trim(),
+      pickupFilterPeriod,
+    );
     const sort = sortBy ?? StoreSortBy.LATEST;
 
     if (sort === StoreSortBy.DISTANCE) {
@@ -73,7 +89,8 @@ export class StoreListService {
       }
     }
 
-    const totalItems = await this.prisma.store.count({ where });
+    const totalItems =
+      pickupTotalItems !== null ? pickupTotalItems : await this.prisma.store.count({ where });
 
     let stores: Store[];
 
@@ -178,7 +195,16 @@ export class StoreListService {
       productCategoryTypes,
       latitude,
       longitude,
+      pickupFilterDate,
+      pickupFilterPeriod,
     } = query;
+
+    const hasPickupDate = Boolean(pickupFilterDate?.trim());
+    const hasPickupPeriod = pickupFilterPeriod != null;
+    if (hasPickupDate !== hasPickupPeriod) {
+      throw new BadRequestException(STORE_ERROR_MESSAGES.PICKUP_FILTER_DATE_PERIOD_PAIR);
+    }
+
     const baseWhere = this.buildStoreWhereForSeller(userId, search);
     const productFilterWhere = await this.buildStoreWhereProductFilter({
       sizes,
@@ -186,10 +212,15 @@ export class StoreListService {
       maxPrice,
       productCategoryTypes,
     });
-    const where: Prisma.StoreWhereInput =
+    const mergedBase: Prisma.StoreWhereInput =
       Object.keys(productFilterWhere).length > 0
         ? { AND: [baseWhere, productFilterWhere] }
         : baseWhere;
+    const { where, totalItems: pickupTotalItems } = await this.narrowStoreWhereByMapPickupFilter(
+      mergedBase,
+      pickupFilterDate?.trim(),
+      pickupFilterPeriod,
+    );
     const sort = sortBy ?? StoreSortBy.LATEST;
 
     if (sort === StoreSortBy.DISTANCE) {
@@ -198,7 +229,8 @@ export class StoreListService {
       }
     }
 
-    const totalItems = await this.prisma.store.count({ where });
+    const totalItems =
+      pickupTotalItems !== null ? pickupTotalItems : await this.prisma.store.count({ where });
 
     let stores: Store[];
 
@@ -281,6 +313,47 @@ export class StoreListService {
     storeResponse.isLiked = isLiked;
 
     return storeResponse;
+  }
+
+  /**
+   * 픽업 일·구간 필터: Prisma where만으로 표현하기 어려운 영업 캘린더를 메모리에서 좁힌 뒤 id IN으로 반영.
+   * @returns totalItems가 null이면 호출부에서 prisma.count로 계산.
+   */
+  private async narrowStoreWhereByMapPickupFilter(
+    baseWhere: Prisma.StoreWhereInput,
+    pickupFilterDate?: string,
+    pickupFilterPeriod?: StoreMapPickupPeriodKind,
+  ): Promise<{ where: Prisma.StoreWhereInput; totalItems: number | null }> {
+    if (!pickupFilterDate || pickupFilterPeriod == null) {
+      return { where: baseWhere, totalItems: null };
+    }
+
+    const rows = await this.prisma.store.findMany({
+      where: baseWhere,
+      select: {
+        id: true,
+        weeklyClosedWeekdays: true,
+        standardOpenTime: true,
+        standardCloseTime: true,
+        businessCalendarOverrides: true,
+      },
+    });
+
+    const filteredIds = rows
+      .filter((r) => storeRowMatchesMapPickupFilter(r, pickupFilterDate, pickupFilterPeriod))
+      .map((r) => r.id);
+
+    if (filteredIds.length === 0) {
+      return {
+        where: { AND: [baseWhere, { id: "never" }] },
+        totalItems: 0,
+      };
+    }
+
+    return {
+      where: { AND: [baseWhere, { id: { in: filteredIds } }] },
+      totalItems: filteredIds.length,
+    };
   }
 
   private async buildStoreWhereForUser(params: {

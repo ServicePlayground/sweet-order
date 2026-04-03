@@ -3,6 +3,14 @@ import {
   STORE_BUSINESS_TIME_HHMM_REGEX,
   isStoreBusinessFullDayWindow,
 } from "@apps/backend/modules/store/constants/store-business-calendar.constants";
+import { StoreMapPickupPeriodKind } from "@apps/backend/modules/store/constants/store.constants";
+
+/** 지도 오전 슬롯: 서울 00:00 이상 ~ 12:00 미만(자정~11:59) */
+const MAP_MORNING_SLOT_START_MIN = 0;
+const MAP_MORNING_SLOT_END_MIN = 12 * 60;
+/** 지도 오후 슬롯: 서울 12:00 이상 ~ 24:00 미만(정오~23:59) */
+const MAP_AFTERNOON_SLOT_START_MIN = 12 * 60;
+const MAP_AFTERNOON_SLOT_END_MIN = 24 * 60;
 
 export type StoreBusinessDayOverrideInput = {
   date: string;
@@ -89,6 +97,141 @@ export function isMinuteWithinHalfHourWindow(
 
 export function isValidHalfHourHhmm(value: string): boolean {
   return STORE_BUSINESS_TIME_HHMM_REGEX.test(value);
+}
+
+/** 같은 날 [a0,a1)·[b0,b1) 반개구간 겹침(끝 미포함) */
+function openMinuteIntervalsOverlap(
+  a0: number,
+  a1: number,
+  b0: number,
+  b1: number,
+): boolean {
+  return Math.max(a0, b0) < Math.min(a1, b1);
+}
+
+/**
+ * 해당 서울 달력 날짜의 유효 영업 구간(분 단위, 당일 0시 기준). 휴무·미설정이면 null.
+ * `isMinuteWithinHalfHourWindow`와 동일한 해석(00:00+00:00 = 하루 전체).
+ */
+export function getEffectiveSeoulDayOpenMinuteRange(
+  state: StoreBusinessCalendarState,
+  year: number,
+  month1To12: number,
+  day: number,
+): { openMin: number; closeMin: number } | null {
+  const anchor = new Date(Date.UTC(year, month1To12 - 1, day, 12 - 9, 0, 0, 0));
+  const { dateKey, weekday } = getSeoulWallClockForPickup(anchor);
+
+  const override = state.dayOverrides.find((o) => o.date === dateKey);
+  if (override) {
+    if (!override.isOpen) return null;
+    if (!override.openTime || !override.closeTime) return null;
+    if (isStoreBusinessFullDayWindow(override.openTime, override.closeTime)) {
+      return { openMin: 0, closeMin: 24 * 60 };
+    }
+    return {
+      openMin: parseHalfHourTimeToMinutes(override.openTime),
+      closeMin: parseHalfHourTimeToMinutes(override.closeTime),
+    };
+  }
+
+  if (state.weeklyClosedWeekdays.includes(weekday)) {
+    return null;
+  }
+
+  if (isStoreBusinessFullDayWindow(state.standardOpenTime, state.standardCloseTime)) {
+    return { openMin: 0, closeMin: 24 * 60 };
+  }
+  return {
+    openMin: parseHalfHourTimeToMinutes(state.standardOpenTime),
+    closeMin: parseHalfHourTimeToMinutes(state.standardCloseTime),
+  };
+}
+
+/**
+ * 지도 오전/오후 필터: 해당 슬롯(서울 자정~정오 / 정오~자정)과 영업 시간대가 한 시각이라도 겹치면 true.
+ */
+export function storeStateOverlapsMapPickupHalfDay(
+  state: StoreBusinessCalendarState,
+  year: number,
+  month1To12: number,
+  day: number,
+  slot: "morning" | "afternoon",
+): boolean {
+  const range = getEffectiveSeoulDayOpenMinuteRange(state, year, month1To12, day);
+  if (!range) return false;
+  if (slot === "morning") {
+    return openMinuteIntervalsOverlap(
+      range.openMin,
+      range.closeMin,
+      MAP_MORNING_SLOT_START_MIN,
+      MAP_MORNING_SLOT_END_MIN,
+    );
+  }
+  return openMinuteIntervalsOverlap(
+    range.openMin,
+    range.closeMin,
+    MAP_AFTERNOON_SLOT_START_MIN,
+    MAP_AFTERNOON_SLOT_END_MIN,
+  );
+}
+
+/**
+ * YYYY-MM-DD(로컬 캘린더에서 선택한 연·월·일과 동일하게 전달) + 서울 정오 앵커 → 해당 서울 달력 날짜에
+ * 영업(휴무 아님, 임시휴무 아님, 영업 시간대 정의됨)이면 true. 웹 `isStoreOpenOnSeoulCalendarDay`와 동일 규칙.
+ */
+export function isStoreOpenOnSeoulCalendarDayFromYmd(
+  state: StoreBusinessCalendarState,
+  year: number,
+  month1To12: number,
+  day: number,
+): boolean {
+  const anchor = new Date(Date.UTC(year, month1To12 - 1, day, 12 - 9, 0, 0, 0));
+  const { dateKey, weekday } = getSeoulWallClockForPickup(anchor);
+
+  const override = state.dayOverrides.find((o) => o.date === dateKey);
+  if (override) {
+    if (!override.isOpen) return false;
+    return Boolean(override.openTime && override.closeTime);
+  }
+
+  if (state.weeklyClosedWeekdays.includes(weekday)) {
+    return false;
+  }
+
+  return Boolean(state.standardOpenTime && state.standardCloseTime);
+}
+
+/**
+ * 스토어 DB 행 + 지도 픽업 필터(날짜·구간).
+ * - fullday: 해당 일 영업일 여부
+ * - morning/afternoon: 서울 오전(00:00~12:00 미만)·오후(12:00~24:00 미만)와 영업 구간 겹침
+ */
+export function storeRowMatchesMapPickupFilter(
+  row: {
+    weeklyClosedWeekdays: number[];
+    standardOpenTime: string;
+    standardCloseTime: string;
+    businessCalendarOverrides: unknown;
+  },
+  pickupDateYmd: string,
+  period: StoreMapPickupPeriodKind,
+): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(pickupDateYmd.trim());
+  if (!m) return false;
+  const y = Number.parseInt(m[1]!, 10);
+  const mo = Number.parseInt(m[2]!, 10);
+  const d = Number.parseInt(m[3]!, 10);
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d)) return false;
+
+  const state = businessCalendarStateFromStoreRow(row);
+  if (period === StoreMapPickupPeriodKind.FULLDAY) {
+    return isStoreOpenOnSeoulCalendarDayFromYmd(state, y, mo, d);
+  }
+  if (period === StoreMapPickupPeriodKind.MORNING) {
+    return storeStateOverlapsMapPickupHalfDay(state, y, mo, d, "morning");
+  }
+  return storeStateOverlapsMapPickupHalfDay(state, y, mo, d, "afternoon");
 }
 
 /**

@@ -33,12 +33,18 @@ export interface StoreListFilter {
   productCategoryTypes?: ProductCategoryType[];
 }
 
+/** 스토어 목록 픽업 일·구간 필터(백엔드 GetStoresRequestDto와 동일) */
+export type StoreListPickupFilterPeriod = "morning" | "afternoon" | "fullday";
+
 /** 스토어 목록 조회 API 요청 파라미터 */
 export interface StoreListParams extends StoreListFilter {
   page: number;
   limit: number;
   search?: string;
   sortBy?: string;
+  /** YYYY-MM-DD, period와 함께 전달 */
+  pickupFilterDate?: string;
+  pickupFilterPeriod?: StoreListPickupFilterPeriod;
 }
 
 export interface StoreInfo {
