@@ -2,13 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import type { OrderStatusTransitionPayload } from "@apps/backend/modules/order/types/order-lifecycle.types";
 import { buildSellerOrderNotificationCopy } from "@apps/backend/modules/notification/utils/seller-order-notification-copy.util";
+import { buildUserOrderNotificationCopy } from "@apps/backend/modules/notification/utils/user-order-notification-copy.util";
 import { NotificationService } from "@apps/backend/modules/notification/services/notification.service";
 import { NotificationGateway } from "@apps/backend/modules/notification/gateways/notification.gateway";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
- * 주문 라이프사이클 훅에서 호출되어, 판매자용 주문 알림을 DB에 저장하고 소켓으로 푸시합니다.
- * 문구는 `buildSellerOrderNotificationCopy`(상태 전환 payload 기준)에서만 결정합니다.
+ * 주문 라이프사이클 훅에서 호출되어, 판매자·구매자 주문 알림을 DB에 저장하고 소켓으로 전달합니다.
  */
 @Injectable()
 export class NotificationOrderDispatchService {
@@ -18,18 +18,21 @@ export class NotificationOrderDispatchService {
     private readonly notificationGateway: NotificationGateway,
   ) {}
 
-  /**
-   * 주문 상태 전환 시 스토어 소유 판매자에게 SELLER_WEB 주문 알림을 저장하고, 설정에 따라 실시간 전달합니다.
-   */
   async handleOrderStatusTransition(payload: OrderStatusTransitionPayload): Promise<void> {
+    await this.dispatchSellerOrderNotification(payload);
+    await this.dispatchUserOrderNotification(payload);
+  }
+
+  /**
+   * 스토어 소유 판매자에게 SELLER_WEB 주문 알림 (설정 반영).
+   */
+  private async dispatchSellerOrderNotification(payload: OrderStatusTransitionPayload): Promise<void> {
     try {
-      // 1) 이 전환에 해당하는 알림 문구가 없으면 조용히 종료 (알림 대상 아님)
       const copy = buildSellerOrderNotificationCopy(payload);
       if (!copy) {
         return;
       }
 
-      // 2) 주문·스토어·판매자(user) 연결 확인
       const order = await this.prisma.order.findUnique({
         where: { id: payload.orderId },
         select: {
@@ -42,7 +45,6 @@ export class NotificationOrderDispatchService {
       }
 
       const sellerUserId = order.store.userId;
-      // 3) 스토어별 판매자 알림 설정 (미수신이면 저장·푸시 모두 생략)
       const prefs = await this.notificationService.getOrCreatePreferenceSellerWeb(
         sellerUserId,
         order.storeId,
@@ -51,7 +53,6 @@ export class NotificationOrderDispatchService {
         return;
       }
 
-      // 4) DB에 알림 행 저장
       const item = await this.notificationService.createSellerWebOrderNotification({
         recipientUserId: sellerUserId,
         title: copy.title,
@@ -60,11 +61,44 @@ export class NotificationOrderDispatchService {
         orderId: payload.orderId,
       });
 
-      // 5) 연결된 판매자 소켓에 브로드캐스트 (목록 갱신 트리거). 토스트·알림음은 클라이언트 설정
       this.notificationGateway.emitSellerNotification(sellerUserId, item);
     } catch (e) {
       LoggerUtil.log(
-        `[NotificationOrderDispatch] 실패 order=${payload.orderId}: ${e instanceof Error ? e.message : String(e)}`,
+        `[NotificationOrderDispatch/seller] 실패 order=${payload.orderId}: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+  }
+
+  /**
+   * 주문자(USER)에게 USER_WEB 주문 알림 (실시간·목록용 DB 저장).
+   */
+  private async dispatchUserOrderNotification(payload: OrderStatusTransitionPayload): Promise<void> {
+    try {
+      const copy = buildUserOrderNotificationCopy(payload);
+      if (!copy) {
+        return;
+      }
+
+      const order = await this.prisma.order.findUnique({
+        where: { id: payload.orderId },
+        select: { userId: true, storeId: true },
+      });
+      if (!order) {
+        return;
+      }
+
+      const item = await this.notificationService.createUserWebOrderNotification({
+        recipientUserId: order.userId,
+        title: copy.title,
+        body: copy.body,
+        storeId: order.storeId,
+        orderId: payload.orderId,
+      });
+
+      this.notificationGateway.emitUserOrderNotification(order.userId, item);
+    } catch (e) {
+      LoggerUtil.log(
+        `[NotificationOrderDispatch/user] 실패 order=${payload.orderId}: ${e instanceof Error ? e.message : String(e)}`,
       );
     }
   }

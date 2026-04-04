@@ -5,6 +5,8 @@ import {
   NotificationCategory,
   Prisma,
 } from "@apps/backend/infra/database/prisma/generated/client";
+
+/** 판매자 웹 알림 목록·소켓 응답에 쓰는 DTO */
 export interface SellerNotificationItemDto {
   id: string;
   createdAt: string;
@@ -16,6 +18,19 @@ export interface SellerNotificationItemDto {
   orderId: string;
 }
 
+/** 사용자 웹 알림 목록·소켓 응답에 쓰는 DTO */
+export interface UserNotificationItemDto {
+  id: string;
+  createdAt: string;
+  appSurface: "USER_WEB";
+  title: string;
+  body: string;
+  read: boolean;
+  storeId: string;
+  orderId: string;
+}
+
+/** 판매자 웹 알림 설정 API 응답 (스토어 단위) */
 export interface NotificationPreferenceDto {
   appSurface: "SELLER_WEB";
   orderNotificationsEnabled: boolean;
@@ -23,8 +38,9 @@ export interface NotificationPreferenceDto {
 }
 
 /**
- * 판매자 웹 알림 API의 영속성 계층.
- * - 목록·읽음·안 읽음 개수·설정(스토어별)·주문 알림 저장
+ * 알림 영속성 계층.
+ * - SELLER_WEB: 스토어별 목록·읽음·미읽음 수·설정·주문 알림 저장
+ * - USER_WEB: 구매자 계정 단위 주문 알림 목록·읽음·미읽음 수·저장 (설정 테이블은 미사용)
  */
 @Injectable()
 export class NotificationService {
@@ -50,6 +66,34 @@ export class NotificationService {
       id: row.id,
       createdAt: row.createdAt.toISOString(),
       appSurface: "SELLER_WEB",
+      title: row.title,
+      body: row.body,
+      read: row.readAt != null,
+      storeId: row.storeId,
+      orderId: row.orderId,
+    };
+  }
+
+  /**
+   * DB 행을 사용자 웹 알림 응답 DTO로 변환합니다.
+   * ORDER 알림은 storeId·orderId가 항상 있어야 합니다.
+   */
+  private toUserItemDto(row: {
+    id: string;
+    createdAt: Date;
+    title: string;
+    body: string;
+    readAt: Date | null;
+    storeId: string | null;
+    orderId: string | null;
+  }): UserNotificationItemDto {
+    if (!row.storeId || !row.orderId) {
+      throw new Error("ORDER 알림에는 storeId·orderId가 필요합니다.");
+    }
+    return {
+      id: row.id,
+      createdAt: row.createdAt.toISOString(),
+      appSurface: "USER_WEB",
       title: row.title,
       body: row.body,
       read: row.readAt != null,
@@ -243,6 +287,125 @@ export class NotificationService {
   }
 
   /**
+   * 구매자(USER_WEB) 주문 알림 한 건을 저장합니다.
+   * 제목·본문은 `NotificationOrderDispatchService`·copy util에서 정해집니다.
+   */
+  async createUserWebOrderNotification(params: {
+    recipientUserId: string;
+    title: string;
+    body: string;
+    storeId: string;
+    orderId: string;
+  }): Promise<UserNotificationItemDto> {
+    const row = await this.prisma.userNotification.create({
+      data: {
+        userId: params.recipientUserId,
+        appSurface: NotificationAppSurface.USER_WEB,
+        category: NotificationCategory.ORDER,
+        title: params.title,
+        body: params.body,
+        storeId: params.storeId,
+        orderId: params.orderId,
+      },
+    });
+    return this.toUserItemDto(row);
+  }
+
+  /**
+   * 로그인한 구매자의 USER_WEB 주문 알림을 페이지네이션으로 조회합니다.
+   * `unreadOnly`가 true이면 미읽음(`readAt` 없음)만 반환합니다.
+   */
+  async listUserWebOrderNotifications(params: {
+    userId: string;
+    unreadOnly: boolean;
+    page: number;
+    limit: number;
+  }): Promise<{ items: UserNotificationItemDto[]; meta: PrismaPaginationMeta }> {
+    const skip = (params.page - 1) * params.limit;
+    const where: Prisma.UserNotificationWhereInput = {
+      userId: params.userId,
+      appSurface: NotificationAppSurface.USER_WEB,
+      category: NotificationCategory.ORDER,
+      orderId: { not: null },
+      ...(params.unreadOnly ? { readAt: null } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      this.prisma.userNotification.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: params.limit,
+      }),
+      this.prisma.userNotification.count({ where }),
+    ]);
+    const totalPages = Math.max(1, Math.ceil(total / params.limit));
+    return {
+      items: rows.map((r) => this.toUserItemDto(r)),
+      meta: {
+        currentPage: params.page,
+        limit: params.limit,
+        totalItems: total,
+        totalPages,
+        hasNext: params.page < totalPages,
+        hasPrev: params.page > 1,
+      },
+    };
+  }
+
+  /**
+   * USER_WEB 주문 알림 단건 읽음 처리. 본인 소유 행만 갱신합니다.
+   */
+  async markReadUserWeb(params: { userId: string; notificationId: string }): Promise<void> {
+    const row = await this.prisma.userNotification.findFirst({
+      where: {
+        id: params.notificationId,
+        userId: params.userId,
+        appSurface: NotificationAppSurface.USER_WEB,
+        category: NotificationCategory.ORDER,
+        orderId: { not: null },
+      },
+    });
+    if (!row) {
+      throw new NotFoundException("알림을 찾을 수 없습니다.");
+    }
+    await this.prisma.userNotification.update({
+      where: { id: row.id },
+      data: { readAt: new Date() },
+    });
+  }
+
+  /**
+   * 해당 사용자의 USER_WEB ORDER 미읽음 알림을 모두 읽음 처리합니다.
+   */
+  async markAllReadUserWebOrderNotifications(userId: string): Promise<void> {
+    await this.prisma.userNotification.updateMany({
+      where: {
+        userId,
+        appSurface: NotificationAppSurface.USER_WEB,
+        category: NotificationCategory.ORDER,
+        orderId: { not: null },
+        readAt: null,
+      },
+      data: { readAt: new Date() },
+    });
+  }
+
+  /**
+   * USER_WEB 주문 알림 중 미읽음 개수 (헤더 배지 등).
+   */
+  async countUnreadUserWebOrderNotifications(userId: string): Promise<number> {
+    return this.prisma.userNotification.count({
+      where: {
+        userId,
+        appSurface: NotificationAppSurface.USER_WEB,
+        category: NotificationCategory.ORDER,
+        orderId: { not: null },
+        readAt: null,
+      },
+    });
+  }
+
+  /**
    * 해당 스토어의 미읽음 SELLER_WEB ORDER 알림 개수를 반환합니다.
    */
   async countUnreadSellerWebForStore(userId: string, storeId: string): Promise<number> {
@@ -274,6 +437,7 @@ export class NotificationService {
   }
 }
 
+/** Prisma 목록 API와 동일한 형태의 페이지 메타 */
 export interface PrismaPaginationMeta {
   currentPage: number;
   limit: number;

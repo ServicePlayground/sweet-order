@@ -17,6 +17,7 @@ import {
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { RegionSelectSheet } from "@/apps/web-user/common/components/headers/RegionSelectSheet";
+import { useAlarmUnreadCount } from "@/apps/web-user/features/alarm/hooks/queries/useAlarmUnreadCount";
 
 const REGION_STORAGE_KEY = "sweet-order:selected-region";
 
@@ -38,6 +39,7 @@ export default function Header({ variant = "main", title }: HeaderProps) {
   const [regionToast, setRegionToast] = useState<"loading" | "done" | null>(null);
   const isRegionChanging = useRef(false);
   const productFetching = useIsFetching({ queryKey: ["product", "list"] });
+  const { data: unreadAlarmCount = 0 } = useAlarmUnreadCount();
   const [showRegionSheet, setShowRegionSheet] = useState(false);
   const [inactiveModal, setInactiveModal] = useState<{
     visible: boolean;
@@ -165,15 +167,30 @@ export default function Header({ variant = "main", title }: HeaderProps) {
   );
 
   // 알람 버튼 컴포넌트 (공통)
-  const AlarmButton = () => (
-    <Link
-      href={PATHS.ALARM}
-      className="relative flex items-center justify-center rounded-lg text-gray-900"
-      aria-label="알람"
-    >
-      <Icon name="alarm" width={24} height={24} />
-    </Link>
-  );
+  const AlarmButton = () => {
+    const badge =
+      unreadAlarmCount > 0
+        ? unreadAlarmCount > 99
+          ? "99+"
+          : String(unreadAlarmCount)
+        : null;
+    return (
+      <Link
+        href={PATHS.ALARM}
+        className="relative flex items-center justify-center rounded-lg text-gray-900"
+        aria-label={
+          unreadAlarmCount > 0 ? `알람, 미읽음 ${unreadAlarmCount}건` : "알람"
+        }
+      >
+        <Icon name="alarm" width={24} height={24} />
+        {badge !== null && (
+          <span className="absolute -top-0.5 -right-1 min-w-[18px] h-[18px] px-0.5 flex items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white leading-none tabular-nums">
+            {badge}
+          </span>
+        )}
+      </Link>
+    );
+  };
 
   const LocationButton = () => (
     <button

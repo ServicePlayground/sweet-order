@@ -19,6 +19,8 @@ import { LikeModule } from "@apps/backend/modules/like/like.module";
 import { UserLikeController } from "@apps/backend/apis/user/controllers/like.controller";
 import { OrderModule } from "@apps/backend/modules/order/order.module";
 import { RecentViewModule } from "@apps/backend/modules/recent-view/recent-view.module";
+import { NotificationModule } from "@apps/backend/modules/notification/notification.module";
+import { UserNotificationController } from "@apps/backend/apis/user/controllers/notification.controller";
 
 /**
  * User API 모듈
@@ -38,6 +40,7 @@ import { RecentViewModule } from "@apps/backend/modules/recent-view/recent-view.
     LikeModule,
     OrderModule,
     RecentViewModule,
+    NotificationModule,
   ],
   controllers: [
     UserUploadController,
@@ -50,6 +53,7 @@ import { RecentViewModule } from "@apps/backend/modules/recent-view/recent-view.
     UserLikeController,
     UserOrderController,
     UserMypageController,
+    UserNotificationController,
   ],
 })
 export class UserApiModule {}

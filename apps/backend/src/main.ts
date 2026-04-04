@@ -181,7 +181,7 @@ async function bootstrap(): Promise<void> {
   LoggerUtil.log(`server is running on port ${port}`);
   LoggerUtil.log(`Environment: ${nodeEnv}`);
   LoggerUtil.log(`CORS origins: ${configService.get("CORS_ORIGIN")}`);
-  LoggerUtil.log(`WebSocket Gateway namespaces: / (chat), /notifications (seller alerts)`);
+  LoggerUtil.log(`WebSocket Gateway namespaces: / (chat), /notifications (seller + user order)`);
   LoggerUtil.log(`API prefix: ${API_PREFIX}`);
 }
 

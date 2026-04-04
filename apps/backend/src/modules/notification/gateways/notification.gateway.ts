@@ -12,11 +12,16 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
-import type { SellerNotificationItemDto } from "@apps/backend/modules/notification/services/notification.service";
+import type {
+  SellerNotificationItemDto,
+  UserNotificationItemDto,
+} from "@apps/backend/modules/notification/services/notification.service";
 
 /**
- * 판매자 웹 실시간 알림 (namespace `/notifications`)
- * 동일 계정의 채팅(`/`)과 분리해 연결·정책을 독립적으로 유지합니다.
+ * 실시간 알림 (namespace `/notifications`)
+ * - SELLER/ADMIN: `seller_notification` (판매자 웹)
+ * - USER: `user_order_notification` (사용자 웹 주문 알림)
+ * 채팅(`/`)과 네임스페이스를 분리합니다.
  */
 @Injectable()
 @WebSocketGateway({
@@ -44,7 +49,7 @@ export class NotificationGateway
   ) {}
 
   afterInit() {
-    LoggerUtil.log("[NotificationGateway] Socket.IO namespace /notifications 초기화");
+    LoggerUtil.log("[NotificationGateway] Socket.IO namespace /notifications 초기화 (seller + user)");
   }
 
   async handleConnection(client: Socket) {
@@ -63,7 +68,7 @@ export class NotificationGateway
       });
       const userId = payload.sub;
 
-      // 3) 판매자 권한 확인 (SELLER/ADMIN만 허용)
+      // 3) 역할 확인 (구매자 USER / 판매자·관리자)
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         select: { role: true },
@@ -74,8 +79,12 @@ export class NotificationGateway
         return;
       }
 
-      if (user.role !== "SELLER" && user.role !== "ADMIN") {
-        client.emit("error", { message: "Seller role required", code: "ROLE_NOT_AUTHORIZED" });
+      if (
+        user.role !== "USER" &&
+        user.role !== "SELLER" &&
+        user.role !== "ADMIN"
+      ) {
+        client.emit("error", { message: "Role not authorized", code: "ROLE_NOT_AUTHORIZED" });
         client.disconnect(true);
         return;
       }
@@ -114,13 +123,22 @@ export class NotificationGateway
   }
 
   emitSellerNotification(userId: string, item: SellerNotificationItemDto): void {
-    // 동일 userId의 모든 활성 소켓(다중 탭/브라우저)에 브로드캐스트
     const sockets = this.connectedUsers.get(userId);
     if (!sockets || sockets.size === 0) {
       return;
     }
     sockets.forEach((socketId) => {
       this.server.to(socketId).emit("seller_notification", item);
+    });
+  }
+
+  emitUserOrderNotification(userId: string, item: UserNotificationItemDto): void {
+    const sockets = this.connectedUsers.get(userId);
+    if (!sockets || sockets.size === 0) {
+      return;
+    }
+    sockets.forEach((socketId) => {
+      this.server.to(socketId).emit("user_order_notification", item);
     });
   }
 

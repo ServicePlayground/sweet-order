@@ -7,9 +7,9 @@ import { NotificationOrderDispatchService } from "@apps/backend/modules/notifica
 import { NotificationGateway } from "@apps/backend/modules/notification/gateways/notification.gateway";
 
 /**
- * 판매자 알림 모듈
- * - NotificationService / NotificationOrderDispatchService: 저장·목록·설정
- * - NotificationGateway: Socket.IO `/notifications`
+ * 주문 알림 모듈
+ * - NotificationService / NotificationOrderDispatchService: 저장·목록·설정·구매자 발송
+ * - NotificationGateway: Socket.IO `/notifications` (판매자·구매자)
  */
 @Module({
   imports: [DatabaseModule, JwtModule, ConfigModule],

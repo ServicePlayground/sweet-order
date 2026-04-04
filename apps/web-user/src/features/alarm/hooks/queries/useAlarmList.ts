@@ -1,43 +1,36 @@
 import { useQuery } from "@tanstack/react-query";
-import { Alarm } from "@/apps/web-user/features/alarm/types/alarm.type";
+import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
+import { alarmApi } from "@/apps/web-user/features/alarm/apis/alarm.api";
+import { alarmQueryKeys } from "@/apps/web-user/features/alarm/constants/alarmQueryKeys.constant";
+import type { Alarm, AlarmNotificationItem } from "@/apps/web-user/features/alarm/types/alarm.type";
+import { formatAlarmListLabels } from "@/apps/web-user/features/alarm/utils/format-alarm-datetime.util";
 
-// TODO: 실제 API 연결 시 교체
-const DUMMY_ALARMS: Alarm[] = [
-  {
-    id: "1",
-    imageUrl: undefined,
-    title: "알림 제목",
-    content: "알림 내용 알림내용",
-    date: "오늘",
-    time: "12:00",
-  },
-  {
-    id: "2",
-    imageUrl: undefined,
-    title: "알림 제목",
-    content: "알림 내용 알림내용",
-    date: "오늘",
-    time: "12:00",
-  },
-  {
-    id: "3",
-    imageUrl: undefined,
-    title: "알림 제목",
-    content: "알림 내용 알림내용",
-    date: "어제",
-    time: "09:30",
-  },
-];
-
-async function fetchAlarmList(): Promise<Alarm[]> {
-  // TODO: 실제 API 호출로 교체
-  // return api.get("/alarms");
-  return DUMMY_ALARMS;
+function mapNotificationsToAlarms(items: AlarmNotificationItem[]): Alarm[] {
+  return items.map((n) => {
+    const { date, time } = formatAlarmListLabels(n.createdAt);
+    return {
+      id: n.id,
+      orderId: n.orderId,
+      read: n.read,
+      title: n.title,
+      content: n.body,
+      date,
+      time,
+    };
+  });
 }
 
 export function useAlarmList() {
+  const hasHydrated = useAuthHasHydrated();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const accessToken = useAuthStore((s) => s.accessToken);
+
   return useQuery({
-    queryKey: ["alarm", "list"],
-    queryFn: fetchAlarmList,
+    queryKey: alarmQueryKeys.list(),
+    queryFn: async () => {
+      const { items } = await alarmApi.getNotifications({ page: 1, limit: 100 });
+      return mapNotificationsToAlarms(items);
+    },
+    enabled: hasHydrated && isAuthenticated && Boolean(accessToken),
   });
 }
