@@ -51,6 +51,8 @@ model User {
   reviews            ProductReview[]
   chatRooms          ChatRoom[]
   orders             Order[]
+  userNotifications       UserNotification[]
+  notificationPreferences UserNotificationPreference[]
 
   @@index([phone])
   @@index([userId])
@@ -227,6 +229,7 @@ model Store {
   chatRooms ChatRoom[]
   feeds     StoreFeed[]
   orders    Order[]
+  notificationPreferences UserNotificationPreference[]
 
   @@unique([userId, businessNo, permissionManagementNumber])
   @@index([userId])
@@ -468,6 +471,44 @@ model Order {
   @@map("orders")
 }
 
+/// 계정 단위 알림 (표면: 판매자 웹 / 사용자 앱·웹 등으로 구분)
+model UserNotification {
+  id         String                 @id @default(cuid())
+  userId     String                 @map("user_id")
+  appSurface NotificationAppSurface @map("app_surface")
+  category   NotificationCategory
+  title      String
+  body       String                 @db.Text
+  readAt     DateTime?              @map("read_at")
+  storeId    String?                @map("store_id")
+  orderId    String?                @map("order_id")
+  createdAt  DateTime               @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, appSurface, storeId, createdAt(sort: Desc)])
+  @@index([userId, appSurface, readAt])
+  @@map("user_notifications")
+}
+
+/// 알림 설정 (판매자 웹: 사용자·스토어·표면 조합별)
+model UserNotificationPreference {
+  id                             String                 @id @default(cuid())
+  userId                         String                 @map("user_id")
+  storeId                        String                 @map("store_id")
+  appSurface                     NotificationAppSurface @map("app_surface")
+  orderNotificationsEnabled     Boolean @default(true) @map("order_notifications_enabled")
+  orderNotificationSoundEnabled Boolean @default(true) @map("order_notification_sound_enabled")
+  updatedAt                      DateTime               @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, appSurface, storeId])
+  @@index([storeId])
+  @@map("user_notification_preferences")
+}
+
 // OrderItem model for order items
 // 하나의 주문(Order)에 여러 개의 주문 항목(OrderItem)이 포함될 수 있습니다.
 // 각 OrderItem은 독립적인 옵션 조합을 가지며, 서로 다른 사이즈, 맛 등을 가질 수 있습니다.
@@ -546,6 +587,15 @@ enum UserRole {
   USER
   SELLER
   ADMIN
+}
+
+enum NotificationAppSurface {
+  SELLER_WEB
+  USER_WEB
+}
+
+enum NotificationCategory {
+  ORDER
 }
 
 enum MessageSenderType {

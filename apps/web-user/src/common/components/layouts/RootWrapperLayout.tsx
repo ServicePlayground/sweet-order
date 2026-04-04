@@ -6,6 +6,7 @@ import Header from "@/apps/web-user/common/components/headers/Header";
 import { Alert } from "@/apps/web-user/common/components/alerts/Alert";
 import { ConfirmAlert } from "@/apps/web-user/common/components/alerts/ConfirmAlert";
 import { AuthProvider } from "@/apps/web-user/common/components/providers/AuthProvider";
+import { AlarmRealtimeListener } from "@/apps/web-user/features/alarm/components/AlarmRealtimeListener";
 
 interface RootWrapperLayoutProps {
   children: ReactNode;
@@ -37,6 +38,7 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
 
   return (
     <AuthProvider>
+      <AlarmRealtimeListener />
       <div className="w-full sm:w-[640px] h-screen mx-auto sm:border-x border-gray-200 overflow-y-auto overflow-x-hidden scrollbar-hide">
         <Header variant={headerVariant} title={headerTitle} />
         <div>{children}</div>

@@ -6,6 +6,7 @@
  * - URL ?q= 검색 시: 스토어 검색 API로 결과 표시 + 목록 패널 자동 오픈
  * - 카카오 키워드 검색: 주변 미입점 마커 (플랫폼과 겹치면 제외)
  * - 현재위치: 있으면 중심, 없으면 강남구 / 버튼으로 재요청
+ * - 픽업 날짜·구간(하루종일/오전/오후) 필터: 영업 캘린더 기준으로 마커·목록·라벨 반영
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
@@ -18,12 +19,14 @@ import type { StoreInfo, StoreListFilter } from "@/apps/web-user/features/store/
 import { MapStoreCard } from "@/apps/web-user/features/store/components/map/MapStoreCard";
 import { MapStoreListSection } from "@/apps/web-user/features/store/components/map/MapStoreListSection";
 import { MapTopSearchBar } from "@/apps/web-user/features/store/components/map/MapTopSearchBar";
+import { MapPickupDateBottomSheet } from "@/apps/web-user/features/store/components/map/MapPickupDateBottomSheet";
 import { MapListSheetPanel } from "@/apps/web-user/features/store/components/map/MapListSheetPanel";
 import { useMapListSheet } from "@/apps/web-user/features/store/hooks/useMapListSheet";
 import {
   DEFAULT_MAP_CENTER,
   MAP_BOUNDS_PADDING,
   KAKAO_PLACES_KEYWORD,
+  MAP_MARKER_LABEL_TEXT_SHADOW,
 } from "@/apps/web-user/features/store/constants/map.constant";
 import {
   escapeHtmlForOverlay,
@@ -31,8 +34,16 @@ import {
   isStoreNameSimilar,
   getStoresInMapBounds,
   filterStoresWithCoordinates,
+  mapPickupFilterToOverlayInstant,
+  mapPickupFilterToStoreListQuery,
+  buildMapPlatformStoreStatusOverlayHtml,
   type MapListSortBy,
+  type MapPickupFilter,
 } from "@/apps/web-user/features/store/utils/map.util";
+import {
+  isStoreOpenOnSeoulCalendarDay,
+  storeCalendarOverlapsMapPickupHalfDay,
+} from "@/apps/web-user/features/store/utils/store-business-calendar.util";
 
 declare global {
   interface Window {
@@ -50,6 +61,8 @@ export default function MapPage() {
   const [selectedStore, setSelectedStore] = useState<StoreInfo | null>(null);
   const [listSortBy, setListSortBy] = useState<MapListSortBy>("distance");
   const [listFilter, setListFilter] = useState<StoreListFilter>({});
+  const [pickupFilter, setPickupFilter] = useState<MapPickupFilter | null>(null);
+  const [pickupCalendarOpen, setPickupCalendarOpen] = useState(false);
 
   // ---- Refs: 지도·마커 ----
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -70,8 +83,12 @@ export default function MapPage() {
   const usedUserLocationForCenterRef = useRef(false); // 이미 현재위치로 중심 잡았는지
   const userLocationOverlayRef = useRef<any | null>(null);
   const userLocationRef = useRef<{ latitude: number; longitude: number } | null>(null); // load 콜백에서 최신 위치 참조용
+  const searchQueryRef = useRef<string | null>(searchQuery);
+  const pickupFilterRef = useRef<MapPickupFilter | null>(pickupFilter);
+  searchQueryRef.current = searchQuery;
+  pickupFilterRef.current = pickupFilter;
 
-  // 목록에 쓸 스토어: 검색 모드면 검색 결과 중 지도 범위 내, 아니면 지도 범위 내 플랫폼 스토어
+  // 목록에 쓸 스토어: 검색 모드면 검색 결과 중 지도 범위 내, 아니면 지도 범위 내 플랫폼 스토어(픽업 필터는 API에서 반영)
   const getStoresForList = useCallback((): StoreInfo[] => {
     const map = mapInstanceRef.current;
     if (!map) return [];
@@ -79,6 +96,9 @@ export default function MapPage() {
       searchStoresRef.current !== null ? searchStoresRef.current : platformStoresRef.current;
     return getStoresInMapBounds(map, source);
   }, []);
+
+  const getStoresForListRef = useRef(getStoresForList);
+  getStoresForListRef.current = getStoresForList;
 
   const listSheet = useMapListSheet(getStoresForList); // 하단 목록 시트(드래그 패널) 상태
 
@@ -99,10 +119,11 @@ export default function MapPage() {
     handlePointerUp: listSheetHandlePointerUp,
   } = listSheet;
 
-  // ---- 지도 범위 내 스토어 (마커 표시용): 검색 모드면 검색 결과만, 아니면 지도 범위 내 플랫폼 스토어
+  // ---- 지도 범위 내 스토어 (마커 표시용): 검색 모드면 검색 결과만, 아니면 지도 범위 내 플랫폼 스토어(픽업 필터는 API에서 반영)
   const getStoresToShow = useCallback((map: any): StoreInfo[] => {
-    if (searchStoresRef.current !== null) return searchStoresRef.current;
-    return getStoresInMapBounds(map, platformStoresRef.current);
+    return searchStoresRef.current !== null
+      ? searchStoresRef.current
+      : getStoresInMapBounds(map, platformStoresRef.current);
   }, []);
 
   /** 카카오 검색 장소가 플랫폼 스토어와 같은 위치/이름이면 미입점 마커에서 제외 */
@@ -156,6 +177,8 @@ export default function MapPage() {
       );
     }
 
+    const statusAt = mapPickupFilterToOverlayInstant(pickupFilter);
+
     stores.forEach((store) => {
       if (store.latitude == null || store.longitude == null) return;
       const position = new window.kakao.maps.LatLng(store.latitude, store.longitude);
@@ -183,15 +206,31 @@ export default function MapPage() {
       });
 
       const safeName = escapeHtmlForOverlay(store.name ?? "");
+      const statusHtml = buildMapPlatformStoreStatusOverlayHtml(
+        store.businessCalendar,
+        statusAt,
+        pickupFilter,
+      );
       const overlay = new window.kakao.maps.CustomOverlay({
         map,
         position,
         yAnchor: 0,
-        content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p></div>`,
+        content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow:${MAP_MARKER_LABEL_TEXT_SHADOW}">${safeName}</p>${statusHtml}</div>`,
       });
       platformOverlaysRef.current.push(overlay);
     });
-  }, [getStoresToShow]);
+  }, [getStoresToShow, pickupFilter]);
+
+  const drawPlatformStoreMarkersRef = useRef(drawPlatformStoreMarkers);
+  drawPlatformStoreMarkersRef.current = drawPlatformStoreMarkers;
+
+  /** 영업 상태 라벨이 시간 경과에 맞게 갱신되도록 1분마다 플랫폼 마커·오버레이 재생성 */
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      drawPlatformStoreMarkersRef.current();
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   /** 현재위치 오버레이(점) 표시/제거 */
   const updateUserLocationMarker = useCallback(
@@ -216,9 +255,13 @@ export default function MapPage() {
     [],
   );
 
-  /** 카카오 키워드 검색으로 주변 미입점(주문제작 케이크) 마커 표시. 검색 모드일 때는 호출하지 않음. */
+  /** 카카오 키워드 검색으로 주변 미입점(주문제작 케이크) 마커 표시. 지도 검색·픽업 필터 시에는 표시하지 않음. */
   const searchPlaces = useCallback(
     (centerLatLng: any) => {
+      if (searchQueryRef.current || pickupFilterRef.current != null) {
+        clearKakaoMarkers();
+        return;
+      }
       if (!window.kakao?.maps?.services) return;
       if (!placesServiceRef.current)
         placesServiceRef.current = new window.kakao.maps.services.Places();
@@ -279,7 +322,7 @@ export default function MapPage() {
                 map,
                 position,
                 yAnchor: 0,
-                content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">${safeName}</p><p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;">미입점</p></div>`,
+                content: `<div class="flex flex-col items-center pointer-events-none" style="margin-top:-4px;"><p class="text-center text-[14px] leading-[1.4] font-bold text-gray-900" style="text-shadow:${MAP_MARKER_LABEL_TEXT_SHADOW}">${safeName}</p><p class="text-center text-[11px] leading-[1.4] font-bold text-gray-500" style="text-shadow:${MAP_MARKER_LABEL_TEXT_SHADOW}">미입점</p></div>`,
               }),
             );
           });
@@ -289,6 +332,18 @@ export default function MapPage() {
     },
     [clearKakaoMarkers, isPlatformStoreDuplicate],
   );
+
+  /** URL 검색 또는 픽업 필터 시 미입점 마커 제거, 해제 시에만 키워드 검색 재실행 */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!mapInstanceRef.current || !window.kakao?.maps) return;
+    const suppress = Boolean(searchQuery || pickupFilter);
+    if (suppress) {
+      clearKakaoMarkers();
+    } else if (searchStoresRef.current === null) {
+      searchPlaces(mapInstanceRef.current.getCenter());
+    }
+  }, [searchQuery, pickupFilter, clearKakaoMarkers, searchPlaces]);
 
   /** 지도 최초 중심: 현재위치 있으면 그곳, 없으면 강남구 */
   const getInitialCenter = useCallback((): { lat: number; lng: number } => {
@@ -301,10 +356,10 @@ export default function MapPage() {
 
   /**
    * 카카오 지도 생성 및 이벤트 등록.
-   * isSearchMode: true면 미입점 검색(searchPlaces) 호출 안 함, 기존 카카오 마커 제거.
+   * suppressKakaoUnopenedMarkers: true면 미입점 검색(searchPlaces) 호출 안 함(지도 검색·픽업 필터와 동일).
    */
   const initializeMap = useCallback(
-    (center: { lat: number; lng: number }, isSearchMode: boolean) => {
+    (center: { lat: number; lng: number }, suppressKakaoUnopenedMarkers: boolean) => {
       if (!window.kakao?.maps || !mapContainerRef.current || mapInstanceRef.current) return;
       window.kakao.maps.load(() => {
         const map = new window.kakao.maps.Map(mapContainerRef.current, {
@@ -313,9 +368,11 @@ export default function MapPage() {
         });
         mapInstanceRef.current = map;
 
-        if (isSearchMode) clearKakaoMarkers();
-        drawPlatformStoreMarkers();
-        if (!isSearchMode) searchPlaces(new window.kakao.maps.LatLng(center.lat, center.lng));
+        if (suppressKakaoUnopenedMarkers) clearKakaoMarkers();
+        drawPlatformStoreMarkersRef.current();
+        if (!suppressKakaoUnopenedMarkers) {
+          searchPlaces(new window.kakao.maps.LatLng(center.lat, center.lng));
+        }
         // load 콜백은 비동기라 클로저의 userLocation이 null일 수 있음 → ref로 최신 위치 사용
         updateUserLocationMarker(userLocationRef.current ?? null);
 
@@ -325,15 +382,19 @@ export default function MapPage() {
             isCenteringFromClickRef.current = false;
             return;
           }
-          drawPlatformStoreMarkers();
-          if (searchStoresRef.current === null) searchPlaces(map.getCenter());
+          drawPlatformStoreMarkersRef.current();
+          const allowKakaoUnopened =
+            searchStoresRef.current === null &&
+            !searchQueryRef.current &&
+            pickupFilterRef.current == null;
+          if (allowKakaoUnopened) searchPlaces(map.getCenter());
           if (listSheetPanelOffsetRef.current > 0) {
-            setListSheetStores(getStoresForList());
+            setListSheetStores(getStoresForListRef.current());
           }
           // 검색 모드가 아니고, 현재 보이는 범위에 스토어가 없으면 목록 패널 접기
           if (
             searchStoresRef.current === null &&
-            getStoresForList().length === 0 &&
+            getStoresForListRef.current().length === 0 &&
             listSheetPanelOffsetRef.current > 0
           ) {
             closeListSheet();
@@ -362,7 +423,7 @@ export default function MapPage() {
                 : new window.kakao.maps.LatLng(DEFAULT_MAP_CENTER.lat, DEFAULT_MAP_CENTER.lng);
             map.setCenter(center);
           }
-          setListSheetStores(getStoresForList());
+          setListSheetStores(getStoresForListRef.current());
           const middleOff = getListSheetMiddleOffset();
           listSheetPanelMaxOffsetRef.current = getListSheetMaxOffset();
           listSheetPanelOffsetRef.current = middleOff;
@@ -372,14 +433,12 @@ export default function MapPage() {
     },
     [
       clearKakaoMarkers,
-      drawPlatformStoreMarkers,
       searchPlaces,
       updateUserLocationMarker,
       userLocation,
       closeListSheet,
       getListSheetMaxOffset,
       getListSheetMiddleOffset,
-      getStoresForList,
       setListSheetStores,
       setListSheetPanelOffset,
     ],
@@ -391,13 +450,13 @@ export default function MapPage() {
     userLocationRef.current = userLocation ?? null;
   }, [userLocation]);
 
-  // 카카오 스크립트 로드 후 지도 1회 생성. searchQuery 있으면 검색 모드로 생성(미입점 마커 없음)
+  // 카카오 스크립트 로드 후 지도 1회 생성. URL 검색·픽업 필터 시 미입점 마커 없음
   useEffect(() => {
     if (typeof window === "undefined") return;
     const ready = kakaoLoaded || (window.kakao && window.kakao.maps);
     if (!ready || mapInstanceRef.current) return;
-    initializeMap(getInitialCenter(), !!searchQuery);
-  }, [kakaoLoaded, userLocation, searchQuery, getInitialCenter, initializeMap]);
+    initializeMap(getInitialCenter(), Boolean(searchQuery || pickupFilter));
+  }, [kakaoLoaded, userLocation, searchQuery, pickupFilter, getInitialCenter, initializeMap]);
 
   // 검색 모드가 아닐 때만: 현재위치 획득 시 지도 중심을 현재위치로 이동 (검색 후 덮어쓰기 방지)
   useEffect(() => {
@@ -412,10 +471,16 @@ export default function MapPage() {
     if (map.panTo) {
       isCenteringFromClickRef.current = true;
       map.panTo(new window.kakao.maps.LatLng(userLocation.latitude, userLocation.longitude));
-      if (searchStoresRef.current === null) searchPlaces(map.getCenter());
+      if (
+        searchStoresRef.current === null &&
+        !searchQueryRef.current &&
+        pickupFilterRef.current == null
+      ) {
+        searchPlaces(map.getCenter());
+      }
     }
     usedUserLocationForCenterRef.current = true;
-  }, [userLocation, searchQuery, searchPlaces]);
+  }, [userLocation, searchQuery, pickupFilter, searchPlaces]);
 
   // 현재위치 변경 시 지도 위 현재위치 마커(점) 갱신
   useEffect(() => {
@@ -436,8 +501,14 @@ export default function MapPage() {
       if (listFilter.maxPrice != null) filterParams.maxPrice = listFilter.maxPrice;
       if (listFilter.productCategoryTypes?.length)
         filterParams.productCategoryTypes = listFilter.productCategoryTypes;
+      const pickupQ = mapPickupFilterToStoreListQuery(pickupFilter);
       while (hasNext) {
-        const res = await storeApi.getList({ page, limit, ...filterParams });
+        const res = await storeApi.getList({
+          page,
+          limit,
+          ...filterParams,
+          ...(pickupQ ?? {}),
+        });
         list.push(...res.data);
         hasNext = res.meta.hasNext;
         page += 1;
@@ -458,7 +529,14 @@ export default function MapPage() {
         }
       })
       .catch(() => {});
-  }, [drawPlatformStoreMarkers, searchPlaces, listFilter, getStoresForList, setListSheetStores]);
+  }, [
+    drawPlatformStoreMarkers,
+    searchPlaces,
+    listFilter,
+    pickupFilter,
+    getStoresForList,
+    setListSheetStores,
+  ]);
 
   // URL ?q= 검색: 스토어 검색 API 호출 후 마커·bounds·목록 패널 처리. 결과 0개여도 패널 열고 중심은 현재위치/강남구
   useEffect(() => {
@@ -477,11 +555,13 @@ export default function MapPage() {
         if (listFilter.maxPrice != null) filterParams.maxPrice = listFilter.maxPrice;
         if (listFilter.productCategoryTypes?.length)
           filterParams.productCategoryTypes = listFilter.productCategoryTypes;
+        const pickupQ = mapPickupFilterToStoreListQuery(pickupFilter);
         const res = await storeApi.getList({
           search: searchQuery,
           page: 1,
           limit: 1000,
           ...filterParams,
+          ...(pickupQ ?? {}),
         });
         const stores = filterStoresWithCoordinates(res.data ?? []);
         if (cancelled) return;
@@ -518,6 +598,7 @@ export default function MapPage() {
   }, [
     searchQuery,
     listFilter,
+    pickupFilter,
     userLocation,
     clearKakaoMarkers,
     drawPlatformStoreMarkers,
@@ -527,6 +608,36 @@ export default function MapPage() {
     setListSheetStores,
     setListSheetPanelOffset,
   ]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    drawPlatformStoreMarkersRef.current();
+    if (listSheetPanelOffsetRef.current > 0) {
+      setListSheetStores(getStoresForList());
+    }
+    setSelectedStore((prev) => {
+      if (!prev || !pickupFilter || !prev.businessCalendar) return prev;
+      if (pickupFilter.kind === "fullday") {
+        return isStoreOpenOnSeoulCalendarDay(prev.businessCalendar, pickupFilter.date) ? prev : null;
+      }
+      if (pickupFilter.kind === "morning") {
+        return storeCalendarOverlapsMapPickupHalfDay(
+          prev.businessCalendar,
+          pickupFilter.date,
+          "morning",
+        )
+          ? prev
+          : null;
+      }
+      return storeCalendarOverlapsMapPickupHalfDay(
+        prev.businessCalendar,
+        pickupFilter.date,
+        "afternoon",
+      )
+        ? prev
+        : null;
+    });
+  }, [pickupFilter, getStoresForList, setListSheetStores]);
 
   // ---- Handlers ----
   /** 내 위치 버튼: 현재위치 재요청 후 다음 effect에서 지도 중심 이동 */
@@ -584,7 +695,20 @@ export default function MapPage() {
         <div ref={mapContainerRef} className="w-full h-full" aria-label="주변 베이커리 지도" />
       </div>
 
-      <MapTopSearchBar searchQuery={searchQuery} />
+      <MapTopSearchBar
+        searchQuery={searchQuery}
+        pickupFilter={pickupFilter}
+        onCalendarClick={() => setPickupCalendarOpen(true)}
+        onPickupClear={() => setPickupFilter(null)}
+      />
+
+      <MapPickupDateBottomSheet
+        isOpen={pickupCalendarOpen}
+        onClose={() => setPickupCalendarOpen(false)}
+        selectedFilter={pickupFilter}
+        onConfirm={setPickupFilter}
+        onClearFilter={() => setPickupFilter(null)}
+      />
 
       <button
         type="button"

@@ -255,9 +255,7 @@ export default function ReviewWritePage() {
           onClick={handleSubmit}
           disabled={!isValid || isSubmitting}
           className={`w-full py-4 rounded-xl text-base font-bold border-none cursor-pointer ${
-            isValid
-              ? "bg-primary text-white"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            isValid ? "bg-primary text-white" : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
           {isSubmitting ? "등록 중..." : "후기 등록"}

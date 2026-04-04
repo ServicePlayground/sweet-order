@@ -1,8 +1,31 @@
+import type { PaginationMeta } from "@/apps/web-user/common/types/api.type";
+
+/** 알림 탭(`/alarm`) 목록 한 줄 UI 모델 */
 export interface Alarm {
   id: string;
+  /** 주문 알림인 경우 예약 상세로 이동할 때 사용 */
+  orderId?: string;
+  read?: boolean;
   imageUrl?: string;
   title: string;
   content: string;
-  date: string; // "오늘" | "어제" | "YYYY.MM.DD"
-  time: string; // "HH:MM"
+  date: string;
+  time: string;
+}
+
+/** GET `/notifications` 응답의 한 건 (USER_WEB 주문 알림) */
+export interface AlarmNotificationItem {
+  id: string;
+  createdAt: string;
+  appSurface: "USER_WEB";
+  title: string;
+  body: string;
+  read: boolean;
+  storeId: string;
+  orderId: string;
+}
+
+export interface AlarmNotificationListResult {
+  items: AlarmNotificationItem[];
+  meta: PaginationMeta;
 }

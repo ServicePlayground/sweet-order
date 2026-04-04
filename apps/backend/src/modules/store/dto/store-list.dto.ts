@@ -8,6 +8,7 @@ import {
   Max,
   IsArray,
   ValidateIf,
+  Matches,
 } from "class-validator";
 import { IsValidRegionsParam } from "@apps/backend/modules/store/decorators/validators.decorator";
 import {
@@ -19,6 +20,7 @@ import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-reques
 import { StoreResponseDto } from "./store-detail.dto";
 import {
   StoreSortBy,
+  StoreMapPickupPeriodKind,
   SWAGGER_EXAMPLES,
 } from "@apps/backend/modules/store/constants/store.constants";
 import {
@@ -130,6 +132,29 @@ export class GetStoresRequestDto extends PaginationRequestDto {
   @Min(-180)
   @Max(180)
   longitude?: number;
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 픽업 기준일. 클라이언트 캘린더에서 선택한 연·월·일을 YYYY-MM-DD로 전달합니다. " +
+      "`pickupFilterPeriod`와 함께 지정하면 해당 일·구간에 영업 중인 스토어만 반환합니다.",
+    example: "2026-04-05",
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  pickupFilterDate?: string;
+
+  @ApiPropertyOptional({
+    description:
+      "(필터) 픽업 구간. morning=서울 00:00~12:00(정오 미만), afternoon=12:00~24:00(자정 미만) 구간과 " +
+      "영업 시간이 겹치는 스토어만. fullday=해당 일 영업(휴무·임시휴무 제외). " +
+      "`pickupFilterDate`와 함께 지정해야 합니다.",
+    enum: StoreMapPickupPeriodKind,
+    example: StoreMapPickupPeriodKind.AFTERNOON,
+  })
+  @IsOptional()
+  @IsEnum(StoreMapPickupPeriodKind)
+  pickupFilterPeriod?: StoreMapPickupPeriodKind;
 }
 
 /**

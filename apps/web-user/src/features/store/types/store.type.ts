@@ -1,5 +1,20 @@
 import type { ProductCategoryType } from "@/apps/web-user/features/product/types/product.type";
 
+/** 영업 캘린더 (백엔드 StoreBusinessCalendarDto와 동일) */
+export interface StoreBusinessDayOverride {
+  date: string;
+  isOpen: boolean;
+  openTime?: string;
+  closeTime?: string;
+}
+
+export interface StoreBusinessCalendar {
+  weeklyClosedWeekdays: number[];
+  standardOpenTime: string;
+  standardCloseTime: string;
+  dayOverrides: StoreBusinessDayOverride[];
+}
+
 export interface StoreListResponse {
   data: StoreInfo[];
   meta: {
@@ -18,12 +33,18 @@ export interface StoreListFilter {
   productCategoryTypes?: ProductCategoryType[];
 }
 
+/** 스토어 목록 픽업 일·구간 필터(백엔드 GetStoresRequestDto와 동일) */
+export type StoreListPickupFilterPeriod = "morning" | "afternoon" | "fullday";
+
 /** 스토어 목록 조회 API 요청 파라미터 */
 export interface StoreListParams extends StoreListFilter {
   page: number;
   limit: number;
   search?: string;
   sortBy?: string;
+  /** YYYY-MM-DD, period와 함께 전달 */
+  pickupFilterDate?: string;
+  pickupFilterPeriod?: StoreListPickupFilterPeriod;
 }
 
 export interface StoreInfo {
@@ -58,6 +79,8 @@ export interface StoreInfo {
   productRepresentativeImageUrls: string[];
   // 상품 중 최소 금액 (노출·판매중인 상품만, 없으면 null)
   minProductPrice: number | null;
+  /** 영업 캘린더 (스토어 목록·상세 API) */
+  businessCalendar?: StoreBusinessCalendar;
   createdAt: Date;
   updatedAt: Date;
 }

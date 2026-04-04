@@ -14,6 +14,9 @@ import { StoreDetailFeedCreatePage } from "@/apps/web-seller/pages/store/detail/
 import { StoreDetailFeedDetailPage } from "@/apps/web-seller/pages/store/detail/feed/Detail";
 import { StoreDetailOrderListPage } from "@/apps/web-seller/pages/store/detail/orders/List";
 import { StoreDetailOrderDetailPage } from "@/apps/web-seller/pages/store/detail/orders/Detail";
+import { StoreDetailNotificationsListPage } from "@/apps/web-seller/pages/store/detail/notifications/List";
+import { StoreDetailNotificationsSettingsPage } from "@/apps/web-seller/pages/store/detail/notifications/Settings";
+import { StoreDetailStatisticsPage } from "@/apps/web-seller/pages/store/detail/statistics/Index";
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
 import { BasicLoginPage } from "@/apps/web-seller/pages/auth/BasicLogin";
 import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
@@ -41,6 +44,10 @@ export const ROUTES = {
   STORE_DETAIL_ORDERS_LIST: (storeId: string) => `/stores/${storeId}/orders`,
   STORE_DETAIL_ORDERS_DETAIL: (storeId: string, orderId: string) =>
     `/stores/${storeId}/orders/${orderId}`,
+  STORE_DETAIL_STATISTICS_ORDERS: (storeId: string) => `/stores/${storeId}/statistics/orders`,
+  STORE_DETAIL_NOTIFICATIONS_LIST: (storeId: string) => `/stores/${storeId}/notifications`,
+  STORE_DETAIL_NOTIFICATIONS_SETTINGS: (storeId: string) =>
+    `/stores/${storeId}/notifications/settings`,
   STORE_DETAIL_EDIT: (storeId: string) => `/stores/${storeId}/edit`,
   STORE_DETAIL_CALENDAR: (storeId: string) => `/stores/${storeId}/calendar`,
   // 인증 관련 경로
@@ -92,6 +99,18 @@ export const ADMIN_ROUTE_CONFIG = [
   {
     path: ROUTES.STORE_DETAIL_ORDERS_DETAIL(":storeId", ":orderId"),
     element: StoreDetailOrderDetailPage,
+  },
+  {
+    path: ROUTES.STORE_DETAIL_STATISTICS_ORDERS(":storeId"),
+    element: StoreDetailStatisticsPage,
+  },
+  {
+    path: ROUTES.STORE_DETAIL_NOTIFICATIONS_LIST(":storeId"),
+    element: StoreDetailNotificationsListPage,
+  },
+  {
+    path: ROUTES.STORE_DETAIL_NOTIFICATIONS_SETTINGS(":storeId"),
+    element: StoreDetailNotificationsSettingsPage,
   },
   { path: ROUTES.STORE_DETAIL_EDIT(":storeId"), element: StoreDetailEditPage },
   { path: ROUTES.STORE_DETAIL_CALENDAR(":storeId"), element: StoreDetailCalendarPage },

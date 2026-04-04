@@ -18,6 +18,7 @@ import {
   UpdateReservationOrderItemsRequestDto,
   UpdateReservationPickupDateRequestDto,
 } from "@apps/backend/modules/order/dto/order-user-reservation-edit.dto";
+import { isPickupAllowedForStore } from "@apps/backend/modules/order/utils/order-store-business-calendar.util";
 
 /**
  * 예약신청(RESERVATION_REQUESTED) 단계에서만 허용되는 주문 수정 (픽업일·주문 항목).
@@ -39,7 +40,7 @@ export class OrderUserReservationEditService {
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderStatus: true },
+      select: { orderStatus: true, storeId: true },
     });
     if (!order) {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
@@ -49,6 +50,27 @@ export class OrderUserReservationEditService {
     if (!RESERVATION_USER_EDIT_ALLOWED_STATUSES.has(status)) {
       LoggerUtil.log(`예약 픽업일 변경 실패: 상태 불가 - orderId: ${orderId}, status: ${status}`);
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION);
+    }
+
+    const store = await this.prisma.store.findUnique({
+      where: { id: order.storeId },
+      select: {
+        weeklyClosedWeekdays: true,
+        standardOpenTime: true,
+        standardCloseTime: true,
+        businessCalendarOverrides: true,
+      },
+    });
+    if (!store) {
+      throw new NotFoundException(ORDER_ERROR_MESSAGES.STORE_NOT_FOUND);
+    }
+
+    const pickupAt = new Date(dto.pickupDate);
+    if (!isPickupAllowedForStore(pickupAt, store)) {
+      LoggerUtil.log(
+        `예약 픽업일 변경 실패: 영업 시간 밖 - orderId: ${orderId}, pickupDate: ${dto.pickupDate}`,
+      );
+      throw new BadRequestException(ORDER_ERROR_MESSAGES.PICKUP_OUTSIDE_STORE_BUSINESS_HOURS);
     }
 
     await this.prisma.order.update({
@@ -72,6 +94,7 @@ export class OrderUserReservationEditService {
         orderStatus: true,
         productId: true,
         storeId: true,
+        pickupDate: true,
       },
     });
     if (!order) {
@@ -84,6 +107,28 @@ export class OrderUserReservationEditService {
         `예약 주문 항목 변경 실패: 상태 불가 - orderId: ${orderId}, status: ${status}`,
       );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_USER_ORDER_ACTION);
+    }
+
+    const store = await this.prisma.store.findUnique({
+      where: { id: order.storeId },
+      select: {
+        weeklyClosedWeekdays: true,
+        standardOpenTime: true,
+        standardCloseTime: true,
+        businessCalendarOverrides: true,
+      },
+    });
+    if (!store) {
+      throw new NotFoundException(ORDER_ERROR_MESSAGES.STORE_NOT_FOUND);
+    }
+
+    if (order.pickupDate) {
+      if (!isPickupAllowedForStore(order.pickupDate, store)) {
+        LoggerUtil.log(
+          `예약 주문 항목 변경 실패: 기존 픽업 일시가 영업 시간 밖 - orderId: ${orderId}`,
+        );
+        throw new BadRequestException(ORDER_ERROR_MESSAGES.PICKUP_OUTSIDE_STORE_BUSINESS_HOURS);
+      }
     }
 
     const { items, totalQuantity, totalPrice } = dto;

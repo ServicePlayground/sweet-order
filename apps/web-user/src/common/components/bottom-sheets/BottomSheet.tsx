@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import clsx from "clsx";
 import { Icon } from "@/apps/web-user/common/components/icons";
 
 interface BottomSheetProps {
@@ -11,6 +12,8 @@ interface BottomSheetProps {
   footer?: ReactNode;
   /** 최대 높이 (기본값: "80%") */
   maxHeight?: string;
+  /** 오버레이·시트 스택 순서 (기본 z-50) */
+  zIndexClassName?: string;
 }
 
 export function BottomSheet({
@@ -20,6 +23,7 @@ export function BottomSheet({
   children,
   footer,
   maxHeight = "80%",
+  zIndexClassName,
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +63,10 @@ export function BottomSheet({
 
   return (
     <div
-      className="fixed mx-auto inset-0 z-50 bg-black/50 transition-opacity"
+      className={clsx(
+        "fixed mx-auto inset-0 bg-black/50 transition-opacity",
+        zIndexClassName ?? "z-50",
+      )}
       onClick={handleBackdropClick}
     >
       <div

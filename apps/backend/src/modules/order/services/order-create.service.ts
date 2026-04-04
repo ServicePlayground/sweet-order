@@ -17,6 +17,7 @@ import {
   parseSizeOptions,
   validateAndNormalizeOrderItem,
 } from "@apps/backend/modules/order/utils/order-item-normalize.util";
+import { isPickupAllowedForStore } from "@apps/backend/modules/order/utils/order-store-business-calendar.util";
 
 /**
  * 주문 생성 서비스
@@ -121,6 +122,14 @@ export class OrderCreateService {
         `주문 생성 실패: 총 금액 불일치 - productId: ${productId}, userId: ${userId}, calculated: ${calculatedTotalPrice}, provided: ${totalPrice}`,
       );
       throw new BadRequestException(ORDER_ERROR_MESSAGES.INVALID_TOTAL_PRICE);
+    }
+
+    const pickupAt = new Date(pickupDate);
+    if (!isPickupAllowedForStore(pickupAt, product.store)) {
+      LoggerUtil.log(
+        `주문 생성 실패: 픽업 일시가 스토어 영업 시간 밖 - productId: ${productId}, userId: ${userId}, pickupDate: ${pickupDate}`,
+      );
+      throw new BadRequestException(ORDER_ERROR_MESSAGES.PICKUP_OUTSIDE_STORE_BUSINESS_HOURS);
     }
 
     // 주문 생성 (트랜잭션)

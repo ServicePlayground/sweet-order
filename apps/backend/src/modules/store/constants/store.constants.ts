@@ -19,8 +19,8 @@ export const STORE_ERROR_MESSAGES = {
     "날짜별 설정에서 영업으로 둔 경우 시작·종료 시각을 모두 입력해야 합니다.",
   BUSINESS_CALENDAR_OVERRIDE_TIME_ORDER:
     "날짜별 영업의 시작 시각은 종료 시각보다 이전이어야 합니다.",
-  BUSINESS_CALENDAR_CONFLICTS_WITH_EXISTING_PICKUP:
-    "변경하려는 영업·휴무 설정과 맞지 않는 픽업 예약이 있습니다. 예약신청·입금대기·입금완료·예약확정·픽업대기 상태의 주문을 조정한 뒤 다시 시도해 주세요.",
+  PICKUP_FILTER_DATE_PERIOD_PAIR:
+    "pickupFilterDate(YYYY-MM-DD)와 pickupFilterPeriod는 함께 생략하거나 함께 지정해야 합니다.",
 } as const;
 
 export const STORE_SUCCESS_MESSAGES = {
@@ -37,6 +37,13 @@ export enum StoreSortBy {
   POPULAR = "popular", // 인기순(좋아요 수 내림차순)
   RATING_AVG = "rating_avg", // 별점순(스토어 소속 상품 리뷰 평균 별점 내림차순)
   DISTANCE = "distance", // 거리순(스토어 좌표 기준, 클라이언트 위도·경도 필요)
+}
+
+/** 지도·목록 픽업 일시 필터(웹 사용자 앱 MapPickupFilter와 동일 값) */
+export enum StoreMapPickupPeriodKind {
+  MORNING = "morning",
+  AFTERNOON = "afternoon",
+  FULLDAY = "fullday",
 }
 
 export const SWAGGER_EXAMPLES = {

@@ -371,12 +371,12 @@ jobs:
                 echo "⚠️ Prisma Client 재생성 실패 (계속 진행합니다)"
               }
 
-              echo "🌱 Staging 데이터베이스 시드 실행 (idempotent)"
-              # .env.staging 기반으로 DATABASE_URL이 이미 export 되어 있으므로 그대로 사용
-              yarn db:seed:staging || {
-                echo "❌ Staging 시드 실행 실패"
-                rollback_deployment
-              }
+              # Staging 배포 시 자동 시드는 비활성화 (실데이터/스테이징 정책 보호). 필요 시 서버에서 수동: yarn db:seed:staging
+              # echo "🌱 Staging 데이터베이스 시드 실행 (idempotent)"
+              # yarn db:seed:staging || {
+              #   echo "❌ Staging 시드 실행 실패"
+              #   rollback_deployment
+              # }
             fi
 
             cd ~/sweet-order

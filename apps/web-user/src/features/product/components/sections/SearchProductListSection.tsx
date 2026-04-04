@@ -3,7 +3,11 @@
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
-import { SortBy, Product, ProductCategoryType } from "@/apps/web-user/features/product/types/product.type";
+import {
+  SortBy,
+  Product,
+  ProductCategoryType,
+} from "@/apps/web-user/features/product/types/product.type";
 import type { MapListSortBy } from "@/apps/web-user/features/store/utils/map.util";
 import { CakeListItem } from "@/apps/web-user/features/product/components/cards/CakeListItem";
 import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";

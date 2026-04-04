@@ -69,7 +69,7 @@ export class OrderUserActionService {
           orderId,
           fromStatus: OrderStatus.PAYMENT_PENDING,
           toStatus: OrderStatus.CANCEL_COMPLETED,
-          source: ORDER_STATUS_TRANSITION_SOURCE.USER_ACTION,
+          source: ORDER_STATUS_TRANSITION_SOURCE.USER_ACTION_PAYMENT_EXPIRED,
         });
         throw new BadRequestException(ORDER_ERROR_MESSAGES.PAYMENT_PENDING_EXPIRED);
       }

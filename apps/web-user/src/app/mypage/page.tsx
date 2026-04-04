@@ -48,7 +48,8 @@ export default function MypagePage() {
   const { data: ordersData } = useMyOrders({ type: "UPCOMING" });
   const upcomingCount =
     ordersData?.data?.filter(
-      (o) => o.orderStatus === OrderStatus.CONFIRMED || o.orderStatus === OrderStatus.PICKUP_PENDING,
+      (o) =>
+        o.orderStatus === OrderStatus.CONFIRMED || o.orderStatus === OrderStatus.PICKUP_PENDING,
     ).length ?? 0;
 
   return (
