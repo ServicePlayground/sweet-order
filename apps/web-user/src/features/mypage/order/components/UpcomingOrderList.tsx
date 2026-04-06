@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Icon } from "@/apps/web-user/common/components/icons";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderResponse, OrderStatus, OrderItemResponse } from "@/apps/web-user/features/order/types/order.type";
+import { formatAddressToDistrict } from "@/apps/web-user/common/utils/address.util";
+import { OrderDateHeader } from "./OrderDateHeader";
+import { OrderActionButtons } from "./OrderActionButtons";
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   [OrderStatus.RESERVATION_REQUESTED]: "예약신청",
@@ -22,30 +24,6 @@ const STATUS_COLOR: Record<string, string> = {
   [OrderStatus.PICKUP_PENDING]: "text-primary bg-primary-50",
 };
 
-function getDDay(pickupDate: string) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const pickup = new Date(pickupDate);
-  pickup.setHours(0, 0, 0, 0);
-  const diff = Math.ceil((pickup.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diff === 0) return "D-Day";
-  if (diff > 0) return `D-${diff}`;
-  return `D+${Math.abs(diff)}`;
-}
-
-function formatPickupDateTime(pickupDate: string) {
-  const date = new Date(pickupDate);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const weekday = ["일", "월", "화", "수", "목", "금", "토"][date.getDay()];
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const ampm = hours < 12 ? "오전" : "오후";
-  const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  return `${year}.${month}.${day}(${weekday}) · ${ampm} ${displayHours}:${minutes}`;
-}
-
 function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   const parts: string[] = [order.productName];
   if (item.sizeDisplayName) parts.push(item.sizeDisplayName);
@@ -59,33 +37,24 @@ function openNavigation(lat: number, lng: number, name: string) {
 }
 
 function UpcomingOrderItem({ order }: { order: OrderResponse }) {
-  const dday = getDDay(order.pickupDate);
   const statusLabel = ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus;
   const statusColor = STATUS_COLOR[order.orderStatus] ?? "text-gray-500 bg-gray-50";
 
   return (
-    <div className="py-4">
-      {/* D-day + 날짜 */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs font-bold text-primary border border-primary-100 rounded px-1.5 py-0.5">
-          {dday}
-        </span>
-        <span className="text-sm font-bold text-gray-900">
-          {formatPickupDateTime(order.pickupDate)}
-        </span>
-      </div>
+    <div className="px-[30px]">
+      <OrderDateHeader pickupDate={order.pickupDate} variant="upcoming" />
 
       {/* 카드 */}
-      <div className="rounded-xl bg-gray-25 border border-gray-100 p-4">
+      <div className="rounded-xl border border-gray-100 px-4 py-3">
         {/* 스토어 정보 + 예약상세 */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-2">
           <div>
             <p className="text-sm font-bold text-gray-900">{order.storeName}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{order.pickupRoadAddress}</p>
+            <p className="text-2sm text-gray-500">{formatAddressToDistrict(order.pickupAddress)}</p>
           </div>
           <Link
             href={`/order/${order.id}`}
-            className="text-xs font-bold text-gray-500 shrink-0"
+            className="flex items-center justify-center w-[46px] h-[21px] text-xs font-bold text-gray-400 underline"
           >
             예약상세
           </Link>
@@ -129,25 +98,16 @@ function UpcomingOrderItem({ order }: { order: OrderResponse }) {
         </div>
 
         {/* 하단 버튼 */}
-        <div className="flex gap-2">
-          <Link
-            href={`/order/${order.id}`}
-            className="flex-1 h-[40px] flex items-center justify-center gap-1 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white"
-          >
-            <Icon name="reviewQna" width={16} height={16} className="text-gray-700" />
-            스토어 문의
-          </Link>
-          <button
-            type="button"
-            onClick={() =>
-              openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName)
-            }
-            className="flex-1 h-[40px] flex items-center justify-center gap-1 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white"
-          >
-            <Icon name="map" width={16} height={16} className="text-gray-700" />
-            길찾기
-          </button>
-        </div>
+        <OrderActionButtons
+          buttons={[
+            { label: "스토어 문의", icon: "reviewQna", href: `/order/${order.id}` },
+            {
+              label: "길찾기",
+              icon: "map",
+              onClick: () => openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName),
+            },
+          ]}
+        />
       </div>
     </div>
   );
@@ -194,11 +154,11 @@ export function UpcomingOrderList() {
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-12 pt-2">
       {orders.map((order) => (
         <UpcomingOrderItem key={order.id} order={order} />
       ))}
-    </>
+    </div>
   );
 }
 
