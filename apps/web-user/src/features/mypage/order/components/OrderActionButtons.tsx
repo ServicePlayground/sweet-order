@@ -12,6 +12,7 @@ interface OrderActionButton {
 
 interface OrderActionButtonsProps {
   buttons: OrderActionButton[];
+  direction?: "row" | "column";
 }
 
 function ButtonContent({ button }: { button: OrderActionButton }) {
@@ -20,20 +21,16 @@ function ButtonContent({ button }: { button: OrderActionButton }) {
       {button.images?.map((img) => (
         <Image key={img.src} src={img.src} alt={img.alt} width={20} height={20} />
       ))}
-      {button.icon && (
-        <Icon name={button.icon} width={20} height={20} className="text-gray-900" />
-      )}
+      {button.icon && <Icon name={button.icon} width={20} height={20} className="text-gray-900" />}
       {button.label}
     </>
   );
 }
 
-const buttonClassName =
-  "flex-1 h-[40px] flex items-center justify-center gap-1 rounded-lg border border-gray-100 text-sm font-bold text-gray-900 bg-white";
-
-export function OrderActionButtons({ buttons }: OrderActionButtonsProps) {
+export function OrderActionButtons({ buttons, direction = "row" }: OrderActionButtonsProps) {
+  const buttonClassName = `${direction === "column" ? "w-full" : "flex-1"} h-[40px] flex items-center justify-center gap-1 rounded-lg border border-gray-100 text-sm font-bold text-gray-900 bg-white`;
   return (
-    <div className="flex gap-2">
+    <div className={`flex gap-2 ${direction === "column" ? "flex-col" : ""}`}>
       {buttons.map((button) =>
         button.href ? (
           <Link key={button.label} href={button.href} className={buttonClassName}>

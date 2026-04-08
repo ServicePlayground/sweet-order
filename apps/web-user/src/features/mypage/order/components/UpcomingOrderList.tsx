@@ -1,28 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
-import { OrderResponse, OrderStatus, OrderItemResponse } from "@/apps/web-user/features/order/types/order.type";
+import {
+  OrderResponse,
+  OrderItemResponse,
+  OrderStatus,
+} from "@/apps/web-user/features/order/types/order.type";
 import { formatAddressToDistrict } from "@/apps/web-user/common/utils/address.util";
 import { OrderDateHeader } from "./OrderDateHeader";
 import { OrderActionButtons } from "./OrderActionButtons";
-
-const ORDER_STATUS_LABEL: Record<string, string> = {
-  [OrderStatus.RESERVATION_REQUESTED]: "예약신청",
-  [OrderStatus.PAYMENT_PENDING]: "입금대기",
-  [OrderStatus.PAYMENT_COMPLETED]: "입금완료",
-  [OrderStatus.CONFIRMED]: "예약확정",
-  [OrderStatus.PICKUP_PENDING]: "픽업대기",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  [OrderStatus.RESERVATION_REQUESTED]: "text-gray-500 bg-gray-50",
-  [OrderStatus.PAYMENT_PENDING]: "text-blue-400 bg-blue-50",
-  [OrderStatus.PAYMENT_COMPLETED]: "text-blue-400 bg-blue-50",
-  [OrderStatus.CONFIRMED]: "text-primary bg-primary-50",
-  [OrderStatus.PICKUP_PENDING]: "text-primary bg-primary-50",
-};
+import { OrderStatusBadge } from "./OrderStatusBadge";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import { PaymentPendingInfo } from "./PaymentPendingInfo";
 
 function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   const parts: string[] = [order.productName];
@@ -36,12 +28,31 @@ function openNavigation(lat: number, lng: number, name: string) {
   window.open(`https://map.kakao.com/link/to/${encodedName},${lat},${lng}`, "_blank");
 }
 
-function UpcomingOrderItem({ order }: { order: OrderResponse }) {
-  const statusLabel = ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus;
-  const statusColor = STATUS_COLOR[order.orderStatus] ?? "text-gray-500 bg-gray-50";
+function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const visibleItems = expanded ? order.orderItems : order.orderItems.slice(0, 2);
+  const hasMore = order.orderItems.length > 2;
 
   return (
-    <div className="px-[30px]">
+    <div className="relative pl-[30px]">
+      <div
+        className="absolute top-0 left-0 w-5"
+        style={{ height: !isLast ? "calc(100% + 48px)" : "100%" }}
+      >
+        <span className="absolute top-0 left-0 w-5 h-5 bg-primary-50 rounded-full z-5" />
+        <span className="absolute top-[5px] left-[5px] w-2.5 h-2.5 bg-primary-300 rounded-full z-10" />
+        {!isLast && (
+          <span
+            className="absolute top-5 left-[9px] w-0.5 h-[calc(100%-20px)] z-1"
+            style={{
+              backgroundImage: "url(/images/contents/order_side_line.png)",
+              backgroundSize: "2px auto",
+              backgroundRepeat: "repeat-y",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
+      </div>
       <OrderDateHeader pickupDate={order.pickupDate} variant="upcoming" />
 
       {/* 카드 */}
@@ -61,18 +72,18 @@ function UpcomingOrderItem({ order }: { order: OrderResponse }) {
         </div>
 
         {/* 주문 아이템 목록 */}
-        <div className="space-y-3 mb-4">
-          {order.orderItems.map((item) => {
+        <div className="space-y-8 py-2.5">
+          {visibleItems.map((item) => {
             const thumbnailUrl = item.imageUrls?.[0] || order.productImages?.[0];
             return (
-              <div key={item.id} className="flex items-center gap-3">
-                <div className="w-[48px] h-[48px] rounded-lg overflow-hidden bg-gray-100 shrink-0">
+              <div key={item.id} className="flex items-center gap-2.5">
+                <div className="w-[44px] h-[44px] rounded overflow-hidden bg-gray-100 shrink-0">
                   {thumbnailUrl ? (
                     <Image
                       src={thumbnailUrl}
                       alt={order.productName}
-                      width={48}
-                      height={48}
+                      width={44}
+                      height={44}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -80,34 +91,53 @@ function UpcomingOrderItem({ order }: { order: OrderResponse }) {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-2xs font-bold rounded px-1.5 py-0.5 shrink-0 ${statusColor}`}>
-                      {statusLabel}
+                  <div className="flex items-center">
+                    <OrderStatusBadge status={order.orderStatus} />
+                    <span className="text-sm text-gray-900 truncate ml-1">
+                      {formatItemName(order, item)}
                     </span>
-                    <span className="text-xs text-gray-900 truncate">
-                      {formatItemName(order, item)} x{item.quantity}
+                    <span className="flex items-center gap-0.5 ml-0.5 text-sm text-gray-900 shrink-0">
+                      <Icon name="multiply" width={8} height={8} /> {item.quantity}
                     </span>
                   </div>
-                  <p className="text-sm font-bold text-gray-900 mt-0.5">
-                    {item.itemPrice.toLocaleString()}원
-                  </p>
+                  <p className="text-sm text-gray-900">{item.itemPrice.toLocaleString()}원</p>
                 </div>
               </div>
             );
           })}
+          {hasMore && (
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className="flex items-center justify-end gap-0.5 !mt-2 text-xs text-gray-500 w-full text-center"
+            >
+              {expanded ? "간략히 보기" : `전체보기 ${order.orderItems.length}`}
+              <Icon
+                name="arrow"
+                width={16}
+                height={16}
+                className={`text-gray-300 transition-transform ${expanded ? "rotate-0" : "rotate-180"}`}
+              />
+            </button>
+          )}
         </div>
 
-        {/* 하단 버튼 */}
-        <OrderActionButtons
-          buttons={[
-            { label: "스토어 문의", icon: "reviewQna", href: `/order/${order.id}` },
-            {
-              label: "길찾기",
-              icon: "map",
-              onClick: () => openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName),
-            },
-          ]}
-        />
+        {/* 하단: 입금대기 vs 기본 버튼 */}
+        {order.orderStatus === OrderStatus.PAYMENT_PENDING ? (
+          <PaymentPendingInfo order={order} />
+        ) : (
+          <OrderActionButtons
+            buttons={[
+              { label: "스토어 문의", icon: "reviewQna", href: `/order/${order.id}` },
+              {
+                label: "길찾기",
+                icon: "map",
+                onClick: () =>
+                  openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName),
+              },
+            ]}
+          />
+        )}
       </div>
     </div>
   );
@@ -155,8 +185,8 @@ export function UpcomingOrderList() {
 
   return (
     <div className="flex flex-col gap-12 pt-2">
-      {orders.map((order) => (
-        <UpcomingOrderItem key={order.id} order={order} />
+      {orders.map((order, index) => (
+        <UpcomingOrderItem key={order.id} order={order} isLast={index === orders.length - 1} />
       ))}
     </div>
   );

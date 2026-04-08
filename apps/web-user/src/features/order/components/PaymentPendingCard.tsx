@@ -7,6 +7,7 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
+import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 
 function useCountdown(createdAt: string) {
   const getRemaining = () => {
@@ -43,10 +44,9 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
   const handleCloseCopyToast = useCallback(() => setShowCopyToast(false), []);
   const handleCloseSuccessToast = useCallback(() => setShowSuccessToast(false), []);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
-  // TODO: 백엔드에서 스토어 계좌 정보 내려주면 교체
-  const bankName = order.storeBankName ?? "신한";
-  const accountNumber = order.storeBankAccountNumber ?? "110-229-220-2222";
-  const accountHolder = order.storeAccountHolderName ?? "김길영";
+  const bankName = getBankLabel(order.storeBankName);
+  const accountNumber = order.storeBankAccountNumber ?? "";
+  const accountHolder = order.storeAccountHolderName ?? "";
   const accountInfo = `${bankName} · ${accountNumber}`;
 
   return (

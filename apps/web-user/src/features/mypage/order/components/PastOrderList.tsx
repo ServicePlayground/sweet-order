@@ -3,24 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
-import { OrderResponse, OrderStatus, OrderItemResponse } from "@/apps/web-user/features/order/types/order.type";
+import { OrderResponse, OrderItemResponse } from "@/apps/web-user/features/order/types/order.type";
 import { OrderDateHeader } from "./OrderDateHeader";
-
-const ORDER_STATUS_LABEL: Record<string, string> = {
-  [OrderStatus.PICKUP_COMPLETED]: "픽업완료",
-  [OrderStatus.CANCEL_COMPLETED]: "취소완료",
-  [OrderStatus.CANCEL_REFUND_PENDING]: "환불대기",
-  [OrderStatus.CANCEL_REFUND_COMPLETED]: "환불완료",
-  [OrderStatus.NO_SHOW]: "노쇼",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  [OrderStatus.PICKUP_COMPLETED]: "text-gray-500 bg-gray-50",
-  [OrderStatus.CANCEL_COMPLETED]: "text-red-400 bg-red-50",
-  [OrderStatus.CANCEL_REFUND_PENDING]: "text-red-400 bg-red-50",
-  [OrderStatus.CANCEL_REFUND_COMPLETED]: "text-red-400 bg-red-50",
-  [OrderStatus.NO_SHOW]: "text-gray-500 bg-gray-50",
-};
+import { OrderStatusBadge } from "./OrderStatusBadge";
 
 function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   const parts: string[] = [order.productName];
@@ -30,9 +15,6 @@ function formatItemName(order: OrderResponse, item: OrderItemResponse) {
 }
 
 function PastOrderItem({ order }: { order: OrderResponse }) {
-  const statusLabel = ORDER_STATUS_LABEL[order.orderStatus] ?? order.orderStatus;
-  const statusColor = STATUS_COLOR[order.orderStatus] ?? "text-gray-500 bg-gray-50";
-
   return (
     <div className="px-[30px]">
       <OrderDateHeader pickupDate={order.pickupDate} variant="past" />
@@ -73,11 +55,12 @@ function PastOrderItem({ order }: { order: OrderResponse }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-2xs font-bold rounded px-1.5 py-0.5 shrink-0 ${statusColor}`}>
-                      {statusLabel}
-                    </span>
+                    <OrderStatusBadge status={order.orderStatus} />
                     <span className="text-xs text-gray-900 truncate">
-                      {formatItemName(order, item)} x{item.quantity}
+                      {formatItemName(order, item)}
+                    </span>
+                    <span className="text-xs text-gray-900 shrink-0">
+                      x{item.quantity}
                     </span>
                   </div>
                   <p className="text-sm font-bold text-gray-900 mt-0.5">
