@@ -25,8 +25,7 @@ export const ORDER_ERROR_MESSAGES = {
   SELLER_CANCEL_REFUND_PENDING_REASON_REQUIRED: "취소환불대기로 변경할 때 사유를 입력해 주세요.",
   ORDER_CREATE_FAILED: "주문 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
   /** 픽업 일시가 스토어 영업 캘린더(정기 휴무·표준 시간·일별 예외)에 맞지 않음 */
-  PICKUP_OUTSIDE_STORE_BUSINESS_HOURS:
-    "선택한 픽업 일시가 스토어 영업 시간에 포함되지 않습니다.",
+  PICKUP_OUTSIDE_STORE_BUSINESS_HOURS: "선택한 픽업 일시가 스토어 영업 시간에 포함되지 않습니다.",
 } as const;
 
 /**
