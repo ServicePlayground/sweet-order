@@ -14,6 +14,8 @@ interface BottomSheetProps {
   maxHeight?: string;
   /** 오버레이·시트 스택 순서 (기본 z-50) */
   zIndexClassName?: string;
+  /** Footer 영역 그림자 표시 여부 (기본값: true) */
+  footerShadow?: boolean;
 }
 
 export function BottomSheet({
@@ -24,6 +26,7 @@ export function BottomSheet({
   footer,
   maxHeight = "80%",
   zIndexClassName,
+  footerShadow = true,
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -93,7 +96,7 @@ export function BottomSheet({
 
         {/* Footer - 고정 영역 */}
         {footer && (
-          <div className="shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)] border-gray-100 bg-white">
+          <div className={clsx("border-gray-100 bg-white", footerShadow ? "shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)]" : "shadow-none")}>
             {footer}
           </div>
         )}

@@ -15,6 +15,8 @@ import { OrderActionButtons } from "./OrderActionButtons";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { PaymentPendingInfo } from "./PaymentPendingInfo";
+import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
+import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
 
 function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   const parts: string[] = [order.productName];
@@ -23,13 +25,10 @@ function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   return parts.join(" ");
 }
 
-function openNavigation(lat: number, lng: number, name: string) {
-  const encodedName = encodeURIComponent(name);
-  window.open(`https://map.kakao.com/link/to/${encodedName},${lat},${lng}`, "_blank");
-}
-
 function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: boolean }) {
   const [expanded, setExpanded] = useState(false);
+  const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
+  const [isInquirySheetOpen, setIsInquirySheetOpen] = useState(false);
   const visibleItems = expanded ? order.orderItems : order.orderItems.slice(0, 2);
   const hasMore = order.orderItems.length > 2;
 
@@ -55,7 +54,6 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
       </div>
       <OrderDateHeader pickupDate={order.pickupDate} variant="upcoming" />
 
-      {/* 카드 */}
       <div className="rounded-xl border border-gray-100 px-4 py-3">
         {/* 스토어 정보 + 예약상세 */}
         <div className="flex items-start justify-between mb-2">
@@ -122,23 +120,62 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
           )}
         </div>
 
-        {/* 하단: 입금대기 vs 기본 버튼 */}
+        {/* 하단: 상태별 안내 */}
         {order.orderStatus === OrderStatus.PAYMENT_PENDING ? (
           <PaymentPendingInfo order={order} />
+        ) : order.orderStatus === OrderStatus.PAYMENT_COMPLETED ? (
+          <div className="mt-2.5 -mx-4 bg-blue-50 rounded-lg rounded-t-none px-4 py-3">
+            <p className="text-sm text-blue-400">판매자의 입금 확인 후 예약이 확정됩니다.</p>
+          </div>
+        ) : order.orderStatus === OrderStatus.CANCEL_REFUND_PENDING ? (
+          <div className="mt-2.5 -mx-4 bg-red-50 rounded-lg rounded-t-none px-4 py-3">
+            <p className="text-sm text-red-400">환불 완료까지 1-2일 소요될 수 있습니다.</p>
+          </div>
+        ) : order.orderStatus === OrderStatus.SELLER_CANCELLED ? (
+          <div className="mt-2.5 -mx-4 bg-red-50 rounded-lg rounded-t-none px-4 py-3">
+            <p className="text-sm font-bold text-red-400">판매자 요청으로 예약 취소되었습니다.</p>
+            <p className="text-2xs text-gray-500 mt-1">
+              {order.storeName}입니다. 일정 상 예약을 취소하게되었습니다. 죄송합니다.
+            </p>
+          </div>
+        ) : order.orderStatus === OrderStatus.NO_SHOW ? (
+          <div className="mt-2.5 -mx-4 bg-red-50 rounded-lg rounded-t-none px-4 py-3">
+            <p className="text-sm font-bold text-red-400">노쇼 처리된 예약입니다.</p>
+            <p className="text-2xs text-gray-500 mt-1">
+              {order.storeName}입니다. 노쇼로 인해 케이크는 폐기처리하였습니다.
+            </p>
+          </div>
         ) : (
           <OrderActionButtons
             buttons={[
-              { label: "스토어 문의", icon: "reviewQna", href: `/order/${order.id}` },
+              {
+                label: "스토어 문의",
+                icon: "reviewQna",
+                onClick: () => setIsInquirySheetOpen(true),
+              },
               {
                 label: "길찾기",
                 icon: "map",
-                onClick: () =>
-                  openNavigation(order.pickupLatitude, order.pickupLongitude, order.storeName),
+                onClick: () => setIsMapSheetOpen(true),
               },
             ]}
           />
         )}
       </div>
+
+      <NavigationBottomSheet
+        isOpen={isMapSheetOpen}
+        onClose={() => setIsMapSheetOpen(false)}
+        latitude={order.pickupLatitude}
+        longitude={order.pickupLongitude}
+        storeName={order.storeName}
+      />
+      <StoreInquiryBottomSheet
+        isOpen={isInquirySheetOpen}
+        onClose={() => setIsInquirySheetOpen(false)}
+        kakaoChannelUrl={null}
+        instagramUrl={null}
+      />
     </div>
   );
 }

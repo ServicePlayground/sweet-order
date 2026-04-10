@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import { Modal } from "@/apps/web-user/common/components/modals/Modal";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
 import { OrderActionButtons } from "./OrderActionButtons";
+import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 
 const PAYMENT_DEADLINE_HOURS = 12;
 
@@ -33,13 +36,24 @@ function useCountdown(paymentPendingAt?: string) {
   return remaining;
 }
 
-function copyToClipboard(text: string) {
-  navigator.clipboard.writeText(text);
-}
-
 export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
   const countdown = useCountdown(order.paymentPendingAt);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
+  const [showCopyToast, setShowCopyToast] = useState(false);
+
+  const handleConfirmPayment = () => {
+    paymentComplete(order.id);
+    setIsConfirmOpen(false);
+  };
+
+  const handleCopyAccountNumber = () => {
+    navigator.clipboard.writeText(order.storeBankAccountNumber ?? "");
+    setShowCopyToast(true);
+  };
+
+  const handleCloseCopyToast = useCallback(() => setShowCopyToast(false), []);
 
   return (
     <div className="mt-2.5 -mx-4">
@@ -67,7 +81,7 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
             <span className="ml-8 text-sm text-gray-900">{order.storeBankAccountNumber}</span>
             <button
               type="button"
-              onClick={() => copyToClipboard(order.storeBankAccountNumber ?? "")}
+              onClick={handleCopyAccountNumber}
               className="ml-1 text-gray-400 w-5 h-5 cursor-pointer"
             >
               <Icon name="copy" width={20} height={20} />
@@ -98,14 +112,53 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
                 { src: "/images/contents/toss.png", alt: "토스" },
                 { src: "/images/contents/kakao.png", alt: "카카오" },
               ],
+              onClick: () => setIsEasyPayOpen(true),
             },
             {
               label: isCompleting ? "처리 중..." : "입금 완료했어요",
-              onClick: () => paymentComplete(order.id),
+              onClick: () => setIsConfirmOpen(true),
             },
           ]}
         />
       </div>
+
+      <Modal
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        title="입금 완료하셨나요?"
+        description={
+          <>
+            입금 완료 버튼을 누르면
+            <br />
+            판매자에게 확인 알림이 전달되며,
+            <br />
+            <span className="text-primary font-bold">입금 확인 후 예약이 확정</span>됩니다.
+          </>
+        }
+        confirmText="취소"
+        cancelText="입금 완료"
+        cancelVariant="primary"
+        onConfirm={() => setIsConfirmOpen(false)}
+        onCancel={handleConfirmPayment}
+      />
+
+      <EasyPaymentBottomSheet
+        isOpen={isEasyPayOpen}
+        onClose={() => setIsEasyPayOpen(false)}
+        bankAccountNumber={order.storeBankAccountNumber}
+        bankName={order.storeBankName}
+        amount={order.totalPrice}
+      />
+
+      {showCopyToast && (
+        <Toast
+          message="복사되었습니다"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="row"
+          onClose={handleCloseCopyToast}
+        />
+      )}
     </div>
   );
 }

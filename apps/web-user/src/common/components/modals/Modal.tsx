@@ -13,7 +13,7 @@ interface ModalProps {
   /** 모달 제목 */
   title: string;
   /** 모달 설명 */
-  description?: string;
+  description?: React.ReactNode;
   /** 확인 버튼 텍스트 */
   confirmText?: string;
   /** 취소 버튼 텍스트 */
