@@ -125,7 +125,26 @@ export interface OrderResponse {
   storeBankName?: string | null;
   storeBankAccountNumber?: string | null;
   storeAccountHolderName?: string | null;
+  sellerCancelReason?: string | null;
+  userCancelReason?: string | null;
+  // 후기 UI 상태
+  myReviewUiStatus: OrderMyReviewUiStatus;
+  linkedProductReviewId?: string | null;
   createdAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   updatedAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   orderItems: OrderItemResponse[];
+}
+
+/**
+ * 후기 UI 상태
+ * - NOT_AVAILABLE: 후기 작성 대상 아님 (픽업 전, 취소 등)
+ * - WRITABLE: 후기 작성 가능 (픽업 완료 + 미작성)
+ * - WRITTEN: 후기 작성 완료
+ * - WITHDRAWN: 후기 삭제로 재작성 불가
+ */
+export enum OrderMyReviewUiStatus {
+  NOT_AVAILABLE = "NOT_AVAILABLE",
+  WRITABLE = "WRITABLE",
+  WRITTEN = "WRITTEN",
+  WITHDRAWN = "WITHDRAWN",
 }

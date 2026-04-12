@@ -14,7 +14,7 @@ import { OrderDateHeader } from "./OrderDateHeader";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { OrderStatusBadge } from "./OrderStatusBadge";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { PaymentPendingInfo } from "./PaymentPendingInfo";
+import { OrderStatusNotice } from "./OrderStatusNotice";
 import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
 import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
 
@@ -70,7 +70,7 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
         </div>
 
         {/* 주문 아이템 목록 */}
-        <div className="space-y-8 py-2.5">
+        <div className="space-y-2 py-2.5">
           {visibleItems.map((item) => {
             const thumbnailUrl = item.imageUrls?.[0] || order.productImages?.[0];
             return (
@@ -120,32 +120,14 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
           )}
         </div>
 
-        {/* 하단: 상태별 안내 */}
-        {order.orderStatus === OrderStatus.PAYMENT_PENDING ? (
-          <PaymentPendingInfo order={order} />
-        ) : order.orderStatus === OrderStatus.PAYMENT_COMPLETED ? (
-          <div className="mt-2.5 -mx-4 bg-blue-50 rounded-lg rounded-t-none px-4 py-3">
-            <p className="text-sm text-blue-400">판매자의 입금 확인 후 예약이 확정됩니다.</p>
-          </div>
-        ) : order.orderStatus === OrderStatus.CANCEL_REFUND_PENDING ? (
-          <div className="mt-2.5 -mx-4 bg-red-50 rounded-lg rounded-t-none px-4 py-3">
-            <p className="text-sm text-red-400">환불 완료까지 1-2일 소요될 수 있습니다.</p>
-          </div>
-        ) : order.orderStatus === OrderStatus.SELLER_CANCELLED ? (
-          <div className="mt-2.5 -mx-4 bg-red-50 rounded-lg rounded-t-none px-4 py-3">
-            <p className="text-sm font-bold text-red-400">판매자 요청으로 예약 취소되었습니다.</p>
-            <p className="text-2xs text-gray-500 mt-1">
-              {order.storeName}입니다. 일정 상 예약을 취소하게되었습니다. 죄송합니다.
-            </p>
-          </div>
-        ) : order.orderStatus === OrderStatus.NO_SHOW ? (
-          <div className="mt-2.5 -mx-4 bg-red-50 rounded-lg rounded-t-none px-4 py-3">
-            <p className="text-sm font-bold text-red-400">노쇼 처리된 예약입니다.</p>
-            <p className="text-2xs text-gray-500 mt-1">
-              {order.storeName}입니다. 노쇼로 인해 케이크는 폐기처리하였습니다.
-            </p>
-          </div>
-        ) : (
+        {/* 상태별 안내 */}
+        <OrderStatusNotice order={order} />
+
+        {/* 스토어 문의 / 길찾기 */}
+        {/* 입금대기: 버튼 없음 (PaymentPendingInfo에서 별도 처리) */}
+        {/* 예약신청, 입금완료, 예약확정, 픽업대기: 스토어 문의 + 길찾기 */}
+        {/* 노쇼, 판매자 취소, 환불대기 등: 스토어 문의만 */}
+        {order.orderStatus !== OrderStatus.PAYMENT_PENDING && (
           <OrderActionButtons
             buttons={[
               {
@@ -153,11 +135,18 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
                 icon: "reviewQna",
                 onClick: () => setIsInquirySheetOpen(true),
               },
-              {
-                label: "길찾기",
-                icon: "map",
-                onClick: () => setIsMapSheetOpen(true),
-              },
+              ...([
+                OrderStatus.RESERVATION_REQUESTED,
+                OrderStatus.PAYMENT_COMPLETED,
+                OrderStatus.CONFIRMED,
+                OrderStatus.PICKUP_PENDING,
+              ].includes(order.orderStatus)
+                ? [{
+                    label: "길찾기" as const,
+                    icon: "map" as const,
+                    onClick: () => setIsMapSheetOpen(true),
+                  }]
+                : []),
             ]}
           />
         )}

@@ -32,9 +32,9 @@ interface OrderDateHeaderProps {
 export function OrderDateHeader({ pickupDate, variant = "upcoming" }: OrderDateHeaderProps) {
   if (variant === "past") {
     return (
-      <div className="flex items-center gap-2 mb-3">
-        <Icon name="calendar" width={16} height={16} className="text-gray-900" />
-        <span className="text-sm font-bold text-gray-900">
+      <div className="flex items-center gap-1.5 mb-3">
+        <Icon name="calendar" width={16} height={16} className="text-gray-500" />
+        <span className="text-sm font-bold text-gray-500">
           {formatPickupDateTime(pickupDate)}
         </span>
       </div>
@@ -43,7 +43,7 @@ export function OrderDateHeader({ pickupDate, variant = "upcoming" }: OrderDateH
 
   return (
     <div className="flex items-center gap-1.5 mb-3">
-      <span className="w-[28px] h-[19px] flex items-center justify-center rounded text-primary text-2xs bg-primary-50 font-bold">
+      <span className="px-1 h-[19px] flex items-center justify-center rounded text-primary text-2xs bg-primary-50 font-bold">
         {getDDay(pickupDate)}
       </span>
       <span className="text-sm font-bold text-gray-900">
