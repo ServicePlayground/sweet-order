@@ -93,7 +93,7 @@ export default function SearchPage() {
             >
               <Icon name="sort" width={20} height={20} className="text-gray-500" />
             </button>
-            <div className="flex flex-1 items-center gap-[12px] py-[16px]">
+            <div className="relative flex flex-1 items-center gap-[12px] py-[16px] after:content-[''] after:absolute after:-left-[12px] after:top-1/2 after:-translate-y-1/2 after:h-3 after:w-[1px] after:bg-gray-50">
               {[
                 { key: "product", label: "상품" },
                 { key: "store", label: "스토어" },

@@ -50,8 +50,9 @@ export function UpcomingOrderCard() {
     OrderStatus.NO_SHOW,
     OrderStatus.PICKUP_COMPLETED,
   ];
-  const orders = data?.data
-    ?.filter((o) => !HIDDEN_STATUSES.includes(o.orderStatus))
+  const orders = data?.pages
+    .flatMap((p) => p.data)
+    .filter((o) => !HIDDEN_STATUSES.includes(o.orderStatus))
     .sort((a, b) => {
       const aIsPending = a.orderStatus === OrderStatus.PAYMENT_PENDING ? 0 : 1;
       const bIsPending = b.orderStatus === OrderStatus.PAYMENT_PENDING ? 0 : 1;
@@ -99,7 +100,7 @@ export function UpcomingOrderCard() {
         onAfterInit={handleSwiperInit}
       >
         {orders.map((order) => (
-          <SwiperSlide key={order.id} style={{ width: "calc(100vw - 40px)" }}>
+          <SwiperSlide key={order.id} style={{ width: "min(calc(100vw - 40px), 600px)" }}>
             {renderCard(order)}
           </SwiperSlide>
         ))}

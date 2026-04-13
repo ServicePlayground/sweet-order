@@ -47,10 +47,12 @@ export default function MypagePage() {
   const [isAppGuideOpen, setIsAppGuideOpen] = useState(false);
   const { data: ordersData } = useMyOrders({ type: "UPCOMING" });
   const upcomingCount =
-    ordersData?.data?.filter(
-      (o) =>
-        o.orderStatus === OrderStatus.CONFIRMED || o.orderStatus === OrderStatus.PICKUP_PENDING,
-    ).length ?? 0;
+    ordersData?.pages
+      .flatMap((p) => p.data)
+      .filter(
+        (o) =>
+          o.orderStatus === OrderStatus.CONFIRMED || o.orderStatus === OrderStatus.PICKUP_PENDING,
+      ).length ?? 0;
 
   return (
     <div className="pb-[60px]">

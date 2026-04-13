@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 import Image from "next/image";
 import Link from "next/link";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
-import { OrderResponse, OrderItemResponse, OrderStatus } from "@/apps/web-user/features/order/types/order.type";
+import {
+  OrderResponse,
+  OrderItemResponse,
+  OrderStatus,
+} from "@/apps/web-user/features/order/types/order.type";
 import { formatAddressToDistrict } from "@/apps/web-user/common/utils/address.util";
 import { OrderDateHeader } from "./OrderDateHeader";
 import { OrderStatusBadge } from "./OrderStatusBadge";
@@ -14,6 +19,8 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
 import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
 import { OrderReviewPrompt } from "./OrderReviewPrompt";
+import { PastOrderFilterBar, type PastFilter } from "./PastOrderFilterBar";
+import { OrderEmptyState } from "./OrderEmptyState";
 
 function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   const parts: string[] = [order.productName];
@@ -70,8 +77,16 @@ function PastOrderItem({ order, isLast }: { order: OrderResponse; isLast: boolea
         <div className="space-y-2 py-2.5">
           {visibleItems.map((item) => {
             const thumbnailUrl = item.imageUrls?.[0] || order.productImages?.[0];
+            const isCancelled = [
+              OrderStatus.CANCEL_COMPLETED,
+              OrderStatus.SELLER_CANCELLED,
+              OrderStatus.BUYER_CANCELLED,
+            ].includes(order.orderStatus);
             return (
-              <div key={item.id} className="flex items-center gap-2.5">
+              <div
+                key={item.id}
+                className={`flex items-center gap-2.5 ${isCancelled ? "opacity-40" : ""}`}
+              >
                 <div className="w-[44px] h-[44px] rounded overflow-hidden bg-gray-100 shrink-0">
                   {thumbnailUrl ? (
                     <Image
@@ -121,26 +136,29 @@ function PastOrderItem({ order, isLast }: { order: OrderResponse; isLast: boolea
         <OrderStatusNotice order={order} />
 
         {/* 스토어 문의 / 길찾기 */}
-        {/* 픽업완료: 버튼 없음 (후기 영역에서 별도 처리) */}
+        {/* 픽업완료, 입금대기: 버튼 없음 */}
         {/* 픽업대기: 스토어 문의 + 길찾기 / 그 외: 스토어 문의만 */}
-        {order.orderStatus !== OrderStatus.PICKUP_COMPLETED && (
-          <OrderActionButtons
-            buttons={[
-              {
-                label: "스토어 문의",
-                icon: "reviewQna",
-                onClick: () => setIsInquirySheetOpen(true),
-              },
-              ...(order.orderStatus === OrderStatus.PICKUP_PENDING
-                ? [{
-                    label: "길찾기" as const,
-                    icon: "map" as const,
-                    onClick: () => setIsMapSheetOpen(true),
-                  }]
-                : []),
-            ]}
-          />
-        )}
+        {order.orderStatus !== OrderStatus.PICKUP_COMPLETED &&
+          order.orderStatus !== OrderStatus.PAYMENT_PENDING && (
+            <OrderActionButtons
+              buttons={[
+                {
+                  label: "스토어 문의",
+                  icon: "reviewQna",
+                  onClick: () => setIsInquirySheetOpen(true),
+                },
+                ...(order.orderStatus === OrderStatus.PICKUP_PENDING
+                  ? [
+                      {
+                        label: "길찾기" as const,
+                        icon: "map" as const,
+                        onClick: () => setIsMapSheetOpen(true),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          )}
 
         {/* 후기 영역: 픽업완료 + 작성가능이면 후기 유도, 작성완료면 후기보기 */}
         <OrderReviewPrompt order={order} />
@@ -163,11 +181,38 @@ function PastOrderItem({ order, isLast }: { order: OrderResponse; isLast: boolea
   );
 }
 
+const CANCEL_NOSHOW_STATUSES: OrderStatus[] = [
+  OrderStatus.CANCEL_COMPLETED,
+  OrderStatus.SELLER_CANCELLED,
+  OrderStatus.BUYER_CANCELLED,
+  OrderStatus.CANCEL_REFUND_PENDING,
+  OrderStatus.CANCEL_REFUND_COMPLETED,
+  OrderStatus.NO_SHOW,
+];
+
+function filterByTab(order: OrderResponse, filter: PastFilter): boolean {
+  if (filter === "ALL") return true;
+  if (filter === "CANCEL_NOSHOW") return CANCEL_NOSHOW_STATUSES.includes(order.orderStatus);
+  return order.orderStatus === OrderStatus[filter];
+}
+
 export function PastOrderList() {
-  const { data, isLoading } = useMyOrders({ type: "PAST" });
-  const orders = [...(data?.data ?? [])].sort(
-    (a, b) => new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime(),
-  );
+  const [activeFilter, setActiveFilter] = useState<PastFilter>("ALL");
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useMyOrders({
+    type: "PAST",
+  });
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    loadMoreRef,
+  });
+
+  const orders = [...(data?.pages.flatMap((p) => p.data) ?? [])]
+    .sort((a, b) => new Date(b.pickupDate).getTime() - new Date(a.pickupDate).getTime())
+    .filter((o) => filterByTab(o, activeFilter));
 
   if (isLoading) {
     return (
@@ -198,20 +243,24 @@ export function PastOrderList() {
     );
   }
 
-  if (orders.length === 0) {
-    return <p className="text-sm text-gray-500 py-10 text-center">지난 예약이 없습니다.</p>;
-  }
-
   return (
-    <div className="flex flex-col gap-12 pt-2">
-      {orders.map((order, index) => (
-        <PastOrderItem key={order.id} order={order} isLast={index === orders.length - 1} />
-      ))}
+    <div>
+      <PastOrderFilterBar activeFilter={activeFilter} onChange={setActiveFilter} />
+      {orders.length === 0 ? (
+        <OrderEmptyState />
+      ) : (
+        <div className="flex flex-col gap-12 pt-2">
+          {orders.map((order, index) => (
+            <PastOrderItem key={order.id} order={order} isLast={index === orders.length - 1} />
+          ))}
+          {hasNextPage && <div ref={loadMoreRef} className="h-4" />}
+        </div>
+      )}
     </div>
   );
 }
 
 export function usePastOrderCount() {
   const { data } = useMyOrders({ type: "PAST" });
-  return data?.data?.length ?? 0;
+  return data?.pages[0]?.meta?.totalItems ?? 0;
 }

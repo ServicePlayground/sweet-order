@@ -2,10 +2,12 @@
  * 페이지네이션 메타 정보
  */
 export interface PaginationMeta {
-  total: number;
-  page: number;
+  currentPage: number;
   limit: number;
+  totalItems: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 /**

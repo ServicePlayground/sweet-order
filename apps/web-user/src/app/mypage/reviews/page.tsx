@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/apps/web-user/common/components/headers/Header";
 import { ReviewSortBy } from "@/apps/web-user/features/review/types/review.type";
 import { useMyReviews } from "@/apps/web-user/features/review/hooks/queries/useMyReviews";
@@ -23,6 +23,17 @@ export default function MyReviewsPage() {
   const { data: writableData } = useWritableReviews();
 
   const reviews = data?.data ?? [];
+
+  // URL 해시(#review-{id})로 특정 후기에 스크롤
+  useEffect(() => {
+    if (!data || reviews.length === 0) return;
+    const hash = window.location.hash;
+    if (!hash) return;
+    const el = document.getElementById(hash.slice(1));
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [data, reviews.length]);
   const totalCount = data?.meta?.totalItems ?? 0;
   const writableCount = writableData?.meta?.totalItems ?? 0;
 

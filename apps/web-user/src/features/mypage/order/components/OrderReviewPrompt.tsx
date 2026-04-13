@@ -33,7 +33,7 @@ export function OrderReviewPrompt({ order }: OrderReviewPromptProps) {
   if (order.myReviewUiStatus === OrderMyReviewUiStatus.WRITTEN) {
     return (
       <Link
-        href={`/mypage/reviews/${order.linkedProductReviewId}`}
+        href={`/mypage/reviews#review-${order.linkedProductReviewId}`}
         className="flex items-center justify-center mt-[18px] h-[40px] rounded-lg border border-gray-100 text-sm font-bold text-gray-900 bg-white"
       >
         작성후기보기

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useInfiniteScroll } from "@/apps/web-user/common/hooks/useInfiniteScroll";
 import Image from "next/image";
 import Link from "next/link";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
@@ -17,6 +18,7 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import { OrderStatusNotice } from "./OrderStatusNotice";
 import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
 import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
+import { OrderEmptyState } from "./OrderEmptyState";
 
 function formatItemName(order: OrderResponse, item: OrderItemResponse) {
   const parts: string[] = [order.productName];
@@ -141,11 +143,13 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
                 OrderStatus.CONFIRMED,
                 OrderStatus.PICKUP_PENDING,
               ].includes(order.orderStatus)
-                ? [{
-                    label: "길찾기" as const,
-                    icon: "map" as const,
-                    onClick: () => setIsMapSheetOpen(true),
-                  }]
+                ? [
+                    {
+                      label: "길찾기" as const,
+                      icon: "map" as const,
+                      onClick: () => setIsMapSheetOpen(true),
+                    },
+                  ]
                 : []),
             ]}
           />
@@ -170,8 +174,19 @@ function UpcomingOrderItem({ order, isLast }: { order: OrderResponse; isLast: bo
 }
 
 export function UpcomingOrderList() {
-  const { data, isLoading } = useMyOrders({ type: "UPCOMING" });
-  const orders = [...(data?.data ?? [])].sort(
+  const { data, isLoading, hasNextPage, isFetchingNextPage, fetchNextPage } = useMyOrders({
+    type: "UPCOMING",
+  });
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    loadMoreRef,
+  });
+
+  const orders = [...(data?.pages.flatMap((p) => p.data) ?? [])].sort(
     (a, b) => new Date(a.pickupDate).getTime() - new Date(b.pickupDate).getTime(),
   );
 
@@ -206,7 +221,7 @@ export function UpcomingOrderList() {
   }
 
   if (orders.length === 0) {
-    return <p className="text-sm text-gray-500 py-10 text-center">예정된 예약이 없습니다.</p>;
+    return <OrderEmptyState />;
   }
 
   return (
@@ -214,11 +229,12 @@ export function UpcomingOrderList() {
       {orders.map((order, index) => (
         <UpcomingOrderItem key={order.id} order={order} isLast={index === orders.length - 1} />
       ))}
+      {hasNextPage && <div ref={loadMoreRef} className="h-4" />}
     </div>
   );
 }
 
 export function useUpcomingOrderCount() {
   const { data } = useMyOrders({ type: "UPCOMING" });
-  return data?.data?.length ?? 0;
+  return data?.pages[0]?.meta?.totalItems ?? 0;
 }
