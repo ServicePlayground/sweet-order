@@ -1,43 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
+import { usePaymentCountdown } from "@/apps/web-user/features/order/hooks/usePaymentCountdown";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 
-const PAYMENT_DEADLINE_HOURS = 12;
-
-function useCountdown(paymentPendingAt?: string) {
-  const [remaining, setRemaining] = useState("");
-
-  useEffect(() => {
-    if (!paymentPendingAt) return;
-
-    const deadline = new Date(paymentPendingAt).getTime() + PAYMENT_DEADLINE_HOURS * 60 * 60 * 1000;
-
-    function update() {
-      const diff = Math.max(0, deadline - Date.now());
-      const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-      setRemaining(`${h}:${m}:${s}`);
-    }
-
-    update();
-    const timer = setInterval(update, 1000);
-    return () => clearInterval(timer);
-  }, [paymentPendingAt]);
-
-  return remaining;
-}
-
 export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
-  const countdown = useCountdown(order.paymentPendingAt);
+  const { text: countdown } = usePaymentCountdown(order.paymentPendingAt, order.pickupDate);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);

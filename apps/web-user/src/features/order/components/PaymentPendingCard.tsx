@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { usePaymentCountdown } from "@/apps/web-user/features/order/hooks/usePaymentCountdown";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Icon } from "@/apps/web-user/common/components/icons";
@@ -11,36 +12,12 @@ import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 
-function useCountdown(createdAt: string) {
-  const getRemaining = () => {
-    const deadline = new Date(createdAt).getTime() + 12 * 60 * 60 * 1000;
-    return Math.max(0, Math.floor((deadline - Date.now()) / 1000));
-  };
-
-  const [remaining, setRemaining] = useState(getRemaining);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const next = getRemaining();
-      setRemaining(next);
-      if (next <= 0) clearInterval(timer);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [createdAt]);
-
-  const hours = String(Math.floor(remaining / 3600)).padStart(2, "0");
-  const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
-  const seconds = String(remaining % 60).padStart(2, "0");
-
-  return { text: `${hours}:${minutes}:${seconds}`, isExpired: remaining <= 0 };
-}
-
 function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text);
 }
 
 export function PaymentPendingCard({ order }: { order: OrderResponse }) {
-  const countdown = useCountdown(order.paymentPendingAt ?? "");
+  const countdown = usePaymentCountdown(order.paymentPendingAt, order.pickupDate);
   const [showCopyToast, setShowCopyToast] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
