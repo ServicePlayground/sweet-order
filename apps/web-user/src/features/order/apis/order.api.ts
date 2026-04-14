@@ -13,7 +13,7 @@ export const orderApi = {
   },
   // 주문 상세조회
   getOrderById: async (orderId: string): Promise<OrderResponse> => {
-    const response = await userClient.get(`/orders/${orderId}`);
+    const response = await userClient.get(`/mypage/orders/${orderId}`);
     return response.data.data;
   },
   // 마이페이지 주문 목록 조회

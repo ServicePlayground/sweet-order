@@ -12,7 +12,7 @@ import {
 } from "@/apps/web-user/features/order/types/order.type";
 import { formatAddressToDistrict } from "@/apps/web-user/common/utils/address.util";
 import { OrderDateHeader } from "./OrderDateHeader";
-import { OrderStatusBadge } from "./OrderStatusBadge";
+import { OrderStatusBadge } from "@/apps/web-user/features/order/components/OrderStatusBadge";
 import { OrderStatusNotice } from "./OrderStatusNotice";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { Icon } from "@/apps/web-user/common/components/icons";
@@ -48,7 +48,7 @@ function PastOrderItem({ order, isLast }: { order: OrderResponse; isLast: boolea
           <span
             className="absolute top-5 left-[9px] w-0.5 h-[calc(100%-20px)] z-1"
             style={{
-              backgroundImage: "url(/images/contents/order_side_line.png)",
+              backgroundImage: "url(/images/contents/order_side_line_off.png)",
               backgroundSize: "2px auto",
               backgroundRepeat: "repeat-y",
               backgroundPosition: "center",

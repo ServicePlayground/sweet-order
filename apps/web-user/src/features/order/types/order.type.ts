@@ -129,6 +129,8 @@ export interface OrderResponse {
   storeAccountHolderName?: string | null;
   sellerCancelReason?: string | null;
   userCancelReason?: string | null;
+  sellerNoShowReason?: string | null;
+  refundRequestReason?: string | null;
   // 후기 UI 상태
   myReviewUiStatus: OrderMyReviewUiStatus;
   linkedProductReviewId?: string | null;
