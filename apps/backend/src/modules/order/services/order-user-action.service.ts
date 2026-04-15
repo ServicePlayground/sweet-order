@@ -6,10 +6,7 @@ import {
 } from "@apps/backend/modules/order/constants/order.constants";
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
 import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
-import {
-  isPaymentPendingWindowExpired,
-  paymentPendingWindowStart,
-} from "@apps/backend/modules/order/utils/order-datetime.util";
+import { isPaymentPendingExpired } from "@apps/backend/modules/order/utils/order-datetime.util";
 import {
   ORDER_PRE_PAYMENT_WINDOW_STATUSES,
   USER_CANCEL_REFUND_REQUEST_SOURCE_STATUSES,
@@ -45,7 +42,13 @@ export class OrderUserActionService {
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderStatus: true, createdAt: true, paymentPendingAt: true },
+      select: {
+        orderStatus: true,
+        createdAt: true,
+        paymentPendingAt: true,
+        paymentPendingDeadlineAt: true,
+        pickupDate: true,
+      },
     });
     if (!order) {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
@@ -59,8 +62,14 @@ export class OrderUserActionService {
     }
 
     if (current === OrderStatus.PAYMENT_PENDING) {
-      const windowStart = paymentPendingWindowStart(order.paymentPendingAt, order.createdAt);
-      if (isPaymentPendingWindowExpired(windowStart, now)) {
+      if (
+        isPaymentPendingExpired(now, {
+          paymentPendingDeadlineAt: order.paymentPendingDeadlineAt,
+          paymentPendingAt: order.paymentPendingAt,
+          createdAt: order.createdAt,
+          pickupDate: order.pickupDate,
+        })
+      ) {
         await this.prisma.order.update({
           where: { id: orderId },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },

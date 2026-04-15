@@ -224,7 +224,10 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             {status === OrderStatus.PAYMENT_PENDING && (
               <div className="border-t border-slate-100 bg-slate-50/50">
                 <div className={ORDER_DETAIL_SECTION_BODY_COMPACT}>
-                  <PaymentPendingCountdown windowStartAt={paymentWindowStart} />
+                  <PaymentPendingCountdown
+                    deadlineAt={order.paymentPendingDeadlineAt ?? undefined}
+                    windowStartAt={paymentWindowStart}
+                  />
                 </div>
               </div>
             )}

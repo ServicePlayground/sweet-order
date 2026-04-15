@@ -122,6 +122,8 @@ export interface OrderResponse {
   pickupLatitude: number;
   pickupLongitude: number;
   paymentPendingAt?: string;
+  /** 입금 마감 시각(ISO). 입금대기에서만 의미 있음 */
+  paymentPendingDeadlineAt?: string | null;
   orderStatus: OrderStatus;
   // 스토어 정산 계좌 (입금대기 시 표시)
   storeBankName?: string | null;

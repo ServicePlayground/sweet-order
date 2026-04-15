@@ -133,6 +133,7 @@ export const SWAGGER_EXAMPLES = {
     pickupLongitude: STORE_SWAGGER_EXAMPLES.LONGITUDE,
     orderStatus: OrderStatus.RESERVATION_REQUESTED,
     paymentPendingAt: null as null,
+    paymentPendingDeadlineAt: null as null,
     userCancelReason: null as null,
     sellerCancelReason: null as null,
     sellerNoShowReason: null as null,

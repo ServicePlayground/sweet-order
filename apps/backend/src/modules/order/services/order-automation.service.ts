@@ -1,12 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { OrderStatus } from "@apps/backend/modules/order/constants/order.constants";
-import {
-  isPickupPendingDue,
-  isPaymentPendingWindowExpired,
-  paymentPendingWindowStart,
-  PAYMENT_PENDING_VALIDITY_MS,
-} from "@apps/backend/modules/order/utils/order-datetime.util";
+import { isPickupPendingDue, isPaymentPendingExpired } from "@apps/backend/modules/order/utils/order-datetime.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/order-lifecycle-hook.service";
 import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
@@ -37,7 +32,7 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * 단일 주문에 대해 만료·픽업 전환 규칙을 즉시 적용 (최신 상태 보장)
-   * 만료 규칙: 입금대기 상태에서 입금대기 진입 시각(`paymentPendingAt`, 레거시는 `createdAt`) 기준 12시간이 지난 주문을 취소완료로 전환합니다. 예약신청 단계는 자동 만료하지 않습니다.
+   * 만료 규칙: 입금대기 상태에서 `paymentPendingDeadlineAt`(없으면 픽업·진입 시각 기준 복원)이 지난 주문을 취소완료로 전환합니다. 예약신청 단계는 자동 만료하지 않습니다.
    * 픽업 규칙: 예약확정 상태에서 픽업 시각이 도달했거나 지난 주문을 픽업대기로 전환합니다.
    */
   async syncOrderLifecycleById(orderId: string): Promise<void> {
@@ -48,18 +43,15 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
     const now = new Date();
 
     if (order.orderStatus === OrderStatus.PAYMENT_PENDING) {
-      const windowStart = paymentPendingWindowStart(order.paymentPendingAt, order.createdAt);
-      if (isPaymentPendingWindowExpired(windowStart, now)) {
-        const expireAnchorBefore = new Date(now.getTime() - PAYMENT_PENDING_VALIDITY_MS);
+      const expiryInput = {
+        paymentPendingDeadlineAt: order.paymentPendingDeadlineAt,
+        paymentPendingAt: order.paymentPendingAt,
+        createdAt: order.createdAt,
+        pickupDate: order.pickupDate,
+      };
+      if (isPaymentPendingExpired(now, expiryInput)) {
         const { count } = await this.prisma.order.updateMany({
-          where: {
-            id: orderId,
-            orderStatus: OrderStatus.PAYMENT_PENDING,
-            OR: [
-              { paymentPendingAt: { lte: expireAnchorBefore } },
-              { AND: [{ paymentPendingAt: null }, { createdAt: { lte: expireAnchorBefore } }] },
-            ],
-          },
+          where: { id: orderId, orderStatus: OrderStatus.PAYMENT_PENDING },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },
         });
         if (count === 1) {
@@ -102,34 +94,32 @@ export class OrderAutomationService implements OnModuleInit, OnModuleDestroy {
   async runBatchTransitions(): Promise<void> {
     try {
       const now = new Date();
-      const expireAnchorBefore = new Date(now.getTime() - PAYMENT_PENDING_VALIDITY_MS);
 
-      const paymentExpiredCandidates = await this.prisma.order.findMany({
+      const paymentPendingRows = await this.prisma.order.findMany({
         where: {
           orderStatus: OrderStatus.PAYMENT_PENDING,
-          OR: [
-            { paymentPendingAt: { lte: expireAnchorBefore } },
-            { AND: [{ paymentPendingAt: null }, { createdAt: { lte: expireAnchorBefore } }] },
-          ],
+          OR: [{ paymentPendingDeadlineAt: { lte: now } }, { paymentPendingDeadlineAt: null }],
         },
-        select: { id: true },
+        select: {
+          id: true,
+          paymentPendingDeadlineAt: true,
+          paymentPendingAt: true,
+          createdAt: true,
+          pickupDate: true,
+        },
       });
 
-      for (const { id } of paymentExpiredCandidates) {
+      for (const row of paymentPendingRows) {
+        if (!isPaymentPendingExpired(now, row)) {
+          continue;
+        }
         const { count } = await this.prisma.order.updateMany({
-          where: {
-            id,
-            orderStatus: OrderStatus.PAYMENT_PENDING,
-            OR: [
-              { paymentPendingAt: { lte: expireAnchorBefore } },
-              { AND: [{ paymentPendingAt: null }, { createdAt: { lte: expireAnchorBefore } }] },
-            ],
-          },
+          where: { id: row.id, orderStatus: OrderStatus.PAYMENT_PENDING },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },
         });
         if (count === 1) {
           this.orderLifecycleHookService.afterOrderStatusTransition({
-            orderId: id,
+            orderId: row.id,
             fromStatus: OrderStatus.PAYMENT_PENDING,
             toStatus: OrderStatus.CANCEL_COMPLETED,
             source: ORDER_STATUS_TRANSITION_SOURCE.AUTOMATION_BATCH,

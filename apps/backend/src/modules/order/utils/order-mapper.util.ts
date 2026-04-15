@@ -139,6 +139,7 @@ export class OrderMapperUtil {
       pickupLongitude: order.pickupLongitude ?? 0,
       orderStatus: order.orderStatus as OrderStatus,
       paymentPendingAt: order.paymentPendingAt ?? null,
+      paymentPendingDeadlineAt: order.paymentPendingDeadlineAt ?? null,
       userCancelReason: order.userCancelReason ?? null,
       sellerCancelReason: order.sellerCancelReason ?? null,
       sellerNoShowReason: order.sellerNoShowReason ?? null,
