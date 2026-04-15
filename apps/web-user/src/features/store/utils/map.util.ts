@@ -141,22 +141,46 @@ export function mapPickupFilterToStoreListQuery(filter: MapPickupFilter | null):
   };
 }
 
+/**
+ * 라벨·마커 핀에서 동일하게 쓰는 영업 상태 (캘린더 없음 → 라벨 없음, 마커는 일반 핀).
+ * @returns null이면 상태 문구 없음, true/false는 픽업 가능 여부
+ */
+export function getMapPlatformStoreOverlayOpenState(
+  calendar: StoreBusinessCalendar | undefined,
+  at: Date,
+  pickupFilter: MapPickupFilter | null = null,
+): boolean | null {
+  if (!calendar) return null;
+  if (pickupFilter == null) {
+    return isStoreOpenForPickupNow(calendar, at);
+  }
+  if (pickupFilter.kind === "fullday") {
+    return isStoreOpenOnSeoulCalendarDay(calendar, pickupFilter.date);
+  }
+  if (pickupFilter.kind === "morning") {
+    return storeCalendarOverlapsMapPickupHalfDay(calendar, pickupFilter.date, "morning");
+  }
+  return storeCalendarOverlapsMapPickupHalfDay(calendar, pickupFilter.date, "afternoon");
+}
+
+/** 라벨에 '마감'이 나올 때와 동일한 조건 — 희미한 핀(map-opened-dim) 사용 */
+export function shouldUseDimPlatformMapMarker(
+  calendar: StoreBusinessCalendar | undefined,
+  at: Date,
+  pickupFilter: MapPickupFilter | null = null,
+): boolean {
+  return getMapPlatformStoreOverlayOpenState(calendar, at, pickupFilter) === false;
+}
+
 /** 플랫폼 스토어 마커 라벨 아래 영업 상태 HTML (픽업/예약가능 · 마감) */
 export function buildMapPlatformStoreStatusOverlayHtml(
   calendar: StoreBusinessCalendar | undefined,
   at: Date,
   pickupFilter: MapPickupFilter | null = null,
 ): string {
-  if (!calendar) return "";
-  const open =
-    pickupFilter == null
-      ? isStoreOpenForPickupNow(calendar, at)
-      : pickupFilter.kind === "fullday"
-        ? isStoreOpenOnSeoulCalendarDay(calendar, pickupFilter.date)
-        : pickupFilter.kind === "morning"
-          ? storeCalendarOverlapsMapPickupHalfDay(calendar, pickupFilter.date, "morning")
-          : storeCalendarOverlapsMapPickupHalfDay(calendar, pickupFilter.date, "afternoon");
+  const open = getMapPlatformStoreOverlayOpenState(calendar, at, pickupFilter);
   const s = MAP_MARKER_LABEL_TEXT_SHADOW;
+  if (open === null) return "";
   if (open) {
     return `<p class="text-center text-[11px] leading-[1.4] font-bold" style="color:#009BF5;text-shadow:${s}">픽업/예약가능</p>`;
   }

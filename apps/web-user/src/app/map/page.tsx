@@ -37,6 +37,7 @@ import {
   mapPickupFilterToOverlayInstant,
   mapPickupFilterToStoreListQuery,
   buildMapPlatformStoreStatusOverlayHtml,
+  shouldUseDimPlatformMapMarker,
   type MapListSortBy,
   type MapPickupFilter,
 } from "@/apps/web-user/features/store/utils/map.util";
@@ -78,6 +79,10 @@ export default function MapPage() {
   const focusedMarkerImageRef = useRef<any | null>(null);
   const openedMarkerImageRef = useRef<any | null>(null);
   const openedFocusedMarkerImageRef = useRef<any | null>(null);
+  const openedDimMarkerImageRef = useRef<any | null>(null);
+  const openedDimFocusedMarkerImageRef = useRef<any | null>(null);
+  /** drawPlatformStoreMarkers와 동일 순서 — 마감(희미 핀) 여부 */
+  const platformMarkerDimFlagsRef = useRef<boolean[]>([]);
   const selectedMarkerRef = useRef<any | null>(null);
   const isCenteringFromClickRef = useRef(false); // 마커 클릭으로 panTo 한 직후 idle에서 재처리 방지
   const usedUserLocationForCenterRef = useRef(false); // 이미 현재위치로 중심 잡았는지
@@ -143,9 +148,11 @@ export default function MapPage() {
     markersRef.current = [];
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
-    if (openedMarkerImageRef.current) {
-      platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
-    }
+    platformMarkersRef.current.forEach((m, i) => {
+      const dim = platformMarkerDimFlagsRef.current[i];
+      if (dim && openedDimMarkerImageRef.current) m.setImage(openedDimMarkerImageRef.current);
+      else if (openedMarkerImageRef.current) m.setImage(openedMarkerImageRef.current);
+    });
     selectedMarkerRef.current = null;
   }, []);
 
@@ -176,26 +183,56 @@ export default function MapPage() {
         { offset: new window.kakao.maps.Point(17.5, 40) },
       );
     }
+    if (!openedDimMarkerImageRef.current) {
+      openedDimMarkerImageRef.current = new window.kakao.maps.MarkerImage(
+        "/images/contents/map-opened-dim.png",
+        new window.kakao.maps.Size(32, 37),
+        { offset: new window.kakao.maps.Point(16, 37) },
+      );
+    }
+    if (!openedDimFocusedMarkerImageRef.current) {
+      openedDimFocusedMarkerImageRef.current = new window.kakao.maps.MarkerImage(
+        "/images/contents/map-opened-dim-focus.png",
+        new window.kakao.maps.Size(35, 40),
+        { offset: new window.kakao.maps.Point(17.5, 40) },
+      );
+    }
 
     const statusAt = mapPickupFilterToOverlayInstant(pickupFilter);
+    platformMarkerDimFlagsRef.current = [];
 
     stores.forEach((store) => {
       if (store.latitude == null || store.longitude == null) return;
+      const useDim = shouldUseDimPlatformMapMarker(
+        store.businessCalendar,
+        statusAt,
+        pickupFilter,
+      );
+      platformMarkerDimFlagsRef.current.push(useDim);
+      const defaultMarkerImage = useDim
+        ? openedDimMarkerImageRef.current
+        : openedMarkerImageRef.current;
       const position = new window.kakao.maps.LatLng(store.latitude, store.longitude);
       const marker = new window.kakao.maps.Marker({
         map,
         position,
-        image: openedMarkerImageRef.current,
+        image: defaultMarkerImage,
       });
       platformMarkersRef.current.push(marker);
 
       window.kakao.maps.event.addListener(marker, "click", () => {
         if (markerImageRef.current)
           markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
-        if (openedMarkerImageRef.current)
-          platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
-        if (openedFocusedMarkerImageRef.current) {
-          marker.setImage(openedFocusedMarkerImageRef.current);
+        platformMarkersRef.current.forEach((m, i) => {
+          const dim = platformMarkerDimFlagsRef.current[i];
+          if (dim && openedDimMarkerImageRef.current) m.setImage(openedDimMarkerImageRef.current);
+          else if (openedMarkerImageRef.current) m.setImage(openedMarkerImageRef.current);
+        });
+        const focusedImg = useDim
+          ? openedDimFocusedMarkerImageRef.current
+          : openedFocusedMarkerImageRef.current;
+        if (focusedImg) {
+          marker.setImage(focusedImg);
           selectedMarkerRef.current = marker;
         }
         if (map?.panTo) {
@@ -305,8 +342,12 @@ export default function MapPage() {
               setSelectedStore(null);
               if (markerImageRef.current)
                 markersRef.current.forEach((m) => m.setImage(markerImageRef.current));
-              if (openedMarkerImageRef.current)
-                platformMarkersRef.current.forEach((m) => m.setImage(openedMarkerImageRef.current));
+              platformMarkersRef.current.forEach((m, i) => {
+                const dim = platformMarkerDimFlagsRef.current[i];
+                if (dim && openedDimMarkerImageRef.current)
+                  m.setImage(openedDimMarkerImageRef.current);
+                else if (openedMarkerImageRef.current) m.setImage(openedMarkerImageRef.current);
+              });
               if (focusedMarkerImageRef.current) {
                 marker.setImage(focusedMarkerImageRef.current);
                 selectedMarkerRef.current = marker;
