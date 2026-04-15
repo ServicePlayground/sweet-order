@@ -6,6 +6,7 @@ import {
   MessageCircle,
   MessageSquareText,
   Navigation,
+  Phone,
   Star,
   Store,
 } from "lucide-react";
@@ -228,6 +229,16 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
                   </div>
                 </dl>
               </div>
+            </div>
+
+            <div className="group rounded-xl border border-emerald-100/90 bg-gradient-to-b from-emerald-50/80 to-white/80 p-4 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-800">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
+                  <Phone className="h-4 w-4" />
+                </span>
+                스토어 연락처
+              </div>
+              <p className="text-sm font-medium text-zinc-900">{s.phoneNumber ?? "미등록"}</p>
             </div>
           </div>
         </div>

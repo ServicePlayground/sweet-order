@@ -178,6 +178,7 @@ model Store {
   logoImageUrl String? @map("logo_image_url") // 스토어 로고 이미지 URL
   name         String // 스토어명
   description  String? // 스토어 설명
+  phoneNumber  String? @map("phone_number") // 스토어 연락처 (전화/휴대폰)
 
   // 비즈니스 필드 - 주소/위치 정보 (카카오지도 활용용)
   address      String? // 지번 주소 (예: "서울특별시 강남구 역삼동 456-789")

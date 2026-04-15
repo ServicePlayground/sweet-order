@@ -44,6 +44,7 @@ export const StoreDetailEditPage: React.FC = () => {
   const storeForm: StoreForm = {
     name: store.name,
     description: store.description || "",
+    phoneNumber: store.phoneNumber || "",
     logoImageUrl: store.logoImageUrl || "",
     kakaoChannelId: store.kakaoChannelId || "",
     instagramId: store.instagramId || "",
@@ -62,6 +63,7 @@ export const StoreDetailEditPage: React.FC = () => {
     const request: UpdateStoreRequestDto = {
       name: data.name,
       description: data.description || "",
+      phoneNumber: data.phoneNumber?.trim() || undefined,
       logoImageUrl: data.logoImageUrl || "",
       kakaoChannelId: data.kakaoChannelId?.trim() || "",
       instagramId: data.instagramId?.trim() || "",

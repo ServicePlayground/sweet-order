@@ -34,6 +34,7 @@ export class StoreUpdateService {
     const updateData: {
       logoImageUrl?: string;
       description?: string;
+      phoneNumber?: string;
       kakaoChannelId?: string;
       instagramId?: string;
       name: string;
@@ -66,6 +67,9 @@ export class StoreUpdateService {
     }
     if (updateStoreDto.description !== undefined) {
       updateData.description = updateStoreDto.description;
+    }
+    if (updateStoreDto.phoneNumber !== undefined) {
+      updateData.phoneNumber = updateStoreDto.phoneNumber.trim();
     }
     if (updateStoreDto.kakaoChannelId !== undefined) {
       updateData.kakaoChannelId = updateStoreDto.kakaoChannelId.trim();

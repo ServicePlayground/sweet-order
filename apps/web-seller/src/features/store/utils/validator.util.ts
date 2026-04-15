@@ -52,6 +52,24 @@ export const validateStoreDescription = (description: string | undefined): strin
 };
 
 /**
+ * 스토어 연락처 유효성 검증
+ */
+export const validateStorePhoneNumber = (value: string | undefined): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "스토어 연락처를 입력해주세요.";
+  }
+  if (trimmed.length < 8 || trimmed.length > 20) {
+    return "스토어 연락처는 8자 이상 20자 이하여야 합니다.";
+  }
+  if (!/^[0-9\-+() ]+$/.test(trimmed)) {
+    return "스토어 연락처는 숫자, 하이픈(-), 공백, 괄호, + 만 사용할 수 있습니다.";
+  }
+  return null;
+};
+
+/**
  * 상세주소 유효성 검증 및 에러 메시지 반환
  */
 export const validateDetailAddress = (detailAddress: string): string | null => {
