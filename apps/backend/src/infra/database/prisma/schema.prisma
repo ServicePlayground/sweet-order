@@ -437,6 +437,8 @@ model Order {
   paymentPendingAt DateTime? @map("payment_pending_at")
   /** 입금 마감 시각(픽업까지 남은 시간에 따라 12h/6h/1h 티어 및 픽업 시각과의 min). 입금대기가 아니면 null */
   paymentPendingDeadlineAt DateTime? @map("payment_pending_deadline_at")
+  /** 사용자가 입금완료 처리 시 입력한 입금자명 */
+  depositorName String? @map("depositor_name")
   /** 입금 전 사용자 취소 시 입력한 사유 (자동 만료 취소 등은 null) */
   userCancelReason String? @map("user_cancel_reason") @db.Text
   /** 판매자가 입금대기에서 예약 취소(취소완료) 시 입력한 사유 */

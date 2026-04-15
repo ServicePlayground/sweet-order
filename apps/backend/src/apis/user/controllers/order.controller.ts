@@ -23,6 +23,7 @@ import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/orde
 import { UpdateOrderStatusResponseDto } from "@apps/backend/modules/order/dto/order-seller-action.dto";
 import {
   CancelOrderBeforePaymentRequestDto,
+  MarkPaymentCompleteRequestDto,
   RequestCancelRefundRequestDto,
 } from "@apps/backend/modules/order/dto/order-user-action.dto";
 import {
@@ -43,6 +44,7 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
   OrderResponseDto,
   UpdateOrderStatusResponseDto,
   CancelOrderBeforePaymentRequestDto,
+  MarkPaymentCompleteRequestDto,
   RequestCancelRefundRequestDto,
   UpdateReservationPickupDateRequestDto,
   UpdateReservationOrderItemsRequestDto,
@@ -120,9 +122,10 @@ export class UserOrderController {
   })
   async markPaymentComplete(
     @Param("id") id: string,
+    @Body() dto: MarkPaymentCompleteRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<UpdateOrderStatusResponseDto> {
-    return await this.orderService.markOrderPaymentCompletedForUser(id, req.user);
+    return await this.orderService.markOrderPaymentCompletedForUser(id, req.user, dto);
   }
 
   /**

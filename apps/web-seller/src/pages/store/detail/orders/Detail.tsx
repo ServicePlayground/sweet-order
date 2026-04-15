@@ -408,6 +408,12 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                입금자명
+              </div>
+              <div className="text-base font-medium text-gray-900">{order.depositorName || "-"}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 총 수량
               </div>
               <div className="text-lg font-semibold text-gray-900">{order.totalQuantity}개</div>

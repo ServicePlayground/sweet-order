@@ -137,6 +137,7 @@ export const SWAGGER_EXAMPLES = {
     orderStatus: OrderStatus.RESERVATION_REQUESTED,
     paymentPendingAt: null as null,
     paymentPendingDeadlineAt: null as null,
+    depositorName: null as null,
     userCancelReason: null as null,
     sellerCancelReason: null as null,
     sellerNoShowReason: null as null,

@@ -79,6 +79,8 @@ export interface OrderResponseDto {
   paymentPendingAt?: Date | string | null;
   /** 입금 마감 시각(픽업 일정 반영). 입금대기가 아니면 null */
   paymentPendingDeadlineAt?: Date | string | null;
+  /** 사용자가 입금완료 처리 시 입력한 입금자명 */
+  depositorName?: string | null;
   pickupDate: Date;
   userCancelReason?: string | null;
   sellerCancelReason?: string | null;

@@ -149,6 +149,7 @@ export class OrderMapperUtil {
       orderStatus: order.orderStatus as OrderStatus,
       paymentPendingAt: order.paymentPendingAt ?? null,
       paymentPendingDeadlineAt: order.paymentPendingDeadlineAt ?? null,
+      depositorName: order.depositorName ?? null,
       userCancelReason: order.userCancelReason ?? null,
       sellerCancelReason: order.sellerCancelReason ?? null,
       sellerNoShowReason: order.sellerNoShowReason ?? null,

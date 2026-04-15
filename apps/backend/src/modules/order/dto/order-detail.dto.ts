@@ -245,6 +245,13 @@ export class OrderResponseDto extends PickupAddressDto {
   paymentPendingDeadlineAt: Date | null;
 
   @ApiPropertyOptional({
+    description: "사용자가 입금완료 처리 시 입력한 입금자명. 미입력 상태 주문은 null",
+    example: "홍길동",
+    nullable: true,
+  })
+  depositorName: string | null;
+
+  @ApiPropertyOptional({
     description:
       "입금 전 사용자 취소 시 입력한 사유. 자동 만료 취소·판매자 취소 등에서는 null일 수 있음",
     example: "일정 변경",
