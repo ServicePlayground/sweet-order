@@ -13,9 +13,9 @@ export interface StatisticsRangePresetButtonsProps {
 
 const presetButtonClass = (active: boolean) =>
   cn(
-    "inline-flex h-9 w-full items-center justify-center rounded-lg border px-3 text-xs font-medium transition-all",
+    "inline-flex h-9 w-full items-center justify-center rounded-md border px-3 text-xs font-medium transition-colors",
     active
-      ? "border-violet-300 bg-violet-50 text-violet-700 shadow-sm dark:border-violet-400/50 dark:bg-violet-500/15 dark:text-violet-200"
+      ? "border-border bg-muted text-foreground"
       : "border-transparent bg-transparent text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground",
   );
 
@@ -27,7 +27,7 @@ export const StatisticsRangePresetButtons: React.FC<StatisticsRangePresetButtons
   onToday,
 }) => {
   return (
-    <div className="grid w-full max-w-[720px] grid-cols-2 gap-2 rounded-xl border border-border bg-background p-1.5 sm:grid-cols-4">
+    <div className="grid w-full max-w-[640px] grid-cols-2 gap-2 rounded-lg border border-border bg-card p-1.5 sm:grid-cols-4">
       <button
         type="button"
         onClick={onAccumulated}

@@ -115,8 +115,8 @@ export const StoreDetailOrderListPage: React.FC = () => {
           </Select>
         </div>
 
-        {/* 필터 */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* 필터 — 상품 목록과 동일 그리드로 인풋 너비 정렬 */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {/* 주문 번호 검색 */}
           <div className="space-y-2">
             <Label>주문 번호</Label>
@@ -170,13 +170,13 @@ export const StoreDetailOrderListPage: React.FC = () => {
 
           {/* 시작 날짜 */}
           <div className="space-y-2">
-            <Label>시작 날짜</Label>
+            <Label>시작날짜</Label>
             <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           </div>
 
           {/* 종료 날짜 */}
           <div className="space-y-2">
-            <Label>종료 날짜</Label>
+            <Label>종료날짜</Label>
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
         </div>
