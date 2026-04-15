@@ -66,9 +66,7 @@ export class UserNotificationController {
   async unreadCount(
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<UserNotificationUnreadCountResponseDto> {
-    const count = await this.notificationService.countUnreadUserWebOrderNotifications(
-      req.user.sub,
-    );
+    const count = await this.notificationService.countUnreadUserWebOrderNotifications(req.user.sub);
     return { count };
   }
 

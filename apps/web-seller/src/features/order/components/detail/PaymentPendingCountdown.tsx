@@ -15,7 +15,10 @@ interface PaymentPendingCountdownProps {
 /**
  * 입금대기 주문: 서버 마감 시각까지 남은 시간을 1초 단위로 표시
  */
-export function PaymentPendingCountdown({ deadlineAt, windowStartAt }: PaymentPendingCountdownProps) {
+export function PaymentPendingCountdown({
+  deadlineAt,
+  windowStartAt,
+}: PaymentPendingCountdownProps) {
   const deadlineMs = useMemo(() => {
     if (deadlineAt) {
       return new Date(deadlineAt).getTime();

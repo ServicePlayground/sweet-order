@@ -203,7 +203,10 @@ export function buildMapSearchUrl(pickupFilter: MapPickupFilter | null): string 
 const MAP_PAGE_PATH = "/map";
 
 /** 지도 페이지 URL (?q·픽업 동시 반영) */
-export function buildMapPageUrl(searchQuery: string | null, pickupFilter: MapPickupFilter | null): string {
+export function buildMapPageUrl(
+  searchQuery: string | null,
+  pickupFilter: MapPickupFilter | null,
+): string {
   const p = new URLSearchParams();
   const q = searchQuery?.trim();
   if (q) p.set("q", q);

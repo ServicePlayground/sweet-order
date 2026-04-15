@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
-import { OrderResponse, OrderMyReviewUiStatus } from "@/apps/web-user/features/order/types/order.type";
+import {
+  OrderResponse,
+  OrderMyReviewUiStatus,
+} from "@/apps/web-user/features/order/types/order.type";
 
 interface OrderReviewPromptProps {
   order: OrderResponse;

@@ -135,19 +135,14 @@ export function MapTopSearchBar({
             <button
               type="button"
               onClick={() =>
-                router.push(
-                  buildMapSearchUrlWithOptionalQuery(searchQuery, pickupFilter ?? null),
-                )
+                router.push(buildMapSearchUrlWithOptionalQuery(searchQuery, pickupFilter ?? null))
               }
               className="flex h-5 w-5 shrink-0 items-center justify-center p-0"
               aria-label="검색어 입력으로 돌아가기"
             >
               <Icon name="closeCircle" width={20} height={20} className="text-gray-300" />
             </button>
-            <div
-              className="h-3 w-px shrink-0 bg-[var(--grayscale-gr-100,#EBEBEA)]"
-              aria-hidden
-            />
+            <div className="h-3 w-px shrink-0 bg-[var(--grayscale-gr-100,#EBEBEA)]" aria-hidden />
             {pickupFilter != null ? (
               <button
                 type="button"

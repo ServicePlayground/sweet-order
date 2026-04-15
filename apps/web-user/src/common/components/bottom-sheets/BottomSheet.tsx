@@ -96,7 +96,12 @@ export function BottomSheet({
 
         {/* Footer - 고정 영역 */}
         {footer && (
-          <div className={clsx("border-gray-100 bg-white", footerShadow ? "shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)]" : "shadow-none")}>
+          <div
+            className={clsx(
+              "border-gray-100 bg-white",
+              footerShadow ? "shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)]" : "shadow-none",
+            )}
+          >
             {footer}
           </div>
         )}

@@ -2,8 +2,14 @@
 
 import Header from "@/apps/web-user/common/components/headers/Header";
 import { Tabs } from "@/apps/web-user/common/components/tabs/Tabs";
-import { UpcomingOrderList, useUpcomingOrderCount } from "@/apps/web-user/features/mypage/order/components/UpcomingOrderList";
-import { PastOrderList, usePastOrderCount } from "@/apps/web-user/features/mypage/order/components/PastOrderList";
+import {
+  UpcomingOrderList,
+  useUpcomingOrderCount,
+} from "@/apps/web-user/features/mypage/order/components/UpcomingOrderList";
+import {
+  PastOrderList,
+  usePastOrderCount,
+} from "@/apps/web-user/features/mypage/order/components/PastOrderList";
 
 export default function MyOrdersPage() {
   const upcomingCount = useUpcomingOrderCount();

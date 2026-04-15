@@ -73,8 +73,7 @@ export default function MapPage() {
   /** URL에 픽업이 있으면 상태에 반영 (검색 페이지 등에서 돌아올 때) */
   useEffect(() => {
     const hasPickupInUrl =
-      searchParams.has(MAP_PICKUP_URL_DATE_KEY) &&
-      searchParams.has(MAP_PICKUP_URL_PERIOD_KEY);
+      searchParams.has(MAP_PICKUP_URL_DATE_KEY) && searchParams.has(MAP_PICKUP_URL_PERIOD_KEY);
     if (!hasPickupInUrl) return;
     const parsed = parseMapPickupFilterFromUrlSearchParams(searchParams);
     setPickupFilter(parsed);
@@ -239,11 +238,7 @@ export default function MapPage() {
 
     stores.forEach((store) => {
       if (store.latitude == null || store.longitude == null) return;
-      const useDim = shouldUseDimPlatformMapMarker(
-        store.businessCalendar,
-        statusAt,
-        pickupFilter,
-      );
+      const useDim = shouldUseDimPlatformMapMarker(store.businessCalendar, statusAt, pickupFilter);
       platformMarkerDimFlagsRef.current.push(useDim);
       const defaultMarkerImage = useDim
         ? openedDimMarkerImageRef.current
@@ -695,7 +690,9 @@ export default function MapPage() {
     setSelectedStore((prev) => {
       if (!prev || !pickupFilter || !prev.businessCalendar) return prev;
       if (pickupFilter.kind === "fullday") {
-        return isStoreOpenOnSeoulCalendarDay(prev.businessCalendar, pickupFilter.date) ? prev : null;
+        return isStoreOpenOnSeoulCalendarDay(prev.businessCalendar, pickupFilter.date)
+          ? prev
+          : null;
       }
       if (pickupFilter.kind === "morning") {
         return storeCalendarOverlapsMapPickupHalfDay(
