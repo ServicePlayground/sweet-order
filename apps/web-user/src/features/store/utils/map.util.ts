@@ -79,6 +79,12 @@ export function formatMapPickupFilterForSearchBar(filter: MapPickupFilter): {
   };
 }
 
+/** 한 줄 표기: "3월 12일 오후" */
+export function formatMapPickupFilterInline(filter: MapPickupFilter): string {
+  const { dateLine, periodLine } = formatMapPickupFilterForSearchBar(filter);
+  return `${dateLine} ${periodLine}`;
+}
+
 /** 마커 라벨용 대표 시각(반나절 필터는 구간 전체가 아니라 표시용 중간대) */
 const OVERLAY_REPRESENTATIVE_SEOUL_HOUR_MORNING = 6;
 const OVERLAY_REPRESENTATIVE_SEOUL_HOUR_AFTERNOON = 18;
@@ -139,6 +145,75 @@ export function mapPickupFilterToStoreListQuery(filter: MapPickupFilter | null):
     pickupFilterDate: `${y}-${mo}-${day}`,
     pickupFilterPeriod: filter.kind,
   };
+}
+
+/** 지도 /map/search 공통 — 픽업 필터를 URL에 실을 때 쓰는 키 */
+export const MAP_PICKUP_URL_DATE_KEY = "pickupDate";
+export const MAP_PICKUP_URL_PERIOD_KEY = "pickupPeriod";
+
+/** URL 쿼리 → MapPickupFilter (유효하지 않으면 null) */
+export function parseMapPickupFilterFromUrlSearchParams(
+  params: Pick<URLSearchParams, "get">,
+): MapPickupFilter | null {
+  const dateStr = params.get(MAP_PICKUP_URL_DATE_KEY);
+  const period = params.get(MAP_PICKUP_URL_PERIOD_KEY);
+  if (!dateStr || !period) return null;
+  if (period !== "morning" && period !== "afternoon" && period !== "fullday") return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (!m) return null;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const day = Number(m[3]);
+  const date = new Date(y, mo - 1, day);
+  if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== day) {
+    return null;
+  }
+  if (period === "morning") return { kind: "morning", date };
+  if (period === "afternoon") return { kind: "afternoon", date };
+  return { kind: "fullday", date };
+}
+
+const MAP_SEARCH_PATH = "/map/search";
+
+/**
+ * 검색 입력 페이지 URL (?q·픽업 선택적)
+ * - 지도에서 검색 결과 닫기(X)로 돌아올 때 검색어·픽업 유지
+ */
+export function buildMapSearchUrlWithOptionalQuery(
+  searchQuery: string | null | undefined,
+  pickupFilter: MapPickupFilter | null,
+): string {
+  const p = new URLSearchParams();
+  const q = searchQuery?.trim();
+  if (q) p.set("q", q);
+  const pq = mapPickupFilterToStoreListQuery(pickupFilter);
+  if (pq) {
+    p.set(MAP_PICKUP_URL_DATE_KEY, pq.pickupFilterDate);
+    p.set(MAP_PICKUP_URL_PERIOD_KEY, pq.pickupFilterPeriod);
+  }
+  const s = p.toString();
+  return s ? `${MAP_SEARCH_PATH}?${s}` : MAP_SEARCH_PATH;
+}
+
+/** 지도 상단에서 검색 페이지로 이동할 때 (선택 픽업이 있으면 쿼리 포함) */
+export function buildMapSearchUrl(pickupFilter: MapPickupFilter | null): string {
+  return buildMapSearchUrlWithOptionalQuery(null, pickupFilter);
+}
+
+const MAP_PAGE_PATH = "/map";
+
+/** 지도 페이지 URL (?q·픽업 동시 반영) */
+export function buildMapPageUrl(searchQuery: string | null, pickupFilter: MapPickupFilter | null): string {
+  const p = new URLSearchParams();
+  const q = searchQuery?.trim();
+  if (q) p.set("q", q);
+  const pq = mapPickupFilterToStoreListQuery(pickupFilter);
+  if (pq) {
+    p.set(MAP_PICKUP_URL_DATE_KEY, pq.pickupFilterDate);
+    p.set(MAP_PICKUP_URL_PERIOD_KEY, pq.pickupFilterPeriod);
+  }
+  const s = p.toString();
+  return s ? `${MAP_PAGE_PATH}?${s}` : MAP_PAGE_PATH;
 }
 
 /**

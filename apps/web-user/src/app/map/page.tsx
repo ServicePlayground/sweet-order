@@ -10,7 +10,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNav";
 import { useUserLocation } from "@/apps/web-user/common/hooks/useUserLocation";
 import { Icon } from "@/apps/web-user/common/components/icons";
@@ -38,6 +38,10 @@ import {
   mapPickupFilterToStoreListQuery,
   buildMapPlatformStoreStatusOverlayHtml,
   shouldUseDimPlatformMapMarker,
+  buildMapPageUrl,
+  parseMapPickupFilterFromUrlSearchParams,
+  MAP_PICKUP_URL_DATE_KEY,
+  MAP_PICKUP_URL_PERIOD_KEY,
   type MapListSortBy,
   type MapPickupFilter,
 } from "@/apps/web-user/features/store/utils/map.util";
@@ -53,6 +57,7 @@ declare global {
 }
 
 export default function MapPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q")?.trim() || null;
   const kakaoJavascriptKey = process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY;
@@ -64,6 +69,37 @@ export default function MapPage() {
   const [listFilter, setListFilter] = useState<StoreListFilter>({});
   const [pickupFilter, setPickupFilter] = useState<MapPickupFilter | null>(null);
   const [pickupCalendarOpen, setPickupCalendarOpen] = useState(false);
+
+  /** URL에 픽업이 있으면 상태에 반영 (검색 페이지 등에서 돌아올 때) */
+  useEffect(() => {
+    const hasPickupInUrl =
+      searchParams.has(MAP_PICKUP_URL_DATE_KEY) &&
+      searchParams.has(MAP_PICKUP_URL_PERIOD_KEY);
+    if (!hasPickupInUrl) return;
+    const parsed = parseMapPickupFilterFromUrlSearchParams(searchParams);
+    setPickupFilter(parsed);
+  }, [searchParams]);
+
+  /** 픽업/검색어와 URL을 맞춤 */
+  const applyPickupToUrl = useCallback(
+    (next: MapPickupFilter | null) => {
+      router.replace(buildMapPageUrl(searchQuery, next));
+    },
+    [router, searchQuery],
+  );
+
+  const handlePickupConfirm = useCallback(
+    (f: MapPickupFilter) => {
+      setPickupFilter(f);
+      applyPickupToUrl(f);
+    },
+    [applyPickupToUrl],
+  );
+
+  const handlePickupClear = useCallback(() => {
+    setPickupFilter(null);
+    applyPickupToUrl(null);
+  }, [applyPickupToUrl]);
 
   // ---- Refs: 지도·마커 ----
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -740,15 +776,15 @@ export default function MapPage() {
         searchQuery={searchQuery}
         pickupFilter={pickupFilter}
         onCalendarClick={() => setPickupCalendarOpen(true)}
-        onPickupClear={() => setPickupFilter(null)}
+        onPickupClear={handlePickupClear}
       />
 
       <MapPickupDateBottomSheet
         isOpen={pickupCalendarOpen}
         onClose={() => setPickupCalendarOpen(false)}
         selectedFilter={pickupFilter}
-        onConfirm={setPickupFilter}
-        onClearFilter={() => setPickupFilter(null)}
+        onConfirm={handlePickupConfirm}
+        onClearFilter={handlePickupClear}
       />
 
       <button
