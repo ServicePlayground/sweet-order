@@ -19,6 +19,12 @@ import {
   hourlyOrdersToValues24,
   weekdayRowsToMetricItems,
 } from "@/apps/web-seller/features/statistics/utils/statistics-chart.util";
+import {
+  STATISTICS_CHART_WRAP,
+  STATISTICS_INNER_ROW,
+  STATISTICS_SURFACE_CARD,
+} from "@/apps/web-seller/features/statistics/constants/statistics.constant";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 
 export interface StatisticsOverallContentProps {
   storeId: string;
@@ -80,7 +86,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
 
   return (
     <div className="space-y-7">
-      <Card className="border-border bg-card">
+      <Card className={STATISTICS_SURFACE_CARD}>
         <CardContent className="space-y-4 p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <p className="text-sm font-semibold tracking-tight text-foreground">
@@ -109,11 +115,21 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
       </Card>
 
       {isLoading ? (
-        <div className="flex items-center justify-center rounded-lg border border-border bg-card py-16">
+        <div
+          className={cn(
+            "flex items-center justify-center rounded-lg border py-16",
+            STATISTICS_SURFACE_CARD,
+          )}
+        >
           <p className="text-sm text-muted-foreground">통계를 불러오는 중...</p>
         </div>
       ) : isError ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-border bg-card py-16">
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center gap-3 rounded-lg border py-16",
+            STATISTICS_SURFACE_CARD,
+          )}
+        >
           <p className="text-sm text-destructive">
             통계를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
           </p>
@@ -129,7 +145,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
           </p>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Card className="border-violet-200/50 bg-gradient-to-br from-violet-50/70 to-background dark:border-violet-500/30 dark:from-violet-500/10">
+            <Card className={STATISTICS_SURFACE_CARD}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">매출</CardTitle>
               </CardHeader>
@@ -139,7 +155,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-emerald-200/60 bg-gradient-to-br from-emerald-50/70 to-background dark:border-emerald-500/30 dark:from-emerald-500/10">
+            <Card className={STATISTICS_SURFACE_CARD}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-muted-foreground">주문건수</CardTitle>
               </CardHeader>
@@ -152,7 +168,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Card className="border-violet-200/50 bg-gradient-to-br from-violet-50/60 to-background dark:border-violet-500/30 dark:from-violet-500/10">
+            <Card className={STATISTICS_SURFACE_CARD}>
               <CardHeader>
                 <CardTitle className="text-base">매출 순</CardTitle>
               </CardHeader>
@@ -163,7 +179,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
                   topProductsByRevenue.map((p, i) => (
                     <div
                       key={p.productId}
-                      className="flex items-center justify-between rounded-xl border border-violet-200/50 bg-white/80 px-3 py-2.5 dark:border-violet-400/25 dark:bg-violet-500/5"
+                      className={cn("flex items-center justify-between", STATISTICS_INNER_ROW)}
                     >
                       <p className="truncate text-sm font-medium">
                         {i + 1}. {p.productName}
@@ -176,7 +192,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
                 )}
               </CardContent>
             </Card>
-            <Card className="border-emerald-200/60 bg-gradient-to-br from-emerald-50/70 to-background dark:border-emerald-500/30 dark:from-emerald-500/10">
+            <Card className={STATISTICS_SURFACE_CARD}>
               <CardHeader>
                 <CardTitle className="text-base">주문건수 순</CardTitle>
               </CardHeader>
@@ -187,7 +203,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
                   topProductsByOrders.map((p, i) => (
                     <div
                       key={p.productId}
-                      className="flex items-center justify-between rounded-xl border border-emerald-200/50 bg-white/80 px-3 py-2.5 dark:border-emerald-400/25 dark:bg-emerald-500/5"
+                      className={cn("flex items-center justify-between", STATISTICS_INNER_ROW)}
                     >
                       <p className="truncate text-sm font-medium">
                         {i + 1}. {p.productName}
@@ -203,7 +219,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card className="h-full overflow-hidden border-sky-200/60 bg-gradient-to-br from-sky-50/70 to-background dark:border-sky-500/30 dark:from-sky-500/10">
+            <Card className={cn("h-full overflow-hidden", STATISTICS_SURFACE_CARD)}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">요일별 주문 요약</CardTitle>
                 <p className="text-xs font-normal text-muted-foreground">주문 접수 시각 기준</p>
@@ -238,13 +254,13 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
                 )}
               </CardContent>
             </Card>
-            <Card className="h-full overflow-hidden border-amber-200/60 bg-gradient-to-br from-amber-50/70 to-background dark:border-amber-500/30 dark:from-amber-500/10">
+            <Card className={cn("h-full overflow-hidden", STATISTICS_SURFACE_CARD)}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">시간대별 주문 요약</CardTitle>
                 <p className="text-xs font-normal text-muted-foreground">주문 접수 시각 기준</p>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto rounded-lg border border-amber-200/45 bg-white/80 p-2 dark:border-amber-400/20 dark:bg-amber-500/5">
+                <div className={STATISTICS_CHART_WRAP}>
                   <div className="min-w-[320px]">
                     <HourlyOrderChart values={hourlyValues} />
                   </div>
@@ -254,7 +270,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card className="h-full overflow-hidden border-indigo-200/60 bg-gradient-to-br from-indigo-50/70 to-background dark:border-indigo-500/30 dark:from-indigo-500/10">
+            <Card className={cn("h-full overflow-hidden", STATISTICS_SURFACE_CARD)}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">요일별 픽업 요약</CardTitle>
                 <p className="text-xs font-normal text-muted-foreground">픽업 예정일시 기준</p>
@@ -290,13 +306,13 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
                 )}
               </CardContent>
             </Card>
-            <Card className="h-full overflow-hidden border-teal-200/60 bg-gradient-to-br from-teal-50/70 to-background dark:border-teal-500/30 dark:from-teal-500/10">
+            <Card className={cn("h-full overflow-hidden", STATISTICS_SURFACE_CARD)}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-base">시간대별 픽업 요약</CardTitle>
                 <p className="text-xs font-normal text-muted-foreground">픽업 예정일시 기준</p>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto rounded-lg border border-teal-200/45 bg-white/80 p-2 dark:border-teal-400/20 dark:bg-teal-500/5">
+                <div className={STATISTICS_CHART_WRAP}>
                   <div className="min-w-[320px]">
                     <HourlyOrderChart values={hourlyPickupValues} />
                   </div>

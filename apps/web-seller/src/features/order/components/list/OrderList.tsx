@@ -50,28 +50,42 @@ export function OrderList({ orders }: OrderListProps) {
               )}
             </div>
 
-            <div className="flex flex-1 items-center justify-between gap-4">
-              <div className="flex-1">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <div className="text-sm font-semibold">{order.productName}</div>
-                  <StatusBadge variant={getOrderStatusBadgeVariant(order.orderStatus)}>
-                    {getOrderStatusLabel(order.orderStatus)}
-                  </StatusBadge>
+            <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="truncate text-sm font-semibold leading-tight">
+                  {order.productName}
                 </div>
-                <div className="text-sm font-semibold">{order.orderNumber}</div>
-                <div className="text-xs text-muted-foreground">
-                  {new Date(order.createdAt).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
+                <div className="text-xs font-medium text-muted-foreground">{order.orderNumber}</div>
+                <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                  <div>
+                    주문 생성:{" "}
+                    {new Date(order.createdAt).toLocaleString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </div>
+                  <div>
+                    픽업 일자:{" "}
+                    {new Date(order.pickupDate).toLocaleString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-foreground">
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <StatusBadge variant={getOrderStatusBadgeVariant(order.orderStatus)}>
+                  {getOrderStatusLabel(order.orderStatus)}
+                </StatusBadge>
+                <div className="text-base font-bold tabular-nums sm:text-lg">
                   {order.totalPrice.toLocaleString()}원
                 </div>
               </div>

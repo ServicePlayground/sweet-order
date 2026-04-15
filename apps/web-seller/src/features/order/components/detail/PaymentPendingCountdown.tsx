@@ -40,20 +40,20 @@ export function PaymentPendingCountdown({
   const seconds = totalSec % 60;
 
   return (
-    <div className="mt-3 rounded-md border border-amber-200 bg-amber-50/90 px-3 py-2.5 text-sm">
-      <div className="font-semibold text-amber-900">입금 유효 시간 (마감 시각까지)</div>
+    <div className="rounded-md border border-amber-200/90 bg-amber-50/95 px-3 py-2.5 text-[13px] leading-snug">
+      <div className="font-semibold text-amber-950">입금 유효 시간 (마감 시각까지)</div>
       {expired ? (
-        <p className="mt-1 leading-relaxed text-amber-900">
+        <p className="mt-1.5 text-[13px] leading-relaxed text-amber-950">
           유효 시간이 지났습니다. 서버에서는 자동으로 취소완료 처리될 수 있어요. 화면이 맞지 않으면
           새로고침해 주세요.
         </p>
       ) : (
         <>
-          <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight text-amber-950">
+          <p className="mt-2 font-mono text-2xl font-bold tabular-nums tracking-tight text-amber-950">
             {pad2(hours)}:{pad2(minutes)}:{pad2(seconds)}
-            <span className="ml-2 align-middle text-base font-semibold text-amber-800">남음</span>
+            <span className="ml-2 align-middle text-[13px] font-semibold text-amber-900">남음</span>
           </p>
-          <p className="mt-1 text-xs text-amber-800/90">
+          <p className="mt-1.5 text-[12px] leading-snug text-amber-900/95">
             마감 시각:{" "}
             {new Date(deadlineMs).toLocaleString("ko-KR", {
               year: "numeric",

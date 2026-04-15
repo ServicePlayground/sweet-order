@@ -11,6 +11,16 @@ import {
   Store,
 } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import {
+  HOME_BLOCK_TITLE,
+  HOME_BODY,
+  HOME_BODY_MUTED,
+  HOME_CAPTION,
+  HOME_LABEL,
+  HOME_MONO,
+  HOME_NUMBER_KPI,
+  HOME_PAGE_TITLE,
+} from "@/apps/web-seller/features/home/constants/store-home-typography.constant";
 import { STORE_BANK_OPTIONS } from "@/apps/web-seller/features/store/constants/store.constants";
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 
@@ -81,7 +91,7 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
   if (isLoading) {
     return (
       <section className="rounded-2xl border border-zinc-200/90 bg-muted/30 p-8">
-        <p className="text-sm text-muted-foreground">스토어 정보를 불러오는 중…</p>
+        <p className={HOME_BODY_MUTED}>스토어 정보를 불러오는 중…</p>
       </section>
     );
   }
@@ -133,7 +143,7 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
           <div className="min-w-0 flex-1 space-y-5 lg:pt-0.5">
             <div className="space-y-4">
               <div className="flex flex-wrap items-end justify-center gap-2 sm:justify-start sm:gap-2.5">
-                <h1 className="min-w-0 text-center text-2xl font-bold leading-tight tracking-tight text-zinc-900 sm:text-left sm:text-3xl">
+                <h1 className={cn("min-w-0 text-center sm:text-left", HOME_PAGE_TITLE)}>
                   {s.name}
                 </h1>
                 <StoreProfileSnsIconLinks
@@ -142,7 +152,12 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
                 />
               </div>
               {s.description ? (
-                <p className="max-w-2xl text-center text-sm leading-relaxed text-zinc-600 sm:text-left">
+                <p
+                  className={cn(
+                    "max-w-2xl text-center leading-relaxed sm:text-left",
+                    HOME_BODY_MUTED,
+                  )}
+                >
                   {s.description}
                 </p>
               ) : null}
@@ -154,10 +169,8 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
                   <Heart className="h-5 w-5 text-rose-600" strokeWidth={2} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-rose-700/90">좋아요</p>
-                  <p className="text-xl font-bold tabular-nums tracking-tight text-zinc-900">
-                    {s.likeCount.toLocaleString("ko-KR")}
-                  </p>
+                  <p className={HOME_LABEL}>좋아요</p>
+                  <p className={HOME_NUMBER_KPI}>{s.likeCount.toLocaleString("ko-KR")}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 rounded-xl border border-amber-100/90 bg-gradient-to-br from-amber-50/90 to-white/80 px-4 py-3.5 shadow-sm ring-1 ring-amber-100/40">
@@ -165,12 +178,10 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
                   <Star className="h-5 w-5 fill-amber-400 text-amber-500" strokeWidth={1.5} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-amber-800/90">평균 평점</p>
+                  <p className={HOME_LABEL}>평균 평점</p>
                   <p className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-bold tabular-nums tracking-tight text-zinc-900">
-                      {s.averageRating.toFixed(1)}
-                    </span>
-                    <span className="text-xs font-medium text-zinc-400">/ 5.0</span>
+                    <span className={HOME_NUMBER_KPI}>{s.averageRating.toFixed(1)}</span>
+                    <span className={HOME_CAPTION}>/ 5.0</span>
                   </p>
                 </div>
               </div>
@@ -179,10 +190,10 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
                   <MessageSquareText className="h-5 w-5" strokeWidth={2} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-violet-700/90">전체 리뷰</p>
-                  <p className="text-xl font-bold tabular-nums tracking-tight text-zinc-900">
+                  <p className={HOME_LABEL}>전체 리뷰</p>
+                  <p className={HOME_NUMBER_KPI}>
                     {s.totalReviewCount.toLocaleString("ko-KR")}
-                    <span className="ml-1 text-sm font-semibold text-zinc-500">건</span>
+                    <span className={cn("ml-1 text-sm font-semibold", HOME_BODY_MUTED)}>건</span>
                   </p>
                 </div>
               </div>
@@ -190,40 +201,38 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
 
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="group rounded-xl border border-amber-100/90 bg-gradient-to-b from-amber-50/80 to-white/80 p-4 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-800">
+                <div className={cn("mb-3 flex items-center gap-2", HOME_BLOCK_TITLE)}>
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
                     <Navigation className="h-4 w-4" />
                   </span>
                   픽업 장소
                 </div>
-                <p className="text-sm font-medium leading-relaxed text-zinc-900">{s.roadAddress}</p>
+                <p className={cn("font-medium leading-relaxed", HOME_BODY)}>{s.roadAddress}</p>
                 {s.detailAddress ? (
-                  <p className="mt-1 text-sm text-amber-900/90">{s.detailAddress}</p>
+                  <p className={cn("mt-1", HOME_BODY_MUTED)}>{s.detailAddress}</p>
                 ) : null}
-                <p className="mt-2 text-xs text-zinc-500">우편번호 {s.zonecode}</p>
+                <p className={cn("mt-2", HOME_CAPTION)}>우편번호 {s.zonecode}</p>
               </div>
 
               <div className="group rounded-xl border border-slate-200/90 bg-gradient-to-b from-slate-50/90 to-white p-4 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-zinc-800">
+                <div className={cn("mb-3 flex items-center gap-2", HOME_BLOCK_TITLE)}>
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-200/90 text-slate-800">
                     <Landmark className="h-4 w-4" />
                   </span>
                   정산 계좌
                 </div>
-                <dl className="space-y-2.5 text-sm">
+                <dl className="space-y-2.5">
                   <div>
-                    <dt className="text-xs font-medium text-zinc-500">은행</dt>
-                    <dd className="mt-0.5 font-medium text-zinc-900">{bankLabel || "—"}</dd>
+                    <dt className={HOME_LABEL}>은행</dt>
+                    <dd className={cn("mt-0.5 font-medium", HOME_BODY)}>{bankLabel || "—"}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-medium text-zinc-500">계좌번호</dt>
-                    <dd className="mt-0.5 font-mono text-xs text-zinc-900 tabular-nums sm:text-sm">
-                      {s.bankAccountNumber ?? "—"}
-                    </dd>
+                    <dt className={HOME_LABEL}>계좌번호</dt>
+                    <dd className={cn("mt-0.5", HOME_MONO)}>{s.bankAccountNumber ?? "—"}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs font-medium text-zinc-500">예금주</dt>
-                    <dd className="mt-0.5 font-medium text-zinc-900">
+                    <dt className={HOME_LABEL}>예금주</dt>
+                    <dd className={cn("mt-0.5 font-medium", HOME_BODY)}>
                       {s.accountHolderName ?? "—"}
                     </dd>
                   </div>
@@ -232,13 +241,13 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
             </div>
 
             <div className="group rounded-xl border border-emerald-100/90 bg-gradient-to-b from-emerald-50/80 to-white/80 p-4 shadow-sm backdrop-blur-sm transition-shadow hover:shadow-md">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-zinc-800">
+              <div className={cn("mb-2 flex items-center gap-2", HOME_BLOCK_TITLE)}>
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
                   <Phone className="h-4 w-4" />
                 </span>
                 스토어 연락처
               </div>
-              <p className="text-sm font-medium text-zinc-900">{s.phoneNumber ?? "미등록"}</p>
+              <p className={cn("font-medium", HOME_BODY)}>{s.phoneNumber ?? "미등록"}</p>
             </div>
           </div>
         </div>
