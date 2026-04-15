@@ -224,7 +224,10 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
             {status === OrderStatus.PAYMENT_PENDING && (
               <div className="border-t border-slate-100 bg-slate-50/50">
                 <div className={ORDER_DETAIL_SECTION_BODY_COMPACT}>
-                  <PaymentPendingCountdown windowStartAt={paymentWindowStart} />
+                  <PaymentPendingCountdown
+                    deadlineAt={order.paymentPendingDeadlineAt ?? undefined}
+                    windowStartAt={paymentWindowStart}
+                  />
                 </div>
               </div>
             )}
@@ -402,6 +405,12 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
               <div className="text-base font-medium text-gray-900">
                 {new Date(order.createdAt).toLocaleString("ko-KR")}
               </div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                입금자명
+              </div>
+              <div className="text-base font-medium text-gray-900">{order.depositorName || "-"}</div>
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">

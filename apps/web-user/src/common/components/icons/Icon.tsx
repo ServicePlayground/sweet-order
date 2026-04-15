@@ -54,6 +54,7 @@ import ReviewFill from "./icons/review_fill.svg";
 import Pencil from "./icons/pencil.svg";
 import ReviewQna from "./icons/review_qna.svg";
 import Copy from "./icons/copy.svg";
+import Multiply from "./icons/multiply.svg";
 
 interface IconProps {
   name: keyof typeof iconTypes;
@@ -117,6 +118,7 @@ export const iconTypes = {
   pencil: Pencil,
   reviewQna: ReviewQna,
   copy: Copy,
+  multiply: Multiply,
 };
 
 export default function Icon({ name, width, height, className, ...props }: IconProps) {

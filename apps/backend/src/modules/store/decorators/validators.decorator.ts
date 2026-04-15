@@ -163,6 +163,51 @@ export class IsValidStoreDescriptionConstraint implements ValidatorConstraintInt
 }
 
 /**
+ * 스토어 연락처 유효성 검증 (숫자, 하이픈, 공백, 괄호, + 허용, 8~20자)
+ */
+@ValidatorConstraint({ name: "isValidStorePhoneNumber", async: false })
+export class IsValidStorePhoneNumberConstraint implements ValidatorConstraintInterface {
+  private errorType: string = "";
+
+  validate(value: string | undefined): boolean {
+    // 선택 필드이므로 값이 없으면 통과
+    if (!value) {
+      this.errorType = "";
+      return true;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      this.errorType = "미입력";
+      return false;
+    }
+    if (trimmed.length < 8 || trimmed.length > 20) {
+      this.errorType = "길이";
+      return false;
+    }
+    if (!/^[0-9\-+() ]+$/.test(trimmed)) {
+      this.errorType = "형식";
+      return false;
+    }
+    this.errorType = "";
+    return true;
+  }
+
+  defaultMessage(): string {
+    if (this.errorType === "미입력") {
+      return "스토어 연락처를 입력해주세요.";
+    }
+    if (this.errorType === "길이") {
+      return "스토어 연락처는 8자 이상 20자 이하여야 합니다.";
+    }
+    if (this.errorType === "형식") {
+      return "스토어 연락처는 숫자, 하이픈(-), 공백, 괄호, + 만 사용할 수 있습니다.";
+    }
+    return "스토어 연락처를 확인해주세요.";
+  }
+}
+
+/**
  * 상세주소 유효성 검증 제약 조건
  */
 @ValidatorConstraint({ name: "isValidDetailAddress", async: false })
@@ -325,6 +370,10 @@ export function IsValidStoreName(validationOptions?: ValidationOptions) {
  */
 export function IsValidStoreDescription(validationOptions?: ValidationOptions) {
   return createValidatorDecorator(new IsValidStoreDescriptionConstraint(), validationOptions);
+}
+
+export function IsValidStorePhoneNumber(validationOptions?: ValidationOptions) {
+  return createValidatorDecorator(new IsValidStorePhoneNumberConstraint(), validationOptions);
 }
 
 /**

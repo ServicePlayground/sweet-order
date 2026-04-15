@@ -37,7 +37,10 @@ export function MyReviewItem({ review, onDelete, onImageClick }: MyReviewItemPro
   };
 
   return (
-    <div className="pt-6 pb-12 border-b border-gray-100 last:border-b-0">
+    <div
+      id={`review-${review.id}`}
+      className="pt-6 pb-12 border-b border-gray-100 last:border-b-0 scroll-mt-10"
+    >
       {/* 스토어명 + 삭제 */}
       <div className="flex items-center justify-between mb-1">
         <Link href={PATHS.STORE.DETAIL(review.storeId)} className="flex items-center gap-0.5">

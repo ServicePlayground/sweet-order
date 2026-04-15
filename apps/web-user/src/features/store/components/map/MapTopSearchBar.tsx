@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import {
+  buildMapSearchUrl,
+  buildMapSearchUrlWithOptionalQuery,
   formatMapPickupFilterForSearchBar,
+  formatMapPickupFilterInline,
   type MapPickupFilter,
 } from "@/apps/web-user/features/store/utils/map.util";
 
@@ -16,7 +18,7 @@ interface MapTopSearchBarProps {
   onPickupClear?: () => void;
 }
 
-function MapPickupFilterChip({
+export function MapPickupFilterChip({
   filter,
   onClear,
 }: {
@@ -75,9 +77,7 @@ export function MapTopSearchBar({
   const renderPickupSlot = () => {
     if (onCalendarClick == null) return null;
     if (pickupFilter != null) {
-      return (
-        <MapPickupFilterChip filter={pickupFilter} onClear={onPickupClear ?? (() => {})} />
-      );
+      return <MapPickupFilterChip filter={pickupFilter} onClear={onPickupClear ?? (() => {})} />;
     }
     return (
       <button
@@ -111,7 +111,7 @@ export function MapTopSearchBar({
       }
     >
       {searchQuery ? (
-        <div className="flex w-full items-center gap-2" style={{ gap: 8 }}>
+        <div className="flex w-full min-w-0 items-center gap-2">
           <button
             type="button"
             onClick={() => router.back()}
@@ -121,7 +121,7 @@ export function MapTopSearchBar({
             <Icon name="back" width={24} height={24} className="text-gray-900 block" />
           </button>
           <span
-            className="flex-1 min-w-0 text-left font-normal truncate"
+            className="min-w-0 flex-1 truncate text-left font-normal"
             style={{
               fontSize: 16,
               lineHeight: "140%",
@@ -130,21 +130,61 @@ export function MapTopSearchBar({
           >
             {searchQuery}
           </span>
-          {renderPickupSlot()}
-          <button
-            type="button"
-            onClick={() => router.push(PATHS.MAP)}
-            className="flex shrink-0 items-center justify-center p-0"
-            aria-label="검색 닫기"
-          >
-            <Icon name="closeCircle" width={20} height={20} className="text-gray-300" />
-          </button>
+          {/* 검색 페이지와 동일: X → 세로선 → 달력 또는 픽업 한 줄 (gap 12px) */}
+          <div className="flex shrink-0 items-center gap-[12px]">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(buildMapSearchUrlWithOptionalQuery(searchQuery, pickupFilter ?? null))
+              }
+              className="flex h-5 w-5 shrink-0 items-center justify-center p-0"
+              aria-label="검색어 입력으로 돌아가기"
+            >
+              <Icon name="closeCircle" width={20} height={20} className="text-gray-300" />
+            </button>
+            <div className="h-3 w-px shrink-0 bg-[var(--grayscale-gr-100,#EBEBEA)]" aria-hidden />
+            {pickupFilter != null ? (
+              <button
+                type="button"
+                onClick={() => onPickupClear?.()}
+                className="max-w-[min(100%,200px)] shrink-0 truncate border-0 p-0 text-left"
+                style={{
+                  borderRadius: 4,
+                  padding: "2px 4px",
+                  background: "var(--primary-or-50, #FFEFEB)",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  lineHeight: "140%",
+                  color: "var(--primary-or-400, #FF653E)",
+                }}
+                aria-label="픽업 날짜 초기화"
+              >
+                {formatMapPickupFilterInline(pickupFilter)}
+              </button>
+            ) : (
+              onCalendarClick != null && (
+                <button
+                  type="button"
+                  onClick={onCalendarClick}
+                  className="flex shrink-0 items-center justify-center border-0 bg-transparent p-0"
+                  aria-label="픽업 날짜 선택"
+                >
+                  <Icon
+                    name="calendar"
+                    width={20}
+                    height={20}
+                    className="block shrink-0 text-gray-500"
+                  />
+                </button>
+              )
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex w-full items-center gap-2" style={{ gap: 8 }}>
           <button
             type="button"
-            onClick={() => router.push(PATHS.MAP_SEARCH)}
+            onClick={() => router.push(buildMapSearchUrl(pickupFilter ?? null))}
             className="min-w-0 flex-1 text-left"
           >
             <div

@@ -8,6 +8,7 @@ import type {
 export interface StoreForm extends StoreAddressDto {
   name: string;
   description?: string;
+  phoneNumber?: string;
   logoImageUrl?: string;
   // 정산 계좌
   bankAccountNumber: string;

@@ -3,6 +3,7 @@ import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui"
 import {
   validateStoreName,
   validateStoreDescription,
+  validateStorePhoneNumber,
   validateDetailAddress,
   validateBankAccountNumber,
   validateAccountHolderName,
@@ -28,6 +29,7 @@ interface Props {
 export const defaultForm: StoreForm = {
   name: "",
   description: "",
+  phoneNumber: "",
   logoImageUrl: "",
   kakaoChannelId: "",
   instagramId: "",
@@ -71,6 +73,10 @@ export const StoreCreationForm: React.FC<Props> = ({
     const descriptionError = validateStoreDescription(form.description);
     if (descriptionError) {
       newErrors.description = descriptionError;
+    }
+    const phoneNumberError = validateStorePhoneNumber(form.phoneNumber);
+    if (phoneNumberError) {
+      newErrors.phoneNumber = phoneNumberError;
     }
     // 상세주소 검증
     const detailAddressError = validateDetailAddress(form.detailAddress);
@@ -159,6 +165,18 @@ export const StoreCreationForm: React.FC<Props> = ({
                 />
                 {errors.description && (
                   <p className="text-sm text-destructive mt-1">{errors.description}</p>
+                )}
+              </div>
+              <div>
+                <Label>스토어 연락처</Label>
+                <Input
+                  placeholder="010-1234-5678"
+                  value={form.phoneNumber || ""}
+                  onChange={handleChange("phoneNumber")}
+                  className={errors.phoneNumber ? "border-destructive" : ""}
+                />
+                {errors.phoneNumber && (
+                  <p className="text-sm text-destructive mt-1">{errors.phoneNumber}</p>
                 )}
               </div>
             </div>

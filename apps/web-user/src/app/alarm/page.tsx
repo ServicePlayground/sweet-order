@@ -22,7 +22,9 @@ export default function AlarmPage() {
         {showLoginHint ? (
           <div className="flex-1 flex flex-col gap-[10px] items-center justify-center mb-[52px] px-5">
             <Icon name="alarm" width={60} height={40} className="text-gray-200" />
-            <p className="text-sm text-gray-700 text-center">로그인하면 주문 알림을 받을 수 있어요</p>
+            <p className="text-sm text-gray-700 text-center">
+              로그인하면 주문 알림을 받을 수 있어요
+            </p>
           </div>
         ) : isLoading ? (
           <AlarmSkeleton />

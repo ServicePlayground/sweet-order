@@ -33,6 +33,7 @@ export const PATHS = {
 
   // 마이페이지
   MYPAGE: "/mypage",
+  MY_ORDERS: "/mypage/order",
   MY_REVIEWS: "/mypage/reviews",
   REVIEW_LIST: "/mypage/reviews/list",
   REVIEW_WRITE: (orderId: string) => `/mypage/reviews/write?orderId=${orderId}`,

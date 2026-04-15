@@ -23,6 +23,7 @@ import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/orde
 import { UpdateOrderStatusResponseDto } from "@apps/backend/modules/order/dto/order-seller-action.dto";
 import {
   CancelOrderBeforePaymentRequestDto,
+  MarkPaymentCompleteRequestDto,
   RequestCancelRefundRequestDto,
 } from "@apps/backend/modules/order/dto/order-user-action.dto";
 import {
@@ -43,6 +44,7 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
   OrderResponseDto,
   UpdateOrderStatusResponseDto,
   CancelOrderBeforePaymentRequestDto,
+  MarkPaymentCompleteRequestDto,
   RequestCancelRefundRequestDto,
   UpdateReservationPickupDateRequestDto,
   UpdateReservationOrderItemsRequestDto,
@@ -95,14 +97,14 @@ export class UserOrderController {
 
   /**
    * 입금완료 처리 (사용자)
-   * 입금대기 상태에서만 가능합니다. 입금대기 진입 시각 기준 12시간이 지나면 자동 취소됩니다.
+   * 입금대기 상태에서만 가능합니다. 입금 마감 시각(`paymentPendingDeadlineAt`)이 지나면 자동 취소됩니다.
    */
   @Patch(":id/payment-complete")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 입금완료 처리",
     description:
-      "입금대기(PAYMENT_PENDING) 주문만 입금완료(PAYMENT_COMPLETED)로 변경합니다. 예약신청(RESERVATION_REQUESTED) 단계에서는 판매자가 입금대기로 바꾼 뒤에만 이용할 수 있습니다. 입금 유효 시간(입금대기 진입 후 12시간)이 지난 경우 처리할 수 없습니다.",
+      "입금대기(PAYMENT_PENDING) 주문만 입금완료(PAYMENT_COMPLETED)로 변경합니다. 예약신청(RESERVATION_REQUESTED) 단계에서는 판매자가 입금대기로 바꾼 뒤에만 이용할 수 있습니다. 입금 마감 시각(픽업 일정에 따라 최대 12시간·6시간·1시간 중 적용)이 지난 경우 처리할 수 없습니다.",
   })
   @SwaggerResponse(200, { dataDto: UpdateOrderStatusResponseDto })
   @SwaggerAuthResponses()
@@ -120,9 +122,10 @@ export class UserOrderController {
   })
   async markPaymentComplete(
     @Param("id") id: string,
+    @Body() dto: MarkPaymentCompleteRequestDto,
     @Request() req: { user: JwtVerifiedPayload },
   ): Promise<UpdateOrderStatusResponseDto> {
-    return await this.orderService.markOrderPaymentCompletedForUser(id, req.user);
+    return await this.orderService.markOrderPaymentCompletedForUser(id, req.user, dto);
   }
 
   /**

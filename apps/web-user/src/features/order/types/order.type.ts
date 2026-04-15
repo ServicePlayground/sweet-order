@@ -2,10 +2,12 @@
  * 페이지네이션 메타 정보
  */
 export interface PaginationMeta {
-  total: number;
-  page: number;
+  currentPage: number;
   limit: number;
+  totalItems: number;
   totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 /**
@@ -68,6 +70,8 @@ export enum OrderStatus {
   CANCEL_COMPLETED = "CANCEL_COMPLETED", // 취소완료
   CANCEL_REFUND_PENDING = "CANCEL_REFUND_PENDING", // 취소/환불 대기
   CANCEL_REFUND_COMPLETED = "CANCEL_REFUND_COMPLETED", // 취소/환불 완료
+  SELLER_CANCELLED = "SELLER_CANCELLED", // 판매자 예약취소
+  BUYER_CANCELLED = "BUYER_CANCELLED", // 구매자 예약취소
   NO_SHOW = "NO_SHOW", // 노쇼
 }
 
@@ -106,6 +110,9 @@ export interface OrderResponse {
   productImages: string[];
   storeId: string;
   storeName: string;
+  storePhoneNumber?: string | null;
+  storeKakaoChannelId?: string | null;
+  storeInstagramId?: string | null;
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;
@@ -118,12 +125,33 @@ export interface OrderResponse {
   pickupLatitude: number;
   pickupLongitude: number;
   paymentPendingAt?: string;
+  /** 입금 마감 시각(ISO). 입금대기에서만 의미 있음 */
+  paymentPendingDeadlineAt?: string | null;
   orderStatus: OrderStatus;
   // 스토어 정산 계좌 (입금대기 시 표시)
   storeBankName?: string | null;
   storeBankAccountNumber?: string | null;
   storeAccountHolderName?: string | null;
+  sellerCancelReason?: string | null;
+  userCancelReason?: string | null;
+  // 후기 UI 상태
+  myReviewUiStatus: OrderMyReviewUiStatus;
+  linkedProductReviewId?: string | null;
   createdAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   updatedAt: string; // JSON 직렬화 시 ISO 8601 문자열로 변환됨
   orderItems: OrderItemResponse[];
+}
+
+/**
+ * 후기 UI 상태
+ * - NOT_AVAILABLE: 후기 작성 대상 아님 (픽업 전, 취소 등)
+ * - WRITABLE: 후기 작성 가능 (픽업 완료 + 미작성)
+ * - WRITTEN: 후기 작성 완료
+ * - WITHDRAWN: 후기 삭제로 재작성 불가
+ */
+export enum OrderMyReviewUiStatus {
+  NOT_AVAILABLE = "NOT_AVAILABLE",
+  WRITABLE = "WRITABLE",
+  WRITTEN = "WRITTEN",
+  WITHDRAWN = "WITHDRAWN",
 }

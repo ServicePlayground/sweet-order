@@ -1,29 +1,49 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
+import { Modal } from "@/apps/web-user/common/components/modals/Modal";
+import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
+import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 
-function useCountdown(createdAt: string) {
-  const getRemaining = () => {
-    const deadline = new Date(createdAt).getTime() + 12 * 60 * 60 * 1000;
+const FALLBACK_PAYMENT_DEADLINE_MS = 12 * 60 * 60 * 1000;
+
+function resolveDeadlineMs(order: OrderResponse): number | null {
+  if (order.paymentPendingDeadlineAt) {
+    return new Date(order.paymentPendingDeadlineAt).getTime();
+  }
+  if (order.paymentPendingAt) {
+    return new Date(order.paymentPendingAt).getTime() + FALLBACK_PAYMENT_DEADLINE_MS;
+  }
+  return null;
+}
+
+function usePaymentPendingCountdown(order: OrderResponse) {
+  const orderRef = useRef(order);
+  orderRef.current = order;
+
+  const getRemainingSec = () => {
+    const deadline = resolveDeadlineMs(orderRef.current);
+    if (deadline == null) return 0;
     return Math.max(0, Math.floor((deadline - Date.now()) / 1000));
   };
 
-  const [remaining, setRemaining] = useState(getRemaining);
+  const [remaining, setRemaining] = useState(getRemainingSec);
 
   useEffect(() => {
+    setRemaining(getRemainingSec());
     const timer = setInterval(() => {
-      const next = getRemaining();
+      const next = getRemainingSec();
       setRemaining(next);
       if (next <= 0) clearInterval(timer);
     }, 1000);
     return () => clearInterval(timer);
-  }, [createdAt]);
+  }, [order.id, order.paymentPendingDeadlineAt, order.paymentPendingAt]);
 
   const hours = String(Math.floor(remaining / 3600)).padStart(2, "0");
   const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
@@ -37,16 +57,17 @@ function copyToClipboard(text: string) {
 }
 
 export function PaymentPendingCard({ order }: { order: OrderResponse }) {
-  const countdown = useCountdown(order.paymentPendingAt ?? "");
+  const countdown = usePaymentPendingCountdown(order);
   const [showCopyToast, setShowCopyToast] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const handleCloseCopyToast = useCallback(() => setShowCopyToast(false), []);
   const handleCloseSuccessToast = useCallback(() => setShowSuccessToast(false), []);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
-  // TODO: 백엔드에서 스토어 계좌 정보 내려주면 교체
-  const bankName = order.storeBankName ?? "신한";
-  const accountNumber = order.storeBankAccountNumber ?? "110-229-220-2222";
-  const accountHolder = order.storeAccountHolderName ?? "김길영";
+  const bankName = getBankLabel(order.storeBankName);
+  const accountNumber = order.storeBankAccountNumber ?? "";
+  const accountHolder = order.storeAccountHolderName ?? "";
   const accountInfo = `${bankName} · ${accountNumber}`;
 
   return (
@@ -104,6 +125,7 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
             <div className="flex gap-2">
               <button
                 type="button"
+                onClick={() => setIsEasyPayOpen(true)}
                 className="flex-1 h-[32px] flex items-center justify-center gap-1 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white"
               >
                 <Image src="/images/contents/toss.png" alt="토스" width={18} height={18} />
@@ -113,11 +135,7 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
               <button
                 type="button"
                 disabled={isCompleting}
-                onClick={() =>
-                  paymentComplete(order.id, {
-                    onSuccess: () => setShowSuccessToast(true),
-                  })
-                }
+                onClick={() => setIsConfirmOpen(true)}
                 className="flex-1 h-[32px] flex items-center justify-center gap-0.5 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white disabled:opacity-50"
               >
                 {isCompleting ? "처리 중..." : "입금 완료했어요"}
@@ -126,6 +144,45 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
           </div>
         </div>
       </div>
+      {createPortal(
+        <EasyPaymentBottomSheet
+          isOpen={isEasyPayOpen}
+          onClose={() => setIsEasyPayOpen(false)}
+          bankAccountNumber={order.storeBankAccountNumber}
+          bankName={order.storeBankName}
+          amount={order.totalPrice}
+        />,
+        document.body,
+      )}
+
+      {createPortal(
+        <Modal
+          isOpen={isConfirmOpen}
+          onClose={() => setIsConfirmOpen(false)}
+          title="입금 완료하셨나요?"
+          description={
+            <>
+              입금 완료 버튼을 누르면
+              <br />
+              판매자에게 확인 알림이 전달되며,
+              <br />
+              <span className="text-primary font-bold">입금 확인 후 예약이 확정</span>됩니다.
+            </>
+          }
+          confirmText="취소"
+          cancelText="입금 완료"
+          cancelVariant="primary"
+          onConfirm={() => setIsConfirmOpen(false)}
+          onCancel={() => {
+            paymentComplete(order.id, {
+              onSuccess: () => setShowSuccessToast(true),
+            });
+            setIsConfirmOpen(false);
+          }}
+        />,
+        document.body,
+      )}
+
       {showSuccessToast &&
         createPortal(
           <Toast

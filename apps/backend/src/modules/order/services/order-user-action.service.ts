@@ -6,10 +6,7 @@ import {
 } from "@apps/backend/modules/order/constants/order.constants";
 import { OrderOwnershipUtil } from "@apps/backend/modules/order/utils/order-ownership.util";
 import { OrderAutomationService } from "@apps/backend/modules/order/services/order-automation.service";
-import {
-  isPaymentPendingWindowExpired,
-  paymentPendingWindowStart,
-} from "@apps/backend/modules/order/utils/order-datetime.util";
+import { isPaymentPendingExpired } from "@apps/backend/modules/order/utils/order-datetime.util";
 import {
   ORDER_PRE_PAYMENT_WINDOW_STATUSES,
   USER_CANCEL_REFUND_REQUEST_SOURCE_STATUSES,
@@ -19,6 +16,7 @@ import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/
 import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
 import {
   CancelOrderBeforePaymentRequestDto,
+  MarkPaymentCompleteRequestDto,
   RequestCancelRefundRequestDto,
 } from "@apps/backend/modules/order/dto/order-user-action.dto";
 
@@ -39,13 +37,23 @@ export class OrderUserActionService {
    * 사용자가 입금을 완료했다고 표시합니다. `PAYMENT_PENDING` → `PAYMENT_COMPLETED` (예약신청 단계에서는 불가).
    * 소유권 검증 → `syncOrderLifecycleById` → 조회 → 검증 → 갱신 → 훅 순서입니다.
    */
-  async markPaymentCompleted(orderId: string, userId: string): Promise<{ id: string }> {
+  async markPaymentCompleted(
+    orderId: string,
+    userId: string,
+    dto: MarkPaymentCompleteRequestDto,
+  ): Promise<{ id: string }> {
     await OrderOwnershipUtil.verifyOrderUserOwnership(this.prisma, orderId, userId);
     await this.orderAutomationService.syncOrderLifecycleById(orderId);
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderStatus: true, createdAt: true, paymentPendingAt: true },
+      select: {
+        orderStatus: true,
+        createdAt: true,
+        paymentPendingAt: true,
+        paymentPendingDeadlineAt: true,
+        pickupDate: true,
+      },
     });
     if (!order) {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
@@ -59,8 +67,14 @@ export class OrderUserActionService {
     }
 
     if (current === OrderStatus.PAYMENT_PENDING) {
-      const windowStart = paymentPendingWindowStart(order.paymentPendingAt, order.createdAt);
-      if (isPaymentPendingWindowExpired(windowStart, now)) {
+      if (
+        isPaymentPendingExpired(now, {
+          paymentPendingDeadlineAt: order.paymentPendingDeadlineAt,
+          paymentPendingAt: order.paymentPendingAt,
+          createdAt: order.createdAt,
+          pickupDate: order.pickupDate,
+        })
+      ) {
         await this.prisma.order.update({
           where: { id: orderId },
           data: { orderStatus: OrderStatus.CANCEL_COMPLETED },
@@ -82,7 +96,10 @@ export class OrderUserActionService {
 
     await this.prisma.order.update({
       where: { id: orderId },
-      data: { orderStatus: OrderStatus.PAYMENT_COMPLETED },
+      data: {
+        orderStatus: OrderStatus.PAYMENT_COMPLETED,
+        depositorName: dto.depositorName,
+      },
     });
     this.orderLifecycleHookService.afterOrderStatusTransition({
       orderId,

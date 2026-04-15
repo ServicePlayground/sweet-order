@@ -44,6 +44,12 @@ export class StoreResponseDto extends StoreAddressDto {
   description?: string | null;
 
   @ApiPropertyOptional({
+    description: "스토어 연락처 (전화/휴대폰)",
+    example: SWAGGER_EXAMPLES.PHONE_NUMBER,
+  })
+  phoneNumber?: string | null;
+
+  @ApiPropertyOptional({
     description: "카카오채널 ID",
     example: SWAGGER_EXAMPLES.KAKAO_CHANNEL_ID,
   })

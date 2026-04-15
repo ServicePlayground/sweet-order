@@ -12,6 +12,7 @@ import { OrderAutomationService } from "@apps/backend/modules/order/services/ord
 import { OrderLifecycleHookService } from "@apps/backend/modules/order/services/order-lifecycle-hook.service";
 import { ORDER_STATUS_TRANSITION_SOURCE } from "@apps/backend/modules/order/types/order-lifecycle.types";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { computePaymentPendingDeadline } from "@apps/backend/modules/order/utils/order-datetime.util";
 
 /**
  * 판매자(스토어 소유자) 주문 액션 전용 서비스.
@@ -51,7 +52,7 @@ export class OrderSellerActionService {
 
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderStatus: true },
+      select: { orderStatus: true, pickupDate: true },
     });
 
     if (!order) {
@@ -100,7 +101,9 @@ export class OrderSellerActionService {
 
     const data: Prisma.OrderUpdateInput = { orderStatus };
     if (orderStatus === OrderStatus.PAYMENT_PENDING) {
-      data.paymentPendingAt = new Date();
+      const at = new Date();
+      data.paymentPendingAt = at;
+      data.paymentPendingDeadlineAt = computePaymentPendingDeadline(at, order.pickupDate);
     }
     if (orderStatus === OrderStatus.CANCEL_COMPLETED && updateDto.sellerCancelReason) {
       data.sellerCancelReason = updateDto.sellerCancelReason.trim();

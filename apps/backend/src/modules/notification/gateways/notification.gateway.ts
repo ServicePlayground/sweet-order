@@ -49,7 +49,9 @@ export class NotificationGateway
   ) {}
 
   afterInit() {
-    LoggerUtil.log("[NotificationGateway] Socket.IO namespace /notifications 초기화 (seller + user)");
+    LoggerUtil.log(
+      "[NotificationGateway] Socket.IO namespace /notifications 초기화 (seller + user)",
+    );
   }
 
   async handleConnection(client: Socket) {
@@ -79,11 +81,7 @@ export class NotificationGateway
         return;
       }
 
-      if (
-        user.role !== "USER" &&
-        user.role !== "SELLER" &&
-        user.role !== "ADMIN"
-      ) {
+      if (user.role !== "USER" && user.role !== "SELLER" && user.role !== "ADMIN") {
         client.emit("error", { message: "Role not authorized", code: "ROLE_NOT_AUTHORIZED" });
         client.disconnect(true);
         return;

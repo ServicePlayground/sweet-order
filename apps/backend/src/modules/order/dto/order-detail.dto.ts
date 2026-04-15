@@ -159,6 +159,27 @@ export class OrderResponseDto extends PickupAddressDto {
   storeName: string;
 
   @ApiPropertyOptional({
+    description: "스토어 연락처(전화/휴대폰). 미등록 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storePhoneNumber,
+    nullable: true,
+  })
+  storePhoneNumber: string | null;
+
+  @ApiPropertyOptional({
+    description: "스토어 카카오채널 ID. 미등록 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeKakaoChannelId,
+    nullable: true,
+  })
+  storeKakaoChannelId: string | null;
+
+  @ApiPropertyOptional({
+    description: "스토어 인스타그램 ID. 미등록 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeInstagramId,
+    nullable: true,
+  })
+  storeInstagramId: string | null;
+
+  @ApiPropertyOptional({
     description: "스토어 정산 계좌 은행 코드 (스토어에 미등록 시 null)",
     enum: StoreBankName,
     nullable: true,
@@ -211,10 +232,24 @@ export class OrderResponseDto extends PickupAddressDto {
   orderStatus: OrderStatus;
 
   @ApiPropertyOptional({
-    description: "입금대기로 전환된 시각. 입금 12시간 유효 기준 시작점(예약신청 단계에서는 null)",
+    description: "입금대기로 전환된 시각. 입금 유효 기준 시작점(예약신청 단계에서는 null)",
     nullable: true,
   })
   paymentPendingAt: Date | null;
+
+  @ApiPropertyOptional({
+    description:
+      "입금 마감 시각(픽업까지 남은 시간에 따라 최대 12h/6h/1h 중 적용 후 픽업 시각과 비교한 값). 입금대기가 아니면 null",
+    nullable: true,
+  })
+  paymentPendingDeadlineAt: Date | null;
+
+  @ApiPropertyOptional({
+    description: "사용자가 입금완료 처리 시 입력한 입금자명. 미입력 상태 주문은 null",
+    example: "홍길동",
+    nullable: true,
+  })
+  depositorName: string | null;
 
   @ApiPropertyOptional({
     description:

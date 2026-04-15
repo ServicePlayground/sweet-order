@@ -1,9 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { MapPickupDateBottomSheet } from "@/apps/web-user/features/store/components/map/MapPickupDateBottomSheet";
+import {
+  buildMapPageUrl,
+  formatMapPickupFilterInline,
+  mapPickupFilterToStoreListQuery,
+  parseMapPickupFilterFromUrlSearchParams,
+  MAP_PICKUP_URL_DATE_KEY,
+  MAP_PICKUP_URL_PERIOD_KEY,
+  type MapPickupFilter,
+} from "@/apps/web-user/features/store/utils/map.util";
 
 const RECENT_SEARCHES_KEY = "recentSearches";
 const MAX_RECENT = 10;
@@ -27,22 +37,62 @@ export default function MapSearchPage() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  const [pickupFilter, setPickupFilter] = useState<MapPickupFilter | null>(null);
+  const [pickupCalendarOpen, setPickupCalendarOpen] = useState(false);
 
   useEffect(() => {
     const q = searchParams.get("q");
     setSearchTerm(q || "");
   }, [searchParams]);
 
-  // 진입 시 검색 인풋에 포커스
+  /** URL에 픽업 쿼리가 있을 때만 동기화 (지도에서 넘어온 선택 등) */
+  useEffect(() => {
+    const hasPickupInUrl =
+      searchParams.has(MAP_PICKUP_URL_DATE_KEY) && searchParams.has(MAP_PICKUP_URL_PERIOD_KEY);
+    if (!hasPickupInUrl) return;
+    const parsed = parseMapPickupFilterFromUrlSearchParams(searchParams);
+    setPickupFilter(parsed);
+  }, [searchParams]);
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  const handlePickupConfirm = useCallback(
+    (f: MapPickupFilter) => {
+      setPickupFilter(f);
+      const p = new URLSearchParams(searchParams.toString());
+      const pq = mapPickupFilterToStoreListQuery(f);
+      if (pq) {
+        p.set(MAP_PICKUP_URL_DATE_KEY, pq.pickupFilterDate);
+        p.set(MAP_PICKUP_URL_PERIOD_KEY, pq.pickupFilterPeriod);
+      }
+      const qt = searchTerm.trim();
+      if (qt) p.set("q", qt);
+      else p.delete("q");
+      const s = p.toString();
+      router.replace(s ? `${PATHS.MAP_SEARCH}?${s}` : PATHS.MAP_SEARCH);
+    },
+    [router, searchParams, searchTerm],
+  );
+
+  const handlePickupClearOnSearch = useCallback(() => {
+    setPickupFilter(null);
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete(MAP_PICKUP_URL_DATE_KEY);
+    p.delete(MAP_PICKUP_URL_PERIOD_KEY);
+    const qt = searchTerm.trim();
+    if (qt) p.set("q", qt);
+    else p.delete("q");
+    const s = p.toString();
+    router.replace(s ? `${PATHS.MAP_SEARCH}?${s}` : PATHS.MAP_SEARCH);
+  }, [router, searchParams, searchTerm]);
 
   const handleSearch = (term: string) => {
     if (!term.trim()) return;
     saveRecentSearch(term.trim());
     setSearchTerm(term.trim());
-    router.push(`${PATHS.MAP}?q=${encodeURIComponent(term.trim())}`);
+    router.push(buildMapPageUrl(term.trim(), pickupFilter));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,9 +104,15 @@ export default function MapSearchPage() {
     router.back();
   };
 
+  /** X는 검색어가 있을 때만 — 입력만 지움(픽업과 무관) */
+  const handleTrailingClear = () => {
+    setSearchTerm("");
+  };
+
+  const showTrailingClear = searchTerm.trim().length > 0;
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* 헤더: space-between, padding 10 20, 아이콘 16x16 + 텍스트, 닫기 underline */}
       <header
         className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between bg-white max-w-[638px] mx-auto w-full"
         style={{
@@ -95,7 +151,6 @@ export default function MapSearchPage() {
         </button>
       </header>
 
-      {/* 검색 영역: padding 16 20, background #FFF, border-bottom gr-100 */}
       <div
         className="flex items-center"
         style={{
@@ -104,7 +159,7 @@ export default function MapSearchPage() {
           borderBottom: "1px solid var(--grayscale-gr-100, #EBEBEA)",
         }}
       >
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 w-full min-w-0">
           <Icon name="search" width={20} height={20} className="text-gray-800 shrink-0" />
           <input
             ref={inputRef}
@@ -114,20 +169,69 @@ export default function MapSearchPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch(searchTerm)}
             placeholder="어떤 케이크를 찾으시나요?"
-            className="flex-1 text-sm text-gray-900 outline-none placeholder:text-gray-500 [&::-webkit-search-cancel-button]:hidden"
+            className="flex-1 min-w-0 text-sm text-gray-900 outline-none placeholder:text-gray-500 [&::-webkit-search-cancel-button]:hidden"
           />
-          {searchTerm.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm("")}
-              className="w-5 h-5 flex items-center justify-center shrink-0"
-              aria-label="입력 지우기"
-            >
-              <Icon name="closeCircle" width={20} height={20} className="text-gray-300" />
-            </button>
-          )}
+          {/* PillTabs·예약 캘린더와 동일한 회색 세로 구분선 + 12px 간격 (ReservationCalendarView 참고) */}
+          <div className="flex shrink-0 items-center gap-[12px]">
+            {showTrailingClear && (
+              <button
+                type="button"
+                onClick={handleTrailingClear}
+                className="flex h-5 w-5 shrink-0 items-center justify-center p-0"
+                aria-label="입력 지우기"
+              >
+                <Icon name="closeCircle" width={20} height={20} className="text-gray-300" />
+              </button>
+            )}
+            <div className="h-3 w-px shrink-0 bg-[var(--grayscale-gr-100,#EBEBEA)]" aria-hidden />
+            {pickupFilter != null ? (
+              <span
+                className="max-w-[min(100%,200px)] shrink-0 truncate"
+                style={{
+                  borderRadius: 4,
+                  padding: "2px 4px",
+                  background: "var(--primary-or-50, #FFEFEB)",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  lineHeight: "140%",
+                  color: "var(--primary-or-400, #FF653E)",
+                }}
+              >
+                {formatMapPickupFilterInline(pickupFilter)}
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPickupCalendarOpen(true)}
+                className="flex shrink-0 items-center justify-center border-0 bg-transparent p-0"
+                aria-label="픽업 날짜 선택"
+              >
+                <Icon
+                  name="calendar"
+                  width={20}
+                  height={20}
+                  className="block shrink-0 text-gray-500"
+                />
+              </button>
+            )}
+          </div>
         </form>
       </div>
+
+      <MapPickupDateBottomSheet
+        isOpen={pickupCalendarOpen}
+        onClose={() => setPickupCalendarOpen(false)}
+        selectedFilter={pickupFilter}
+        onConfirm={handlePickupConfirm}
+        onClearFilter={
+          pickupFilter != null
+            ? () => {
+                handlePickupClearOnSearch();
+                setPickupCalendarOpen(false);
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }

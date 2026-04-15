@@ -24,6 +24,21 @@ export class CancelOrderBeforePaymentRequestDto {
 }
 
 /**
+ * 입금완료 요청 (사용자)
+ */
+export class MarkPaymentCompleteRequestDto {
+  @ApiProperty({
+    description: "입금자명 (예금주명 형식과 동일 검증)",
+    example: "홍길동",
+  })
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty()
+  @IsValidAccountHolderName()
+  depositorName: string;
+}
+
+/**
  * 입금 완료 이후 취소·환불 요청 (사용자) — 사유 + 환불 계좌 (스토어 정산 계좌와 동일 검증)
  */
 export class RequestCancelRefundRequestDto {

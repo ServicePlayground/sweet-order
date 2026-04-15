@@ -1,6 +1,6 @@
 /**
  * 판매자용 주문 상태 안내 문구.
- * 입금 12시간(입금대기 진입 시각 기준)·픽업 시각 도달 자동 전환 등은 백엔드 `order-automation`·`order-datetime.util` 규칙과 맞춥니다.
+ * 입금 마감(픽업까지 남은 시간에 따라 최대 12h·6h·1h)·픽업 시각 도달 자동 전환 등은 백엔드 `order-automation`·`order-datetime.util` 규칙과 맞춥니다.
  */
 import { OrderStatus } from "@/apps/web-seller/features/order/types/order.dto";
 
@@ -9,7 +9,7 @@ export const ORDER_STATUS_SELLER_FLOW_LINE_BY_STATUS: Record<OrderStatus, string
   [OrderStatus.RESERVATION_REQUESTED]:
     "예약신청: 고객이 주문을 넣은 직후 단계입니다. 판매자가 ‘예약 확인’으로 입금대기로 넘기기 전까지는 처리가 진행되지 않습니다. 수락이 어렵다면 예약 취소(사유 입력)로 마무리할 수 있어요.",
   [OrderStatus.PAYMENT_PENDING]:
-    "입금대기: 예약을 확인해 고객이 입금할 수 있는 단계입니다. 입금대기로 바뀐 시각부터 12시간 안에 고객이 입금 완료 처리를 하지 않으면 시스템이 자동으로 취소완료로 바꿉니다. 입금을 기다리지 않고 바로 ‘예약 확정’으로 넘길 수도 있어요. 필요 시 예약 취소도 가능합니다.",
+    "입금대기: 예약을 확인해 고객이 입금할 수 있는 단계입니다. 픽업 일정에 따라 정해진 마감까지 고객이 입금 완료 처리를 하지 않으면 시스템이 자동으로 취소완료로 바꿉니다. 입금을 기다리지 않고 바로 ‘예약 확정’으로 넘길 수도 있어요. 필요 시 예약 취소도 가능합니다.",
   [OrderStatus.PAYMENT_COMPLETED]:
     "입금완료: 고객이 입금 완료를 누른 단계입니다. 판매자는 ‘예약 확정’으로 넘기면 됩니다. 취소·환불이 필요하면 취소환불대기로 전환할 수 있어요.",
   [OrderStatus.CONFIRMED]:
@@ -21,7 +21,7 @@ export const ORDER_STATUS_SELLER_FLOW_LINE_BY_STATUS: Record<OrderStatus, string
   [OrderStatus.NO_SHOW]:
     "노쇼: 픽업대기 상태일 때 고객이 픽업하지 않은 경우, 판매자가 ‘노쇼’로 처리한 종료 상태입니다.",
   [OrderStatus.CANCEL_COMPLETED]:
-    "취소완료: 예약신청·입금대기 단계에서 고객 또는 판매자가 취소했거나, 입금대기 12시간이 지나 시스템이 자동 취소한 경우 등으로 이 상태가 됩니다.",
+    "취소완료: 예약신청·입금대기 단계에서 고객 또는 판매자가 취소했거나, 입금 마감이 지나 시스템이 자동 취소한 경우 등으로 이 상태가 됩니다.",
   [OrderStatus.CANCEL_REFUND_PENDING]:
     "취소환불대기: 입금완료·예약확정·픽업대기 상태일 때 고객이 취소·환불을 요청했거나, 판매자가 이 상태로 올린 단계입니다. 환불을 마친 뒤 취소환불완료로 바꾸면 됩니다.",
   [OrderStatus.CANCEL_REFUND_COMPLETED]:

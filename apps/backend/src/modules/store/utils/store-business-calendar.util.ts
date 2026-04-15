@@ -100,12 +100,7 @@ export function isValidHalfHourHhmm(value: string): boolean {
 }
 
 /** 같은 날 [a0,a1)·[b0,b1) 반개구간 겹침(끝 미포함) */
-function openMinuteIntervalsOverlap(
-  a0: number,
-  a1: number,
-  b0: number,
-  b1: number,
-): boolean {
+function openMinuteIntervalsOverlap(a0: number, a1: number, b0: number, b1: number): boolean {
   return Math.max(a0, b0) < Math.min(a1, b1);
 }
 
