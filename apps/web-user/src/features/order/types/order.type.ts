@@ -110,6 +110,9 @@ export interface OrderResponse {
   productImages: string[];
   storeId: string;
   storeName: string;
+  storePhoneNumber?: string | null;
+  storeKakaoChannelId?: string | null;
+  storeInstagramId?: string | null;
   orderNumber: string;
   totalQuantity: number;
   totalPrice: number;

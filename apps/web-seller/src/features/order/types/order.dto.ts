@@ -59,6 +59,9 @@ export interface OrderResponseDto {
   productImages: string[];
   storeId: string;
   storeName: string;
+  storePhoneNumber?: string | null;
+  storeKakaoChannelId?: string | null;
+  storeInstagramId?: string | null;
   storeBankName?: string | null;
   storeBankAccountNumber?: string | null;
   storeAccountHolderName?: string | null;

@@ -159,6 +159,27 @@ export class OrderResponseDto extends PickupAddressDto {
   storeName: string;
 
   @ApiPropertyOptional({
+    description: "스토어 연락처(전화/휴대폰). 미등록 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storePhoneNumber,
+    nullable: true,
+  })
+  storePhoneNumber: string | null;
+
+  @ApiPropertyOptional({
+    description: "스토어 카카오채널 ID. 미등록 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeKakaoChannelId,
+    nullable: true,
+  })
+  storeKakaoChannelId: string | null;
+
+  @ApiPropertyOptional({
+    description: "스토어 인스타그램 ID. 미등록 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeInstagramId,
+    nullable: true,
+  })
+  storeInstagramId: string | null;
+
+  @ApiPropertyOptional({
     description: "스토어 정산 계좌 은행 코드 (스토어에 미등록 시 null)",
     enum: StoreBankName,
     nullable: true,
