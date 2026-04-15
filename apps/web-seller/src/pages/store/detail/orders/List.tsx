@@ -32,6 +32,8 @@ export const StoreDetailOrderListPage: React.FC = () => {
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [pickupStartDate, setPickupStartDate] = useState<string>("");
+  const [pickupEndDate, setPickupEndDate] = useState<string>("");
 
   // 주문 번호 검색 debounce (과도한 API 호출 방지)
   const debouncedOrderNumber = useDebouncedValue(orderNumber, DEBOUNCE_DELAY_MS);
@@ -39,7 +41,16 @@ export const StoreDetailOrderListPage: React.FC = () => {
   // 필터나 정렬이 변경되면 페이지를 1로 리셋
   useEffect(() => {
     setPage(1);
-  }, [orderStatus, type, debouncedOrderNumber, startDate, endDate, sortBy]);
+  }, [
+    orderStatus,
+    type,
+    debouncedOrderNumber,
+    startDate,
+    endDate,
+    pickupStartDate,
+    pickupEndDate,
+    sortBy,
+  ]);
 
   const handleResetFilters = useCallback(() => {
     setPage(1);
@@ -48,6 +59,8 @@ export const StoreDetailOrderListPage: React.FC = () => {
     setOrderNumber("");
     setStartDate("");
     setEndDate("");
+    setPickupStartDate("");
+    setPickupEndDate("");
   }, []);
 
   const hasActiveFilters =
@@ -55,7 +68,9 @@ export const StoreDetailOrderListPage: React.FC = () => {
     type !== undefined ||
     orderNumber.trim() !== "" ||
     startDate !== "" ||
-    endDate !== "";
+    endDate !== "" ||
+    pickupStartDate !== "" ||
+    pickupEndDate !== "";
 
   if (!storeId) {
     return (
@@ -75,6 +90,8 @@ export const StoreDetailOrderListPage: React.FC = () => {
     orderNumber: debouncedOrderNumber.trim() || undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
+    pickupStartDate: pickupStartDate || undefined,
+    pickupEndDate: pickupEndDate || undefined,
   });
 
   const orders = data?.data || [];
@@ -116,9 +133,9 @@ export const StoreDetailOrderListPage: React.FC = () => {
         </div>
 
         {/* 필터 — 상품 목록과 동일 그리드로 인풋 너비 정렬 */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
           {/* 주문 번호 검색 */}
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-1">
             <Label>주문 번호</Label>
             <Input
               placeholder="주문 번호 검색"
@@ -128,7 +145,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
           </div>
 
           {/* 주문 상태 필터 */}
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-1">
             <Label>주문 상태</Label>
             <Select
               value={orderStatus || "ALL"}
@@ -151,7 +168,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
           </div>
 
           {/* 픽업 예정/지난 예약 */}
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-1">
             <Label>픽업 예정/지난 예약</Label>
             <Select
               value={type ?? "ALL"}
@@ -168,16 +185,36 @@ export const StoreDetailOrderListPage: React.FC = () => {
             </Select>
           </div>
 
-          {/* 시작 날짜 */}
-          <div className="space-y-2">
-            <Label>시작날짜</Label>
+          {/* 주문 생성 시작일 */}
+          <div className="min-w-0 space-y-1">
+            <Label>주문 생성 시작일</Label>
             <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
           </div>
 
-          {/* 종료 날짜 */}
-          <div className="space-y-2">
-            <Label>종료날짜</Label>
+          {/* 주문 생성 종료일 */}
+          <div className="min-w-0 space-y-1">
+            <Label>주문 생성 종료일</Label>
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </div>
+
+          {/* 픽업 일정 시작일 */}
+          <div className="min-w-0 space-y-1">
+            <Label>픽업 일정 시작일</Label>
+            <Input
+              type="date"
+              value={pickupStartDate}
+              onChange={(e) => setPickupStartDate(e.target.value)}
+            />
+          </div>
+
+          {/* 픽업 일정 종료일 */}
+          <div className="min-w-0 space-y-1">
+            <Label>픽업 일정 종료일</Label>
+            <Input
+              type="date"
+              value={pickupEndDate}
+              onChange={(e) => setPickupEndDate(e.target.value)}
+            />
           </div>
         </div>
       </div>

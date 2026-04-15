@@ -19,13 +19,25 @@ import {
   todayISODateLocal,
 } from "@/apps/web-seller/features/statistics/utils/statistics-date.util";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import {
+  HOME_CARD,
+  HOME_CARD_ACTION_BUTTON,
+  HOME_CARD_HEADER,
+  HOME_BODY_MUTED,
+  HOME_CARD_TITLE,
+  HOME_CAPTION,
+  HOME_EMPHASIS,
+  HOME_GRID_2_COL,
+  HOME_ITEM_BOX,
+  HOME_LABEL,
+  HOME_NUMBER,
+  HOME_NUMBER_KPI,
+} from "@/apps/web-seller/features/home/constants/store-home-typography.constant";
 
 export interface StoreHomeStatisticsSectionProps {
   storeId: string;
 }
-
-const statCardHeader =
-  "flex flex-row flex-wrap items-start justify-between gap-3 space-y-0 pb-2 sm:items-center";
 
 function formatRangeLabel(startIso: string, endIso: string): string {
   const fmt = (iso: string) => {
@@ -62,22 +74,22 @@ export const StoreHomeStatisticsSection: React.FC<StoreHomeStatisticsSectionProp
   const emptyHint = "해당 기간에 집계된 데이터가 없습니다.";
 
   return (
-    <section className="w-full border-t border-border pt-6">
-      <Card className="w-full border-border bg-card">
-        <CardHeader className={statCardHeader}>
+    <section className="w-full">
+      <Card className={cn("w-full", HOME_CARD)}>
+        <CardHeader className={HOME_CARD_HEADER}>
           <div className="min-w-0 space-y-1">
-            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+            <CardTitle className={cn("flex items-center gap-2", HOME_CARD_TITLE)}>
               <BarChart3 className="h-4 w-4 shrink-0 text-primary" />
               주문 통계
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{rangeLabel}</span>
+            <p className={HOME_BODY_MUTED}>
+              <span className={HOME_EMPHASIS}>{rangeLabel}</span>
               {isFetching && !isLoading ? (
-                <span className="ml-2 text-xs text-muted-foreground">· 업데이트 중…</span>
+                <span className={cn("ml-2", HOME_CAPTION)}>· 업데이트 중…</span>
               ) : null}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="shrink-0" asChild>
+          <Button variant="outline" size="sm" className={HOME_CARD_ACTION_BUTTON} asChild>
             <Link to={ROUTES.STORE_DETAIL_STATISTICS_ORDERS(storeId)}>통계 보기</Link>
           </Button>
         </CardHeader>
@@ -85,7 +97,7 @@ export const StoreHomeStatisticsSection: React.FC<StoreHomeStatisticsSectionProp
         <CardContent className="space-y-6 pt-0">
           {isLoading ? (
             <div className="flex w-full items-center justify-center rounded-lg border border-border bg-muted/20 py-14">
-              <p className="text-sm text-muted-foreground">통계를 불러오는 중...</p>
+              <p className={HOME_BODY_MUTED}>통계를 불러오는 중…</p>
             </div>
           ) : isError ? (
             <div className="flex w-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/20 py-14">
@@ -101,48 +113,40 @@ export const StoreHomeStatisticsSection: React.FC<StoreHomeStatisticsSectionProp
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Card className="border-border bg-card shadow-none">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      매출
-                    </CardTitle>
+                    <p className={HOME_LABEL}>매출</p>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-semibold tabular-nums tracking-tight">
-                      ₩{totalSales.toLocaleString("ko-KR")}
-                    </p>
+                    <p className={HOME_NUMBER_KPI}>₩{totalSales.toLocaleString("ko-KR")}</p>
                   </CardContent>
                 </Card>
                 <Card className="border-border bg-card shadow-none">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      주문 건수
-                    </CardTitle>
+                    <p className={HOME_LABEL}>주문 건수</p>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-semibold tabular-nums tracking-tight">
-                      {totalOrders.toLocaleString("ko-KR")}건
-                    </p>
+                    <p className={HOME_NUMBER_KPI}>{totalOrders.toLocaleString("ko-KR")}건</p>
                   </CardContent>
                 </Card>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <Card className="border-border bg-card shadow-none">
+              <div className={HOME_GRID_2_COL}>
+                <Card className={cn(HOME_CARD, "shadow-none")}>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base">매출 순</CardTitle>
+                    <CardTitle className={HOME_CARD_TITLE}>매출 순</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {topProductsByRevenue.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">{emptyHint}</p>
+                      <p className={HOME_BODY_MUTED}>{emptyHint}</p>
                     ) : (
                       topProductsByRevenue.map((p, i) => (
                         <div
                           key={p.productId}
-                          className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/20 px-3 py-2.5"
+                          className={cn(HOME_ITEM_BOX, "flex items-center justify-between")}
                         >
-                          <p className="truncate text-sm font-medium">
+                          <p className={cn("truncate", HOME_EMPHASIS)}>
                             {i + 1}. {p.productName}
                           </p>
-                          <p className="text-sm font-semibold tabular-nums">
+                          <p className={cn(HOME_NUMBER, "font-semibold")}>
                             ₩{p.revenue.toLocaleString("ko-KR")}
                           </p>
                         </div>
@@ -150,23 +154,23 @@ export const StoreHomeStatisticsSection: React.FC<StoreHomeStatisticsSectionProp
                     )}
                   </CardContent>
                 </Card>
-                <Card className="border-border bg-card shadow-none">
+                <Card className={cn(HOME_CARD, "shadow-none")}>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base">주문 건수 순</CardTitle>
+                    <CardTitle className={HOME_CARD_TITLE}>주문 건수 순</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {topProductsByOrders.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">{emptyHint}</p>
+                      <p className={HOME_BODY_MUTED}>{emptyHint}</p>
                     ) : (
                       topProductsByOrders.map((p, i) => (
                         <div
                           key={p.productId}
-                          className="flex items-center justify-between rounded-lg border border-border/80 bg-muted/20 px-3 py-2.5"
+                          className={cn(HOME_ITEM_BOX, "flex items-center justify-between")}
                         >
-                          <p className="truncate text-sm font-medium">
+                          <p className={cn("truncate", HOME_EMPHASIS)}>
                             {i + 1}. {p.productName}
                           </p>
-                          <p className="text-sm font-semibold tabular-nums">
+                          <p className={cn(HOME_NUMBER, "font-semibold")}>
                             {p.orderCount.toLocaleString("ko-KR")}건
                           </p>
                         </div>

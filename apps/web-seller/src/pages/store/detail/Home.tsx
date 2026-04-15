@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { StoreHomeContent } from "@/apps/web-seller/features/home/components/StoreHomeContent";
+import { HOME_SCREEN_HEADING } from "@/apps/web-seller/features/home/constants/store-home-typography.constant";
 
 export const StoreDetailHomePage: React.FC = () => {
   const { storeId } = useParams();
@@ -16,7 +17,7 @@ export const StoreDetailHomePage: React.FC = () => {
   return (
     <div className="space-y-6 pb-10">
       <header>
-        <h1 className="text-3xl font-bold">스토어 홈</h1>
+        <h1 className={HOME_SCREEN_HEADING}>스토어 홈</h1>
       </header>
       <StoreHomeContent storeId={storeId} />
     </div>

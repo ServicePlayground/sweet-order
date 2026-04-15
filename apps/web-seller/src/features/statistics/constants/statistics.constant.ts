@@ -9,3 +9,18 @@ export const STATISTICS_DEFAULT_DAY_OFFSET = -6;
 
 /** 주문 통계 개요 React Query staleTime */
 export const STATISTICS_OVERVIEW_STALE_TIME_MS = 60_000;
+
+/**
+ * 주문 통계 화면 카드 표면 — 영역마다 색을 달리하지 않고 동일 톤의 그라데이션만 사용합니다.
+ * (차트 막대 색은 `HorizontalMetricBars` 등에서 구분)
+ */
+export const STATISTICS_SURFACE_CARD =
+  "border-border/90 bg-gradient-to-br from-violet-50/50 via-background to-muted/25 shadow-sm dark:border-border dark:from-violet-500/[0.11] dark:via-background dark:to-background";
+
+/** 순위·리스트 한 줄 */
+export const STATISTICS_INNER_ROW =
+  "rounded-xl border border-border/70 bg-background/80 px-3 py-2.5 backdrop-blur-[1px] dark:bg-background/35";
+
+/** 시간대 차트 래퍼 */
+export const STATISTICS_CHART_WRAP =
+  "overflow-x-auto rounded-lg border border-border/70 bg-background/80 p-2 dark:bg-background/30";
