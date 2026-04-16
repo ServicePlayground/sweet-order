@@ -30,6 +30,9 @@ type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
             bankAccountNumber: true;
             bankName: true;
             accountHolderName: true;
+            phoneNumber: true;
+            kakaoChannelId: true;
+            instagramId: true;
           };
         };
       };
@@ -76,6 +79,9 @@ export class ReviewMapperUtil {
             bankAccountNumber: true,
             bankName: true,
             accountHolderName: true,
+            phoneNumber: true,
+            kakaoChannelId: true,
+            instagramId: true,
           },
         },
       },

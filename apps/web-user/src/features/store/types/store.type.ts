@@ -53,6 +53,7 @@ export interface StoreInfo {
   logoImageUrl?: string;
   name: string;
   description?: string;
+  phoneNumber?: string;
   isLiked: boolean | null;
   // 사업자 정보
   businessNo: string;

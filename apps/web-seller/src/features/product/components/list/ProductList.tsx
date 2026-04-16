@@ -48,35 +48,21 @@ export function ProductList({ products }: ProductListProps) {
               )}
             </div>
 
-            {/* 상품 정보 */}
-            <div className="flex flex-1 items-center justify-between gap-4">
-              <div className="flex-1">
-                <div className="mb-1 flex items-center gap-2">
-                  <div className="text-sm font-semibold">{product.name}</div>
-                  <div className="flex gap-1">
-                    <StatusBadge variant={product.salesStatus === "ENABLE" ? "success" : "default"}>
-                      {product.salesStatus === "ENABLE" ? "판매중" : "판매중지"}
-                    </StatusBadge>
-                    <StatusBadge
-                      variant={product.visibilityStatus === "ENABLE" ? "info" : "default"}
-                    >
-                      {product.visibilityStatus === "ENABLE" ? "노출" : "숨김"}
-                    </StatusBadge>
-                  </div>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {new Date(product.createdAt).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </div>
+            {/* 상품 정보: 이름 | [배지 → 가격] */}
+            <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="min-w-0 flex-1 truncate text-sm font-semibold leading-tight">
+                {product.name}
               </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-foreground">
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  <StatusBadge variant={product.salesStatus === "ENABLE" ? "success" : "default"}>
+                    {product.salesStatus === "ENABLE" ? "판매중" : "판매중지"}
+                  </StatusBadge>
+                  <StatusBadge variant={product.visibilityStatus === "ENABLE" ? "info" : "default"}>
+                    {product.visibilityStatus === "ENABLE" ? "노출" : "숨김"}
+                  </StatusBadge>
+                </div>
+                <div className="text-base font-bold tabular-nums sm:text-lg">
                   {product.salePrice.toLocaleString()}원
                 </div>
               </div>

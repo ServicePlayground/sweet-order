@@ -51,22 +51,21 @@ export const StatisticsDateRangeField: React.FC<StatisticsDateRangeFieldProps> =
 
   return (
     <div className="space-y-3">
-      <div className="flex w-full max-w-[720px] flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex w-full max-w-[640px] flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="grid w-full gap-3 md:grid-cols-2 md:gap-3">
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">시작일</Label>
+            <Label>시작날짜</Label>
             <div>
               <Input
                 type="date"
                 value={startDate}
                 max={endDate}
                 onChange={(e) => onStart(e.target.value)}
-                className="h-11 rounded-xl border-border bg-background px-3 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-violet-300 dark:focus-visible:ring-violet-500/50"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">종료일</Label>
+            <Label>종료날짜</Label>
             <div>
               <Input
                 type="date"
@@ -74,7 +73,6 @@ export const StatisticsDateRangeField: React.FC<StatisticsDateRangeFieldProps> =
                 min={startDate}
                 max={today}
                 onChange={(e) => onEnd(e.target.value)}
-                className="h-11 rounded-xl border-border bg-background px-3 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-violet-300 dark:focus-visible:ring-violet-500/50"
               />
             </div>
           </div>

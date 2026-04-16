@@ -73,6 +73,7 @@ export class StoreCreateService {
               logoImageUrl: createStoreDto.logoImageUrl,
               name: createStoreDto.name,
               description: createStoreDto.description,
+              phoneNumber: createStoreDto.phoneNumber?.trim(),
               // 주소/위치 정보
               address: createStoreDto.address,
               roadAddress: createStoreDto.roadAddress,

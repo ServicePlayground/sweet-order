@@ -169,18 +169,12 @@ export default function Header({ variant = "main", title }: HeaderProps) {
   // 알람 버튼 컴포넌트 (공통)
   const AlarmButton = () => {
     const badge =
-      unreadAlarmCount > 0
-        ? unreadAlarmCount > 99
-          ? "99+"
-          : String(unreadAlarmCount)
-        : null;
+      unreadAlarmCount > 0 ? (unreadAlarmCount > 99 ? "99+" : String(unreadAlarmCount)) : null;
     return (
       <Link
         href={PATHS.ALARM}
         className="relative flex items-center justify-center rounded-lg text-gray-900"
-        aria-label={
-          unreadAlarmCount > 0 ? `알람, 미읽음 ${unreadAlarmCount}건` : "알람"
-        }
+        aria-label={unreadAlarmCount > 0 ? `알람, 미읽음 ${unreadAlarmCount}건` : "알람"}
       >
         <Icon name="alarm" width={24} height={24} />
         {badge !== null && (

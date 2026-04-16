@@ -59,6 +59,9 @@ export interface OrderResponseDto {
   productImages: string[];
   storeId: string;
   storeName: string;
+  storePhoneNumber?: string | null;
+  storeKakaoChannelId?: string | null;
+  storeInstagramId?: string | null;
   storeBankName?: string | null;
   storeBankAccountNumber?: string | null;
   storeAccountHolderName?: string | null;
@@ -72,8 +75,12 @@ export interface OrderResponseDto {
   pickupLatitude: number;
   pickupLongitude: number;
   orderStatus: OrderStatus;
-  /** 입금대기 진입 시각(입금 12시간 기준). 예약신청 단계에서는 null */
+  /** 입금대기 진입 시각. 예약신청 단계에서는 null */
   paymentPendingAt?: Date | string | null;
+  /** 입금 마감 시각(픽업 일정 반영). 입금대기가 아니면 null */
+  paymentPendingDeadlineAt?: Date | string | null;
+  /** 사용자가 입금완료 처리 시 입력한 입금자명 */
+  depositorName?: string | null;
   pickupDate: Date;
   userCancelReason?: string | null;
   sellerCancelReason?: string | null;

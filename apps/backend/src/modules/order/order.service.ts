@@ -18,6 +18,7 @@ import {
 import { UpdateOrderStatusRequestDto } from "./dto/order-seller-action.dto";
 import {
   CancelOrderBeforePaymentRequestDto,
+  MarkPaymentCompleteRequestDto,
   RequestCancelRefundRequestDto,
 } from "@apps/backend/modules/order/dto/order-user-action.dto";
 import {
@@ -106,8 +107,9 @@ export class OrderService {
   async markOrderPaymentCompletedForUser(
     orderId: string,
     user: JwtVerifiedPayload,
+    dto: MarkPaymentCompleteRequestDto,
   ): Promise<{ id: string }> {
-    return this.orderUserActionService.markPaymentCompleted(orderId, user.sub);
+    return this.orderUserActionService.markPaymentCompleted(orderId, user.sub, dto);
   }
 
   /** 입금 전 예약 취소 (사용자) */

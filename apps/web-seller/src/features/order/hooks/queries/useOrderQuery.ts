@@ -20,6 +20,8 @@ export function useOrderList({
   orderStatus,
   startDate,
   endDate,
+  pickupStartDate,
+  pickupEndDate,
   orderNumber,
   type,
 }: Partial<OrderListQueryParams> & { page: number; limit: number; sortBy: OrderSortBy }) {
@@ -34,6 +36,8 @@ export function useOrderList({
       orderStatus,
       startDate,
       endDate,
+      pickupStartDate,
+      pickupEndDate,
       orderNumber,
       type,
     }),
@@ -54,6 +58,12 @@ export function useOrderList({
       }
       if (endDate) {
         params.endDate = endDate;
+      }
+      if (pickupStartDate) {
+        params.pickupStartDate = pickupStartDate;
+      }
+      if (pickupEndDate) {
+        params.pickupEndDate = pickupEndDate;
       }
       if (orderNumber) {
         params.orderNumber = orderNumber;

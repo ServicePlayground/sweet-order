@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { usePaymentCountdown } from "@/apps/web-user/features/order/hooks/usePaymentCountdown";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Icon } from "@/apps/web-user/common/components/icons";
@@ -12,12 +11,53 @@ import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 
+const FALLBACK_PAYMENT_DEADLINE_MS = 12 * 60 * 60 * 1000;
+
+function resolveDeadlineMs(order: OrderResponse): number | null {
+  if (order.paymentPendingDeadlineAt) {
+    return new Date(order.paymentPendingDeadlineAt).getTime();
+  }
+  if (order.paymentPendingAt) {
+    return new Date(order.paymentPendingAt).getTime() + FALLBACK_PAYMENT_DEADLINE_MS;
+  }
+  return null;
+}
+
+function usePaymentPendingCountdown(order: OrderResponse) {
+  const orderRef = useRef(order);
+  orderRef.current = order;
+
+  const getRemainingSec = () => {
+    const deadline = resolveDeadlineMs(orderRef.current);
+    if (deadline == null) return 0;
+    return Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+  };
+
+  const [remaining, setRemaining] = useState(getRemainingSec);
+
+  useEffect(() => {
+    setRemaining(getRemainingSec());
+    const timer = setInterval(() => {
+      const next = getRemainingSec();
+      setRemaining(next);
+      if (next <= 0) clearInterval(timer);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [order.id, order.paymentPendingDeadlineAt, order.paymentPendingAt]);
+
+  const hours = String(Math.floor(remaining / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((remaining % 3600) / 60)).padStart(2, "0");
+  const seconds = String(remaining % 60).padStart(2, "0");
+
+  return { text: `${hours}:${minutes}:${seconds}`, isExpired: remaining <= 0 };
+}
+
 function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text);
 }
 
 export function PaymentPendingCard({ order }: { order: OrderResponse }) {
-  const countdown = usePaymentCountdown(order.paymentPendingAt, order.pickupDate);
+  const countdown = usePaymentPendingCountdown(order);
   const [showCopyToast, setShowCopyToast] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);

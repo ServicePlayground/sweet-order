@@ -26,7 +26,9 @@ export class NotificationOrderDispatchService {
   /**
    * 스토어 소유 판매자에게 SELLER_WEB 주문 알림 (설정 반영).
    */
-  private async dispatchSellerOrderNotification(payload: OrderStatusTransitionPayload): Promise<void> {
+  private async dispatchSellerOrderNotification(
+    payload: OrderStatusTransitionPayload,
+  ): Promise<void> {
     try {
       const copy = buildSellerOrderNotificationCopy(payload);
       if (!copy) {
@@ -72,7 +74,9 @@ export class NotificationOrderDispatchService {
   /**
    * 주문자(USER)에게 USER_WEB 주문 알림 (실시간·목록용 DB 저장).
    */
-  private async dispatchUserOrderNotification(payload: OrderStatusTransitionPayload): Promise<void> {
+  private async dispatchUserOrderNotification(
+    payload: OrderStatusTransitionPayload,
+  ): Promise<void> {
     try {
       const copy = buildUserOrderNotificationCopy(payload);
       if (!copy) {

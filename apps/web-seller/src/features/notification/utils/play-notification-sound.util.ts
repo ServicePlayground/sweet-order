@@ -1,5 +1,6 @@
 /**
- * 주문 알림용 멜로디 (소켓 수신 시). 브라우저 정책상 사용자 인터랙션 전에는 재생이 막힐 수 있습니다.
+ * 주문 알림용 "딩-동" 사운드 (소켓 수신 시).
+ * 브라우저 정책상 사용자 인터랙션 전에는 재생이 막힐 수 있습니다.
  */
 export function playNotificationChime(): void {
   try {
@@ -9,35 +10,35 @@ export function playNotificationChime(): void {
     if (!Ctx) return;
     const ctx = new Ctx();
     const master = ctx.createGain();
-    master.gain.value = 0.32;
+    master.gain.value = 0.8;
     master.connect(ctx.destination);
 
-    const scheduleNote = (frequency: number, start: number, duration: number) => {
+    const playTone = (frequency: number, start: number, duration: number) => {
       const osc = ctx.createOscillator();
       const g = ctx.createGain();
-      osc.type = "triangle";
+      osc.type = "sine";
       osc.frequency.value = frequency;
-      const peak = 0.95;
-      const attackEnd = start + 0.04;
       const end = start + duration;
-      g.gain.setValueAtTime(0.0001, start);
-      g.gain.exponentialRampToValueAtTime(peak, attackEnd);
-      g.gain.exponentialRampToValueAtTime(0.0001, end);
+      const fadeIn = 0.05;
+      const fadeOut = 0.05;
+      const peak = 0.5;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(peak, start + fadeIn);
+      g.gain.linearRampToValueAtTime(0, end - fadeOut);
       osc.connect(g);
       g.connect(master);
       osc.start(start);
-      osc.stop(end + 0.02);
+      osc.stop(end);
     };
 
     const t0 = ctx.currentTime;
-    // C5 → E5 → G5 (장3화음 상행), 약 0.65초
-    scheduleNote(523.25, t0, 0.22);
-    scheduleNote(659.25, t0 + 0.16, 0.24);
-    scheduleNote(783.99, t0 + 0.34, 0.32);
+    // "띵-동": 예시처럼 높은음(1000Hz) -> 낮은음(800Hz)
+    playTone(1000, t0, 0.4);
+    playTone(800, t0 + 0.2, 0.5);
 
     window.setTimeout(() => {
       void ctx.close().catch(() => undefined);
-    }, 900);
+    }, 1000);
   } catch {
     // ignore
   }

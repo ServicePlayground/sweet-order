@@ -63,6 +63,7 @@ export const SWAGGER_EXAMPLES = {
   ACCOUNT_HOLDER_NAME: "홍길동",
   KAKAO_CHANNEL_ID: "sweetorder_channel",
   INSTAGRAM_ID: "sweetorder_official",
+  PHONE_NUMBER: "010-1234-5678",
 };
 
 /**

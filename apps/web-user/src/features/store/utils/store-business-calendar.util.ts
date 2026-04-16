@@ -91,12 +91,7 @@ const MAP_MORNING_SLOT_END_MIN = 12 * 60;
 const MAP_AFTERNOON_SLOT_START_MIN = 12 * 60;
 const MAP_AFTERNOON_SLOT_END_MIN = 24 * 60;
 
-function openMinuteIntervalsOverlap(
-  a0: number,
-  a1: number,
-  b0: number,
-  b1: number,
-): boolean {
+function openMinuteIntervalsOverlap(a0: number, a1: number, b0: number, b1: number): boolean {
   return Math.max(a0, b0) < Math.min(a1, b1);
 }
 

@@ -162,6 +162,7 @@ export class StoreMapperUtil {
         logoImageUrl: store.logoImageUrl ?? undefined,
         name: store.name,
         description: store.description ?? undefined,
+        phoneNumber: store.phoneNumber ?? undefined,
 
         // 픽업장소
         address: store.address ?? "",

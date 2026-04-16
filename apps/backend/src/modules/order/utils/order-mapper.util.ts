@@ -20,6 +20,9 @@ type OrderWithItems = Order & {
     bankAccountNumber: string | null;
     bankName: StoreBankName | null;
     accountHolderName: string | null;
+    phoneNumber: string | null;
+    kakaoChannelId: string | null;
+    instagramId: string | null;
   };
 };
 
@@ -43,6 +46,9 @@ export class OrderMapperUtil {
         bankAccountNumber: true,
         bankName: true,
         accountHolderName: true,
+        phoneNumber: true,
+        kakaoChannelId: true,
+        instagramId: true,
       },
     },
   } as const satisfies Prisma.OrderInclude;
@@ -123,6 +129,9 @@ export class OrderMapperUtil {
       productImages: order.productImages ?? [],
       storeId: order.storeId,
       storeName: order.storeName ?? "",
+      storePhoneNumber: order.store.phoneNumber ?? null,
+      storeKakaoChannelId: order.store.kakaoChannelId ?? null,
+      storeInstagramId: order.store.instagramId ?? null,
       storeBankName: order.store.bankName ?? null,
       storeBankAccountNumber: order.store.bankAccountNumber ?? null,
       storeAccountHolderName: order.store.accountHolderName ?? null,
@@ -139,6 +148,8 @@ export class OrderMapperUtil {
       pickupLongitude: order.pickupLongitude ?? 0,
       orderStatus: order.orderStatus as OrderStatus,
       paymentPendingAt: order.paymentPendingAt ?? null,
+      paymentPendingDeadlineAt: order.paymentPendingDeadlineAt ?? null,
+      depositorName: order.depositorName ?? null,
       userCancelReason: order.userCancelReason ?? null,
       sellerCancelReason: order.sellerCancelReason ?? null,
       sellerNoShowReason: order.sellerNoShowReason ?? null,

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Bell, CalendarDays } from "lucide-react";
+import { Bell, CalendarDays, ClipboardList, Newspaper } from "lucide-react";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 import {
   Card,
   CardContent,
@@ -19,13 +20,29 @@ import { StoreBusinessCalendarPreview } from "@/apps/web-seller/features/store/c
 import { StoreHomeStatisticsSection } from "@/apps/web-seller/features/home/components/StoreHomeStatisticsSection";
 import { useStoreHomeDashboardQuery } from "@/apps/web-seller/features/home/hooks/queries/useStoreHomeDashboardQuery";
 import { feedContentToExcerpt } from "@/apps/web-seller/features/home/utils/feed-excerpt.util";
+import {
+  HOME_CARD,
+  HOME_CARD_ACTION_BUTTON,
+  HOME_CARD_CONTENT,
+  HOME_CARD_CONTENT_TABLE,
+  HOME_CARD_HEADER,
+  HOME_BODY_MUTED,
+  HOME_CARD_TITLE,
+  HOME_CAPTION,
+  HOME_EMPHASIS,
+  HOME_GRID_2_COL,
+  HOME_ITEM_BOX,
+  HOME_MONO,
+  HOME_NUMBER,
+  HOME_NUMBER_MUTED,
+  HOME_SECTION_GAP,
+  HOME_TABLE_CELL,
+  HOME_TABLE_HEAD,
+} from "@/apps/web-seller/features/home/constants/store-home-typography.constant";
 
 export interface StoreHomeContentProps {
   storeId: string;
 }
-
-const homeCardHeader =
-  "flex flex-row flex-wrap items-start justify-between gap-3 space-y-0 pb-2 sm:items-center";
 
 export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) => {
   const { data: home, isLoading, isError } = useStoreHomeDashboardQuery(storeId);
@@ -36,50 +53,51 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
   const recentFeeds = home?.recentFeeds ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className={HOME_SECTION_GAP}>
       <StoreHomeStoreProfile storeId={storeId} />
 
       <StoreBusinessCalendarPreview storeId={storeId} className="w-full" />
 
-      <div className="grid w-full grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="border-border bg-card xl:col-span-2">
-          <CardHeader className={homeCardHeader}>
+      <div className={cn("w-full", HOME_GRID_2_COL)}>
+        <Card className={HOME_CARD}>
+          <CardHeader className={HOME_CARD_HEADER}>
             <div className="min-w-0">
-              <CardTitle className="text-base">최근 주문</CardTitle>
+              <CardTitle className={cn("flex items-center gap-2", HOME_CARD_TITLE)}>
+                <ClipboardList className="h-4 w-4 shrink-0 text-primary" />
+                최근 주문
+              </CardTitle>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0" asChild>
+            <Button variant="outline" size="sm" className={HOME_CARD_ACTION_BUTTON} asChild>
               <Link to={ROUTES.STORE_DETAIL_ORDERS_LIST(storeId)}>주문 보기</Link>
             </Button>
           </CardHeader>
-          <CardContent className="overflow-x-auto px-0 sm:px-6">
+          <CardContent className={HOME_CARD_CONTENT_TABLE}>
             {isLoading ? (
-              <p className="px-6 py-8 text-sm text-muted-foreground">불러오는 중…</p>
+              <p className={cn("px-6 py-8", HOME_BODY_MUTED)}>불러오는 중…</p>
             ) : isError ? (
               <p className="px-6 py-8 text-sm text-destructive">목록을 불러오지 못했습니다.</p>
             ) : recentOrders.length === 0 ? (
-              <p className="px-6 py-8 text-sm text-muted-foreground">표시할 주문이 없습니다.</p>
+              <p className={cn("px-6 py-8", HOME_BODY_MUTED)}>표시할 주문이 없습니다.</p>
             ) : (
-              <table className="w-full min-w-[640px] text-sm">
+              <table className="w-full min-w-[640px]">
                 <thead>
-                  <tr className="border-b border-border text-left text-muted-foreground">
-                    <th className="px-6 py-2 font-medium">주문번호</th>
-                    <th className="py-2 pr-4 font-medium">상품</th>
-                    <th className="py-2 pr-4 font-medium">금액</th>
-                    <th className="py-2 pr-4 font-medium">상태</th>
-                    <th className="py-2 pr-4 font-medium">픽업</th>
-                    <th className="py-2 pr-6 font-medium">접수</th>
+                  <tr className="border-b border-border text-left">
+                    <th className={cn("px-6 py-2", HOME_TABLE_HEAD)}>주문번호</th>
+                    <th className={cn("py-2 pr-4", HOME_TABLE_HEAD)}>상품</th>
+                    <th className={cn("py-2 pr-4", HOME_TABLE_HEAD)}>금액</th>
+                    <th className={cn("py-2 pr-4", HOME_TABLE_HEAD)}>상태</th>
+                    <th className={cn("py-2 pr-4", HOME_TABLE_HEAD)}>픽업</th>
+                    <th className={cn("py-2 pr-6", HOME_TABLE_HEAD)}>접수</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentOrders.map((row) => (
                     <tr key={row.id} className="border-b border-border/80 last:border-0">
-                      <td className="px-6 py-3 font-mono text-xs text-foreground">
-                        {row.orderNumber}
-                      </td>
-                      <td className="max-w-[200px] truncate py-3 pr-4 text-foreground">
+                      <td className={cn("px-6 py-3", HOME_MONO)}>{row.orderNumber}</td>
+                      <td className={cn("max-w-[200px] truncate py-3 pr-4", HOME_TABLE_CELL)}>
                         {row.productName}
                       </td>
-                      <td className="py-3 pr-4 tabular-nums text-foreground">
+                      <td className={cn("py-3 pr-4", HOME_NUMBER)}>
                         ₩{row.totalPrice.toLocaleString("ko-KR")}
                       </td>
                       <td className="py-3 pr-4">
@@ -87,7 +105,7 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
                           {getOrderStatusLabel(row.orderStatus)}
                         </StatusBadge>
                       </td>
-                      <td className="py-3 pr-4 text-muted-foreground">
+                      <td className={cn("py-3 pr-4", HOME_NUMBER_MUTED)}>
                         {row.pickupDate != null
                           ? new Date(row.pickupDate).toLocaleString("ko-KR", {
                               month: "short",
@@ -97,7 +115,7 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
                             })
                           : "—"}
                       </td>
-                      <td className="py-3 pr-6 text-muted-foreground">
+                      <td className={cn("py-3 pr-6", HOME_NUMBER_MUTED)}>
                         {new Date(row.createdAt).toLocaleString("ko-KR", {
                           month: "short",
                           day: "numeric",
@@ -113,36 +131,33 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
-          <CardHeader className={homeCardHeader}>
+        <Card className={HOME_CARD}>
+          <CardHeader className={HOME_CARD_HEADER}>
             <div className="min-w-0">
-              <CardTitle className="flex items-center gap-2 text-base">
+              <CardTitle className={cn("flex items-center gap-2", HOME_CARD_TITLE)}>
                 <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
                 오늘 픽업 예정
               </CardTitle>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0" asChild>
+            <Button variant="outline" size="sm" className={HOME_CARD_ACTION_BUTTON} asChild>
               <Link to={ROUTES.STORE_DETAIL_CALENDAR(storeId)}>캘린더 보기</Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={HOME_CARD_CONTENT}>
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">불러오는 중…</p>
+              <p className={HOME_BODY_MUTED}>불러오는 중…</p>
             ) : isError ? (
               <p className="text-sm text-destructive">불러오지 못했습니다.</p>
             ) : todayPickups.length === 0 ? (
-              <p className="text-sm text-muted-foreground">오늘 픽업 예정인 주문이 없습니다.</p>
+              <p className={HOME_BODY_MUTED}>오늘 픽업 예정인 주문이 없습니다.</p>
             ) : (
               todayPickups.map((o) => (
-                <div
-                  key={o.id}
-                  className="rounded-lg border border-border bg-muted/30 px-3 py-2.5 text-sm"
-                >
-                  <p className="font-mono text-xs text-foreground">{o.orderNumber}</p>
-                  <p className="text-muted-foreground">
+                <div key={o.id} className={HOME_ITEM_BOX}>
+                  <p className={HOME_MONO}>{o.orderNumber}</p>
+                  <p className={HOME_BODY_MUTED}>
                     {o.productName} · {getOrderStatusLabel(o.orderStatus)}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className={cn("mt-1", HOME_CAPTION)}>
                     {new Date(o.pickupDate).toLocaleString("ko-KR")}
                   </p>
                 </div>
@@ -152,44 +167,42 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="border-border bg-card">
-          <CardHeader className={homeCardHeader}>
+      <div className={HOME_GRID_2_COL}>
+        <Card className={HOME_CARD}>
+          <CardHeader className={HOME_CARD_HEADER}>
             <div className="min-w-0">
-              <CardTitle className="flex items-center gap-2 text-base">
+              <CardTitle className={cn("flex items-center gap-2", HOME_CARD_TITLE)}>
                 <Bell className="h-4 w-4 shrink-0 text-primary" />
                 최근 알림
               </CardTitle>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0" asChild>
+            <Button variant="outline" size="sm" className={HOME_CARD_ACTION_BUTTON} asChild>
               <Link to={ROUTES.STORE_DETAIL_NOTIFICATIONS_LIST(storeId)}>알림 보기</Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={HOME_CARD_CONTENT}>
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">불러오는 중…</p>
+              <p className={HOME_BODY_MUTED}>불러오는 중…</p>
             ) : isError ? (
               <p className="text-sm text-destructive">불러오지 못했습니다.</p>
             ) : recentNotifications.length === 0 ? (
-              <p className="text-sm text-muted-foreground">알림이 없습니다.</p>
+              <p className={HOME_BODY_MUTED}>알림이 없습니다.</p>
             ) : (
               recentNotifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`rounded-lg border px-3 py-2.5 text-sm ${
-                    !n.read ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20"
-                  }`}
+                  className={`${HOME_ITEM_BOX} ${!n.read ? "border-primary/40 bg-primary/5" : ""}`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-medium text-foreground">{n.title}</p>
+                    <p className={HOME_EMPHASIS}>{n.title}</p>
                     {!n.read ? (
                       <span className="shrink-0 rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
                         N
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-muted-foreground">{n.body}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className={HOME_BODY_MUTED}>{n.body}</p>
+                  <p className={cn("mt-1", HOME_CAPTION)}>
                     {new Date(n.createdAt).toLocaleString("ko-KR")}
                   </p>
                 </div>
@@ -198,28 +211,31 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
           </CardContent>
         </Card>
 
-        <Card className="border-border bg-card">
-          <CardHeader className={homeCardHeader}>
+        <Card className={HOME_CARD}>
+          <CardHeader className={HOME_CARD_HEADER}>
             <div className="min-w-0">
-              <CardTitle className="text-base">최근 피드</CardTitle>
+              <CardTitle className={cn("flex items-center gap-2", HOME_CARD_TITLE)}>
+                <Newspaper className="h-4 w-4 shrink-0 text-primary" />
+                최근 피드
+              </CardTitle>
             </div>
-            <Button variant="outline" size="sm" className="shrink-0" asChild>
+            <Button variant="outline" size="sm" className={HOME_CARD_ACTION_BUTTON} asChild>
               <Link to={ROUTES.STORE_DETAIL_FEED_LIST(storeId)}>피드 보기</Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className={HOME_CARD_CONTENT}>
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">불러오는 중…</p>
+              <p className={HOME_BODY_MUTED}>불러오는 중…</p>
             ) : isError ? (
               <p className="text-sm text-destructive">불러오지 못했습니다.</p>
             ) : recentFeeds.length === 0 ? (
-              <p className="text-sm text-muted-foreground">등록된 피드가 없습니다.</p>
+              <p className={HOME_BODY_MUTED}>등록된 피드가 없습니다.</p>
             ) : (
               recentFeeds.map((f) => (
-                <div key={f.id} className="rounded-lg border border-border bg-muted/20 px-3 py-2.5">
-                  <p className="font-medium text-foreground">{f.title}</p>
-                  <p className="text-sm text-muted-foreground">{feedContentToExcerpt(f.content)}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                <div key={f.id} className={HOME_ITEM_BOX}>
+                  <p className={HOME_EMPHASIS}>{f.title}</p>
+                  <p className={HOME_BODY_MUTED}>{feedContentToExcerpt(f.content)}</p>
+                  <p className={cn("mt-1", HOME_CAPTION)}>
                     {new Date(f.updatedAt).toLocaleString("ko-KR")}
                   </p>
                 </div>

@@ -6,6 +6,7 @@ import {
   IsValidLogoImageUrl,
   IsValidBankAccountNumber,
   IsValidAccountHolderName,
+  IsValidStorePhoneNumber,
 } from "@apps/backend/modules/store/decorators/validators.decorator";
 import {
   SWAGGER_EXAMPLES,
@@ -40,6 +41,13 @@ export class UpdateStoreRequestDto extends StoreAddressDto {
   })
   @IsValidStoreDescription()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: "스토어 연락처 (전화/휴대폰)",
+    example: SWAGGER_EXAMPLES.PHONE_NUMBER,
+  })
+  @IsValidStorePhoneNumber()
+  phoneNumber?: string;
 
   @ApiPropertyOptional({
     description: "카카오채널 ID",

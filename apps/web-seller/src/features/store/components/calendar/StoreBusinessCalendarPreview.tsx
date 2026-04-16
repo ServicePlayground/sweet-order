@@ -20,6 +20,17 @@ import {
   WEEKDAY_LABELS_KO,
 } from "@/apps/web-seller/features/store/utils/store-calendar.util";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import {
+  HOME_CARD,
+  HOME_CARD_ACTION_BUTTON,
+  HOME_CARD_HEADER,
+  HOME_BODY_MUTED,
+  HOME_CALENDAR_CELL_META,
+  HOME_CALENDAR_DAY_NUM,
+  HOME_CALENDAR_MONTH,
+  HOME_CALENDAR_WEEKDAY,
+  HOME_CARD_TITLE,
+} from "@/apps/web-seller/features/home/constants/store-home-typography.constant";
 
 function startOfMonth(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -109,11 +120,17 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
 
   if (isLoading) {
     return (
-      <Card className={cn("overflow-hidden border-border bg-card", className)}>
-        <CardHeader className="pb-2">
+      <Card className={cn("overflow-hidden", HOME_CARD, className)}>
+        <CardHeader className={HOME_CARD_HEADER}>
           <div className="h-5 w-40 animate-pulse rounded bg-muted" />
+          <div
+            className={cn(
+              "h-9 shrink-0 animate-pulse rounded-md bg-muted",
+              HOME_CARD_ACTION_BUTTON,
+            )}
+          />
         </CardHeader>
-        <CardContent className="p-4 sm:p-5">
+        <CardContent>
           <div className="mb-4 flex justify-between">
             <div className="h-9 w-9 animate-pulse rounded-md bg-zinc-200" />
             <div className="h-7 w-28 animate-pulse rounded bg-zinc-200" />
@@ -134,8 +151,8 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
 
   if (isError || !store) {
     return (
-      <Card className={cn("border-border bg-card", className)}>
-        <CardContent className="p-6 text-sm text-muted-foreground">
+      <Card className={cn(HOME_CARD, className)}>
+        <CardContent className={cn("p-6", HOME_BODY_MUTED)}>
           캘린더 정보를 불러오지 못했습니다.{" "}
           <Link
             to={ROUTES.STORE_DETAIL_CALENDAR(storeId)}
@@ -150,19 +167,19 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
   }
 
   return (
-    <Card className={cn("overflow-hidden border-border bg-card", className)}>
-      <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 space-y-0 pb-2 sm:items-center">
+    <Card className={cn("overflow-hidden", HOME_CARD, className)}>
+      <CardHeader className={HOME_CARD_HEADER}>
         <div className="min-w-0 space-y-1">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className={cn("flex items-center gap-2", HOME_CARD_TITLE)}>
             <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
             영업 캘린더
           </CardTitle>
         </div>
-        <Button variant="outline" size="sm" className="shrink-0" asChild>
+        <Button variant="outline" size="sm" className={HOME_CARD_ACTION_BUTTON} asChild>
           <Link to={ROUTES.STORE_DETAIL_CALENDAR(storeId)}>캘린더 보기</Link>
         </Button>
       </CardHeader>
-      <CardContent className="p-4 sm:p-5">
+      <CardContent>
         <div className="mb-4 flex items-center justify-between">
           <Button
             type="button"
@@ -173,7 +190,7 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <span className="text-xl font-semibold">
+          <span className={HOME_CALENDAR_MONTH}>
             {year}년 {month + 1}월
           </span>
           <Button
@@ -186,9 +203,9 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
-        <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-sm font-semibold text-muted-foreground">
+        <div className="mb-2 grid grid-cols-7 gap-1.5 text-center">
           {WEEKDAY_LABELS_KO.map((d) => (
-            <div key={d} className="py-1.5">
+            <div key={d} className={cn("py-1.5", HOME_CALENDAR_WEEKDAY)}>
               {d}
             </div>
           ))}
@@ -215,13 +232,11 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
                   !eff.isOpen ? "bg-zinc-100 dark:bg-zinc-900/60" : "",
                 )}
               >
-                <span className="text-lg font-semibold leading-none tabular-nums text-foreground sm:text-xl">
-                  {cell.day}
-                </span>
+                <span className={HOME_CALENDAR_DAY_NUM}>{cell.day}</span>
                 <div className="mt-auto flex flex-col gap-1 pt-1">
                   <span
                     className={cn(
-                      "text-xs font-semibold leading-tight sm:text-sm",
+                      HOME_CALENDAR_CELL_META,
                       hasOverride ? "text-primary" : "text-muted-foreground",
                     )}
                   >
@@ -229,7 +244,7 @@ export const StoreBusinessCalendarPreview: React.FC<StoreBusinessCalendarPreview
                   </span>
                   <span
                     className={cn(
-                      "text-xs font-medium leading-tight sm:text-sm",
+                      HOME_CALENDAR_CELL_META,
                       eff.isOpen
                         ? "text-emerald-700 dark:text-emerald-400"
                         : "text-rose-600 dark:text-rose-400",

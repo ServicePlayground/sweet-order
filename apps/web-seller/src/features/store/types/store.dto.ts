@@ -65,6 +65,7 @@ export interface StoreResponseDto extends StoreAddressDto {
   logoImageUrl?: string | null;
   name: string;
   description?: string | null;
+  phoneNumber?: string | null;
   kakaoChannelId?: string | null;
   instagramId?: string | null;
   businessNo: string;
@@ -120,6 +121,7 @@ export interface CreateStoreRequestDto extends StoreAddressDto {
   onlineTradingCompanyDetail: OnlineTradingCompanyDetailRequestDto;
   name: string;
   description?: string;
+  phoneNumber?: string;
   logoImageUrl?: string;
   kakaoChannelId?: string;
   instagramId?: string;
@@ -135,6 +137,7 @@ export interface CreateStoreResponseDto {
 export interface UpdateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
+  phoneNumber?: string;
   logoImageUrl?: string;
   kakaoChannelId?: string;
   instagramId?: string;
