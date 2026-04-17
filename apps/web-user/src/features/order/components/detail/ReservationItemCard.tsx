@@ -63,26 +63,9 @@ export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
 
           if (status === OrderStatus.RESERVATION_REQUESTED) {
             return (
-              <div className="flex gap-2 mt-3">
-                <button type="button" className={buttonClass}>
-                  예약취소
-                </button>
+              <div className="flex mt-3">
                 <button type="button" className={buttonClass}>
                   옵션변경
-                </button>
-              </div>
-            );
-          }
-
-          if (
-            status === OrderStatus.PAYMENT_PENDING ||
-            status === OrderStatus.PAYMENT_COMPLETED ||
-            status === OrderStatus.CONFIRMED
-          ) {
-            return (
-              <div className="flex gap-2 mt-3">
-                <button type="button" className={buttonClass}>
-                  예약취소
                 </button>
               </div>
             );
@@ -93,7 +76,7 @@ export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
             status === OrderStatus.CANCEL_COMPLETED
           ) {
             return (
-              <div className="flex gap-2 mt-3">
+              <div className="flex mt-3">
                 <button type="button" className={buttonClass}>
                   취소 상세
                 </button>
@@ -104,27 +87,60 @@ export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
           return null;
         })()}
       </div>
+      {expanded && (
+        <div className="px-4 py-3 border-t border-gray-100 space-y-2 text-xs text-gray-700 bg-gray-50">
+          <div>
+            <p className="text-xs text-gray-500">상품명</p>
+            <div className="flex items-center justify-between text-2sm text-gray-900">
+              <span>{order.productName}</span>
+              <span>{item.itemPrice.toLocaleString()}원</span>
+            </div>
+          </div>
+          {item.sizeDisplayName && (
+            <div>
+              <p className="text-xs text-gray-500">사이즈</p>
+              <div className="flex items-center justify-between text-2sm text-gray-900">
+                <span>{item.sizeDisplayName}</span>
+                <span>+{item.sizePrice?.toLocaleString()}원</span>
+              </div>
+            </div>
+          )}
+          {item.flavorDisplayName && (
+            <div>
+              <p className="text-xs text-gray-500">맛</p>
+              <div className="flex items-center justify-between text-2sm text-gray-900">
+                <span>{item.flavorDisplayName}</span>
+                <span>+{item.flavorPrice?.toLocaleString()}원</span>
+              </div>
+            </div>
+          )}
+          {item.letteringMessage && (
+            <div>
+              <p className="text-xs text-gray-500">레터링 문구</p>
+              <p className="text-2sm text-gray-900">{item.letteringMessage}</p>
+            </div>
+          )}
+          {item.requestMessage && (
+            <div>
+              <p className="text-xs text-gray-500">요청사항</p>
+              <p className="text-2sm text-gray-900">{item.requestMessage}</p>
+            </div>
+          )}
+        </div>
+      )}
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="flex items-center justify-center w-full py-2.5 text-xs text-gray-500 border-t border-gray-100 bg-white"
+        className="flex items-center justify-center gap-1 w-full py-2.5 text-2sm text-gray-900 border-t border-gray-100 bg-gray-50"
       >
         상세 보기
         <Icon
           name="arrow"
           width={16}
           height={16}
-          className={`text-gray-400 transition-transform ${expanded ? "rotate-0" : "rotate-180"}`}
+          className={`text-gray-300 transition-transform ${expanded ? "rotate-0" : "rotate-180"}`}
         />
       </button>
-      {expanded && (
-        <div className="px-4 py-3 border-t border-gray-100 bg-white space-y-1.5 text-xs text-gray-700">
-          {item.sizeDisplayName && <p>사이즈: {item.sizeDisplayName}</p>}
-          {item.flavorDisplayName && <p>맛: {item.flavorDisplayName}</p>}
-          {item.letteringMessage && <p>레터링: {item.letteringMessage}</p>}
-          {item.requestMessage && <p>요청사항: {item.requestMessage}</p>}
-        </div>
-      )}
     </div>
   );
 }

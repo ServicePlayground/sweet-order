@@ -1,17 +1,14 @@
 "use client";
 
+import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { usePaymentCountdown } from "@/apps/web-user/features/order/hooks/usePaymentCountdown";
 
 interface PaymentPendingCountdownHeaderProps {
-  paymentPendingAt?: string;
-  pickupDate: string;
+  order: OrderResponse;
 }
 
-export function PaymentPendingCountdownHeader({
-  paymentPendingAt,
-  pickupDate,
-}: PaymentPendingCountdownHeaderProps) {
-  const { text: countdown } = usePaymentCountdown(paymentPendingAt, pickupDate);
+export function PaymentPendingCountdownHeader({ order }: PaymentPendingCountdownHeaderProps) {
+  const { text: countdown } = usePaymentCountdown(order);
 
   return (
     <div className="flex items-center justify-between px-5 py-2.5 bg-blue-50">

@@ -25,10 +25,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
       {/* 입금대기: 상단 카운트다운 + 결제정보 → 예약정보 순서 */}
       {isPaymentPending && (
         <div className="-mt-5 mb-3">
-          <PaymentPendingCountdownHeader
-            paymentPendingAt={order.paymentPendingAt}
-            pickupDate={order.pickupDate}
-          />
+          <PaymentPendingCountdownHeader order={order} />
         </div>
       )}
       <div className="flex flex-col gap-10">

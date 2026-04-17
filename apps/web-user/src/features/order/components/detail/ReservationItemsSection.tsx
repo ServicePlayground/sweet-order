@@ -12,7 +12,7 @@ export function ReservationItemsSection({ order }: ReservationItemsSectionProps)
       <OrderDetailSectionTitle
         right={
           <button type="button" className="text-xs text-gray-500 font-bold underline">
-            전체취소
+            예약취소
           </button>
         }
       >

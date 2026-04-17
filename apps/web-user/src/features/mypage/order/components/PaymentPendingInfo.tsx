@@ -1,56 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
+import { usePaymentCountdown } from "@/apps/web-user/features/order/hooks/usePaymentCountdown";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 
-const FALLBACK_PAYMENT_DEADLINE_MS = 12 * 60 * 60 * 1000;
-
-function resolveDeadlineMs(order: OrderResponse): number | null {
-  if (order.paymentPendingDeadlineAt) {
-    return new Date(order.paymentPendingDeadlineAt).getTime();
-  }
-  if (order.paymentPendingAt) {
-    return new Date(order.paymentPendingAt).getTime() + FALLBACK_PAYMENT_DEADLINE_MS;
-  }
-  return null;
-}
-
-function usePaymentPendingCountdown(order: OrderResponse) {
-  const [remaining, setRemaining] = useState("");
-  const orderRef = useRef(order);
-  orderRef.current = order;
-
-  useEffect(() => {
-    function update() {
-      const deadline = resolveDeadlineMs(orderRef.current);
-      if (deadline == null) {
-        setRemaining("");
-        return;
-      }
-      const diff = Math.max(0, deadline - Date.now());
-      const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-      setRemaining(`${h}:${m}:${s}`);
-    }
-
-    update();
-    const timer = setInterval(update, 1000);
-    return () => clearInterval(timer);
-  }, [order.id, order.paymentPendingDeadlineAt, order.paymentPendingAt]);
-
-  return remaining;
-}
-
 export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
-  const countdown = usePaymentPendingCountdown(order);
+  const { text: countdown } = usePaymentCountdown(order);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
