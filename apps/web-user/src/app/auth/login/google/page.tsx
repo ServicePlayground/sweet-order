@@ -22,7 +22,7 @@ function GoogleAuthCallbackContent() {
   useEffect(() => {
     const code = searchParams.get("code");
     if (!code) {
-      router.replace(PATHS.QA);
+      router.replace(PATHS.HOME);
       return;
     }
 
@@ -30,7 +30,7 @@ function GoogleAuthCallbackContent() {
       try {
         const data = await authApi.googleLogin(code);
         setAccessToken(data.accessToken);
-        router.replace(PATHS.QA);
+        router.replace(PATHS.HOME);
       } catch (error: unknown) {
         const err = error as {
           response?: {
@@ -49,7 +49,7 @@ function GoogleAuthCallbackContent() {
           params.set("googleEmail", googleEmail);
           router.replace(`${PATHS.AUTH.GOOGLE_REGISTER}?${params.toString()}`);
         } else {
-          router.replace(PATHS.QA);
+          router.replace(PATHS.HOME);
           showAlert({
             type: "error",
             title: "오류",

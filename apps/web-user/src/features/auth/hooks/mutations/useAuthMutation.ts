@@ -47,7 +47,7 @@ export function useGoogleRegister() {
     mutationFn: authApi.googleRegister,
     onSuccess: (data) => {
       setAccessToken(data.accessToken);
-      router.replace(PATHS.QA);
+      router.replace(PATHS.HOME);
     },
     onError: (error) => {
       showAlert({
