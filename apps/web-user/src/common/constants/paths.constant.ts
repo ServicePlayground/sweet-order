@@ -46,4 +46,9 @@ export const PATHS = {
 
   // QA/테스트 전용 페이지
   QA: "/qa",
+
+  AUTH: {
+    GOOGLE_REDIRECT_URI: "/auth/login/google",
+    GOOGLE_REGISTER: "/auth/register/google",
+  },
 } as const;

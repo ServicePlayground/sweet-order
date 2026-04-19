@@ -85,7 +85,7 @@ export class ChatRoomUserResponseDto {
 
   @ApiPropertyOptional({
     description: "사용자 닉네임",
-    example: "홍길동",
+    example: "홍길동_4821",
   })
   nickname: string | null;
 

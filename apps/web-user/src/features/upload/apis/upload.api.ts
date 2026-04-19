@@ -1,4 +1,4 @@
-import { userClient } from "@/apps/web-user/common/config/axios.config";
+import { consumerClient } from "@/apps/web-user/common/config/axios.config";
 import { UploadFileResponse } from "@/apps/web-user/features/upload/types/upload.type";
 
 export const uploadApi = {
@@ -7,10 +7,8 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await userClient.post("/uploads/file", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await consumerClient.post("/uploads/file", formData, {
+      timeout: 120_000,
     });
     return response.data.data;
   },

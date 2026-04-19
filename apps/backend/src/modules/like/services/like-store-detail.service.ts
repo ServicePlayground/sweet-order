@@ -34,8 +34,8 @@ export class LikeStoreDetailService {
     // 좋아요 여부 확인
     const like = await this.prisma.storeLike.findUnique({
       where: {
-        userId_storeId: {
-          userId,
+        consumerId_storeId: {
+          consumerId: userId,
           storeId,
         },
       },

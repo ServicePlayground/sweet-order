@@ -6,31 +6,26 @@ import { Icon } from "@/apps/web-user/common/components/icons";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNav";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
-import { useMe } from "@/apps/web-user/features/user/hooks/queries/useMe";
+import { useMypageProfile } from "@/apps/web-user/features/mypage/hooks/queries/useMypageProfile";
 import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
 import {
-  navigateToLoginPage,
   isWebViewEnvironment,
+  requestGoogleLoginInWebView,
 } from "@/apps/web-user/common/utils/webview.bridge";
 import { UpcomingOrderCard } from "../../features/order/components/UpcomingOrderCard";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
 
-function getLoginInfo(user: {
-  googleId: string;
-  googleEmail: string;
-  email: string;
-  kakaoId?: string;
-  naverId?: string;
-}) {
-  if (user.googleId)
+function getLoginInfo(user: { googleId: string; googleEmail: string; phone: string }) {
+  if (user.googleId && user.googleEmail) {
     return (
       <div className="flex items-center gap-[6px]">
         <span className="px-1 py-0.5 bg-gray-50 text-2xs font-bold rounded-sm">구글</span>
         {user.googleEmail}
       </div>
     );
-  return user.email;
+  }
+  return user.phone;
 }
 
 const QUICK_LINKS = [
@@ -43,7 +38,7 @@ const QUICK_LINKS = [
 export default function MypagePage() {
   const { isAuthenticated, setAccessToken } = useAuthStore();
   const hasHydrated = useAuthHasHydrated();
-  const { data: user } = useMe();
+  const { data: user } = useMypageProfile();
   const [isAppGuideOpen, setIsAppGuideOpen] = useState(false);
   const { data: ordersData } = useMyOrders({ type: "UPCOMING" });
   const upcomingCount =
@@ -145,7 +140,7 @@ export default function MypagePage() {
             type="button"
             onClick={() => {
               if (isWebViewEnvironment()) {
-                navigateToLoginPage();
+                requestGoogleLoginInWebView();
               } else if (process.env.NODE_ENV === "development") {
                 setAccessToken(process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN ?? "");
               } else {

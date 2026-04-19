@@ -42,7 +42,7 @@ export class OrderStatisticsService {
     const { start, end } = kstYmdRangeToUtcBounds(startDate, endDate);
 
     const store = await this.prisma.store.findFirst({
-      where: { id: storeId, userId: user.sub },
+      where: { id: storeId, sellerId: user.sub },
       select: { id: true },
     });
     if (!store) {

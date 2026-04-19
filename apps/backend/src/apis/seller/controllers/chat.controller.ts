@@ -6,7 +6,7 @@ import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-respons
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { AuthenticatedUser, JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
 import {
   ChatRoomListForSellerResponseDto,
@@ -25,8 +25,8 @@ import { PaginationRequestDto } from "@apps/backend/common/dto/pagination-reques
   ChatRoomForSellerResponseDto,
   MessageListResponseDto,
 )
-@Controller(`${USER_ROLES.SELLER}/chat-room`)
-@Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] })
+@Controller(`${AUDIENCE.SELLER}/chat-room`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerChatController {
   constructor(private readonly chatService: ChatService) {}
 

@@ -14,7 +14,7 @@ import { reverseGeocode } from "@/apps/web-user/common/utils/kakao-geocode.util"
 declare global {
   interface Window {
     // 웹뷰 -> Flutter
-    Loginpage: {
+    GoogleLogin?: {
       postMessage: (message: string) => void;
     };
     Logout: {
@@ -38,14 +38,13 @@ declare global {
 // ============================================================================
 
 /**
- * 로그인 페이지로 이동하는 웹뷰 통신 함수
- * Flutter 앱의 로그인 페이지로 이동하도록 메시지를 전송합니다.
+ * Flutter 앱에서 Google OAuth 로그인 플로우를 시작하도록 메시지를 전송합니다.
  */
-export function navigateToLoginPage(): void {
+export function requestGoogleLoginInWebView(): void {
   try {
-    window.Loginpage.postMessage("true");
+    window.GoogleLogin?.postMessage("true");
   } catch (error) {
-    console.error("로그인 페이지 이동 중 오류가 발생했습니다:", error);
+    console.error("Google 로그인 요청 중 오류가 발생했습니다:", error);
   }
 }
 
@@ -76,13 +75,14 @@ export function requestLocationFromWebView(): void {
 
 /**
  * 웹뷰 환경인지 확인하는 함수
+ * (Flutter에서 주입하는 GoogleLogin / mylocation 브릿지 존재 여부)
  */
 export function isWebViewEnvironment(): boolean {
   if (typeof window === "undefined") {
     return false;
   }
 
-  return typeof window.Loginpage !== "undefined";
+  return typeof window.GoogleLogin !== "undefined" || typeof window.mylocation !== "undefined";
 }
 
 // ============================================================================

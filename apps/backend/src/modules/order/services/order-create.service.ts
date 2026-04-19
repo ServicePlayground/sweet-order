@@ -168,7 +168,7 @@ export class OrderCreateService {
 
             const order = await tx.order.create({
               data: {
-                userId,
+                consumerId: userId,
                 productId,
                 productName,
                 productImages,

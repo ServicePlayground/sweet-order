@@ -20,7 +20,7 @@ export class ReviewWritableListService {
     const { page, limit } = query;
 
     const where: Prisma.OrderWhereInput = {
-      userId,
+      consumerId: userId,
       orderStatus: OrderStatus.PICKUP_COMPLETED,
       review: { is: null },
     };

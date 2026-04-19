@@ -17,14 +17,14 @@ export class ChatRoomUpdateService {
   /**
    * 채팅방 읽음 처리 (공통)
    */
-  async markChatRoomAsRead(roomId: string, readerId: string, readerType: "user" | "store") {
+  async markChatRoomAsRead(roomId: string, readerId: string, readerType: "consumer" | "store") {
     const chatRoom = await this.chatRoomDetailService.findChatRoomById(roomId);
 
     // 권한 확인
     await ChatPermissionUtil.verifyChatRoomAccess(chatRoom, readerId, readerType, this.prisma);
 
     // 읽지 않은 메시지 수 초기화
-    const updateData = readerType === "user" ? { userUnread: 0 } : { storeUnread: 0 };
+    const updateData = readerType === "consumer" ? { userUnread: 0 } : { storeUnread: 0 };
 
     await this.prisma.chatRoom.update({
       where: { id: roomId },

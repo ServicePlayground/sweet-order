@@ -3,6 +3,8 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
 import {
   AUTH_ERROR_MESSAGES,
+  AudienceConst,
+  PHONE_VERIFICATION_CODE_EXPIRY_MINUTES,
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
@@ -10,6 +12,9 @@ import {
   VerifyPhoneCodeRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+
+/** 인증 완료 후 다음 단계(구글 가입·계정 찾기 등)에 사용할 수 있는 유효 시간 */
+const VERIFIED_PURPOSE_VALID_MS = 60 * 60 * 1000;
 
 /**
  * 휴대폰 인증 서비스
@@ -29,13 +34,16 @@ export class PhoneService {
    * @param sendCodeDto 휴대폰 번호와 인증 목적
    * @throws BadRequestException 잘못된 휴대폰 번호 형식이거나 재발송 제한에 걸린 경우
    */
-  async sendVerificationCode(sendCodeDto: SendVerificationCodeRequestDto): Promise<void> {
-    const { phone, purpose } = sendCodeDto;
+  async sendVerificationCode(
+    sendCodeDto: SendVerificationCodeRequestDto,
+  ): Promise<{ expiresAt: Date }> {
+    const { phone, audience, purpose: kind } = sendCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
+    const storedPurpose = PhoneUtil.composeStoredPhoneVerificationPurpose(audience, kind);
 
     // 1. 인증번호 생성
     const verificationCode = PhoneUtil.generateVerificationCode();
-    const expiresAt = PhoneUtil.getExpirationTime(5); // 5분 후 만료
+    const expiresAt = PhoneUtil.getExpirationTime(PHONE_VERIFICATION_CODE_EXPIRY_MINUTES);
 
     // 2. 트랜잭션으로 인증 정보 저장 - PhoneVerification 테이블
     await this.prisma.$transaction(
@@ -44,7 +52,7 @@ export class PhoneService {
         await tx.phoneVerification.deleteMany({
           where: {
             phone: normalizedPhone,
-            purpose,
+            purpose: storedPurpose,
             isVerified: false,
           },
         });
@@ -55,7 +63,7 @@ export class PhoneService {
             phone: normalizedPhone,
             verificationCode,
             expiresAt,
-            purpose,
+            purpose: storedPurpose,
           },
         });
       },
@@ -67,6 +75,8 @@ export class PhoneService {
 
     // 3. SMS 발송 - ERD 요구사항: 신뢰할 수 있는 인증 서비스 연동
     // TODO: 실제 SMS 발송 서비스 연동 (예: 네이버 클라우드 플랫폼, 카카오 알림톡 등)
+
+    return { expiresAt };
   }
 
   /**
@@ -76,15 +86,16 @@ export class PhoneService {
    * @throws BadRequestException 인증번호가 잘못되었거나 만료되었거나 시도 횟수를 초과한 경우
    */
   async verifyPhoneCode(verifyCodeDto: VerifyPhoneCodeRequestDto): Promise<void> {
-    const { phone, verificationCode, purpose } = verifyCodeDto;
+    const { phone, verificationCode, audience, purpose: kind } = verifyCodeDto;
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
+    const storedPurpose = PhoneUtil.composeStoredPhoneVerificationPurpose(audience, kind);
 
     // ------- TODO: 삭제 필요 (임시 처리: 인증 통과) -------
     if (verificationCode === "777777") {
       const existingVerification = await this.prisma.phoneVerification.findFirst({
         where: {
           phone: normalizedPhone,
-          purpose,
+          purpose: storedPurpose,
           isVerified: false, // 인증되지 않은 레코드만 조회
         },
         orderBy: { createdAt: "desc" }, // 가장 최근 순 정렬
@@ -93,7 +104,7 @@ export class PhoneService {
       // 인증 정보가 존재하지 않는 경우
       if (!existingVerification) {
         LoggerUtil.log(
-          `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${purpose}`,
+          `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${storedPurpose}`,
         );
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
       }
@@ -101,7 +112,7 @@ export class PhoneService {
       // 2. 만료 시간 확인 - 5분 후 자동 만료
       if (existingVerification.expiresAt < new Date()) {
         LoggerUtil.log(
-          `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${purpose}, expiresAt: ${existingVerification.expiresAt}`,
+          `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${storedPurpose}, expiresAt: ${existingVerification.expiresAt}`,
         );
         throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
       }
@@ -129,7 +140,7 @@ export class PhoneService {
       where: {
         phone: normalizedPhone,
         verificationCode,
-        purpose, // 목적별로 구분하여 검증
+        purpose: storedPurpose,
         isVerified: false, // 인증되지 않은 레코드만 조회
       },
       orderBy: { createdAt: "desc" }, // 가장 최근 순 정렬
@@ -138,7 +149,7 @@ export class PhoneService {
     // 인증 정보가 존재하지 않는 경우
     if (!phoneVerification) {
       LoggerUtil.log(
-        `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${purpose}, verificationCode: ${verificationCode}`,
+        `휴대폰 인증 실패: 인증 정보 없음 - phone: ${normalizedPhone}, purpose: ${storedPurpose}, verificationCode: ${verificationCode}`,
       );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_FAILED);
     }
@@ -146,7 +157,7 @@ export class PhoneService {
     // 2. 만료 시간 확인 - 5분 후 자동 만료
     if (phoneVerification.expiresAt < new Date()) {
       LoggerUtil.log(
-        `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${purpose}, expiresAt: ${phoneVerification.expiresAt}`,
+        `휴대폰 인증 실패: 인증번호 만료 - phone: ${normalizedPhone}, purpose: ${storedPurpose}, expiresAt: ${phoneVerification.expiresAt}`,
       );
       throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_EXPIRED);
     }
@@ -171,30 +182,33 @@ export class PhoneService {
 
   /**
    * 휴대폰 인증 상태 확인
-   * 인증 완료 후 1시간 이내의 인증만 유효한 것으로 간주
-   * createdAt과 expiresAt 모두 확인하여 안전하게 검증
+   *
+   * `verifyPhoneCode`로 `isVerified: true`가 된 뒤, 그 시점(`updatedAt`)으로부터
+   * 1시간 이내에만 유효한 것으로 봅니다 (`VERIFIED_PURPOSE_VALID_MS`와 동일).
+   * (코드 입력 단계의 유효성은 `verifyPhoneCode`에서 `expiresAt`으로 검증합니다.)
    *
    * @param phone 휴대폰 번호
-   * @param purpose 인증 목적 (선택적, 기본값: 회원가입)
+   * @param audience 인증 주체 (consumer | seller)
+   * @param kind 인증 종류 (`PhoneVerificationPurpose`)
    * @returns 인증 상태 유효 여부
    */
   async checkPhoneVerificationStatus(
     phone: string,
-    purpose: PhoneVerificationPurpose,
+    audience: AudienceConst,
+    kind: PhoneVerificationPurpose,
   ): Promise<boolean> {
     const normalizedPhone = PhoneUtil.normalizePhone(phone);
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000); // 1시간 전
+    const validSince = new Date(Date.now() - VERIFIED_PURPOSE_VALID_MS);
+    const composed = PhoneUtil.composeStoredPhoneVerificationPurpose(audience, kind);
 
     const phoneVerification = await this.prisma.phoneVerification.findFirst({
       where: {
         phone: normalizedPhone,
-        purpose, // 목적별로 구분하여 확인
-        isVerified: true, // 인증된 레코드만 유효
-        createdAt: {
-          gte: oneHourAgo, // 1시간 이내에 인증된 것만 유효
-        },
+        purpose: composed,
+        isVerified: true,
+        updatedAt: { gte: validSince },
       },
-      orderBy: { createdAt: "desc" }, // 가장 최근 인증 레코드만 유효
+      orderBy: { updatedAt: "desc" },
     });
 
     return !!phoneVerification;

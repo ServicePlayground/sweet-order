@@ -1,121 +1,121 @@
 import { Injectable } from "@nestjs/common";
-import { Request as ExpressRequest } from "express";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
-import { UserService } from "@apps/backend/modules/auth/services/user.service";
+import { ConsumerService } from "@apps/backend/modules/auth/services/consumer.service";
+import { SellerService } from "@apps/backend/modules/auth/services/seller.service";
 import { GoogleService } from "@apps/backend/modules/auth/services/google.service";
 import {
-  RegisterRequestDto,
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
-  CheckUserIdRequestDto,
-  LoginRequestDto,
-  FindAccountRequestDto,
-  ChangePasswordRequestDto,
   ChangePhoneRequestDto,
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
+  FindAccountRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 
-/**
- * 인증 서비스
- *
- * 모든 인증 관련 기능을 통합하여 제공하는 메인 서비스입니다.
- * UserService, PhoneService, GoogleService를 조합하여 사용합니다.
- */
+/** 세션(액세스 토큰) 유효 확인 API 공통 응답 — DB 조회 없음 */
+type SessionAvailabilityResponse = { available: true };
+
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly consumerService: ConsumerService,
+    private readonly sellerService: SellerService,
     private readonly phoneService: PhoneService,
     private readonly googleService: GoogleService,
   ) {}
 
-  /**
-   * 일반 - 회원가입
-   */
-  async register(registerDto: RegisterRequestDto) {
-    return await this.userService.register(registerDto);
+  private getSessionAvailabilityResponse(): SessionAvailabilityResponse {
+    return { available: true as const };
   }
 
   /**
-   * 일반 - ID 중복 확인
+   * 구글 — Authorization Code 로그인 (구매자). 리다이렉트 URI는 구매자 앱 기준.
    */
-  async checkUserIdAvailability(checkUserIdDto: CheckUserIdRequestDto) {
-    return await this.userService.checkUserIdAvailability(checkUserIdDto);
+  async consumerGoogleLoginWithCode(dto: GoogleLoginRequestDto) {
+    return this.googleService.consumerGoogleLoginWithCode(dto);
   }
 
   /**
-   * 일반 - 로그인
+   * 구글 — Authorization Code 로그인 (판매자). 리다이렉트 URI는 판매자 앱 기준.
    */
-  async login(loginDto: LoginRequestDto) {
-    return await this.userService.login(loginDto);
+  async sellerGoogleLoginWithCode(dto: GoogleLoginRequestDto) {
+    return this.googleService.sellerGoogleLoginWithCode(dto);
   }
 
   /**
-   * 일반 - 비밀번호 변경
+   * 구글 — 회원가입·최초 연동 (휴대폰 인증 완료 후, 구매자)
    */
-  async changePassword(changePasswordDto: ChangePasswordRequestDto) {
-    await this.userService.changePassword(changePasswordDto);
+  async consumerGoogleRegisterWithPhone(dto: GoogleRegisterRequestDto) {
+    return this.googleService.consumerGoogleRegisterWithPhone(dto);
   }
 
   /**
-   * 계정 찾기
-   * 휴대폰 인증을 통해 계정 정보를 찾습니다.
-   * 일반 로그인 계정인 경우 userId를, 구글 로그인 계정인 경우 googleEmail을 반환합니다.
-   * 둘 다 있는 경우 모두 반환합니다.
+   * 구글 — 회원가입·최초 연동 (휴대폰 인증 완료 후, 판매자)
    */
-  async findAccount(findAccountDto: FindAccountRequestDto) {
-    return await this.userService.findAccount(findAccountDto);
+  async sellerGoogleRegisterWithPhone(dto: GoogleRegisterRequestDto) {
+    return this.googleService.sellerGoogleRegisterWithPhone(dto);
   }
 
   /**
-   * 구글 - Authorization Code로 구글 로그인 처리
+   * 구매자 액세스 토큰이 가드·전략을 통과했을 때의 확인 응답 (DB 조회 없음)
    */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
-    return await this.googleService.googleLoginWithCode(codeDto);
+  getCurrentUser(user: JwtVerifiedPayload): SessionAvailabilityResponse {
+    void user.sub;
+    return this.getSessionAvailabilityResponse();
   }
 
   /**
-   * 구글 - 로그인 회원가입 (휴대폰 인증 완료 후)
+   * 판매자 액세스 토큰이 가드·전략을 통과했을 때의 확인 응답 (DB 조회 없음)
    */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
-    return await this.googleService.googleRegisterWithPhone(googleRegisterDto);
+  getCurrentSeller(user: JwtVerifiedPayload): SessionAvailabilityResponse {
+    void user.sub;
+    return this.getSessionAvailabilityResponse();
+  }
+
+  /**
+   * 계정 찾기 (구매자) — 발송/확인 시 `audience: consumer`, `purpose: find_account`로 인증 완료 후 호출
+   */
+  async findAccountConsumer(dto: FindAccountRequestDto) {
+    return this.consumerService.findAccount(dto);
+  }
+
+  /**
+   * 계정 찾기 (판매자) — 발송/확인 시 `audience: seller`, `purpose: find_account`로 인증 완료 후 호출
+   */
+  async findAccountSeller(dto: FindAccountRequestDto) {
+    return this.sellerService.findAccount(dto);
+  }
+
+  /** 휴대폰 번호 변경 (구매자) */
+  async changePhoneConsumer(dto: ChangePhoneRequestDto, user: JwtVerifiedPayload) {
+    await this.consumerService.changePhone(dto, user);
+  }
+
+  /** 휴대폰 번호 변경 (판매자) */
+  async changePhoneSeller(dto: ChangePhoneRequestDto, user: JwtVerifiedPayload) {
+    await this.sellerService.changePhone(dto, user);
   }
 
   /**
    * 휴대폰 인증번호 발송
+   * `audience`(consumer | seller)와 `purpose`(종류)를 함께 보내면 DB에는 `consumer:google_registration` 형태로 저장됩니다.
    */
-  async sendVerificationCode(sendCodeDto: SendVerificationCodeRequestDto) {
-    await this.phoneService.sendVerificationCode(sendCodeDto);
+  async sendVerificationCode(dto: SendVerificationCodeRequestDto) {
+    return await this.phoneService.sendVerificationCode(dto);
   }
 
   /**
-   * 휴대폰 인증번호 확인
+   * 휴대폰 인증번호 확인 — 발송 시와 동일한 `audience`·`purpose`를 전달해야 합니다.
    */
-  async verifyPhoneCode(verifyCodeDto: VerifyPhoneCodeRequestDto) {
-    await this.phoneService.verifyPhoneCode(verifyCodeDto);
+  async verifyPhoneCode(dto: VerifyPhoneCodeRequestDto) {
+    await this.phoneService.verifyPhoneCode(dto);
   }
 
   /**
-   * 휴대폰 번호 변경
+   * 헤더 기반 인증 — 클라이언트에서 토큰 삭제로 처리; 서버는 동작 없음
    */
-  async changePhone(changePhoneDto: ChangePhoneRequestDto, user: JwtVerifiedPayload) {
-    await this.userService.changePhone(changePhoneDto, user);
-  }
-
-  /**
-   * 현재 로그인한 사용자 정보 조회
-   */
-  async getCurrentUser(user: JwtVerifiedPayload, req: ExpressRequest) {
-    return await this.userService.getCurrentUser(user, req);
-  }
-
-  /**
-   * 로그아웃 처리
-   * 헤더 기반 인증에서는 클라이언트에서 토큰을 삭제하면 되므로 서버에서는 별도 처리 불필요
-   */
-  async logout() {
+  logout(): void {
     // 헤더 기반 인증에서는 클라이언트에서 토큰을 삭제하면 되므로 서버에서는 별도 처리 불필요
   }
 }

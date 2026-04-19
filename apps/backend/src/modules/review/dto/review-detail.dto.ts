@@ -67,7 +67,7 @@ export class ReviewResponseDto {
 
   @ApiProperty({
     description: "사용자 닉네임",
-    example: "철수킹",
+    example: "김철수_739",
   })
   userNickname: string | null;
 

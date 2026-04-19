@@ -79,7 +79,7 @@ export class ProductMapperUtil {
    */
   static readonly STORE_INFO_WITH_USER_ID_SELECT = {
     ...ProductMapperUtil.STORE_INFO_SELECT,
-    userId: true,
+    sellerId: true,
   } as const satisfies Prisma.StoreSelect;
 
   /**

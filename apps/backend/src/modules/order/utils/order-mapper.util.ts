@@ -123,7 +123,7 @@ export class OrderMapperUtil {
   static mapToOrderResponse(order: OrderWithItems): OrderResponseDto {
     return {
       id: order.id,
-      userId: order.userId,
+      userId: order.consumerId,
       productId: order.productId,
       productName: order.productName ?? "",
       productImages: order.productImages ?? [],

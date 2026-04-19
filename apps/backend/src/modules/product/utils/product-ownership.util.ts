@@ -23,7 +23,7 @@ export class ProductOwnershipUtil {
     productId: string,
     userId: string,
     includeStoreSelect?: Prisma.StoreSelect,
-  ): Promise<Product & { store: { userId: string; [key: string]: any } }> {
+  ): Promise<Product & { store: { sellerId: string; [key: string]: any } }> {
     const product = await prisma.product.findFirst({
       where: {
         id: productId,
@@ -31,7 +31,7 @@ export class ProductOwnershipUtil {
       include: {
         store: {
           select: {
-            userId: true,
+            sellerId: true,
             ...(includeStoreSelect || {}),
           },
         },
@@ -45,14 +45,14 @@ export class ProductOwnershipUtil {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    if (product.store.userId !== userId) {
+    if (product.store.sellerId !== userId) {
       LoggerUtil.log(
-        `상품 소유권 확인 실패: 소유권 없음 - productId: ${productId}, userId: ${userId}, storeUserId: ${product.store.userId}`,
+        `상품 소유권 확인 실패: 소유권 없음 - productId: ${productId}, userId: ${userId}, storeSellerId: ${product.store.sellerId}`,
       );
       throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.FORBIDDEN);
     }
 
-    return product as Product & { store: { userId: string; [key: string]: any } };
+    return product as Product & { store: { sellerId: string; [key: string]: any } };
   }
 
   /**
@@ -74,7 +74,7 @@ export class ProductOwnershipUtil {
       },
       select: {
         id: true,
-        userId: true,
+        sellerId: true,
       },
     });
 
@@ -85,9 +85,9 @@ export class ProductOwnershipUtil {
       throw new NotFoundException(PRODUCT_ERROR_MESSAGES.STORE_NOT_FOUND);
     }
 
-    if (store.userId !== userId) {
+    if (store.sellerId !== userId) {
       LoggerUtil.log(
-        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeUserId: ${store.userId}`,
+        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeSellerId: ${store.sellerId}`,
       );
       throw new ForbiddenException(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED);
     }

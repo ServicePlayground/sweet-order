@@ -45,7 +45,7 @@ export class OrderSellerActionService {
   ): Promise<{ id: string }> {
     await OrderOwnershipUtil.verifyOrderStoreOwnership(this.prisma, orderId, userId, {
       id: true,
-      userId: true,
+      sellerId: true,
     });
 
     await this.orderAutomationService.syncOrderLifecycleById(orderId);

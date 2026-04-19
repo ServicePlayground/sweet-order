@@ -7,7 +7,7 @@ import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.
  */
 type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
   include: {
-    user: {
+    consumer: {
       select: {
         nickname: true;
         profileImageUrl: true;
@@ -52,7 +52,7 @@ export class ReviewMapperUtil {
   static readonly USER_INFO_SELECT = {
     nickname: true,
     profileImageUrl: true,
-  } as const satisfies Prisma.UserSelect;
+  } as const satisfies Prisma.ConsumerSelect;
 
   /**
    * Product + Store 정보 include
@@ -90,7 +90,7 @@ export class ReviewMapperUtil {
 
   /**
    * Prisma ProductReview 엔티티를 ReviewResponseDto로 변환
-   * @param review - Prisma ProductReview 엔티티 (user, product.store 포함)
+   * @param review - Prisma ProductReview 엔티티 (consumer, product.store 포함)
    * @returns ReviewResponseDto 객체
    */
   static mapToReviewResponse(review: ProductReviewWithUserAndProductStore): ReviewResponseDto {
@@ -99,14 +99,14 @@ export class ReviewMapperUtil {
       productId: review.productId,
       storeId: review.product.storeId,
       storeName: review.product.store.name,
-      userId: review.userId,
+      userId: review.consumerId,
       orderId: review.orderId ?? null,
       order: review.order ? OrderMapperUtil.mapToOrderResponse(review.order) : null,
       rating: review.rating,
       content: review.content,
       imageUrls: review.imageUrls,
-      userNickname: review.user.nickname,
-      userProfileImageUrl: review.user.profileImageUrl,
+      userNickname: review.consumer.nickname,
+      userProfileImageUrl: review.consumer.profileImageUrl,
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
     };

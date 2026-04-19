@@ -16,48 +16,63 @@ datasource db {
 // Models
 // ============================================================================
 
-// User model for authentication and user management
-model User {
-  // Primary Key
+/// 구매자 앱(web-user) 전용 계정 — 판매자 계정과 DB·토큰으로 완전 분리
+model Consumer {
   id String @id @default(cuid())
 
-  // 관계 필드
-  userId String? @unique @map("user_id") // 사용자 ID (일반 회원가입용, 소셜 로그인 시 null 가능)
+  phone           String  @unique
+  name            String?
+  nickname        String?
+  profileImageUrl String? @map("profile_image_url")
+  isPhoneVerified Boolean @default(false) @map("is_phone_verified")
+  isActive        Boolean @default(true) @map("is_active")
 
-  // 비즈니스 필드
-  phone           String  @unique // 휴대폰 번호 (통합 정보 탐색용, 필수)
-  passwordHash    String? @map("password_hash") // 암호화된 비밀번호 (일반 회원가입용)
-  name            String? // 사용자 실명
-  nickname        String? // 닉네임
-  email           String? // 이메일
-  profileImageUrl String? @map("profile_image_url") // 프로필 이미지 URL
-  isPhoneVerified Boolean @default(false) @map("is_phone_verified") // 휴대폰 인증 여부
-  isActive        Boolean @default(true) @map("is_active") // 계정 활성화 상태
-  role            UserRole @default(USER) // 사용자 권한 (USER, SELLER, ADMIN)
+  googleId    String? @unique @map("google_id")
+  googleEmail String? @map("google_email")
 
-  // 소셜 로그인 관련 필드
-  googleId    String? @unique @map("google_id") // 구글 사용자 ID
-  googleEmail String? @map("google_email") // 구글 이메일
+  createdAt   DateTime @default(now()) @map("created_at")
+  lastLoginAt DateTime? @map("last_login_at")
 
-  // 시스템 필드
-  createdAt   DateTime @default(now()) @map("created_at") // 계정 생성일시
-  lastLoginAt DateTime? @map("last_login_at") // 마지막 로그인 시간
-
-  // Relations
   productLikes       ProductLike[]
   storeLikes         StoreLike[]
   productRecentViews ProductRecentView[]
-  stores             Store[]
   reviews            ProductReview[]
   chatRooms          ChatRoom[]
   orders             Order[]
-  userNotifications       UserNotification[]
+  consumerNotifications UserNotification[]
+
+  @@index([phone])
+  @@index([googleId])
+  @@map("consumers")
+}
+
+/// 판매자 앱(web-seller) 전용 계정
+model Seller {
+  id String @id @default(cuid())
+
+  phone           String  @unique
+  name            String?
+  nickname        String?
+  profileImageUrl String? @map("profile_image_url")
+  isPhoneVerified Boolean @default(false) @map("is_phone_verified")
+  isActive        Boolean @default(true) @map("is_active")
+
+  googleId    String? @unique @map("google_id")
+  googleEmail String? @map("google_email")
+
+  /// 판매자 온보딩·검증 단계 (스토어 생성 후 갱신)
+  sellerVerificationStatus SellerVerificationStatus @default(REGISTERED) @map("seller_verification_status")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  stores                  Store[]
+  sellerNotifications     UserNotification[]
   notificationPreferences UserNotificationPreference[]
 
   @@index([phone])
-  @@index([userId])
   @@index([googleId])
-  @@map("users")
+  @@map("sellers")
 }
 
 // Phone verification for registration and password recovery
@@ -150,18 +165,18 @@ model ProductLike {
   id String @id @default(cuid())
 
   // 관계 필드
-  userId    String @map("user_id") // 사용자 ID
-  productId String @map("product_id") // 상품 ID
+  consumerId String @map("consumer_id")
+  productId  String @map("product_id")
 
   // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, productId])
-  @@index([userId])
+  @@unique([consumerId, productId])
+  @@index([consumerId])
   @@index([productId])
   @@map("product_likes")
 }
@@ -172,7 +187,7 @@ model Store {
   id String @id @default(cuid())
 
   // 관계 필드
-  userId String @map("user_id") // 판매자 사용자 ID
+  sellerId String @map("seller_id")
 
   // 비즈니스 필드 - 스토어 정보
   logoImageUrl String? @map("logo_image_url") // 스토어 로고 이미지 URL
@@ -224,7 +239,7 @@ model Store {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  seller    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  seller    Seller       @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   products  Product[]
   likes     StoreLike[]
   chatRooms ChatRoom[]
@@ -232,8 +247,8 @@ model Store {
   orders    Order[]
   notificationPreferences UserNotificationPreference[]
 
-  @@unique([userId, businessNo, permissionManagementNumber])
-  @@index([userId])
+  @@unique([sellerId, businessNo, permissionManagementNumber])
+  @@index([sellerId])
   @@index([businessNo])
   @@index([likeCount])
   @@index([latitude, longitude]) // 위치 기반 검색을 위한 인덱스
@@ -246,19 +261,19 @@ model ProductRecentView {
   id String @id @default(cuid())
 
   // 관계 필드
-  userId    String @map("user_id")    // 사용자 ID
-  productId String @map("product_id") // 상품 ID
+  consumerId String @map("consumer_id")
+  productId  String @map("product_id")
 
   // 시스템 필드
   viewedAt DateTime @default(now()) @map("viewed_at") // 마지막 조회 시간
 
   // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   // 인덱스 최적화
-  @@unique([userId, productId])
-  @@index([userId, viewedAt(sort: Desc)])
+  @@unique([consumerId, productId])
+  @@index([consumerId, viewedAt(sort: Desc)])
   @@index([productId])
   @@map("product_recent_views")
 }
@@ -269,18 +284,18 @@ model StoreLike {
   id String @id @default(cuid())
 
   // 관계 필드
-  userId  String @map("user_id") // 사용자 ID
-  storeId String @map("store_id") // 스토어 ID
+  consumerId String @map("consumer_id")
+  storeId    String @map("store_id")
 
   // 시스템 필드
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  store    Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, storeId])
-  @@index([userId])
+  @@unique([consumerId, storeId])
+  @@index([consumerId])
   @@index([storeId])
   @@map("store_likes")
 }
@@ -291,10 +306,10 @@ model ProductReview {
   id String @id @default(cuid())
 
   // 관계 필드
-  productId String @map("product_id") // 상품 ID
-  userId    String @map("user_id") // 사용자 ID
+  productId  String @map("product_id")
+  consumerId String @map("consumer_id")
   /** 마이페이지에서 주문 기준으로 작성한 후기인 경우 연결 (주문당 최대 1건) */
-  orderId   String? @unique @map("order_id") // 주문 ID
+  orderId    String? @unique @map("order_id")
 
   // 비즈니스 필드
   rating    Float // 별점 (0.0 ~ 5.0)
@@ -309,15 +324,15 @@ model ProductReview {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  order    Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   // 인덱스 최적화
   @@index([productId, createdAt(sort: Desc)]) // 상품별 후기 목록 조회 최적화 (최신순)
   @@index([productId, rating(sort: Desc), createdAt(sort: Desc)], map: "product_reviews_product_id_rating_desc_created_at_idx") // 상품별 후기 목록 조회 최적화 (별점 내림차순)
   @@index([productId, rating(sort: Asc), createdAt(sort: Desc)], map: "product_reviews_product_id_rating_asc_created_at_idx") // 상품별 후기 목록 조회 최적화 (별점 오름차순)
-  @@index([userId]) // 사용자별 후기 조회
+  @@index([consumerId]) // 사용자별 후기 조회
   @@map("product_reviews")
 }
 
@@ -327,8 +342,8 @@ model ChatRoom {
   id String @id @default(cuid())
 
   // 관계 필드
-  userId  String @map("user_id") // 사용자 ID
-  storeId String @map("store_id") // 스토어 ID
+  consumerId String @map("consumer_id")
+  storeId    String @map("store_id")
 
   // 비즈니스 필드
   lastMessage   String? @map("last_message") @db.VarChar(1000) // 마지막 메시지 미리보기용 (최대 1000자)
@@ -341,14 +356,14 @@ model ChatRoom {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  store    Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  store    Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   messages Message[]
 
-  @@unique([userId, storeId]) // 1대1 채팅방 보장
-  @@index([userId, lastMessageAt(sort: Desc)]) // 사용자 채팅방 목록 조회 최적화
+  @@unique([consumerId, storeId]) // 1대1 채팅방 보장
+  @@index([consumerId, lastMessageAt(sort: Desc)]) // 사용자 채팅방 목록 조회 최적화
   @@index([storeId, lastMessageAt(sort: Desc)]) // 판매자 채팅방 목록 조회 최적화
-  @@index([userId]) // 기존 인덱스 유지
+  @@index([consumerId]) // 기존 인덱스 유지
   @@index([storeId]) // 기존 인덱스 유지
   @@map("chat_rooms")
 }
@@ -410,9 +425,9 @@ model Order {
   id String @id @default(cuid())
 
   // 관계 필드
-  userId    String @map("user_id") // 사용자 ID
-  productId String @map("product_id") // 상품 ID (하나의 주문은 하나의 상품에 대한 주문)
-  storeId   String @map("store_id") // 스토어 ID
+  consumerId String @map("consumer_id")
+  productId  String @map("product_id")
+  storeId    String @map("store_id")
   storeName String? @map("store_name") // 스토어명 (주문 시점의 스토어명 보존)
   productName  String? @map("product_name") // 상품명 (주문 시점의 상품명 보존)
   productImages String[] @default([]) @map("product_images") // 상품 이미지 (주문 시점의 상품 이미지 보존)
@@ -459,14 +474,14 @@ model Order {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product  Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   store    Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
   review     ProductReview?
 
   // 인덱스 최적화
-  @@index([userId, createdAt(sort: Desc)]) // 사용자별 주문 목록 조회 최적화 (최신순)
+  @@index([consumerId, createdAt(sort: Desc)]) // 사용자별 주문 목록 조회 최적화 (최신순)
   @@index([storeId, createdAt(sort: Desc)]) // 스토어별 주문 목록 조회 최적화 (최신순)
   @@index([productId]) // 상품별 주문 조회
   @@index([orderStatus]) // 주문 상태별 조회
@@ -477,10 +492,11 @@ model Order {
   @@map("orders")
 }
 
-/// 계정 단위 알림 (표면: 판매자 웹 / 사용자 앱·웹 등으로 구분)
+/// 계정 단위 알림 (USER_WEB: consumerId / SELLER_WEB: sellerId)
 model UserNotification {
   id         String                 @id @default(cuid())
-  userId     String                 @map("user_id")
+  consumerId String?                @map("consumer_id")
+  sellerId   String?                @map("seller_id")
   appSurface NotificationAppSurface @map("app_surface")
   category   NotificationCategory
   title      String
@@ -490,27 +506,30 @@ model UserNotification {
   orderId    String?                @map("order_id")
   createdAt  DateTime               @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consumer Consumer? @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  seller   Seller?   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
 
-  @@index([userId, appSurface, storeId, createdAt(sort: Desc)])
-  @@index([userId, appSurface, readAt])
+  @@index([consumerId, appSurface, storeId, createdAt(sort: Desc)])
+  @@index([sellerId, appSurface, storeId, createdAt(sort: Desc)])
+  @@index([consumerId, appSurface, readAt])
+  @@index([sellerId, appSurface, readAt])
   @@map("user_notifications")
 }
 
-/// 알림 설정 (판매자 웹: 사용자·스토어·표면 조합별)
+/// 알림 설정 (판매자 웹: 판매자·스토어·표면 조합별)
 model UserNotificationPreference {
   id                             String                 @id @default(cuid())
-  userId                         String                 @map("user_id")
+  sellerId                       String                 @map("seller_id")
   storeId                        String                 @map("store_id")
   appSurface                     NotificationAppSurface @map("app_surface")
   orderNotificationsEnabled     Boolean @default(true) @map("order_notifications_enabled")
   orderNotificationSoundEnabled Boolean @default(true) @map("order_notification_sound_enabled")
   updatedAt                      DateTime               @updatedAt @map("updated_at")
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  store Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  seller Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  store  Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, appSurface, storeId])
+  @@unique([sellerId, appSurface, storeId])
   @@index([storeId])
   @@map("user_notification_preferences")
 }
@@ -589,10 +608,10 @@ enum ProductCategoryType {
   PHOTO          // 사진
 }
 
-enum UserRole {
-  USER
-  SELLER
-  ADMIN
+/// 판매자 검증·온보딩
+enum SellerVerificationStatus {
+  REGISTERED // 가입만 완료
+  BUSINESS_VERIFIED // 사업자 등록·통신판매 등 검증 완료(정책에 맞게 갱신)
 }
 
 enum NotificationAppSurface {
@@ -605,7 +624,7 @@ enum NotificationCategory {
 }
 
 enum MessageSenderType {
-  USER
+  CONSUMER
   STORE
 }
 

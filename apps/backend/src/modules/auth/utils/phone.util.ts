@@ -1,4 +1,6 @@
 import { randomInt } from "crypto";
+import type { AudienceConst } from "@apps/backend/modules/auth/constants/auth.constants";
+import { PhoneVerificationPurpose } from "@apps/backend/modules/auth/constants/auth.constants";
 
 export class PhoneUtil {
   /**
@@ -63,5 +65,15 @@ export class PhoneUtil {
     }
 
     return phone;
+  }
+
+  /**
+   * DB `phone_verifications.purpose`에 저장되는 문자열(`{audience}:{kind}`)을 조합합니다.
+   */
+  static composeStoredPhoneVerificationPurpose(
+    audience: AudienceConst,
+    kind: PhoneVerificationPurpose,
+  ): string {
+    return `${audience}:${kind}`;
   }
 }

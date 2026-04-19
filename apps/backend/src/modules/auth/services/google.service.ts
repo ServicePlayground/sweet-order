@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import axios, { AxiosInstance } from "axios";
 import {
   AUTH_ERROR_MESSAGES,
+  AUDIENCE,
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { GoogleUserInfo } from "@apps/backend/modules/auth/types/auth.types";
@@ -15,17 +16,24 @@ import {
   GoogleRegisterRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-request.dto";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { buildInitialNicknameFromName } from "@apps/backend/modules/auth/utils/google-register-nickname.util";
 
 /**
- * 구글 OAuth 서비스
- * 구글 로그인 관련 비즈니스 로직을 처리합니다.
+ * 구글 OAuth — Consumer / Seller 테이블·JWT aud 분리
+ *
+ * - 로그인: Authorization Code → 토큰 교환 → userinfo → DB 조회 후 JWT 발급
+ * - 미가입·휴대폰 미인증: 프론트가 동일 메시지(`PHONE_VERIFICATION_REQUIRED`)로 회원가입(휴대폰 인증) 플로우로 분기
  */
 @Injectable()
 export class GoogleService {
-  private readonly googleClientId: string;
-  private readonly googleClientSecret: string;
-  private readonly googleRedirectUri: string;
-  private readonly userDomain: string;
+  private readonly consumerGoogleClientId: string;
+  private readonly consumerGoogleClientSecret: string;
+  private readonly sellerGoogleClientId: string;
+  private readonly sellerGoogleClientSecret: string;
+  private readonly consumerBase: string;
+  private readonly consumerPath: string;
+  private readonly sellerBase: string;
+  private readonly sellerPath: string;
   private readonly httpClient: AxiosInstance;
 
   constructor(
@@ -34,23 +42,24 @@ export class GoogleService {
     private readonly configService: ConfigService,
     private readonly phoneService: PhoneService,
   ) {
-    this.googleClientId = configService.get<string>("GOOGLE_CLIENT_ID")!;
-    this.googleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
-    this.googleRedirectUri = configService.get<string>("GOOGLE_REDIRECT_URI")!;
-    this.userDomain = configService.get<string>("PUBLIC_USER_DOMAIN")!;
-
-    // 안정적인 HTTP 클라이언트 설정
+    this.consumerGoogleClientId = configService.get<string>("GOOGLE_CLIENT_ID")!;
+    this.consumerGoogleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
+    this.sellerGoogleClientId = configService.get<string>("GOOGLE_CLIENT_ID_SELLER")!;
+    this.sellerGoogleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET_SELLER")!;
+    this.consumerBase = this.configService.get<string>("PUBLIC_USER_DOMAIN")!;
+    this.consumerPath = this.configService.get<string>("GOOGLE_REDIRECT_URI")!;
+    this.sellerBase = this.configService.get<string>("PUBLIC_SELLER_DOMAIN")!;
+    this.sellerPath = this.configService.get<string>("GOOGLE_REDIRECT_URI_SELLER")!;
     this.httpClient = axios.create({
-      timeout: 30000, // 30초 타임아웃
+      timeout: 30000,
       headers: {
         "User-Agent": "SweetOrder-Backend/1.0",
         Accept: "application/json",
         "Accept-Encoding": "gzip, deflate, br",
       },
-      // 연결 재사용을 위한 설정
       maxRedirects: 5,
-      validateStatus: (status) => status < 500, // 5xx 에러만 재시도
-      // 배포환경에서의 네트워크 안정성을 위한 설정
+      /** 4xx도 throw 하지 않음 → 아래에서 status·본문 검증 필수 */
+      validateStatus: (status) => status < 500,
       httpsAgent: new (require("https").Agent)({
         keepAlive: true,
         keepAliveMsecs: 30000,
@@ -62,37 +71,49 @@ export class GoogleService {
     });
   }
 
-  /**
-   * Authorization Code로 구글 로그인 처리
-   * @param codeDto - 구글에서 받은 Authorization Code
-   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
-   */
-  async googleLoginWithCode(codeDto: GoogleLoginRequestDto) {
-    const { code } = codeDto;
+  async consumerGoogleLoginWithCode(dto: GoogleLoginRequestDto) {
+    const googleUserInfo = await this.exchangeCodeForToken(
+      dto.code,
+      `${this.consumerBase}${this.consumerPath.startsWith("/") ? this.consumerPath : `/${this.consumerPath}`}`,
+      {
+        clientId: this.consumerGoogleClientId,
+        clientSecret: this.consumerGoogleClientSecret,
+      },
+    );
+    return this.googleLogin(googleUserInfo);
+  }
 
-    // Authorization Code를 Access Token으로 교환하고 사용자 정보 가져오기
-    const googleUserInfo = await this.exchangeCodeForToken(code);
-
-    return await this.googleLogin(googleUserInfo);
+  async sellerGoogleLoginWithCode(dto: GoogleLoginRequestDto) {
+    const googleUserInfo = await this.exchangeCodeForToken(
+      dto.code,
+      `${this.sellerBase}${this.sellerPath.startsWith("/") ? this.sellerPath : `/${this.sellerPath}`}`,
+      {
+        clientId: this.sellerGoogleClientId,
+        clientSecret: this.sellerGoogleClientSecret,
+      },
+    );
+    return this.googleLoginSeller(googleUserInfo);
   }
 
   /**
-   * Authorization Code를 Access Token으로 교환
-   * @param code - 구글에서 받은 Authorization Code
-   * @returns Access Token과 사용자 정보
+   * Authorization Code로 액세스 토큰 교환 후 Google userinfo 조회.
+   * @throws BadRequestException `GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED` — 코드 만료·redirect_uri 불일치·클라이언트 불일치 등
    */
-  async exchangeCodeForToken(code: string): Promise<GoogleUserInfo> {
+  private async exchangeCodeForToken(
+    code: string,
+    redirectUri: string,
+    credentials: { clientId: string; clientSecret: string },
+  ): Promise<GoogleUserInfo> {
+    const { clientId, clientSecret } = credentials;
     try {
-      // Authorization Code를 Access Token으로 교환
-      // Google OAuth는 application/x-www-form-urlencoded 형식을 요구
       const tokenResponse = await this.httpClient.post(
         "https://oauth2.googleapis.com/token",
         new URLSearchParams({
-          client_id: this.googleClientId,
-          client_secret: this.googleClientSecret,
+          client_id: clientId,
+          client_secret: clientSecret,
           code: decodeURIComponent(code),
           grant_type: "authorization_code",
-          redirect_uri: `${this.userDomain}${this.googleRedirectUri}`,
+          redirect_uri: redirectUri,
         }),
         {
           headers: {
@@ -113,6 +134,8 @@ export class GoogleService {
           },
         },
       );
+
+      console.log(userInfoResponse);
 
       const userInfo = userInfoResponse.data;
 
@@ -138,191 +161,215 @@ export class GoogleService {
   }
 
   /**
-   * 구글 로그인 처리 (내부 메서드)
+   * 구글 로그인 처리 (사용자용)
    * @param googleUserInfo - 구글 사용자 정보
-   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
+   * @returns 액세스 토큰 및 리프레시 토큰
    */
   async googleLogin(googleUserInfo: GoogleUserInfo) {
     const {
       userInfo: { googleId, googleEmail },
     } = googleUserInfo;
 
-    // 1. googleId로 기존 사용자 확인
-    const user = await this.prisma.user.findUnique({
+    const consumer = await this.prisma.consumer.findUnique({
       where: { googleId },
     });
 
-    if (!user) {
+    // 1. gooleId로 기존 사용자 조회
+    if (!consumer) {
       // 새 사용자인 경우 -> 휴대폰 인증 필요
-      LoggerUtil.log(
-        `구글 로그인 실패: 새 사용자 (휴대폰 인증 필요) - googleId: ${googleId}, googleEmail: ${googleEmail}`,
-      );
       throw new BadRequestException({
         message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
-        googleId: googleId,
-        googleEmail: googleEmail,
+        googleId,
+        googleEmail,
       });
     }
 
     // 2. 휴대폰 인증 상태 확인
-    if (!user.phone || !user.isPhoneVerified) {
-      LoggerUtil.log(
-        `구글 로그인 실패: 휴대폰 인증 미완료 - googleId: ${googleId}, userId: ${user.id}, hasPhone: ${!!user.phone}, isPhoneVerified: ${user.isPhoneVerified}`,
-      );
+    if (!consumer.phone || !consumer.isPhoneVerified) {
       throw new BadRequestException({
         message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
-        googleId: googleId,
-        googleEmail: googleEmail,
+        googleId,
+        googleEmail,
       });
     }
 
-    // 3. 트랜잭션으로 JWT 토큰 생성 및 마지막 로그인 시간 업데이트
-    return await this.prisma.$transaction(
-      async (tx) => {
-        // JWT 토큰 생성 (최소 정보만 포함: sub만)
-        const tokenPair = await this.jwtUtil.generateTokenPair({
-          sub: user.id,
-        });
-
-        // 마지막 로그인 시간 업데이트
-        await tx.user.update({
-          where: { id: user.id },
-          data: { lastLoginAt: new Date() },
-        });
-
-        // 응답에 토큰만 반환 (사용자 정보는 제외)
-        return {
-          accessToken: tokenPair.accessToken,
-          refreshToken: tokenPair.refreshToken,
-        };
-      },
-      {
-        maxWait: 5000, // 최대 대기 시간 (5초)
-        timeout: 10000, // 타임아웃 (10초)
-      },
-    );
-  }
-
-  /**
-   * 구글 로그인 회원가입 (휴대폰 인증 완료 후)
-   * @param googleRegisterDto - 구글 회원가입 정보
-   * @returns 사용자 정보 (토큰은 응답 본문에 포함)
-   */
-  async googleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
-    const { googleId, googleEmail, phone } = googleRegisterDto;
-    const normalizedPhone = PhoneUtil.normalizePhone(phone);
-
-    // 1. 구글 ID 중복 검증 (필수)
-    await this.checkGoogleIdDuplication(googleId);
-
-    // 2. 휴대폰 인증 상태 확인 (1시간 이내 인증만 유효)
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
-      normalizedPhone,
-      PhoneVerificationPurpose.GOOGLE_REGISTRATION,
-    );
-    if (!isPhoneVerified) {
-      LoggerUtil.log(
-        `구글 회원가입 실패: 휴대폰 인증 미완료 - googleId: ${googleId}, phone: ${normalizedPhone}`,
-      );
-      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
-    }
-
-    // 3. 휴대폰번호 중복 확인 및 계정 타입별 처리
-    const existingPhoneUser = await this.prisma.user.findFirst({
-      where: { phone: normalizedPhone },
+    // JWT 발급 및 마지막 로그인 시간 업데이트
+    return await this.prisma.$transaction(async (tx) => {
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: consumer.id,
+        aud: AUDIENCE.CONSUMER,
+      });
+      await tx.consumer.update({
+        where: { id: consumer.id },
+        data: { lastLoginAt: new Date() },
+      });
+      return { accessToken: tokenPair.accessToken, refreshToken: tokenPair.refreshToken };
     });
-
-    if (existingPhoneUser) {
-      // 휴대폰번호가 중복되는 경우, 기존 계정의 타입을 확인
-      if (existingPhoneUser.googleId) {
-        // 구글 계정(googleId)에서 이미 사용중인 경우 -> 에러 발생
-        if (existingPhoneUser.userId && existingPhoneUser.googleId) {
-          // 일반 로그인과 구글 로그인 모두 가능한 계정
-          LoggerUtil.log(
-            `구글 회원가입 실패: 휴대폰번호 중복 (다중 계정) - googleId: ${googleId}, phone: ${normalizedPhone}`,
-          );
-          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_MULTIPLE_ACCOUNTS);
-        } else {
-          // 구글 로그인 계정만 존재
-          LoggerUtil.log(
-            `구글 회원가입 실패: 휴대폰번호 중복 (구글 계정) - googleId: ${googleId}, phone: ${normalizedPhone}`,
-          );
-          throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
-        }
-      } else if (existingPhoneUser.userId) {
-        // 일반 계정(userId)에서만 사용중인 경우 -> 업데이트 후 로그인 처리
-        return await this.prisma.$transaction(
-          async (tx) => {
-            const user = await tx.user.update({
-              where: { id: existingPhoneUser.id },
-              data: {
-                googleId,
-                googleEmail,
-                lastLoginAt: new Date(),
-              },
-            });
-
-            // JWT 토큰 생성 (최소 정보만 포함: sub만)
-            const tokenPair = await this.jwtUtil.generateTokenPair({
-              sub: user.id,
-            });
-
-            // 응답에 토큰만 반환 (사용자 정보는 제외)
-            return {
-              accessToken: tokenPair.accessToken,
-              refreshToken: tokenPair.refreshToken,
-            };
-          },
-          {
-            maxWait: 5000, // 최대 대기 시간 (5초)
-            timeout: 10000, // 타임아웃 (10초)
-          },
-        );
-      }
-    }
-
-    // 3. 휴대폰번호가 중복되지 않은 경우 - 새 사용자 생성
-    return await this.prisma.$transaction(
-      async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            googleId,
-            googleEmail,
-            phone: normalizedPhone,
-            isPhoneVerified: true,
-            lastLoginAt: new Date(),
-          },
-        });
-
-        // JWT 토큰 생성 (최소 정보만 포함: sub만)
-        const tokenPair = await this.jwtUtil.generateTokenPair({
-          sub: user.id,
-        });
-
-        // 응답에 토큰만 반환 (사용자 정보는 제외)
-        return {
-          accessToken: tokenPair.accessToken,
-          refreshToken: tokenPair.refreshToken,
-        };
-      },
-      {
-        maxWait: 5000, // 최대 대기 시간 (5초)
-        timeout: 10000, // 타임아웃 (10초)
-      },
-    );
   }
 
   /**
-   * 구글 ID 중복 검증 (내부 메서드)
+   * 구글 로그인 처리 (판매자용)
+   * @param googleUserInfo - 구글 사용자 정보
+   * @returns 액세스 토큰 및 리프레시 토큰
    */
-  private async checkGoogleIdDuplication(googleId: string): Promise<void> {
-    const existingUser = await this.prisma.user.findUnique({
+  private async googleLoginSeller(googleUserInfo: GoogleUserInfo) {
+    const {
+      userInfo: { googleId, googleEmail },
+    } = googleUserInfo;
+
+    const seller = await this.prisma.seller.findUnique({
       where: { googleId },
     });
 
-    if (existingUser) {
-      LoggerUtil.log(`구글 회원가입 실패: 구글 ID 중복 - googleId: ${googleId}`);
+    // 1. gooleId로 기존 사용자 조회
+    if (!seller) {
+      // 새 사용자인 경우 -> 휴대폰 인증 필요
+      throw new BadRequestException({
+        message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
+        googleId,
+        googleEmail,
+      });
+    }
+
+    // 2. 휴대폰 인증 상태 확인
+    if (!seller.phone || !seller.isPhoneVerified) {
+      throw new BadRequestException({
+        message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
+        googleId,
+        googleEmail,
+      });
+    }
+
+    // JWT 발급 및 마지막 로그인 시간 업데이트
+    return await this.prisma.$transaction(async (tx) => {
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: seller.id,
+        aud: AUDIENCE.SELLER,
+      });
+      await tx.seller.update({
+        where: { id: seller.id },
+        data: { lastLoginAt: new Date() },
+      });
+      return { accessToken: tokenPair.accessToken, refreshToken: tokenPair.refreshToken };
+    });
+  }
+
+  /**
+   * 구글 회원가입(구매자) — 휴대폰 `GOOGLE_REGISTRATION` 인증 완료 후에만 진행
+   * @throws ConflictException 이미 다른 구글과 연결된 번호 / 동일 번호 비구글 계정 / 이미 존재하는 googleId
+   */
+  async consumerGoogleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
+    const { googleId, googleEmail, phone, name } = googleRegisterDto;
+    const trimmedName = name.trim();
+    const normalizedPhone = PhoneUtil.normalizePhone(phone);
+
+    // 1. 구글 ID 중복 검증 (필수)
+    const existing = await this.prisma.consumer.findUnique({ where: { googleId } });
+    if (existing) {
       throw new ConflictException(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS);
     }
+
+    // 2. 휴대폰 인증 상태 확인
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedPhone,
+      AUDIENCE.CONSUMER,
+      PhoneVerificationPurpose.GOOGLE_REGISTRATION,
+    );
+    if (!isPhoneVerified) {
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
+    }
+
+    const existingPhone = await this.prisma.consumer.findFirst({
+      where: { phone: normalizedPhone },
+    });
+
+    // 3. 동일 번호 구글 계정 중복 검증
+    if (existingPhone?.googleId) {
+      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
+    }
+
+    // 4. 동일 번호 비구글 계정 중복 검증
+    if (existingPhone && !existingPhone.googleId) {
+      throw new ConflictException(AUTH_ERROR_MESSAGES.ACCOUNT_EXISTS_BY_PHONE);
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      const row = await tx.consumer.create({
+        data: {
+          googleId,
+          googleEmail,
+          phone: normalizedPhone,
+          name: trimmedName,
+          nickname: buildInitialNicknameFromName(trimmedName),
+          isPhoneVerified: true,
+          lastLoginAt: new Date(),
+        },
+      });
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: row.id,
+        aud: AUDIENCE.CONSUMER,
+      });
+      return { accessToken: tokenPair.accessToken, refreshToken: tokenPair.refreshToken };
+    });
+  }
+
+  /**
+   * 구글 회원가입(판매자) — 휴대폰 `GOOGLE_REGISTRATION` 인증 완료 후에만 진행
+   * @throws ConflictException 이미 다른 구글과 연결된 번호 / 동일 번호 비구글 계정 / 이미 존재하는 googleId
+   */
+  async sellerGoogleRegisterWithPhone(googleRegisterDto: GoogleRegisterRequestDto) {
+    const { googleId, googleEmail, phone, name } = googleRegisterDto;
+    const trimmedName = name.trim();
+    const normalizedPhone = PhoneUtil.normalizePhone(phone);
+
+    // 1. 구글 ID 중복 검증 (필수)
+    const existing = await this.prisma.seller.findUnique({ where: { googleId } });
+    if (existing) {
+      throw new ConflictException(AUTH_ERROR_MESSAGES.GOOGLE_ID_ALREADY_EXISTS);
+    }
+
+    // 2. 휴대폰 인증 상태 확인
+    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+      normalizedPhone,
+      AUDIENCE.SELLER,
+      PhoneVerificationPurpose.GOOGLE_REGISTRATION,
+    );
+    if (!isPhoneVerified) {
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED);
+    }
+
+    const existingPhone = await this.prisma.seller.findFirst({
+      where: { phone: normalizedPhone },
+    });
+
+    // 3. 동일 번호 구글 계정 중복 검증
+    if (existingPhone?.googleId) {
+      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
+    }
+
+    // 4. 동일 번호 비구글 계정 중복 검증
+    if (existingPhone && !existingPhone.googleId) {
+      throw new ConflictException(AUTH_ERROR_MESSAGES.ACCOUNT_EXISTS_BY_PHONE);
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      const row = await tx.seller.create({
+        data: {
+          googleId,
+          googleEmail,
+          phone: normalizedPhone,
+          name: trimmedName,
+          nickname: buildInitialNicknameFromName(trimmedName),
+          isPhoneVerified: true,
+          lastLoginAt: new Date(),
+          sellerVerificationStatus: "REGISTERED",
+        },
+      });
+      const tokenPair = await this.jwtUtil.generateTokenPair({
+        sub: row.id,
+        aud: AUDIENCE.SELLER,
+      });
+      return { accessToken: tokenPair.accessToken, refreshToken: tokenPair.refreshToken };
+    });
   }
 }

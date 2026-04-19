@@ -3,9 +3,8 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { DatabaseModule } from "@apps/backend/infra/database/database.module";
-import { UserApiModule } from "@apps/backend/apis/user/user-api.module";
+import { ConsumerApiModule } from "@apps/backend/apis/consumer/consumer-api.module";
 import { SellerApiModule } from "@apps/backend/apis/seller/seller-api.module";
-import { AdminApiModule } from "@apps/backend/apis/admin/admin-api.module";
 import { SuccessResponseInterceptor } from "@apps/backend/common/interceptors/success-response.interceptor";
 import { ErrorResponseInterceptor } from "@apps/backend/common/interceptors/error-response.interceptor";
 
@@ -38,14 +37,11 @@ import { ErrorResponseInterceptor } from "@apps/backend/common/interceptors/erro
     // 데이터베이스 모듈
     DatabaseModule,
 
-    // User API 모듈
-    UserApiModule,
+    // Consumer API 모듈
+    ConsumerApiModule,
 
     // Seller API 모듈
     SellerApiModule,
-
-    // Admin API 모듈
-    AdminApiModule,
   ],
   providers: [
     // 전역 Success Response Interceptor 등록 // 성공적인 응답을 통일된 형태로 변환

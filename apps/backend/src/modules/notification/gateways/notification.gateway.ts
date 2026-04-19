@@ -11,6 +11,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import type {
   SellerNotificationItemDto,
@@ -19,7 +20,7 @@ import type {
 
 /**
  * 실시간 알림 (namespace `/notifications`)
- * - SELLER/ADMIN: `seller_notification` (판매자 웹)
+ * - SELLER: `seller_notification` (판매자 웹)
  * - USER: `user_order_notification` (사용자 웹 주문 알림)
  * 채팅(`/`)과 네임스페이스를 분리합니다.
  */
@@ -69,19 +70,29 @@ export class NotificationGateway
         secret: this.configService.get<string>("JWT_SECRET"),
       });
       const userId = payload.sub;
+      const aud = payload.aud;
 
-      // 3) 역할 확인 (구매자 USER / 판매자·관리자)
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true },
-      });
-      if (!user) {
-        client.emit("error", { message: "User not found", code: "USER_NOT_FOUND" });
-        client.disconnect(true);
-        return;
-      }
-
-      if (user.role !== "USER" && user.role !== "SELLER" && user.role !== "ADMIN") {
+      if (aud === AUDIENCE.CONSUMER) {
+        const row = await this.prisma.consumer.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
+        if (!row) {
+          client.emit("error", { message: "User not found", code: "USER_NOT_FOUND" });
+          client.disconnect(true);
+          return;
+        }
+      } else if (aud === AUDIENCE.SELLER) {
+        const row = await this.prisma.seller.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
+        if (!row) {
+          client.emit("error", { message: "User not found", code: "USER_NOT_FOUND" });
+          client.disconnect(true);
+          return;
+        }
+      } else {
         client.emit("error", { message: "Role not authorized", code: "ROLE_NOT_AUTHORIZED" });
         client.disconnect(true);
         return;

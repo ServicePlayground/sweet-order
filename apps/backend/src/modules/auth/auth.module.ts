@@ -3,7 +3,8 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
 import { AuthService } from "@apps/backend/modules/auth/auth.service";
-import { UserService } from "@apps/backend/modules/auth/services/user.service";
+import { ConsumerService } from "@apps/backend/modules/auth/services/consumer.service";
+import { SellerService } from "@apps/backend/modules/auth/services/seller.service";
 import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
 import { GoogleService } from "@apps/backend/modules/auth/services/google.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
@@ -12,7 +13,7 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
 
 /**
  * 인증 모듈
- * 사용자 인증, JWT 토큰 관리, 휴대폰 인증, 구글 OAuth 등의 기능을 제공합니다.
+ * 사용자 인증, JWT 토큰 관리, 휴대폰 인증, 구글 OAuth를 제공합니다.
  */
 @Module({
   // 이 모듈에서 사용할 다른 모듈들을 import합니다
@@ -30,7 +31,8 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
   // 이 모듈에서 제공하는 서비스들 (비즈니스 로직 처리)
   providers: [
     AuthService,
-    UserService,
+    ConsumerService,
+    SellerService,
     PhoneService,
     GoogleService,
     JwtUtil,
@@ -38,6 +40,6 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
     AuthGuard,
   ],
   // 다른 모듈에서 사용할 수 있도록 export하는 서비스들
-  exports: [AuthService, AuthGuard],
+  exports: [AuthService, AuthGuard, ConsumerService, SellerService],
 })
 export class AuthModule {}

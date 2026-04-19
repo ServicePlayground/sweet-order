@@ -28,13 +28,10 @@ type ChatRoomWithStore = Prisma.ChatRoomGetPayload<{
   };
 }>;
 
-/**
- * User와 함께 include된 ChatRoom 타입
- * 판매자용 채팅방 목록 조회 시 사용
- */
+/** 판매자용 — 구매자(Consumer) 프로필 포함 */
 type ChatRoomWithUser = Prisma.ChatRoomGetPayload<{
   include: {
-    user: {
+    consumer: {
       select: {
         id: true;
         nickname: true;
@@ -55,15 +52,11 @@ export class ChatMapperUtil {
     logoImageUrl: true,
   } as const satisfies Prisma.StoreSelect;
 
-  /**
-   * User 정보 select 필드 (채팅방 목록 조회 시 사용)
-   * 판매자용 채팅방 목록에서 사용자 정보를 가져올 때 사용
-   */
-  static readonly USER_INFO_SELECT = {
+  static readonly CONSUMER_INFO_SELECT = {
     id: true,
     nickname: true,
     profileImageUrl: true,
-  } as const satisfies Prisma.UserSelect;
+  } as const satisfies Prisma.ConsumerSelect;
   /**
    * Prisma Message 엔티티를 MessageResponseDto로 변환
    * @param message - Prisma Message 엔티티
@@ -102,20 +95,15 @@ export class ChatMapperUtil {
     };
   }
 
-  /**
-   * Prisma ChatRoom 엔티티를 ChatRoomForSellerResponseDto로 변환 (판매자용)
-   * @param chatRoom - Prisma ChatRoom 엔티티 (user 포함)
-   * @returns ChatRoomForSellerResponseDto 객체
-   */
   static mapToChatRoomForSellerResponseDto(
     chatRoom: ChatRoomWithUser,
   ): ChatRoomForSellerResponseDto {
     return {
       id: chatRoom.id,
       user: {
-        id: chatRoom.user.id,
-        nickname: chatRoom.user.nickname,
-        profileImageUrl: chatRoom.user.profileImageUrl,
+        id: chatRoom.consumer.id,
+        nickname: chatRoom.consumer.nickname,
+        profileImageUrl: chatRoom.consumer.profileImageUrl,
       },
       lastMessage: chatRoom.lastMessage,
       lastMessageAt: chatRoom.lastMessageAt,

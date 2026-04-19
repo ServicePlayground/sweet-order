@@ -15,11 +15,7 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  USER_ROLES,
-  AUTH_ERROR_MESSAGES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
-import { createMessageObject } from "@apps/backend/common/utils/message.util";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { NotificationService } from "@apps/backend/modules/notification/services/notification.service";
 import {
   SellerNotificationListQueryDto,
@@ -40,8 +36,8 @@ import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-r
   SellerNotificationPreferenceResponseDto,
   SellerNotificationUnreadCountResponseDto,
 )
-@Controller(`${USER_ROLES.SELLER}/notifications`)
-@Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] })
+@Controller(`${AUDIENCE.SELLER}/notifications`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerNotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
@@ -49,9 +45,6 @@ export class SellerNotificationController {
   @ApiOperation({ summary: "판매자 웹 알림 목록 (스토어별)" })
   @SwaggerResponse(200, { dataDto: SellerNotificationListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   async list(
     @Query() query: SellerNotificationListQueryDto,
     @Request() req: { user: JwtVerifiedPayload },

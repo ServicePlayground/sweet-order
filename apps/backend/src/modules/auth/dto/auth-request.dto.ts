@@ -1,111 +1,17 @@
-import { IsString, IsNotEmpty } from "class-validator";
+import { IsString, IsNotEmpty, IsEnum, IsIn, MinLength, MaxLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import {
-  IsValidUserId,
-  IsValidPassword,
   IsValidKoreanPhone,
   IsValidVerificationCode,
 } from "@apps/backend/common/decorators/validators.decorator";
 import {
+  AUDIENCE,
   SWAGGER_EXAMPLES,
   SWAGGER_DESCRIPTIONS,
   PhoneVerificationPurpose,
+  AudienceConst,
 } from "@apps/backend/modules/auth/constants/auth.constants";
-
-// 일반 - 회원가입 요청 DTO
-export class RegisterRequestDto {
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.USER_ID,
-    example: SWAGGER_EXAMPLES.USER_DATA.userId,
-  })
-  @IsString()
-  @IsValidUserId()
-  userId: string;
-
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.PASSWORD,
-    example: SWAGGER_EXAMPLES.PASSWORD,
-  })
-  @IsString()
-  @IsValidPassword()
-  password: string;
-
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
-  })
-  @IsString()
-  @IsValidKoreanPhone()
-  phone: string;
-}
-
-// 일반 - ID 중복 확인 요청 DTO
-export class CheckUserIdRequestDto {
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.USER_ID,
-    example: SWAGGER_EXAMPLES.USER_DATA.userId,
-  })
-  @IsString()
-  @IsValidUserId()
-  userId: string;
-}
-
-// 일반 - 로그인 요청 DTO
-export class LoginRequestDto {
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.USER_ID,
-    example: SWAGGER_EXAMPLES.USER_DATA.userId,
-  })
-  @IsString()
-  @IsValidUserId()
-  userId: string;
-
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.PASSWORD,
-    example: SWAGGER_EXAMPLES.PASSWORD,
-  })
-  @IsString()
-  @IsValidPassword()
-  password: string;
-}
-
-// 일반 - 비밀번호 변경 요청 DTO
-export class ChangePasswordRequestDto {
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.USER_ID,
-    example: SWAGGER_EXAMPLES.USER_DATA.userId,
-  })
-  @IsString()
-  @IsValidUserId()
-  userId: string;
-
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
-  })
-  @IsString()
-  @IsValidKoreanPhone()
-  phone: string;
-
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.PASSWORD,
-    example: SWAGGER_EXAMPLES.PASSWORD,
-  })
-  @IsString()
-  @IsValidPassword()
-  newPassword: string;
-}
-
-// 계정 찾기 요청 DTO
-export class FindAccountRequestDto {
-  @ApiProperty({
-    description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
-  })
-  @IsString()
-  @IsValidKoreanPhone()
-  phone: string;
-}
 
 /**
  * 구글 로그인 요청 DTO (Authorization Code)
@@ -126,7 +32,7 @@ export class GoogleLoginRequestDto {
 export class GoogleRegisterRequestDto {
   @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.GOOGLE_ID,
-    example: SWAGGER_EXAMPLES.USER_DATA.googleId,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.googleId,
   })
   @IsNotEmpty()
   @IsString()
@@ -134,15 +40,26 @@ export class GoogleRegisterRequestDto {
 
   @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.GOOGLE_EMAIL,
-    example: SWAGGER_EXAMPLES.USER_DATA.googleEmail,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.googleEmail,
   })
   @IsNotEmpty()
   @IsString()
   googleEmail: string;
 
   @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.DISPLAY_NAME,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.name,
+  })
+  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(50)
+  name: string;
+
+  @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.phone,
   })
   @IsString()
   @IsValidKoreanPhone()
@@ -153,19 +70,26 @@ export class GoogleRegisterRequestDto {
 export class SendVerificationCodeRequestDto {
   @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.phone,
   })
   @IsString()
   @IsValidKoreanPhone()
   phone: string;
 
   @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.PHONE_VERIFICATION_AUDIENCE,
+    example: AUDIENCE.CONSUMER,
+    enum: [AUDIENCE.CONSUMER, AUDIENCE.SELLER],
+  })
+  @IsIn([AUDIENCE.CONSUMER, AUDIENCE.SELLER])
+  audience: AudienceConst;
+
+  @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.PHONE_VERIFICATION_PURPOSE,
     example: PhoneVerificationPurpose.REGISTRATION,
     enum: PhoneVerificationPurpose,
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsEnum(PhoneVerificationPurpose)
   purpose: PhoneVerificationPurpose;
 }
 
@@ -173,7 +97,7 @@ export class SendVerificationCodeRequestDto {
 export class VerifyPhoneCodeRequestDto {
   @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.phone,
   })
   @IsString()
   @IsValidKoreanPhone()
@@ -188,20 +112,38 @@ export class VerifyPhoneCodeRequestDto {
   verificationCode: string;
 
   @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.PHONE_VERIFICATION_AUDIENCE,
+    example: AUDIENCE.CONSUMER,
+    enum: [AUDIENCE.CONSUMER, AUDIENCE.SELLER],
+  })
+  @IsIn([AUDIENCE.CONSUMER, AUDIENCE.SELLER])
+  audience: AudienceConst;
+
+  @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.PHONE_VERIFICATION_PURPOSE,
     example: PhoneVerificationPurpose.REGISTRATION,
     enum: PhoneVerificationPurpose,
   })
-  @IsString()
-  @IsNotEmpty()
+  @IsEnum(PhoneVerificationPurpose)
   purpose: PhoneVerificationPurpose;
+}
+
+/** 계정 찾기 — 휴대폰 인증(FIND_ACCOUNT 목적) 완료 후 요청 */
+export class FindAccountRequestDto {
+  @ApiProperty({
+    description: SWAGGER_DESCRIPTIONS.PHONE,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.phone,
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  phone: string;
 }
 
 // 휴대폰 번호 변경 요청 DTO
 export class ChangePhoneRequestDto {
   @ApiProperty({
     description: SWAGGER_DESCRIPTIONS.PHONE,
-    example: SWAGGER_EXAMPLES.USER_DATA.phone,
+    example: SWAGGER_EXAMPLES.CONSUMER_DATA.phone,
   })
   @IsString()
   @IsValidKoreanPhone()

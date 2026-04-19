@@ -107,7 +107,7 @@ export class NotificationService {
    */
   private async assertStoreOwnedByUser(storeId: string, userId: string): Promise<void> {
     const store = await this.prisma.store.findFirst({
-      where: { id: storeId, userId },
+      where: { id: storeId, sellerId: userId },
       select: { id: true },
     });
     if (!store) {
@@ -129,7 +129,7 @@ export class NotificationService {
     await this.assertStoreOwnedByUser(params.storeId, params.userId);
     const skip = (params.page - 1) * params.limit;
     const where: Prisma.UserNotificationWhereInput = {
-      userId: params.userId,
+      sellerId: params.userId,
       appSurface: NotificationAppSurface.SELLER_WEB,
       category: NotificationCategory.ORDER,
       storeId: params.storeId,
@@ -166,7 +166,7 @@ export class NotificationService {
     const row = await this.prisma.userNotification.findFirst({
       where: {
         id: params.notificationId,
-        userId: params.userId,
+        sellerId: params.userId,
         appSurface: NotificationAppSurface.SELLER_WEB,
         category: NotificationCategory.ORDER,
         orderId: { not: null },
@@ -188,7 +188,7 @@ export class NotificationService {
     await this.assertStoreOwnedByUser(params.storeId, params.userId);
     await this.prisma.userNotification.updateMany({
       where: {
-        userId: params.userId,
+        sellerId: params.userId,
         appSurface: NotificationAppSurface.SELLER_WEB,
         category: NotificationCategory.ORDER,
         storeId: params.storeId,
@@ -209,14 +209,14 @@ export class NotificationService {
     await this.assertStoreOwnedByUser(storeId, userId);
     const row = await this.prisma.userNotificationPreference.upsert({
       where: {
-        userId_appSurface_storeId: {
-          userId,
+        sellerId_appSurface_storeId: {
+          sellerId: userId,
           appSurface: NotificationAppSurface.SELLER_WEB,
           storeId,
         },
       },
       create: {
-        userId,
+        sellerId: userId,
         storeId,
         appSurface: NotificationAppSurface.SELLER_WEB,
         orderNotificationsEnabled: true,
@@ -247,8 +247,8 @@ export class NotificationService {
     };
     const row = await this.prisma.userNotificationPreference.update({
       where: {
-        userId_appSurface_storeId: {
-          userId,
+        sellerId_appSurface_storeId: {
+          sellerId: userId,
           appSurface: NotificationAppSurface.SELLER_WEB,
           storeId,
         },
@@ -274,7 +274,7 @@ export class NotificationService {
   }): Promise<SellerNotificationItemDto> {
     const row = await this.prisma.userNotification.create({
       data: {
-        userId: params.recipientUserId,
+        sellerId: params.recipientUserId,
         appSurface: NotificationAppSurface.SELLER_WEB,
         category: NotificationCategory.ORDER,
         title: params.title,
@@ -299,7 +299,7 @@ export class NotificationService {
   }): Promise<UserNotificationItemDto> {
     const row = await this.prisma.userNotification.create({
       data: {
-        userId: params.recipientUserId,
+        consumerId: params.recipientUserId,
         appSurface: NotificationAppSurface.USER_WEB,
         category: NotificationCategory.ORDER,
         title: params.title,
@@ -323,7 +323,7 @@ export class NotificationService {
   }): Promise<{ items: UserNotificationItemDto[]; meta: PrismaPaginationMeta }> {
     const skip = (params.page - 1) * params.limit;
     const where: Prisma.UserNotificationWhereInput = {
-      userId: params.userId,
+      consumerId: params.userId,
       appSurface: NotificationAppSurface.USER_WEB,
       category: NotificationCategory.ORDER,
       orderId: { not: null },
@@ -359,7 +359,7 @@ export class NotificationService {
     const row = await this.prisma.userNotification.findFirst({
       where: {
         id: params.notificationId,
-        userId: params.userId,
+        consumerId: params.userId,
         appSurface: NotificationAppSurface.USER_WEB,
         category: NotificationCategory.ORDER,
         orderId: { not: null },
@@ -380,7 +380,7 @@ export class NotificationService {
   async markAllReadUserWebOrderNotifications(userId: string): Promise<void> {
     await this.prisma.userNotification.updateMany({
       where: {
-        userId,
+        consumerId: userId,
         appSurface: NotificationAppSurface.USER_WEB,
         category: NotificationCategory.ORDER,
         orderId: { not: null },
@@ -396,7 +396,7 @@ export class NotificationService {
   async countUnreadUserWebOrderNotifications(userId: string): Promise<number> {
     return this.prisma.userNotification.count({
       where: {
-        userId,
+        consumerId: userId,
         appSurface: NotificationAppSurface.USER_WEB,
         category: NotificationCategory.ORDER,
         orderId: { not: null },
@@ -412,7 +412,7 @@ export class NotificationService {
     await this.assertStoreOwnedByUser(storeId, userId);
     return this.prisma.userNotification.count({
       where: {
-        userId,
+        sellerId: userId,
         appSurface: NotificationAppSurface.SELLER_WEB,
         category: NotificationCategory.ORDER,
         storeId,

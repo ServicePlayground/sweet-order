@@ -1,4 +1,4 @@
-import { userClient } from "@/apps/web-user/common/config/axios.config";
+import { consumerClient } from "@/apps/web-user/common/config/axios.config";
 import {
   Feed,
   FeedListResponse,
@@ -12,7 +12,7 @@ export const feedApi = {
     page = 1,
     limit = 20,
   }: GetFeedsParams): Promise<FeedListResponse> => {
-    const response = await userClient.get(`/feed/store/${storeId}`, {
+    const response = await consumerClient.get(`/feed/store/${storeId}`, {
       params: { page, limit },
     });
     return response.data.data;
@@ -20,7 +20,7 @@ export const feedApi = {
 
   // 스토어 피드 단일 조회
   getStoreFeed: async (storeId: string, feedId: string): Promise<Feed> => {
-    const response = await userClient.get(`/feed/store/${storeId}/${feedId}`);
+    const response = await consumerClient.get(`/feed/store/${storeId}/${feedId}`);
     return response.data.data;
   },
 };

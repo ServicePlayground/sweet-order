@@ -1,137 +1,38 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import {
-  createUrlWithReturnUrl,
-  createGoogleOAuthUrlWithReturnUrl,
-} from "@/apps/web-seller/common/utils/returnUrl.util";
+import { AuthCardLayout } from "@/apps/web-seller/common/components/layouts/AuthCardLayout";
+import googleIcon from "@/apps/web-seller/assets/images/google.png";
 
-// 모두 인증이 필요할 때 여기 페이지 경로(/auth/login 경로로 리다이렉트됨, 이후 reutnUrl 유지한채로 리다이렉트됨)
 export function LoginPage() {
-  const [searchParams] = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl");
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        minHeight: "100vh",
-        padding: "40px 20px",
-        backgroundColor: "#fafafa",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          backgroundColor: "white",
-          borderRadius: "12px",
-          padding: "48px 32px",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "8px" }}>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: "700",
-              color: "#1a1a1a",
-              margin: "0 0 8px 0",
-            }}
-          >
+    <AuthCardLayout>
+      <div className="flex flex-col gap-8">
+        <div className="space-y-2 text-center">
+          <h1 className="text-[1.65rem] font-bold tracking-tight text-zinc-900 sm:text-[1.75rem]">
             로그인
           </h1>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#666",
-              margin: "0",
-            }}
-          >
-            Sweet Order에 오신 것을 환영합니다
-          </p>
+          <p className="text-sm leading-relaxed text-zinc-500">Picake 판매자 센터</p>
         </div>
 
-        <Link
-          to={createUrlWithReturnUrl(ROUTES.AUTH.LOGIN_BASIC, returnUrl || undefined)}
-          style={{
-            width: "100%",
-            height: "52px",
-            border: "none",
-            borderRadius: "8px",
-            backgroundColor: "#1a1a1a",
-            color: "white",
-            fontSize: "16px",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textDecoration: "none",
-            transition: "all 0.2s ease",
-            cursor: "pointer",
-          }}
-        >
-          일반 로그인
-        </Link>
-
         <a
-          href={createGoogleOAuthUrlWithReturnUrl(
-            `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}${ROUTES.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`,
-            returnUrl || undefined,
-          )}
-          style={{
-            width: "100%",
-            height: "52px",
-            border: "1px solid #e0e0e0",
-            borderRadius: "8px",
-            backgroundColor: "white",
-            color: "#1a1a1a",
-            fontSize: "16px",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textDecoration: "none",
-            transition: "all 0.2s ease",
-            cursor: "pointer",
-          }}
+          href={`https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${window.location.origin}${ROUTES.AUTH.GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile&prompt=select_account`}
+          className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl border border-zinc-200 bg-white text-[15px] font-semibold text-zinc-900 shadow-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2"
         >
-          구글 로그인
+          <img src={googleIcon} alt="" width={20} height={20} className="block shrink-0" />
+          Google로 계속하기
         </a>
 
-        <div
-          style={{
-            height: "1px",
-            backgroundColor: "#e0e0e0",
-            margin: "8px 0",
-          }}
-        />
-
-        <Link
-          to={ROUTES.AUTH.FIND_ACCOUNT}
-          style={{
-            width: "100%",
-            height: "44px",
-            border: "none",
-            backgroundColor: "transparent",
-            color: "#666",
-            fontSize: "14px",
-            fontWeight: "500",
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "color 0.2s ease",
-            cursor: "pointer",
-          }}
-        >
-          계정 찾기
-        </Link>
+        <div className="flex justify-center border-t border-zinc-100 pt-2">
+          <Link
+            to={ROUTES.AUTH.FIND_ACCOUNT}
+            className="inline-flex items-center gap-0.5 rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+          >
+            계정 찾기
+            <ChevronRight className="h-4 w-4 opacity-70" aria-hidden />
+          </Link>
+        </div>
       </div>
-    </div>
+    </AuthCardLayout>
   );
 }

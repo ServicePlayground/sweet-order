@@ -37,7 +37,7 @@ export interface GetMessagesRequestDto {
   limit: number;
 }
 
-export type MessageSenderType = "user" | "store";
+export type MessageSenderType = "consumer" | "store";
 
 /** 메시지 단일 항목 (공통 MessageResponseDto와 구분) */
 export interface ChatMessageResponseDto {

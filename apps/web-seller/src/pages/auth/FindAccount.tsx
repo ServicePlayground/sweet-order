@@ -1,90 +1,109 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { useFindAccount } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
+import { ArrowLeft, Loader2, Mail, RefreshCw } from "lucide-react";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
-import FindAccountResultForm from "@/apps/web-seller/features/auth/components/forms/FindAccountResultForm";
-import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-seller/features/auth/types/auth.dto";
-import type { FindAccountForm } from "@/apps/web-seller/features/auth/types/auth.ui";
+import { useFindAccount } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
+import {
+  PHONE_VERIFICATION_PURPOSE,
+  type FindAccountResponseDto,
+} from "@/apps/web-seller/features/auth/types/auth.dto";
+import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { AuthCardLayout } from "@/apps/web-seller/common/components/layouts/AuthCardLayout";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
 
+/**
+ * 판매자 계정 찾기 — 휴대폰 인증(`FIND_ACCOUNT`) 후 `POST /v1/seller/auth/find-account`
+ */
 export function FindAccountPage() {
   const findAccountMutation = useFindAccount();
-  const [accountInfo, setAccountInfo] = useState<FindAccountForm | null>(null);
-  const [currentStep, setCurrentStep] = useState<"phoneVerification" | "result">(
-    "phoneVerification",
-  );
+  const [result, setResult] = useState<FindAccountResponseDto | null>(null);
 
-  // 휴대폰 인증 완료 후 계정 찾기 처리
-  const handlePhoneVerificationComplete = async (phone: string) => {
-    const result = await findAccountMutation.mutateAsync(phone);
-    setAccountInfo(result);
-    setCurrentStep("result");
+  const handleVerificationComplete = async (phone: string) => {
+    try {
+      const data = await findAccountMutation.mutateAsync({ phone });
+      setResult(data);
+    } catch {
+      // 오류는 useFindAccount에서 알림 처리
+    }
   };
 
-  // 결과 표시 단계
-  if (currentStep === "result" && accountInfo) {
-    return <FindAccountResultForm accountInfo={accountInfo} />;
-  }
-
-  // 휴대폰 인증 단계
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        minHeight: "100vh",
-        padding: "40px 20px",
-        backgroundColor: "#fafafa",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "500px",
-          backgroundColor: "white",
-          padding: "40px",
-          borderRadius: "12px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h1
-          style={{ textAlign: "center", marginBottom: "32px", fontSize: "24px", fontWeight: "600" }}
-        >
-          계정 찾기
-        </h1>
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#666",
-            textAlign: "center",
-            marginBottom: "32px",
-            lineHeight: "1.5",
-          }}
-        >
-          휴대폰 번호로 등록된 계정을 찾아드립니다.
-        </p>
+    <AuthCardLayout>
+      <div className="flex flex-col gap-8">
+        <div className="space-y-3 text-center">
+          <h1 className="text-[1.65rem] font-bold tracking-tight text-zinc-900 sm:text-[1.75rem]">
+            계정 찾기
+          </h1>
+          <p className="text-sm leading-relaxed text-zinc-500">
+            가입 시 사용한 휴대폰 번호로 인증하면, 연결된 구글 계정 이메일을 확인할 수 있습니다.
+          </p>
+        </div>
 
-        <PhoneVerificationForm
-          onVerificationComplete={handlePhoneVerificationComplete}
-          purpose={PHONE_VERIFICATION_PURPOSE.ID_FIND}
-        />
+        {result ? (
+          <div
+            className={cn(
+              "rounded-xl border border-zinc-200/90 bg-zinc-50/80 p-5",
+              result.googleEmail && "border-emerald-200/80 bg-emerald-50/50",
+            )}
+          >
+            <div className="mb-3 flex items-center gap-2">
+              <div
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                  result.googleEmail
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-zinc-200/80 text-zinc-600",
+                )}
+              >
+                <Mail className="h-4 w-4" strokeWidth={2} aria-hidden />
+              </div>
+              <p className="text-sm font-semibold text-zinc-900">조회 결과</p>
+            </div>
+            {result.googleEmail ? (
+              <p className="break-all text-[15px] leading-relaxed text-zinc-800">
+                <span className="text-zinc-500">연결된 구글 계정</span>
+                <br />
+                <span className="text-base font-semibold text-zinc-900">{result.googleEmail}</span>
+              </p>
+            ) : (
+              <p className="text-sm leading-relaxed text-zinc-600">
+                해당 번호로 등록된 계정은 있으나, 구글 이메일이 연동되어 있지 않습니다.
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => setResult(null)}
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+              다시 조회하기
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <PhoneVerificationForm
+              onVerificationComplete={handleVerificationComplete}
+              purpose={PHONE_VERIFICATION_PURPOSE.FIND_ACCOUNT}
+            />
+            {findAccountMutation.isPending ? (
+              <div className="flex items-center justify-center gap-2 text-sm text-zinc-500">
+                <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden />
+                계정 정보를 조회하는 중...
+              </div>
+            ) : null}
+          </div>
+        )}
 
-        <Link
-          to={ROUTES.AUTH.LOGIN}
-          style={{
-            color: "#666",
-            fontSize: "14px",
-            textDecoration: "none",
-            marginTop: "24px",
-            textAlign: "center",
-            display: "block",
-          }}
-        >
-          ← 로그인 페이지로 돌아가기
-        </Link>
+        <div className="flex justify-center border-t border-zinc-100 pt-1">
+          <Link
+            to={ROUTES.AUTH.LOGIN}
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            로그인으로 돌아가기
+          </Link>
+        </div>
       </div>
-    </div>
+    </AuthCardLayout>
   );
 }
