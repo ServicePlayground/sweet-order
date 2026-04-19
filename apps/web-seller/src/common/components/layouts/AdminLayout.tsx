@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
-import { Menu, User, LogOut, Bell } from "lucide-react";
+import { Menu, User, LogOut, Bell, UserCircle } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
@@ -153,14 +153,27 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                   {isProfileMenuOpen ? (
                     <div
                       role="menu"
-                      className="absolute right-0 top-full z-50 mt-2 w-48 rounded-md border border-zinc-200 bg-white shadow-lg"
+                      className="absolute right-0 top-full z-50 mt-2 w-52 rounded-md border border-zinc-200 bg-white py-1 shadow-lg"
                     >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          navigate(ROUTES.MYPAGE);
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100"
+                      >
+                        <UserCircle className="h-4 w-4 shrink-0" />
+                        마이페이지
+                      </button>
+                      <div className="my-1 border-t border-zinc-200" />
                       <button
                         type="button"
                         role="menuitem"
                         onClick={handleLogout}
                         disabled={logoutMutation.isPending}
-                        className="flex w-full items-center gap-2 rounded-md px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100 disabled:opacity-50"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100 disabled:opacity-50"
                       >
                         <LogOut className="h-4 w-4" />
                         로그아웃

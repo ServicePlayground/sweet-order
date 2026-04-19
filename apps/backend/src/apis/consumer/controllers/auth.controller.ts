@@ -2,14 +2,15 @@ import { Controller, Post, Body, Get, HttpCode, HttpStatus, Request } from "@nes
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { AuthService } from "@apps/backend/modules/auth/auth.service";
+import { FindAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-find-account.dto";
+import {
+  GoogleLoginRequestDto,
+  GoogleRegisterRequestDto,
+} from "@apps/backend/modules/auth/dto/auth-google-oauth.dto";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
-  ChangePhoneRequestDto,
-  GoogleLoginRequestDto,
-  GoogleRegisterRequestDto,
-  FindAccountRequestDto,
-} from "@apps/backend/modules/auth/dto/auth-request.dto";
+} from "@apps/backend/modules/auth/dto/auth-phone-verification.dto";
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
@@ -19,7 +20,6 @@ import {
   AUTH_SUCCESS_MESSAGES,
   AUDIENCE,
   SWAGGER_EXAMPLES,
-  SWAGGER_RESPONSE_EXAMPLES,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 
@@ -36,7 +36,7 @@ export class ConsumerAuthController {
     description:
       "프론트엔드에서 받은 Authorization Code로 구글 로그인을 처리합니다. 응답에서 accessToken과 refreshToken을 반환합니다. 400 PHONE_VERIFICATION_REQUIRED 오류가 발생했을 때는 googleId와 googleEmail을 반환하며 휴대폰 인증 후 구글 회원가입 API로 해당 파라미터 값을 전달하여 회원가입을 처리해야 합니다.",
   })
-  @SwaggerResponse(200, { dataExample: SWAGGER_RESPONSE_EXAMPLES.TOKEN_RESPONSE })
+  @SwaggerResponse(200, { dataExample: SWAGGER_EXAMPLES.TOKEN_RESPONSE })
   @SwaggerResponse(400, {
     dataExample: {
       message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
@@ -58,7 +58,7 @@ export class ConsumerAuthController {
     description:
       "새로운 구글 사용자를 등록합니다. 응답에서 accessToken과 refreshToken을 반환합니다. 휴대폰 인증이 완료된 상태여야 합니다. 동일한 구글 ID와 휴대폰 번호가 존재할 경우 중복 에러가 발생합니다.",
   })
-  @SwaggerResponse(201, { dataExample: SWAGGER_RESPONSE_EXAMPLES.TOKEN_RESPONSE })
+  @SwaggerResponse(201, { dataExample: SWAGGER_EXAMPLES.TOKEN_RESPONSE })
   async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
     return await this.authService.consumerGoogleRegisterWithPhone(registerDto);
   }
@@ -127,31 +127,13 @@ export class ConsumerAuthController {
     return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_VERIFICATION_CONFIRMED);
   }
 
-  @Post("change-phone")
-  @Auth({ isPublic: false, audiences: ["consumer"] })
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: "(로그인 필요) 휴대폰 번호 변경",
-    description:
-      "인증된 사용자의 휴대폰 번호를 새로운 번호로 변경합니다. 새 휴대폰 번호는 미리 인증이 완료되어야 합니다.",
-  })
-  @SwaggerResponse(200, { dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED) })
-  @SwaggerAuthResponses()
-  async changePhone(
-    @Body() changePhoneDto: ChangePhoneRequestDto,
-    @Request() req: { user: JwtVerifiedPayload },
-  ) {
-    await this.authService.changePhoneConsumer(changePhoneDto, req.user);
-    return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED);
-  }
-
   @Get("me")
   @Auth({ isPublic: false, audiences: ["consumer"] })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "(로그인 필요) 액세스 토큰 유효 확인",
     description:
-      "Authorization 헤더의 Access Token을 사용하여 인증된 사용자인지 검사합니다. 가드를 통과하면 `{ available: true }`만 반환합니다. 프로필은 `GET /consumer/mypage/profile`을 사용하세요.",
+      "Authorization 헤더의 Access Token을 사용하여 인증된 사용자인지 검사합니다. 가드를 통과하면 `{ available: true }`만 반환합니다.",
   })
   @SwaggerResponse(200, { dataExample: { available: true } })
   @SwaggerAuthResponses()

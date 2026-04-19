@@ -1,17 +1,18 @@
 import { Injectable } from "@nestjs/common";
-import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
-import { ConsumerService } from "@apps/backend/modules/auth/services/consumer.service";
-import { SellerService } from "@apps/backend/modules/auth/services/seller.service";
-import { GoogleService } from "@apps/backend/modules/auth/services/google.service";
+import { AuthPhoneService } from "@apps/backend/modules/auth/services/auth-phone.service";
+import { AuthGoogleOauthService } from "@apps/backend/modules/auth/services/auth-google-oauth.service";
+import { AuthAccountFindService } from "@apps/backend/modules/auth/services/auth-account-find.service";
+import { FindAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-find-account.dto";
+import {
+  GoogleLoginRequestDto,
+  GoogleRegisterRequestDto,
+} from "@apps/backend/modules/auth/dto/auth-google-oauth.dto";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
-  ChangePhoneRequestDto,
-  GoogleLoginRequestDto,
-  GoogleRegisterRequestDto,
-  FindAccountRequestDto,
-} from "@apps/backend/modules/auth/dto/auth-request.dto";
+} from "@apps/backend/modules/auth/dto/auth-phone-verification.dto";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 
 /** 세션(액세스 토큰) 유효 확인 API 공통 응답 — DB 조회 없음 */
 type SessionAvailabilityResponse = { available: true };
@@ -19,10 +20,9 @@ type SessionAvailabilityResponse = { available: true };
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly consumerService: ConsumerService,
-    private readonly sellerService: SellerService,
-    private readonly phoneService: PhoneService,
-    private readonly googleService: GoogleService,
+    private readonly authAccountFindService: AuthAccountFindService,
+    private readonly authPhoneService: AuthPhoneService,
+    private readonly authGoogleOauthService: AuthGoogleOauthService,
   ) {}
 
   private getSessionAvailabilityResponse(): SessionAvailabilityResponse {
@@ -33,28 +33,28 @@ export class AuthService {
    * 구글 — Authorization Code 로그인 (구매자). 리다이렉트 URI는 구매자 앱 기준.
    */
   async consumerGoogleLoginWithCode(dto: GoogleLoginRequestDto) {
-    return this.googleService.consumerGoogleLoginWithCode(dto);
+    return this.authGoogleOauthService.consumerGoogleLoginWithCode(dto);
   }
 
   /**
    * 구글 — Authorization Code 로그인 (판매자). 리다이렉트 URI는 판매자 앱 기준.
    */
   async sellerGoogleLoginWithCode(dto: GoogleLoginRequestDto) {
-    return this.googleService.sellerGoogleLoginWithCode(dto);
+    return this.authGoogleOauthService.sellerGoogleLoginWithCode(dto);
   }
 
   /**
    * 구글 — 회원가입·최초 연동 (휴대폰 인증 완료 후, 구매자)
    */
   async consumerGoogleRegisterWithPhone(dto: GoogleRegisterRequestDto) {
-    return this.googleService.consumerGoogleRegisterWithPhone(dto);
+    return this.authGoogleOauthService.consumerGoogleRegisterWithPhone(dto);
   }
 
   /**
    * 구글 — 회원가입·최초 연동 (휴대폰 인증 완료 후, 판매자)
    */
   async sellerGoogleRegisterWithPhone(dto: GoogleRegisterRequestDto) {
-    return this.googleService.sellerGoogleRegisterWithPhone(dto);
+    return this.authGoogleOauthService.sellerGoogleRegisterWithPhone(dto);
   }
 
   /**
@@ -77,24 +77,14 @@ export class AuthService {
    * 계정 찾기 (구매자) — 발송/확인 시 `audience: consumer`, `purpose: find_account`로 인증 완료 후 호출
    */
   async findAccountConsumer(dto: FindAccountRequestDto) {
-    return this.consumerService.findAccount(dto);
+    return this.authAccountFindService.findAccount(dto, AUDIENCE.CONSUMER);
   }
 
   /**
    * 계정 찾기 (판매자) — 발송/확인 시 `audience: seller`, `purpose: find_account`로 인증 완료 후 호출
    */
   async findAccountSeller(dto: FindAccountRequestDto) {
-    return this.sellerService.findAccount(dto);
-  }
-
-  /** 휴대폰 번호 변경 (구매자) */
-  async changePhoneConsumer(dto: ChangePhoneRequestDto, user: JwtVerifiedPayload) {
-    await this.consumerService.changePhone(dto, user);
-  }
-
-  /** 휴대폰 번호 변경 (판매자) */
-  async changePhoneSeller(dto: ChangePhoneRequestDto, user: JwtVerifiedPayload) {
-    await this.sellerService.changePhone(dto, user);
+    return this.authAccountFindService.findAccount(dto, AUDIENCE.SELLER);
   }
 
   /**
@@ -102,14 +92,14 @@ export class AuthService {
    * `audience`(consumer | seller)와 `purpose`(종류)를 함께 보내면 DB에는 `consumer:google_registration` 형태로 저장됩니다.
    */
   async sendVerificationCode(dto: SendVerificationCodeRequestDto) {
-    return await this.phoneService.sendVerificationCode(dto);
+    return await this.authPhoneService.sendVerificationCode(dto);
   }
 
   /**
    * 휴대폰 인증번호 확인 — 발송 시와 동일한 `audience`·`purpose`를 전달해야 합니다.
    */
   async verifyPhoneCode(dto: VerifyPhoneCodeRequestDto) {
-    await this.phoneService.verifyPhoneCode(dto);
+    await this.authPhoneService.verifyPhoneCode(dto);
   }
 
   /**

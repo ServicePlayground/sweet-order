@@ -10,22 +10,17 @@ import {
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
-} from "@apps/backend/modules/auth/dto/auth-request.dto";
+} from "@apps/backend/modules/auth/dto/auth-phone-verification.dto";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /** 인증 완료 후 다음 단계(구글 가입·계정 찾기 등)에 사용할 수 있는 유효 시간 */
 const VERIFIED_PURPOSE_VALID_MS = 60 * 60 * 1000;
 
 /**
- * 휴대폰 인증 서비스
- *
- * 주요 기능:
- * - 휴대폰 인증번호 발송
- * - 휴대폰 인증번호 확인
- * - 인증 상태 관리
+ * 휴대폰 인증 (발송·확인·상태 조회)
  */
 @Injectable()
-export class PhoneService {
+export class AuthPhoneService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**

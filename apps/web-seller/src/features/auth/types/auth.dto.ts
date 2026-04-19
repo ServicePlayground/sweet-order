@@ -61,8 +61,3 @@ export interface FindAccountRequestDto {
 export interface FindAccountResponseDto {
   googleEmail: string | null;
 }
-
-/** POST /v1/seller/auth/change-phone (로그인 필요) */
-export interface ChangePhoneRequestDto {
-  newPhone: string;
-}

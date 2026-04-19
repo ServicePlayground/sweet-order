@@ -9,12 +9,12 @@ import {
   PhoneVerificationPurpose,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { GoogleUserInfo } from "@apps/backend/modules/auth/types/auth.types";
-import { PhoneService } from "@apps/backend/modules/auth/services/phone.service";
+import { AuthPhoneService } from "@apps/backend/modules/auth/services/auth-phone.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
 import {
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
-} from "@apps/backend/modules/auth/dto/auth-request.dto";
+} from "@apps/backend/modules/auth/dto/auth-google-oauth.dto";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { buildInitialNicknameFromName } from "@apps/backend/modules/auth/utils/google-register-nickname.util";
 
@@ -25,7 +25,7 @@ import { buildInitialNicknameFromName } from "@apps/backend/modules/auth/utils/g
  * - 미가입·휴대폰 미인증: 프론트가 동일 메시지(`PHONE_VERIFICATION_REQUIRED`)로 회원가입(휴대폰 인증) 플로우로 분기
  */
 @Injectable()
-export class GoogleService {
+export class AuthGoogleOauthService {
   private readonly consumerGoogleClientId: string;
   private readonly consumerGoogleClientSecret: string;
   private readonly sellerGoogleClientId: string;
@@ -40,7 +40,7 @@ export class GoogleService {
     private readonly prisma: PrismaService,
     private readonly jwtUtil: JwtUtil,
     private readonly configService: ConfigService,
-    private readonly phoneService: PhoneService,
+    private readonly authPhoneService: AuthPhoneService,
   ) {
     this.consumerGoogleClientId = configService.get<string>("GOOGLE_CLIENT_ID")!;
     this.consumerGoogleClientSecret = configService.get<string>("GOOGLE_CLIENT_SECRET")!;
@@ -134,8 +134,6 @@ export class GoogleService {
           },
         },
       );
-
-      console.log(userInfoResponse);
 
       const userInfo = userInfoResponse.data;
 
@@ -270,7 +268,7 @@ export class GoogleService {
     }
 
     // 2. 휴대폰 인증 상태 확인
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+    const isPhoneVerified = await this.authPhoneService.checkPhoneVerificationStatus(
       normalizedPhone,
       AUDIENCE.CONSUMER,
       PhoneVerificationPurpose.GOOGLE_REGISTRATION,
@@ -329,7 +327,7 @@ export class GoogleService {
     }
 
     // 2. 휴대폰 인증 상태 확인
-    const isPhoneVerified = await this.phoneService.checkPhoneVerificationStatus(
+    const isPhoneVerified = await this.authPhoneService.checkPhoneVerificationStatus(
       normalizedPhone,
       AUDIENCE.SELLER,
       PhoneVerificationPurpose.GOOGLE_REGISTRATION,

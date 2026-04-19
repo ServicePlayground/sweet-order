@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Query,
   Param,
@@ -18,7 +19,11 @@ import { RecentViewService } from "@apps/backend/modules/recent-view/recent-view
 import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
-import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
+import {
+  AUDIENCE,
+  AUTH_ERROR_MESSAGES,
+  AUTH_SUCCESS_MESSAGES,
+} from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import {
   OrderListResponseDto,
@@ -51,8 +56,13 @@ import {
 import { GetRecentViewedProductsRequestDto } from "@apps/backend/modules/recent-view/dto/recent-view-list.dto";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import { ConsumerService } from "@apps/backend/modules/auth/services/consumer.service";
-import { SWAGGER_EXAMPLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { AuthMypagePhoneService } from "@apps/backend/modules/auth/services/auth-mypage-phone.service";
+import { AuthMypageProfileService } from "@apps/backend/modules/auth/services/auth-mypage-profile.service";
+import {
+  ChangePhoneRequestDto,
+  ConsumerMypageProfileResponseDto,
+  UpdateMypageProfileRequestDto,
+} from "@apps/backend/modules/auth/dto/mypage-profile.dto";
 
 /**
  * 마이페이지 컨트롤러
@@ -71,12 +81,16 @@ import { SWAGGER_EXAMPLES } from "@apps/backend/modules/auth/constants/auth.cons
   CreateMyReviewRequestDto,
   StoreListResponseDto,
   ProductListResponseDto,
+  UpdateMypageProfileRequestDto,
+  ConsumerMypageProfileResponseDto,
+  ChangePhoneRequestDto,
 )
 @Controller(`${AUDIENCE.CONSUMER}/mypage`)
 @Auth({ isPublic: false, audiences: ["consumer"] })
 export class ConsumerMypageController {
   constructor(
-    private readonly consumerService: ConsumerService,
+    private readonly mypageProfile: AuthMypageProfileService,
+    private readonly mypagePhone: AuthMypagePhoneService,
     private readonly orderService: OrderService,
     private readonly reviewService: ReviewService,
     private readonly likeService: LikeService,
@@ -84,7 +98,7 @@ export class ConsumerMypageController {
   ) {}
 
   /**
-   * 내 프로필 조회 (구매자 계정 정보)
+   * 내 프로필 조회
    */
   @Get("profile")
   @HttpCode(HttpStatus.OK)
@@ -92,10 +106,52 @@ export class ConsumerMypageController {
     summary: "(로그인 필요) 내 프로필 조회",
     description: "로그인한 구매자의 프로필 정보를 조회합니다.",
   })
-  @SwaggerResponse(200, { dataExample: SWAGGER_EXAMPLES.CONSUMER_DATA })
+  @SwaggerResponse(200, { dataDto: ConsumerMypageProfileResponseDto })
   @SwaggerAuthResponses()
   async getMyProfile(@Request() req: { user: JwtVerifiedPayload }) {
-    return await this.consumerService.getProfile(req.user);
+    return await this.mypageProfile.getConsumerProfile(req.user);
+  }
+
+  /**
+   * 내 프로필 부분 수정
+   */
+  @Patch("profile")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 내 프로필 수정",
+    description:
+      "이름·닉네임·프로필 이미지 URL 중 요청 본문에 포함된 항목만 갱신합니다. 화면마다 일부 필드만 보내도 됩니다. `profileImageUrl`에 `null`을 보내면 프로필 이미지를 제거합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: ConsumerMypageProfileResponseDto })
+  @SwaggerAuthResponses()
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PROFILE_UPDATE_NO_FIELDS),
+  })
+  async patchMyProfile(
+    @Body() body: UpdateMypageProfileRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ) {
+    return await this.mypageProfile.updateConsumerMypageProfile(body, req.user);
+  }
+
+  /**
+   * 휴대폰 번호 변경
+   */
+  @Post("change-phone")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 휴대폰 번호 변경",
+    description:
+      "인증된 구매자의 휴대폰 번호를 새 번호로 변경합니다. 새 번호는 `purpose: phone_change`로 미리 인증이 완료되어야 합니다.",
+  })
+  @SwaggerResponse(200, { dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED) })
+  @SwaggerAuthResponses()
+  async changePhone(
+    @Body() changePhoneDto: ChangePhoneRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ) {
+    await this.mypagePhone.changePhone(changePhoneDto, req.user, AUDIENCE.CONSUMER);
+    return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED);
   }
 
   /**

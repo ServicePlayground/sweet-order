@@ -1,8 +1,8 @@
 import { Seller } from "@apps/backend/infra/database/prisma/generated/client";
-import { SellerInfo } from "@apps/backend/modules/auth/types/auth.types";
+import { SellerMypageProfileResponseDto } from "@apps/backend/modules/auth/dto/mypage-profile.dto";
 
 export class SellerMapperUtil {
-  static mapToSellerInfo(seller: Seller, lastLoginAt?: Date): SellerInfo {
+  static mapToSellerInfo(seller: Seller, lastLoginAt?: Date): SellerMypageProfileResponseDto {
     return {
       id: seller.id,
       phone: seller.phone,

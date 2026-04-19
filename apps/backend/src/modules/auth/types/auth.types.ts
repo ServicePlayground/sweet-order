@@ -5,7 +5,7 @@ import type { AudienceConst } from "@apps/backend/modules/auth/constants/auth.co
  */
 
 /**
- * JWT 페이로드 (액세스·리프레시 공통 최소 필드)
+ * JWT 페이로드 (액세스·리프레시 공통 최소 필드) — 서명·검증용, HTTP 요청 DTO 아님
  */
 export interface JwtPayload {
   sub: string;
@@ -14,7 +14,7 @@ export interface JwtPayload {
 }
 
 /**
- * JWT 토큰 검증 결과 인터페이스
+ * JWT 디코드·검증 결과 — 가드·전략 내부용, HTTP DTO 아님
  */
 export interface JwtVerifiedPayload extends JwtPayload {
   type?: string;
@@ -23,7 +23,7 @@ export interface JwtVerifiedPayload extends JwtPayload {
 }
 
 /**
- * Passport JWT 검증 후 요청에 실리는 사용자 정보
+ * Passport JWT 검증 후 `req.user` — 전략에서 DB 조회로 보강한 형태, HTTP DTO 아님
  */
 export interface AuthenticatedUser extends JwtVerifiedPayload {
   id: string;
@@ -36,50 +36,11 @@ export interface AuthenticatedUser extends JwtVerifiedPayload {
 }
 
 /**
- * 구글 OAuth 사용자 정보
+ * 구글 토큰 교환 직후 userinfo 조회 결과 — 서비스 내부 전달용, HTTP DTO 아님
  */
 export interface GoogleUserInfo {
   userInfo: {
     googleId: string;
     googleEmail: string;
   };
-}
-
-/**
- * 토큰 쌍
- */
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
-
-/** 구매자(Consumer) 프로필 (예: GET /consumer/mypage/profile) */
-export interface ConsumerInfo {
-  id: string;
-  phone: string;
-  name: string;
-  nickname: string;
-  profileImageUrl: string;
-  isPhoneVerified: boolean;
-  isActive: boolean;
-  googleId: string;
-  googleEmail: string;
-  createdAt: Date;
-  lastLoginAt: Date;
-}
-
-/** 판매자(Seller) 프로필 DTO (필요 시 별도 프로필 API에서 사용) */
-export interface SellerInfo {
-  id: string;
-  phone: string;
-  name: string;
-  nickname: string;
-  profileImageUrl: string;
-  isPhoneVerified: boolean;
-  isActive: boolean;
-  googleId: string;
-  googleEmail: string;
-  sellerVerificationStatus: "REGISTERED" | "BUSINESS_VERIFIED";
-  createdAt: Date;
-  lastLoginAt: Date;
 }

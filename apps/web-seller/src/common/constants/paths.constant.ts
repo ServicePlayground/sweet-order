@@ -20,9 +20,12 @@ import { StoreDetailStatisticsPage } from "@/apps/web-seller/pages/store/detail/
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
 import { FindAccountPage } from "@/apps/web-seller/pages/auth/FindAccount";
 import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
+import { MypageIndexPage } from "@/apps/web-seller/pages/mypage/Index";
 
 export const ROUTES = {
   ROOT: "/",
+  // 마이페이지
+  MYPAGE: "/mypage",
   // 스토어 관련 경로
   STORE_CREATE: "/store/create",
   STORE_DETAIL_HOME: (storeId: string) => `/stores/${storeId}`,
@@ -65,6 +68,7 @@ export const AUTH_ROUTE_CONFIG = [
 // 관리자 관련 경로 (AdminLayout 안)
 export const ADMIN_ROUTE_CONFIG = [
   { path: ROUTES.ROOT, element: RootPage },
+  { path: ROUTES.MYPAGE, element: MypageIndexPage },
   // 스토어 관련 경로
   { path: ROUTES.STORE_CREATE, element: StoreCreatePage },
   { path: ROUTES.STORE_DETAIL_HOME(":storeId"), element: StoreDetailHomePage },

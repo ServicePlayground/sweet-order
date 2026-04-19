@@ -8,7 +8,6 @@ import {
   MeResponseDto,
   FindAccountRequestDto,
   FindAccountResponseDto,
-  ChangePhoneRequestDto,
 } from "@/apps/web-seller/features/auth/types/auth.dto";
 import { sellerClient } from "@/apps/web-seller/common/config/axios.config";
 import type { MessageResponseDto } from "@/apps/web-seller/common/types/api.dto";
@@ -57,11 +56,6 @@ export const authApi = {
 
   findAccount: async (body: FindAccountRequestDto): Promise<FindAccountResponseDto> => {
     const response = await sellerClient.post("/auth/find-account", body);
-    return response.data.data;
-  },
-
-  changePhone: async (body: ChangePhoneRequestDto): Promise<MessageResponseDto> => {
-    const response = await sellerClient.post("/auth/change-phone", body);
     return response.data.data;
   },
 };

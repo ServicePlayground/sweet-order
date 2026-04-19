@@ -16,6 +16,7 @@ import { SellerStatisticsController } from "@apps/backend/apis/seller/controller
 import { SellerNotificationController } from "@apps/backend/apis/seller/controllers/notification.controller";
 import { SellerHomeController } from "@apps/backend/apis/seller/controllers/home.controller";
 import { SellerAuthController } from "@apps/backend/apis/seller/controllers/auth.controller";
+import { SellerMypageController } from "@apps/backend/apis/seller/controllers/mypage.controller";
 import { SellerHomeModule } from "@apps/backend/modules/seller-home/seller-home.module";
 import { UploadModule } from "@apps/backend/modules/upload/upload.module";
 import { SellerUploadController } from "@apps/backend/apis/seller/controllers/upload.controller";
@@ -50,6 +51,7 @@ import { SellerUploadController } from "@apps/backend/apis/seller/controllers/up
     SellerFeedController,
     SellerStatisticsController,
     SellerNotificationController,
+    SellerMypageController,
     // SellerChatController,
   ],
 })

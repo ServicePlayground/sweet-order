@@ -1,4 +1,4 @@
-/** SMS 인증번호 입력 가능 시간(분) — `PhoneUtil.getExpirationTime`·`PhoneService.sendVerificationCode`와 동일 */
+/** SMS 인증번호 입력 가능 시간(분) — `PhoneUtil.getExpirationTime`·`AuthPhoneService.sendVerificationCode`와 동일 */
 export const PHONE_VERIFICATION_CODE_EXPIRY_MINUTES = 5;
 
 /**
@@ -38,6 +38,8 @@ export const AUTH_ERROR_MESSAGES = {
     "[ACCESS_TOKEN_INVALID] 액세스 토큰에 필수 정보가 누락되었습니다. 다시 로그인해주세요.",
   /* ------------------------------------------------------------------------------------------------------ */
   AUDIENCE_NOT_AUTHORIZED: "이 API에 사용할 수 있는 인증 토큰이 아닙니다.",
+  PROFILE_UPDATE_NO_FIELDS:
+    "변경할 정보가 없습니다. name, nickname, profileImageUrl 중 하나 이상을 보내주세요.",
   USER_NOT_FOUND: "사용자를 찾을 수 없습니다.",
   PHONE_VERIFICATION_EXPIRED: "인증번호가 만료되었습니다.",
   PHONE_GOOGLE_ACCOUNT_EXISTS: "해당 휴대폰 번호로 이미 등록된 구글 계정이 있습니다.",
@@ -125,25 +127,14 @@ export const SWAGGER_EXAMPLES = {
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     lastLoginAt: new Date("2024-01-01T00:00:00.000Z"),
   },
-  GOOGLE_CODE: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
-  VERIFICATION_CODE: "123456",
-} as const;
-
-/**
- * Swagger 응답 예시 데이터
- * 복합 응답 구조를 위한 예시 데이터를 제공합니다.
- */
-export const SWAGGER_RESPONSE_EXAMPLES = {
-  /**
-   * 로그인/회원가입 응답 — 본문은 `{ accessToken, refreshToken }` 문자열만.
-   * JWT 페이로드(디코드 시)는 최소 `sub`, `aud`(consumer|seller), `type`(access|refresh), `iat`, `exp` 입니다.
-   */
   TOKEN_RESPONSE: {
     accessToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbHh4eHhjb25zdW1lciIsImF1ZCI6ImNvbnN1bWVyIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTcwNDA2NzIwMCwiZXhwIjoxNzM1Njg5NjAwfQ.example_sig",
     refreshToken:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbHh4eHhjb25zdW1lciIsImF1ZCI6ImNvbnN1bWVyIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MDQwNjcyMDAsImV4cCI6MTczNTY4OTYwMH0.example_sig",
   },
+  GOOGLE_CODE: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
+  VERIFICATION_CODE: "123456",
 } as const;
 
 /**

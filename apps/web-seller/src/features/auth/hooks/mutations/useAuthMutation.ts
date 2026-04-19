@@ -5,7 +5,6 @@ import { authApi } from "@/apps/web-seller/features/auth/apis/auth.api";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import type {
-  ChangePhoneRequestDto,
   FindAccountRequestDto,
   PhoneVerificationPurpose,
 } from "@/apps/web-seller/features/auth/types/auth.dto";
@@ -89,29 +88,6 @@ export function useFindAccount() {
 
   return useMutation({
     mutationFn: (dto: FindAccountRequestDto) => authApi.findAccount(dto),
-    onError: (error) => {
-      addAlert({
-        message: getApiMessage.error(error),
-        title: "오류",
-        severity: "error",
-      });
-    },
-  });
-}
-
-/** 로그인 상태 — 새 번호 `PHONE_CHANGE` 인증 후 POST /auth/change-phone */
-export function useChangePhone() {
-  const { addAlert } = useAlertStore();
-
-  return useMutation({
-    mutationFn: (dto: ChangePhoneRequestDto) => authApi.changePhone(dto),
-    onSuccess: (response) => {
-      addAlert({
-        message: getApiMessage.success(response),
-        title: "성공",
-        severity: "success",
-      });
-    },
     onError: (error) => {
       addAlert({
         message: getApiMessage.error(error),
