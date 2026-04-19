@@ -267,6 +267,9 @@ jobs:
             GOOGLE_CLIENT_ID=${{ secrets.STAGING_GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
             GOOGLE_REDIRECT_URI=/auth/login/google
+            GOOGLE_CLIENT_ID_SELLER=${{ secrets.STAGING_GOOGLE_CLIENT_ID_SELLER }}
+            GOOGLE_CLIENT_SECRET_SELLER=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET_SELLER }}
+            GOOGLE_REDIRECT_URI_SELLER=/auth/login/google
 
             # SWAGGER
             SWAGGER_USERNAME=${{ secrets.STAGING_SWAGGER_USERNAME }}
