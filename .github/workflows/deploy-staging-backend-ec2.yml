@@ -292,14 +292,6 @@ jobs:
             # 환경 변수 파일 권한 설정
             chmod 600 apps/backend/.env.staging
 
-            # Staging DB 전체 리셋 (개발의 db:reset:dev와 동일). 매 배포마다 실행하면 데이터가 매번 초기화됩니다.
-            # 1회만 반영한 뒤에는 이 블록 전체를 제거하거나 주석 처리하세요.
-            echo "🔄 Staging DB reset (yarn db:reset:staging)"
-            yarn db:reset:staging || {
-              echo "❌ db:reset:staging 실패"
-              rollback_deployment
-            }
-
             echo "🗄️ Prisma migrate"
             cd apps/backend
             # DATABASE_URL을 안전하게 읽어서 export (주석 제외, 첫 번째 매칭만)
