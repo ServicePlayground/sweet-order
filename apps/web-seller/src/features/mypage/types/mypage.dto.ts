@@ -30,3 +30,8 @@ export interface UpdateSellerMypageProfileRequestDto {
 export interface ChangePhoneRequestDto {
   newPhone: string;
 }
+
+/** POST /v1/seller/mypage/withdraw */
+export interface WithdrawAccountRequestDto {
+  reason: string;
+}

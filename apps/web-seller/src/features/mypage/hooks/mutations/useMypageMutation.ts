@@ -6,6 +6,7 @@ import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import type {
   ChangePhoneRequestDto,
   UpdateSellerMypageProfileRequestDto,
+  WithdrawAccountRequestDto,
 } from "@/apps/web-seller/features/mypage/types/mypage.dto";
 
 export function useUpdateMypageProfile() {
@@ -41,6 +42,29 @@ export function useMypageChangePhone() {
     mutationFn: (dto: ChangePhoneRequestDto) => mypageApi.changePhone(dto),
     onSuccess: (response) => {
       void queryClient.invalidateQueries({ queryKey: mypageQueryKeys.profile() });
+      addAlert({
+        message: getApiMessage.success(response),
+        title: "성공",
+        severity: "success",
+      });
+    },
+    onError: (error) => {
+      addAlert({
+        message: getApiMessage.error(error),
+        title: "오류",
+        severity: "error",
+      });
+    },
+  });
+}
+
+/** 회원 탈퇴 — POST /mypage/withdraw */
+export function useMypageWithdraw() {
+  const { addAlert } = useAlertStore();
+
+  return useMutation({
+    mutationFn: (dto: WithdrawAccountRequestDto) => mypageApi.withdrawAccount(dto),
+    onSuccess: (response) => {
       addAlert({
         message: getApiMessage.success(response),
         title: "성공",

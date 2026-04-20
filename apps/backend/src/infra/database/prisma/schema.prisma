@@ -26,6 +26,8 @@ model Consumer {
   profileImageUrl String? @map("profile_image_url")
   isPhoneVerified Boolean @default(false) @map("is_phone_verified")
   isActive        Boolean @default(true) @map("is_active")
+  withdrawReason  String? @map("withdraw_reason")
+  withdrawnAt     DateTime? @map("withdrawn_at")
 
   googleId    String? @unique @map("google_id")
   googleEmail String? @map("google_email")
@@ -56,6 +58,8 @@ model Seller {
   profileImageUrl String? @map("profile_image_url")
   isPhoneVerified Boolean @default(false) @map("is_phone_verified")
   isActive        Boolean @default(true) @map("is_active")
+  withdrawReason  String? @map("withdraw_reason")
+  withdrawnAt     DateTime? @map("withdrawn_at")
 
   googleId    String? @unique @map("google_id")
   googleEmail String? @map("google_email")

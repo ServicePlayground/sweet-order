@@ -4,6 +4,7 @@ import type {
   ChangePhoneRequestDto,
   SellerMypageProfileResponseDto,
   UpdateSellerMypageProfileRequestDto,
+  WithdrawAccountRequestDto,
 } from "@/apps/web-seller/features/mypage/types/mypage.dto";
 
 export const mypageApi = {
@@ -21,6 +22,11 @@ export const mypageApi = {
 
   changePhone: async (body: ChangePhoneRequestDto): Promise<MessageResponseDto> => {
     const response = await sellerClient.post("/mypage/change-phone", body);
+    return response.data.data;
+  },
+
+  withdrawAccount: async (body: WithdrawAccountRequestDto): Promise<MessageResponseDto> => {
+    const response = await sellerClient.post("/mypage/withdraw", body);
     return response.data.data;
   },
 };

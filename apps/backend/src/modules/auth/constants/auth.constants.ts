@@ -55,6 +55,7 @@ export const AUTH_SUCCESS_MESSAGES = {
   PHONE_VERIFICATION_SENT: "인증번호가 발송되었습니다.",
   PHONE_VERIFICATION_CONFIRMED: "인증번호가 확인되었습니다.",
   PHONE_CHANGED: "휴대폰 번호가 변경되었습니다.",
+  ACCOUNT_WITHDRAWN: "회원 탈퇴가 완료되었습니다.",
   ACCESS_TOKEN_REFRESHED: "새로운 Access Token이 발급되었습니다.",
   LOGOUT_SUCCESS: "로그아웃이 완료되었습니다.",
 } as const;

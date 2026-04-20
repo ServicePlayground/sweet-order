@@ -8,6 +8,7 @@ import { AuthGoogleOauthService } from "@apps/backend/modules/auth/services/auth
 import { AuthAccountFindService } from "@apps/backend/modules/auth/services/auth-account-find.service";
 import { AuthMypagePhoneService } from "@apps/backend/modules/auth/services/auth-mypage-phone.service";
 import { AuthMypageProfileService } from "@apps/backend/modules/auth/services/auth-mypage-profile.service";
+import { AuthWithdrawService } from "@apps/backend/modules/auth/services/auth-withdraw.service";
 import { JwtUtil } from "@apps/backend/modules/auth/utils/jwt.util";
 import { JwtStrategy } from "@apps/backend/modules/auth/strategies/jwt.strategy";
 import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
@@ -31,6 +32,7 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
     AuthAccountFindService,
     AuthMypagePhoneService,
     AuthMypageProfileService,
+    AuthWithdrawService,
     AuthPhoneService,
     AuthGoogleOauthService,
     JwtUtil,
@@ -43,6 +45,7 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
     AuthPhoneService,
     AuthMypagePhoneService,
     AuthMypageProfileService,
+    AuthWithdrawService,
     AuthAccountFindService,
   ],
 })

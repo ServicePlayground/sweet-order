@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useMypageProfile } from "@/apps/web-seller/features/mypage/hooks/queries/useMypageProfileQuery";
 import { MypageProfileSection } from "@/apps/web-seller/features/mypage/components/MypageProfileSection";
 import { MypagePhoneSection } from "@/apps/web-seller/features/mypage/components/MypagePhoneSection";
+import { MypageWithdrawSection } from "@/apps/web-seller/features/mypage/components/MypageWithdrawSection";
 
 /**
  * 판매자 계정 마이페이지
@@ -27,6 +28,7 @@ export const MypageIndexPage: React.FC = () => {
 
       <MypageProfileSection profile={profile} />
       <MypagePhoneSection />
+      <MypageWithdrawSection />
     </div>
   );
 };

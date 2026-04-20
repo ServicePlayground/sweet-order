@@ -17,6 +17,8 @@ import {
   SellerMypageProfileResponseDto,
   UpdateMypageProfileRequestDto,
 } from "@apps/backend/modules/auth/dto/mypage-profile.dto";
+import { AuthWithdrawService } from "@apps/backend/modules/auth/services/auth-withdraw.service";
+import { WithdrawAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-withdraw.dto";
 
 /**
  * 마이페이지 컨트롤러
@@ -34,6 +36,7 @@ export class SellerMypageController {
   constructor(
     private readonly mypageProfile: AuthMypageProfileService,
     private readonly mypagePhone: AuthMypagePhoneService,
+    private readonly withdrawService: AuthWithdrawService,
   ) {}
 
   @Get("profile")
@@ -82,5 +85,23 @@ export class SellerMypageController {
   ) {
     await this.mypagePhone.changePhone(changePhoneDto, req.user, AUDIENCE.SELLER);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.PHONE_CHANGED);
+  }
+
+  @Post("withdraw")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 회원 탈퇴",
+    description: "로그인한 판매자 계정을 비활성화 처리하고 탈퇴 사유를 저장합니다.",
+  })
+  @SwaggerResponse(200, {
+    dataExample: createMessageObject(AUTH_SUCCESS_MESSAGES.ACCOUNT_WITHDRAWN),
+  })
+  @SwaggerAuthResponses()
+  async withdrawAccount(
+    @Body() body: WithdrawAccountRequestDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ) {
+    await this.withdrawService.withdraw(AUDIENCE.SELLER, req.user.sub, body.reason);
+    return createMessageObject(AUTH_SUCCESS_MESSAGES.ACCOUNT_WITHDRAWN);
   }
 }
