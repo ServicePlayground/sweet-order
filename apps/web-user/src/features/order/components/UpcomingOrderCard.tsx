@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
@@ -35,9 +36,13 @@ function UpcomingOrderCardSkeleton() {
   );
 }
 
+const MAX_VISIBLE_CARDS = 3;
+
 export function UpcomingOrderCard() {
+  const router = useRouter();
   const { data, isLoading } = useMyOrders({ type: "UPCOMING" });
   const hasPeeked = useRef(false);
+  const hasNavigated = useRef(false);
 
   if (isLoading) return <UpcomingOrderCardSkeleton />;
 
@@ -60,8 +65,11 @@ export function UpcomingOrderCard() {
     });
   if (!orders || orders.length === 0) return null;
 
+  const hasMore = orders.length > MAX_VISIBLE_CARDS;
+  const visibleOrders = hasMore ? orders.slice(0, MAX_VISIBLE_CARDS) : orders;
+
   const handleSwiperInit = (swiper: SwiperType) => {
-    if (orders.length > 1 && !hasPeeked.current) {
+    if (visibleOrders.length > 1 && !hasPeeked.current) {
       hasPeeked.current = true;
       const wrapper = swiper.wrapperEl;
       if (!wrapper) return;
@@ -86,8 +94,8 @@ export function UpcomingOrderCard() {
       <ConfirmedOrderCard order={order} />
     );
 
-  if (orders.length === 1) {
-    return <div className="mb-4 px-5">{renderCard(orders[0])}</div>;
+  if (visibleOrders.length === 1 && !hasMore) {
+    return <div className="mb-4 px-5">{renderCard(visibleOrders[0])}</div>;
   }
 
   return (
@@ -98,12 +106,36 @@ export function UpcomingOrderCard() {
         slidesOffsetAfter={20}
         className="!overflow-visible"
         onAfterInit={handleSwiperInit}
+        onReachEnd={() => {
+          if (hasMore && !hasNavigated.current) {
+            hasNavigated.current = true;
+            setTimeout(() => {
+              router.push("/mypage/order");
+            }, 800);
+          }
+        }}
       >
-        {orders.map((order) => (
+        {visibleOrders.map((order) => (
           <SwiperSlide key={order.id} style={{ width: "min(calc(100vw - 40px), 600px)" }}>
             {renderCard(order)}
           </SwiperSlide>
         ))}
+        {hasMore && (
+          <SwiperSlide style={{ width: "80px" }}>
+            <button
+              type="button"
+              onClick={() => router.push("/mypage/order")}
+              className="flex flex-col items-center justify-center gap-2 w-full h-full min-h-[160px]"
+            >
+              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
+                <svg width={16} height={16} viewBox="0 0 16 16" fill="none">
+                  <path d="M6 3l5 5-5 5" stroke="#9CA3AF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <span className="text-xs text-gray-500">모두보기</span>
+            </button>
+          </SwiperSlide>
+        )}
       </Swiper>
     </div>
   );

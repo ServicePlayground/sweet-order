@@ -25,12 +25,15 @@ interface ReservationItemCardProps {
 export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
   const [expanded, setExpanded] = useState(false);
   const thumbnailUrl = item.imageUrls?.[0] || order.productImages?.[0];
+  const isCancelled =
+    order.orderStatus === OrderStatus.CANCEL_REFUND_PENDING ||
+    order.orderStatus === OrderStatus.CANCEL_COMPLETED;
 
   return (
     <div className="rounded-xl bg-gray-25 border border-gray-100 overflow-hidden">
       <div className="p-3">
         <div className="flex gap-3">
-          <div className="w-[72px] h-[72px] rounded-lg overflow-hidden bg-gray-100 shrink-0">
+          <div className={`w-[72px] h-[72px] rounded-lg overflow-hidden bg-gray-100 shrink-0 ${isCancelled ? "opacity-30" : ""}`}>
             {thumbnailUrl ? (
               <Image
                 src={thumbnailUrl}
@@ -45,13 +48,13 @@ export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
-              <p className="text-xs text-gray-500">예약상품</p>
+              <p className={`text-xs text-gray-500 ${isCancelled ? "opacity-30" : ""}`}>예약상품</p>
               <OrderStatusBadge status={order.orderStatus} />
             </div>
-            <p className="text-sm text-gray-900 mt-0.5 truncate">
+            <p className={`text-sm text-gray-900 mt-0.5 truncate ${isCancelled ? "opacity-30" : ""}`}>
               {formatItemName(order, item)} ×{item.quantity}
             </p>
-            <p className="text-base font-bold text-gray-900 mt-1">
+            <p className={`text-base font-bold text-gray-900 mt-1 ${isCancelled ? "opacity-30" : ""}`}>
               {item.itemPrice.toLocaleString()}원
             </p>
           </div>
