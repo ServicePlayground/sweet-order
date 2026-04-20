@@ -41,7 +41,7 @@ export class AuthMypageProfileService {
 
     if (!row) {
       LoggerUtil.log(`구매자 프로필 조회 실패: consumer 없음 - id: ${user.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
 
     return ConsumerMapperUtil.mapConsumerToInfo(row);
@@ -58,7 +58,7 @@ export class AuthMypageProfileService {
 
     if (!row) {
       LoggerUtil.log(`판매자 프로필 조회 실패: seller 없음 - id: ${user.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
 
     return SellerMapperUtil.mapToSellerInfo(row);
@@ -80,7 +80,7 @@ export class AuthMypageProfileService {
 
     if (!existing) {
       LoggerUtil.log(`구매자 프로필 수정 실패: consumer 없음 - id: ${user.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
 
     const data: Prisma.ConsumerUpdateInput = {};
@@ -118,7 +118,7 @@ export class AuthMypageProfileService {
 
     if (!existing) {
       LoggerUtil.log(`판매자 프로필 수정 실패: seller 없음 - id: ${user.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
 
     const data: Prisma.SellerUpdateInput = {};

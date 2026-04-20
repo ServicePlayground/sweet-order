@@ -48,7 +48,7 @@ export class AuthMypagePhoneService {
 
       if (!currentUser) {
         LoggerUtil.log(`휴대폰 번호 변경 실패: consumer 없음 - id: ${user.sub}`);
-        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
       }
 
       if (normalizedNewPhone === currentUser.phone) {
@@ -85,7 +85,7 @@ export class AuthMypagePhoneService {
 
     if (!current) {
       LoggerUtil.log(`휴대폰 번호 변경 실패: seller 없음 - id: ${user.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
 
     if (normalizedNewPhone === current.phone) {

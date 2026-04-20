@@ -193,7 +193,7 @@ export class AuthGoogleOauthService {
 
     // 3. 계정 활성 상태 확인
     if (!consumer.isActive) {
-      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_INACTIVE);
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
     }
 
     // JWT 발급 및 마지막 로그인 시간 업데이트
@@ -243,7 +243,7 @@ export class AuthGoogleOauthService {
       });
     }
     if (!seller.isActive) {
-      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCOUNT_INACTIVE);
+      throw new BadRequestException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
     }
 
     // JWT 발급 및 마지막 로그인 시간 업데이트

@@ -125,10 +125,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     if (!c) {
       LoggerUtil.log(`JWT 검증 실패: consumer 없음 - id: ${payload.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
     if (!c.isActive) {
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_INACTIVE);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
     }
 
     const loginType = "google" as const;
@@ -159,10 +159,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     if (!s) {
       LoggerUtil.log(`JWT 검증 실패: seller 없음 - id: ${payload.sub}`);
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
     if (!s.isActive) {
-      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_INACTIVE);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
     }
 
     const loginType = "google" as const;

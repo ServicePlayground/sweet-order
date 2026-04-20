@@ -16,9 +16,7 @@ export const AUTH_ERROR_MESSAGES = {
     "인증번호 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",
   PHONE_VERIFICATION_FAILED: "인증번호가 올바르지 않습니다.",
   VERIFICATION_CODE_INVALID_FORMAT: "인증번호는 6자리 숫자여야 합니다.",
-  ACCOUNT_NOT_FOUND: "계정을 찾을 수 없습니다.",
   ACCOUNT_NOT_FOUND_BY_PHONE: "해당 휴대폰 번호로 등록된 계정이 없습니다.",
-  ACCOUNT_INACTIVE: "비활성화된 계정입니다.",
   GOOGLE_REGISTER_FAILED: "구글 로그인 회원가입에 실패했습니다.",
   /* --------------------------------- 토큰 관련 에러 메시지 (반드시 401으로 사용) (주의: 프론트호환성을 위해, 여기 외에 401 오류가 있으면 안됨) --------------------------------- */
   REFRESH_TOKEN_EXPIRED:
@@ -36,6 +34,8 @@ export const AUTH_ERROR_MESSAGES = {
   ACCESS_TOKEN_WRONG_TYPE: "[ACCESS_TOKEN_INVALID] 액세스 토큰의 타입이 올바르지 않습니다.",
   ACCESS_TOKEN_MISSING_REQUIRED_INFO:
     "[ACCESS_TOKEN_INVALID] 액세스 토큰에 필수 정보가 누락되었습니다. 다시 로그인해주세요.",
+  ACCESS_TOKEN_ACCOUNT_NOT_FOUND: "[ACCESS_TOKEN_INVALID] 계정을 찾을 수 없습니다.",
+  ACCESS_TOKEN_ACCOUNT_INACTIVE: "[ACCESS_TOKEN_INVALID] 비활성화된 계정입니다.",
   /* ------------------------------------------------------------------------------------------------------ */
   AUDIENCE_NOT_AUTHORIZED: "이 API에 사용할 수 있는 인증 토큰이 아닙니다.",
   PROFILE_UPDATE_NO_FIELDS:
