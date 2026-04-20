@@ -9,7 +9,7 @@ import {
   OnlineTradingCompanyDetailRequestDto,
 } from "@apps/backend/modules/business/dto/business-request.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   NTS_API_ERROR_MESSAGES,
   KFTC_API_ERROR_MESSAGES,
@@ -20,8 +20,8 @@ import {
  * 사업서비스 관련 컨트롤러
  */
 @ApiTags("사업 서비스")
-@Controller(`${USER_ROLES.SELLER}/business`)
-@Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // USER, SELLER, ADMIN 모두 접근 가능
+@Controller(`${AUDIENCE.SELLER}/business`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerBusinessController {
   constructor(private readonly businessService: BusinessService) {}
 

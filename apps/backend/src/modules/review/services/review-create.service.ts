@@ -31,7 +31,7 @@ export class ReviewCreateService {
       where: { id: dto.orderId },
       select: {
         id: true,
-        userId: true,
+        consumerId: true,
         productId: true,
         orderStatus: true,
       },
@@ -42,7 +42,7 @@ export class ReviewCreateService {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    if (order.userId !== userId) {
+    if (order.consumerId !== userId) {
       LoggerUtil.log(`후기 작성 실패: 주문 권한 없음 - userId: ${userId}, orderId: ${dto.orderId}`);
       throw new ForbiddenException(ORDER_ERROR_MESSAGES.FORBIDDEN);
     }
@@ -72,7 +72,7 @@ export class ReviewCreateService {
 
     const review = await this.prisma.productReview.create({
       data: {
-        userId,
+        consumerId: userId,
         productId: order.productId,
         orderId: order.id,
         rating: dto.rating,
@@ -80,7 +80,7 @@ export class ReviewCreateService {
         imageUrls: dto.imageUrls ?? [],
       },
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,

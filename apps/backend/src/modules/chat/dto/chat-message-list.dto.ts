@@ -36,7 +36,7 @@ export class MessageResponseDto {
   @ApiProperty({
     description: "발신자 타입",
     enum: MessageSenderType,
-    example: MessageSenderType.USER,
+    example: MessageSenderType.CONSUMER,
   })
   senderType: MessageSenderType;
 

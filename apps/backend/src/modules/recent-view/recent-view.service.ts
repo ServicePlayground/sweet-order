@@ -25,9 +25,9 @@ export class RecentViewService {
   async recordProductView(userId: string, productId: string): Promise<void> {
     await this.prisma.productRecentView.upsert({
       where: {
-        userId_productId: { userId, productId },
+        consumerId_productId: { consumerId: userId, productId },
       },
-      create: { userId, productId },
+      create: { consumerId: userId, productId },
       update: { viewedAt: new Date() },
     });
   }
@@ -42,7 +42,7 @@ export class RecentViewService {
   ): Promise<ProductListResponseDto> {
     const { page, limit } = query;
     const where = {
-      userId,
+      consumerId: userId,
       product: { visibilityStatus: EnableStatus.ENABLE },
     };
 
@@ -80,7 +80,7 @@ export class RecentViewService {
   private async getLikedProductIds(userId: string, productIds: string[]): Promise<Set<string>> {
     if (productIds.length === 0) return new Set<string>();
     const likes = await this.prisma.productLike.findMany({
-      where: { userId, productId: { in: productIds } },
+      where: { consumerId: userId, productId: { in: productIds } },
       select: { productId: true },
     });
     return new Set(likes.map((l) => l.productId));

@@ -24,7 +24,7 @@ export const STORE_ERROR_MESSAGES = {
 } as const;
 
 export const STORE_SUCCESS_MESSAGES = {
-  STORE_CREATED: "스토어가 생성되었습니다.",
+  CREATION_SUCCESS: "스토어가 생성되었습니다.",
   LIKE_ADDED: "스토어에 좋아요를 추가했습니다.",
   LIKE_REMOVED: "스토어 좋아요를 취소했습니다.",
 } as const;

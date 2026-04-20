@@ -38,7 +38,7 @@ export class ProductListService {
 
     const likes = await this.prisma.productLike.findMany({
       where: {
-        userId,
+        consumerId: userId,
         productId: {
           in: productIds,
         },
@@ -447,7 +447,7 @@ export class ProductListService {
 
     const userStores = await this.prisma.store.findMany({
       where: {
-        userId: user.sub,
+        sellerId: user.sub,
       },
       select: {
         id: true,

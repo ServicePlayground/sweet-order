@@ -27,6 +27,9 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
     if (pathname?.startsWith("/reservation")) return { variant: "minimal" };
     if (pathname === "/alarm") return { variant: "back-title", title: "알림" };
     if (pathname === "/qa") return { variant: "minimal" };
+    if (pathname === "/auth/register/google" || pathname === "/auth/login/google") {
+      return { variant: "minimal" };
+    }
     if (pathname?.startsWith("/mypage/")) return { variant: "minimal" };
     if (pathname === "/mypage") return { variant: "minimal" };
     if (pathname?.startsWith("/product/")) return { variant: "product" };

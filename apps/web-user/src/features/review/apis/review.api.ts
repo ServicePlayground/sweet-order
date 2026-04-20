@@ -1,4 +1,4 @@
-import { userClient } from "@/apps/web-user/common/config/axios.config";
+import { consumerClient } from "@/apps/web-user/common/config/axios.config";
 import {
   Review,
   ReviewListResponse,
@@ -15,7 +15,7 @@ export const reviewApi = {
     productId,
     ...params
   }: GetProductReviewsParams): Promise<ReviewListResponse> => {
-    const response = await userClient.get(`/review/product/${productId}`, { params });
+    const response = await consumerClient.get(`/review/product/${productId}`, { params });
     return response.data.data;
   },
 
@@ -24,13 +24,13 @@ export const reviewApi = {
     storeId,
     ...params
   }: GetStoreReviewsParams): Promise<ReviewListResponse> => {
-    const response = await userClient.get(`/review/store/${storeId}`, { params });
+    const response = await consumerClient.get(`/review/store/${storeId}`, { params });
     return response.data.data;
   },
 
   // 스토어 후기 단일 조회
   getStoreReview: async (storeId: string, reviewId: string): Promise<Review> => {
-    const response = await userClient.get(`/review/store/${storeId}/${reviewId}`);
+    const response = await consumerClient.get(`/review/store/${storeId}/${reviewId}`);
     return response.data.data;
   },
 
@@ -40,7 +40,7 @@ export const reviewApi = {
     limit?: number;
     sortBy?: string;
   }): Promise<MyReviewListResponse> => {
-    const response = await userClient.get(`/mypage/reviews`, { params });
+    const response = await consumerClient.get(`/mypage/reviews`, { params });
     return response.data.data;
   },
 
@@ -49,17 +49,17 @@ export const reviewApi = {
     page?: number;
     limit?: number;
   }): Promise<WritableReviewListResponse> => {
-    const response = await userClient.get(`/mypage/reviews/writable`, { params });
+    const response = await consumerClient.get(`/mypage/reviews/writable`, { params });
     return response.data.data;
   },
 
   // 후기 작성
   createReview: async (data: CreateReviewRequest): Promise<void> => {
-    await userClient.post(`/mypage/reviews`, data);
+    await consumerClient.post(`/mypage/reviews`, data);
   },
 
   // 내가 작성한 후기 삭제
   deleteMyReview: async (reviewId: string): Promise<void> => {
-    await userClient.delete(`/mypage/reviews/${reviewId}`);
+    await consumerClient.delete(`/mypage/reviews/${reviewId}`);
   },
 };

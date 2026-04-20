@@ -1,0 +1,37 @@
+/**
+ * 판매자 마이페이지 API — `GET|PATCH /v1/seller/mypage/profile`, `POST /v1/seller/mypage/change-phone`
+ * 백엔드 `mypage-profile.dto` 등과 정합
+ */
+
+/** GET /v1/seller/mypage/profile */
+export interface SellerMypageProfileResponseDto {
+  id: string;
+  phone: string;
+  name: string;
+  nickname: string;
+  profileImageUrl: string;
+  isPhoneVerified: boolean;
+  isActive: boolean;
+  googleId: string;
+  googleEmail: string;
+  sellerVerificationStatus: string;
+  createdAt: string;
+  lastLoginAt: string;
+}
+
+/** PATCH /v1/seller/mypage/profile */
+export interface UpdateSellerMypageProfileRequestDto {
+  name?: string;
+  nickname?: string;
+  profileImageUrl?: string | null;
+}
+
+/** POST /v1/seller/mypage/change-phone — `purpose: phone_change` 인증 완료 후 */
+export interface ChangePhoneRequestDto {
+  newPhone: string;
+}
+
+/** POST /v1/seller/mypage/withdraw */
+export interface WithdrawAccountRequestDto {
+  reason: string;
+}

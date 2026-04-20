@@ -23,14 +23,14 @@ export class StoreOwnershipUtil {
     storeId: string,
     userId: string,
     includeSelect?: Prisma.StoreSelect,
-  ): Promise<Store & { userId: string }> {
+  ): Promise<Store & { sellerId: string }> {
     const store = await prisma.store.findFirst({
       where: {
         id: storeId,
       },
       select: {
         id: true,
-        userId: true,
+        sellerId: true,
         ...(includeSelect || {}),
       },
     });
@@ -42,13 +42,13 @@ export class StoreOwnershipUtil {
       throw new NotFoundException(STORE_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    if (store.userId !== userId) {
+    if (store.sellerId !== userId) {
       LoggerUtil.log(
-        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeUserId: ${store.userId}`,
+        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeSellerId: ${store.sellerId}`,
       );
       throw new ForbiddenException(STORE_ERROR_MESSAGES.FORBIDDEN);
     }
 
-    return store as Store & { userId: string };
+    return store as Store & { sellerId: string };
   }
 }

@@ -25,7 +25,7 @@ export class ChatMessageListService {
   async getMessages(
     roomId: string,
     userId: string,
-    userType: "user" | "store",
+    userType: "consumer" | "store",
     query: PaginationRequestDto,
   ): Promise<MessageListResponseDto> {
     // 채팅방 조회 및 권한 확인

@@ -127,11 +127,10 @@ jobs:
                 echo "📢 주의: 디스크 사용량이 지속적으로 높다면 EC2 루트 볼륨 확장 또는 배포 로직 개선을 고려하세요"
               fi
               
-              # 기존 프로젝트의 node_modules와 dist 삭제 (백업 크기 줄이기)
+              # 기존 프로젝트의 node_modules 삭제 (dist는 롤백 시 PM2 기동에 필요하므로 유지)
               if [ -d ~/sweet-order ]; then
-                echo "🗑️ 기존 프로젝트의 node_modules 및 dist 디렉토리 삭제 중..."
+                echo "🗑️ 기존 프로젝트의 node_modules 디렉토리 삭제 중..."
                 find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
-                find ~/sweet-order -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
                 find ~/sweet-order -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
                 find ~/sweet-order -type d -name ".yarn" -exec rm -rf {} + 2>/dev/null || true
               fi
@@ -183,12 +182,11 @@ jobs:
             fi
 
             # 기존 프로젝트 백업 (타임스탬프 포함)
-            # 백업 전에 node_modules와 dist 삭제하여 백업 크기 최소화
+            # 백업 전에 node_modules만 삭제 (dist는 롤백 시 이전 빌드로 서비스 복구에 필요)
             CURRENT_BACKUP_NAME=""
             if [ -d ~/sweet-order ]; then
-              echo "🗑️ 백업 전 불필요한 파일 정리 중 (node_modules, dist 등)..."
+              echo "🗑️ 백업 전 불필요한 파일 정리 중 (node_modules 등)..."
               find ~/sweet-order -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
-              find ~/sweet-order -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
               find ~/sweet-order -type d -name ".next" -exec rm -rf {} + 2>/dev/null || true
               find ~/sweet-order -type d -name ".yarn" -exec rm -rf {} + 2>/dev/null || true
               find ~/sweet-order -type f -name "*.log" -delete 2>/dev/null || true
@@ -267,6 +265,9 @@ jobs:
             GOOGLE_CLIENT_ID=${{ secrets.STAGING_GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET }}
             GOOGLE_REDIRECT_URI=/auth/login/google
+            GOOGLE_CLIENT_ID_SELLER=${{ secrets.STAGING_GOOGLE_CLIENT_ID_SELLER }}
+            GOOGLE_CLIENT_SECRET_SELLER=${{ secrets.STAGING_GOOGLE_CLIENT_SECRET_SELLER }}
+            GOOGLE_REDIRECT_URI_SELLER=/auth/login/google
 
             # SWAGGER
             SWAGGER_USERNAME=${{ secrets.STAGING_SWAGGER_USERNAME }}

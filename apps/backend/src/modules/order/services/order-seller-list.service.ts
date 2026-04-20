@@ -53,7 +53,7 @@ export class OrderSellerListService {
     // 사용자가 소유한 스토어 목록 조회
     const userStores = await this.prisma.store.findMany({
       where: {
-        userId: user.sub,
+        sellerId: user.sub,
       },
       select: {
         id: true,

@@ -17,11 +17,8 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   FEED_ERROR_MESSAGES,
   FEED_SUCCESS_MESSAGES,
@@ -44,8 +41,8 @@ import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-detail.dto"
  */
 @ApiTags("피드")
 @ApiExtraModels(CreateFeedResponseDto, UpdateFeedResponseDto, FeedListResponseDto, FeedResponseDto)
-@Controller(`${USER_ROLES.SELLER}/store/:storeId/feed`)
-@Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] })
+@Controller(`${AUDIENCE.SELLER}/store/:storeId/feed`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerFeedController {
   constructor(private readonly feedService: FeedService) {}
 
@@ -60,9 +57,6 @@ export class SellerFeedController {
   })
   @SwaggerResponse(200, { dataDto: FeedListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
@@ -86,9 +80,6 @@ export class SellerFeedController {
   })
   @SwaggerResponse(200, { dataDto: FeedResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
@@ -138,9 +129,6 @@ export class SellerFeedController {
   @SwaggerResponse(200, { dataDto: UpdateFeedResponseDto })
   @SwaggerAuthResponses()
   @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
-  @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })
   @SwaggerResponse(404, { dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_NOT_FOUND) })
@@ -166,9 +154,6 @@ export class SellerFeedController {
     dataExample: createMessageObject(FEED_SUCCESS_MESSAGES.FEED_DELETED),
   })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(FEED_ERROR_MESSAGES.FEED_FORBIDDEN),
   })

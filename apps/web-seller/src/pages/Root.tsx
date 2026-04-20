@@ -4,7 +4,6 @@ import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/use
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import type { StoreResponseDto } from "@/apps/web-seller/features/store/types/store.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
-import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
 
 export const RootPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +24,6 @@ export const RootPage: React.FC = () => {
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-semibold">스토어가 없습니다</h1>
         <p className="text-muted-foreground">먼저 스토어를 생성해주세요.</p>
-        <Button onClick={() => navigate(ROUTES.STORE_CREATE)}>스토어 만들기</Button>
       </div>
     );
   }

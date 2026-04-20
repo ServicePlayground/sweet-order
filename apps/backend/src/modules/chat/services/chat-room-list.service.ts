@@ -21,21 +21,21 @@ export class ChatRoomListService {
    * 사용자의 채팅방 목록 조회 (사용자용)
    */
   async getChatRoomsByUserIdForUser(
-    userId: string,
+    consumerId: string,
     query: PaginationRequestDto,
   ): Promise<{ data: ChatRoomResponseDto[]; meta: any }> {
     const { page, limit } = query;
 
     // 전체 개수 조회
     const totalItems = await this.prisma.chatRoom.count({
-      where: { userId },
+      where: { consumerId },
     });
 
     // 페이지네이션 계산
     const skip = (page - 1) * limit;
 
     const chatRooms = await this.prisma.chatRoom.findMany({
-      where: { userId },
+      where: { consumerId },
       include: {
         store: {
           select: ChatMapperUtil.STORE_INFO_SELECT,
@@ -84,8 +84,8 @@ export class ChatRoomListService {
     const chatRooms = await this.prisma.chatRoom.findMany({
       where: { storeId },
       include: {
-        user: {
-          select: ChatMapperUtil.USER_INFO_SELECT,
+        consumer: {
+          select: ChatMapperUtil.CONSUMER_INFO_SELECT,
         },
       },
       orderBy: {

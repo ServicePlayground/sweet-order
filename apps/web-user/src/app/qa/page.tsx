@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
 import { useProductList } from "@/apps/web-user/features/product/hooks/queries/useProductList";
@@ -9,39 +10,24 @@ import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/use
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import {
-  navigateToLoginPage,
-  toExternalAppSchemeUrl,
-} from "@/apps/web-user/common/utils/webview.bridge";
-
-const QA_WEB_USERS = {
-  STAGING: {
-    id: "user001",
-    token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWw2MWpzMzIwMDAxMm51dW1ucXFxcHhnIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3MjY4ODU3NywiZXhwIjoxNzgwNDY0NTc3fQ.qjoakaoz64_NIKChWXLOCBCfDO7XwzUM1lUlr21wcrA",
-  },
-  DEV: {
-    id: "user001",
-    token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW5jY2lpZWgwMDAwMXlna25lNmtidHdnIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc3NDgyNDIyMywiZXhwIjoxNzgyNjAwMjIzfQ.B7hUhlggA_Er67SbNfFmFA_PwZC_MXIUvrCp_XljmaU",
-  },
-} as const;
+import { toExternalAppSchemeUrl } from "@/apps/web-user/common/utils/webview.bridge";
 
 export default function QAPage() {
-  const { isAuthenticated, clearAccessToken, setAccessToken } = useAuthStore();
+  const { isAuthenticated, clearAccessToken } = useAuthStore();
   const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
   );
   const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
+  const [googleAuthHref, setGoogleAuthHref] = useState<string | null>(null);
 
-  const handleWebLogin = () => {
-    setAccessToken(QA_WEB_USERS.STAGING.token);
-  };
-
-  const handleDevWebLogin = () => {
-    setAccessToken(QA_WEB_USERS.DEV.token);
-  };
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!clientId || typeof window === "undefined") return;
+    const redirectUri = `${window.location.origin}${PATHS.AUTH.GOOGLE_REDIRECT_URI}`;
+    const href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=email+profile&prompt=select_account`;
+    setGoogleAuthHref(href);
+  }, []);
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
@@ -151,8 +137,8 @@ export default function QAPage() {
         {/* 인증 섹션 */}
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
-            <span className="w-2 h-2 rounded-full bg-blue-400" />
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">App 로그인</h2>
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">로그인</h2>
           </div>
 
           <div className="flex items-center gap-2 mb-4">
@@ -164,89 +150,21 @@ export default function QAPage() {
             </span>
           </div>
 
-          {!isAuthenticated && (
-            <button
-              onClick={navigateToLoginPage}
-              className="w-full px-4 py-2.5 text-xs font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-400 transition-colors"
+          {!isAuthenticated && googleAuthHref && (
+            <a
+              href={googleAuthHref}
+              className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-2xl border border-gray-200 bg-white text-[15px] font-semibold text-gray-900 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
             >
-              App 로그인하기
-            </button>
-          )}
-
-          {/* Web 로그인: 토큰 직접 사용 (앱브릿지와 동일하게 setAccessToken만 호출) */}
-          <div className="mt-5 pt-5 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
-                Web 로그인
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isAuthenticated ? "bg-green-400" : "bg-red-400"
-                }`}
+              <Image
+                src="/images/contents/google.png"
+                alt=""
+                width={20}
+                height={20}
+                className="block shrink-0"
               />
-              <span className="text-sm text-gray-700">
-                {isAuthenticated ? "로그인됨" : "로그아웃 상태"}
-              </span>
-            </div>
-
-            {!isAuthenticated && (
-              <div className="space-y-4">
-                {/* Staging 영역 */}
-                <div className="pb-4 border-b border-gray-100">
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-3">
-                    Staging
-                  </p>
-                  <div className="flex flex-col gap-1.5 text-xs text-gray-600 mb-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Staging ID</span>
-                      <span className="font-bold text-gray-800">{QA_WEB_USERS.STAGING.id}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Staging 토큰</span>
-                      <span className="font-mono font-bold text-gray-800 truncate max-w-[120px] min-w-0">
-                        {QA_WEB_USERS.STAGING.token}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleWebLogin}
-                    className="w-full px-4 py-2.5 text-xs font-bold text-white bg-amber-500 rounded-2xl hover:bg-amber-400 transition-colors"
-                  >
-                    Staging 계정으로 로그인
-                  </button>
-                </div>
-
-                {/* Dev 영역 */}
-                <div className="pb-1">
-                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-3">
-                    Dev
-                  </p>
-                  <div className="flex flex-col gap-1.5 text-xs text-gray-600 mb-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Dev ID</span>
-                      <span className="font-bold text-gray-800">{QA_WEB_USERS.DEV.id}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Dev 토큰</span>
-                      <span className="font-mono font-bold text-gray-800 truncate max-w-[120px] min-w-0">
-                        {QA_WEB_USERS.DEV.token}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleDevWebLogin}
-                    className="w-full px-4 py-2.5 text-xs font-bold text-white bg-gray-700 rounded-2xl hover:bg-gray-600 transition-colors"
-                  >
-                    Dev 계정으로 로그인
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              Google로 계속하기
+            </a>
+          )}
 
           {isAuthenticated && (
             <div className="pt-4 mt-3 border-t border-gray-100">

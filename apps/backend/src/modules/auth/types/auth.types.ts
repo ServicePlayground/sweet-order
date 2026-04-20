@@ -1,74 +1,42 @@
+import type { AudienceConst } from "@apps/backend/modules/auth/constants/auth.constants";
+
 /**
  * 인증 관련 타입 정의
- * 사용자 인증과 관련된 모든 타입들을 중앙 집중식으로 관리합니다.
  */
 
-export type UserRole = "USER" | "SELLER" | "ADMIN"; // 사용자 역할
-
 /**
- * 사용자 정보 인터페이스
- * User 엔티티의 주요 필드를 포함하는 사용자 정보 구조를 정의합니다.
- */
-export interface UserInfo {
-  id: string;
-  role: UserRole;
-  userId?: string;
-  phone: string;
-  name?: string;
-  nickname?: string;
-  email?: string;
-  profileImageUrl?: string;
-  isPhoneVerified: boolean;
-  isActive: boolean;
-  googleId?: string;
-  googleEmail?: string;
-  createdAt: Date;
-  lastLoginAt?: Date;
-}
-
-/**
- * JWT 페이로드 인터페이스
- * JWT 토큰의 페이로드 구조를 정의합니다.
- * 최소한의 정보만 포함하여 토큰 크기를 줄이고, 변경 가능한 정보(role 등)는 DB에서 조회합니다.
+ * JWT 페이로드 (액세스·리프레시 공통 최소 필드) — 서명·검증용, HTTP 요청 DTO 아님
  */
 export interface JwtPayload {
-  sub: string; // 사용자 고유 ID (user.id) - 유일하게 필요한 정보
+  sub: string;
+  /** JWT `aud` 클레임 — `AUDIENCE` 상수 값과 동일한 리터럴 유니온(`AudienceConst`) */
+  aud: AudienceConst;
 }
 
 /**
- * JWT 토큰 검증 결과 인터페이스
- * JWT 라이브러리에서 반환하는 전체 페이로드 구조
+ * JWT 디코드·검증 결과 — 가드·전략 내부용, HTTP DTO 아님
  */
 export interface JwtVerifiedPayload extends JwtPayload {
-  type?: string; // 토큰 타입 (access | refresh)
-  iat?: number; // 토큰 발급 시간
-  exp?: number; // 토큰 만료 시간
+  type?: string;
+  iat?: number;
+  exp?: number;
 }
 
 /**
- * JWT 검증 후 DB에서 조회한 최신 사용자 정보
- * JWT Strategy의 validate 메서드에서 반환하는 최종 사용자 정보
+ * Passport JWT 검증 후 `req.user` — 전략에서 DB 조회로 보강한 형태, HTTP DTO 아님
  */
 export interface AuthenticatedUser extends JwtVerifiedPayload {
-  id: string; // 사용자 고유 ID (user.id)
-  role: UserRole;
+  id: string;
+  aud: AudienceConst;
   phone: string;
-  loginType: "general" | "google";
+  loginType: "google";
   loginId: string;
+  /** aud === "seller" 일 때만 */
+  sellerVerificationStatus?: "REGISTERED" | "BUSINESS_VERIFIED";
 }
 
 /**
- * 토큰 쌍 인터페이스
- * 액세스 토큰과 리프레시 토큰을 포함하는 구조를 정의합니다.
- */
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
-
-/**
- * 구글 OAuth 사용자 정보 인터페이스
- * 구글에서 받은 사용자 정보 구조를 정의합니다.
+ * 구글 토큰 교환 직후 userinfo 조회 결과 — 서비스 내부 전달용, HTTP DTO 아님
  */
 export interface GoogleUserInfo {
   userInfo: {

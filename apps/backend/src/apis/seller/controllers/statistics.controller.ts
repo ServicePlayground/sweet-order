@@ -4,10 +4,7 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   OrderStatisticsOverviewRequestDto,
   OrderStatisticsOverviewResponseDto,
@@ -23,8 +20,8 @@ import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/orde
  */
 @ApiTags("통계")
 @ApiExtraModels(OrderStatisticsOverviewResponseDto)
-@Controller(`${USER_ROLES.SELLER}/statistics`)
-@Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] })
+@Controller(`${AUDIENCE.SELLER}/statistics`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerStatisticsController {
   constructor(private readonly orderStatisticsService: OrderStatisticsService) {}
 
@@ -41,9 +38,6 @@ export class SellerStatisticsController {
   })
   @SwaggerResponse(200, { dataDto: OrderStatisticsOverviewResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED),
   })

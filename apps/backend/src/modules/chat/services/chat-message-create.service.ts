@@ -30,7 +30,7 @@ export class ChatMessageCreateService {
     roomId: string,
     text: string,
     senderId: string,
-    senderType: "user" | "store",
+    senderType: "consumer" | "store",
   ): Promise<MessageResponseDto> {
     // 채팅방 조회 및 권한 확인
     const chatRoom = await this.chatRoomDetailService.findChatRoomById(roomId);
@@ -51,7 +51,7 @@ export class ChatMessageCreateService {
             roomId,
             text: trimmedText,
             senderId,
-            senderType: senderType.toUpperCase() as "USER" | "STORE",
+            senderType: senderType.toUpperCase() as "CONSUMER" | "STORE",
           },
         });
 
@@ -113,12 +113,12 @@ export class ChatMessageCreateService {
     tx: Prisma.TransactionClient,
     roomId: string,
     lastMessagePreview: string,
-    senderType: "user" | "store",
+    senderType: "consumer" | "store",
   ): Promise<void> {
     const updateData = {
       lastMessage: lastMessagePreview,
       lastMessageAt: new Date(),
-      ...(senderType === "user"
+      ...(senderType === "consumer"
         ? { storeUnread: { increment: 1 } }
         : { userUnread: { increment: 1 } }),
     };

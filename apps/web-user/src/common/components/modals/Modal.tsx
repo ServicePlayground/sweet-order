@@ -103,7 +103,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="relative z-10 w-[calc(100%-40px)] max-w-[320px] bg-white rounded-2xl px-[20px] pt-[36px]">
         <div className="text-center py-[12px]">
           <h2 className="text-base font-bold text-gray-900 mb-[8px] break-keep">{title}</h2>
-          {description && <p className="text-sm text-gray-700 break-keep">{description}</p>}
+          {description && <div className="text-sm text-gray-700 break-keep">{description}</div>}
         </div>
 
         <div className="flex gap-[8px] py-[20px]">

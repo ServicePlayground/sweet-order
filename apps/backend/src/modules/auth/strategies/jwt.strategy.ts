@@ -9,24 +9,25 @@ import { AuthenticatedUser, JwtVerifiedPayload } from "@apps/backend/modules/aut
 import {
   AUTH_ERROR_MESSAGES,
   TOKEN_TYPES,
+  AUDIENCE,
 } from "@apps/backend/modules/auth/constants/auth.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
 /**
- * JWT 전략
- * Passport JWT 전략을 구현하여 JWT 토큰 검증을 처리합니다.
- * 사용자 요청 → Controller → @Auth 데코레이터 → AuthGuard → Passport → JwtStrategy → validate() → req.user
+ * JWT 전략 (passport-jwt)
  *
- * 이 전략은 다음과 같은 검증을 수행합니다:
- * 1. Authorization 헤더에서 Bearer 토큰 추출
- * 2. JWT 시크릿 키로 토큰 서명 검증
- * 3. 토큰 만료 시간 확인 (Passport가 자동 처리)
- * 4. 토큰 타입이 ACCESS 토큰인지 확인
- * 5. 필수 페이로드 필드 존재 여부 확인 (sub만 필요)
- * 6. DB에서 최신 사용자 정보 조회 (role 등 변경 가능한 정보를 최신 상태로 가져옴)
+ * 흐름: 요청 → Controller → `@Auth` → `AuthGuard("jwt")` → Passport → 본 전략 → `validate` 반환값이 `req.user`.
  *
- * 검증이 성공하면 최신 사용자 정보를 반환하고, 실패하면 UnauthorizedException을 발생시킵니다.
- * JWT 페이로드는 최소화되어 sub만 포함되며, role 등 변경 가능한 정보는 매 요청마다 DB에서 조회합니다.
+ * 수행하는 일:
+ * 1. `Authorization: Bearer <token>` 에서 액세스 토큰 문자열 추출 (`jwtFromRequest`)
+ * 2. `JWT_SECRET` 으로 서명 검증·만료 검사 (passport-jwt, `validate` 호출 전에 처리)
+ * 3. `validate` 에서 `type === access`, `sub`·`aud` 존재 여부 확인
+ * 4. `aud` 가 consumer/seller 인 경우 DB에서 해당 계정을 조회해 비활성 여부·`phone`·(seller면) 사업자 검증 상태 등 최신 값을 붙여 반환
+ *
+ * 발급 페이로드는 {@link JwtUtil} 기준 `sub`, `aud`, `type`(access|refresh) 및 `iat`/`exp` 이다.
+ * 역할·권한을 JWT에 넣지 않고, 필요한 필드는 매 요청 DB 조회로 맞춘다.
+ *
+ * 실패 시 `UnauthorizedException`(메시지는 `AUTH_ERROR_MESSAGES` 참고).
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -41,121 +42,140 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     super({
-      // JWT 토큰 추출: Authorization 헤더에서 Bearer 토큰 추출
+      /** Bearer 가 없거나 비어 있으면 `null` → `AuthGuard` 쪽에서 optional/public 과 조합해 처리 */
       jwtFromRequest: (req: Request) => {
-        // Authorization 헤더에서 Bearer 토큰 추출
         const authHeader = req.headers.authorization;
 
-        // 토큰이 없으면 null 반환 (OptionalPublic 엔드포인트에서 선택적 인증 지원)
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
           return null;
         }
 
-        const accessToken = authHeader.substring(7); // "Bearer " 제거
+        const accessToken = authHeader.substring(7);
 
-        // 토큰이 비어있으면 null 반환
         if (!accessToken) {
           return null;
         }
-
         return accessToken;
       },
-      // JWT 서명 검증을 위한 시크릿 키
       secretOrKey: jwtSecret,
-      // 토큰 만료 시간 검증을 활성화 (false = 만료된 토큰 거부)
+      /** `false`: 만료 토큰은 전략 단계에서 거부 (검증 오류는 주로 `AuthGuard.handleRequest`에서 메시지 매핑) */
       ignoreExpiration: false,
     });
   }
 
   /**
-   * JWT 토큰을 검증하고 사용자 정보를 반환합니다.
+   * 서명·만료를 통과한 디코드 페이로드에 대해 타입·필수 필드·대상(`aud`)별 DB 일치 여부를 검사한다.
    *
-   * Passport가 JWT 토큰을 디코딩한 후 이 메서드를 호출하여 추가 검증을 수행합니다.
-   * DB에서 최신 사용자 정보를 조회하여 role 등 변경 가능한 정보를 최신 상태로 반환합니다.
-   *
-   * @param payload JWT 페이로드 (토큰에서 추출된 사용자 정보 - sub만 포함)
-   * @returns 검증된 사용자 정보 (요청 객체의 user 속성에 저장됨)
-   * @throws UnauthorizedException 토큰 검증 실패 시
+   * @param payload — 최소 `sub`, `aud`, `type`(access), 표준 클레임 `iat`/`exp` 포함
+   * @returns `AuthenticatedUser` (`req.user`)
    */
   async validate(payload: JwtVerifiedPayload): Promise<AuthenticatedUser> {
     try {
-      // 0. Access Token 검증 (JWT 서명 및 만료시간 자동 검증)
-      // 이 부분은 Passport JWT가 자동으로 처리하므로 여기서는 처리하지 않습니다.
-      // 토큰 만료: Passport가 자동으로 TokenExpiredError 발생, 서명 오류: JsonWebTokenError 발생
-
-      // 1. 토큰 타입 검증: ACCESS 토큰만 허용 (REFRESH 토큰은 별도 처리)
+      // 액세스 토큰만 허용 (리프레시는 토큰 갱신 등 별도 플로우)
       if (payload.type !== TOKEN_TYPES.ACCESS) {
         LoggerUtil.log(`JWT 검증 실패: 잘못된 토큰 타입 - type: ${payload.type}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_WRONG_TYPE);
       }
 
-      // 2. 필수 필드 검증: 사용자 ID(sub)가 있는지 확인
-      if (!payload.sub) {
+      if (!payload.sub || !payload.aud) {
         LoggerUtil.log(`JWT 검증 실패: 필수 필드 없음 - payload: ${JSON.stringify(payload)}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_MISSING_REQUIRED_INFO);
       }
 
-      // 3. DB에서 최신 사용자 정보 조회 (role 등 변경 가능한 정보를 최신 상태로 가져옴)
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-        select: {
-          id: true,
-          role: true,
-          phone: true,
-          userId: true,
-          googleId: true,
-          isActive: true,
-        },
-      });
-
-      if (!user) {
-        LoggerUtil.log(`JWT 검증 실패: 계정 없음 - userId: ${payload.sub}`);
-        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND);
+      if (payload.aud === AUDIENCE.CONSUMER) {
+        return await this.validateConsumer(payload);
+      }
+      if (payload.aud === AUDIENCE.SELLER) {
+        return await this.validateSeller(payload);
       }
 
-      // 4. 사용자 계정 활성화 상태 확인
-      if (!user.isActive) {
-        LoggerUtil.log(`JWT 검증 실패: 계정 비활성화 - userId: ${payload.sub}`);
-        throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCOUNT_INACTIVE);
-      }
-
-      // 5. 로그인 타입 및 로그인 ID 결정
-      const loginType = user.googleId ? "google" : "general";
-      const loginId = loginType === "google" ? (user.googleId ?? "") : (user.userId ?? "");
-
-      // 6. 최신 사용자 정보 반환 (JWT 페이로드 + DB에서 조회한 최신 정보)
-      // 이 정보는 @Request() 데코레이터로 접근 가능한 req.user에 저장됩니다
-      return {
-        ...payload,
-        id: user.id,
-        role: user.role,
-        phone: user.phone,
-        loginType,
-        loginId,
-      };
+      LoggerUtil.log(`JWT 검증 실패: 알 수 없는 aud - aud: ${payload.aud}`);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
     } catch (error) {
-      // 이미 UnauthorizedException인 경우 그대로 던지기
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-
-      // JWT 토큰 만료 에러
+      // JWT 만료/형식 오류는 보통 validate 호출 전에 발생하나, 방어적으로 동일 메시지로 매핑
       if (error instanceof TokenExpiredError) {
         LoggerUtil.log(`JWT 검증 실패: 토큰 만료`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_EXPIRED);
       }
-
-      // JWT 토큰 형식 오류, 서명 오류 등
       if (error instanceof JsonWebTokenError) {
         LoggerUtil.log(`JWT 검증 실패: 토큰 형식 오류 - error: ${error.message}`);
         throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
       }
-
-      // 기타 예상치 못한 오류
       LoggerUtil.log(
         `JWT 검증 실패: 알 수 없는 에러 - error: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
     }
+  }
+
+  /** `aud === consumer`: 계정 존재·활성 여부 확인 후 표시용 `loginId`(googleId) 등을 채운다. */
+  private async validateConsumer(payload: JwtVerifiedPayload): Promise<AuthenticatedUser> {
+    const c = await this.prisma.consumer.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        phone: true,
+        googleId: true,
+        isActive: true,
+      },
+    });
+
+    if (!c) {
+      LoggerUtil.log(`JWT 검증 실패: consumer 없음 - id: ${payload.sub}`);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
+    }
+    if (!c.isActive) {
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
+    }
+
+    const loginType = "google" as const;
+    const loginId = c.googleId ?? "";
+
+    return {
+      ...payload,
+      aud: AUDIENCE.CONSUMER,
+      id: c.id,
+      phone: c.phone,
+      loginType,
+      loginId,
+    };
+  }
+
+  /** `aud === seller`: consumer와 동일하며 `sellerVerificationStatus` 를 추가로 실어 간다. */
+  private async validateSeller(payload: JwtVerifiedPayload): Promise<AuthenticatedUser> {
+    const s = await this.prisma.seller.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        phone: true,
+        googleId: true,
+        isActive: true,
+        sellerVerificationStatus: true,
+      },
+    });
+
+    if (!s) {
+      LoggerUtil.log(`JWT 검증 실패: seller 없음 - id: ${payload.sub}`);
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
+    }
+    if (!s.isActive) {
+      throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
+    }
+
+    const loginType = "google" as const;
+    const loginId = s.googleId ?? "";
+
+    return {
+      ...payload,
+      aud: AUDIENCE.SELLER,
+      id: s.id,
+      phone: s.phone,
+      loginType,
+      loginId,
+      sellerVerificationStatus: s.sellerVerificationStatus,
+    };
   }
 }

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
-import { Menu, User, LogOut, Bell } from "lucide-react";
+import { Menu, User, LogOut, Bell, UserCircle } from "lucide-react";
 import { AdminSidebar } from "@/apps/web-seller/common/components/sidebar/AdminSidebar";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
@@ -63,6 +63,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(!isMobile);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   const { isAuthenticated } = useAuthStore();
   const logoutMutation = useLogout();
@@ -79,6 +80,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) return;
+    const handlePointerDown = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [isProfileMenuOpen]);
 
   const handleDrawerToggle = () => {
     if (isMobile) {
@@ -124,28 +136,51 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               스토어 만들기
             </Button>
             {isAuthenticated && (
-              <div className="relative flex items-center">
+              <div className="flex items-center">
                 <AdminHeaderNotificationButton />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="text-zinc-700 hover:bg-zinc-100"
-                >
-                  <User className="h-6 w-6" />
-                </Button>
-                {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-zinc-200 z-50">
-                    <button
-                      onClick={handleLogout}
-                      disabled={logoutMutation.isPending}
-                      className="w-full px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100 flex items-center gap-2 rounded-md disabled:opacity-50"
+                <div ref={profileMenuRef} className="relative flex shrink-0 items-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="button"
+                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    aria-expanded={isProfileMenuOpen}
+                    aria-haspopup="menu"
+                    className="text-zinc-700 hover:bg-zinc-100"
+                  >
+                    <User className="h-6 w-6" />
+                  </Button>
+                  {isProfileMenuOpen ? (
+                    <div
+                      role="menu"
+                      className="absolute right-0 top-full z-50 mt-2 w-52 rounded-md border border-zinc-200 bg-white py-1 shadow-lg"
                     >
-                      <LogOut className="h-4 w-4" />
-                      로그아웃
-                    </button>
-                  </div>
-                )}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          navigate(ROUTES.MYPAGE);
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100"
+                      >
+                        <UserCircle className="h-4 w-4 shrink-0" />
+                        마이페이지
+                      </button>
+                      <div className="my-1 border-t border-zinc-200" />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={handleLogout}
+                        disabled={logoutMutation.isPending}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-zinc-900 hover:bg-zinc-100 disabled:opacity-50"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        로그아웃
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             )}
           </div>

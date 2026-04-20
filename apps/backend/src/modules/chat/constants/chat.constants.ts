@@ -15,14 +15,14 @@ export const CHAT_SUCCESS_MESSAGES = {
  * 메시지 발신자 타입 enum
  */
 export enum MessageSenderType {
-  USER = "user", // 사용자
-  STORE = "store", // 스토어(판매자)
+  CONSUMER = "consumer",
+  STORE = "store",
 }
 
 export const SWAGGER_EXAMPLES = {
   ID: "QXZw02vBqVXNQ29c4w9n9ZdG",
   STORE_ID: STORE_SWAGGER_EXAMPLES.ID,
-  USER_ID: USER_SWAGGER_EXAMPLES.USER_DATA.id,
+  USER_ID: USER_SWAGGER_EXAMPLES.CONSUMER_DATA.id,
   MESSAGE_ID: "cm1234567890",
   ROOM_ID: "cm0987654321",
   LAST_MESSAGE: "안녕하세요, 케이크 주문하고 싶어요.",

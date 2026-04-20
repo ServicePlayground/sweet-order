@@ -18,14 +18,14 @@ import { StoreDetailNotificationsListPage } from "@/apps/web-seller/pages/store/
 import { StoreDetailNotificationsSettingsPage } from "@/apps/web-seller/pages/store/detail/notifications/Settings";
 import { StoreDetailStatisticsPage } from "@/apps/web-seller/pages/store/detail/statistics/Index";
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
-import { BasicLoginPage } from "@/apps/web-seller/pages/auth/BasicLogin";
-import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
-import { BasicRegisterPage } from "@/apps/web-seller/pages/auth/BasicRegister";
 import { FindAccountPage } from "@/apps/web-seller/pages/auth/FindAccount";
-import { ResetPasswordPage } from "@/apps/web-seller/pages/auth/ResetPassword";
+import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
+import { MypageIndexPage } from "@/apps/web-seller/pages/mypage/Index";
 
 export const ROUTES = {
   ROOT: "/",
+  // 마이페이지
+  MYPAGE: "/mypage",
   // 스토어 관련 경로
   STORE_CREATE: "/store/create",
   STORE_DETAIL_HOME: (storeId: string) => `/stores/${storeId}`,
@@ -53,27 +53,22 @@ export const ROUTES = {
   // 인증 관련 경로
   AUTH: {
     LOGIN: "/auth/login",
-    LOGIN_BASIC: "/auth/login/basic",
+    FIND_ACCOUNT: "/auth/login/find-account",
     GOOGLE_REDIRECT_URI: "/auth/login/google",
-    REGISTER_BASIC: "/auth/register/basic",
-    FIND_ACCOUNT: "/auth/find-account",
-    RESET_PASSWORD: "/auth/reset-password",
   },
 } as const;
 
 // 인증 관련 경로 (AdminLayout 밖)
 export const AUTH_ROUTE_CONFIG = [
   { path: ROUTES.AUTH.LOGIN, element: LoginPage },
-  { path: ROUTES.AUTH.LOGIN_BASIC, element: BasicLoginPage },
-  { path: ROUTES.AUTH.GOOGLE_REDIRECT_URI, element: GoogleAuthCallbackPage },
-  { path: ROUTES.AUTH.REGISTER_BASIC, element: BasicRegisterPage },
   { path: ROUTES.AUTH.FIND_ACCOUNT, element: FindAccountPage },
-  { path: ROUTES.AUTH.RESET_PASSWORD, element: ResetPasswordPage },
+  { path: ROUTES.AUTH.GOOGLE_REDIRECT_URI, element: GoogleAuthCallbackPage },
 ] as const;
 
 // 관리자 관련 경로 (AdminLayout 안)
 export const ADMIN_ROUTE_CONFIG = [
   { path: ROUTES.ROOT, element: RootPage },
+  { path: ROUTES.MYPAGE, element: MypageIndexPage },
   // 스토어 관련 경로
   { path: ROUTES.STORE_CREATE, element: StoreCreatePage },
   { path: ROUTES.STORE_DETAIL_HOME(":storeId"), element: StoreDetailHomePage },

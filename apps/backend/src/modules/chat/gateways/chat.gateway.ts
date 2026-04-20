@@ -15,6 +15,7 @@ import { ConfigService } from "@nestjs/config";
 import { ChatService } from "../chat.service";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { MessageResponseDto } from "../dto/chat-message-list.dto";
 import { ChatPermissionUtil } from "@apps/backend/modules/chat/utils/chat-permission.util";
 import { CHAT_ERROR_MESSAGES } from "@apps/backend/modules/chat/constants/chat.constants";
@@ -134,29 +135,52 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       });
 
       const userId = payload.sub;
-      LoggerUtil.log(
-        `[✅ 2단계 완료] JWT 토큰 검증 성공 - socketId: ${client.id}, userId: ${userId}`,
-      );
+      const aud = payload.aud;
 
-      // DB에서 사용자 정보 조회 (role 확인용)
-      LoggerUtil.log(`[3단계] 사용자 정보 조회 시작 - socketId: ${client.id}, userId: ${userId}`);
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true },
-      });
-
-      if (!user) {
-        const errorMessage = `User not found: ${userId}`;
-        LoggerUtil.log(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}`);
-        // 에러 메시지를 클라이언트에 전달한 후 연결 종료
-        client.emit("error", { message: errorMessage, code: "USER_NOT_FOUND" });
+      if (!aud || (aud !== AUDIENCE.CONSUMER && aud !== AUDIENCE.SELLER)) {
+        const errorMessage = "Invalid token audience for chat";
+        LoggerUtil.log(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}, aud: ${aud}`);
+        client.emit("error", { message: errorMessage, code: "INVALID_AUDIENCE" });
         client.disconnect(true);
         return;
       }
 
-      const userType = user.role === "SELLER" ? "store" : "user";
       LoggerUtil.log(
-        `[✅ 3단계 완료] 사용자 정보 조회 성공 - socketId: ${client.id}, userId: ${userId}, role: ${user.role}, userType: ${userType}`,
+        `[✅ 2단계 완료] JWT 토큰 검증 성공 - socketId: ${client.id}, userId: ${userId}, aud: ${aud}`,
+      );
+
+      LoggerUtil.log(`[3단계] 계정 조회 시작 - socketId: ${client.id}, userId: ${userId}`);
+      let userType: "consumer" | "store";
+      if (aud === AUDIENCE.CONSUMER) {
+        const row = await this.prisma.consumer.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
+        if (!row) {
+          const errorMessage = `Consumer not found: ${userId}`;
+          LoggerUtil.log(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}`);
+          client.emit("error", { message: errorMessage, code: "USER_NOT_FOUND" });
+          client.disconnect(true);
+          return;
+        }
+        userType = "consumer";
+      } else {
+        const row = await this.prisma.seller.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
+        if (!row) {
+          const errorMessage = `Seller not found: ${userId}`;
+          LoggerUtil.log(`[❌ 연결 거부] ${errorMessage} - socketId: ${client.id}`);
+          client.emit("error", { message: errorMessage, code: "USER_NOT_FOUND" });
+          client.disconnect(true);
+          return;
+        }
+        userType = "store";
+      }
+
+      LoggerUtil.log(
+        `[✅ 3단계 완료] 계정 조회 성공 - socketId: ${client.id}, userId: ${userId}, userType: ${userType}`,
       );
 
       // 소켓에 사용자 정보 저장

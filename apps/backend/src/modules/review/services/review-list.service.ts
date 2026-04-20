@@ -52,7 +52,7 @@ export class ReviewListService {
       skip,
       take: limit,
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
@@ -104,7 +104,7 @@ export class ReviewListService {
       skip,
       take: limit,
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,

@@ -39,14 +39,14 @@ export class NotificationOrderDispatchService {
         where: { id: payload.orderId },
         select: {
           storeId: true,
-          store: { select: { userId: true } },
+          store: { select: { sellerId: true } },
         },
       });
-      if (!order?.store?.userId) {
+      if (!order?.store?.sellerId) {
         return;
       }
 
-      const sellerUserId = order.store.userId;
+      const sellerUserId = order.store.sellerId;
       const prefs = await this.notificationService.getOrCreatePreferenceSellerWeb(
         sellerUserId,
         order.storeId,
@@ -85,21 +85,21 @@ export class NotificationOrderDispatchService {
 
       const order = await this.prisma.order.findUnique({
         where: { id: payload.orderId },
-        select: { userId: true, storeId: true },
+        select: { consumerId: true, storeId: true },
       });
       if (!order) {
         return;
       }
 
       const item = await this.notificationService.createUserWebOrderNotification({
-        recipientUserId: order.userId,
+        recipientUserId: order.consumerId,
         title: copy.title,
         body: copy.body,
         storeId: order.storeId,
         orderId: payload.orderId,
       });
 
-      this.notificationGateway.emitUserOrderNotification(order.userId, item);
+      this.notificationGateway.emitUserOrderNotification(order.consumerId, item);
     } catch (e) {
       LoggerUtil.log(
         `[NotificationOrderDispatch/user] 실패 order=${payload.orderId}: ${e instanceof Error ? e.message : String(e)}`,
