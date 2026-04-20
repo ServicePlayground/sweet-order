@@ -63,6 +63,20 @@ export class ConsumerAuthController {
       "새로운 구글 사용자를 등록합니다. 응답에서 accessToken과 refreshToken을 반환합니다. 휴대폰 인증이 완료된 상태여야 합니다. 동일한 구글 ID와 휴대폰 번호가 존재할 경우 중복 에러가 발생합니다.",
   })
   @SwaggerResponse(201, { dataExample: SWAGGER_EXAMPLES.TOKEN_RESPONSE })
+  @SwaggerResponse(409, {
+    dataExample: {
+      message: AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS,
+      name: "홍*동",
+      phone: "010-****-5678",
+    },
+  })
+  @SwaggerResponse(409, {
+    dataExample: {
+      message: AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS,
+      name: "홍*동",
+      phone: "010-****-5678",
+    },
+  })
   async googleRegisterWithPhone(@Body() registerDto: GoogleRegisterRequestDto) {
     return await this.authService.consumerGoogleRegisterWithPhone(registerDto);
   }
@@ -97,6 +111,20 @@ export class ConsumerAuthController {
       "새로운 카카오 사용자를 등록합니다. 응답에서 accessToken과 refreshToken을 반환합니다. 휴대폰 인증이 완료된 상태여야 합니다. 동일한 카카오 ID와 휴대폰 번호가 존재할 경우 중복 에러가 발생합니다.",
   })
   @SwaggerResponse(201, { dataExample: SWAGGER_EXAMPLES.TOKEN_RESPONSE })
+  @SwaggerResponse(409, {
+    dataExample: {
+      message: AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS,
+      name: "홍*동",
+      phone: "010-****-5678",
+    },
+  })
+  @SwaggerResponse(409, {
+    dataExample: {
+      message: AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS,
+      name: "홍*동",
+      phone: "010-****-5678",
+    },
+  })
   async kakaoRegisterWithPhone(@Body() registerDto: KakaoRegisterRequestDto) {
     return await this.authService.consumerKakaoRegisterWithPhone(registerDto);
   }

@@ -6,6 +6,8 @@ import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import type { PhoneVerificationPurpose } from "@/apps/web-user/features/auth/types/auth.dto";
+import type { DuplicateAccountPayload } from "@/apps/web-user/features/auth/types/auth.dto";
+import { parseDuplicateAccountPayload } from "@/apps/web-user/features/auth/utils/register-duplicate-account.util";
 
 export function useSendPhoneVerification() {
   const { showAlert } = useAlertStore();
@@ -38,7 +40,9 @@ export function useVerifyPhoneCode() {
   });
 }
 
-export function useGoogleRegister() {
+export function useGoogleRegister(options?: {
+  onDuplicateAccount?: (payload: DuplicateAccountPayload) => void;
+}) {
   const router = useRouter();
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const { showAlert } = useAlertStore();
@@ -50,6 +54,11 @@ export function useGoogleRegister() {
       router.replace(PATHS.HOME);
     },
     onError: (error) => {
+      const duplicate = parseDuplicateAccountPayload(error);
+      if (duplicate) {
+        options?.onDuplicateAccount?.(duplicate);
+        return;
+      }
       showAlert({
         type: "error",
         title: "오류",
@@ -59,7 +68,9 @@ export function useGoogleRegister() {
   });
 }
 
-export function useKakaoRegister() {
+export function useKakaoRegister(options?: {
+  onDuplicateAccount?: (payload: DuplicateAccountPayload) => void;
+}) {
   const router = useRouter();
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
   const { showAlert } = useAlertStore();
@@ -71,6 +82,11 @@ export function useKakaoRegister() {
       router.replace(PATHS.HOME);
     },
     onError: (error) => {
+      const duplicate = parseDuplicateAccountPayload(error);
+      if (duplicate) {
+        options?.onDuplicateAccount?.(duplicate);
+        return;
+      }
       showAlert({
         type: "error",
         title: "오류",

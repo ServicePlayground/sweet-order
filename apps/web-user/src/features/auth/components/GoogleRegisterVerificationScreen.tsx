@@ -12,7 +12,9 @@ import {
   useSendPhoneVerification,
   useVerifyPhoneCode,
 } from "@/apps/web-user/features/auth/hooks/mutations/useAuthMutation";
+import { OAuthRegisterDuplicateAccountScreen } from "@/apps/web-user/features/auth/components/OAuthRegisterDuplicateAccountScreen";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
+import type { DuplicateAccountPayload } from "@/apps/web-user/features/auth/types/auth.dto";
 import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-user/features/auth/types/auth.dto";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import {
@@ -37,7 +39,12 @@ export function GoogleRegisterVerificationScreen() {
   const searchParams = useSearchParams();
   const sendPhoneVerificationMutation = useSendPhoneVerification();
   const verifyPhoneCodeMutation = useVerifyPhoneCode();
-  const googleRegisterMutation = useGoogleRegister();
+
+  const [duplicateAccount, setDuplicateAccount] = useState<DuplicateAccountPayload | null>(null);
+  const handleDuplicateAccount = useCallback((payload: DuplicateAccountPayload) => {
+    setDuplicateAccount(payload);
+  }, []);
+  const googleRegisterMutation = useGoogleRegister({ onDuplicateAccount: handleDuplicateAccount });
 
   const [googleLoginData, setGoogleLoginData] = useState<{
     googleId: string;
@@ -186,6 +193,15 @@ export function GoogleRegisterVerificationScreen() {
 
   if (!googleLoginData) {
     return null;
+  }
+
+  if (duplicateAccount) {
+    return (
+      <OAuthRegisterDuplicateAccountScreen
+        payload={duplicateAccount}
+        onBack={() => setDuplicateAccount(null)}
+      />
+    );
   }
 
   return (

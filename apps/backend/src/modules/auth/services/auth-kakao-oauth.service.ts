@@ -11,6 +11,7 @@ import {
 import { KakaoUserInfo } from "@apps/backend/modules/auth/types/auth.types";
 import { AuthPhoneService } from "@apps/backend/modules/auth/services/auth-phone.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
+import { maskDisplayNameForPrivacy } from "@apps/backend/modules/auth/utils/display-name.util";
 import {
   KakaoLoginRequestDto,
   KakaoRegisterRequestDto,
@@ -253,10 +254,18 @@ export class AuthKakaoOauthService {
     });
 
     if (existingPhone?.kakaoId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS);
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
-    if (existingPhone && !existingPhone.kakaoId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.ACCOUNT_EXISTS_BY_PHONE);
+    if (existingPhone?.googleId) {
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
 
     return await this.prisma.$transaction(async (tx) => {
@@ -303,10 +312,18 @@ export class AuthKakaoOauthService {
     });
 
     if (existingPhone?.kakaoId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS);
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
-    if (existingPhone && !existingPhone.kakaoId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.ACCOUNT_EXISTS_BY_PHONE);
+    if (existingPhone?.googleId) {
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
 
     return await this.prisma.$transaction(async (tx) => {

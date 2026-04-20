@@ -10,7 +10,6 @@ export const AUTH_ERROR_MESSAGES = {
     "비밀번호는 8자 이상의 영문 대소문자, 숫자, 특수문자(@$!%*?&)를 포함해야 합니다.",
   PHONE_INVALID_FORMAT: "올바른 한국 휴대폰 번호 형식이 아닙니다. (예: 010-1234-5678)",
   PHONE_ALREADY_EXISTS: "이미 사용 중인 휴대폰 번호입니다.",
-  ACCOUNT_EXISTS_BY_PHONE: "해당 번호로 등록된 계정이 있습니다.",
   PHONE_VERIFICATION_REQUIRED: "휴대폰 인증이 필요합니다.",
   PHONE_VERIFICATION_CODE_GENERATION_FAILED:
     "인증번호 생성에 실패했습니다. 잠시 후 다시 시도해주세요.",

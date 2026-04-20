@@ -11,6 +11,7 @@ import {
 import { GoogleUserInfo } from "@apps/backend/modules/auth/types/auth.types";
 import { AuthPhoneService } from "@apps/backend/modules/auth/services/auth-phone.service";
 import { PhoneUtil } from "@apps/backend/modules/auth/utils/phone.util";
+import { maskDisplayNameForPrivacy } from "@apps/backend/modules/auth/utils/display-name.util";
 import {
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
@@ -291,12 +292,20 @@ export class AuthGoogleOauthService {
 
     // 3. 동일 번호 구글 계정 중복 검증
     if (existingPhone?.googleId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
 
-    // 4. 동일 번호 비구글 계정 중복 검증
-    if (existingPhone && !existingPhone.googleId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.ACCOUNT_EXISTS_BY_PHONE);
+    // 4. 동일 번호 카카오 계정 중복 검증
+    if (existingPhone?.kakaoId) {
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
 
     return await this.prisma.$transaction(async (tx) => {
@@ -350,12 +359,20 @@ export class AuthGoogleOauthService {
 
     // 3. 동일 번호 구글 계정 중복 검증
     if (existingPhone?.googleId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS);
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
 
-    // 4. 동일 번호 비구글 계정 중복 검증
-    if (existingPhone && !existingPhone.googleId) {
-      throw new ConflictException(AUTH_ERROR_MESSAGES.ACCOUNT_EXISTS_BY_PHONE);
+    // 4. 동일 번호 카카오 계정 중복 검증
+    if (existingPhone?.kakaoId) {
+      throw new ConflictException({
+        message: AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS,
+        name: maskDisplayNameForPrivacy(existingPhone.name),
+        phone: PhoneUtil.maskPhone(existingPhone.phone),
+      });
     }
 
     return await this.prisma.$transaction(async (tx) => {

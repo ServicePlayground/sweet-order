@@ -12,7 +12,9 @@ import {
   useSendPhoneVerification,
   useVerifyPhoneCode,
 } from "@/apps/web-user/features/auth/hooks/mutations/useAuthMutation";
+import { OAuthRegisterDuplicateAccountScreen } from "@/apps/web-user/features/auth/components/OAuthRegisterDuplicateAccountScreen";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
+import type { DuplicateAccountPayload } from "@/apps/web-user/features/auth/types/auth.dto";
 import { PHONE_VERIFICATION_PURPOSE } from "@/apps/web-user/features/auth/types/auth.dto";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import {
@@ -33,7 +35,12 @@ export function KakaoRegisterVerificationScreen() {
   const searchParams = useSearchParams();
   const sendPhoneVerificationMutation = useSendPhoneVerification();
   const verifyPhoneCodeMutation = useVerifyPhoneCode();
-  const kakaoRegisterMutation = useKakaoRegister();
+
+  const [duplicateAccount, setDuplicateAccount] = useState<DuplicateAccountPayload | null>(null);
+  const handleDuplicateAccount = useCallback((payload: DuplicateAccountPayload) => {
+    setDuplicateAccount(payload);
+  }, []);
+  const kakaoRegisterMutation = useKakaoRegister({ onDuplicateAccount: handleDuplicateAccount });
 
   const [kakaoLoginData, setKakaoLoginData] = useState<{
     kakaoId: string;
@@ -182,6 +189,15 @@ export function KakaoRegisterVerificationScreen() {
 
   if (!kakaoLoginData) {
     return null;
+  }
+
+  if (duplicateAccount) {
+    return (
+      <OAuthRegisterDuplicateAccountScreen
+        payload={duplicateAccount}
+        onBack={() => setDuplicateAccount(null)}
+      />
+    );
   }
 
   return (
