@@ -35,11 +35,7 @@ function KakaoAuthCallbackContent() {
         };
         const { kakaoId, kakaoEmail, message } = err?.response?.data?.data || {};
 
-        if (
-          message === AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED &&
-          kakaoId &&
-          kakaoEmail
-        ) {
+        if (message === AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED && kakaoId && kakaoEmail) {
           const params = new URLSearchParams();
           params.set("kakaoId", kakaoId);
           params.set("kakaoEmail", kakaoEmail);
