@@ -31,6 +31,8 @@ model Consumer {
 
   googleId    String? @unique @map("google_id")
   googleEmail String? @map("google_email")
+  kakaoId     String? @unique @map("kakao_id")
+  kakaoEmail  String? @map("kakao_email")
 
   createdAt   DateTime @default(now()) @map("created_at")
   lastLoginAt DateTime? @map("last_login_at")
@@ -45,6 +47,7 @@ model Consumer {
 
   @@index([phone])
   @@index([googleId])
+  @@index([kakaoId])
   @@map("consumers")
 }
 
@@ -63,6 +66,8 @@ model Seller {
 
   googleId    String? @unique @map("google_id")
   googleEmail String? @map("google_email")
+  kakaoId     String? @unique @map("kakao_id")
+  kakaoEmail  String? @map("kakao_email")
 
   /// 판매자 온보딩·검증 단계 (스토어 생성 후 갱신)
   sellerVerificationStatus SellerVerificationStatus @default(REGISTERED) @map("seller_verification_status")
@@ -76,6 +81,7 @@ model Seller {
 
   @@index([phone])
   @@index([googleId])
+  @@index([kakaoId])
   @@map("sellers")
 }
 

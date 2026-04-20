@@ -1,12 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { AuthPhoneService } from "@apps/backend/modules/auth/services/auth-phone.service";
 import { AuthGoogleOauthService } from "@apps/backend/modules/auth/services/auth-google-oauth.service";
+import { AuthKakaoOauthService } from "@apps/backend/modules/auth/services/auth-kakao-oauth.service";
 import { AuthAccountFindService } from "@apps/backend/modules/auth/services/auth-account-find.service";
 import { FindAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-find-account.dto";
 import {
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-google-oauth.dto";
+import {
+  KakaoLoginRequestDto,
+  KakaoRegisterRequestDto,
+} from "@apps/backend/modules/auth/dto/auth-kakao-oauth.dto";
 import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
@@ -23,6 +28,7 @@ export class AuthService {
     private readonly authAccountFindService: AuthAccountFindService,
     private readonly authPhoneService: AuthPhoneService,
     private readonly authGoogleOauthService: AuthGoogleOauthService,
+    private readonly authKakaoOauthService: AuthKakaoOauthService,
   ) {}
 
   private getSessionAvailabilityResponse(): SessionAvailabilityResponse {
@@ -55,6 +61,34 @@ export class AuthService {
    */
   async sellerGoogleRegisterWithPhone(dto: GoogleRegisterRequestDto) {
     return this.authGoogleOauthService.sellerGoogleRegisterWithPhone(dto);
+  }
+
+  /**
+   * 카카오 — Authorization Code 로그인 (구매자)
+   */
+  async consumerKakaoLoginWithCode(dto: KakaoLoginRequestDto) {
+    return this.authKakaoOauthService.consumerKakaoLoginWithCode(dto);
+  }
+
+  /**
+   * 카카오 — 회원가입·최초 연동 (휴대폰 인증 완료 후, 구매자)
+   */
+  async consumerKakaoRegisterWithPhone(dto: KakaoRegisterRequestDto) {
+    return this.authKakaoOauthService.consumerKakaoRegisterWithPhone(dto);
+  }
+
+  /**
+   * 카카오 — Authorization Code 로그인 (판매자)
+   */
+  async sellerKakaoLoginWithCode(dto: KakaoLoginRequestDto) {
+    return this.authKakaoOauthService.sellerKakaoLoginWithCode(dto);
+  }
+
+  /**
+   * 카카오 — 회원가입·최초 연동 (휴대폰 인증 완료 후, 판매자)
+   */
+  async sellerKakaoRegisterWithPhone(dto: KakaoRegisterRequestDto) {
+    return this.authKakaoOauthService.sellerKakaoRegisterWithPhone(dto);
   }
 
   /**

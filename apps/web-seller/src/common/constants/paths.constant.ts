@@ -20,6 +20,7 @@ import { StoreDetailStatisticsPage } from "@/apps/web-seller/pages/store/detail/
 import { LoginPage } from "@/apps/web-seller/pages/auth/Login";
 import { FindAccountPage } from "@/apps/web-seller/pages/auth/FindAccount";
 import { GoogleAuthCallbackPage } from "@/apps/web-seller/pages/auth/GoogleAuthCallback";
+import { KakaoAuthCallbackPage } from "@/apps/web-seller/pages/auth/KakaoAuthCallback";
 import { MypageIndexPage } from "@/apps/web-seller/pages/mypage/Index";
 
 export const ROUTES = {
@@ -55,6 +56,7 @@ export const ROUTES = {
     LOGIN: "/auth/login",
     FIND_ACCOUNT: "/auth/login/find-account",
     GOOGLE_REDIRECT_URI: "/auth/login/google",
+    KAKAO_REDIRECT_URI: "/auth/login/kakao",
   },
 } as const;
 
@@ -63,6 +65,7 @@ export const AUTH_ROUTE_CONFIG = [
   { path: ROUTES.AUTH.LOGIN, element: LoginPage },
   { path: ROUTES.AUTH.FIND_ACCOUNT, element: FindAccountPage },
   { path: ROUTES.AUTH.GOOGLE_REDIRECT_URI, element: GoogleAuthCallbackPage },
+  { path: ROUTES.AUTH.KAKAO_REDIRECT_URI, element: KakaoAuthCallbackPage },
 ] as const;
 
 // 관리자 관련 경로 (AdminLayout 안)

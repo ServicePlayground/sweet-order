@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { AuthCardLayout } from "@/apps/web-seller/common/components/layouts/AuthCardLayout";
 import googleIcon from "@/apps/web-seller/assets/images/google.png";
+import kakaoIcon from "@/apps/web-seller/assets/images/kakaotalk.png";
 
 export function LoginPage() {
   return (
@@ -21,6 +22,14 @@ export function LoginPage() {
         >
           <img src={googleIcon} alt="" width={20} height={20} className="block shrink-0" />
           Google로 계속하기
+        </a>
+
+        <a
+          href={`https://kauth.kakao.com/oauth/authorize?client_id=${import.meta.env.VITE_PUBLIC_KAKAO_RESTAPI_KEY}&redirect_uri=${window.location.origin}${ROUTES.AUTH.KAKAO_REDIRECT_URI}&response_type=code`}
+          className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl border border-[#F7E600] bg-[#FEE500] text-[15px] font-semibold text-[#191919] shadow-sm transition-colors hover:bg-[#f7de00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:ring-offset-2"
+        >
+          <img src={kakaoIcon} alt="" width={20} height={20} className="block shrink-0" />
+          Kakao로 계속하기
         </a>
 
         <div className="flex justify-center border-t border-zinc-100 pt-2">

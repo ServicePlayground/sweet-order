@@ -1,9 +1,11 @@
 import {
   VerifyPhoneCodeRequestDto,
   GoogleRegisterRequestDto,
+  KakaoRegisterRequestDto,
   PhoneVerificationPurpose,
   AUDIENCE,
   GoogleLoginRequestDto,
+  KakaoLoginRequestDto,
   TokenResponseDto,
   MeResponseDto,
   FindAccountRequestDto,
@@ -51,6 +53,17 @@ export const authApi = {
 
   googleRegister: async (data: GoogleRegisterRequestDto): Promise<TokenResponseDto> => {
     const response = await sellerClient.post("/auth/google/register", data);
+    return response.data.data;
+  },
+
+  kakaoLogin: async (code: string): Promise<TokenResponseDto> => {
+    const requestDto: KakaoLoginRequestDto = { code };
+    const response = await sellerClient.post("/auth/kakao/login", requestDto);
+    return response.data.data;
+  },
+
+  kakaoRegister: async (data: KakaoRegisterRequestDto): Promise<TokenResponseDto> => {
+    const response = await sellerClient.post("/auth/kakao/register", data);
     return response.data.data;
   },
 

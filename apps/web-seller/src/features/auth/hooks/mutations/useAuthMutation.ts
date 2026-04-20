@@ -82,6 +82,27 @@ export function useGoogleRegister() {
   });
 }
 
+// 카카오 회원가입 `KAKAO_REGISTRATION` 인증 완료 후 POST /auth/kakao/register
+export function useKakaoRegister() {
+  const { login } = useAuthStore();
+  const navigate = useNavigate();
+  const { addAlert } = useAlertStore();
+
+  return useMutation({
+    mutationFn: authApi.kakaoRegister,
+    onSuccess: (data) => {
+      login({ navigate, accessToken: data.accessToken });
+    },
+    onError: (error) => {
+      addAlert({
+        message: getApiMessage.error(error),
+        title: "오류",
+        severity: "error",
+      });
+    },
+  });
+}
+
 /** 휴대폰 `FIND_ACCOUNT` 인증 완료 후 — POST /auth/find-account */
 export function useFindAccount() {
   const { addAlert } = useAlertStore();

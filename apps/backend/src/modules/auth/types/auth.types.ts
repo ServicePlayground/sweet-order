@@ -29,7 +29,7 @@ export interface AuthenticatedUser extends JwtVerifiedPayload {
   id: string;
   aud: AudienceConst;
   phone: string;
-  loginType: "google";
+  loginType: "google" | "kakao";
   loginId: string;
   /** aud === "seller" 일 때만 */
   sellerVerificationStatus?: "REGISTERED" | "BUSINESS_VERIFIED";
@@ -42,5 +42,15 @@ export interface GoogleUserInfo {
   userInfo: {
     googleId: string;
     googleEmail: string;
+  };
+}
+
+/**
+ * 카카오 토큰 교환 직후 userinfo 조회 결과 — 서비스 내부 전달용, HTTP DTO 아님
+ */
+export interface KakaoUserInfo {
+  userInfo: {
+    kakaoId: string;
+    kakaoEmail: string;
   };
 }

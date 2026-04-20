@@ -97,6 +97,12 @@ export class MypageProfileBaseResponseDto {
   @ApiProperty({ example: SWAGGER_EXAMPLES.CONSUMER_DATA.googleEmail })
   googleEmail: string;
 
+  @ApiProperty({ example: SWAGGER_EXAMPLES.CONSUMER_DATA.kakaoId })
+  kakaoId: string;
+
+  @ApiProperty({ example: SWAGGER_EXAMPLES.CONSUMER_DATA.kakaoEmail })
+  kakaoEmail: string;
+
   @ApiProperty({
     type: String,
     format: "date-time",

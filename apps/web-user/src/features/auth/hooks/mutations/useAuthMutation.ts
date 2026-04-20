@@ -58,3 +58,24 @@ export function useGoogleRegister() {
     },
   });
 }
+
+export function useKakaoRegister() {
+  const router = useRouter();
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const { showAlert } = useAlertStore();
+
+  return useMutation({
+    mutationFn: authApi.kakaoRegister,
+    onSuccess: (data) => {
+      setAccessToken(data.accessToken);
+      router.replace(PATHS.HOME);
+    },
+    onError: (error) => {
+      showAlert({
+        type: "error",
+        title: "오류",
+        message: getApiMessage.error(error),
+      });
+    },
+  });
+}

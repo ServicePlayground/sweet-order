@@ -24,7 +24,11 @@ export class AuthAccountFindService {
   async findAccount(
     dto: FindAccountRequestDto,
     audience: typeof AUDIENCE.CONSUMER | typeof AUDIENCE.SELLER,
-  ): Promise<{ googleEmail: string | null }> {
+  ): Promise<{
+    loginType: "google" | "kakao";
+    loginId: string;
+    loginEmail: string | null;
+  }> {
     const normalizedPhone = PhoneUtil.normalizePhone(dto.phone);
     const verified = await this.authPhoneService.checkPhoneVerificationStatus(
       normalizedPhone,
@@ -38,21 +42,49 @@ export class AuthAccountFindService {
     if (audience === AUDIENCE.CONSUMER) {
       const row = await this.prisma.consumer.findUnique({
         where: { phone: normalizedPhone },
-        select: { googleEmail: true },
+        select: { googleId: true, googleEmail: true, kakaoId: true, kakaoEmail: true },
       });
       if (!row) {
         throw new NotFoundException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
       }
-      return { googleEmail: row.googleEmail ?? null };
+      if (row.kakaoId) {
+        return {
+          loginType: "kakao",
+          loginId: row.kakaoId,
+          loginEmail: row.kakaoEmail ?? null,
+        };
+      }
+      if (row.googleId) {
+        return {
+          loginType: "google",
+          loginId: row.googleId,
+          loginEmail: row.googleEmail ?? null,
+        };
+      }
+      throw new NotFoundException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
     }
 
     const row = await this.prisma.seller.findUnique({
       where: { phone: normalizedPhone },
-      select: { googleEmail: true },
+      select: { googleId: true, googleEmail: true, kakaoId: true, kakaoEmail: true },
     });
     if (!row) {
       throw new NotFoundException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
     }
-    return { googleEmail: row.googleEmail ?? null };
+    if (row.kakaoId) {
+      return {
+        loginType: "kakao",
+        loginId: row.kakaoId,
+        loginEmail: row.kakaoEmail ?? null,
+      };
+    }
+    if (row.googleId) {
+      return {
+        loginType: "google",
+        loginId: row.googleId,
+        loginEmail: row.googleEmail ?? null,
+      };
+    }
+    throw new NotFoundException(AUTH_ERROR_MESSAGES.ACCOUNT_NOT_FOUND_BY_PHONE);
   }
 }
