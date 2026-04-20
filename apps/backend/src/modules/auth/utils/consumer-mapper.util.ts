@@ -13,6 +13,8 @@ export class ConsumerMapperUtil {
       isActive: user.isActive,
       googleId: user.googleId ?? "",
       googleEmail: user.googleEmail ?? "",
+      kakaoId: user.kakaoId ?? "",
+      kakaoEmail: user.kakaoEmail ?? "",
       createdAt: user.createdAt,
       lastLoginAt: lastLoginAt ?? user.lastLoginAt ?? new Date(),
     };

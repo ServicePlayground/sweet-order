@@ -119,6 +119,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: true,
         phone: true,
         googleId: true,
+        kakaoId: true,
         isActive: true,
       },
     });
@@ -131,8 +132,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
     }
 
-    const loginType = "google" as const;
-    const loginId = c.googleId ?? "";
+    const loginType = c.kakaoId ? ("kakao" as const) : ("google" as const);
+    const loginId = c.kakaoId ?? c.googleId ?? "";
 
     return {
       ...payload,
@@ -152,6 +153,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: true,
         phone: true,
         googleId: true,
+        kakaoId: true,
         isActive: true,
         sellerVerificationStatus: true,
       },
@@ -165,8 +167,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_INACTIVE);
     }
 
-    const loginType = "google" as const;
-    const loginId = s.googleId ?? "";
+    const loginType = s.kakaoId ? ("kakao" as const) : ("google" as const);
+    const loginId = s.kakaoId ?? s.googleId ?? "";
 
     return {
       ...payload,

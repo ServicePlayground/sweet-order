@@ -5,6 +5,7 @@ import { ConfigService } from "@nestjs/config";
 import { AuthService } from "@apps/backend/modules/auth/auth.service";
 import { AuthPhoneService } from "@apps/backend/modules/auth/services/auth-phone.service";
 import { AuthGoogleOauthService } from "@apps/backend/modules/auth/services/auth-google-oauth.service";
+import { AuthKakaoOauthService } from "@apps/backend/modules/auth/services/auth-kakao-oauth.service";
 import { AuthAccountFindService } from "@apps/backend/modules/auth/services/auth-account-find.service";
 import { AuthMypagePhoneService } from "@apps/backend/modules/auth/services/auth-mypage-phone.service";
 import { AuthMypageProfileService } from "@apps/backend/modules/auth/services/auth-mypage-profile.service";
@@ -35,6 +36,7 @@ import { AuthGuard } from "@apps/backend/modules/auth/guards/auth.guard";
     AuthWithdrawService,
     AuthPhoneService,
     AuthGoogleOauthService,
+    AuthKakaoOauthService,
     JwtUtil,
     JwtStrategy,
     AuthGuard,

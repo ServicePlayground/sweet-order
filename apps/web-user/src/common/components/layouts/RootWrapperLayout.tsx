@@ -27,7 +27,12 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
     if (pathname?.startsWith("/reservation")) return { variant: "minimal" };
     if (pathname === "/alarm") return { variant: "back-title", title: "알림" };
     if (pathname === "/qa") return { variant: "minimal" };
-    if (pathname === "/auth/register/google" || pathname === "/auth/login/google") {
+    if (
+      pathname === "/auth/register/google" ||
+      pathname === "/auth/login/google" ||
+      pathname === "/auth/register/kakao" ||
+      pathname === "/auth/login/kakao"
+    ) {
       return { variant: "minimal" };
     }
     if (pathname?.startsWith("/mypage/")) return { variant: "minimal" };

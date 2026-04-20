@@ -12,7 +12,21 @@ import { UpcomingOrderCard } from "../../features/order/components/UpcomingOrder
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
 
-function getLoginInfo(user: { googleId: string; googleEmail: string; phone: string }) {
+function getLoginInfo(user: {
+  googleId: string;
+  googleEmail: string;
+  kakaoId: string;
+  kakaoEmail: string;
+  phone: string;
+}) {
+  if (user.kakaoId && user.kakaoEmail) {
+    return (
+      <div className="flex items-center gap-[6px]">
+        <span className="px-1 py-0.5 bg-gray-50 text-2xs font-bold rounded-sm">카카오</span>
+        {user.kakaoEmail}
+      </div>
+    );
+  }
   if (user.googleId && user.googleEmail) {
     return (
       <div className="flex items-center gap-[6px]">

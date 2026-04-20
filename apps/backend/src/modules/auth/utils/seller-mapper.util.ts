@@ -13,6 +13,8 @@ export class SellerMapperUtil {
       isActive: seller.isActive,
       googleId: seller.googleId ?? "",
       googleEmail: seller.googleEmail ?? "",
+      kakaoId: seller.kakaoId ?? "",
+      kakaoEmail: seller.kakaoEmail ?? "",
       sellerVerificationStatus: seller.sellerVerificationStatus,
       createdAt: seller.createdAt,
       lastLoginAt: lastLoginAt ?? seller.lastLoginAt ?? new Date(),

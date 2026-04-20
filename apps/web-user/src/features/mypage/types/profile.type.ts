@@ -8,6 +8,8 @@ export interface MypageProfile {
   isActive: boolean;
   googleId: string;
   googleEmail: string;
+  kakaoId: string;
+  kakaoEmail: string;
   createdAt: string;
   lastLoginAt: string;
 }

@@ -35,7 +35,7 @@ export function FindAccountPage() {
             계정 찾기
           </h1>
           <p className="text-sm leading-relaxed text-zinc-500">
-            가입 시 사용한 휴대폰 번호로 인증하면, 연결된 구글 계정 이메일을 확인할 수 있습니다.
+            가입 시 사용한 휴대폰 번호로 인증하면, 연결된 소셜 계정 정보를 확인할 수 있습니다.
           </p>
         </div>
 
@@ -43,14 +43,14 @@ export function FindAccountPage() {
           <div
             className={cn(
               "rounded-xl border border-zinc-200/90 bg-zinc-50/80 p-5",
-              result.googleEmail && "border-emerald-200/80 bg-emerald-50/50",
+              result.loginEmail && "border-emerald-200/80 bg-emerald-50/50",
             )}
           >
             <div className="mb-3 flex items-center gap-2">
               <div
                 className={cn(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                  result.googleEmail
+                  result.loginEmail
                     ? "bg-emerald-100 text-emerald-700"
                     : "bg-zinc-200/80 text-zinc-600",
                 )}
@@ -59,15 +59,17 @@ export function FindAccountPage() {
               </div>
               <p className="text-sm font-semibold text-zinc-900">조회 결과</p>
             </div>
-            {result.googleEmail ? (
+            {result.loginEmail ? (
               <p className="break-all text-[15px] leading-relaxed text-zinc-800">
-                <span className="text-zinc-500">연결된 구글 계정</span>
+                <span className="text-zinc-500">
+                  연결된 {result.loginType === "kakao" ? "카카오" : "구글"} 계정
+                </span>
                 <br />
-                <span className="text-base font-semibold text-zinc-900">{result.googleEmail}</span>
+                <span className="text-base font-semibold text-zinc-900">{result.loginEmail}</span>
               </p>
             ) : (
               <p className="text-sm leading-relaxed text-zinc-600">
-                해당 번호로 등록된 계정은 있으나, 구글 이메일이 연동되어 있지 않습니다.
+                해당 번호로 등록된 계정은 있으나, 이메일 정보가 연동되어 있지 않습니다.
               </p>
             )}
             <button

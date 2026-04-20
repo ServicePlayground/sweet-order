@@ -7,6 +7,7 @@ export type AudienceConst = (typeof AUDIENCE)[keyof typeof AUDIENCE];
 export const PHONE_VERIFICATION_PURPOSE = {
   REGISTRATION: "registration",
   GOOGLE_REGISTRATION: "google_registration",
+  KAKAO_REGISTRATION: "kakao_registration",
   PHONE_CHANGE: "phone_change",
   FIND_ACCOUNT: "find_account",
 } as const;
@@ -22,9 +23,20 @@ export interface GoogleLoginRequestDto {
   code: string;
 }
 
+export interface KakaoLoginRequestDto {
+  code: string;
+}
+
 export interface GoogleRegisterRequestDto {
   googleId: string;
   googleEmail: string;
+  name: string;
+  phone: string;
+}
+
+export interface KakaoRegisterRequestDto {
+  kakaoId: string;
+  kakaoEmail: string;
   name: string;
   phone: string;
 }

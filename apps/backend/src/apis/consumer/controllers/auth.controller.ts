@@ -8,6 +8,10 @@ import {
   GoogleRegisterRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-google-oauth.dto";
 import {
+  KakaoLoginRequestDto,
+  KakaoRegisterRequestDto,
+} from "@apps/backend/modules/auth/dto/auth-kakao-oauth.dto";
+import {
   SendVerificationCodeRequestDto,
   VerifyPhoneCodeRequestDto,
 } from "@apps/backend/modules/auth/dto/auth-phone-verification.dto";
@@ -63,6 +67,40 @@ export class ConsumerAuthController {
     return await this.authService.consumerGoogleRegisterWithPhone(registerDto);
   }
 
+  @Post("kakao/login")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "카카오 로그인 (구매자)",
+    description:
+      "프론트엔드에서 받은 Authorization Code로 카카오 로그인을 처리합니다. 응답에서 accessToken과 refreshToken을 반환합니다. 400 PHONE_VERIFICATION_REQUIRED 오류가 발생했을 때는 kakaoId와 kakaoEmail을 반환하며 휴대폰 인증 후 카카오 회원가입 API로 해당 파라미터 값을 전달하여 회원가입을 처리해야 합니다.",
+  })
+  @SwaggerResponse(200, { dataExample: SWAGGER_EXAMPLES.TOKEN_RESPONSE })
+  @SwaggerResponse(400, {
+    dataExample: {
+      message: AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED,
+      kakaoId: SWAGGER_EXAMPLES.KAKAO_ID,
+      kakaoEmail: SWAGGER_EXAMPLES.KAKAO_EMAIL,
+    },
+  })
+  @SwaggerResponse(400, {
+    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.KAKAO_OAUTH_TOKEN_EXCHANGE_FAILED),
+  })
+  async kakaoAuth(@Body() authDto: KakaoLoginRequestDto) {
+    return await this.authService.consumerKakaoLoginWithCode(authDto);
+  }
+
+  @Post("kakao/register")
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "카카오 회원가입 (구매자, 휴대폰 인증 후)",
+    description:
+      "새로운 카카오 사용자를 등록합니다. 응답에서 accessToken과 refreshToken을 반환합니다. 휴대폰 인증이 완료된 상태여야 합니다. 동일한 카카오 ID와 휴대폰 번호가 존재할 경우 중복 에러가 발생합니다.",
+  })
+  @SwaggerResponse(201, { dataExample: SWAGGER_EXAMPLES.TOKEN_RESPONSE })
+  async kakaoRegisterWithPhone(@Body() registerDto: KakaoRegisterRequestDto) {
+    return await this.authService.consumerKakaoRegisterWithPhone(registerDto);
+  }
+
   @Post("find-account")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -71,7 +109,11 @@ export class ConsumerAuthController {
       "휴대폰 인증을 `audience: consumer`, `purpose: find_account`로 완료한 뒤 호출합니다.",
   })
   @SwaggerResponse(200, {
-    dataExample: { googleEmail: SWAGGER_EXAMPLES.CONSUMER_DATA.googleEmail },
+    dataExample: {
+      loginType: "google",
+      loginId: SWAGGER_EXAMPLES.CONSUMER_DATA.googleId,
+      loginEmail: SWAGGER_EXAMPLES.CONSUMER_DATA.googleEmail,
+    },
   })
   @SwaggerResponse(400, {
     dataExample: createMessageObject(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED),

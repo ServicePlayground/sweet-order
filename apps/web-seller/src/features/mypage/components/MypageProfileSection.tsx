@@ -134,8 +134,14 @@ export const MypageProfileSection: React.FC<MypageProfileSectionProps> = ({ prof
             <span className="font-medium">{profile.phone}</span>
           </div>
           <div className="grid gap-1 sm:grid-cols-[140px_1fr] sm:items-center">
-            <span className="text-muted-foreground">구글 이메일</span>
-            <span>{profile.googleEmail || "—"}</span>
+            <span className="text-muted-foreground">로그인 계정</span>
+            <span>
+              {profile.kakaoEmail
+                ? `카카오 (${profile.kakaoEmail})`
+                : profile.googleEmail
+                  ? `구글 (${profile.googleEmail})`
+                  : "—"}
+            </span>
           </div>
           <div className="grid gap-1 sm:grid-cols-[140px_1fr] sm:items-center">
             <span className="text-muted-foreground">휴대폰 인증</span>

@@ -3,6 +3,8 @@ import {
   AUDIENCE,
   GoogleLoginRequestDto,
   GoogleRegisterRequestDto,
+  KakaoLoginRequestDto,
+  KakaoRegisterRequestDto,
   MessageResponseDto,
   PhoneVerificationPurpose,
   TokenResponseDto,
@@ -18,6 +20,17 @@ export const authApi = {
 
   googleRegister: async (data: GoogleRegisterRequestDto): Promise<TokenResponseDto> => {
     const response = await consumerClient.post("/auth/google/register", data);
+    return response.data.data;
+  },
+
+  kakaoLogin: async (code: string): Promise<TokenResponseDto> => {
+    const requestDto: KakaoLoginRequestDto = { code };
+    const response = await consumerClient.post("/auth/kakao/login", requestDto);
+    return response.data.data;
+  },
+
+  kakaoRegister: async (data: KakaoRegisterRequestDto): Promise<TokenResponseDto> => {
+    const response = await consumerClient.post("/auth/kakao/register", data);
     return response.data.data;
   },
 

@@ -14,6 +14,8 @@ export interface SellerMypageProfileResponseDto {
   isActive: boolean;
   googleId: string;
   googleEmail: string;
+  kakaoId: string;
+  kakaoEmail: string;
   sellerVerificationStatus: string;
   createdAt: string;
   lastLoginAt: string;

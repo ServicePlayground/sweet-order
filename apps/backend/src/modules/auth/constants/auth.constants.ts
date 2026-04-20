@@ -45,6 +45,9 @@ export const AUTH_ERROR_MESSAGES = {
   PHONE_GOOGLE_ACCOUNT_EXISTS: "해당 휴대폰 번호로 이미 등록된 구글 계정이 있습니다.",
   GOOGLE_ID_ALREADY_EXISTS: "이미 사용 중인 구글 계정입니다.",
   GOOGLE_OAUTH_TOKEN_EXCHANGE_FAILED: "구글 OAuth 토큰 교환 실패",
+  PHONE_KAKAO_ACCOUNT_EXISTS: "해당 휴대폰 번호로 이미 등록된 카카오 계정이 있습니다.",
+  KAKAO_ID_ALREADY_EXISTS: "이미 사용 중인 카카오 계정입니다.",
+  KAKAO_OAUTH_TOKEN_EXCHANGE_FAILED: "카카오 OAuth 토큰 교환 실패",
   THROTTLE_LIMIT_EXCEEDED: "ThrottlerException: Too Many Requests",
 } as const;
 
@@ -76,6 +79,7 @@ export type AudienceConst = (typeof AUDIENCE)[keyof typeof AUDIENCE];
 export enum PhoneVerificationPurpose {
   REGISTRATION = "registration",
   GOOGLE_REGISTRATION = "google_registration",
+  KAKAO_REGISTRATION = "kakao_registration",
   PHONE_CHANGE = "phone_change",
   FIND_ACCOUNT = "find_account",
 }
@@ -111,6 +115,8 @@ export const SWAGGER_EXAMPLES = {
     isActive: true,
     googleId: "google123456789",
     googleEmail: "user@gmail.com",
+    kakaoId: "1234567890",
+    kakaoEmail: "user@kakao.com",
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     lastLoginAt: new Date("2024-01-01T00:00:00.000Z"),
   },
@@ -124,6 +130,8 @@ export const SWAGGER_EXAMPLES = {
     isActive: true,
     googleId: "google987654321",
     googleEmail: "seller@gmail.com",
+    kakaoId: "9876543210",
+    kakaoEmail: "seller@kakao.com",
     sellerVerificationStatus: "BUSINESS_VERIFIED" as const,
     createdAt: new Date("2024-01-01T00:00:00.000Z"),
     lastLoginAt: new Date("2024-01-01T00:00:00.000Z"),
@@ -135,6 +143,9 @@ export const SWAGGER_EXAMPLES = {
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbHh4eHhjb25zdW1lciIsImF1ZCI6ImNvbnN1bWVyIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3MDQwNjcyMDAsImV4cCI6MTczNTY4OTYwMH0.example_sig",
   },
   GOOGLE_CODE: "4/0AVGzR1BWFlPYjsU53FD39J4-JQPvDk5mcygFcOM0SBhus6Dw_8UsjZUxCvkKhtVIz92-1w",
+  KAKAO_CODE: "abcde1234567890example",
+  KAKAO_ID: "1234567890",
+  KAKAO_EMAIL: "user@kakao.com",
   VERIFICATION_CODE: "123456",
 } as const;
 
@@ -147,13 +158,16 @@ export const SWAGGER_DESCRIPTIONS = {
   VERIFICATION_CODE: "인증번호 (6자리 숫자)",
   GOOGLE_CODE:
     "구글 OAuth Authorization Code (구매자/판매자 앱별 redirect_uri·클라이언트와 짝이 맞아야 함)",
+  KAKAO_CODE: "카카오 OAuth Authorization Code (redirect_uri·REST API 키와 짝이 맞아야 함)",
   GOOGLE_ID: "구글 사용자 ID (userinfo `id`)",
   GOOGLE_EMAIL: "구글 계정 이메일",
+  KAKAO_ID: "카카오 사용자 ID (`/v2/user/me`의 `id`)",
+  KAKAO_EMAIL: "카카오 계정 이메일 (동의 항목에 따라 없을 수 있음)",
   DISPLAY_NAME: "이름 (구글 회원가입 시 필수, 1~50자)",
   NICKNAME: "표시용 닉네임 (구글 최초 가입 시 `{실명}_{난수}` 자동 부여 가능)",
   REFRESH_TOKEN: "리프레시 토큰",
   PHONE_VERIFICATION_PURPOSE:
-    "인증 목적 enum — registration | google_registration | phone_change | find_account (경로에 따라 audience는 consumer/seller로 고정)",
+    "인증 목적 enum — registration | google_registration | kakao_registration | phone_change | find_account (경로에 따라 audience는 consumer/seller로 고정)",
   PHONE_VERIFICATION_AUDIENCE:
     "요청 DTO에 포함되나, consumer/seller 각 인증 API에서는 서버가 audience를 덮어씁니다.",
 } as const;

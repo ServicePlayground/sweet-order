@@ -20,6 +20,7 @@ export default function QAPage() {
   );
   const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
   const [googleAuthHref, setGoogleAuthHref] = useState<string | null>(null);
+  const [kakaoAuthHref, setKakaoAuthHref] = useState<string | null>(null);
 
   useEffect(() => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -27,6 +28,14 @@ export default function QAPage() {
     const redirectUri = `${window.location.origin}${PATHS.AUTH.GOOGLE_REDIRECT_URI}`;
     const href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=email+profile&prompt=select_account`;
     setGoogleAuthHref(href);
+  }, []);
+
+  useEffect(() => {
+    const clientId = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY;
+    if (!clientId || typeof window === "undefined") return;
+    const redirectUri = `${window.location.origin}${PATHS.AUTH.KAKAO_REDIRECT_URI}`;
+    const href = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+    setKakaoAuthHref(href);
   }, []);
 
   const handleGetLocation = () => {
@@ -151,19 +160,36 @@ export default function QAPage() {
           </div>
 
           {!isAuthenticated && googleAuthHref && (
-            <a
-              href={googleAuthHref}
-              className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-2xl border border-gray-200 bg-white text-[15px] font-semibold text-gray-900 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
-            >
-              <Image
-                src="/images/contents/google.png"
-                alt=""
-                width={20}
-                height={20}
-                className="block shrink-0"
-              />
-              Google로 계속하기
-            </a>
+            <div className="flex flex-col gap-2">
+              <a
+                href={googleAuthHref}
+                className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-2xl border border-gray-200 bg-white text-[15px] font-semibold text-gray-900 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+              >
+                <Image
+                  src="/images/contents/google.png"
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="block shrink-0"
+                />
+                Google로 계속하기
+              </a>
+              {kakaoAuthHref && (
+                <a
+                  href={kakaoAuthHref}
+                  className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-2xl border border-[#F7E600] bg-[#FEE500] text-[15px] font-semibold text-[#191919] shadow-sm transition-colors hover:bg-[#f7de00]"
+                >
+                  <Image
+                    src="/images/contents/kakaotalk.png"
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="block shrink-0"
+                  />
+                  Kakao로 계속하기
+                </a>
+              )}
+            </div>
           )}
 
           {isAuthenticated && (

@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { authApi } from "@/apps/web-seller/features/auth/apis/auth.api";
-import { useGoogleRegister } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
+import { useKakaoRegister } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
 import PhoneVerificationForm from "@/apps/web-seller/features/auth/components/forms/PhoneVerificationForm";
 import { Input } from "@/apps/web-seller/common/components/inputs/Input";
@@ -11,21 +11,17 @@ import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
 
-/**
- * 구글 OAuth 리다이렉트 콜백 — `code`로 `/v1/seller/auth/google/login` 호출
- * 휴대폰 미연동 시 백엔드가 `googleId`/`googleEmail`과 함께 400 → 이 화면에서 휴대폰 인증 후 register
- */
-export function GoogleAuthCallbackPage() {
+export function KakaoAuthCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const login = useAuthStore((s) => s.login);
-  const googleRegisterMutation = useGoogleRegister();
+  const kakaoRegisterMutation = useKakaoRegister();
   const { addAlert } = useAlertStore();
 
   const [showPhoneVerification, setShowPhoneVerification] = useState(false);
-  const [googleLoginData, setGoogleLoginData] = useState<{
-    googleId: string;
-    googleEmail: string;
+  const [kakaoLoginData, setKakaoLoginData] = useState<{
+    kakaoId: string;
+    kakaoEmail: string;
   } | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -39,33 +35,33 @@ export function GoogleAuthCallbackPage() {
 
     const run = async () => {
       try {
-        const data = await authApi.googleLogin(code);
+        const data = await authApi.kakaoLogin(code);
         login({ navigate, accessToken: data.accessToken });
       } catch (error: unknown) {
         const err = error as {
           response?: {
             data?: {
               message?: string;
-              data?: { googleId?: string; googleEmail?: string; message?: string };
+              data?: { kakaoId?: string; kakaoEmail?: string; message?: string };
             };
           };
         };
         const payload = (err?.response?.data?.data ?? err?.response?.data ?? {}) as {
           message?: string;
-          googleId?: string;
-          googleEmail?: string;
+          kakaoId?: string;
+          kakaoEmail?: string;
         };
         const message = payload.message ?? "";
-        const googleId = payload.googleId;
-        const googleEmail = payload.googleEmail;
+        const kakaoId = payload.kakaoId;
+        const kakaoEmail = payload.kakaoEmail;
 
         if (
           typeof message === "string" &&
           message.includes(AUTH_ERROR_MESSAGES.PHONE_VERIFICATION_REQUIRED) &&
-          googleId &&
-          googleEmail
+          kakaoId &&
+          kakaoEmail
         ) {
-          setGoogleLoginData({ googleId, googleEmail });
+          setKakaoLoginData({ kakaoId, kakaoEmail });
           setShowPhoneVerification(true);
         } else {
           navigate(ROUTES.AUTH.LOGIN);
@@ -103,11 +99,11 @@ export function GoogleAuthCallbackPage() {
   };
 
   const handlePhoneVerificationComplete = async (phone: string) => {
-    if (!googleLoginData) return;
+    if (!kakaoLoginData) return;
     if (!validateDisplayName(displayName)) return;
 
-    await googleRegisterMutation.mutateAsync({
-      ...googleLoginData,
+    await kakaoRegisterMutation.mutateAsync({
+      ...kakaoLoginData,
       phone,
       name: displayName.trim(),
     });
@@ -151,7 +147,7 @@ export function GoogleAuthCallbackPage() {
           </h2>
           <div style={{ marginBottom: "24px" }}>
             <label
-              htmlFor="google-auth-display-name"
+              htmlFor="kakao-auth-display-name"
               style={{
                 display: "block",
                 marginBottom: "8px",
@@ -163,7 +159,7 @@ export function GoogleAuthCallbackPage() {
               이름
             </label>
             <Input
-              id="google-auth-display-name"
+              id="kakao-auth-display-name"
               type="text"
               name="displayName"
               value={displayName}
@@ -177,7 +173,7 @@ export function GoogleAuthCallbackPage() {
           </div>
           <PhoneVerificationForm
             onVerificationComplete={handlePhoneVerificationComplete}
-            purpose={PHONE_VERIFICATION_PURPOSE.GOOGLE_REGISTRATION}
+            purpose={PHONE_VERIFICATION_PURPOSE.KAKAO_REGISTRATION}
           />
         </div>
       </div>
@@ -195,7 +191,7 @@ export function GoogleAuthCallbackPage() {
         gap: "20px",
       }}
     >
-      <div>구글 로그인 처리 중...</div>
+      <div>카카오 로그인 처리 중...</div>
     </div>
   );
 }
