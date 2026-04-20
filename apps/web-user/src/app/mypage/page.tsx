@@ -8,10 +8,6 @@ import { BottomNav } from "@/apps/web-user/common/components/navigation/BottomNa
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { useMypageProfile } from "@/apps/web-user/features/mypage/hooks/queries/useMypageProfile";
 import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/auth.store";
-import {
-  isWebViewEnvironment,
-  requestGoogleLoginInWebView,
-} from "@/apps/web-user/common/utils/webview.bridge";
 import { UpcomingOrderCard } from "../../features/order/components/UpcomingOrderCard";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
@@ -139,9 +135,7 @@ export default function MypagePage() {
           <button
             type="button"
             onClick={() => {
-              if (isWebViewEnvironment()) {
-                requestGoogleLoginInWebView();
-              } else if (process.env.NODE_ENV === "development") {
+              if (process.env.NODE_ENV === "development") {
                 setAccessToken(process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN ?? "");
               } else {
                 setIsAppGuideOpen(true);

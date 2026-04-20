@@ -10,10 +10,7 @@ import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/use
 import { SortBy, Product } from "@/apps/web-user/features/product/types/product.type";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 import { Icon } from "@/apps/web-user/common/components/icons";
-import {
-  requestGoogleLoginInWebView,
-  toExternalAppSchemeUrl,
-} from "@/apps/web-user/common/utils/webview.bridge";
+import { toExternalAppSchemeUrl } from "@/apps/web-user/common/utils/webview.bridge";
 
 export default function QAPage() {
   const { isAuthenticated, clearAccessToken } = useAuthStore();
@@ -140,8 +137,8 @@ export default function QAPage() {
         {/* 인증 섹션 */}
         <section className="bg-white rounded-2xl p-5 border border-gray-200">
           <div className="flex items-center gap-2 mb-4">
-            <span className="w-2 h-2 rounded-full bg-blue-400" />
-            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">App 로그인</h2>
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">로그인</h2>
           </div>
 
           <div className="flex items-center gap-2 mb-4">
@@ -153,10 +150,9 @@ export default function QAPage() {
             </span>
           </div>
 
-          {!isAuthenticated && (
-            <button
-              type="button"
-              onClick={() => requestGoogleLoginInWebView()}
+          {!isAuthenticated && googleAuthHref && (
+            <a
+              href={googleAuthHref}
               className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-2xl border border-gray-200 bg-white text-[15px] font-semibold text-gray-900 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
             >
               <Image
@@ -167,44 +163,8 @@ export default function QAPage() {
                 className="block shrink-0"
               />
               Google로 계속하기
-            </button>
+            </a>
           )}
-
-          <div className="mt-5 pt-5 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
-                Web 로그인
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-2 mb-4">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isAuthenticated ? "bg-green-400" : "bg-red-400"
-                }`}
-              />
-              <span className="text-sm text-gray-700">
-                {isAuthenticated ? "로그인됨" : "로그아웃 상태"}
-              </span>
-            </div>
-
-            {!isAuthenticated && googleAuthHref && (
-              <a
-                href={googleAuthHref}
-                className="group flex h-[52px] w-full items-center justify-center gap-2.5 rounded-2xl border border-gray-200 bg-white text-[15px] font-semibold text-gray-900 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
-              >
-                <Image
-                  src="/images/contents/google.png"
-                  alt=""
-                  width={20}
-                  height={20}
-                  className="block shrink-0"
-                />
-                Google로 계속하기
-              </a>
-            )}
-          </div>
 
           {isAuthenticated && (
             <div className="pt-4 mt-3 border-t border-gray-100">
