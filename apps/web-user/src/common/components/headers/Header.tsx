@@ -24,9 +24,11 @@ const REGION_STORAGE_KEY = "sweet-order:selected-region";
 interface HeaderProps {
   variant?: "main" | "product" | "minimal" | "search" | "back-title";
   title?: string;
+  /** `back-title`에서 뒤로 버튼 동작을 덮어쓸 때 사용 (미지정 시 `router.back()`) */
+  onBackClick?: () => void;
 }
 
-export default function Header({ variant = "main", title }: HeaderProps) {
+export default function Header({ variant = "main", title, onBackClick }: HeaderProps) {
   const router = useRouter();
   const { address, latitude, longitude, setAddress, setSelectedRegion } =
     useUserCurrentLocationStore();
@@ -205,7 +207,7 @@ export default function Header({ variant = "main", title }: HeaderProps) {
     return (
       <header className="sticky top-0 z-50 bg-white px-5 relative flex items-center justify-center h-[52px]">
         <button
-          onClick={() => router.back()}
+          onClick={() => (onBackClick ? onBackClick() : router.back())}
           className="absolute left-5 flex items-center justify-center rounded-lg border-none bg-transparent text-gray-900 cursor-pointer"
           aria-label="뒤로가기"
         >

@@ -1,3 +1,5 @@
+import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
+
 export const AUDIENCE = {
   CONSUMER: "consumer",
   SELLER: "seller",
@@ -53,3 +55,13 @@ export interface MessageResponseDto {
   /** 인증번호 입력 만료 시각 (ISO 8601) — `POST .../send-verification-code` 응답에 포함 */
   expiresAt?: string;
 }
+
+export type DuplicateAccountPayload = {
+  message:
+    | typeof AUTH_ERROR_MESSAGES.PHONE_KAKAO_ACCOUNT_EXISTS
+    | typeof AUTH_ERROR_MESSAGES.PHONE_GOOGLE_ACCOUNT_EXISTS;
+  name: string;
+  phone: string;
+};
+
+export type OAuthLoginProvider = "google" | "kakao";
