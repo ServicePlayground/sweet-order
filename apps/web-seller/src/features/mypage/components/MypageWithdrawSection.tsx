@@ -26,7 +26,9 @@ export const MypageWithdrawSection: React.FC = () => {
 
   const handleWithdraw = async () => {
     if (!canSubmit) return;
-    const ok = window.confirm("정말로 회원 탈퇴를 진행하시겠어요? 탈퇴 후에는 계정이 비활성화됩니다.");
+    const ok = window.confirm(
+      "정말로 회원 탈퇴를 진행하시겠어요? 탈퇴 후에는 계정이 비활성화됩니다.",
+    );
     if (!ok) return;
 
     await withdrawMutation.mutateAsync({ reason: trimmedReason });
