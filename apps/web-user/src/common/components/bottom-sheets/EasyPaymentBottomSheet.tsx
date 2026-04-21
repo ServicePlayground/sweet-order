@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BottomSheet } from "@/apps/web-user/common/components/bottom-sheets/BottomSheet";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { BottomSheetOptionList } from "./BottomSheetOptionList";
+import { APP_ONLY_MODAL } from "@/apps/web-user/common/constants/messages.constant";
 
 function isMobileDevice(): boolean {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -84,11 +85,17 @@ export function EasyPaymentBottomSheet({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="픽케이크 앱에서 이용해주세요"
-        description="간편 입금 기능은 모바일 앱에서만 이용 가능합니다."
-        confirmText="확인"
-        hideCancel
+        title={APP_ONLY_MODAL.title}
+        description={APP_ONLY_MODAL.description}
+        confirmText="취소"
+        confirmVariant="outline"
+        cancelText="앱 다운로드"
+        cancelVariant="primary"
         onConfirm={() => setIsModalOpen(false)}
+        onCancel={() => {
+          window.open("https://pickcake.app/download", "_blank");
+          setIsModalOpen(false);
+        }}
       />
     </>
   );

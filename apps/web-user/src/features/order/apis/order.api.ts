@@ -29,7 +29,7 @@ export const orderApi = {
     return response.data.data;
   },
   // 입금완료 처리
-  paymentComplete: async (orderId: string): Promise<void> => {
-    await userClient.patch(`/orders/${orderId}/payment-complete`);
+  paymentComplete: async (orderId: string, depositorName: string): Promise<void> => {
+    await userClient.patch(`/orders/${orderId}/payment-complete`, { depositorName });
   },
 };

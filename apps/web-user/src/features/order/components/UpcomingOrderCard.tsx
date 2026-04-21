@@ -122,39 +122,43 @@ export function UpcomingOrderCard() {
     return <div className="mb-4 px-5">{renderCard(visibleOrders[0])}</div>;
   }
 
-  const handleTouchEnd = (swiper: SwiperType) => {
-    if (hasNavigated.current || !hasMore) return;
-    if (swiper.isEnd) {
-      hasNavigated.current = true;
-      setTimeout(() => router.push("/mypage/order"), 400);
-    }
-  };
-
   return (
     <div className="mb-4 pl-5">
       <Swiper
         slidesPerView="auto"
         spaceBetween={10}
-        slidesOffsetAfter={20}
+        slidesOffsetAfter={hasMore ? 120 : 20}
         className="!overflow-visible"
         onAfterInit={handleSwiperInit}
-        onTouchEnd={handleTouchEnd}
+        onTouchEnd={(swiper) => {
+          if (!hasMore || hasNavigated.current) return;
+          if (swiper.isEnd && swiper.touches.diff < -80) {
+            hasNavigated.current = true;
+            router.push("/mypage/order");
+          }
+        }}
       >
-        {visibleOrders.map((order) => (
-          <SwiperSlide key={order.id} style={{ width: "min(calc(100vw - 40px), 600px)" }}>
-            {renderCard(order)}
-          </SwiperSlide>
-        ))}
-        {hasMore && (
-          <SwiperSlide style={{ width: "100px" }}>
-            <div className="flex flex-col items-center justify-center gap-2 w-full h-[202px]">
-              <span className="flex items-center justify-center w-7 h-7 rounded-full border border-gray-300">
-                <Icon name="cardMore" width={20} height={20} className="text-gray-400" />
-              </span>
-              <span className="text-2sm text-gray-500">모두보기</span>
+        {visibleOrders.map((order, index) => (
+          <SwiperSlide
+            key={order.id}
+            style={{
+              width: "min(calc(100vw - 40px), 600px)",
+              ...(index === visibleOrders.length - 1 && hasMore ? { overflow: "visible" } : {}),
+            }}
+          >
+            <div className="relative">
+              {renderCard(order)}
+              {index === visibleOrders.length - 1 && hasMore && (
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-[10px] flex flex-col items-center gap-2 w-[100px]">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-full border border-gray-300">
+                    <Icon name="cardMore" width={20} height={20} className="text-gray-400" />
+                  </span>
+                  <span className="text-2sm text-gray-500">모두보기</span>
+                </div>
+              )}
             </div>
           </SwiperSlide>
-        )}
+        ))}
       </Swiper>
     </div>
   );

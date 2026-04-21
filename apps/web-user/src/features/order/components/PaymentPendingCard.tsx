@@ -11,6 +11,15 @@ import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
+import { PaymentConfirmBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/PaymentConfirmBottomSheet";
+import {
+  APP_ONLY_MODAL,
+  PAYMENT_COMPLETE_MODAL,
+} from "@/apps/web-user/common/constants/messages.constant";
+
+function isMobileDevice(): boolean {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
 
 function copyToClipboard(text: string) {
   navigator.clipboard.writeText(text);
@@ -21,7 +30,10 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
   const [showCopyToast, setShowCopyToast] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
+  const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isAppOnlyModalOpen, setIsAppOnlyModalOpen] = useState(false);
+  const [depositorName, setDepositorName] = useState("");
   const handleCloseCopyToast = useCallback(() => setShowCopyToast(false), []);
   const handleCloseSuccessToast = useCallback(() => setShowSuccessToast(false), []);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
@@ -85,7 +97,13 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setIsEasyPayOpen(true)}
+                onClick={() => {
+                  if (!isMobileDevice()) {
+                    setIsAppOnlyModalOpen(true);
+                    return;
+                  }
+                  setIsEasyPayOpen(true);
+                }}
                 className="flex-1 h-[32px] flex items-center justify-center gap-1 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white"
               >
                 <Image src="/images/contents/toss.png" alt="토스" width={18} height={18} />
@@ -95,7 +113,7 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
               <button
                 type="button"
                 disabled={isCompleting}
-                onClick={() => setIsConfirmOpen(true)}
+                onClick={() => setIsPaymentSheetOpen(true)}
                 className="flex-1 h-[32px] flex items-center justify-center gap-0.5 rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white disabled:opacity-50"
               >
                 {isCompleting ? "처리 중..." : "입금 완료했어요"}
@@ -104,6 +122,24 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
           </div>
         </div>
       </div>
+      {createPortal(
+        <Modal
+          isOpen={isAppOnlyModalOpen}
+          onClose={() => setIsAppOnlyModalOpen(false)}
+          title={APP_ONLY_MODAL.title}
+          description={APP_ONLY_MODAL.description}
+          confirmText="취소"
+          confirmVariant="outline"
+          cancelText="앱 다운로드"
+          cancelVariant="primary"
+          onConfirm={() => setIsAppOnlyModalOpen(false)}
+          onCancel={() => {
+            window.open("https://pickcake.app/download", "_blank");
+            setIsAppOnlyModalOpen(false);
+          }}
+        />,
+        document.body,
+      )}
       {createPortal(
         <EasyPaymentBottomSheet
           isOpen={isEasyPayOpen}
@@ -116,28 +152,35 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
       )}
 
       {createPortal(
+        <PaymentConfirmBottomSheet
+          isOpen={isPaymentSheetOpen}
+          onClose={() => setIsPaymentSheetOpen(false)}
+          amount={order.totalPrice}
+          onConfirm={(name) => {
+            setDepositorName(name);
+            setIsConfirmOpen(true);
+          }}
+        />,
+        document.body,
+      )}
+
+      {createPortal(
         <Modal
           isOpen={isConfirmOpen}
           onClose={() => setIsConfirmOpen(false)}
-          title="입금 완료하셨나요?"
-          description={
-            <>
-              입금 완료 버튼을 누르면
-              <br />
-              판매자에게 확인 알림이 전달되며,
-              <br />
-              <span className="text-primary font-bold">입금 확인 후 예약이 확정</span>됩니다.
-            </>
-          }
+          title={PAYMENT_COMPLETE_MODAL.title}
+          description={PAYMENT_COMPLETE_MODAL.description}
           confirmText="취소"
           cancelText="입금 완료"
           cancelVariant="primary"
           onConfirm={() => setIsConfirmOpen(false)}
           onCancel={() => {
-            paymentComplete(order.id, {
-              onSuccess: () => setShowSuccessToast(true),
-            });
+            paymentComplete(
+              { orderId: order.id, depositorName },
+              { onSuccess: () => setShowSuccessToast(true) },
+            );
             setIsConfirmOpen(false);
+            setIsPaymentSheetOpen(false);
           }}
         />,
         document.body,
