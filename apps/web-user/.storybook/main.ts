@@ -22,6 +22,9 @@ const config: StorybookConfig = {
     getAbsolutePath("@storybook/addon-onboarding"),
   ],
   framework: getAbsolutePath("@storybook/nextjs-vite"),
+  docs: {
+    autodocs: true,
+  },
   staticDirs: ["../public"],
   viteFinal: async (config) => {
     config.plugins = config.plugins || [];

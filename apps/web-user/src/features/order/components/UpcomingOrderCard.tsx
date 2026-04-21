@@ -7,6 +7,7 @@ import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
+import { Icon } from "@/apps/web-user/common/components/icons";
 import { PaymentPendingCard } from "./PaymentPendingCard";
 import { ConfirmedOrderCard } from "./ConfirmedOrderCard";
 
@@ -43,6 +44,8 @@ export function UpcomingOrderCard() {
   const { data, isLoading } = useMyOrders({ type: "UPCOMING" });
   const hasPeeked = useRef(false);
   const hasNavigated = useRef(false);
+  const overscrollTriggered = useRef(false);
+  const moreButtonRef = useRef<HTMLDivElement>(null);
 
   if (isLoading) return <UpcomingOrderCardSkeleton />;
 
@@ -73,14 +76,35 @@ export function UpcomingOrderCard() {
       hasPeeked.current = true;
       const wrapper = swiper.wrapperEl;
       if (!wrapper) return;
+
+      let cancelled = false;
+      const cancelPeek = () => {
+        cancelled = true;
+        wrapper.style.transition = "";
+        wrapper.style.transform = "";
+        swiper.allowTouchMove = true;
+        wrapper.removeEventListener("touchstart", cancelPeek);
+        wrapper.removeEventListener("pointerdown", cancelPeek);
+      };
+
+      wrapper.addEventListener("touchstart", cancelPeek, { once: true });
+      wrapper.addEventListener("pointerdown", cancelPeek, { once: true });
+      swiper.allowTouchMove = false;
+
       setTimeout(() => {
+        if (cancelled) return;
         wrapper.style.transition = "transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1)";
         wrapper.style.transform = "translate3d(-15px, 0, 0)";
         setTimeout(() => {
+          if (cancelled) return;
           wrapper.style.transition = "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
           wrapper.style.transform = "translate3d(0, 0, 0)";
           setTimeout(() => {
+            if (cancelled) return;
             wrapper.style.transition = "";
+            swiper.allowTouchMove = true;
+            wrapper.removeEventListener("touchstart", cancelPeek);
+            wrapper.removeEventListener("pointerdown", cancelPeek);
           }, 600);
         }, 350);
       }, 500);
@@ -98,6 +122,14 @@ export function UpcomingOrderCard() {
     return <div className="mb-4 px-5">{renderCard(visibleOrders[0])}</div>;
   }
 
+  const handleTouchEnd = (swiper: SwiperType) => {
+    if (hasNavigated.current || !hasMore) return;
+    if (swiper.isEnd) {
+      hasNavigated.current = true;
+      setTimeout(() => router.push("/mypage/order"), 400);
+    }
+  };
+
   return (
     <div className="mb-4 pl-5">
       <Swiper
@@ -106,14 +138,7 @@ export function UpcomingOrderCard() {
         slidesOffsetAfter={20}
         className="!overflow-visible"
         onAfterInit={handleSwiperInit}
-        onReachEnd={() => {
-          if (hasMore && !hasNavigated.current) {
-            hasNavigated.current = true;
-            setTimeout(() => {
-              router.push("/mypage/order");
-            }, 800);
-          }
-        }}
+        onTouchEnd={handleTouchEnd}
       >
         {visibleOrders.map((order) => (
           <SwiperSlide key={order.id} style={{ width: "min(calc(100vw - 40px), 600px)" }}>
@@ -121,19 +146,13 @@ export function UpcomingOrderCard() {
           </SwiperSlide>
         ))}
         {hasMore && (
-          <SwiperSlide style={{ width: "80px" }}>
-            <button
-              type="button"
-              onClick={() => router.push("/mypage/order")}
-              className="flex flex-col items-center justify-center gap-2 w-full h-full min-h-[160px]"
-            >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-200">
-                <svg width={16} height={16} viewBox="0 0 16 16" fill="none">
-                  <path d="M6 3l5 5-5 5" stroke="#9CA3AF" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <span className="text-xs text-gray-500">모두보기</span>
-            </button>
+          <SwiperSlide style={{ width: "100px" }}>
+            <div className="flex flex-col items-center justify-center gap-2 w-full h-[202px]">
+              <span className="flex items-center justify-center w-7 h-7 rounded-full border border-gray-300">
+                <Icon name="cardMore" width={20} height={20} className="text-gray-400" />
+              </span>
+              <span className="text-2sm text-gray-500">모두보기</span>
+            </div>
           </SwiperSlide>
         )}
       </Swiper>
