@@ -32,4 +32,8 @@ export const orderApi = {
   paymentComplete: async (orderId: string, depositorName: string): Promise<void> => {
     await consumerClient.patch(`/orders/${orderId}/payment-complete`, { depositorName });
   },
+  // 입금 전 예약 취소 (RESERVATION_REQUESTED, PAYMENT_PENDING 상태)
+  cancelBeforePayment: async (orderId: string, reason: string): Promise<void> => {
+    await consumerClient.patch(`/orders/${orderId}/cancel-before-payment`, { reason });
+  },
 };

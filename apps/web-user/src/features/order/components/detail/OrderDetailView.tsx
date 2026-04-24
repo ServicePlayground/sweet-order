@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { OrderResponse, OrderStatus } from "@/apps/web-user/features/order/types/order.type";
+import Link from "next/link";
+import {
+  OrderResponse,
+  OrderStatus,
+  OrderMyReviewUiStatus,
+} from "@/apps/web-user/features/order/types/order.type";
 import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
 import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
 import { ReservationInfoSection } from "./ReservationInfoSection";
@@ -10,6 +15,8 @@ import { ReservationItemsSection } from "./ReservationItemsSection";
 import { NoticeSection } from "./NoticeSection";
 import { PaymentPendingCountdownHeader } from "./PaymentPendingCountdownHeader";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import { Button } from "@/apps/web-user/common/components/buttons/Button";
+import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
 function getStatusNotice(status: OrderStatus): {
   message: string;
@@ -38,9 +45,10 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
   const [isInquirySheetOpen, setIsInquirySheetOpen] = useState(false);
 
   const isPaymentPending = order.orderStatus === OrderStatus.PAYMENT_PENDING;
+  const canWriteReview = order.myReviewUiStatus === OrderMyReviewUiStatus.WRITABLE;
 
   return (
-    <div className="pt-5">
+    <div className={`pt-5 ${canWriteReview ? "pb-[92px]" : ""}`}>
       {/* 입금대기: 상단 카운트다운 + 결제정보 → 예약정보 순서 */}
       {isPaymentPending && (
         <div className="-mt-5 mb-3">
@@ -51,7 +59,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
         const notice = getStatusNotice(order.orderStatus);
         if (!notice) return null;
         return (
-          <div className="px-5 py-4"> 
+          <div className="px-5 py-4">
             <div
               className={`flex items-center gap-2 px-3 py-2.5 rounded-lg ${
                 notice.isRed ? "bg-red-50" : "bg-gray-50"
@@ -63,9 +71,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
                 height={16}
                 className={notice.isRed ? "text-red-400" : "text-gray-400"}
               />
-              <p className="text-xs text-gray-700">
-                {notice.message}
-              </p>
+              <p className="text-xs text-gray-700">{notice.message}</p>
             </div>
           </div>
         );
@@ -108,6 +114,14 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
           instagramUrl={null}
         />
       </div>
+
+      {canWriteReview && (
+        <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-[638px] bg-white px-5 py-2.5 shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)]">
+          <Link href={PATHS.REVIEW_WRITE(order.id)}>
+            <Button variant="outline">후기 작성</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

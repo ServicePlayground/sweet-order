@@ -31,6 +31,12 @@ export const PATHS = {
   // 저장 페이지
   SAVED: "/mypage/saved",
 
+  // 주문 관련 경로
+  ORDER: {
+    DETAIL: (orderId: string) => `/order/${orderId}`,
+    CANCEL: (orderId: string) => `/order/${orderId}/cancel`,
+  },
+
   // 마이페이지
   MYPAGE: "/mypage",
   MY_ORDERS: "/mypage/order",
