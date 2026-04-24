@@ -16,7 +16,10 @@ export class ChatRoomCreateService {
    * 채팅방 생성 또는 조회 (사용자용)
    * 기존 채팅방이 있으면 반환하고, 없으면 생성합니다.
    */
-  async createOrGetChatRoomForUser(userId: string, createChatRoomDto: CreateChatRoomRequestDto) {
+  async createOrGetChatRoomForUser(
+    consumerId: string,
+    createChatRoomDto: CreateChatRoomRequestDto,
+  ) {
     const { storeId } = createChatRoomDto;
 
     // 스토어 존재 여부 확인
@@ -26,7 +29,9 @@ export class ChatRoomCreateService {
     });
 
     if (!store) {
-      LoggerUtil.log(`채팅방 생성 실패: 스토어 없음 - userId: ${userId}, storeId: ${storeId}`);
+      LoggerUtil.log(
+        `채팅방 생성 실패: 스토어 없음 - consumerId: ${consumerId}, storeId: ${storeId}`,
+      );
       throw new NotFoundException(CHAT_ERROR_MESSAGES.STORE_NOT_FOUND);
     }
 
@@ -34,14 +39,14 @@ export class ChatRoomCreateService {
       // 기존 채팅방 조회 또는 생성
       const chatRoom = await this.prisma.chatRoom.upsert({
         where: {
-          userId_storeId: {
-            userId,
+          consumerId_storeId: {
+            consumerId,
             storeId,
           },
         },
         update: {},
         create: {
-          userId,
+          consumerId,
           storeId,
         },
       });
@@ -49,7 +54,7 @@ export class ChatRoomCreateService {
       return { id: chatRoom.id };
     } catch (error: unknown) {
       LoggerUtil.log(
-        `채팅방 생성 실패: 트랜잭션 에러 - userId: ${userId}, storeId: ${storeId}, error: ${error instanceof Error ? error.message : String(error)}`,
+        `채팅방 생성 실패: 트랜잭션 에러 - consumerId: ${consumerId}, storeId: ${storeId}, error: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw error;
     }

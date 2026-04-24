@@ -1,12 +1,11 @@
 import { Module } from "@nestjs/common";
+import { AuthModule } from "@apps/backend/modules/auth/auth.module";
 import { ProductModule } from "@apps/backend/modules/product/product.module";
 import { SellerProductController } from "./controllers/product.controller";
 import { BusinessModule } from "@apps/backend/modules/business/business.module";
 import { SellerBusinessController } from "./controllers/business.controller";
 import { StoreModule } from "@apps/backend/modules/store/store.module";
 import { SellerStoreController } from "@apps/backend/apis/seller/controllers/store.controller";
-import { ChatModule } from "@apps/backend/modules/chat/chat.module";
-import { SellerChatController } from "./controllers/chat.controller";
 import { FeedModule } from "@apps/backend/modules/feed/feed.module";
 import { SellerFeedController } from "./controllers/feed.controller";
 import { OrderModule } from "@apps/backend/modules/order/order.module";
@@ -16,7 +15,11 @@ import { SellerOrderController } from "@apps/backend/apis/seller/controllers/ord
 import { SellerStatisticsController } from "@apps/backend/apis/seller/controllers/statistics.controller";
 import { SellerNotificationController } from "@apps/backend/apis/seller/controllers/notification.controller";
 import { SellerHomeController } from "@apps/backend/apis/seller/controllers/home.controller";
+import { SellerAuthController } from "@apps/backend/apis/seller/controllers/auth.controller";
+import { SellerMypageController } from "@apps/backend/apis/seller/controllers/mypage.controller";
 import { SellerHomeModule } from "@apps/backend/modules/seller-home/seller-home.module";
+import { UploadModule } from "@apps/backend/modules/upload/upload.module";
+import { SellerUploadController } from "@apps/backend/apis/seller/controllers/upload.controller";
 
 /**
  * Seller API 모듈
@@ -25,26 +28,31 @@ import { SellerHomeModule } from "@apps/backend/modules/seller-home/seller-home.
  */
 @Module({
   imports: [
-    ProductModule,
+    UploadModule,
+    AuthModule,
     BusinessModule,
+    SellerHomeModule,
     StoreModule,
-    ChatModule,
+    ProductModule,
     FeedModule,
     OrderModule,
     StatisticsModule,
     NotificationModule,
-    SellerHomeModule,
+    // ChatModule,
   ],
   controllers: [
-    SellerProductController,
+    SellerUploadController,
+    SellerAuthController,
     SellerBusinessController,
+    SellerHomeController,
     SellerStoreController,
-    SellerChatController,
-    SellerFeedController,
+    SellerProductController,
     SellerOrderController,
+    SellerFeedController,
     SellerStatisticsController,
     SellerNotificationController,
-    SellerHomeController,
+    SellerMypageController,
+    // SellerChatController,
   ],
 })
 export class SellerApiModule {}

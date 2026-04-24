@@ -1,4 +1,4 @@
-import { userClient } from "@/apps/web-user/common/config/axios.config";
+import { consumerClient } from "@/apps/web-user/common/config/axios.config";
 import { MessageResponse, PaginationMeta } from "@/apps/web-user/common/types/api.type";
 import { StoreInfo } from "@/apps/web-user/features/store/types/store.type";
 import { Product } from "@/apps/web-user/features/product/types/product.type";
@@ -20,7 +20,7 @@ export const likeApi = {
     limit: number;
     sortBy: string;
   }): Promise<LikedStoresResponse> => {
-    const response = await userClient.get("/mypage/likes/stores", { params });
+    const response = await consumerClient.get("/mypage/likes/stores", { params });
     return response.data.data;
   },
   // 좋아요한 상품 목록 조회
@@ -29,27 +29,27 @@ export const likeApi = {
     limit: number;
     sortBy: string;
   }): Promise<LikedProductsResponse> => {
-    const response = await userClient.get("/mypage/likes/products", { params });
+    const response = await consumerClient.get("/mypage/likes/products", { params });
     return response.data.data;
   },
   // 상품 좋아요 추가
   addProductLike: async (productId: string): Promise<MessageResponse> => {
-    const response = await userClient.post(`/products/${productId}/like`);
+    const response = await consumerClient.post(`/products/${productId}/like`);
     return response.data.data;
   },
   // 상품 좋아요 삭제
   removeProductLike: async (productId: string): Promise<MessageResponse> => {
-    const response = await userClient.delete(`/products/${productId}/like`);
+    const response = await consumerClient.delete(`/products/${productId}/like`);
     return response.data.data;
   },
   // 스토어 좋아요 추가
   addStoreLike: async (storeId: string): Promise<MessageResponse> => {
-    const response = await userClient.post(`/store/${storeId}/like`);
+    const response = await consumerClient.post(`/store/${storeId}/like`);
     return response.data.data;
   },
   // 스토어 좋아요 삭제
   removeStoreLike: async (storeId: string): Promise<MessageResponse> => {
-    const response = await userClient.delete(`/store/${storeId}/like`);
+    const response = await consumerClient.delete(`/store/${storeId}/like`);
     return response.data.data;
   },
 };

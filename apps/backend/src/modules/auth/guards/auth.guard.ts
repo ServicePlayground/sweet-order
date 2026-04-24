@@ -8,22 +8,18 @@ import {
 import { Observable } from "rxjs";
 import { Reflector } from "@nestjs/core";
 import { AuthGuard as BaseAuthGuard } from "@nestjs/passport";
-import { UserRole } from "@apps/backend/modules/auth/types/auth.types";
-import { AUTH_ERROR_MESSAGES } from "@apps/backend/modules/auth/constants/auth.constants";
+import {
+  AUTH_ERROR_MESSAGES,
+  type AudienceConst,
+} from "@apps/backend/modules/auth/constants/auth.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 
-/**
- * 통합 인증 메타데이터 키
- */
 export const AUTH_METADATA_KEY = "auth";
 
-/**
- * 인증 메타데이터 인터페이스
- */
 export interface AuthMetadata {
   isPublic: boolean; // 인증 건너뛰기
-  isOptionalPublic?: boolean; // 선택적 인증: 토큰이 있으면 검증하고 user 설정, 없으면 통과
-  roles?: UserRole[]; // 역할 검증
+  isOptionalPublic?: boolean; // 선택적 인증: 토큰이 있으면 검증하고, 없으면 통과
+  audiences?: AudienceConst[];
 }
 
 /**
@@ -120,14 +116,13 @@ export class AuthGuard extends BaseAuthGuard("jwt") implements CanActivate {
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_INVALID);
     }
 
-    // 역할 검증 (메타데이터가 있고 역할이 지정된 경우에만 수행)
-    if (authMetadata?.roles && authMetadata.roles.length > 0) {
-      const hasRequiredRole = authMetadata.roles.includes(user.role);
-      if (!hasRequiredRole) {
+    if (authMetadata?.audiences && authMetadata.audiences.length > 0) {
+      const ok = authMetadata.audiences.includes(user.aud);
+      if (!ok) {
         LoggerUtil.log(
-          `인증 실패: 권한 없음 - userId: ${user.id || user.sub}, userRole: ${user.role}, requiredRoles: ${authMetadata.roles.join(",")}`,
+          `인증 실패: aud 불일치 - userAud: ${user.aud}, required: ${authMetadata.audiences.join(",")}`,
         );
-        throw new ForbiddenException(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED);
+        throw new ForbiddenException(AUTH_ERROR_MESSAGES.AUDIENCE_NOT_AUTHORIZED);
       }
     }
 

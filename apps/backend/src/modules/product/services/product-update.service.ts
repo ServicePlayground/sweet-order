@@ -73,7 +73,9 @@ export class ProductUpdateService {
     user: JwtVerifiedPayload,
   ) {
     // 상품 소유권 확인
-    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
+    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, {
+      sellerId: true,
+    });
 
     // 기존 상품 정보 조회 (옵션 업데이트를 위해 필요)
     const product = await this.prisma.product.findUnique({

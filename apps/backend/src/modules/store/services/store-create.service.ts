@@ -23,14 +23,14 @@ export class StoreCreateService {
    * 스토어 생성 (판매자용)
    * 1단계, 2단계 API를 다시 호출하여 검증하고 스토어를 생성합니다.
    */
-  async createStoreForSeller(userId: string, createStoreDto: CreateStoreRequestDto) {
+  async createStoreForSeller(sellerId: string, createStoreDto: CreateStoreRequestDto) {
     // 1) 1단계와 2단계의 사업자등록번호가 일치하는지 검증
     // 하이픈 제거 후 비교
     const businessNo1 = createStoreDto.businessValidation.b_no.replace(/[-\s]/g, "");
     const businessNo2 = createStoreDto.onlineTradingCompanyDetail.brno.replace(/[-\s]/g, "");
     if (businessNo1 !== businessNo2) {
       LoggerUtil.log(
-        `스토어 생성 실패: 사업자등록번호 불일치 - userId: ${userId}, businessNo1: ${businessNo1}, businessNo2: ${businessNo2}`,
+        `스토어 생성 실패: 사업자등록번호 불일치 - sellerId: ${sellerId}, businessNo1: ${businessNo1}, businessNo2: ${businessNo2}`,
       );
       throw new BadRequestException(STORE_ERROR_MESSAGES.BUSINESS_REGISTRATION_NUMBER_MISMATCH);
     }
@@ -55,7 +55,7 @@ export class StoreCreateService {
         async (tx) => {
           const store = await tx.store.create({
             data: {
-              userId,
+              sellerId,
               // 사업자 정보 (1단계 - 사용자 입력값만 저장, 사업자등록번호는 정규화하여 저장)
               businessNo: normalizedBusinessNo,
               representativeName: createStoreDto.businessValidation.p_nm,
@@ -91,11 +91,10 @@ export class StoreCreateService {
             },
           });
 
-          // 스토어 생성 완료 후 사용자 role을 seller로 변경 (이미 seller인 경우 유지)
-          await tx.user.update({
-            where: { id: userId },
+          await tx.seller.update({
+            where: { id: sellerId },
             data: {
-              role: "SELLER",
+              sellerVerificationStatus: "BUSINESS_VERIFIED",
             },
           });
 
@@ -112,14 +111,14 @@ export class StoreCreateService {
       // 동시 요청 경합으로 DB unique 제약(P2002)에 걸리는 경우를 도메인 에러로 변환
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         LoggerUtil.log(
-          `스토어 생성 실패: DB unique 제약 위반 - userId: ${userId}, error: ${error.message}`,
+          `스토어 생성 실패: DB unique 제약 위반 - sellerId: ${sellerId}, error: ${error.message}`,
         );
         throw new BadRequestException(
           STORE_ERROR_MESSAGES.STORE_ALREADY_EXISTS_WITH_SAME_BUSINESS_INFO,
         );
       }
       LoggerUtil.log(
-        `스토어 생성 실패: 트랜잭션 에러 - userId: ${userId}, error: ${error instanceof Error ? error.message : String(error)}`,
+        `스토어 생성 실패: 트랜잭션 에러 - sellerId: ${sellerId}, error: ${error instanceof Error ? error.message : String(error)}`,
       );
       throw error;
     }

@@ -150,7 +150,7 @@ export class StoreMapperUtil {
 
       return {
         id: store.id,
-        userId: store.userId,
+        userId: store.sellerId,
         businessNo: store.businessNo,
         representativeName: store.representativeName,
         openingDate: store.openingDate,

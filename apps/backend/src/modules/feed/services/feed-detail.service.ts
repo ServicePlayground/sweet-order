@@ -56,7 +56,7 @@ export class FeedDetailService {
       feedId,
       user.sub,
       {
-        userId: true,
+        sellerId: true,
         logoImageUrl: true,
       },
       storeId,

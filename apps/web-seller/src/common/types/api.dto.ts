@@ -17,6 +17,8 @@ export interface PaginationMetaDto {
 /** 메시지 응답 (공통) */
 export interface MessageResponseDto {
   message: string;
+  /** 인증번호 입력 만료 시각 (ISO 8601) — `POST .../send-verification-code` 응답에 포함 */
+  expiresAt?: string;
 }
 
 /** 사용 가능 여부 응답 (중복 체크 등) */

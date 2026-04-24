@@ -69,7 +69,7 @@ export class LikeUserListService {
     const orderBy = this.buildStoreOrderByForRelation(sortBy ?? StoreSortBy.LATEST);
 
     const where: Prisma.StoreLikeWhereInput = {
-      userId,
+      consumerId: userId,
       ...(Object.keys(storeWhere).length > 0 ? { store: storeWhere } : {}),
     };
 
@@ -158,7 +158,7 @@ export class LikeUserListService {
     const orderBy = this.buildProductOrderByForRelation(effectiveSortBy);
 
     const where: Prisma.ProductLikeWhereInput = {
-      userId,
+      consumerId: userId,
       product: productWhere,
     };
 

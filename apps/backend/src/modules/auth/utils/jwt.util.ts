@@ -2,11 +2,8 @@ import { JwtService } from "@nestjs/jwt";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { TOKEN_TYPES, JWT_EXPIRATION } from "@apps/backend/modules/auth/constants/auth.constants";
-import {
-  JwtPayload,
-  JwtVerifiedPayload,
-  TokenPair,
-} from "@apps/backend/modules/auth/types/auth.types";
+import { AuthTokenPairResponseDto } from "@apps/backend/modules/auth/dto/auth-token.dto";
+import { JwtPayload, JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 @Injectable()
 export class JwtUtil {
   constructor(
@@ -19,7 +16,7 @@ export class JwtUtil {
    * @param payload JWT 페이로드
    * @returns 토큰 쌍
    */
-  async generateTokenPair(payload: JwtPayload): Promise<TokenPair> {
+  async generateTokenPair(payload: JwtPayload): Promise<AuthTokenPairResponseDto> {
     const accessTokenPayload = {
       ...payload,
       type: TOKEN_TYPES.ACCESS,

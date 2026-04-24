@@ -23,14 +23,14 @@ export class OrderOwnershipUtil {
     orderId: string,
     userId: string,
     includeStoreSelect?: Prisma.StoreSelect,
-  ): Promise<Order & { store: { id: string; userId: string; [key: string]: any } }> {
+  ): Promise<Order & { store: { id: string; sellerId: string; [key: string]: any } }> {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
         store: {
           select: {
             id: true,
-            userId: true,
+            sellerId: true,
             ...(includeStoreSelect || {}),
           },
         },
@@ -42,14 +42,14 @@ export class OrderOwnershipUtil {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    if (order.store.userId !== userId) {
+    if (order.store.sellerId !== userId) {
       LoggerUtil.log(
-        `주문 소유권 확인 실패: 소유권 없음 - orderId: ${orderId}, userId: ${userId}, storeUserId: ${order.store.userId}`,
+        `주문 소유권 확인 실패: 소유권 없음 - orderId: ${orderId}, userId: ${userId}, storeSellerId: ${order.store.sellerId}`,
       );
       throw new ForbiddenException(ORDER_ERROR_MESSAGES.FORBIDDEN);
     }
 
-    return order as Order & { store: { id: string; userId: string; [key: string]: any } };
+    return order as Order & { store: { id: string; sellerId: string; [key: string]: any } };
   }
 
   /**
@@ -75,9 +75,9 @@ export class OrderOwnershipUtil {
       throw new NotFoundException(ORDER_ERROR_MESSAGES.NOT_FOUND);
     }
 
-    if (order.userId !== userId) {
+    if (order.consumerId !== userId) {
       LoggerUtil.log(
-        `주문 소유권 확인 실패: 소유권 없음 - orderId: ${orderId}, userId: ${userId}, orderUserId: ${order.userId}`,
+        `주문 소유권 확인 실패: 소유권 없음 - orderId: ${orderId}, userId: ${userId}, orderConsumerId: ${order.consumerId}`,
       );
       throw new ForbiddenException(ORDER_ERROR_MESSAGES.FORBIDDEN);
     }

@@ -24,10 +24,7 @@ import {
   UpdateStoreResponseDto,
 } from "@apps/backend/modules/store/dto/store-update.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   NTS_API_ERROR_MESSAGES,
   KFTC_API_ERROR_MESSAGES,
@@ -56,8 +53,8 @@ import {
   StoreBusinessCalendarDto,
   UpdateStoreBusinessCalendarResponseDto,
 )
-@Controller(`${USER_ROLES.SELLER}/store`)
-@Auth({ isPublic: false, roles: ["USER", "SELLER", "ADMIN"] }) // USER, SELLER, ADMIN 모두 접근 가능
+@Controller(`${AUDIENCE.SELLER}/store`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerStoreController {
   constructor(private readonly storeService: StoreService) {}
 
@@ -167,9 +164,6 @@ export class SellerStoreController {
   })
   @SwaggerResponse(200, { dataDto: StoreResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async getStoreDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
@@ -191,9 +185,6 @@ export class SellerStoreController {
   @SwaggerAuthResponses()
   @SwaggerResponse(400, {
     dataExample: createMessageObject(STORE_ERROR_MESSAGES.BUSINESS_CALENDAR_STANDARD_TIME_ORDER),
-  })
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
   })
   @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
@@ -217,9 +208,6 @@ export class SellerStoreController {
   })
   @SwaggerResponse(200, { dataDto: UpdateStoreResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(STORE_ERROR_MESSAGES.NOT_FOUND) })
   async updateStore(

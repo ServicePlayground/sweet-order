@@ -38,7 +38,7 @@ export class ReviewDetailService {
         ...PRODUCT_REVIEW_ACTIVE_FILTER,
       },
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
@@ -64,11 +64,11 @@ export class ReviewDetailService {
     const review = await this.prisma.productReview.findFirst({
       where: {
         id: reviewId,
-        userId,
+        consumerId: userId,
         ...PRODUCT_REVIEW_ACTIVE_FILTER,
       },
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,
@@ -112,7 +112,7 @@ export class ReviewDetailService {
         ...PRODUCT_REVIEW_ACTIVE_FILTER,
       },
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,

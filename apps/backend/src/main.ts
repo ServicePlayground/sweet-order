@@ -9,14 +9,12 @@ import { IoAdapter } from "@nestjs/platform-socket.io";
 import { AppModule } from "@apps/backend/app.module";
 import { API_PREFIX } from "@apps/backend/common/constants/app.constants";
 import { SellerApiModule } from "@apps/backend/apis/seller/seller-api.module";
-import { UserApiModule } from "@apps/backend/apis/user/user-api.module";
-import { AdminApiModule } from "@apps/backend/apis/admin/admin-api.module";
+import { ConsumerApiModule } from "@apps/backend/apis/consumer/consumer-api.module";
 import {
-  adminSwaggerConfig,
   sellerSwaggerConfig,
-  userSwaggerConfig,
+  consumerSwaggerConfig,
 } from "@apps/backend/common/config/swagger.config";
-import { USER_ROLES } from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { initializeSentry } from "@apps/backend/common/config/sentry.config";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
@@ -130,7 +128,7 @@ async function bootstrap(): Promise<void> {
   // 호출 순서 중요 (설정 순서에 따라 적용되는 순서가 다름)
   app.setGlobalPrefix(API_PREFIX);
 
-  // Swagger 3-way split (development와 staging 환경에서만 활성화)
+  // Swagger User / Seller (development와 staging 환경에서만 활성화)
   if (nodeEnv !== "production") {
     // 스웨거 Basic Auth 미들웨어 설정
     const swaggerUsername = configService.get("SWAGGER_USERNAME");
@@ -159,20 +157,15 @@ async function bootstrap(): Promise<void> {
       },
     );
 
-    const userDoc = SwaggerModule.createDocument(app, userSwaggerConfig, {
-      include: [UserApiModule],
+    const consumerDoc = SwaggerModule.createDocument(app, consumerSwaggerConfig, {
+      include: [ConsumerApiModule],
     });
-    SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.USER}`, app, userDoc);
+    SwaggerModule.setup(`${API_PREFIX}/docs/${AUDIENCE.CONSUMER}`, app, consumerDoc);
 
     const sellerDoc = SwaggerModule.createDocument(app, sellerSwaggerConfig, {
       include: [SellerApiModule],
     });
-    SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.SELLER}`, app, sellerDoc);
-
-    const adminDoc = SwaggerModule.createDocument(app, adminSwaggerConfig, {
-      include: [AdminApiModule],
-    });
-    SwaggerModule.setup(`${API_PREFIX}/docs/${USER_ROLES.ADMIN}`, app, adminDoc);
+    SwaggerModule.setup(`${API_PREFIX}/docs/${AUDIENCE.SELLER}`, app, sellerDoc);
   }
 
   // 서버 시작

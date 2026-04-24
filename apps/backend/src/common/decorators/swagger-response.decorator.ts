@@ -48,7 +48,7 @@ export function SwaggerResponse(
           example: {
             success,
             data: dataExample,
-            timestamp: SWAGGER_EXAMPLES.USER_DATA.createdAt,
+            timestamp: SWAGGER_EXAMPLES.CONSUMER_DATA.createdAt,
             statusCode,
             responseId: success
               ? "1735123456789-success-a1b2c3d4-e5f6-7890-abcd-ef1234567890-1a2b3c4d"

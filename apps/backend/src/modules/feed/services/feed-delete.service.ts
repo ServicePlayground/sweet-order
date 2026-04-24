@@ -21,7 +21,7 @@ export class FeedDeleteService {
       this.prisma,
       feedId,
       user.sub,
-      { userId: true },
+      { sellerId: true },
       storeId,
     );
 

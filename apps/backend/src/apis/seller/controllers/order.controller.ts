@@ -15,10 +15,7 @@ import { Auth } from "@apps/backend/modules/auth/decorators/auth.decorator";
 import { SwaggerResponse } from "@apps/backend/common/decorators/swagger-response.decorator";
 import { SwaggerAuthResponses } from "@apps/backend/common/decorators/swagger-auth-responses.decorator";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   OrderListResponseDto,
   OrderListRequestDto,
@@ -43,8 +40,8 @@ import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/orde
   OrderResponseDto,
   PaginationMetaResponseDto,
 )
-@Controller(`${USER_ROLES.SELLER}/orders`)
-@Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] }) // SELLER와 ADMIN 역할만 접근 가능
+@Controller(`${AUDIENCE.SELLER}/orders`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerOrderController {
   constructor(private readonly orderService: OrderService) {}
 
@@ -61,9 +58,6 @@ export class SellerOrderController {
   })
   @SwaggerResponse(200, { dataDto: OrderListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
@@ -86,9 +80,6 @@ export class SellerOrderController {
   })
   @SwaggerResponse(200, { dataDto: OrderResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
   })
@@ -126,9 +117,6 @@ export class SellerOrderController {
     ),
   })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(ORDER_ERROR_MESSAGES.FORBIDDEN),
   })

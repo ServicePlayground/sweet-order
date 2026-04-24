@@ -1,4 +1,4 @@
-import { userClient } from "@/apps/web-seller/common/config/axios.config";
+import { sellerClient } from "@/apps/web-seller/common/config/axios.config";
 import type { UploadFileResponseDto } from "@/apps/web-seller/features/upload/types/upload.dto";
 
 export const uploadApi = {
@@ -7,10 +7,8 @@ export const uploadApi = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await userClient.post("/uploads/file", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    const response = await sellerClient.post("/uploads/file", formData, {
+      timeout: 120_000,
     });
     return response.data.data;
   },

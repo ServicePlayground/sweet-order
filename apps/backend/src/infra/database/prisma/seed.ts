@@ -1,39 +1,38 @@
-import { PrismaClient, ProductCategoryType, StoreBankName } from "./generated/client";
-import * as bcrypt from "bcrypt";
+import {
+  PrismaClient,
+  ProductCategoryType,
+  SellerVerificationStatus,
+  StoreBankName,
+} from "./generated/client";
 
 const prisma = new PrismaClient();
 
-const SEED_USERS = {
-  USER1: {
-    USER_ID: "user001",
-    PASSWORD: "Password123!",
+/**
+ * 시드용 계정 1쌍 — Consumer / Seller 테이블·JWT aud 분리 구조에 맞춤
+ */
+const SEED_ACCOUNTS = {
+  SELLER: {
     PHONE: "01012345678",
     NAME: "김철수",
-    NICKNAME: "철수킹",
-    EMAIL: "kimcs@example.com",
+    NICKNAME: "김철수_739",
     PROFILE_IMAGE_URL:
       "https://static-staging.sweetorders.com/uploads/2__1770124158308_b45059e5.jpeg",
+    GOOGLE_ID: "115107911178776387683",
+    GOOGLE_EMAIL: "olo90632951@gmail.com",
+    /** 시드 판매자는 스토어·상품 시드까지 쓰므로 검증 완료 상태로 둠 */
+    SELLER_VERIFICATION_STATUS: SellerVerificationStatus.BUSINESS_VERIFIED,
     CREATED_AT: new Date("2024-01-15T10:30:00Z"),
     LAST_LOGIN_AT: new Date("2024-01-20T14:25:00Z"),
   },
-  USER2: {
-    USER_ID: "user002",
-    PASSWORD: "Password456!",
+  CONSUMER: {
     PHONE: "01023456789",
+    NAME: "홍길동",
+    NICKNAME: "홍길동_4821",
+    PROFILE_IMAGE_URL:
+      "https://static-staging.sweetorders.com/uploads/2__1770124158308_b45059e5.jpeg",
+    GOOGLE_ID: "115107911178776387683",
+    GOOGLE_EMAIL: "olo90632951@gmail.com",
     CREATED_AT: new Date("2024-01-16T09:15:00Z"),
-  },
-  USER3: {
-    PHONE: "01034567890",
-    GOOGLE_ID: "google_123456789",
-    GOOGLE_EMAIL: "john.doe@gmail.com",
-    CREATED_AT: new Date("2024-01-17T16:45:00Z"),
-  },
-  USER4: {
-    USER_ID: "user004",
-    PHONE: "01078901234",
-    GOOGLE_ID: "google_987654321",
-    GOOGLE_EMAIL: "jane.smith@gmail.com",
-    CREATED_AT: new Date("2023-12-01T10:00:00Z"),
   },
 };
 
@@ -216,136 +215,58 @@ const SEED_STORE_FEEDS = {
 };
 
 /**
- * 시드 사용자들을 생성합니다.
+ * 시드 계정을 생성합니다 — 구매자 1명, 판매자 1명.
  *
  * 동작 방식:
- * - userId, phone, googleId 중 하나라도 존재하는지 확인
- * - 존재하면: 업데이트하지 않고 기존 사용자 반환 (그대로 유지)
- * - 존재하지 않으면: 새로 생성
- *
+ * - phone 기준 존재 여부 확인
+ * - 존재하면: 업데이트하지 않고 기존 행 반환
+ * - 없으면: 새로 생성 (구글 OAuth·휴대폰 인증 플로우와 동일한 필드 형태)
  */
 async function upsertSeedUsers() {
-  const hashedPassword1 = await bcrypt.hash(SEED_USERS.USER1.PASSWORD, 12);
-  const hashedPassword2 = await bcrypt.hash(SEED_USERS.USER2.PASSWORD, 12);
-
-  /**
-   * USER1: 판매자 계정 (user001)
-   * - userId 또는 phone으로 찾음 (둘 중 하나라도 존재하면 업데이트하지 않음)
-   * - 존재 시: 업데이트하지 않고 기존 사용자 반환
-   * - 존재하지 않을 시: 모든 필드로 새로 생성
-   */
-  let user1 =
-    (await prisma.user.findUnique({
-      where: { userId: SEED_USERS.USER1.USER_ID },
-    })) ||
-    (await prisma.user.findUnique({
-      where: { phone: SEED_USERS.USER1.PHONE },
-    }));
-  if (!user1) {
-    user1 = await prisma.user.create({
+  let seller = await prisma.seller.findUnique({
+    where: { phone: SEED_ACCOUNTS.SELLER.PHONE },
+  });
+  if (!seller) {
+    seller = await prisma.seller.create({
       data: {
-        userId: SEED_USERS.USER1.USER_ID,
-        role: "SELLER",
-        phone: SEED_USERS.USER1.PHONE,
-        passwordHash: hashedPassword1,
-        name: SEED_USERS.USER1.NAME,
-        nickname: SEED_USERS.USER1.NICKNAME,
-        email: SEED_USERS.USER1.EMAIL,
-        profileImageUrl: SEED_USERS.USER1.PROFILE_IMAGE_URL,
+        phone: SEED_ACCOUNTS.SELLER.PHONE,
+        googleId: SEED_ACCOUNTS.SELLER.GOOGLE_ID,
+        googleEmail: SEED_ACCOUNTS.SELLER.GOOGLE_EMAIL,
+        name: SEED_ACCOUNTS.SELLER.NAME,
+        nickname: SEED_ACCOUNTS.SELLER.NICKNAME,
+        profileImageUrl: SEED_ACCOUNTS.SELLER.PROFILE_IMAGE_URL,
         isPhoneVerified: true,
         isActive: true,
-        createdAt: SEED_USERS.USER1.CREATED_AT,
-        lastLoginAt: SEED_USERS.USER1.LAST_LOGIN_AT,
+        sellerVerificationStatus: SEED_ACCOUNTS.SELLER.SELLER_VERIFICATION_STATUS,
+        createdAt: SEED_ACCOUNTS.SELLER.CREATED_AT,
+        lastLoginAt: SEED_ACCOUNTS.SELLER.LAST_LOGIN_AT,
       },
     });
   }
 
-  /**
-   * USER2: 일반 사용자 계정 (user002)
-   * - userId 또는 phone으로 찾음 (둘 중 하나라도 존재하면 업데이트하지 않음)
-   * - 존재 시: 업데이트하지 않고 기존 사용자 반환
-   * - 존재하지 않을 시: 기본 필드만으로 새로 생성
-   */
-  let user2 =
-    (await prisma.user.findUnique({
-      where: { userId: SEED_USERS.USER2.USER_ID },
-    })) ||
-    (await prisma.user.findUnique({
-      where: { phone: SEED_USERS.USER2.PHONE },
-    }));
-  if (!user2) {
-    user2 = await prisma.user.create({
+  let consumer = await prisma.consumer.findUnique({
+    where: { phone: SEED_ACCOUNTS.CONSUMER.PHONE },
+  });
+  if (!consumer) {
+    consumer = await prisma.consumer.create({
       data: {
-        userId: SEED_USERS.USER2.USER_ID,
-        phone: SEED_USERS.USER2.PHONE,
-        passwordHash: hashedPassword2,
+        phone: SEED_ACCOUNTS.CONSUMER.PHONE,
+        googleId: SEED_ACCOUNTS.CONSUMER.GOOGLE_ID,
+        googleEmail: SEED_ACCOUNTS.CONSUMER.GOOGLE_EMAIL,
+        name: SEED_ACCOUNTS.CONSUMER.NAME,
+        nickname: SEED_ACCOUNTS.CONSUMER.NICKNAME,
+        profileImageUrl: SEED_ACCOUNTS.CONSUMER.PROFILE_IMAGE_URL,
         isPhoneVerified: true,
         isActive: true,
-        createdAt: SEED_USERS.USER2.CREATED_AT,
+        createdAt: SEED_ACCOUNTS.CONSUMER.CREATED_AT,
       },
     });
   }
 
-  /**
-   * USER3: 구글 소셜 로그인 계정 (userId 없음)
-   * - phone 또는 googleId로 찾음 (둘 중 하나라도 존재하면 업데이트하지 않음)
-   * - 존재 시: 업데이트하지 않고 기존 사용자 반환
-   * - 존재하지 않을 시: 구글 계정 정보만으로 새로 생성
-   * - passwordHash는 없음 (소셜 로그인만 사용)
-   */
-  let user3 =
-    (await prisma.user.findUnique({
-      where: { phone: SEED_USERS.USER3.PHONE },
-    })) ||
-    (await prisma.user.findUnique({
-      where: { googleId: SEED_USERS.USER3.GOOGLE_ID },
-    }));
-  if (!user3) {
-    user3 = await prisma.user.create({
-      data: {
-        phone: SEED_USERS.USER3.PHONE,
-        googleId: SEED_USERS.USER3.GOOGLE_ID,
-        googleEmail: SEED_USERS.USER3.GOOGLE_EMAIL,
-        isPhoneVerified: true,
-        isActive: true,
-        createdAt: SEED_USERS.USER3.CREATED_AT,
-      },
-    });
-  }
-
-  /**
-   * USER4: 일반 로그인 + 구글 로그인 모두 가능한 계정 (user004)
-   * - userId, phone, googleId 중 하나라도 존재하면 업데이트하지 않음
-   * - 존재 시: 업데이트하지 않고 기존 사용자 반환
-   * - 존재하지 않을 시: 일반 로그인과 구글 로그인 모두 가능한 계정으로 새로 생성
-   * - 일반 로그인과 소셜 로그인을 모두 지원하는 하이브리드 계정
-   */
-  let user4 =
-    (await prisma.user.findUnique({
-      where: { userId: SEED_USERS.USER4.USER_ID },
-    })) ||
-    (await prisma.user.findUnique({
-      where: { phone: SEED_USERS.USER4.PHONE },
-    })) ||
-    (await prisma.user.findUnique({
-      where: { googleId: SEED_USERS.USER4.GOOGLE_ID },
-    }));
-  if (!user4) {
-    user4 = await prisma.user.create({
-      data: {
-        userId: SEED_USERS.USER4.USER_ID,
-        phone: SEED_USERS.USER4.PHONE,
-        passwordHash: hashedPassword1,
-        googleId: SEED_USERS.USER4.GOOGLE_ID,
-        googleEmail: SEED_USERS.USER4.GOOGLE_EMAIL,
-        isPhoneVerified: true,
-        isActive: true,
-        createdAt: SEED_USERS.USER4.CREATED_AT,
-      },
-    });
-  }
-
-  return [user1, user2, user3, user4];
+  return {
+    seller,
+    consumers: [consumer],
+  };
 }
 
 /**
@@ -356,30 +277,27 @@ async function upsertSeedUsers() {
  * - 존재하면: 업데이트하지 않고 기존 스토어 반환 (그대로 유지)
  * - 존재하지 않으면: 새로 생성
  */
-async function upsertStores(users: Awaited<ReturnType<typeof upsertSeedUsers>>) {
-  const [seller] = users;
-
-  // 판매자가 없으면 에러
+async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>["seller"]) {
   if (!seller) {
-    throw new Error("판매자(USER1)가 생성되지 않았습니다. 사용자 생성에 실패했습니다.");
+    throw new Error("판매자 시드 계정이 없습니다. upsertSeedUsers를 확인하세요.");
   }
 
   /**
    * STORE1: 첫 번째 스토어
-   * - name과 userId로 찾음 (같은 판매자의 스토어인지 확인)
+   * - name과 sellerId로 찾음 (같은 판매자의 스토어인지 확인)
    * - 존재 시: 업데이트하지 않고 기존 스토어 반환
    * - 존재하지 않을 시: 모든 필드로 새로 생성
    */
   let store1 = await prisma.store.findFirst({
     where: {
       name: SEED_STORES.STORE1.NAME,
-      userId: seller.id,
+      sellerId: seller.id,
     },
   });
   if (!store1) {
     store1 = await prisma.store.create({
       data: {
-        userId: seller.id,
+        sellerId: seller.id,
         name: SEED_STORES.STORE1.NAME,
         description: SEED_STORES.STORE1.DESCRIPTION,
         logoImageUrl: SEED_STORES.STORE1.LOGO_IMAGE_URL,
@@ -413,20 +331,20 @@ async function upsertStores(users: Awaited<ReturnType<typeof upsertSeedUsers>>) 
 
   /**
    * STORE2: 두 번째 스토어 (같은 판매자의 다른 스토어)
-   * - name과 userId로 찾음 (같은 판매자의 스토어인지 확인)
+   * - name과 sellerId로 찾음 (같은 판매자의 스토어인지 확인)
    * - 존재 시: 업데이트하지 않고 기존 스토어 반환
    * - 존재하지 않을 시: 모든 필드로 새로 생성
    */
   let store2 = await prisma.store.findFirst({
     where: {
       name: SEED_STORES.STORE2.NAME,
-      userId: seller.id,
+      sellerId: seller.id,
     },
   });
   if (!store2) {
     store2 = await prisma.store.create({
       data: {
-        userId: seller.id,
+        sellerId: seller.id,
         name: SEED_STORES.STORE2.NAME,
         description: SEED_STORES.STORE2.DESCRIPTION,
         logoImageUrl: SEED_STORES.STORE2.LOGO_IMAGE_URL,
@@ -562,7 +480,7 @@ async function upsertProducts(stores: Awaited<ReturnType<typeof upsertStores>>) 
  * - 같은 사용자가 여러 리뷰를 작성할 수 있음
  */
 async function seedProductReviews(
-  users: Awaited<ReturnType<typeof upsertSeedUsers>>,
+  consumers: Awaited<ReturnType<typeof upsertSeedUsers>>["consumers"],
   products: Awaited<ReturnType<typeof upsertProducts>>,
   stores: Awaited<ReturnType<typeof upsertStores>>,
 ) {
@@ -572,9 +490,9 @@ async function seedProductReviews(
     return 0;
   }
 
-  // 사용자가 없으면 리뷰 생성 불가
-  if (!users || users.length === 0) {
-    console.warn("⚠️ 사용자가 없어 리뷰를 생성할 수 없습니다.");
+  // 구매자가 없으면 리뷰 생성 불가
+  if (!consumers || consumers.length === 0) {
+    console.warn("⚠️ 구매자가 없어 리뷰를 생성할 수 없습니다.");
     return 0;
   }
 
@@ -615,7 +533,7 @@ async function seedProductReviews(
     // 리뷰가 없는 상품에 3~5개의 랜덤 리뷰 생성
     const reviewCount = Math.floor(Math.random() * 3) + 3; // 3~5개
     for (let j = 0; j < reviewCount; j++) {
-      const userIndex = Math.floor(Math.random() * users.length);
+      const consumerIndex = Math.floor(Math.random() * consumers.length);
       const rating = Math.round((Math.random() * 4.5 + 0.5) * 10) / 10;
       const content = SEED_REVIEW_CONTENTS[Math.floor(Math.random() * SEED_REVIEW_CONTENTS.length)];
       const imageCount = Math.floor(Math.random() * 3); // 0~2개의 이미지
@@ -625,7 +543,7 @@ async function seedProductReviews(
         prisma.productReview.create({
           data: {
             productId: product.id,
-            userId: users[userIndex].id,
+            consumerId: consumers[consumerIndex].id,
             rating,
             content,
             imageUrls,
@@ -730,7 +648,7 @@ async function seedStoreFeeds() {
  * 중요!!: ** 스키마가 수정되더라도 ** 기존 데이터 유지되면서 새로운 데이터가 추가/수정되는 방식으로 해야, 실제 배포환경에서 오류가 발생하지 않습니다.
  *
  * 실행 순서:
- * 1. 사용자 생성 (4명, 기존 사용자는 업데이트하지 않음)
+ * 1. 계정 생성 (구매자 1명 + 판매자 1명, 기존 행은 업데이트하지 않음)
  * 2. 스토어 생성 (2개, 기존 스토어는 업데이트하지 않음)
  * 3. 상품 생성 (100개, 상품이 하나도 없을 때만 생성)
  * 4. 상품 리뷰 생성 (리뷰가 하나도 없을 때만 생성)
@@ -738,20 +656,22 @@ async function seedStoreFeeds() {
  *
  * 특징:
  * - idempotent: 여러 번 실행해도 안전함
- * - 사용자는 기존 데이터가 있으면 업데이트하지 않음 (보존)
+ * - 구매자·판매자는 phone으로 존재하면 업데이트하지 않음 (보존)
  * - 스토어는 name 기준으로 존재하면 업데이트하지 않음 (보존)
  * - 상품은 1개 이상 존재하면 업데이트하지 않음, 하나도 없을 때만 생성
  * - 리뷰는 1개 이상 존재하면 업데이트하지 않음, 하나도 없을 때만 생성
  * - 피드는 1개 이상 존재하면 업데이트하지 않음, 하나도 없을 때만 생성
  */
 async function main() {
-  const users = await upsertSeedUsers();
-  const stores = await upsertStores(users);
+  const { seller, consumers } = await upsertSeedUsers();
+  const stores = await upsertStores(seller);
   const products = await upsertProducts(stores);
-  const reviewCreatedCount = await seedProductReviews(users, products, stores);
+  const reviewCreatedCount = await seedProductReviews(consumers, products, stores);
   const feedCreatedCount = await seedStoreFeeds();
 
-  console.log(`✅ Seed users created/retrieved: ${users.length}`);
+  console.log(
+    `✅ Seed seller + consumer created/retrieved: ${1 + consumers.length} (seller 1 + consumer 1)`,
+  );
   console.log(`✅ Stores created/retrieved: ${stores.length}`);
   console.log(`✅ Products created/retrieved: ${products.length}`);
   console.log(`✅ Product reviews created (if none existed): ${reviewCreatedCount}`);

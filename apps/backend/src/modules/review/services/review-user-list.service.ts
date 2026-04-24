@@ -29,7 +29,7 @@ export class ReviewUserListService {
     const { page, limit, sortBy } = query;
 
     const where: Prisma.ProductReviewWhereInput = {
-      userId,
+      consumerId: userId,
       ...PRODUCT_REVIEW_ACTIVE_FILTER,
     };
 
@@ -45,7 +45,7 @@ export class ReviewUserListService {
       skip,
       take: limit,
       include: {
-        user: {
+        consumer: {
           select: ReviewMapperUtil.USER_INFO_SELECT,
         },
         ...ReviewMapperUtil.PRODUCT_STORE_INCLUDE,

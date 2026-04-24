@@ -28,7 +28,7 @@ export class FeedUpdateService {
       this.prisma,
       feedId,
       user.sub,
-      { userId: true },
+      { sellerId: true },
       storeId,
     );
 

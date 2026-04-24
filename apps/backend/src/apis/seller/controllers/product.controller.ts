@@ -25,10 +25,7 @@ import { ProductListResponseDto } from "@apps/backend/modules/product/dto/produc
 import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
-import {
-  AUTH_ERROR_MESSAGES,
-  USER_ROLES,
-} from "@apps/backend/modules/auth/constants/auth.constants";
+import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import {
   CreateProductRequestDto,
   CreateProductResponseDto,
@@ -51,8 +48,8 @@ import { GetSellerProductsRequestDto } from "@apps/backend/modules/product/dto/p
   ProductResponseDto,
   PaginationMetaResponseDto,
 )
-@Controller(`${USER_ROLES.SELLER}/products`)
-@Auth({ isPublic: false, roles: ["SELLER", "ADMIN"] }) // SELLER와 ADMIN 역할만 접근 가능
+@Controller(`${AUDIENCE.SELLER}/products`)
+@Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용
 export class SellerProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -70,9 +67,6 @@ export class SellerProductController {
   })
   @SwaggerResponse(200, { dataDto: ProductListResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
@@ -98,9 +92,8 @@ export class SellerProductController {
   @SwaggerResponse(200, { dataDto: ProductResponseDto })
   @SwaggerAuthResponses()
   @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
+    dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN),
   })
-  @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async getProductDetail(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {
     return await this.productService.getProductDetailForSeller(id, req.user);
@@ -119,9 +112,6 @@ export class SellerProductController {
   })
   @SwaggerResponse(201, { dataDto: CreateProductResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, {
     dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.STORE_NOT_OWNED),
   })
@@ -147,9 +137,6 @@ export class SellerProductController {
   })
   @SwaggerResponse(200, { dataDto: UpdateProductResponseDto })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async updateProduct(
@@ -174,9 +161,6 @@ export class SellerProductController {
     dataExample: createMessageObject(PRODUCT_SUCCESS_MESSAGES.PRODUCT_DELETED),
   })
   @SwaggerAuthResponses()
-  @SwaggerResponse(403, {
-    dataExample: createMessageObject(AUTH_ERROR_MESSAGES.ROLE_NOT_AUTHORIZED),
-  })
   @SwaggerResponse(403, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.FORBIDDEN) })
   @SwaggerResponse(404, { dataExample: createMessageObject(PRODUCT_ERROR_MESSAGES.NOT_FOUND) })
   async deleteProduct(@Param("id") id: string, @Request() req: { user: JwtVerifiedPayload }) {

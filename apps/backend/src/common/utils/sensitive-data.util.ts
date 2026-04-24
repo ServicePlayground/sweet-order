@@ -79,7 +79,6 @@ export class SensitiveDataUtil {
     const masked: any = {};
     const sensitiveKeys = [
       "password",
-      "passwordHash",
       "token",
       "accessToken",
       "refreshToken",

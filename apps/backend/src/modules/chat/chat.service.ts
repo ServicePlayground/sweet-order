@@ -60,7 +60,7 @@ export class ChatService {
   /**
    * 채팅방 읽음 처리 (공통)
    */
-  async markChatRoomAsRead(roomId: string, readerId: string, readerType: "user" | "store") {
+  async markChatRoomAsRead(roomId: string, readerId: string, readerType: "consumer" | "store") {
     return await this.chatRoomUpdateService.markChatRoomAsRead(roomId, readerId, readerType);
   }
 
@@ -71,7 +71,7 @@ export class ChatService {
     roomId: string,
     text: string,
     senderId: string,
-    senderType: "user" | "store",
+    senderType: "consumer" | "store",
   ): Promise<MessageResponseDto> {
     return await this.chatMessageCreateService.sendMessage(roomId, text, senderId, senderType);
   }
@@ -82,7 +82,7 @@ export class ChatService {
   async getMessages(
     roomId: string,
     userId: string,
-    userType: "user" | "store",
+    userType: "consumer" | "store",
     query: PaginationRequestDto,
   ): Promise<MessageListResponseDto> {
     return await this.chatMessageListService.getMessages(roomId, userId, userType, query);

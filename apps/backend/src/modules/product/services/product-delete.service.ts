@@ -13,7 +13,9 @@ export class ProductDeleteService {
    */
   async deleteProductForSeller(id: string, user: JwtVerifiedPayload) {
     // 상품 소유권 확인
-    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, { userId: true });
+    await ProductOwnershipUtil.verifyProductOwnership(this.prisma, id, user.sub, {
+      sellerId: true,
+    });
 
     try {
       await this.prisma.product.delete({

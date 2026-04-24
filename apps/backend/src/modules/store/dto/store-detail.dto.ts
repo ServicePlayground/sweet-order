@@ -21,7 +21,7 @@ export class StoreResponseDto extends StoreAddressDto {
 
   @ApiProperty({
     description: "사용자 ID",
-    example: USER_SWAGGER_EXAMPLES.USER_DATA.id,
+    example: USER_SWAGGER_EXAMPLES.CONSUMER_DATA.id,
   })
   userId: string;
 

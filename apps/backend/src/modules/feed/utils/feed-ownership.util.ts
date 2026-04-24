@@ -22,11 +22,11 @@ export class FeedOwnershipUtil {
     prisma: PrismaService,
     feedId: string,
     userId: string,
-    includeStoreSelect?: { userId: boolean; logoImageUrl?: boolean },
+    includeStoreSelect?: { sellerId: boolean; logoImageUrl?: boolean },
     expectedStoreId?: string,
   ): Promise<
     StoreFeed & {
-      store: { userId: string; logoImageUrl?: string | null };
+      store: { sellerId: string; logoImageUrl?: string | null };
     }
   > {
     const feed = await prisma.storeFeed.findFirst({
@@ -37,7 +37,7 @@ export class FeedOwnershipUtil {
       include: {
         store: {
           select: {
-            userId: true,
+            sellerId: true,
             ...(includeStoreSelect?.logoImageUrl && { logoImageUrl: true }),
           },
         },
@@ -49,15 +49,15 @@ export class FeedOwnershipUtil {
       throw new NotFoundException(FEED_ERROR_MESSAGES.FEED_NOT_FOUND);
     }
 
-    if (feed.store.userId !== userId) {
+    if (feed.store.sellerId !== userId) {
       LoggerUtil.log(
-        `피드 소유권 확인 실패: 소유권 없음 - feedId: ${feedId}, userId: ${userId}, storeUserId: ${feed.store.userId}`,
+        `피드 소유권 확인 실패: 소유권 없음 - feedId: ${feedId}, userId: ${userId}, storeSellerId: ${feed.store.sellerId}`,
       );
       throw new ForbiddenException(FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
     }
 
     return feed as StoreFeed & {
-      store: { userId: string; logoImageUrl?: string | null };
+      store: { sellerId: string; logoImageUrl?: string | null };
     };
   }
 
@@ -82,7 +82,7 @@ export class FeedOwnershipUtil {
       },
       select: {
         id: true,
-        userId: true,
+        sellerId: true,
       },
     });
 
@@ -93,9 +93,9 @@ export class FeedOwnershipUtil {
       throw new NotFoundException(errorMessage || FEED_ERROR_MESSAGES.STORE_NOT_FOUND);
     }
 
-    if (store.userId !== userId) {
+    if (store.sellerId !== userId) {
       LoggerUtil.log(
-        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeUserId: ${store.userId}`,
+        `스토어 소유권 확인 실패: 소유권 없음 - storeId: ${storeId}, userId: ${userId}, storeSellerId: ${store.sellerId}`,
       );
       throw new ForbiddenException(errorMessage || FEED_ERROR_MESSAGES.FEED_FORBIDDEN);
     }

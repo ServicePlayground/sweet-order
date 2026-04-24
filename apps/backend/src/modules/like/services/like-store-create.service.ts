@@ -38,7 +38,7 @@ export class LikeStoreCreateService {
           // 좋아요 추가 (중복 생성은 DB unique 제약으로 방지)
           await tx.storeLike.create({
             data: {
-              userId,
+              consumerId: userId,
               storeId,
             },
           });

@@ -460,7 +460,7 @@ export class StoreListService {
   }
 
   private buildStoreWhereForSeller(userId: string, search?: string): Prisma.StoreWhereInput {
-    const where: Prisma.StoreWhereInput = { userId };
+    const where: Prisma.StoreWhereInput = { sellerId: userId };
     if (search?.trim()) {
       const keyword = search.trim();
       where.name = { contains: keyword, mode: "insensitive" };
@@ -606,7 +606,7 @@ export class StoreListService {
   private async getLikedStoreIds(userId: string, storeIds: string[]): Promise<Set<string>> {
     if (storeIds.length === 0) return new Set<string>();
     const likes = await this.prisma.storeLike.findMany({
-      where: { userId, storeId: { in: storeIds } },
+      where: { consumerId: userId, storeId: { in: storeIds } },
       select: { storeId: true },
     });
     return new Set(likes.map((l) => l.storeId));

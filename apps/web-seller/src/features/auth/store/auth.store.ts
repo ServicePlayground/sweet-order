@@ -4,7 +4,6 @@ import {
   setAccessToken as setTokenToStorage,
   removeAccessToken,
 } from "@/apps/web-seller/common/utils/token.util";
-import { getReturnUrlFromParams } from "@/apps/web-seller/common/utils/returnUrl.util";
 
 interface AuthState {
   // 상태
@@ -13,7 +12,7 @@ interface AuthState {
 
   // 액션
   setInitialized: (value: boolean) => void;
-  login: ({ navigate, accessToken }: { navigate?: any; accessToken?: string }) => void;
+  login: (args: { navigate?: any; accessToken?: string }) => void;
   logout: (navigate?: any) => void;
 }
 
@@ -29,31 +28,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
     }),
 
   // 로그인 (localStorage에만 토큰 저장)
-  login: ({ navigate, accessToken }: { navigate?: any; accessToken?: string }) => {
+  login: ({ navigate, accessToken }) => {
     set({ isAuthenticated: true, isInitialized: true });
     if (accessToken) {
       setTokenToStorage(accessToken);
     }
 
-    // returnUrl이나 state 파라미터가 있으면 해당 페이지로 이동, 없으면 루트로 이동
     if (navigate && typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      const returnUrl = getReturnUrlFromParams(searchParams);
-
-      if (returnUrl) {
-        const decodedUrl = decodeURIComponent(returnUrl);
-        // 전체 URL인 경우 pathname만 추출
-        try {
-          const url = new URL(decodedUrl);
-          navigate(url.pathname + url.search);
-        } catch {
-          // 상대 경로인 경우 그대로 사용
-          navigate(decodedUrl);
-        }
-      } else {
-        // returnUrl이 없으면 루트 페이지로 이동
-        navigate(ROUTES.ROOT);
-      }
+      navigate(ROUTES.ROOT);
     }
   },
 

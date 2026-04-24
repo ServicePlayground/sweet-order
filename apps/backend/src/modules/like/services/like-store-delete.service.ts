@@ -38,8 +38,8 @@ export class LikeStoreDeleteService {
           // 좋아요 삭제
           await tx.storeLike.delete({
             where: {
-              userId_storeId: {
-                userId,
+              consumerId_storeId: {
+                consumerId: userId,
                 storeId,
               },
             },

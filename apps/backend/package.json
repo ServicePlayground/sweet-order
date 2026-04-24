@@ -8,6 +8,7 @@
     "build:production": "NODE_ENV=production nest build",
     "postinstall": "prisma generate --schema ./src/infra/database/prisma/schema.prisma",
     "db:reset:dev": "dotenv -e ./.env.development -- prisma migrate reset --force --schema ./src/infra/database/prisma/schema.prisma",
+    "db:reset:staging": "dotenv -e ./.env.staging -- prisma migrate reset --force --schema ./src/infra/database/prisma/schema.prisma",
     "db:migrate:dev": "dotenv -e ./.env.development -- prisma migrate dev --schema ./src/infra/database/prisma/schema.prisma",
     "db:migrate:status": "dotenv -e ./.env.development -- prisma migrate status --schema ./src/infra/database/prisma/schema.prisma",
     "db:migrate:deploy": "prisma migrate deploy --schema ./src/infra/database/prisma/schema.prisma",

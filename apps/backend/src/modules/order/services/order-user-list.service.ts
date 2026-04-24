@@ -48,7 +48,7 @@ export class OrderUserListService {
     } = query;
 
     const where: Prisma.OrderWhereInput = {
-      userId,
+      consumerId: userId,
     };
 
     mergeOrderPickupDateConditions(where, {

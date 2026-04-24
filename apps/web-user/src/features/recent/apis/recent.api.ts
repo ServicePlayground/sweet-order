@@ -1,4 +1,4 @@
-import { userClient } from "@/apps/web-user/common/config/axios.config";
+import { consumerClient } from "@/apps/web-user/common/config/axios.config";
 import { PaginationMeta } from "@/apps/web-user/common/types/api.type";
 import { Product } from "@/apps/web-user/features/product/types/product.type";
 
@@ -13,7 +13,7 @@ export const recentApi = {
     limit: number;
     sortBy: string;
   }): Promise<RecentProductsResponse> => {
-    const response = await userClient.get("/mypage/recent/products", { params });
+    const response = await consumerClient.get("/mypage/recent/products", { params });
     return response.data.data;
   },
 };

@@ -1,47 +1,62 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
+import { useAlertStore } from "@/apps/web-user/common/store/alert.store";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_DOMAIN;
 
 const axiosConfig = {
-  baseURL: `${API_BASE_URL}/v1/user`,
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
 };
 
-// user API 클라이언트
-export const userClient = axios.create({ ...axiosConfig, baseURL: `${API_BASE_URL}/v1/user` });
+export const consumerClient = axios.create({
+  ...axiosConfig,
+  baseURL: `${API_BASE_URL}/v1/consumer`,
+});
 
-// 요청 인터셉터 - Authorization 헤더 추가
-userClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Zustand store에서 직접 토큰 조회
-    const token = useAuthStore.getState().accessToken;
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+// 공통 요청 인터셉터 - Authorization 헤더 추가
+const requestInterceptor = (config: InternalAxiosRequestConfig) => {
+  // 기본 Content-Type(application/json)이 FormData 요청에 남으면 boundary 없이 전송되어 업로드가 실패함
+  if (config.data instanceof FormData && config.headers) {
+    const headers = config.headers as InternalAxiosRequestConfig["headers"] & {
+      delete?: (name: string) => void;
+    };
+    if (typeof headers.delete === "function") {
+      headers.delete("Content-Type");
+    } else {
+      delete (headers as Record<string, unknown>)["Content-Type"];
+      delete (headers as Record<string, unknown>)["content-type"];
     }
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  },
-);
+  }
 
-// 응답 인터셉터
-userClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
-  async (error: AxiosError<any>) => {
-    const status = error.response?.status;
-    const message = error.response?.data?.data?.message;
+  const token = useAuthStore.getState().accessToken;
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+};
 
-    // 401 && ACCESS_TOKEN_INVALID 오류 처리
-    if (status === 401 && message?.includes("ACCESS_TOKEN_INVALID")) {
-      // Zustand store에서 토큰 제거
-      useAuthStore.getState().clearAccessToken();
-    }
+// 공통 응답 인터셉터 - 401 에러 처리
+const responseErrorHandler = async (error: AxiosError<{ data?: { message?: string } }>) => {
+  const status = error.response?.status;
+  const message = error.response?.data?.data?.message;
 
-    return Promise.reject(error);
-  },
+  // 401 && ACCESS_TOKEN_INVALID 오류 처리
+  if (status === 401 && message?.includes("ACCESS_TOKEN_INVALID")) {
+    useAuthStore.getState().clearAccessToken();
+    useAlertStore.getState().showAlert({
+      type: "error",
+      title: "로그인",
+      message: "로그인한 뒤 이용해 주세요.",
+    });
+    return Promise.resolve();
+  }
+
+  return Promise.reject(error);
+};
+
+consumerClient.interceptors.request.use(requestInterceptor, (error) => Promise.reject(error));
+consumerClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  responseErrorHandler,
 );
