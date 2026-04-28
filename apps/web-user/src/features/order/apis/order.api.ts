@@ -1,5 +1,6 @@
 import { consumerClient } from "@/apps/web-user/common/config/axios.config";
 import {
+  CreateOrderItemRequest,
   CreateOrderRequest,
   MyOrdersResponse,
   OrderResponse,
@@ -35,5 +36,32 @@ export const orderApi = {
   // 입금 전 예약 취소 (RESERVATION_REQUESTED, PAYMENT_PENDING 상태)
   cancelBeforePayment: async (orderId: string, reason: string): Promise<void> => {
     await consumerClient.patch(`/orders/${orderId}/cancel-before-payment`, { reason });
+  },
+  // 픽업 날짜 변경 (RESERVATION_REQUESTED 상태에서만)
+  updateReservationPickupDate: async (orderId: string, pickupDate: string): Promise<void> => {
+    await consumerClient.patch(`/orders/${orderId}/reservation/pickup-date`, { pickupDate });
+  },
+  // 주문 항목 옵션 변경 (RESERVATION_REQUESTED 상태에서만)
+  updateReservationOrderItems: async (
+    orderId: string,
+    body: {
+      items: CreateOrderItemRequest[];
+      totalQuantity: number;
+      totalPrice: number;
+    },
+  ): Promise<void> => {
+    await consumerClient.patch(`/orders/${orderId}/reservation/items`, body);
+  },
+  // 결제 후 환불 요청 (PAYMENT_COMPLETED, CONFIRMED, PICKUP_PENDING 상태)
+  requestRefund: async (
+    orderId: string,
+    body: {
+      reason: string;
+      bankName: string;
+      bankAccountNumber: string;
+      accountHolderName: string;
+    },
+  ): Promise<void> => {
+    await consumerClient.patch(`/orders/${orderId}/refund-request`, body);
   },
 };

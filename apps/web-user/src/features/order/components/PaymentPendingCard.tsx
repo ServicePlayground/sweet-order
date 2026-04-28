@@ -189,9 +189,10 @@ export function PaymentPendingCard({ order }: { order: OrderResponse }) {
       {showSuccessToast &&
         createPortal(
           <Toast
-            message="입금완료 처리되었습니다"
+            message="입금 확인 후 예약이 확정됩니다."
             iconName="checkCircle"
             iconClassName="text-green-400"
+            variant="row"
             duration={3000}
             onClose={handleCloseSuccessToast}
           />,

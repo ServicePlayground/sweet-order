@@ -20,9 +20,10 @@ function formatItemName(order: OrderResponse, item: OrderItemResponse) {
 interface ReservationItemCardProps {
   order: OrderResponse;
   item: OrderItemResponse;
+  onChangeOptions?: (item: OrderItemResponse) => void;
 }
 
-export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
+export function ReservationItemCard({ order, item, onChangeOptions }: ReservationItemCardProps) {
   const [expanded, setExpanded] = useState(false);
   const thumbnailUrl = item.imageUrls?.[0] || order.productImages?.[0];
   const isCancelled =
@@ -67,7 +68,11 @@ export function ReservationItemCard({ order, item }: ReservationItemCardProps) {
           if (status === OrderStatus.RESERVATION_REQUESTED) {
             return (
               <div className="flex mt-3">
-                <button type="button" className={buttonClass}>
+                <button
+                  type="button"
+                  onClick={() => onChangeOptions?.(item)}
+                  className={buttonClass}
+                >
                   옵션변경
                 </button>
               </div>

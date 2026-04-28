@@ -83,11 +83,11 @@ export const RadioGroup = <T extends string | number = string>({
               />
               <span
                 aria-hidden="true"
-                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                  isSelected ? "border-primary" : "border-gray-300"
+                className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                  isSelected ? "border-primary bg-primary" : "border-gray-300 bg-white"
                 }`}
               >
-                {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
               </span>
               <span className="text-sm text-gray-900">{option.label}</span>
             </label>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
 import { PaymentConfirmBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/PaymentConfirmBottomSheet";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
@@ -27,6 +28,7 @@ export function PaymentPendingActions({ order }: PaymentPendingActionsProps) {
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
   const [isAppOnlyModalOpen, setIsAppOnlyModalOpen] = useState(false);
   const [depositorName, setDepositorName] = useState("");
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   return (
     <>
@@ -76,7 +78,10 @@ export function PaymentPendingActions({ order }: PaymentPendingActionsProps) {
         cancelVariant="primary"
         onConfirm={() => setIsConfirmOpen(false)}
         onCancel={() => {
-          paymentComplete({ orderId: order.id, depositorName });
+          paymentComplete(
+            { orderId: order.id, depositorName },
+            { onSuccess: () => setShowSuccessToast(true) },
+          );
           setIsConfirmOpen(false);
           setIsPaymentSheetOpen(false);
         }}
@@ -105,6 +110,17 @@ export function PaymentPendingActions({ order }: PaymentPendingActionsProps) {
         bankName={order.storeBankName}
         amount={order.totalPrice}
       />
+
+      {showSuccessToast && (
+        <Toast
+          message="입금 확인 후 예약이 확정됩니다."
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="row"
+          duration={3000}
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
     </>
   );
 }

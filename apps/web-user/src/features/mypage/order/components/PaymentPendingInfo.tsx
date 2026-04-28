@@ -28,6 +28,7 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
   const [isAppOnlyModalOpen, setIsAppOnlyModalOpen] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [depositorName, setDepositorName] = useState("");
 
   const handleCopyAccountNumber = () => {
@@ -36,6 +37,7 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
   };
 
   const handleCloseCopyToast = useCallback(() => setShowCopyToast(false), []);
+  const handleCloseSuccessToast = useCallback(() => setShowSuccessToast(false), []);
 
   return (
     <div className="mt-2.5 -mx-4">
@@ -130,7 +132,10 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
         cancelVariant="primary"
         onConfirm={() => setIsConfirmOpen(false)}
         onCancel={() => {
-          paymentComplete({ orderId: order.id, depositorName });
+          paymentComplete(
+            { orderId: order.id, depositorName },
+            { onSuccess: () => setShowSuccessToast(true) },
+          );
           setIsConfirmOpen(false);
           setIsPaymentSheetOpen(false);
         }}
@@ -167,6 +172,17 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
           iconClassName="text-green-400"
           variant="row"
           onClose={handleCloseCopyToast}
+        />
+      )}
+
+      {showSuccessToast && (
+        <Toast
+          message="입금 확인 후 예약이 확정됩니다."
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="row"
+          duration={3000}
+          onClose={handleCloseSuccessToast}
         />
       )}
     </div>

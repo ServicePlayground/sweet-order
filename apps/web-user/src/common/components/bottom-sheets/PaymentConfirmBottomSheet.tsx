@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/apps/web-user/common/components/icons";
+import { useMypageProfile } from "@/apps/web-user/features/mypage/hooks/queries/useMypageProfile";
 import { BottomSheet } from "./BottomSheet";
 
 interface PaymentConfirmBottomSheetProps {
@@ -17,7 +18,15 @@ export function PaymentConfirmBottomSheet({
   amount,
   onConfirm,
 }: PaymentConfirmBottomSheetProps) {
+  const { data: profile } = useMypageProfile();
   const [depositorName, setDepositorName] = useState("");
+
+  // 시트가 열릴 때 사용자 이름을 기본값으로 채워줌
+  useEffect(() => {
+    if (isOpen) {
+      setDepositorName(profile?.name ?? "");
+    }
+  }, [isOpen, profile?.name]);
 
   const handleClose = () => {
     setDepositorName("");

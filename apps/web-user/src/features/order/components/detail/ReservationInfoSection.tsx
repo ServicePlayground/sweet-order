@@ -29,12 +29,14 @@ interface ReservationInfoSectionProps {
   order: OrderResponse;
   onInquiryClick: () => void;
   onMapClick: () => void;
+  onChangePickupDate: () => void;
 }
 
 export function ReservationInfoSection({
   order,
   onInquiryClick,
   onMapClick,
+  onChangePickupDate,
 }: ReservationInfoSectionProps) {
   const hideActions = HIDDEN_STATUSES.includes(order.orderStatus);
   const showChangePickup = order.orderStatus === OrderStatus.RESERVATION_REQUESTED;
@@ -80,7 +82,9 @@ export function ReservationInfoSection({
           <OrderActionButtons
             buttons={[
               { label: "스토어 문의", icon: "reviewQna", onClick: onInquiryClick },
-              ...(showChangePickup ? [{ label: "픽업 날짜 변경" }] : []),
+              ...(showChangePickup
+                ? [{ label: "픽업 날짜 변경", onClick: onChangePickupDate }]
+                : []),
             ]}
           />
         </div>

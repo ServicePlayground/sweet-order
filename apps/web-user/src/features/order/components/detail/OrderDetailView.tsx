@@ -3,17 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  OrderItemResponse,
   OrderResponse,
   OrderStatus,
   OrderMyReviewUiStatus,
 } from "@/apps/web-user/features/order/types/order.type";
 import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
 import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { ReservationInfoSection } from "./ReservationInfoSection";
 import { PaymentInfoSection } from "./PaymentInfoSection";
 import { ReservationItemsSection } from "./ReservationItemsSection";
 import { NoticeSection } from "./NoticeSection";
 import { PaymentPendingCountdownHeader } from "./PaymentPendingCountdownHeader";
+import { PickupDateChangeBottomSheet } from "./PickupDateChangeBottomSheet";
+import { OptionChangeBottomSheet } from "./OptionChangeBottomSheet";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
@@ -43,6 +47,10 @@ interface OrderDetailViewProps {
 export function OrderDetailView({ order }: OrderDetailViewProps) {
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
   const [isInquirySheetOpen, setIsInquirySheetOpen] = useState(false);
+  const [isPickupDateSheetOpen, setIsPickupDateSheetOpen] = useState(false);
+  const [showPickupDateUpdatedToast, setShowPickupDateUpdatedToast] = useState(false);
+  const [optionEditTargetItem, setOptionEditTargetItem] = useState<OrderItemResponse | null>(null);
+  const [showOptionUpdatedToast, setShowOptionUpdatedToast] = useState(false);
 
   const isPaymentPending = order.orderStatus === OrderStatus.PAYMENT_PENDING;
   const canWriteReview = order.myReviewUiStatus === OrderMyReviewUiStatus.WRITABLE;
@@ -84,6 +92,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
               order={order}
               onInquiryClick={() => setIsInquirySheetOpen(true)}
               onMapClick={() => setIsMapSheetOpen(true)}
+              onChangePickupDate={() => setIsPickupDateSheetOpen(true)}
             />
           </div>
         ) : (
@@ -92,12 +101,16 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
               order={order}
               onInquiryClick={() => setIsInquirySheetOpen(true)}
               onMapClick={() => setIsMapSheetOpen(true)}
+              onChangePickupDate={() => setIsPickupDateSheetOpen(true)}
             />
             <PaymentInfoSection order={order} />
           </div>
         )}
 
-        <ReservationItemsSection order={order} />
+        <ReservationItemsSection
+          order={order}
+          onChangeOptions={(item) => setOptionEditTargetItem(item)}
+        />
         <NoticeSection />
 
         <NavigationBottomSheet
@@ -113,6 +126,20 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
           kakaoChannelUrl={null}
           instagramUrl={null}
         />
+        <PickupDateChangeBottomSheet
+          isOpen={isPickupDateSheetOpen}
+          onClose={() => setIsPickupDateSheetOpen(false)}
+          orderId={order.id}
+          initialPickupDate={order.pickupDate}
+          onSuccess={() => setShowPickupDateUpdatedToast(true)}
+        />
+        <OptionChangeBottomSheet
+          isOpen={optionEditTargetItem !== null}
+          onClose={() => setOptionEditTargetItem(null)}
+          order={order}
+          item={optionEditTargetItem}
+          onSuccess={() => setShowOptionUpdatedToast(true)}
+        />
       </div>
 
       {canWriteReview && (
@@ -121,6 +148,30 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
             <Button variant="outline">후기 작성</Button>
           </Link>
         </div>
+      )}
+
+      {showPickupDateUpdatedToast && (
+        <Toast
+          message="날짜 변경 완료"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="column"
+          position="center"
+          duration={2000}
+          onClose={() => setShowPickupDateUpdatedToast(false)}
+        />
+      )}
+
+      {showOptionUpdatedToast && (
+        <Toast
+          message="옵션 변경 완료"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="column"
+          position="center"
+          duration={2000}
+          onClose={() => setShowOptionUpdatedToast(false)}
+        />
       )}
     </div>
   );

@@ -6,10 +6,19 @@ import { useRouter } from "next/navigation";
 import { OrderResponse, OrderStatus } from "@/apps/web-user/features/order/types/order.type";
 import { useCancelBeforePayment } from "@/apps/web-user/features/order/hooks/mutations/useCancelBeforePayment";
 import { RadioGroup, RadioOption } from "@/apps/web-user/common/components/inputs/RadioGroup";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import { usePendingToastStore } from "@/apps/web-user/common/store/pending-toast.store";
+import { useCancelFlowStore } from "@/apps/web-user/common/store/cancel-flow.store";
+import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
 const PRE_PAYMENT_CANCELLABLE_STATUSES: OrderStatus[] = [
   OrderStatus.RESERVATION_REQUESTED,
   OrderStatus.PAYMENT_PENDING,
+];
+
+const POST_PAYMENT_CANCELLABLE_STATUSES: OrderStatus[] = [
+  OrderStatus.PAYMENT_COMPLETED,
+  OrderStatus.CONFIRMED,
 ];
 
 type ReasonOption = "CHANGE_OF_MIND" | "ORDER_MISTAKE" | "OTHER";
@@ -31,13 +40,22 @@ interface OrderCancelViewProps {
 export function OrderCancelView({ order }: OrderCancelViewProps) {
   const router = useRouter();
   const { mutate: cancelOrder, isPending } = useCancelBeforePayment();
+  const setPendingToast = usePendingToastStore((s) => s.setPendingToast);
+  const setCancelReason = useCancelFlowStore((s) => s.setReason);
 
   const [selectedReason, setSelectedReason] = useState<ReasonOption | null>(null);
   const [otherReasonText, setOtherReasonText] = useState("");
+  // 취소 성공 직후 invalidate로 인한 refetch가 navigation보다 먼저 끝나
+  // 가드 텍스트가 깜빡이는 걸 방지하는 플래그
+  const [isLeaving, setIsLeaving] = useState(false);
 
-  const isPrePaymentCancellable = PRE_PAYMENT_CANCELLABLE_STATUSES.includes(order.orderStatus);
+  const isPrePayment = PRE_PAYMENT_CANCELLABLE_STATUSES.includes(order.orderStatus);
+  const isPostPayment = POST_PAYMENT_CANCELLABLE_STATUSES.includes(order.orderStatus);
+  const isCancellable = isPrePayment || isPostPayment;
 
-  if (!isPrePaymentCancellable) {
+  if (isLeaving) return null;
+
+  if (!isCancellable) {
     return (
       <div className="px-5 py-10 text-center">
         <p className="text-sm text-gray-500">
@@ -62,11 +80,28 @@ export function OrderCancelView({ order }: OrderCancelViewProps) {
   const handleSubmit = () => {
     if (!isValid || isPending) return;
     const reason = buildReason();
+
+    // 결제 후: 사유를 store에 저장하고 환불 계좌 입력 페이지(2/2)로 이동
+    if (isPostPayment) {
+      setCancelReason(reason);
+      router.push(PATHS.ORDER.CANCEL_REFUND(order.id));
+      return;
+    }
+
+    // 결제 전: cancel-before-payment API 즉시 호출
     cancelOrder(
       { orderId: order.id, reason },
       {
         onSuccess: () => {
-          router.back();
+          setIsLeaving(true);
+          setPendingToast({
+            message: "취소완료",
+            iconName: "checkCircle",
+            iconClassName: "text-green-400",
+            variant: "column",
+            position: "center",
+          });
+          router.replace(PATHS.ORDER.DETAIL(order.id));
         },
       },
     );
@@ -166,7 +201,7 @@ export function OrderCancelView({ order }: OrderCancelViewProps) {
               onChange={(e) => setOtherReasonText(e.target.value)}
               placeholder="내용을 입력해주세요."
               maxLength={2000}
-              className="mt-3 w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary"
+              className="mt-1.5 w-full px-3 py-2.5 border border-gray-200 rounded-md text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-primary"
             />
           )}
         </section>
@@ -181,10 +216,19 @@ export function OrderCancelView({ order }: OrderCancelViewProps) {
           className={`w-full h-[52px] rounded-xl text-base font-bold border-none ${
             isValid && !isPending
               ? "bg-primary text-white cursor-pointer"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-gray-200 text-gray-300 cursor-not-allowed"
           }`}
         >
-          {isPending ? "취소 중..." : "예약취소"}
+          {isPostPayment ? (
+            <span className="inline-flex items-center justify-center gap-1">
+              환불 계좌 입력
+              <Icon name="arrow" width={20} height={20} className="rotate-90" />
+            </span>
+          ) : isPending ? (
+            "취소 중..."
+          ) : (
+            "예약취소"
+          )}
         </button>
       </div>
     </div>
