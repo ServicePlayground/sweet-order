@@ -4,7 +4,6 @@ import {
   SellerVerificationStatus,
   StoreBankName,
 } from "./generated/client";
-import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 
 const prisma = new PrismaClient();
 
@@ -59,6 +58,7 @@ const SEED_STORES = {
     BANK_ACCOUNT_NUMBER: "1103021234567",
     BANK_NAME: StoreBankName.KB_KOOKMIN,
     ACCOUNT_HOLDER_NAME: "홍길동",
+    PHONE_NUMBER: "010-1234-5678",
     LIKE_COUNT: 15,
     CREATED_AT: new Date("2024-01-15T10:30:00Z"),
     UPDATED_AT: new Date("2024-01-15T10:30:00Z"),
@@ -83,10 +83,18 @@ const SEED_STORES = {
     BANK_ACCOUNT_NUMBER: "1002-345-678901",
     BANK_NAME: StoreBankName.SHINHAN,
     ACCOUNT_HOLDER_NAME: "홍길동",
+    PHONE_NUMBER: "010-9876-5432",
     LIKE_COUNT: 8,
     CREATED_AT: new Date("2024-01-16T10:30:00Z"),
     UPDATED_AT: new Date("2024-01-16T10:30:00Z"),
   },
+};
+
+const SEED_STORE_REFUND_CANCELLATION_POLICY = {
+  rules: [
+    { daysBeforePickup: 7, refundDescription: "결제액의 50% 환불" },
+    { daysBeforePickup: 3, refundDescription: "결제액의 30% 환불" },
+  ],
 };
 
 const SEED_PRODUCT_BASE = {
@@ -302,6 +310,7 @@ async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>[
         name: SEED_STORES.STORE1.NAME,
         description: SEED_STORES.STORE1.DESCRIPTION,
         logoImageUrl: SEED_STORES.STORE1.LOGO_IMAGE_URL,
+        phoneNumber: SEED_STORES.STORE1.PHONE_NUMBER,
         address: SEED_STORES.STORE1.ADDRESS,
         roadAddress: SEED_STORES.STORE1.ROAD_ADDRESS,
         detailAddress: SEED_STORES.STORE1.DETAIL_ADDRESS,
@@ -324,7 +333,7 @@ async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>[
         standardOpenTime: "00:00",
         standardCloseTime: "00:00",
         businessCalendarOverrides: [],
-        refundCancellationPolicy: STORE_SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
+        refundCancellationPolicy: SEED_STORE_REFUND_CANCELLATION_POLICY,
         createdAt: SEED_STORES.STORE1.CREATED_AT,
         updatedAt: SEED_STORES.STORE1.UPDATED_AT,
       },
@@ -350,6 +359,7 @@ async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>[
         name: SEED_STORES.STORE2.NAME,
         description: SEED_STORES.STORE2.DESCRIPTION,
         logoImageUrl: SEED_STORES.STORE2.LOGO_IMAGE_URL,
+        phoneNumber: SEED_STORES.STORE2.PHONE_NUMBER,
         address: SEED_STORES.STORE2.ADDRESS,
         roadAddress: SEED_STORES.STORE2.ROAD_ADDRESS,
         detailAddress: SEED_STORES.STORE2.DETAIL_ADDRESS,
@@ -371,7 +381,7 @@ async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>[
         standardOpenTime: "00:00",
         standardCloseTime: "00:00",
         businessCalendarOverrides: [],
-        refundCancellationPolicy: STORE_SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
+        refundCancellationPolicy: SEED_STORE_REFUND_CANCELLATION_POLICY,
         createdAt: SEED_STORES.STORE2.CREATED_AT,
         updatedAt: SEED_STORES.STORE2.UPDATED_AT,
       },
