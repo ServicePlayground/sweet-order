@@ -23,10 +23,7 @@ const POST_PAYMENT_CANCELLABLE_STATUSES: OrderStatus[] = [
   OrderStatus.CONFIRMED,
 ];
 
-export function ReservationItemsSection({
-  order,
-  onChangeOptions,
-}: ReservationItemsSectionProps) {
+export function ReservationItemsSection({ order, onChangeOptions }: ReservationItemsSectionProps) {
   const isPrePaymentCancellable = PRE_PAYMENT_CANCELLABLE_STATUSES.includes(order.orderStatus);
   const isPostPaymentCancellable = POST_PAYMENT_CANCELLABLE_STATUSES.includes(order.orderStatus);
   const canCancel = isPrePaymentCancellable || isPostPaymentCancellable;

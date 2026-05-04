@@ -1,4 +1,7 @@
-import type { RefundCancellationPolicyDto, RefundRuleItemDto } from "@/apps/web-seller/features/store/types/store.dto";
+import type {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@/apps/web-seller/features/store/types/store.dto";
 
 function emptyPolicy(): RefundCancellationPolicyDto {
   return { rules: [{ daysBeforePickup: 0, refundDescription: "" }] };
@@ -22,7 +25,11 @@ function normalizeRuleItem(raw: unknown): RefundRuleItemDto | null {
 
 /** API 응답 → 폼용 (`rules` 또는 단일 필드 레거시) */
 export function normalizeRefundPolicyFromApi(
-  raw: RefundCancellationPolicyDto | (Record<string, unknown> & { rules?: unknown }) | undefined | null,
+  raw:
+    | RefundCancellationPolicyDto
+    | (Record<string, unknown> & { rules?: unknown })
+    | undefined
+    | null,
 ): RefundCancellationPolicyDto {
   if (!raw) return emptyPolicy();
 

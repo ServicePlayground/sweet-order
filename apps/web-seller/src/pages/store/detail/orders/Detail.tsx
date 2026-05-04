@@ -82,7 +82,11 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <ContentLoading variant="page" message="주문 정보를 불러오는 중…" className="border-0 shadow-none" />
+      <ContentLoading
+        variant="page"
+        message="주문 정보를 불러오는 중…"
+        className="border-0 shadow-none"
+      />
     );
   }
 

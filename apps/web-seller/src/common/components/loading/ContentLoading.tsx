@@ -24,8 +24,7 @@ export function ContentLoading({
   className,
   showLogo = false,
 }: ContentLoadingProps) {
-  const size =
-    spinnerSize ?? (variant === "inline" ? "sm" : variant === "page" ? "lg" : "md");
+  const size = spinnerSize ?? (variant === "inline" ? "sm" : variant === "page" ? "lg" : "md");
 
   if (variant === "inline") {
     return (

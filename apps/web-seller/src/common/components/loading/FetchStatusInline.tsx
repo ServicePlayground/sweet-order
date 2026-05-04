@@ -7,13 +7,13 @@ interface FetchStatusInlineProps {
 }
 
 /** 백그라운드 리페치 등 짧은 상태 표시 (헤더 옆 등) */
-export function FetchStatusInline({
-  message = "업데이트 중…",
-  className,
-}: FetchStatusInlineProps) {
+export function FetchStatusInline({ message = "업데이트 중…", className }: FetchStatusInlineProps) {
   return (
     <span
-      className={cn("inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500", className)}
+      className={cn(
+        "inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500",
+        className,
+      )}
       role="status"
       aria-live="polite"
     >

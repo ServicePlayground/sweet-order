@@ -149,7 +149,9 @@ export class StoreMapperUtil {
         businessCalendarStateFromStoreRow(store),
       );
 
-      const refundCancellationPolicy = refundCancellationPolicyFromDb(store.refundCancellationPolicy);
+      const refundCancellationPolicy = refundCancellationPolicyFromDb(
+        store.refundCancellationPolicy,
+      );
 
       return {
         id: store.id,

@@ -59,9 +59,7 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
     <div className="w-full">
       {label && (
         <div className={hint ? "mb-[10px]" : "mb-[10px]"}>
-          <label
-            className={`block text-sm font-bold text-gray-900 ${hint ? "pb-[6px]" : ""}`}
-          >
+          <label className={`block text-sm font-bold text-gray-900 ${hint ? "pb-[6px]" : ""}`}>
             {label}
           </label>
           {hint && <p className="text-xs text-gray-500">{hint}</p>}
@@ -73,9 +71,7 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({
         disabled={disabled}
         className="w-full h-[42px] px-3 flex items-center justify-between border border-gray-100 rounded-lg text-sm bg-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span className={value ? "text-gray-900" : "text-gray-400"}>
-          {value ?? placeholder}
-        </span>
+        <span className={value ? "text-gray-900" : "text-gray-400"}>{value ?? placeholder}</span>
         <Icon
           name={iconName}
           width={20}

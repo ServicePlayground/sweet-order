@@ -67,7 +67,9 @@ export function assertRefundCancellationPolicyOrThrow(dto: RefundCancellationPol
     const r = rules[i];
     const d = r.daysBeforePickup;
     if (d === undefined || !Number.isInteger(d) || d < 0 || d > 999) {
-      throw new BadRequestException(`${i + 1}번째 규칙: 픽업 며칠 전은 0~999 사이 정수로 입력해 주세요.`);
+      throw new BadRequestException(
+        `${i + 1}번째 규칙: 픽업 며칠 전은 0~999 사이 정수로 입력해 주세요.`,
+      );
     }
     const t = (r.refundDescription ?? "").trim();
     if (!t) {

@@ -164,7 +164,12 @@ export function KakaoAuthCallbackPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-100 px-4 py-12">
-      <ContentLoading variant="page" message="카카오 로그인 처리 중…" showLogo className="min-h-0 py-10" />
+      <ContentLoading
+        variant="page"
+        message="카카오 로그인 처리 중…"
+        showLogo
+        className="min-h-0 py-10"
+      />
     </div>
   );
 }

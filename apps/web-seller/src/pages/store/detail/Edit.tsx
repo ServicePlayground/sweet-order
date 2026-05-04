@@ -27,7 +27,12 @@ export const StoreDetailEditPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <ContentLoading variant="page" message="스토어 정보를 불러오는 중…" showLogo className="border-0 shadow-none" />
+      <ContentLoading
+        variant="page"
+        message="스토어 정보를 불러오는 중…"
+        showLogo
+        className="border-0 shadow-none"
+      />
     );
   }
 

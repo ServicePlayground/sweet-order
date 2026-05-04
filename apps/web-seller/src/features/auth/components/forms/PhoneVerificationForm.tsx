@@ -194,7 +194,10 @@ export default function PhoneVerificationForm({
               aria-label="인증번호"
               aria-invalid={!!verificationCodeError}
             />
-            <p className="text-right text-xs font-medium text-zinc-500 tabular-nums" aria-live="polite">
+            <p
+              className="text-right text-xs font-medium text-zinc-500 tabular-nums"
+              aria-live="polite"
+            >
               {formatCountdownMmSs(remainingSeconds)} 내 입력
             </p>
           </div>

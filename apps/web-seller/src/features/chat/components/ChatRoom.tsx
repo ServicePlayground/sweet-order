@@ -149,7 +149,10 @@ export const ChatRoom: React.FC = () => {
                 className="flex min-h-[100px] items-center justify-center py-4"
               >
                 {isFetchingNextPage ? (
-                  <InfiniteScrollLoading message="이전 메시지를 불러오는 중…" className="gap-2 py-4" />
+                  <InfiniteScrollLoading
+                    message="이전 메시지를 불러오는 중…"
+                    className="gap-2 py-4"
+                  />
                 ) : null}
               </div>
             )}

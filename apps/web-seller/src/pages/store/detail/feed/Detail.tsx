@@ -42,7 +42,11 @@ export const StoreDetailFeedDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <ContentLoading variant="page" message="피드를 불러오는 중…" className="border-0 shadow-none" />
+      <ContentLoading
+        variant="page"
+        message="피드를 불러오는 중…"
+        className="border-0 shadow-none"
+      />
     );
   }
 

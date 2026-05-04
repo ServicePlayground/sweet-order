@@ -6,10 +6,7 @@ import { useOrderDetail } from "@/apps/web-user/features/order/hooks/queries/use
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
 import { OrderCancelView } from "@/apps/web-user/features/order/components/cancel/OrderCancelView";
 
-const POST_PAYMENT_STATUSES: OrderStatus[] = [
-  OrderStatus.PAYMENT_COMPLETED,
-  OrderStatus.CONFIRMED,
-];
+const POST_PAYMENT_STATUSES: OrderStatus[] = [OrderStatus.PAYMENT_COMPLETED, OrderStatus.CONFIRMED];
 
 export default function OrderCancelPage() {
   const params = useParams<{ orderId: string }>();

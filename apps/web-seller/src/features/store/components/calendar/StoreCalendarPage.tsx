@@ -312,7 +312,11 @@ export const StoreCalendarPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">스토어 캘린더</h1>
-        <ContentLoading variant="page" message="스토어와 캘린더를 불러오는 중…" className="border-0 shadow-none" />
+        <ContentLoading
+          variant="page"
+          message="스토어와 캘린더를 불러오는 중…"
+          className="border-0 shadow-none"
+        />
       </div>
     );
   }
