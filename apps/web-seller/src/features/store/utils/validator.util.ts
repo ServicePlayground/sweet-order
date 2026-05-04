@@ -52,11 +52,10 @@ export const validateStoreDescription = (description: string | undefined): strin
 };
 
 /**
- * 스토어 연락처 유효성 검증
+ * 스토어 연락처 유효성 검증 (필수)
  */
 export const validateStorePhoneNumber = (value: string | undefined): string | null => {
-  if (!value) return null;
-  const trimmed = value.trim();
+  const trimmed = (value ?? "").trim();
   if (!trimmed) {
     return "스토어 연락처를 입력해주세요.";
   }

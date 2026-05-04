@@ -168,10 +168,12 @@ export const StoreCreationForm: React.FC<Props> = ({
                 )}
               </div>
               <div>
-                <Label>스토어 연락처</Label>
+                <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">
+                  스토어 연락처
+                </Label>
                 <Input
                   placeholder="010-1234-5678"
-                  value={form.phoneNumber || ""}
+                  value={form.phoneNumber}
                   onChange={handleChange("phoneNumber")}
                   className={errors.phoneNumber ? "border-destructive" : ""}
                 />

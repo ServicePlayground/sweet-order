@@ -63,7 +63,7 @@ export const StoreDetailEditPage: React.FC = () => {
     const request: UpdateStoreRequestDto = {
       name: data.name,
       description: data.description || "",
-      phoneNumber: data.phoneNumber?.trim() || undefined,
+      phoneNumber: data.phoneNumber.trim(),
       logoImageUrl: data.logoImageUrl || "",
       kakaoChannelId: data.kakaoChannelId?.trim() || "",
       instagramId: data.instagramId?.trim() || "",

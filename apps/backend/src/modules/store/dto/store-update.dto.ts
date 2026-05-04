@@ -42,12 +42,12 @@ export class UpdateStoreRequestDto extends StoreAddressDto {
   @IsValidStoreDescription()
   description?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: "스토어 연락처 (전화/휴대폰)",
     example: SWAGGER_EXAMPLES.PHONE_NUMBER,
   })
   @IsValidStorePhoneNumber()
-  phoneNumber?: string;
+  phoneNumber: string;
 
   @ApiPropertyOptional({
     description: "카카오채널 ID",

@@ -121,7 +121,7 @@ export interface CreateStoreRequestDto extends StoreAddressDto {
   onlineTradingCompanyDetail: OnlineTradingCompanyDetailRequestDto;
   name: string;
   description?: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   logoImageUrl?: string;
   kakaoChannelId?: string;
   instagramId?: string;
@@ -137,7 +137,7 @@ export interface CreateStoreResponseDto {
 export interface UpdateStoreRequestDto extends StoreAddressDto {
   name: string;
   description?: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   logoImageUrl?: string;
   kakaoChannelId?: string;
   instagramId?: string;

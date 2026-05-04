@@ -34,7 +34,7 @@ export class StoreUpdateService {
     const updateData: {
       logoImageUrl?: string;
       description?: string;
-      phoneNumber?: string;
+      phoneNumber: string;
       kakaoChannelId?: string;
       instagramId?: string;
       name: string;
@@ -59,6 +59,7 @@ export class StoreUpdateService {
       bankAccountNumber: updateStoreDto.bankAccountNumber.trim(),
       bankName: updateStoreDto.bankName,
       accountHolderName: updateStoreDto.accountHolderName.trim(),
+      phoneNumber: updateStoreDto.phoneNumber.trim(),
     };
 
     // 선택적 필드: 값이 제공된 경우에만 업데이트
@@ -67,9 +68,6 @@ export class StoreUpdateService {
     }
     if (updateStoreDto.description !== undefined) {
       updateData.description = updateStoreDto.description;
-    }
-    if (updateStoreDto.phoneNumber !== undefined) {
-      updateData.phoneNumber = updateStoreDto.phoneNumber.trim();
     }
     if (updateStoreDto.kakaoChannelId !== undefined) {
       updateData.kakaoChannelId = updateStoreDto.kakaoChannelId.trim();
