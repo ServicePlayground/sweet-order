@@ -10,6 +10,8 @@ import { Textarea } from "@/apps/web-seller/common/components/textareas/Textarea
 import { formatTime } from "@/apps/web-seller/common/utils/date.util";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
+import { InfiniteScrollLoading } from "@/apps/web-seller/common/components/loading/InfiniteScrollLoading";
 
 export const ChatRoom: React.FC = () => {
   const params = useParams();
@@ -133,9 +135,7 @@ export const ChatRoom: React.FC = () => {
       {/* 메시지 영역 */}
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-muted-foreground">메시지를 불러오는 중...</div>
-          </div>
+          <ContentLoading variant="section" message="메시지를 불러오는 중…" className="py-12" />
         ) : allChatMessageResponseDtos.length === 0 ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-muted-foreground">메시지가 없습니다.</div>
@@ -148,12 +148,9 @@ export const ChatRoom: React.FC = () => {
                 ref={loadMoreRef}
                 className="flex min-h-[100px] items-center justify-center py-4"
               >
-                {isFetchingNextPage && (
-                  <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                    <span>이전 메시지를 불러오는 중...</span>
-                  </div>
-                )}
+                {isFetchingNextPage ? (
+                  <InfiniteScrollLoading message="이전 메시지를 불러오는 중…" className="gap-2 py-4" />
+                ) : null}
               </div>
             )}
             {allChatMessageResponseDtos.map((message) => {

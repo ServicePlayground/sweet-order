@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { authApi } from "@/apps/web-seller/features/auth/apis/auth.api";
 import { useGoogleRegister } from "@/apps/web-seller/features/auth/hooks/mutations/useAuthMutation";
 import { useAuthStore } from "@/apps/web-seller/features/auth/store/auth.store";
@@ -10,6 +11,8 @@ import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { useAlertStore } from "@/apps/web-seller/common/store/alert.store";
 import getApiMessage from "@/apps/web-seller/common/utils/getApiMessage";
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-seller/features/auth/constants/auth.constant";
+import { AuthBrandedCard } from "@/apps/web-seller/common/components/layouts/AuthBrandedCard";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 /**
  * 구글 OAuth 리다이렉트 콜백 — `code`로 `/v1/seller/auth/google/login` 호출
@@ -115,51 +118,29 @@ export function GoogleAuthCallbackPage() {
 
   if (showPhoneVerification) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-          minHeight: "100vh",
-          padding: "40px 20px",
-          backgroundColor: "#fafafa",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "500px",
-            backgroundColor: "white",
-            padding: "40px",
-            borderRadius: "12px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h2
-            style={{
-              margin: "0 0 24px",
-              textAlign: "center",
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              lineHeight: 1.35,
-              letterSpacing: "-0.02em",
-              color: "#18181b",
-            }}
-          >
-            회원가입
-          </h2>
-          <div style={{ marginBottom: "24px" }}>
-            <label
-              htmlFor="google-auth-display-name"
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "#3f3f46",
-              }}
+      <AuthBrandedCard
+        title="회원가입"
+        description={
+          <>
+            판매자 센터 이용을 위해 <strong className="font-medium text-zinc-700">실명</strong>과{" "}
+            <strong className="font-medium text-zinc-700">휴대폰 인증</strong>이 필요합니다.
+          </>
+        }
+        footer={
+          <div className="flex justify-center">
+            <Link
+              to={ROUTES.AUTH.LOGIN}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-sm font-medium text-zinc-600 transition-colors hover:bg-white hover:text-zinc-900"
             >
+              <ArrowLeft className="size-4" aria-hidden />
+              로그인으로 돌아가기
+            </Link>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-8">
+          <div className="space-y-2">
+            <label htmlFor="google-auth-display-name" className="text-sm font-medium text-zinc-700">
               이름
             </label>
             <Input
@@ -172,6 +153,7 @@ export function GoogleAuthCallbackPage() {
               placeholder="실명을 입력해 주세요"
               maxLength={50}
               autoComplete="name"
+              className="rounded-lg"
               aria-invalid={!!nameError}
             />
           </div>
@@ -180,22 +162,13 @@ export function GoogleAuthCallbackPage() {
             purpose={PHONE_VERIFICATION_PURPOSE.GOOGLE_REGISTRATION}
           />
         </div>
-      </div>
+      </AuthBrandedCard>
     );
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        flexDirection: "column",
-        gap: "20px",
-      }}
-    >
-      <div>구글 로그인 처리 중...</div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-100 px-4 py-12">
+      <ContentLoading variant="page" message="구글 로그인 처리 중…" showLogo className="min-h-0 py-10" />
     </div>
   );
 }

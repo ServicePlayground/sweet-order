@@ -19,6 +19,7 @@ import { StoreHomeStoreProfile } from "@/apps/web-seller/features/home/component
 import { StoreBusinessCalendarPreview } from "@/apps/web-seller/features/store/components/calendar/StoreBusinessCalendarPreview";
 import { StoreHomeStatisticsSection } from "@/apps/web-seller/features/home/components/StoreHomeStatisticsSection";
 import { useStoreHomeDashboardQuery } from "@/apps/web-seller/features/home/hooks/queries/useStoreHomeDashboardQuery";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 import { feedContentToExcerpt } from "@/apps/web-seller/features/home/utils/feed-excerpt.util";
 import {
   HOME_CARD,
@@ -73,7 +74,7 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
           </CardHeader>
           <CardContent className={HOME_CARD_CONTENT_TABLE}>
             {isLoading ? (
-              <p className={cn("px-6 py-8", HOME_BODY_MUTED)}>불러오는 중…</p>
+              <ContentLoading variant="section" message="불러오는 중…" className="px-6 py-8" />
             ) : isError ? (
               <p className="px-6 py-8 text-sm text-destructive">목록을 불러오지 못했습니다.</p>
             ) : recentOrders.length === 0 ? (
@@ -145,7 +146,7 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
           </CardHeader>
           <CardContent className={HOME_CARD_CONTENT}>
             {isLoading ? (
-              <p className={HOME_BODY_MUTED}>불러오는 중…</p>
+              <ContentLoading variant="section" message="불러오는 중…" className="py-8" />
             ) : isError ? (
               <p className="text-sm text-destructive">불러오지 못했습니다.</p>
             ) : todayPickups.length === 0 ? (
@@ -182,7 +183,7 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
           </CardHeader>
           <CardContent className={HOME_CARD_CONTENT}>
             {isLoading ? (
-              <p className={HOME_BODY_MUTED}>불러오는 중…</p>
+              <ContentLoading variant="section" message="불러오는 중…" className="py-8" />
             ) : isError ? (
               <p className="text-sm text-destructive">불러오지 못했습니다.</p>
             ) : recentNotifications.length === 0 ? (
@@ -225,7 +226,7 @@ export const StoreHomeContent: React.FC<StoreHomeContentProps> = ({ storeId }) =
           </CardHeader>
           <CardContent className={HOME_CARD_CONTENT}>
             {isLoading ? (
-              <p className={HOME_BODY_MUTED}>불러오는 중…</p>
+              <ContentLoading variant="section" message="불러오는 중…" className="py-8" />
             ) : isError ? (
               <p className="text-sm text-destructive">불러오지 못했습니다.</p>
             ) : recentFeeds.length === 0 ? (

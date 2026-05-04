@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Loader2, User } from "lucide-react";
+import { User } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,6 +12,7 @@ import { useUpdateMypageProfile } from "@/apps/web-seller/features/mypage/hooks/
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/mutations/useUploadMutation";
 import { SELLER_VERIFICATION_STATUS_LABEL } from "@/apps/web-seller/features/mypage/constants/mypage.ui";
 import type { SellerMypageProfileResponseDto } from "@/apps/web-seller/features/mypage/types/mypage.dto";
+import { LoadingSpinner } from "@/apps/web-seller/common/components/loading/LoadingSpinner";
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -248,7 +249,7 @@ export const MypageProfileSection: React.FC<MypageProfileSectionProps> = ({ prof
             >
               {updateMutation.isPending ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <LoadingSpinner size="sm" className="mr-2" aria-hidden />
                   저장 중…
                 </>
               ) : (

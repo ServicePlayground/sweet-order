@@ -11,6 +11,7 @@ import { BaseButton as Button } from "@/apps/web-seller/common/components/button
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { RichTextEditor } from "@/apps/web-seller/common/components/editors/RichTextEditor";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 export const StoreDetailFeedDetailPage: React.FC = () => {
   const { storeId, feedId } = useParams<{ storeId: string; feedId: string }>();
@@ -41,9 +42,7 @@ export const StoreDetailFeedDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">로딩 중...</div>
-      </div>
+      <ContentLoading variant="page" message="피드를 불러오는 중…" className="border-0 shadow-none" />
     );
   }
 

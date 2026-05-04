@@ -9,6 +9,7 @@ import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui"
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { useUpdateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 export const StoreDetailEditPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -26,9 +27,7 @@ export const StoreDetailEditPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">로딩 중...</div>
-      </div>
+      <ContentLoading variant="page" message="스토어 정보를 불러오는 중…" showLogo className="border-0 shadow-none" />
     );
   }
 
