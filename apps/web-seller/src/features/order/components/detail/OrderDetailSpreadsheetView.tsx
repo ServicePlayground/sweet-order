@@ -116,10 +116,18 @@ export const OrderDetailSpreadsheetView: React.FC<OrderDetailSpreadsheetViewProp
               <SheetKvRow label="주문일시">
                 {new Date(order.createdAt).toLocaleString("ko-KR")}
               </SheetKvRow>
-              <SheetKvRow label="입금자명">{order.depositorName?.trim() || "—"}</SheetKvRow>
               <SheetKvRow label="총 수량">{`${order.totalQuantity}개`}</SheetKvRow>
               <SheetKvRow label="총 금액">
                 <span className="font-semibold text-primary">{`${order.totalPrice.toLocaleString()}원`}</span>
+              </SheetKvRow>
+
+              <SheetSectionRow>입금·예약자 연락</SheetSectionRow>
+              <SheetKvRow label="입금자명">{order.depositorName?.trim() || "—"}</SheetKvRow>
+              <SheetKvRow label="예약자명">
+                {order.reservationContactName?.trim() || "—"}
+              </SheetKvRow>
+              <SheetKvRow label="예약 연락처(휴대폰)">
+                {order.reservationPhone?.trim() || "—"}
               </SheetKvRow>
 
               <SheetSectionRow>픽업</SheetSectionRow>

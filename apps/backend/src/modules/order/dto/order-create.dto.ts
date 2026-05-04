@@ -10,10 +10,11 @@ import {
   Min,
   MaxLength,
 } from "class-validator";
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
 import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
 import { IsValidStoreName } from "@apps/backend/modules/store/decorators/validators.decorator";
+import { IsValidKoreanPhone } from "@apps/backend/common/decorators/validators.decorator";
 
 /**
  * 주문 항목 생성 요청 DTO
@@ -196,6 +197,36 @@ export class CreateOrderRequestDto extends PickupAddressDto {
   })
   @IsValidStoreName()
   storeName: string;
+
+  @ApiPropertyOptional({
+    description: "예약자명 (선택)",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.reservationContactName,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value !== "string") return value;
+    const t = value.trim();
+    return t === "" ? undefined : t;
+  })
+  @IsString()
+  @MaxLength(50)
+  reservationContactName?: string;
+
+  @ApiPropertyOptional({
+    description: "예약 연락처 휴대폰 번호 (선택, 하이픈 포함 가능)",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.reservationPhone,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null) return undefined;
+    if (typeof value !== "string") return value;
+    const t = value.replace(/[-\s]/g, "").trim();
+    return t === "" ? undefined : t;
+  })
+  @IsString()
+  @IsValidKoreanPhone()
+  reservationPhone?: string;
 
   // 픽업장소 정보는 PickupAddressDto 상속
 

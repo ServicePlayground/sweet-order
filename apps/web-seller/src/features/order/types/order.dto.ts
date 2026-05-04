@@ -81,6 +81,10 @@ export interface OrderResponseDto {
   paymentPendingDeadlineAt?: Date | string | null;
   /** 사용자가 입금완료 처리 시 입력한 입금자명 */
   depositorName?: string | null;
+  /** 주문 시 선택 입력한 예약자명 */
+  reservationContactName?: string | null;
+  /** 주문 시 선택 입력한 예약 연락처(휴대폰) */
+  reservationPhone?: string | null;
   pickupDate: Date;
   userCancelReason?: string | null;
   sellerCancelReason?: string | null;

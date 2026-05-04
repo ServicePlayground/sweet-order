@@ -459,6 +459,11 @@ model Order {
   pickupLatitude     Float? @map("pickup_latitude") // 픽업 장소 위도
   pickupLongitude    Float? @map("pickup_longitude") // 픽업 장소 경도
 
+  // 주문 시 선택 입력한 예약자명
+  reservationContactName String? @map("reservation_contact_name")
+  // 주문 시 선택 입력한 예약 연락처(휴대폰, 숫자만 저장)
+  reservationPhone       String? @map("reservation_phone")
+
   // 비즈니스 필드 - 주문 상태
   orderStatus OrderStatus @default(RESERVATION_REQUESTED) @map("order_status") // 주문 상태
   /** 입금대기로 전환된 시각(입금 유효 기준 시작). 예약신청만 있을 때는 null */

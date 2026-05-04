@@ -48,6 +48,10 @@ export interface CreateOrderRequest {
   totalQuantity: number;
   totalPrice: number;
   storeName: string;
+  /** 예약자명 (선택) */
+  reservationContactName?: string;
+  /** 예약 연락처 휴대폰 (선택) */
+  reservationPhone?: string;
   // 픽업장소
   pickupAddress: string;
   pickupRoadAddress: string;
@@ -128,6 +132,10 @@ export interface OrderResponse {
   /** 입금 마감 시각(ISO). 입금대기에서만 의미 있음 */
   paymentPendingDeadlineAt?: string | null;
   orderStatus: OrderStatus;
+  /** 주문 시 선택 입력한 예약자명 */
+  reservationContactName?: string | null;
+  /** 주문 시 선택 입력한 예약 연락처(휴대폰) */
+  reservationPhone?: string | null;
   // 스토어 정산 계좌 (입금대기 시 표시)
   storeBankName?: string | null;
   storeBankAccountNumber?: string | null;

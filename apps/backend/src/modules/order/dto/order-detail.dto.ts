@@ -261,6 +261,20 @@ export class OrderResponseDto extends PickupAddressDto {
   depositorName: string | null;
 
   @ApiPropertyOptional({
+    description: "주문 시 선택 입력한 예약자명. 미입력 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.reservationContactName,
+    nullable: true,
+  })
+  reservationContactName: string | null;
+
+  @ApiPropertyOptional({
+    description: "주문 시 선택 입력한 예약 연락처(휴대폰, 숫자만). 미입력 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.reservationPhone,
+    nullable: true,
+  })
+  reservationPhone: string | null;
+
+  @ApiPropertyOptional({
     description:
       "입금 전 사용자 취소 시 입력한 사유. 자동 만료 취소·판매자 취소 등에서는 null일 수 있음",
     example: "일정 변경",
