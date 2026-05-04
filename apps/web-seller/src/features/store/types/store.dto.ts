@@ -59,6 +59,17 @@ export interface StoreAddressDto {
   longitude: number;
 }
 
+/** 환불·취소 규칙 한 줄 */
+export interface RefundRuleItemDto {
+  daysBeforePickup: number;
+  refundDescription: string;
+}
+
+/** 환불·취소 규정 (`rules` 배열, 백엔드 JSON과 동일) */
+export interface RefundCancellationPolicyDto {
+  rules: RefundRuleItemDto[];
+}
+
 export interface StoreResponseDto extends StoreAddressDto {
   id: string;
   userId: string;
@@ -91,6 +102,8 @@ export interface StoreResponseDto extends StoreAddressDto {
   minProductPrice: number | null;
   /** 영업 캘린더 (백엔드 StoreResponseDto.businessCalendar, 구버전 API는 생략될 수 있음) */
   businessCalendar?: StoreBusinessCalendarDto;
+  /** 환불·취소 규정 (구버전 배포 시 생략될 수 있음) */
+  refundCancellationPolicy?: RefundCancellationPolicyDto;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -128,6 +141,7 @@ export interface CreateStoreRequestDto extends StoreAddressDto {
   bankAccountNumber: string;
   bankName: StoreBankName;
   accountHolderName: string;
+  refundCancellationPolicy: RefundCancellationPolicyDto;
 }
 
 export interface CreateStoreResponseDto {
@@ -144,6 +158,7 @@ export interface UpdateStoreRequestDto extends StoreAddressDto {
   bankAccountNumber: string;
   bankName: StoreBankName;
   accountHolderName: string;
+  refundCancellationPolicy: RefundCancellationPolicyDto;
 }
 
 export interface UpdateStoreResponseDto {

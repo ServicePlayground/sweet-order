@@ -65,6 +65,10 @@ import {
 } from "@apps/backend/modules/auth/dto/mypage-profile.dto";
 import { AuthWithdrawService } from "@apps/backend/modules/auth/services/auth-withdraw.service";
 import { WithdrawAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-withdraw.dto";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 마이페이지 컨트롤러
@@ -75,6 +79,8 @@ import { WithdrawAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-w
   OrderListResponseDto,
   OrderResponseDto,
   OrderItemResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
   MyReviewListResponseDto,
   WritableReviewOrdersListResponseDto,
   GetWritableReviewOrdersRequestDto,

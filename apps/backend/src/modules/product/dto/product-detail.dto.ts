@@ -13,6 +13,7 @@ import {
   CreateCakeFlavorOptionDto,
 } from "@apps/backend/modules/product/dto/product-create.dto";
 import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
+import { RefundCancellationPolicyDto } from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 케이크 사이즈 옵션 응답 DTO
@@ -292,6 +293,14 @@ export class ProductResponseDto extends PickupAddressDto {
     example: UPLOAD_SWAGGER_EXAMPLES.FILE_URL,
   })
   storeLogoImageUrl?: string | null;
+
+  @ApiProperty({
+    description:
+      "스토어 환불·취소 규정(스토어 `refund_cancellation_policy` JSON과 동일). 상품 조회 시점 스토어 설정입니다.",
+    type: RefundCancellationPolicyDto,
+    example: STORE_SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
+  })
+  storeRefundCancellationPolicy: RefundCancellationPolicyDto;
 
   // 픽업장소 정보는 PickupAddressDto 상속
 }

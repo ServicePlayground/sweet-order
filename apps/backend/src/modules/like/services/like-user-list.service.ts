@@ -175,16 +175,7 @@ export class LikeUserListService {
         product: {
           include: {
             store: {
-              select: {
-                name: true,
-                logoImageUrl: true,
-                address: true,
-                roadAddress: true,
-                detailAddress: true,
-                zonecode: true,
-                latitude: true,
-                longitude: true,
-              },
+              select: ProductMapperUtil.STORE_INFO_SELECT,
             },
             reviews: ProductMapperUtil.REVIEWS_INCLUDE_FOR_STATS,
           },

@@ -8,6 +8,7 @@ import { SWAGGER_EXAMPLES as USER_SWAGGER_EXAMPLES } from "@apps/backend/modules
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
 import { StoreAddressDto } from "@apps/backend/modules/store/dto/store-common.dto";
 import { StoreBusinessCalendarDto } from "@apps/backend/modules/store/dto/store-business-calendar.dto";
+import { RefundCancellationPolicyDto } from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 스토어 응답 DTO
@@ -171,6 +172,14 @@ export class StoreResponseDto extends StoreAddressDto {
     type: StoreBusinessCalendarDto,
   })
   businessCalendar: StoreBusinessCalendarDto;
+
+  @ApiProperty({
+    description:
+      "환불·취소 규정. `rules` 배열에 단계별로 픽업 N일 전(N=0이면 당일)과 조건 문구를 둡니다.",
+    type: RefundCancellationPolicyDto,
+    example: SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
+  })
+  refundCancellationPolicy: RefundCancellationPolicyDto;
 
   @ApiProperty({
     description: "생성일시",

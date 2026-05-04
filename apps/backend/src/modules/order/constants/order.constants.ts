@@ -125,6 +125,7 @@ export const SWAGGER_EXAMPLES = {
     storeBankName: STORE_SWAGGER_EXAMPLES.BANK_NAME,
     storeBankAccountNumber: STORE_SWAGGER_EXAMPLES.BANK_ACCOUNT_NUMBER,
     storeAccountHolderName: STORE_SWAGGER_EXAMPLES.ACCOUNT_HOLDER_NAME,
+    storeRefundCancellationPolicy: STORE_SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
     totalQuantity: 2,
     totalPrice: 140000,
     pickupDate: new Date("2024-01-15T14:00:00.000Z"),

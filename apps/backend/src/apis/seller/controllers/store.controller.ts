@@ -40,6 +40,10 @@ import {
   StoreBusinessCalendarDto,
   UpdateStoreBusinessCalendarResponseDto,
 } from "@apps/backend/modules/store/dto/store-business-calendar.dto";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 스토어 관련 컨트롤러
@@ -52,6 +56,8 @@ import {
   StoreResponseDto,
   StoreBusinessCalendarDto,
   UpdateStoreBusinessCalendarResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
 )
 @Controller(`${AUDIENCE.SELLER}/store`)
 @Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용

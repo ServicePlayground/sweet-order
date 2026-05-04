@@ -108,6 +108,7 @@ export const StoreCreatePage: React.FC = () => {
       zonecode: data.zonecode,
       latitude: data.latitude,
       longitude: data.longitude,
+      refundCancellationPolicy: data.refundCancellationPolicy,
     });
   };
 

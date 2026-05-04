@@ -243,6 +243,9 @@ model Store {
   /** 날짜별 예외 [{ date: "YYYY-MM-DD", isOpen, openTime?, closeTime? }] */
   businessCalendarOverrides Json @default("[]") @map("business_calendar_overrides")
 
+  // 환불·취소 규정 (JSON). { rules: [{ daysBeforePickup, refundDescription }, ...] } (N=0이면 픽업 당일)
+  refundCancellationPolicy Json @default("{\"rules\":[{\"daysBeforePickup\":0,\"refundDescription\":\"\"}]}") @map("refund_cancellation_policy")
+
   // 시스템 필드
   likeCount Int      @default(0) @map("like_count") // 좋아요 개수
   createdAt DateTime @default(now()) @map("created_at")

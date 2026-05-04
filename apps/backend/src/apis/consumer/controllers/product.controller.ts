@@ -18,6 +18,10 @@ import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-r
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 사용자 상품 컨트롤러
@@ -34,6 +38,8 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
   PaginationMetaResponseDto,
   CakeSizeOptionResponseDto,
   CakeFlavorOptionResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
 )
 @Controller(`${AUDIENCE.CONSUMER}/products`)
 @Auth({ isOptionalPublic: true, audiences: ["consumer"] }) // 선택적 인증(비로그인 사용자도 접근 가능) - 구매자 JWT(aud: user)만 허용

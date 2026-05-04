@@ -51,7 +51,6 @@ export function useUpdateStore() {
         severity: "success",
         message: "스토어 수정이 완료되었습니다.",
       });
-      // 스토어 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: storeQueryKeys.all });
       navigate(ROUTES.STORE_DETAIL_HOME(variables.storeId));
     },

@@ -4,6 +4,7 @@ import {
   SellerVerificationStatus,
   StoreBankName,
 } from "./generated/client";
+import { SWAGGER_EXAMPLES as STORE_SWAGGER_EXAMPLES } from "@apps/backend/modules/store/constants/store.constants";
 
 const prisma = new PrismaClient();
 
@@ -323,6 +324,7 @@ async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>[
         standardOpenTime: "00:00",
         standardCloseTime: "00:00",
         businessCalendarOverrides: [],
+        refundCancellationPolicy: STORE_SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
         createdAt: SEED_STORES.STORE1.CREATED_AT,
         updatedAt: SEED_STORES.STORE1.UPDATED_AT,
       },
@@ -369,6 +371,7 @@ async function upsertStores(seller: Awaited<ReturnType<typeof upsertSeedUsers>>[
         standardOpenTime: "00:00",
         standardCloseTime: "00:00",
         businessCalendarOverrides: [],
+        refundCancellationPolicy: STORE_SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
         createdAt: SEED_STORES.STORE2.CREATED_AT,
         updatedAt: SEED_STORES.STORE2.UPDATED_AT,
       },

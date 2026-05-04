@@ -17,6 +17,11 @@ import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Car
 import { BaseInput as Input } from "@/apps/web-seller/common/components/inputs/BaseInput";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { AddressInput } from "@/apps/web-seller/common/components/inputs/AddressInput";
+import { StoreRefundCancellationPolicyFields } from "@/apps/web-seller/features/store/components/StoreRefundCancellationPolicyFields";
+import {
+  createInitialRefundCancellationPolicy,
+  validateRefundCancellationPolicy,
+} from "@/apps/web-seller/features/store/utils/refund-cancellation-policy.util";
 
 interface Props {
   onSubmit: (data: StoreForm) => void;
@@ -42,6 +47,7 @@ export const defaultForm: StoreForm = {
   zonecode: "",
   latitude: 0,
   longitude: 0,
+  refundCancellationPolicy: createInitialRefundCancellationPolicy(),
 };
 
 export const StoreCreationForm: React.FC<Props> = ({
@@ -52,7 +58,9 @@ export const StoreCreationForm: React.FC<Props> = ({
   submitButtonText,
 }) => {
   const [form, setForm] = useState<StoreForm>(initialValue || defaultForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof StoreForm, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof StoreForm | "refundCancellationPolicy", string>>
+  >({});
 
   useEffect(() => {
     if (initialValue) {
@@ -62,7 +70,7 @@ export const StoreCreationForm: React.FC<Props> = ({
   }, [initialValue]);
 
   const validate = () => {
-    const newErrors: Partial<Record<keyof StoreForm, string>> = {};
+    const newErrors: Partial<Record<keyof StoreForm | "refundCancellationPolicy", string>> = {};
 
     // 스토어 이름 검증
     const nameError = validateStoreName(form.name);
@@ -93,6 +101,11 @@ export const StoreCreationForm: React.FC<Props> = ({
     const accountHolderError = validateAccountHolderName(form.accountHolderName);
     if (accountHolderError) {
       newErrors.accountHolderName = accountHolderError;
+    }
+
+    const refundPolicyError = validateRefundCancellationPolicy(form.refundCancellationPolicy);
+    if (refundPolicyError) {
+      newErrors.refundCancellationPolicy = refundPolicyError;
     }
 
     setErrors(newErrors);
@@ -319,6 +332,22 @@ export const StoreCreationForm: React.FC<Props> = ({
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-2">환불·취소 규정</h2>
+            <div className="border-t mb-6" />
+            <StoreRefundCancellationPolicyFields
+              policy={form.refundCancellationPolicy}
+              onChange={(next) => {
+                const nextForm = { ...form, refundCancellationPolicy: next };
+                setForm(nextForm);
+                onChange?.(nextForm);
+              }}
+              sectionError={errors.refundCancellationPolicy}
+            />
           </CardContent>
         </Card>
       </div>

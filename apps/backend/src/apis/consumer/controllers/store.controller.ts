@@ -8,6 +8,10 @@ import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { StoreResponseDto } from "@apps/backend/modules/store/dto/store-detail.dto";
 import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
+import {
   GetStoresRequestDto,
   StoreListResponseDto,
 } from "@apps/backend/modules/store/dto/store-list.dto";
@@ -18,7 +22,13 @@ import { StoreRegionDepthsResponseDto } from "@apps/backend/modules/store/dto/st
  * 스토어 관련 컨트롤러
  */
 @ApiTags("스토어")
-@ApiExtraModels(StoreResponseDto, StoreListResponseDto, StoreRegionDepthsResponseDto)
+@ApiExtraModels(
+  StoreResponseDto,
+  StoreListResponseDto,
+  StoreRegionDepthsResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+)
 @Controller(`${AUDIENCE.CONSUMER}/store`)
 @Auth({ isOptionalPublic: true, audiences: ["consumer"] }) // 선택적 인증(비로그인 사용자도 접근 가능) - 구매자 JWT(aud: user)만 허용
 export class ConsumerStoreController {

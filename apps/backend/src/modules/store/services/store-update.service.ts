@@ -5,6 +5,8 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 import { StoreOwnershipUtil } from "@apps/backend/modules/store/utils/store-ownership.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
+import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { sanitizeRefundCancellationPolicyForDb } from "@apps/backend/modules/store/utils/store-refund-cancellation-policy.util";
 
 /**
  * 스토어 수정 서비스
@@ -47,6 +49,7 @@ export class StoreUpdateService {
       bankAccountNumber: string;
       bankName: StoreBankName;
       accountHolderName: string;
+      refundCancellationPolicy: Prisma.InputJsonValue;
     } = {
       // 필수 필드
       name: updateStoreDto.name,
@@ -60,6 +63,9 @@ export class StoreUpdateService {
       bankName: updateStoreDto.bankName,
       accountHolderName: updateStoreDto.accountHolderName.trim(),
       phoneNumber: updateStoreDto.phoneNumber.trim(),
+      refundCancellationPolicy: sanitizeRefundCancellationPolicyForDb(
+        updateStoreDto.refundCancellationPolicy,
+      ),
     };
 
     // 선택적 필드: 값이 제공된 경우에만 업데이트

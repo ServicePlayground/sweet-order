@@ -28,6 +28,10 @@ import { OrderResponseDto } from "@apps/backend/modules/order/dto/order-detail.d
 import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-response.dto";
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/order.constants";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 판매자 주문 컨트롤러
@@ -38,6 +42,8 @@ import { ORDER_ERROR_MESSAGES } from "@apps/backend/modules/order/constants/orde
   UpdateOrderStatusResponseDto,
   OrderListResponseDto,
   OrderResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
   PaginationMetaResponseDto,
 )
 @Controller(`${AUDIENCE.SELLER}/orders`)
