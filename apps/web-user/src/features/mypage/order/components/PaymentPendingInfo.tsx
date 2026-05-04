@@ -1,65 +1,35 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { OrderResponse } from "@/apps/web-user/features/order/types/order.type";
 import { Icon } from "@/apps/web-user/common/components/icons";
 import { Modal } from "@/apps/web-user/common/components/modals/Modal";
 import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { getBankLabel } from "@/apps/web-user/common/utils/bank.util";
 import { usePaymentComplete } from "@/apps/web-user/features/order/hooks/mutations/usePaymentComplete";
+import { usePaymentCountdown } from "@/apps/web-user/features/order/hooks/usePaymentCountdown";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { EasyPaymentBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/EasyPaymentBottomSheet";
+import { PaymentConfirmBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/PaymentConfirmBottomSheet";
+import {
+  APP_ONLY_MODAL,
+  PAYMENT_COMPLETE_MODAL,
+} from "@/apps/web-user/common/constants/messages.constant";
 
-const FALLBACK_PAYMENT_DEADLINE_MS = 12 * 60 * 60 * 1000;
-
-function resolveDeadlineMs(order: OrderResponse): number | null {
-  if (order.paymentPendingDeadlineAt) {
-    return new Date(order.paymentPendingDeadlineAt).getTime();
-  }
-  if (order.paymentPendingAt) {
-    return new Date(order.paymentPendingAt).getTime() + FALLBACK_PAYMENT_DEADLINE_MS;
-  }
-  return null;
-}
-
-function usePaymentPendingCountdown(order: OrderResponse) {
-  const [remaining, setRemaining] = useState("");
-  const orderRef = useRef(order);
-  orderRef.current = order;
-
-  useEffect(() => {
-    function update() {
-      const deadline = resolveDeadlineMs(orderRef.current);
-      if (deadline == null) {
-        setRemaining("");
-        return;
-      }
-      const diff = Math.max(0, deadline - Date.now());
-      const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
-      const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
-      const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-      setRemaining(`${h}:${m}:${s}`);
-    }
-
-    update();
-    const timer = setInterval(update, 1000);
-    return () => clearInterval(timer);
-  }, [order.id, order.paymentPendingDeadlineAt, order.paymentPendingAt]);
-
-  return remaining;
+function isMobileDevice(): boolean {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
 export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
-  const countdown = usePaymentPendingCountdown(order);
+  const { text: countdown } = usePaymentCountdown(order);
   const { mutate: paymentComplete, isPending: isCompleting } = usePaymentComplete();
+  const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isEasyPayOpen, setIsEasyPayOpen] = useState(false);
+  const [isAppOnlyModalOpen, setIsAppOnlyModalOpen] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
-
-  const handleConfirmPayment = () => {
-    paymentComplete(order.id);
-    setIsConfirmOpen(false);
-  };
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [depositorName, setDepositorName] = useState("");
 
   const handleCopyAccountNumber = () => {
     navigator.clipboard.writeText(order.storeBankAccountNumber ?? "");
@@ -67,6 +37,7 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
   };
 
   const handleCloseCopyToast = useCallback(() => setShowCopyToast(false), []);
+  const handleCloseSuccessToast = useCallback(() => setShowSuccessToast(false), []);
 
   return (
     <div className="mt-2.5 -mx-4">
@@ -125,34 +96,65 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
                 { src: "/images/contents/toss.png", alt: "토스" },
                 { src: "/images/contents/kakao.png", alt: "카카오" },
               ],
-              onClick: () => setIsEasyPayOpen(true),
+              onClick: () => {
+                if (!isMobileDevice()) {
+                  setIsAppOnlyModalOpen(true);
+                  return;
+                }
+                setIsEasyPayOpen(true);
+              },
             },
             {
               label: isCompleting ? "처리 중..." : "입금 완료했어요",
-              onClick: () => setIsConfirmOpen(true),
+              onClick: () => setIsPaymentSheetOpen(true),
             },
           ]}
         />
       </div>
 
+      <PaymentConfirmBottomSheet
+        isOpen={isPaymentSheetOpen}
+        onClose={() => setIsPaymentSheetOpen(false)}
+        amount={order.totalPrice}
+        onConfirm={(name) => {
+          setDepositorName(name);
+          setIsConfirmOpen(true);
+        }}
+      />
+
       <Modal
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
-        title="입금 완료하셨나요?"
-        description={
-          <>
-            입금 완료 버튼을 누르면
-            <br />
-            판매자에게 확인 알림이 전달되며,
-            <br />
-            <span className="text-primary font-bold">입금 확인 후 예약이 확정</span>됩니다.
-          </>
-        }
+        title={PAYMENT_COMPLETE_MODAL.title}
+        description={PAYMENT_COMPLETE_MODAL.description}
         confirmText="취소"
         cancelText="입금 완료"
         cancelVariant="primary"
         onConfirm={() => setIsConfirmOpen(false)}
-        onCancel={handleConfirmPayment}
+        onCancel={() => {
+          paymentComplete(
+            { orderId: order.id, depositorName },
+            { onSuccess: () => setShowSuccessToast(true) },
+          );
+          setIsConfirmOpen(false);
+          setIsPaymentSheetOpen(false);
+        }}
+      />
+
+      <Modal
+        isOpen={isAppOnlyModalOpen}
+        onClose={() => setIsAppOnlyModalOpen(false)}
+        title={APP_ONLY_MODAL.title}
+        description={APP_ONLY_MODAL.description}
+        confirmText="취소"
+        confirmVariant="outline"
+        cancelText="앱 다운로드"
+        cancelVariant="primary"
+        onConfirm={() => setIsAppOnlyModalOpen(false)}
+        onCancel={() => {
+          window.open("https://pickcake.app/download", "_blank");
+          setIsAppOnlyModalOpen(false);
+        }}
       />
 
       <EasyPaymentBottomSheet
@@ -170,6 +172,17 @@ export function PaymentPendingInfo({ order }: { order: OrderResponse }) {
           iconClassName="text-green-400"
           variant="row"
           onClose={handleCloseCopyToast}
+        />
+      )}
+
+      {showSuccessToast && (
+        <Toast
+          message="입금 확인 후 예약이 확정됩니다."
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="row"
+          duration={3000}
+          onClose={handleCloseSuccessToast}
         />
       )}
     </div>

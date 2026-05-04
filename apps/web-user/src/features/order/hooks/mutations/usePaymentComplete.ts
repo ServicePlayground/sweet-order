@@ -9,7 +9,8 @@ export function usePaymentComplete() {
   const { showAlert } = useAlertStore();
 
   return useMutation({
-    mutationFn: (orderId: string) => orderApi.paymentComplete(orderId),
+    mutationFn: ({ orderId, depositorName }: { orderId: string; depositorName: string }) =>
+      orderApi.paymentComplete(orderId, depositorName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderQueryKeys.all });
     },

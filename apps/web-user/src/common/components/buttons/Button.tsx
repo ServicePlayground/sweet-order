@@ -78,7 +78,7 @@ export const Button: React.FC<ButtonProps> = ({
         w-full font-bold rounded-xl transition-all duration-200 px-[10px]
         ${variantStyles[variant]}
         ${sizeStyles[size]}
-        ${disabled ? "!bg-gray-200 text-gray-300 cursor-not-allowed" : "cursor-pointer"}
+        ${disabled ? "!bg-gray-200 !text-gray-300 cursor-not-allowed" : "cursor-pointer"}
         ${className}
       `
         .trim()
