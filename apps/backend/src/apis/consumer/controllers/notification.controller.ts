@@ -29,12 +29,12 @@ import { PaginationMetaResponseDto } from "@apps/backend/common/dto/pagination-r
   UserNotificationUnreadCountResponseDto,
 )
 @Controller(`${AUDIENCE.CONSUMER}/notifications`)
-@Auth({ isPublic: false, audiences: ["consumer"] }) // 구매자 JWT(aud: user)만 허용
+@Auth({ isPublic: false, audiences: ["consumer"] }) // 구매자 JWT(aud: consumer)만 허용
 export class ConsumerNotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Get()
-  @ApiOperation({ summary: "(로그인) 사용자 웹 주문 알림 목록" })
+  @ApiOperation({ summary: "(로그인 필요) 사용자 웹 주문 알림 목록" })
   @SwaggerResponse(200, { dataDto: UserNotificationListResponseDto })
   @SwaggerAuthResponses()
   async list(
@@ -53,7 +53,7 @@ export class ConsumerNotificationController {
   }
 
   @Get("unread-count")
-  @ApiOperation({ summary: "(로그인) 주문 알림 미읽음 개수" })
+  @ApiOperation({ summary: "(로그인 필요) 주문 알림 미읽음 개수" })
   @SwaggerResponse(200, { dataDto: UserNotificationUnreadCountResponseDto })
   @SwaggerAuthResponses()
   async unreadCount(
@@ -65,7 +65,7 @@ export class ConsumerNotificationController {
 
   @Patch("read-all")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "주문 알림 모두 읽음" })
+  @ApiOperation({ summary: "(로그인 필요) 주문 알림 모두 읽음" })
   @SwaggerResponse(200, { dataExample: { ok: true } })
   @SwaggerAuthResponses()
   async markAllRead(@Request() req: { user: JwtVerifiedPayload }): Promise<{ ok: true }> {
@@ -75,7 +75,7 @@ export class ConsumerNotificationController {
 
   @Patch(":id/read")
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "주문 알림 읽음 처리" })
+  @ApiOperation({ summary: "(로그인 필요) 주문 알림 읽음 처리" })
   @SwaggerResponse(200, { dataExample: { ok: true } })
   @SwaggerAuthResponses()
   async markRead(

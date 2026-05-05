@@ -37,10 +37,15 @@ export interface NotificationPreferenceDto {
   orderNotificationSoundEnabled: boolean;
 }
 
+/** 구매자 웹 알림 설정 API 응답 (계정 단위) */
+export interface UserNotificationPreferenceDto {
+  pushNotificationsEnabled: boolean;
+}
+
 /**
  * 알림 영속성 계층.
  * - SELLER_WEB: 스토어별 목록·읽음·미읽음 수·설정·주문 알림 저장
- * - USER_WEB: 구매자 계정 단위 주문 알림 목록·읽음·미읽음 수·저장 (설정 테이블은 미사용)
+ * - USER_WEB: 구매자 계정 단위 주문 알림 목록·읽음·미읽음 수·설정·저장
  */
 @Injectable()
 export class NotificationService {
@@ -406,6 +411,54 @@ export class NotificationService {
   }
 
   /**
+   * 구매자 계정 단위 USER_WEB 알림 설정을 조회합니다. 없으면 기본값으로 생성(upsert)합니다.
+   */
+  async getOrCreatePreferenceUserWeb(userId: string): Promise<UserNotificationPreferenceDto> {
+    const row = await this.prisma.consumerNotificationPreference.upsert({
+      where: {
+        consumerId_appSurface: {
+          consumerId: userId,
+          appSurface: NotificationAppSurface.USER_WEB,
+        },
+      },
+      create: {
+        consumerId: userId,
+        appSurface: NotificationAppSurface.USER_WEB,
+        orderPushEnabled: true,
+      },
+      update: {},
+    });
+    return this.toUserPreferenceDto(row);
+  }
+
+  /**
+   * 구매자 계정 단위 USER_WEB 알림 설정을 갱신합니다.
+   */
+  async updatePreferenceUserWeb(
+    userId: string,
+    patch: {
+      pushNotificationsEnabled?: boolean;
+    },
+  ): Promise<UserNotificationPreferenceDto> {
+    const existing = await this.getOrCreatePreferenceUserWeb(userId);
+    const next = {
+      pushNotificationsEnabled: patch.pushNotificationsEnabled ?? existing.pushNotificationsEnabled,
+    };
+    const row = await this.prisma.consumerNotificationPreference.update({
+      where: {
+        consumerId_appSurface: {
+          consumerId: userId,
+          appSurface: NotificationAppSurface.USER_WEB,
+        },
+      },
+      data: {
+        orderPushEnabled: next.pushNotificationsEnabled,
+      },
+    });
+    return this.toUserPreferenceDto(row);
+  }
+
+  /**
    * 해당 스토어의 미읽음 SELLER_WEB ORDER 알림 개수를 반환합니다.
    */
   async countUnreadSellerWebForStore(userId: string, storeId: string): Promise<number> {
@@ -433,6 +486,15 @@ export class NotificationService {
       appSurface: "SELLER_WEB",
       orderNotificationsEnabled: row.orderNotificationsEnabled,
       orderNotificationSoundEnabled: row.orderNotificationSoundEnabled,
+    };
+  }
+
+  /**
+   * Prisma 구매자 설정 행을 API 응답 DTO 형태로 맞춥니다.
+   */
+  private toUserPreferenceDto(row: { orderPushEnabled: boolean }): UserNotificationPreferenceDto {
+    return {
+      pushNotificationsEnabled: row.orderPushEnabled,
     };
   }
 }

@@ -22,7 +22,7 @@ import {
 } from "@/apps/web-user/common/components/buttons/oauth-provider-login-buttons";
 
 export default function QAPage() {
-  const { isAuthenticated, clearAccessToken } = useAuthStore();
+  const { isAuthenticated, handleLogoutByEnvironment } = useAuthStore();
   const { address, latitude, longitude, setLocation, setAddress } = useUserCurrentLocationStore();
   const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "success" | "error">(
     "idle",
@@ -190,7 +190,7 @@ export default function QAPage() {
           {isAuthenticated && (
             <div className="pt-4 mt-3 border-t border-gray-100">
               <button
-                onClick={() => clearAccessToken()}
+                onClick={() => handleLogoutByEnvironment()}
                 className="w-full px-4 py-2.5 text-xs font-bold text-white bg-red-500 rounded-2xl hover:bg-red-400 transition-colors"
               >
                 로그아웃

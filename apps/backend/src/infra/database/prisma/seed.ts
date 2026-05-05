@@ -32,6 +32,7 @@ const SEED_ACCOUNTS = {
       "https://static-staging.sweetorders.com/uploads/2__1770124158308_b45059e5.jpeg",
     GOOGLE_ID: "115107911178776387683",
     GOOGLE_EMAIL: "olo90632951@gmail.com",
+    PUSH_NOTIFICATIONS_ENABLED: true,
     CREATED_AT: new Date("2024-01-16T09:15:00Z"),
   },
 };

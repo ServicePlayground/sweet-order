@@ -9,42 +9,36 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
 import { useUserCurrentLocationStore } from "@/apps/web-user/common/store/user-current-location.store";
 import { reverseGeocode } from "@/apps/web-user/common/utils/kakao-geocode.util";
+import { useRemoveConsumerFcmToken } from "@/apps/web-user/features/fcm/hooks/mutations/useRemoveConsumerFcmToken";
+import { useUpsertConsumerFcmToken } from "@/apps/web-user/features/fcm/hooks/mutations/useUpsertConsumerFcmToken";
+import type { FcmToken } from "@/apps/web-user/features/fcm/types/fcm.type";
 
 // 타입 정의
 declare global {
   interface Window {
     // 웹뷰 -> Flutter
-    Logout: {
+    mylocation: {
       postMessage: (message: string) => void;
     };
-    mylocation: {
+    requestFcmTokenUpsert: {
+      postMessage: (message: string) => void;
+    };
+    requestFcmTokenRemove: {
       postMessage: (message: string) => void;
     };
 
     // Flutter -> 웹뷰
-    Auth: {
-      login: (accessToken: string) => void;
-      logout: () => void;
-    };
     receiveLocation: (latitude: string | number, longitude: string | number) => void;
+    FcmToken: {
+      upsert: (fcmToken: FcmToken) => void;
+      remove: (fcmToken: Omit<FcmToken, "token">) => void;
+    };
   }
 }
 
 // ============================================================================
 // 웹뷰 -> Flutter
 // ============================================================================
-
-/**
- * 로그아웃을 수행하는 웹뷰 통신 함수
- * Flutter 앱에 로그아웃 메시지를 전송합니다. Flutter 내에서 토큰을 제거합니다.
- */
-export function logoutFromWebView(): void {
-  try {
-    window.Logout.postMessage("true");
-  } catch (error) {
-    console.error("로그아웃 중 오류가 발생했습니다:", error);
-  }
-}
 
 /**
  * 앱에서 위치 정보를 요청하는 웹뷰 통신 함수
@@ -56,6 +50,22 @@ export function requestLocationFromWebView(): void {
     window.mylocation.postMessage("true");
   } catch (error) {
     console.error("위치 정보 요청 중 오류가 발생했습니다:", error);
+  }
+}
+
+export function requestFcmTokenUpsert(): void {
+  try {
+    window.requestFcmTokenUpsert.postMessage("true");
+  } catch (error) {
+    console.error("FCM 토큰 업데이트 중 오류가 발생했습니다:", error);
+  }
+}
+
+export function requestFcmTokenRemove(): void {
+  try {
+    window.requestFcmTokenRemove.postMessage("true");
+  } catch (error) {
+    console.error("FCM 토큰 삭제 중 오류가 발생했습니다:", error);
   }
 }
 
@@ -81,29 +91,15 @@ export function isWebViewEnvironment(): boolean {
  * 이 훅은 앱 초기화 시 한 번 호출되어야 합니다.
  */
 export function useWebViewBridge() {
-  const { setAccessToken, clearAccessToken } = useAuthStore();
+  const { login, handleLogoutByEnvironment } = useAuthStore();
   const { setLocation, setAddress } = useUserCurrentLocationStore();
+  const { mutateAsync: upsertConsumerFcmToken } = useUpsertConsumerFcmToken();
+  const { mutateAsync: removeConsumerFcmToken } = useRemoveConsumerFcmToken();
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
-
-    // Flutter 앱에서 호출할 수 있도록 window.Auth 객체 초기화
-    window.Auth = {
-      login: (accessToken: string) => {
-        if (!accessToken || typeof accessToken !== "string") {
-          console.warn("유효하지 않은 토큰이 전달되었습니다.");
-          return;
-        }
-        // 전역 상태(Zustand store)에 토큰 저장
-        setAccessToken(accessToken);
-      },
-      logout: () => {
-        // 전역 상태(Zustand store)에서 토큰 제거
-        clearAccessToken();
-      },
-    };
 
     // Flutter 앱에서 호출할 수 있도록 window.receiveLocation 함수 초기화
     window.receiveLocation = (latitude: string | number, longitude: string | number) => {
@@ -118,6 +114,36 @@ export function useWebViewBridge() {
       reverseGeocode(latNumber, lngNumber).then((result) => {
         if (result) setAddress(result);
       });
+    };
+
+    // Flutter 앱에서 호출할 수 있도록 window.FcmToken 객체 초기화
+    window.FcmToken = {
+      upsert: ({ token, deviceId }: FcmToken) => {
+        if (!token || typeof token !== "string" || !deviceId || typeof deviceId !== "string") {
+          console.warn("유효하지 않은 FCM 토큰 또는 디바이스 ID가 전달되었습니다.");
+          return;
+        }
+        const normalizedToken = token.trim();
+        const normalizedDeviceId = deviceId.trim();
+        if (!normalizedToken || !normalizedDeviceId) {
+          console.warn("유효하지 않은 FCM 토큰 또는 디바이스 ID가 전달되었습니다.");
+          return;
+        }
+
+        upsertConsumerFcmToken({ token: normalizedToken, deviceId: normalizedDeviceId });
+      },
+      remove: ({ deviceId }: Omit<FcmToken, "token">) => {
+        if (!deviceId || typeof deviceId !== "string") {
+          console.warn("유효하지 않은 디바이스 ID가 전달되었습니다.");
+          return;
+        }
+        const normalizedDeviceId = deviceId.trim();
+        if (!normalizedDeviceId) {
+          console.warn("유효하지 않은 디바이스 ID가 전달되었습니다.");
+          return;
+        }
+        removeConsumerFcmToken({ deviceId: normalizedDeviceId });
+      },
     };
 
     // 환경에 따라 자동으로 위치 요청
@@ -142,7 +168,14 @@ export function useWebViewBridge() {
         },
       );
     }
-  }, [setAccessToken, clearAccessToken, setLocation, setAddress]);
+  }, [
+    login,
+    handleLogoutByEnvironment,
+    setLocation,
+    setAddress,
+    upsertConsumerFcmToken,
+    removeConsumerFcmToken,
+  ]);
 }
 
 // ============================================================================

@@ -44,6 +44,8 @@ model Consumer {
   chatRooms          ChatRoom[]
   orders             Order[]
   consumerNotifications UserNotification[]
+  fcmTokens          ConsumerFcmToken[]
+  notificationPreferences ConsumerNotificationPreference[]
 
   @@index([phone])
   @@index([googleId])
@@ -550,6 +552,36 @@ model UserNotificationPreference {
   @@unique([sellerId, appSurface, storeId])
   @@index([storeId])
   @@map("user_notification_preferences")
+}
+
+/// 구매자 알림 설정 (구매자·표면 조합별)
+model ConsumerNotificationPreference {
+  id               String                 @id @default(cuid())
+  consumerId       String                 @map("consumer_id")
+  appSurface       NotificationAppSurface @map("app_surface")
+  orderPushEnabled Boolean                @default(true) @map("order_push_enabled")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+
+  @@unique([consumerId, appSurface])
+  @@map("consumer_notification_preferences")
+}
+
+/// 구매자 앱(Flutter) FCM 토큰 (구매자 단위, 디바이스/설치 단위 1토큰)
+model ConsumerFcmToken {
+  id         String   @id @default(cuid())
+  consumerId String   @map("consumer_id")
+  deviceId   String   @map("device_id")
+  token      String   @unique
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  consumer Consumer @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+
+  @@index([consumerId])
+  @@unique([consumerId, deviceId])
+  @@map("consumer_fcm_tokens")
 }
 
 // OrderItem model for order items

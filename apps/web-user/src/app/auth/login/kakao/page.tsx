@@ -12,7 +12,7 @@ import getApiMessage from "@/apps/web-user/common/utils/getApiMessage";
 function KakaoAuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const login = useAuthStore((s) => s.login);
   const { showAlert } = useAlertStore();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ function KakaoAuthCallbackContent() {
     const run = async () => {
       try {
         const data = await authApi.kakaoLogin(code);
-        setAccessToken(data.accessToken);
+        login(data.accessToken);
         router.replace(PATHS.HOME);
       } catch (error: unknown) {
         const err = error as {
@@ -52,7 +52,7 @@ function KakaoAuthCallbackContent() {
     };
 
     void run();
-  }, [searchParams, router, setAccessToken, showAlert]);
+  }, [searchParams, router, login, showAlert]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-gray-50">

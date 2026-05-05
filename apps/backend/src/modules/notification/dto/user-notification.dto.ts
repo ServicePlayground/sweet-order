@@ -70,3 +70,15 @@ export class UserNotificationUnreadCountResponseDto {
   @ApiProperty()
   count: number;
 }
+
+export class UserNotificationPreferenceUpdateDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  pushNotificationsEnabled?: boolean;
+}
+
+export class UserNotificationPreferenceResponseDto {
+  @ApiProperty()
+  pushNotificationsEnabled: boolean;
+}
