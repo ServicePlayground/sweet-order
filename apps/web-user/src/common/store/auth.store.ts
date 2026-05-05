@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "sweet-order:auth",
+      name: "picake:auth",
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         accessToken: state.accessToken,

@@ -11,7 +11,7 @@ export default create({
   fontBase: "'Pretendard', sans-serif",
   textColor: "#1a1a1a",
 
-  brandTitle: "Sweet Order",
+  brandTitle: "Picake",
   brandUrl: "",
   brandTarget: "_self",
 });

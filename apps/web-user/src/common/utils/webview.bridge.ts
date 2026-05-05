@@ -147,7 +147,7 @@ export function useWebViewBridge() {
     };
 
     // 환경에 따라 자동으로 위치 요청
-    const hasStoredRegion = !!localStorage.getItem("sweet-order:selected-region");
+    const hasStoredRegion = !!localStorage.getItem("picake:selected-region");
 
     if (isWebViewEnvironment()) {
       requestLocationFromWebView();

@@ -158,7 +158,7 @@ export const StoreCreationForm: React.FC<Props> = ({
                   스토어 이름
                 </Label>
                 <Input
-                  placeholder="스위트오더 스토어"
+                  placeholder="Picake"
                   value={form.name}
                   onChange={handleChange("name")}
                   className={errors.name ? "border-destructive" : ""}
@@ -207,7 +207,7 @@ export const StoreCreationForm: React.FC<Props> = ({
               <div>
                 <Label>카카오채널 ID</Label>
                 <Input
-                  placeholder="sweetorder_channel"
+                  placeholder="Picake_channel"
                   value={form.kakaoChannelId || ""}
                   onChange={handleChange("kakaoChannelId")}
                 />
@@ -226,7 +226,7 @@ export const StoreCreationForm: React.FC<Props> = ({
               <div>
                 <Label>인스타그램 ID</Label>
                 <Input
-                  placeholder="sweetorder_official"
+                  placeholder="Picake_official"
                   value={form.instagramId || ""}
                   onChange={handleChange("instagramId")}
                 />

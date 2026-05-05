@@ -91,7 +91,7 @@ export const SWAGGER_EXAMPLES = {
   B_NO: "1198288946", // 사업자등록번호
   P_NM: "홍길동", // 대표자명
   START_DT: "20230101", // 개업일자
-  B_NM: "스위트오더", // 상호명
+  B_NM: "Picake", // 상호명
   B_SECTOR: "도매 및 소매업", // 업태명
   B_TYPE: "전자상거래 소매 중개업", // 종목명
   B_ADR: "사업장 주소", // 사업장 주소

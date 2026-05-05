@@ -8,7 +8,7 @@ interface SellerAppLogoProps {
   alt?: string;
 }
 
-export function SellerAppLogo({ className, width = 120, alt = "Sweet Order" }: SellerAppLogoProps) {
+export function SellerAppLogo({ className, width = 120, alt = "Picake" }: SellerAppLogoProps) {
   return (
     <img
       src={logoUrl}

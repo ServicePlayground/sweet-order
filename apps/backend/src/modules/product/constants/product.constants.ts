@@ -149,7 +149,7 @@ export const SWAGGER_EXAMPLES = {
     // 고시정보 (식품 판매 시 법적 필수 항목)
     productNumber: "CAKE-001",
     productNoticeFoodType: "케이크류",
-    productNoticeProducer: "스위트오더",
+    productNoticeProducer: "Picake",
     productNoticeOrigin: "국내산",
     productNoticeAddress: "서울시 강남구 테헤란로 123",
     productNoticeManufactureDate: "2024-01-01",

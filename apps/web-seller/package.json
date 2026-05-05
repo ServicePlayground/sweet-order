@@ -1,7 +1,7 @@
 {
-  "name": "@sweet-order/web-seller",
+  "name": "@picake/web-seller",
   "version": "1.0.0",
-  "description": "Sweet Order Seller Admin Panel",
+  "description": "Picake Seller Admin Panel",
   "private": true,
   "type": "module",
   "scripts": {

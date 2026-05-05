@@ -19,8 +19,8 @@ const pretendard = localFont({
 // 기본 메타데이터 (TODO: 추후 수정필요)
 export const metadata: Metadata = {
   title: {
-    default: "Sweet Order - 달콤한 디저트 주문 플랫폼",
-    template: "%s | Sweet Order", // 하위 페이지에서 %s 부분이 교체됨
+    default: "Picake - 달콤한 디저트 주문 플랫폼",
+    template: "%s | Picake", // 하위 페이지에서 %s 부분이 교체됨
   },
   description:
     "달콤한 디저트를 온라인으로 주문하는 최고의 플랫폼. 신선한 케이크, 쿠키, 마카롱 등 다양한 디저트를 집에서 편리하게 주문하세요.",
@@ -29,21 +29,21 @@ export const metadata: Metadata = {
     "케이크 주문",
     "온라인 디저트",
     "디저트 배달",
-    "Sweet Order",
+    "Picake",
     "달콤한 디저트",
     "디저트 플랫폼",
   ],
-  authors: [{ name: "Sweet Order Team" }],
-  creator: "Sweet Order",
-  publisher: "Sweet Order",
+  authors: [{ name: "Picake Team" }],
+  creator: "Picake",
+  publisher: "Picake",
 
   // Open Graph (페이스북, 카카오톡 등 소셜 미디어 공유용)
   openGraph: {
     type: "website",
     locale: "ko_KR",
     url: "https://sweetorders.com",
-    siteName: "Sweet Order",
-    title: "Sweet Order - 달콤한 디저트 주문 플랫폼",
+    siteName: "Picake",
+    title: "Picake - 달콤한 디저트 주문 플랫폼",
     description:
       "달콤한 디저트를 온라인으로 주문하는 최고의 플랫폼. 신선한 케이크, 쿠키, 마카롱 등 다양한 디저트를 집에서 편리하게 주문하세요.",
     images: [
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg", // 1200x630px 권장
         width: 1200,
         height: 630,
-        alt: "Sweet Order - 달콤한 디저트 주문 플랫폼",
+        alt: "Picake - 달콤한 디저트 주문 플랫폼",
       },
     ],
   },
@@ -69,24 +69,15 @@ export const metadata: Metadata = {
     },
   },
 
-  // 언어 및 지역 설정
-  alternates: {
-    canonical: "https://sweetorders.com",
-    languages: {
-      "ko-KR": "https://sweetorders.com",
-      "en-US": "https://sweetorders.com/en",
-    },
-  },
-
   // 앱 관련 메타데이터
-  applicationName: "Sweet Order",
+  applicationName: "Picake",
   category: "Food & Dining",
 
   // 추가 메타데이터
   other: {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Sweet Order",
+    "apple-mobile-web-app-title": "Picake",
     "mobile-web-app-capable": "yes",
     "msapplication-TileColor": "#ff6b6b",
     "theme-color": "#ff6b6b",
