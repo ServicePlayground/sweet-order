@@ -35,6 +35,6 @@ const commonSwaggerConfig = (title: string) => {
     .build();
 };
 
-export const consumerSwaggerConfig = commonSwaggerConfig("Sweet Order - Consumer API");
+export const consumerSwaggerConfig = commonSwaggerConfig("Picake - Consumer API");
 
-export const sellerSwaggerConfig = commonSwaggerConfig("Sweet Order - Seller API");
+export const sellerSwaggerConfig = commonSwaggerConfig("Picake - Seller API");

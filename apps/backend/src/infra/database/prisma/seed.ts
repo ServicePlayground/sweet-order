@@ -39,7 +39,7 @@ const SEED_ACCOUNTS = {
 
 const SEED_STORES = {
   STORE1: {
-    NAME: "스위트오더 스토어",
+    NAME: "Picake",
     DESCRIPTION: "맛있는 케이크를 판매하는 스토어입니다.",
     LOGO_IMAGE_URL:
       "https://static-staging.sweetorders.com/uploads/NYenL1720090515_1770124331535_5b9aa552.png",
@@ -52,7 +52,7 @@ const SEED_STORES = {
     BUSINESS_NO: "1198288946",
     REPRESENTATIVE_NAME: "홍길동",
     OPENING_DATE: "20230101",
-    BUSINESS_NAME: "스위트오더",
+    BUSINESS_NAME: "Picake",
     BUSINESS_SECTOR: "도매 및 소매업",
     BUSINESS_TYPE: "전자상거래 소매 중개업",
     PERMISSION_MANAGEMENT_NUMBER: "2021-서울강동-0422",
@@ -171,7 +171,7 @@ const SEED_PRODUCT_BASE = {
   DETAIL_DESCRIPTION: "<p>고급 초콜릿으로 만든 프리미엄 케이크입니다.</p>",
   PRODUCT_NOTICE: {
     FOOD_TYPE: "케이크류",
-    PRODUCER: "스위트오더",
+    PRODUCER: "Picake",
     ORIGIN: "국내산",
     ADDRESS: "서울시 강남구 테헤란로 123",
     MANUFACTURE_DATE: "2024-01-01",

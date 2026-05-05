@@ -19,7 +19,7 @@ import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 import { RegionSelectSheet } from "@/apps/web-user/common/components/headers/RegionSelectSheet";
 import { useAlarmUnreadCount } from "@/apps/web-user/features/alarm/hooks/queries/useAlarmUnreadCount";
 
-const REGION_STORAGE_KEY = "sweet-order:selected-region";
+const REGION_STORAGE_KEY = "picake:selected-region";
 
 interface HeaderProps {
   variant?: "main" | "product" | "minimal" | "search" | "back-title";

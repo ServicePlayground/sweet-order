@@ -48,7 +48,7 @@ export enum StoreMapPickupPeriodKind {
 
 export const SWAGGER_EXAMPLES = {
   ID: "QXZw02vBqVXNQ29c4w9n9ZdG",
-  NAME: "스위트오더 스토어",
+  NAME: "Picake",
   DESCRIPTION: "맛있는 케이크를 판매하는 스토어입니다.",
   CREATED_AT: new Date("2024-01-01T00:00:00.000Z"),
   // 주소/위치 정보
@@ -61,8 +61,8 @@ export const SWAGGER_EXAMPLES = {
   BANK_ACCOUNT_NUMBER: "110-302-1234567",
   BANK_NAME: StoreBankName.KB_KOOKMIN,
   ACCOUNT_HOLDER_NAME: "홍길동",
-  KAKAO_CHANNEL_ID: "sweetorder_channel",
-  INSTAGRAM_ID: "sweetorder_official",
+  KAKAO_CHANNEL_ID: "Picake_channel",
+  INSTAGRAM_ID: "Picake_official",
   PHONE_NUMBER: "010-1234-5678",
   REFUND_CANCELLATION_POLICY: {
     rules: [

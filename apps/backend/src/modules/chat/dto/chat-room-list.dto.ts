@@ -62,7 +62,7 @@ export class ChatRoomStoreResponseDto {
 
   @ApiProperty({
     description: "스토어 이름",
-    example: "스위트오더 스토어",
+    example: "Picake",
   })
   name: string;
 

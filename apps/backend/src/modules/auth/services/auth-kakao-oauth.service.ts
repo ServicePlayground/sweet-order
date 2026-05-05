@@ -49,7 +49,7 @@ export class AuthKakaoOauthService {
     this.httpClient = axios.create({
       timeout: 30000,
       headers: {
-        "User-Agent": "SweetOrder-Backend/1.0",
+        "User-Agent": "Picake-Backend/1.0",
         Accept: "application/json",
         "Accept-Encoding": "gzip, deflate, br",
       },

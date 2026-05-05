@@ -204,7 +204,7 @@ export default function MypagePage() {
         isOpen={isAppGuideOpen}
         onClose={() => setIsAppGuideOpen(false)}
         title="앱을 설치해주세요!"
-        description="로그인은 스위트오더 앱에서만 가능합니다."
+        description="로그인은 Picake 앱에서만 가능합니다."
         confirmText="확인"
         onConfirm={() => setIsAppGuideOpen(false)}
         hideCancel

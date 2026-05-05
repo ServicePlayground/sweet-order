@@ -112,7 +112,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 </Select>
               </div>
             ) : (
-              <div className="flex-1 text-sm font-medium truncate text-zinc-100">SWEET ORDER</div>
+              <div className="flex-1 text-sm font-medium truncate text-zinc-100">PICAKE</div>
             )}
             {!isMobile && (
               <Button

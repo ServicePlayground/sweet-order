@@ -44,7 +44,7 @@ export const ProductCreationProductNoticeSection: React.FC<
               제조사
             </Label>
             <Input
-              placeholder="예: 스위트오더"
+              placeholder="예: Picake"
               value={form.productNoticeProducer || ""}
               onChange={onChange("productNoticeProducer")}
               className={errors.productNoticeProducer ? "border-destructive" : ""}

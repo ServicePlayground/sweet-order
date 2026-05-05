@@ -151,7 +151,7 @@ export const BusinessRegistrationForm: React.FC<Props> = ({ onSubmit, initialVal
         <div>
           <Label className="after:content-['*'] after:ml-0.5 after:text-destructive">상호</Label>
           <Input
-            placeholder="스위트오더"
+            placeholder="Picake"
             value={form.b_nm}
             onChange={handleChange("b_nm")}
             maxLength={50}
