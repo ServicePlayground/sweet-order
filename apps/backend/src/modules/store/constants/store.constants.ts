@@ -64,6 +64,12 @@ export const SWAGGER_EXAMPLES = {
   KAKAO_CHANNEL_ID: "sweetorder_channel",
   INSTAGRAM_ID: "sweetorder_official",
   PHONE_NUMBER: "010-1234-5678",
+  REFUND_CANCELLATION_POLICY: {
+    rules: [
+      { daysBeforePickup: 7, refundDescription: "결제액의 50% 환불" },
+      { daysBeforePickup: 3, refundDescription: "결제액의 30% 환불" },
+    ],
+  },
 };
 
 /**

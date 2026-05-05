@@ -46,7 +46,7 @@ const QUICK_LINKS = [
 ] as const;
 
 export default function MypagePage() {
-  const { isAuthenticated, setAccessToken } = useAuthStore();
+  const { isAuthenticated, login } = useAuthStore();
   const hasHydrated = useAuthHasHydrated();
   const { data: user } = useMypageProfile();
   const [isAppGuideOpen, setIsAppGuideOpen] = useState(false);
@@ -150,7 +150,7 @@ export default function MypagePage() {
             type="button"
             onClick={() => {
               if (process.env.NODE_ENV === "development") {
-                setAccessToken(process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN ?? "");
+                login(process.env.NEXT_PUBLIC_DEV_ACCESS_TOKEN ?? "");
               } else {
                 setIsAppGuideOpen(true);
               }

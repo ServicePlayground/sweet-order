@@ -5,7 +5,10 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { PrismaService } from "@apps/backend/infra/database/prisma.service";
-import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import {
+  NotificationAppSurface,
+  Prisma,
+} from "@apps/backend/infra/database/prisma/generated/client";
 import {
   ConsumerMypageProfileResponseDto,
   SellerMypageProfileResponseDto,
@@ -35,16 +38,31 @@ export class AuthMypageProfileService {
       throw new ForbiddenException(AUTH_ERROR_MESSAGES.AUDIENCE_NOT_AUTHORIZED);
     }
 
-    const row = await this.prisma.consumer.findUnique({
-      where: { id: user.sub },
-    });
+    const [row, preference] = await Promise.all([
+      this.prisma.consumer.findUnique({
+        where: { id: user.sub },
+      }),
+      this.prisma.consumerNotificationPreference.findUnique({
+        where: {
+          consumerId_appSurface: {
+            consumerId: user.sub,
+            appSurface: NotificationAppSurface.USER_WEB,
+          },
+        },
+        select: { orderPushEnabled: true },
+      }),
+    ]);
 
     if (!row) {
       LoggerUtil.log(`구매자 프로필 조회 실패: consumer 없음 - id: ${user.sub}`);
       throw new UnauthorizedException(AUTH_ERROR_MESSAGES.ACCESS_TOKEN_ACCOUNT_NOT_FOUND);
     }
 
-    return ConsumerMapperUtil.mapConsumerToInfo(row);
+    return ConsumerMapperUtil.mapConsumerToInfo(
+      row,
+      undefined,
+      preference?.orderPushEnabled ?? true,
+    );
   }
 
   async getSellerProfile(user: JwtVerifiedPayload): Promise<SellerMypageProfileResponseDto> {

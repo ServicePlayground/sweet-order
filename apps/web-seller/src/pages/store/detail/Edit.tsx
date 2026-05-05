@@ -1,14 +1,15 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { StoreCreationForm } from "@/apps/web-seller/features/store/components/forms/StoreCreationForm";
-import type {
-  StoreBankName,
-  UpdateStoreRequestDto,
-} from "@/apps/web-seller/features/store/types/store.dto";
 import type { StoreForm } from "@/apps/web-seller/features/store/types/store.ui";
+import {
+  storeFormToUpdateRequest,
+  storeResponseToStoreForm,
+} from "@/apps/web-seller/features/store/utils/store-form.mapper";
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
 import { useUpdateStore } from "@/apps/web-seller/features/store/hooks/mutations/useStoreMutation";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 export const StoreDetailEditPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -26,9 +27,12 @@ export const StoreDetailEditPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">로딩 중...</div>
-      </div>
+      <ContentLoading
+        variant="page"
+        message="스토어 정보를 불러오는 중…"
+        showLogo
+        className="border-0 shadow-none"
+      />
     );
   }
 
@@ -40,43 +44,10 @@ export const StoreDetailEditPage: React.FC = () => {
     );
   }
 
-  // StoreResponseDto를 StoreForm으로 변환
-  const storeForm: StoreForm = {
-    name: store.name,
-    description: store.description || "",
-    phoneNumber: store.phoneNumber || "",
-    logoImageUrl: store.logoImageUrl || "",
-    kakaoChannelId: store.kakaoChannelId || "",
-    instagramId: store.instagramId || "",
-    bankAccountNumber: store.bankAccountNumber ?? "",
-    bankName: (store.bankName ?? "") as StoreBankName | "",
-    accountHolderName: store.accountHolderName ?? "",
-    address: store.address,
-    roadAddress: store.roadAddress,
-    detailAddress: store.detailAddress,
-    zonecode: store.zonecode,
-    latitude: store.latitude,
-    longitude: store.longitude,
-  };
+  const storeForm: StoreForm = storeResponseToStoreForm(store);
 
   const handleUpdate = async (data: StoreForm) => {
-    const request: UpdateStoreRequestDto = {
-      name: data.name,
-      description: data.description || "",
-      phoneNumber: data.phoneNumber?.trim() || undefined,
-      logoImageUrl: data.logoImageUrl || "",
-      kakaoChannelId: data.kakaoChannelId?.trim() || "",
-      instagramId: data.instagramId?.trim() || "",
-      bankAccountNumber: data.bankAccountNumber.trim(),
-      bankName: data.bankName as StoreBankName,
-      accountHolderName: data.accountHolderName.trim(),
-      address: data.address,
-      roadAddress: data.roadAddress,
-      detailAddress: data.detailAddress,
-      zonecode: data.zonecode,
-      latitude: data.latitude,
-      longitude: data.longitude,
-    };
+    const request = storeFormToUpdateRequest(data);
 
     await updateStoreMutation.mutateAsync({
       storeId,

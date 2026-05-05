@@ -44,13 +44,13 @@ export function useGoogleRegister(options?: {
   onDuplicateAccount?: (payload: DuplicateAccountPayload) => void;
 }) {
   const router = useRouter();
-  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const login = useAuthStore((s) => s.login);
   const { showAlert } = useAlertStore();
 
   return useMutation({
     mutationFn: authApi.googleRegister,
     onSuccess: (data) => {
-      setAccessToken(data.accessToken);
+      login(data.accessToken);
       router.replace(PATHS.HOME);
     },
     onError: (error) => {
@@ -72,13 +72,13 @@ export function useKakaoRegister(options?: {
   onDuplicateAccount?: (payload: DuplicateAccountPayload) => void;
 }) {
   const router = useRouter();
-  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const login = useAuthStore((s) => s.login);
   const { showAlert } = useAlertStore();
 
   return useMutation({
     mutationFn: authApi.kakaoRegister,
     onSuccess: (data) => {
-      setAccessToken(data.accessToken);
+      login(data.accessToken);
       router.replace(PATHS.HOME);
     },
     onError: (error) => {

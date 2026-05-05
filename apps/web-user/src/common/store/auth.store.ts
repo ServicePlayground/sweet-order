@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  isWebViewEnvironment,
+  requestFcmTokenRemove,
+  requestFcmTokenUpsert,
+} from "@/apps/web-user/common/utils/webview.bridge";
 
 interface AuthState {
   // 상태
@@ -10,8 +15,9 @@ interface AuthState {
   accessToken: string | null;
 
   // 액션
-  setAccessToken: (token: string) => void;
-  clearAccessToken: () => void;
+  login: (token: string) => void;
+  handleLogoutByEnvironment: () => void;
+  logout: () => void;
   getAccessToken: () => string | null;
 }
 
@@ -22,16 +28,29 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       accessToken: null,
 
-      // 토큰 설정 (Zustand 상태만 업데이트)
-      setAccessToken: (token: string) => {
+      // 로그인 처리 (Zustand 상태 업데이트 + 앱에 FCM 토큰 업서트 요청)
+      login: (token: string) => {
         set({
           accessToken: token,
           isAuthenticated: true,
         });
+        requestFcmTokenUpsert();
       },
 
-      // 토큰 제거 (Zustand 상태만 초기화)
-      clearAccessToken: () => {
+      // 로그아웃 준비 (웹뷰라면 FCM 토큰 제거 요청, 웹뷰가 아니라면 상태 초기화)
+      handleLogoutByEnvironment: () => {
+        if (isWebViewEnvironment()) {
+          requestFcmTokenRemove();
+        } else {
+          set({
+            accessToken: null,
+            isAuthenticated: false,
+          });
+        }
+      },
+
+      // 로그아웃 처리 (Zustand 상태 초기화)
+      logout: () => {
         set({
           accessToken: null,
           isAuthenticated: false,

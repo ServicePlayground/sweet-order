@@ -12,6 +12,7 @@ import {
   useDeleteProduct,
 } from "@/apps/web-seller/features/product/hooks/mutations/useProductMutation";
 import { Card, CardContent } from "@/apps/web-seller/common/components/cards/Card";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 export const StoreDetailProductDetailPage: React.FC = () => {
   const { storeId, productId } = useParams<{ storeId: string; productId: string }>();
@@ -30,9 +31,11 @@ export const StoreDetailProductDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">로딩 중...</div>
-      </div>
+      <ContentLoading
+        variant="page"
+        message="상품 정보를 불러오는 중…"
+        className="border-0 shadow-none"
+      />
     );
   }
 

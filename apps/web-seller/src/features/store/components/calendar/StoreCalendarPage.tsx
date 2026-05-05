@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/apps/web-seller/common/components/cards/Card";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 import { Button } from "@/apps/web-seller/common/components/buttons/Button";
 import { StatusBadge } from "@/apps/web-seller/common/components/badges/StatusBadge";
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
@@ -309,8 +310,13 @@ export const StoreCalendarPage: React.FC = () => {
 
   if (storeLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">로딩 중...</div>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">스토어 캘린더</h1>
+        <ContentLoading
+          variant="page"
+          message="스토어와 캘린더를 불러오는 중…"
+          className="border-0 shadow-none"
+        />
       </div>
     );
   }

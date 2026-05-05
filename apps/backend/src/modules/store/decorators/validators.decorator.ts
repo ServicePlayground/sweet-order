@@ -163,20 +163,14 @@ export class IsValidStoreDescriptionConstraint implements ValidatorConstraintInt
 }
 
 /**
- * 스토어 연락처 유효성 검증 (숫자, 하이픈, 공백, 괄호, + 허용, 8~20자)
+ * 스토어 연락처 유효성 검증 (필수, 숫자·하이픈·공백·괄호·+ 허용, 8~20자)
  */
 @ValidatorConstraint({ name: "isValidStorePhoneNumber", async: false })
 export class IsValidStorePhoneNumberConstraint implements ValidatorConstraintInterface {
   private errorType: string = "";
 
   validate(value: string | undefined): boolean {
-    // 선택 필드이므로 값이 없으면 통과
-    if (!value) {
-      this.errorType = "";
-      return true;
-    }
-
-    const trimmed = value.trim();
+    const trimmed = (value ?? "").trim();
     if (!trimmed) {
       this.errorType = "미입력";
       return false;

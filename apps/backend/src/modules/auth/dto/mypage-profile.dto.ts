@@ -121,7 +121,13 @@ export class MypageProfileBaseResponseDto {
 /**
  * 구매자 마이페이지 — 프로필 조회 응답
  */
-export class ConsumerMypageProfileResponseDto extends MypageProfileBaseResponseDto {}
+export class ConsumerMypageProfileResponseDto extends MypageProfileBaseResponseDto {
+  @ApiProperty({
+    description: "주문 푸시 알림 수신 여부",
+    example: true,
+  })
+  pushNotificationsEnabled: boolean;
+}
 
 /**
  * 판매자 마이페이지 — 프로필 조회 응답

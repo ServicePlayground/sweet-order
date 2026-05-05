@@ -19,6 +19,7 @@ import {
 } from "@/apps/web-seller/features/order/types/order.dto";
 import { ORDER_STATUS_FILTER_OPTIONS } from "@/apps/web-seller/features/order/utils/order-status-ui.util";
 import { useDebouncedValue } from "@/apps/web-seller/common/hooks/useDebouncedValue";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 const DEBOUNCE_DELAY_MS = 300;
 const LIMIT = 30;
@@ -221,9 +222,7 @@ export const StoreDetailOrderListPage: React.FC = () => {
 
       {/* 주문 목록 */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">주문을 불러오는 중...</div>
-        </div>
+        <ContentLoading variant="section" message="주문을 불러오는 중…" className="py-12" />
       ) : isError ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-destructive">주문을 불러오는 중 오류가 발생했습니다.</div>

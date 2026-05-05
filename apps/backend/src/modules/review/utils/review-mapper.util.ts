@@ -1,6 +1,9 @@
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { ReviewResponseDto } from "@apps/backend/modules/review/dto/review-detail.dto";
-import { OrderMapperUtil } from "@apps/backend/modules/order/utils/order-mapper.util";
+import {
+  ORDER_RESPONSE_STORE_SELECT,
+  OrderMapperUtil,
+} from "@apps/backend/modules/order/utils/order-mapper.util";
 
 /**
  * User · Product(Store) · Order(항목 포함) 정보가 포함된 ProductReview 타입
@@ -26,14 +29,7 @@ type ProductReviewWithUserAndProductStore = Prisma.ProductReviewGetPayload<{
           };
         };
         store: {
-          select: {
-            bankAccountNumber: true;
-            bankName: true;
-            accountHolderName: true;
-            phoneNumber: true;
-            kakaoChannelId: true;
-            instagramId: true;
-          };
+          select: typeof ORDER_RESPONSE_STORE_SELECT;
         };
       };
     };
@@ -75,14 +71,7 @@ export class ReviewMapperUtil {
           select: { id: true, deletedAt: true },
         },
         store: {
-          select: {
-            bankAccountNumber: true,
-            bankName: true,
-            accountHolderName: true,
-            phoneNumber: true,
-            kakaoChannelId: true,
-            instagramId: true,
-          },
+          select: ORDER_RESPONSE_STORE_SELECT,
         },
       },
     },

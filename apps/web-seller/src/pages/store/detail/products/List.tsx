@@ -13,6 +13,8 @@ import { BaseButton as Button } from "@/apps/web-seller/common/components/button
 import { Label } from "@/apps/web-seller/common/components/labels/Label";
 import { useProductList } from "@/apps/web-seller/features/product/hooks/queries/useProductQuery";
 import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScroll";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
+import { InfiniteScrollLoading } from "@/apps/web-seller/common/components/loading/InfiniteScrollLoading";
 import { ProductList } from "@/apps/web-seller/features/product/components/list/ProductList";
 import {
   SortBy,
@@ -306,9 +308,7 @@ export const StoreDetailProductListPage: React.FC = () => {
 
       {/* 상품 목록 */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">상품을 불러오는 중...</div>
-        </div>
+        <ContentLoading variant="section" message="상품을 불러오는 중…" className="py-12" />
       ) : (
         <>
           <ProductList products={products} />
@@ -316,12 +316,9 @@ export const StoreDetailProductListPage: React.FC = () => {
           {/* 무한 스크롤 트리거 */}
           {hasNextPage && (
             <div ref={loadMoreRef} className="flex min-h-[100px] items-center justify-center py-8">
-              {isFetchingNextPage && (
-                <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                  <span>더 많은 상품을 불러오는 중...</span>
-                </div>
-              )}
+              {isFetchingNextPage ? (
+                <InfiniteScrollLoading message="더 많은 상품을 불러오는 중…" />
+              ) : null}
             </div>
           )}
         </>

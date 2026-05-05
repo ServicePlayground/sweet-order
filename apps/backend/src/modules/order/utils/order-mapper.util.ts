@@ -7,8 +7,19 @@ import {
   OrderMyReviewUiStatus,
   OrderStatus,
 } from "@apps/backend/modules/order/constants/order.constants";
-import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { refundCancellationPolicyFromDb } from "@apps/backend/modules/store/utils/store-refund-cancellation-policy.util";
+
+/** 주문 응답에 실을 스토어 연락·정산·환불 규정 select (후기 등 동일 include와 공유) */
+export const ORDER_RESPONSE_STORE_SELECT = {
+  bankAccountNumber: true,
+  bankName: true,
+  accountHolderName: true,
+  phoneNumber: true,
+  kakaoChannelId: true,
+  instagramId: true,
+  refundCancellationPolicy: true,
+} as const satisfies Prisma.StoreSelect;
 
 /**
  * Prisma Order 엔티티 타입 (orderItems·연결 후기 id 포함)
@@ -16,14 +27,7 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 type OrderWithItems = Order & {
   orderItems: OrderItem[];
   review: { id: string; deletedAt: Date | null } | null;
-  store: {
-    bankAccountNumber: string | null;
-    bankName: StoreBankName | null;
-    accountHolderName: string | null;
-    phoneNumber: string | null;
-    kakaoChannelId: string | null;
-    instagramId: string | null;
-  };
+  store: Prisma.StoreGetPayload<{ select: typeof ORDER_RESPONSE_STORE_SELECT }>;
 };
 
 /**
@@ -42,14 +46,7 @@ export class OrderMapperUtil {
       select: { id: true, deletedAt: true },
     },
     store: {
-      select: {
-        bankAccountNumber: true,
-        bankName: true,
-        accountHolderName: true,
-        phoneNumber: true,
-        kakaoChannelId: true,
-        instagramId: true,
-      },
+      select: ORDER_RESPONSE_STORE_SELECT,
     },
   } as const satisfies Prisma.OrderInclude;
 
@@ -135,6 +132,9 @@ export class OrderMapperUtil {
       storeBankName: order.store.bankName ?? null,
       storeBankAccountNumber: order.store.bankAccountNumber ?? null,
       storeAccountHolderName: order.store.accountHolderName ?? null,
+      storeRefundCancellationPolicy: refundCancellationPolicyFromDb(
+        order.store.refundCancellationPolicy,
+      ),
       orderNumber: order.orderNumber,
       totalQuantity: order.totalQuantity,
       totalPrice: order.totalPrice,
@@ -150,6 +150,8 @@ export class OrderMapperUtil {
       paymentPendingAt: order.paymentPendingAt ?? null,
       paymentPendingDeadlineAt: order.paymentPendingDeadlineAt ?? null,
       depositorName: order.depositorName ?? null,
+      reservationContactName: order.reservationContactName ?? null,
+      reservationPhone: order.reservationPhone ?? null,
       userCancelReason: order.userCancelReason ?? null,
       sellerCancelReason: order.sellerCancelReason ?? null,
       sellerNoShowReason: order.sellerNoShowReason ?? null,

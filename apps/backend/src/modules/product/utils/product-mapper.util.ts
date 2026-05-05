@@ -1,10 +1,24 @@
 import { ProductResponseDto } from "@apps/backend/modules/product/dto/product-detail.dto";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
+import { refundCancellationPolicyFromDb } from "@apps/backend/modules/store/utils/store-refund-cancellation-policy.util";
 
 /**
  * 상품 매핑 유틸리티
  * 상품 응답 DTO 변환 시 공통 로직을 제공합니다.
  */
+
+/** 상품 응답에 실을 스토어 기본·픽업 위치·환불 규정 select (목록·상세·최근 본 상품 공통) */
+const PRODUCT_RESPONSE_STORE_SELECT = {
+  name: true,
+  logoImageUrl: true,
+  address: true,
+  roadAddress: true,
+  detailAddress: true,
+  zonecode: true,
+  latitude: true,
+  longitude: true,
+  refundCancellationPolicy: true,
+} as const satisfies Prisma.StoreSelect;
 
 /**
  * Store만 include된 Product 타입
@@ -12,18 +26,7 @@ import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
  */
 type ProductWithStore = Prisma.ProductGetPayload<{
   include: {
-    store: {
-      select: {
-        name: true;
-        logoImageUrl: true;
-        address: true;
-        roadAddress: true;
-        detailAddress: true;
-        zonecode: true;
-        latitude: true;
-        longitude: true;
-      };
-    };
+    store: { select: typeof PRODUCT_RESPONSE_STORE_SELECT };
   };
 }>;
 
@@ -39,18 +42,7 @@ export type ProductWithReviewsAndStore = Prisma.ProductGetPayload<{
         rating: true;
       };
     };
-    store: {
-      select: {
-        name: true;
-        logoImageUrl: true;
-        address: true;
-        roadAddress: true;
-        detailAddress: true;
-        zonecode: true;
-        latitude: true;
-        longitude: true;
-      };
-    };
+    store: { select: typeof PRODUCT_RESPONSE_STORE_SELECT };
   };
 }>;
 
@@ -62,23 +54,14 @@ export class ProductMapperUtil {
    * Store 기본 정보 및 위치 정보 select 필드
    * 상품 조회 시 store의 이름, 이미지, 위치 정보를 가져오기 위한 공통 select 필드
    */
-  static readonly STORE_INFO_SELECT = {
-    name: true,
-    logoImageUrl: true,
-    address: true,
-    roadAddress: true,
-    detailAddress: true,
-    zonecode: true,
-    latitude: true,
-    longitude: true,
-  } as const satisfies Prisma.StoreSelect;
+  static readonly STORE_INFO_SELECT = PRODUCT_RESPONSE_STORE_SELECT;
 
   /**
    * Store 기본 정보, 위치 정보 및 userId select 필드
    * 권한 확인이 필요한 경우 사용
    */
   static readonly STORE_INFO_WITH_USER_ID_SELECT = {
-    ...ProductMapperUtil.STORE_INFO_SELECT,
+    ...PRODUCT_RESPONSE_STORE_SELECT,
     sellerId: true,
   } as const satisfies Prisma.StoreSelect;
 
@@ -139,6 +122,7 @@ export class ProductMapperUtil {
       isLiked: isLiked !== undefined ? isLiked : null,
       storeName: store.name,
       storeLogoImageUrl: store?.logoImageUrl || undefined,
+      storeRefundCancellationPolicy: refundCancellationPolicyFromDb(store.refundCancellationPolicy),
       // 픽업장소
       pickupAddress: store.address ?? "",
       pickupRoadAddress: store.roadAddress ?? "",

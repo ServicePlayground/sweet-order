@@ -6,6 +6,7 @@ import {
 import { SWAGGER_EXAMPLES } from "@apps/backend/modules/order/constants/order.constants";
 import { PickupAddressDto } from "@apps/backend/modules/product/dto/product-common.dto";
 import { StoreBankName } from "@apps/backend/modules/store/constants/store.constants";
+import { RefundCancellationPolicyDto } from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 주문 항목 응답 DTO
@@ -199,6 +200,14 @@ export class OrderResponseDto extends PickupAddressDto {
   storeAccountHolderName: string | null;
 
   @ApiProperty({
+    description:
+      "주문 조회 시점 스토어에 등록된 환불·취소 규정(스토어 `refund_cancellation_policy` JSON과 동일 구조). 주문 생성 시점 스냅샷이 아닙니다.",
+    type: RefundCancellationPolicyDto,
+    example: SWAGGER_EXAMPLES.ORDER_DATA.storeRefundCancellationPolicy,
+  })
+  storeRefundCancellationPolicy: RefundCancellationPolicyDto;
+
+  @ApiProperty({
     description: "주문 번호",
     example: SWAGGER_EXAMPLES.ORDER_DATA.orderNumber,
   })
@@ -250,6 +259,20 @@ export class OrderResponseDto extends PickupAddressDto {
     nullable: true,
   })
   depositorName: string | null;
+
+  @ApiPropertyOptional({
+    description: "주문 시 선택 입력한 예약자명. 미입력 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.reservationContactName,
+    nullable: true,
+  })
+  reservationContactName: string | null;
+
+  @ApiPropertyOptional({
+    description: "주문 시 선택 입력한 예약 연락처(휴대폰, 숫자만). 미입력 시 null",
+    example: SWAGGER_EXAMPLES.ORDER_DATA.reservationPhone,
+    nullable: true,
+  })
+  reservationPhone: string | null;
 
   @ApiPropertyOptional({
     description:

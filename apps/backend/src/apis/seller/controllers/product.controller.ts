@@ -35,6 +35,10 @@ import {
   UpdateProductResponseDto,
 } from "@apps/backend/modules/product/dto/product-update.dto";
 import { GetSellerProductsRequestDto } from "@apps/backend/modules/product/dto/product-list.dto";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 판매자 상품 컨트롤러
@@ -47,6 +51,8 @@ import { GetSellerProductsRequestDto } from "@apps/backend/modules/product/dto/p
   ProductListResponseDto,
   ProductResponseDto,
   PaginationMetaResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
 )
 @Controller(`${AUDIENCE.SELLER}/products`)
 @Auth({ isPublic: false, audiences: ["seller"] }) // 판매자 JWT(aud: seller)만 허용

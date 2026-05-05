@@ -13,6 +13,7 @@ import { cn } from "@/apps/web-seller/common/utils/classname.util";
 import { useSellerNotificationsRequired } from "@/apps/web-seller/features/notification/components/providers/SellerNotificationProvider";
 import type { SellerNotificationItem } from "@/apps/web-seller/features/notification/types/notification.dto";
 import { Bell, ChevronRight } from "lucide-react";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 /** 알림 행 클릭 시 읽음 처리 후 주문 상세로 이동 (주문 알림 전제). */
 function NotificationListCard(props: {
@@ -99,6 +100,7 @@ export const StoreDetailNotificationsListPage: React.FC = () => {
     return (
       <div className="space-y-6">
         <h1 className="text-3xl font-bold">알림 목록</h1>
+        <ContentLoading variant="page" message="알림을 불러오는 중…" showLogo />
       </div>
     );
   }

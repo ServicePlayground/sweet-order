@@ -23,6 +23,7 @@ import {
 } from "@/apps/web-seller/features/home/constants/store-home-typography.constant";
 import { STORE_BANK_OPTIONS } from "@/apps/web-seller/features/store/constants/store.constants";
 import { useStoreDetail } from "@/apps/web-seller/features/store/hooks/queries/useStoreQuery";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 function kakaoChannelHref(id: string): string {
   let slug = id.replace(/^@/, "").trim();
@@ -91,7 +92,7 @@ export const StoreHomeStoreProfile: React.FC<StoreHomeStoreProfileProps> = ({ st
   if (isLoading) {
     return (
       <section className="rounded-2xl border border-zinc-200/90 bg-muted/30 p-8">
-        <p className={HOME_BODY_MUTED}>스토어 정보를 불러오는 중…</p>
+        <ContentLoading variant="section" message="스토어 정보를 불러오는 중…" className="py-6" />
       </section>
     );
   }

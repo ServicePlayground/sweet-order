@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
 import { BaseButton as Button } from "@/apps/web-seller/common/components/buttons/BaseButton";
-import { CloudUpload, Trash2, Loader2 } from "lucide-react";
+import { CloudUpload, Trash2 } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import { LoadingSpinner } from "@/apps/web-seller/common/components/loading/LoadingSpinner";
 import { useUploadFile } from "@/apps/web-seller/features/upload/hooks/mutations/useUploadMutation";
 import { ImagePreview } from "@/apps/web-seller/common/components/images/ImagePreview";
 import {
@@ -206,7 +207,7 @@ export const ImageMultiUpload: React.FC<ImageMultiUploadProps> = ({
             <ImagePreview src={singleImageUrl} />
           ) : isUploading ? (
             <div className="flex flex-col items-center gap-2">
-              <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+              <LoadingSpinner size="lg" className="text-muted-foreground" aria-hidden />
               <p className="text-sm text-muted-foreground">업로드 중...</p>
             </div>
           ) : (
@@ -222,7 +223,7 @@ export const ImageMultiUpload: React.FC<ImageMultiUploadProps> = ({
 
           {isUploading && singleImageUrl && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-              <Loader2 className="h-10 w-10 animate-spin text-white" />
+              <LoadingSpinner size="lg" className="text-white" aria-hidden />
             </div>
           )}
 
@@ -286,7 +287,7 @@ export const ImageMultiUpload: React.FC<ImageMultiUploadProps> = ({
               <ImagePreview src={url} />
               {uploadingIndex === index && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                  <Loader2 className="h-10 w-10 animate-spin text-white" />
+                  <LoadingSpinner size="lg" className="text-white" aria-hidden />
                 </div>
               )}
               <Button

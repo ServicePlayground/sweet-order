@@ -5,6 +5,8 @@ import { useInfiniteScroll } from "@/apps/web-seller/common/hooks/useInfiniteScr
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import type { FeedResponseDto } from "@/apps/web-seller/features/feed/types/feed.dto";
 import { FeedList } from "@/apps/web-seller/features/feed/components/list/FeedList";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
+import { InfiniteScrollLoading } from "@/apps/web-seller/common/components/loading/InfiniteScrollLoading";
 
 export const StoreDetailFeedListPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -48,9 +50,7 @@ export const StoreDetailFeedListPage: React.FC = () => {
 
       {/* 피드 목록 */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">피드를 불러오는 중...</div>
-        </div>
+        <ContentLoading variant="section" message="피드를 불러오는 중…" className="py-12" />
       ) : (
         <>
           <FeedList feeds={feeds} />
@@ -58,12 +58,9 @@ export const StoreDetailFeedListPage: React.FC = () => {
           {/* 무한 스크롤 트리거 */}
           {hasNextPage && (
             <div ref={loadMoreRef} className="flex min-h-[100px] items-center justify-center py-8">
-              {isFetchingNextPage && (
-                <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                  <span>더 많은 피드를 불러오는 중...</span>
-                </div>
-              )}
+              {isFetchingNextPage ? (
+                <InfiniteScrollLoading message="더 많은 피드를 불러오는 중…" />
+              ) : null}
             </div>
           )}
         </>

@@ -15,6 +15,10 @@ import {
   OrderItemResponseDto,
   OrderResponseDto,
 } from "@apps/backend/modules/order/dto/order-detail.dto";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 import { PRODUCT_ERROR_MESSAGES } from "@apps/backend/modules/product/constants/product.constants";
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 
@@ -22,7 +26,14 @@ import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/stor
  * 후기 관련 컨트롤러
  */
 @ApiTags("후기")
-@ApiExtraModels(ReviewListResponseDto, ReviewResponseDto, OrderResponseDto, OrderItemResponseDto)
+@ApiExtraModels(
+  ReviewListResponseDto,
+  ReviewResponseDto,
+  OrderResponseDto,
+  OrderItemResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+)
 @Controller(`${AUDIENCE.CONSUMER}/review`)
 @Auth({ isPublic: true })
 export class ConsumerReviewController {

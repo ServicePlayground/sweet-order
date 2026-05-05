@@ -38,6 +38,7 @@ import {
 } from "@/apps/web-seller/features/order/components/detail/OrderDetailSheetTable";
 import { CircleHelp, X } from "lucide-react";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 type ReasonTarget =
   | OrderStatus.CANCEL_COMPLETED
@@ -81,9 +82,11 @@ export const StoreDetailOrderDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-[13px] font-medium text-slate-500">로딩 중...</div>
-      </div>
+      <ContentLoading
+        variant="page"
+        message="주문 정보를 불러오는 중…"
+        className="border-0 shadow-none"
+      />
     );
   }
 

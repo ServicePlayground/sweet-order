@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Put,
   Delete,
   Query,
   Param,
@@ -65,6 +66,15 @@ import {
 } from "@apps/backend/modules/auth/dto/mypage-profile.dto";
 import { AuthWithdrawService } from "@apps/backend/modules/auth/services/auth-withdraw.service";
 import { WithdrawAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-withdraw.dto";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
+import { NotificationService } from "@apps/backend/modules/notification/services/notification.service";
+import {
+  UserNotificationPreferenceResponseDto,
+  UserNotificationPreferenceUpdateDto,
+} from "@apps/backend/modules/notification/dto/user-notification.dto";
 
 /**
  * 마이페이지 컨트롤러
@@ -75,6 +85,8 @@ import { WithdrawAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-w
   OrderListResponseDto,
   OrderResponseDto,
   OrderItemResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
   MyReviewListResponseDto,
   WritableReviewOrdersListResponseDto,
   GetWritableReviewOrdersRequestDto,
@@ -86,6 +98,7 @@ import { WithdrawAccountRequestDto } from "@apps/backend/modules/auth/dto/auth-w
   UpdateMypageProfileRequestDto,
   ConsumerMypageProfileResponseDto,
   ChangePhoneRequestDto,
+  UserNotificationPreferenceResponseDto,
 )
 @Controller(`${AUDIENCE.CONSUMER}/mypage`)
 @Auth({ isPublic: false, audiences: ["consumer"] })
@@ -98,6 +111,7 @@ export class ConsumerMypageController {
     private readonly reviewService: ReviewService,
     private readonly likeService: LikeService,
     private readonly recentViewService: RecentViewService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   /**
@@ -173,6 +187,35 @@ export class ConsumerMypageController {
   ) {
     await this.withdrawService.withdraw(AUDIENCE.CONSUMER, req.user.sub, body.reason);
     return createMessageObject(AUTH_SUCCESS_MESSAGES.ACCOUNT_WITHDRAWN);
+  }
+
+  @Get("notification-preferences")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 알림설정 조회",
+    description: "알림설정을 조회합니다. 설정이 없으면 기본값(켜짐)으로 생성합니다.",
+  })
+  @SwaggerResponse(200, { dataDto: UserNotificationPreferenceResponseDto })
+  @SwaggerAuthResponses()
+  async getNotificationPreferences(
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<UserNotificationPreferenceResponseDto> {
+    return this.notificationService.getOrCreatePreferenceUserWeb(req.user.sub);
+  }
+
+  @Put("notification-preferences")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "(로그인 필요) 마이페이지 알림설정 저장",
+    description: "알림설정을 수정합니다. 전달된 필드만 반영됩니다.",
+  })
+  @SwaggerResponse(200, { dataDto: UserNotificationPreferenceResponseDto })
+  @SwaggerAuthResponses()
+  async updateNotificationPreferences(
+    @Body() body: UserNotificationPreferenceUpdateDto,
+    @Request() req: { user: JwtVerifiedPayload },
+  ): Promise<UserNotificationPreferenceResponseDto> {
+    return this.notificationService.updatePreferenceUserWeb(req.user.sub, body);
   }
 
   /**

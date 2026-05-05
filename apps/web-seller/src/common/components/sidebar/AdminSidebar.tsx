@@ -16,6 +16,7 @@ import {
 } from "@/apps/web-seller/common/components/selects/Select";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
 import { useSellerNotifications } from "@/apps/web-seller/features/notification/components/providers/SellerNotificationProvider";
+import { SellerAppLogo } from "@/apps/web-seller/common/components/branding/SellerAppLogo";
 
 interface AdminSidebarProps {
   isMobile: boolean;
@@ -126,7 +127,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </div>
 
           {/* Navigation Menu */}
-          <nav className="flex-1 overflow-y-auto">
+          <nav className="min-h-0 flex-1 overflow-y-auto">
             <ul className="p-2 space-y-1">
               {menuItems.map((item) => {
                 const hasChildren = Array.isArray(item.children) && item.children.length > 0;
@@ -184,6 +185,20 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
               })}
             </ul>
           </nav>
+
+          <footer className="shrink-0 border-t border-zinc-800/90 bg-zinc-900/50 px-4 py-3.5">
+            <div className="flex items-center gap-3 rounded-lg border border-zinc-800/80 bg-zinc-800/40 px-3 py-2.5">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-white/95 p-1 shadow-sm">
+                <SellerAppLogo width={32} className="max-h-8" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Picake
+                </p>
+                <p className="truncate text-sm font-medium text-zinc-200">판매자 센터</p>
+              </div>
+            </div>
+          </footer>
         </div>
       </aside>
     </>

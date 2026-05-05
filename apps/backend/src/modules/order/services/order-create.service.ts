@@ -55,6 +55,8 @@ export class OrderCreateService {
       pickupZonecode,
       pickupLatitude,
       pickupLongitude,
+      reservationContactName,
+      reservationPhone,
     } = createOrderDto;
 
     // 상품 존재 여부 및 판매 가능 여부 확인
@@ -184,6 +186,8 @@ export class OrderCreateService {
                 pickupZonecode,
                 pickupLatitude,
                 pickupLongitude,
+                reservationContactName: reservationContactName ?? null,
+                reservationPhone: reservationPhone ?? null,
                 orderStatus,
                 orderItems: {
                   create: normalizedItems,

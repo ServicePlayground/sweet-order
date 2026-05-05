@@ -1,0 +1,160 @@
+"use client";
+
+import Image from "next/image";
+import { useState } from "react";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import {
+  OrderResponse,
+  OrderItemResponse,
+  OrderStatus,
+} from "@/apps/web-user/features/order/types/order.type";
+import { OrderStatusBadge } from "@/apps/web-user/features/order/components/OrderStatusBadge";
+
+function formatItemName(order: OrderResponse, item: OrderItemResponse) {
+  const parts: string[] = [order.productName];
+  if (item.sizeDisplayName) parts.push(item.sizeDisplayName);
+  if (item.flavorDisplayName) parts.push(item.flavorDisplayName);
+  return parts.join(" ");
+}
+
+interface ReservationItemCardProps {
+  order: OrderResponse;
+  item: OrderItemResponse;
+  onChangeOptions?: (item: OrderItemResponse) => void;
+}
+
+export function ReservationItemCard({ order, item, onChangeOptions }: ReservationItemCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const thumbnailUrl = item.imageUrls?.[0] || order.productImages?.[0];
+  const isCancelled =
+    order.orderStatus === OrderStatus.CANCEL_REFUND_PENDING ||
+    order.orderStatus === OrderStatus.CANCEL_COMPLETED;
+
+  return (
+    <div className="rounded-xl bg-gray-25 border border-gray-100 overflow-hidden">
+      <div className="p-3">
+        <div className="flex gap-3">
+          <div
+            className={`w-[72px] h-[72px] rounded-lg overflow-hidden bg-gray-100 shrink-0 ${isCancelled ? "opacity-30" : ""}`}
+          >
+            {thumbnailUrl ? (
+              <Image
+                src={thumbnailUrl}
+                alt={order.productName}
+                width={72}
+                height={72}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <p className={`text-xs text-gray-500 ${isCancelled ? "opacity-30" : ""}`}>예약상품</p>
+              <OrderStatusBadge status={order.orderStatus} />
+            </div>
+            <p
+              className={`text-sm text-gray-900 mt-0.5 truncate ${isCancelled ? "opacity-30" : ""}`}
+            >
+              {formatItemName(order, item)} ×{item.quantity}
+            </p>
+            <p
+              className={`text-base font-bold text-gray-900 mt-1 ${isCancelled ? "opacity-30" : ""}`}
+            >
+              {item.itemPrice.toLocaleString()}원
+            </p>
+          </div>
+        </div>
+        {(() => {
+          const buttonClass =
+            "flex-1 h-[32px] rounded-lg border border-gray-100 text-xs font-bold text-gray-900 bg-white";
+          const status = order.orderStatus;
+
+          if (status === OrderStatus.RESERVATION_REQUESTED) {
+            return (
+              <div className="flex mt-3">
+                <button
+                  type="button"
+                  onClick={() => onChangeOptions?.(item)}
+                  className={buttonClass}
+                >
+                  옵션변경
+                </button>
+              </div>
+            );
+          }
+
+          if (
+            status === OrderStatus.CANCEL_REFUND_PENDING ||
+            status === OrderStatus.CANCEL_COMPLETED
+          ) {
+            return (
+              <div className="flex mt-3">
+                <button type="button" className={buttonClass}>
+                  취소 상세
+                </button>
+              </div>
+            );
+          }
+
+          return null;
+        })()}
+      </div>
+      {expanded && (
+        <div className="px-4 py-3 border-t border-gray-100 space-y-2 text-xs text-gray-700 bg-gray-50">
+          <div>
+            <p className="text-xs text-gray-500">상품명</p>
+            <div className="flex items-center justify-between text-2sm text-gray-900">
+              <span>{order.productName}</span>
+              <span>{item.itemPrice.toLocaleString()}원</span>
+            </div>
+          </div>
+          {item.sizeDisplayName && (
+            <div>
+              <p className="text-xs text-gray-500">사이즈</p>
+              <div className="flex items-center justify-between text-2sm text-gray-900">
+                <span>{item.sizeDisplayName}</span>
+                <span>+{item.sizePrice?.toLocaleString()}원</span>
+              </div>
+            </div>
+          )}
+          {item.flavorDisplayName && (
+            <div>
+              <p className="text-xs text-gray-500">맛</p>
+              <div className="flex items-center justify-between text-2sm text-gray-900">
+                <span>{item.flavorDisplayName}</span>
+                <span>+{item.flavorPrice?.toLocaleString()}원</span>
+              </div>
+            </div>
+          )}
+          {item.letteringMessage && (
+            <div>
+              <p className="text-xs text-gray-500">레터링 문구</p>
+              <p className="text-2sm text-gray-900">{item.letteringMessage}</p>
+            </div>
+          )}
+          {item.requestMessage && (
+            <div>
+              <p className="text-xs text-gray-500">요청사항</p>
+              <p className="text-2sm text-gray-900">{item.requestMessage}</p>
+            </div>
+          )}
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        className="flex items-center justify-center gap-1 w-full py-2.5 text-2sm text-gray-900 border-t border-gray-100 bg-gray-50"
+      >
+        상세 보기
+        <Icon
+          name="arrow"
+          width={16}
+          height={16}
+          className={`text-gray-300 transition-transform ${expanded ? "rotate-0" : "rotate-180"}`}
+        />
+      </button>
+    </div>
+  );
+}

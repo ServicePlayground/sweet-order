@@ -4,10 +4,11 @@ import { useStoreList } from "@/apps/web-seller/features/store/hooks/queries/use
 import { flattenAndDeduplicateInfiniteData } from "@/apps/web-seller/common/utils/pagination.util";
 import type { StoreResponseDto } from "@/apps/web-seller/features/store/types/store.dto";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
 
 export const RootPage: React.FC = () => {
   const navigate = useNavigate();
-  const { data: storeListData } = useStoreList();
+  const { data: storeListData, isLoading } = useStoreList();
   const stores = useMemo(() => {
     if (!storeListData) return [];
     return flattenAndDeduplicateInfiniteData<StoreResponseDto>(storeListData);
@@ -19,6 +20,17 @@ export const RootPage: React.FC = () => {
     }
   }, [stores, navigate]);
 
+  if (isLoading) {
+    return (
+      <ContentLoading
+        variant="page"
+        message="스토어를 불러오는 중…"
+        showLogo
+        className="border-0 shadow-none"
+      />
+    );
+  }
+
   if (stores.length === 0) {
     return (
       <div className="flex flex-col gap-4">
@@ -28,9 +40,5 @@ export const RootPage: React.FC = () => {
     );
   }
 
-  return (
-    <div>
-      <p className="text-muted-foreground">스토어로 이동 중...</p>
-    </div>
-  );
+  return <ContentLoading variant="section" message="스토어로 이동 중…" className="py-12" />;
 };

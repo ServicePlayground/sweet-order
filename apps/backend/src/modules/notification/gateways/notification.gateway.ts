@@ -13,6 +13,7 @@ import { PrismaService } from "@apps/backend/infra/database/prisma.service";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
 import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 import type {
   SellerNotificationItemDto,
   UserNotificationItemDto,
@@ -109,6 +110,11 @@ export class NotificationGateway
       LoggerUtil.log(`[NotificationGateway] 연결 userId=${userId} socketId=${client.id}`);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
+      LoggerUtil.log(`[NotificationGateway] 연결 실패 socketId=${client.id} reason=${message}`);
+      SentryUtil.captureException(e, "warning", {
+        module: "notification-gateway",
+        operation: "handle-connection",
+      });
       client.emit("error", {
         message,
         code: e instanceof Error && e.name === "TokenExpiredError" ? "TOKEN_EXPIRED" : "AUTH_ERROR",

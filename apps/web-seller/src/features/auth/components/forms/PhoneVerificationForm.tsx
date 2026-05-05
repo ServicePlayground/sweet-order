@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
 import refreshIcon from "@/apps/web-seller/assets/images/refresh.png";
 import { Input } from "@/apps/web-seller/common/components/inputs/Input";
 import { Button } from "@/apps/web-seller/common/components/buttons/Button";
+import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import { LoadingSpinner } from "@/apps/web-seller/common/components/loading/LoadingSpinner";
 import {
   useSendPhoneVerification,
   useVerifyPhoneCode,
@@ -119,8 +120,8 @@ export default function PhoneVerificationForm({
     !verifyPending;
 
   return (
-    <form className="w-full space-y-6" onSubmit={(e) => e.preventDefault()}>
-      <div className="flex flex-col gap-[10px]">
+    <form className="w-full space-y-5" onSubmit={(e) => e.preventDefault()}>
+      <div className="flex flex-col gap-2.5">
         <label htmlFor="auth-phone" className="text-sm font-medium text-zinc-700">
           휴대폰 번호
         </label>
@@ -135,7 +136,7 @@ export default function PhoneVerificationForm({
               error={phoneError}
               placeholder="01012345678"
               maxLength={11}
-              className="font-mono tabular-nums tracking-wide"
+              className="rounded-lg font-mono tabular-nums tracking-wide"
               aria-invalid={!!phoneError}
             />
           </div>
@@ -144,22 +145,26 @@ export default function PhoneVerificationForm({
             variant="outline"
             onClick={handleSendVerificationCode}
             disabled={!phone || !!phoneError || sendPending}
-            className="box-border inline-flex h-[42px] min-h-[42px] shrink-0 !w-auto items-center justify-center rounded-lg border border-gray-100 bg-white px-5 text-sm font-bold leading-tight text-zinc-900 disabled:bg-gray-50 disabled:text-gray-400"
+            className={cn(
+              "h-12 shrink-0 rounded-lg border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-800 shadow-sm",
+              "hover:bg-zinc-50 hover:text-zinc-900",
+              "disabled:border-zinc-100 disabled:bg-zinc-50 disabled:text-zinc-400",
+            )}
           >
             {sendPending ? (
               <span className="inline-flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                <LoadingSpinner size="sm" aria-hidden />
                 발송 중
               </span>
             ) : isCodeSent ? (
-              <span className="inline-flex flex-row items-center gap-[4px]">
+              <span className="inline-flex items-center gap-1">
                 재전송
                 <img
                   src={refreshIcon}
                   alt=""
-                  width={20}
-                  height={20}
-                  className="size-5 shrink-0"
+                  width={18}
+                  height={18}
+                  className="size-[18px] shrink-0 opacity-80"
                   aria-hidden
                 />
               </span>
@@ -170,7 +175,10 @@ export default function PhoneVerificationForm({
         </div>
 
         {isCodeSent ? (
-          <div className="flex flex-col gap-[4px]">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="auth-code" className="sr-only">
+              인증번호
+            </label>
             <Input
               id="auth-code"
               type="text"
@@ -180,14 +188,14 @@ export default function PhoneVerificationForm({
               value={verificationCode}
               onChange={handleVerificationCodeChange}
               error={verificationCodeError}
-              placeholder="인증번호를 입력해주세요."
+              placeholder="인증번호 6자리"
               maxLength={6}
-              className="text-base font-medium text-zinc-900 placeholder:text-zinc-400"
+              className="rounded-lg text-base font-medium text-zinc-900 placeholder:text-zinc-400"
               aria-label="인증번호"
               aria-invalid={!!verificationCodeError}
             />
             <p
-              className="text-right text-xs font-normal text-[var(--system-blu-400,#009BF5)]"
+              className="text-right text-xs font-medium text-zinc-500 tabular-nums"
               aria-live="polite"
             >
               {formatCountdownMmSs(remainingSeconds)} 내 입력
@@ -200,11 +208,11 @@ export default function PhoneVerificationForm({
         type="button"
         disabled={!canVerify}
         onClick={handleVerifyCode}
-        className="h-12 w-full rounded-xl text-sm font-semibold shadow-sm"
+        className="h-[50px] w-full rounded-lg text-[15px] font-medium shadow-sm"
       >
         {verifyPending ? (
           <span className="inline-flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            <LoadingSpinner size="sm" aria-hidden />
             인증 중
           </span>
         ) : (

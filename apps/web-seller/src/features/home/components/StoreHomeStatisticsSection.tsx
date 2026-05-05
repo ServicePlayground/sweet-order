@@ -20,6 +20,8 @@ import {
 } from "@/apps/web-seller/features/statistics/utils/statistics-date.util";
 import { ROUTES } from "@/apps/web-seller/common/constants/paths.constant";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
+import { FetchStatusInline } from "@/apps/web-seller/common/components/loading/FetchStatusInline";
 import {
   HOME_CARD,
   HOME_CARD_ACTION_BUTTON,
@@ -85,7 +87,9 @@ export const StoreHomeStatisticsSection: React.FC<StoreHomeStatisticsSectionProp
             <p className={HOME_BODY_MUTED}>
               <span className={HOME_EMPHASIS}>{rangeLabel}</span>
               {isFetching && !isLoading ? (
-                <span className={cn("ml-2", HOME_CAPTION)}>· 업데이트 중…</span>
+                <span className="ml-2 inline-flex align-middle">
+                  <FetchStatusInline message="업데이트 중…" className={HOME_CAPTION} />
+                </span>
               ) : null}
             </p>
           </div>
@@ -96,8 +100,8 @@ export const StoreHomeStatisticsSection: React.FC<StoreHomeStatisticsSectionProp
 
         <CardContent className="space-y-6 pt-0">
           {isLoading ? (
-            <div className="flex w-full items-center justify-center rounded-lg border border-border bg-muted/20 py-14">
-              <p className={HOME_BODY_MUTED}>통계를 불러오는 중…</p>
+            <div className="flex w-full items-center justify-center rounded-lg border border-border bg-muted/20 py-6">
+              <ContentLoading variant="section" message="통계를 불러오는 중…" className="py-8" />
             </div>
           ) : isError ? (
             <div className="flex w-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-muted/20 py-14">

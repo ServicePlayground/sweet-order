@@ -95,7 +95,7 @@ export const StoreCreatePage: React.FC = () => {
       },
       name: data.name,
       description: data.description,
-      phoneNumber: data.phoneNumber?.trim() || undefined,
+      phoneNumber: data.phoneNumber.trim(),
       logoImageUrl: data.logoImageUrl,
       kakaoChannelId: data.kakaoChannelId?.trim(),
       instagramId: data.instagramId?.trim(),
@@ -108,6 +108,7 @@ export const StoreCreatePage: React.FC = () => {
       zonecode: data.zonecode,
       latitude: data.latitude,
       longitude: data.longitude,
+      refundCancellationPolicy: data.refundCancellationPolicy,
     });
   };
 

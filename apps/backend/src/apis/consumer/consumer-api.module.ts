@@ -18,7 +18,9 @@ import { ConsumerLikeController } from "@apps/backend/apis/consumer/controllers/
 import { OrderModule } from "@apps/backend/modules/order/order.module";
 import { RecentViewModule } from "@apps/backend/modules/recent-view/recent-view.module";
 import { NotificationModule } from "@apps/backend/modules/notification/notification.module";
+import { FcmModule } from "@apps/backend/modules/fcm/fcm.module";
 import { ConsumerNotificationController } from "@apps/backend/apis/consumer/controllers/notification.controller";
+import { ConsumerFcmTokenController } from "@apps/backend/apis/consumer/controllers/fcm-token.controller";
 
 /**
  * Consumer(구매자) API 모듈 — 경로 prefix `consumer`, JWT aud `consumer`
@@ -28,6 +30,7 @@ import { ConsumerNotificationController } from "@apps/backend/apis/consumer/cont
   imports: [
     UploadModule,
     AuthModule,
+    FcmModule,
     StoreModule,
     ProductModule,
     OrderModule,
@@ -41,6 +44,7 @@ import { ConsumerNotificationController } from "@apps/backend/apis/consumer/cont
   controllers: [
     ConsumerUploadController,
     ConsumerAuthController,
+    ConsumerFcmTokenController,
     ConsumerStoreController,
     ConsumerProductController,
     ConsumerOrderController,

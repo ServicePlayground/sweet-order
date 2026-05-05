@@ -5,6 +5,7 @@ import { CreateStoreRequestDto } from "@apps/backend/modules/store/dto/store-cre
 import { STORE_ERROR_MESSAGES } from "@apps/backend/modules/store/constants/store.constants";
 import { Prisma } from "@apps/backend/infra/database/prisma/generated/client";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { sanitizeRefundCancellationPolicyForDb } from "@apps/backend/modules/store/utils/store-refund-cancellation-policy.util";
 
 /**
  * 스토어 생성 서비스
@@ -73,7 +74,7 @@ export class StoreCreateService {
               logoImageUrl: createStoreDto.logoImageUrl,
               name: createStoreDto.name,
               description: createStoreDto.description,
-              phoneNumber: createStoreDto.phoneNumber?.trim(),
+              phoneNumber: createStoreDto.phoneNumber.trim(),
               // 주소/위치 정보
               address: createStoreDto.address,
               roadAddress: createStoreDto.roadAddress,
@@ -88,6 +89,9 @@ export class StoreCreateService {
               // 채널 정보
               kakaoChannelId: createStoreDto.kakaoChannelId?.trim(),
               instagramId: createStoreDto.instagramId?.trim(),
+              refundCancellationPolicy: sanitizeRefundCancellationPolicyForDb(
+                createStoreDto.refundCancellationPolicy,
+              ),
             },
           });
 

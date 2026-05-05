@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsEnum, IsOptional, IsString, ValidateNested } from "class-validator";
 import {
   IsValidStoreName,
   IsValidStoreDescription,
@@ -14,6 +15,7 @@ import {
 } from "@apps/backend/modules/store/constants/store.constants";
 import { SWAGGER_EXAMPLES as UPLOAD_SWAGGER_EXAMPLES } from "@apps/backend/modules/upload/constants/upload.constants";
 import { StoreAddressDto } from "@apps/backend/modules/store/dto/store-common.dto";
+import { RefundCancellationPolicyDto } from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 스토어 수정 요청 DTO
@@ -42,12 +44,12 @@ export class UpdateStoreRequestDto extends StoreAddressDto {
   @IsValidStoreDescription()
   description?: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: "스토어 연락처 (전화/휴대폰)",
     example: SWAGGER_EXAMPLES.PHONE_NUMBER,
   })
   @IsValidStorePhoneNumber()
-  phoneNumber?: string;
+  phoneNumber: string;
 
   @ApiPropertyOptional({
     description: "카카오채널 ID",
@@ -86,6 +88,16 @@ export class UpdateStoreRequestDto extends StoreAddressDto {
   })
   @IsValidAccountHolderName()
   accountHolderName: string;
+
+  @ApiProperty({
+    description:
+      "환불·취소 규정(필수). `rules` 배열(최소 1개): 각 항목에 픽업 N일 전(0=당일) + 조건.",
+    type: RefundCancellationPolicyDto,
+    example: SWAGGER_EXAMPLES.REFUND_CANCELLATION_POLICY,
+  })
+  @ValidateNested()
+  @Type(() => RefundCancellationPolicyDto)
+  refundCancellationPolicy: RefundCancellationPolicyDto;
 
   // 주소/위치는 StoreAddressDto 상속
 }

@@ -12,6 +12,10 @@ import { SellerNotificationItemResponseDto } from "@apps/backend/modules/notific
 import { FeedResponseDto } from "@apps/backend/modules/feed/dto/feed-detail.dto";
 import { SellerHomeService } from "@apps/backend/modules/seller-home/seller-home.service";
 import { SellerHomeDashboardResponseDto } from "@apps/backend/modules/seller-home/dto/seller-home-dashboard.dto";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 판매자 스토어 홈 대시보드 API
@@ -22,6 +26,8 @@ import { SellerHomeDashboardResponseDto } from "@apps/backend/modules/seller-hom
 @ApiExtraModels(
   SellerHomeDashboardResponseDto,
   OrderResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
   SellerNotificationItemResponseDto,
   FeedResponseDto,
 )

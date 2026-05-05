@@ -1,5 +1,6 @@
 import type {
   GetSellerStoresRequestDto,
+  RefundCancellationPolicyDto,
   StoreAddressDto,
   StoreBankName,
 } from "@/apps/web-seller/features/store/types/store.dto";
@@ -8,7 +9,7 @@ import type {
 export interface StoreForm extends StoreAddressDto {
   name: string;
   description?: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   logoImageUrl?: string;
   // 정산 계좌
   bankAccountNumber: string;
@@ -17,6 +18,8 @@ export interface StoreForm extends StoreAddressDto {
   /** 채널 정보 */
   kakaoChannelId?: string;
   instagramId?: string;
+  /** 환불·취소 규정 (필수, `rules` 배열) */
+  refundCancellationPolicy: RefundCancellationPolicyDto;
 }
 
 /** 쿼리 키/옵션용 (page 제외, 클라이언트 전용) */

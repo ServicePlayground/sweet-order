@@ -8,6 +8,7 @@ import {
   businessCalendarStateFromStoreRow,
   toStoreBusinessCalendarApiShape,
 } from "@apps/backend/modules/store/utils/store-business-calendar.util";
+import { refundCancellationPolicyFromDb } from "@apps/backend/modules/store/utils/store-refund-cancellation-policy.util";
 
 /**
  * 스토어 매핑 유틸리티
@@ -148,6 +149,10 @@ export class StoreMapperUtil {
         businessCalendarStateFromStoreRow(store),
       );
 
+      const refundCancellationPolicy = refundCancellationPolicyFromDb(
+        store.refundCancellationPolicy,
+      );
+
       return {
         id: store.id,
         userId: store.sellerId,
@@ -185,6 +190,7 @@ export class StoreMapperUtil {
         productRepresentativeImageUrls,
         minProductPrice,
         businessCalendar,
+        refundCancellationPolicy,
         createdAt: store.createdAt,
         updatedAt: store.updatedAt,
       };

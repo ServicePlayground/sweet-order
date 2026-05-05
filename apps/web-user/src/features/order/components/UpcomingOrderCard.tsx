@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
+import { Icon } from "@/apps/web-user/common/components/icons";
 import { PaymentPendingCard } from "./PaymentPendingCard";
 import { ConfirmedOrderCard } from "./ConfirmedOrderCard";
 
@@ -35,9 +37,15 @@ function UpcomingOrderCardSkeleton() {
   );
 }
 
+const MAX_VISIBLE_CARDS = 3;
+
 export function UpcomingOrderCard() {
+  const router = useRouter();
   const { data, isLoading } = useMyOrders({ type: "UPCOMING" });
   const hasPeeked = useRef(false);
+  const hasNavigated = useRef(false);
+  const overscrollTriggered = useRef(false);
+  const moreButtonRef = useRef<HTMLDivElement>(null);
 
   if (isLoading) return <UpcomingOrderCardSkeleton />;
 
@@ -60,19 +68,43 @@ export function UpcomingOrderCard() {
     });
   if (!orders || orders.length === 0) return null;
 
+  const hasMore = orders.length > MAX_VISIBLE_CARDS;
+  const visibleOrders = hasMore ? orders.slice(0, MAX_VISIBLE_CARDS) : orders;
+
   const handleSwiperInit = (swiper: SwiperType) => {
-    if (orders.length > 1 && !hasPeeked.current) {
+    if (visibleOrders.length > 1 && !hasPeeked.current) {
       hasPeeked.current = true;
       const wrapper = swiper.wrapperEl;
       if (!wrapper) return;
+
+      let cancelled = false;
+      const cancelPeek = () => {
+        cancelled = true;
+        wrapper.style.transition = "";
+        wrapper.style.transform = "";
+        swiper.allowTouchMove = true;
+        wrapper.removeEventListener("touchstart", cancelPeek);
+        wrapper.removeEventListener("pointerdown", cancelPeek);
+      };
+
+      wrapper.addEventListener("touchstart", cancelPeek, { once: true });
+      wrapper.addEventListener("pointerdown", cancelPeek, { once: true });
+      swiper.allowTouchMove = false;
+
       setTimeout(() => {
+        if (cancelled) return;
         wrapper.style.transition = "transform 0.35s cubic-bezier(0.25, 0.1, 0.25, 1)";
         wrapper.style.transform = "translate3d(-15px, 0, 0)";
         setTimeout(() => {
+          if (cancelled) return;
           wrapper.style.transition = "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
           wrapper.style.transform = "translate3d(0, 0, 0)";
           setTimeout(() => {
+            if (cancelled) return;
             wrapper.style.transition = "";
+            swiper.allowTouchMove = true;
+            wrapper.removeEventListener("touchstart", cancelPeek);
+            wrapper.removeEventListener("pointerdown", cancelPeek);
           }, 600);
         }, 350);
       }, 500);
@@ -86,8 +118,8 @@ export function UpcomingOrderCard() {
       <ConfirmedOrderCard order={order} />
     );
 
-  if (orders.length === 1) {
-    return <div className="mb-4 px-5">{renderCard(orders[0])}</div>;
+  if (visibleOrders.length === 1 && !hasMore) {
+    return <div className="mb-4 px-5">{renderCard(visibleOrders[0])}</div>;
   }
 
   return (
@@ -95,13 +127,36 @@ export function UpcomingOrderCard() {
       <Swiper
         slidesPerView="auto"
         spaceBetween={10}
-        slidesOffsetAfter={20}
+        slidesOffsetAfter={hasMore ? 120 : 20}
         className="!overflow-visible"
         onAfterInit={handleSwiperInit}
+        onTouchEnd={(swiper) => {
+          if (!hasMore || hasNavigated.current) return;
+          if (swiper.isEnd && swiper.touches.diff < -80) {
+            hasNavigated.current = true;
+            router.push("/mypage/order");
+          }
+        }}
       >
-        {orders.map((order) => (
-          <SwiperSlide key={order.id} style={{ width: "min(calc(100vw - 40px), 600px)" }}>
-            {renderCard(order)}
+        {visibleOrders.map((order, index) => (
+          <SwiperSlide
+            key={order.id}
+            style={{
+              width: "min(calc(100vw - 40px), 600px)",
+              ...(index === visibleOrders.length - 1 && hasMore ? { overflow: "visible" } : {}),
+            }}
+          >
+            <div className="relative">
+              {renderCard(order)}
+              {index === visibleOrders.length - 1 && hasMore && (
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-[10px] flex flex-col items-center gap-2 w-[100px]">
+                  <span className="flex items-center justify-center w-7 h-7 rounded-full border border-gray-300">
+                    <Icon name="cardMore" width={20} height={20} className="text-gray-400" />
+                  </span>
+                  <span className="text-2sm text-gray-500">모두보기</span>
+                </div>
+              )}
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>

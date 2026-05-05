@@ -33,6 +33,10 @@ import {
 import { createMessageObject } from "@apps/backend/common/utils/message.util";
 import { AUDIENCE } from "@apps/backend/modules/auth/constants/auth.constants";
 import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types";
+import {
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
+} from "@apps/backend/modules/store/dto/store-refund-cancellation-policy.dto";
 
 /**
  * 사용자 주문 컨트롤러
@@ -42,6 +46,8 @@ import { JwtVerifiedPayload } from "@apps/backend/modules/auth/types/auth.types"
 @ApiExtraModels(
   CreateOrderResponseDto,
   OrderResponseDto,
+  RefundCancellationPolicyDto,
+  RefundRuleItemDto,
   UpdateOrderStatusResponseDto,
   CancelOrderBeforePaymentRequestDto,
   MarkPaymentCompleteRequestDto,

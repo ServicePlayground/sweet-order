@@ -25,6 +25,8 @@ import {
   STATISTICS_SURFACE_CARD,
 } from "@/apps/web-seller/features/statistics/constants/statistics.constant";
 import { cn } from "@/apps/web-seller/common/utils/classname.util";
+import { ContentLoading } from "@/apps/web-seller/common/components/loading/ContentLoading";
+import { FetchStatusInline } from "@/apps/web-seller/common/components/loading/FetchStatusInline";
 
 export interface StatisticsOverallContentProps {
   storeId: string;
@@ -92,9 +94,7 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
             <p className="text-sm font-semibold tracking-tight text-foreground">
               선택한 기간 기준 주문 전체 요약
             </p>
-            {isFetching && !isLoading ? (
-              <p className="text-xs text-muted-foreground">업데이트 중…</p>
-            ) : null}
+            {isFetching && !isLoading ? <FetchStatusInline message="업데이트 중…" /> : null}
           </div>
           <StatisticsDateRangeField
             startDate={startDate}
@@ -117,11 +117,11 @@ export const StatisticsOverallContent: React.FC<StatisticsOverallContentProps> =
       {isLoading ? (
         <div
           className={cn(
-            "flex items-center justify-center rounded-lg border py-16",
+            "flex items-center justify-center rounded-lg border py-8",
             STATISTICS_SURFACE_CARD,
           )}
         >
-          <p className="text-sm text-muted-foreground">통계를 불러오는 중...</p>
+          <ContentLoading variant="section" message="통계를 불러오는 중…" className="py-10" />
         </div>
       ) : isError ? (
         <div

@@ -1,0 +1,178 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  OrderItemResponse,
+  OrderResponse,
+  OrderStatus,
+  OrderMyReviewUiStatus,
+} from "@/apps/web-user/features/order/types/order.type";
+import { NavigationBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/NavigationBottomSheet";
+import { StoreInquiryBottomSheet } from "@/apps/web-user/common/components/bottom-sheets/StoreInquiryBottomSheet";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
+import { ReservationInfoSection } from "./ReservationInfoSection";
+import { PaymentInfoSection } from "./PaymentInfoSection";
+import { ReservationItemsSection } from "./ReservationItemsSection";
+import { NoticeSection } from "./NoticeSection";
+import { PaymentPendingCountdownHeader } from "./PaymentPendingCountdownHeader";
+import { PickupDateChangeBottomSheet } from "./PickupDateChangeBottomSheet";
+import { OptionChangeBottomSheet } from "./OptionChangeBottomSheet";
+import { Icon } from "@/apps/web-user/common/components/icons";
+import { Button } from "@/apps/web-user/common/components/buttons/Button";
+import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+
+function getStatusNotice(status: OrderStatus): {
+  message: string;
+  isRed: boolean;
+} | null {
+  switch (status) {
+    case OrderStatus.PAYMENT_COMPLETED:
+      return { message: "판매자의 입금 확인 후 예약이 확정됩니다.", isRed: false };
+    case OrderStatus.CANCEL_REFUND_PENDING:
+      return { message: "환불까지 영업일 기준 1-2일 소요될 수 있습니다.", isRed: false };
+    case OrderStatus.SELLER_CANCELLED:
+      return { message: "판매자 요청으로 예약 취소되었습니다.", isRed: false };
+    case OrderStatus.NO_SHOW:
+      return { message: "노쇼 처리된 예약입니다.", isRed: true };
+    default:
+      return null;
+  }
+}
+
+interface OrderDetailViewProps {
+  order: OrderResponse;
+}
+
+export function OrderDetailView({ order }: OrderDetailViewProps) {
+  const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
+  const [isInquirySheetOpen, setIsInquirySheetOpen] = useState(false);
+  const [isPickupDateSheetOpen, setIsPickupDateSheetOpen] = useState(false);
+  const [showPickupDateUpdatedToast, setShowPickupDateUpdatedToast] = useState(false);
+  const [optionEditTargetItem, setOptionEditTargetItem] = useState<OrderItemResponse | null>(null);
+  const [showOptionUpdatedToast, setShowOptionUpdatedToast] = useState(false);
+
+  const isPaymentPending = order.orderStatus === OrderStatus.PAYMENT_PENDING;
+  const canWriteReview = order.myReviewUiStatus === OrderMyReviewUiStatus.WRITABLE;
+
+  return (
+    <div className={`pt-5 ${canWriteReview ? "pb-[92px]" : ""}`}>
+      {/* 입금대기: 상단 카운트다운 + 결제정보 → 예약정보 순서 */}
+      {isPaymentPending && (
+        <div className="-mt-5 mb-3">
+          <PaymentPendingCountdownHeader order={order} />
+        </div>
+      )}
+      {(() => {
+        const notice = getStatusNotice(order.orderStatus);
+        if (!notice) return null;
+        return (
+          <div className="px-5 py-4">
+            <div
+              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg ${
+                notice.isRed ? "bg-red-50" : "bg-gray-50"
+              }`}
+            >
+              <Icon
+                name="warning"
+                width={16}
+                height={16}
+                className={notice.isRed ? "text-red-400" : "text-gray-400"}
+              />
+              <p className="text-xs text-gray-700">{notice.message}</p>
+            </div>
+          </div>
+        );
+      })()}
+      <div className="flex flex-col gap-10">
+        {isPaymentPending ? (
+          <div className="flex flex-col gap-10">
+            <PaymentInfoSection order={order} />
+            <ReservationInfoSection
+              order={order}
+              onInquiryClick={() => setIsInquirySheetOpen(true)}
+              onMapClick={() => setIsMapSheetOpen(true)}
+              onChangePickupDate={() => setIsPickupDateSheetOpen(true)}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-10">
+            <ReservationInfoSection
+              order={order}
+              onInquiryClick={() => setIsInquirySheetOpen(true)}
+              onMapClick={() => setIsMapSheetOpen(true)}
+              onChangePickupDate={() => setIsPickupDateSheetOpen(true)}
+            />
+            <PaymentInfoSection order={order} />
+          </div>
+        )}
+
+        <ReservationItemsSection
+          order={order}
+          onChangeOptions={(item) => setOptionEditTargetItem(item)}
+        />
+        <NoticeSection />
+
+        <NavigationBottomSheet
+          isOpen={isMapSheetOpen}
+          onClose={() => setIsMapSheetOpen(false)}
+          latitude={order.pickupLatitude}
+          longitude={order.pickupLongitude}
+          storeName={order.storeName}
+        />
+        <StoreInquiryBottomSheet
+          isOpen={isInquirySheetOpen}
+          onClose={() => setIsInquirySheetOpen(false)}
+          kakaoChannelUrl={null}
+          instagramUrl={null}
+        />
+        <PickupDateChangeBottomSheet
+          isOpen={isPickupDateSheetOpen}
+          onClose={() => setIsPickupDateSheetOpen(false)}
+          orderId={order.id}
+          initialPickupDate={order.pickupDate}
+          onSuccess={() => setShowPickupDateUpdatedToast(true)}
+        />
+        <OptionChangeBottomSheet
+          isOpen={optionEditTargetItem !== null}
+          onClose={() => setOptionEditTargetItem(null)}
+          order={order}
+          item={optionEditTargetItem}
+          onSuccess={() => setShowOptionUpdatedToast(true)}
+        />
+      </div>
+
+      {canWriteReview && (
+        <div className="fixed bottom-0 left-0 right-0 mx-auto max-w-[638px] bg-white px-5 py-2.5 shadow-[0_12px_48px_-12px_rgba(0,0,0,0.16)]">
+          <Link href={PATHS.REVIEW_WRITE(order.id)}>
+            <Button variant="outline">후기 작성</Button>
+          </Link>
+        </div>
+      )}
+
+      {showPickupDateUpdatedToast && (
+        <Toast
+          message="날짜 변경 완료"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="column"
+          position="center"
+          duration={2000}
+          onClose={() => setShowPickupDateUpdatedToast(false)}
+        />
+      )}
+
+      {showOptionUpdatedToast && (
+        <Toast
+          message="옵션 변경 완료"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="column"
+          position="center"
+          duration={2000}
+          onClose={() => setShowOptionUpdatedToast(false)}
+        />
+      )}
+    </div>
+  );
+}
