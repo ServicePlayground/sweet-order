@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as admin from "firebase-admin";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 import {
   FCM_MAX_MULTICAST_TOKENS,
   SendFcmTokensParams,
@@ -48,6 +49,10 @@ export class FcmService implements OnModuleInit {
       LoggerUtil.log(
         `[FcmService] Firebase Admin SDK 초기화 실패: ${e instanceof Error ? e.message : String(e)}`,
       );
+      SentryUtil.captureException(e, "error", {
+        module: "fcm",
+        operation: "firebase-admin-init",
+      });
     }
   }
 
@@ -144,6 +149,10 @@ export class FcmService implements OnModuleInit {
       LoggerUtil.log(
         `[FcmService] sendToTokens 실패: ${e instanceof Error ? e.message : String(e)}`,
       );
+      SentryUtil.captureException(e, "error", {
+        module: "fcm",
+        operation: "send-to-tokens",
+      });
     }
 
     return { invalidTokens: Array.from(invalidTokenSet) };

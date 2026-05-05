@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConsumerFcmTokenService } from "@apps/backend/modules/fcm/services/consumer-fcm-token.service";
 import { FcmService } from "@apps/backend/modules/fcm/fcm.service";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 import type { SendConsumerPushParams } from "@apps/backend/modules/fcm/types/fcm-push.types";
 
 /**
@@ -45,6 +46,11 @@ export class ConsumerFcmPushService {
       LoggerUtil.log(
         `[ConsumerFcmPushService] 실패 consumer=${params.consumerId}: ${e instanceof Error ? e.message : String(e)}`,
       );
+      SentryUtil.captureException(e, "error", {
+        module: "consumer-fcm-push",
+        operation: "send-to-consumer",
+        consumerId: params.consumerId,
+      });
     }
   }
 }

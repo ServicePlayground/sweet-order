@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { FileValidator } from "../utils/file-validator.util";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 /**
  * 업로드 생성 서비스
@@ -92,6 +93,10 @@ export class UploadCreateService {
       // S3 관련 에러는 내부 서버 에러로 처리
       if (error.name === "S3ServiceException" || error.$metadata?.httpStatusCode >= 500) {
         LoggerUtil.log(`파일 업로드 실패: S3 서버 에러 - error: ${error.message || String(error)}`);
+        SentryUtil.captureException(error, "error", {
+          module: "upload",
+          operation: "s3-put-object",
+        });
         throw new InternalServerErrorException("파일 업로드 중 서버 오류가 발생했습니다.");
       }
 
@@ -104,6 +109,10 @@ export class UploadCreateService {
       LoggerUtil.log(
         `파일 업로드 실패: 알 수 없는 에러 - error: ${error.message || String(error)}`,
       );
+      SentryUtil.captureException(error, "error", {
+        module: "upload",
+        operation: "upload-file",
+      });
       throw new BadRequestException("파일 업로드에 실패했습니다. 파일 형식과 크기를 확인해주세요.");
     }
   }

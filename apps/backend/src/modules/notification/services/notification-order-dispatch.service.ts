@@ -7,6 +7,7 @@ import { NotificationService } from "@apps/backend/modules/notification/services
 import { NotificationGateway } from "@apps/backend/modules/notification/gateways/notification.gateway";
 import { ConsumerOrderFcmPushService } from "@apps/backend/modules/fcm/services/consumer-order-fcm-push.service";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 /**
  * 주문 라이프사이클 훅에서 호출되어, 판매자·구매자 주문 알림을 처리합니다.
@@ -69,6 +70,12 @@ export class NotificationOrderDispatchService {
       LoggerUtil.log(
         `[NotificationOrderDispatch/seller] 실패 order=${payload.orderId}: ${e instanceof Error ? e.message : String(e)}`,
       );
+      SentryUtil.captureException(e, "error", {
+        module: "notification-order-dispatch",
+        channel: "seller",
+        orderId: payload.orderId,
+        source: payload.source,
+      });
     }
   }
 
@@ -117,6 +124,12 @@ export class NotificationOrderDispatchService {
       LoggerUtil.log(
         `[NotificationOrderDispatch/user] 실패 order=${payload.orderId}: ${e instanceof Error ? e.message : String(e)}`,
       );
+      SentryUtil.captureException(e, "error", {
+        module: "notification-order-dispatch",
+        channel: "user",
+        orderId: payload.orderId,
+        source: payload.source,
+      });
     }
   }
 }

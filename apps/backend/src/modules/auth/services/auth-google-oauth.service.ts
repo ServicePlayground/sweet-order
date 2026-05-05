@@ -18,6 +18,7 @@ import {
 } from "@apps/backend/modules/auth/dto/auth-google-oauth.dto";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { buildInitialNicknameFromName } from "@apps/backend/modules/auth/utils/google-register-nickname.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 /**
  * 구글 OAuth — Consumer / Seller 테이블·JWT aud 분리
@@ -154,6 +155,13 @@ export class AuthGoogleOauthService {
       };
 
       LoggerUtil.log(`Google OAuth 에러 발생: ${JSON.stringify(sanitizedError, null, 2)}`);
+      const status = error.response?.status;
+      if (!status || status >= 500) {
+        SentryUtil.captureException(error, "error", {
+          module: "auth-google-oauth",
+          operation: "exchange-code-for-token",
+        });
+      }
 
       throw error;
     }

@@ -18,6 +18,7 @@ import {
 } from "@apps/backend/modules/auth/dto/auth-kakao-oauth.dto";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
 import { buildInitialNicknameFromName } from "@apps/backend/modules/auth/utils/google-register-nickname.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 @Injectable()
 export class AuthKakaoOauthService {
@@ -143,6 +144,13 @@ export class AuthKakaoOauthService {
         statusText: error.response?.statusText,
       };
       LoggerUtil.log(`Kakao OAuth 에러 발생: ${JSON.stringify(sanitizedError, null, 2)}`);
+      const status = error.response?.status;
+      if (!status || status >= 500) {
+        SentryUtil.captureException(error, "error", {
+          module: "auth-kakao-oauth",
+          operation: "exchange-code-for-token",
+        });
+      }
       if (error instanceof BadRequestException) {
         throw error;
       }

@@ -58,6 +58,7 @@ async function bootstrap(): Promise<void> {
       const isDbConnected = await prismaService.checkConnection();
 
       if (!isDbConnected) {
+        LoggerUtil.log("[HealthCheck] database disconnected");
         return res.status(503).json({
           status: "unhealthy",
           database: "disconnected",
@@ -71,6 +72,13 @@ async function bootstrap(): Promise<void> {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      LoggerUtil.log(
+        `[HealthCheck] failure: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      SentryUtil.captureException(error, "error", {
+        module: "main",
+        operation: "health-check",
+      });
       res.status(503).json({
         status: "unhealthy",
         database: "unknown",
@@ -178,4 +186,11 @@ async function bootstrap(): Promise<void> {
   LoggerUtil.log(`API prefix: ${API_PREFIX}`);
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  LoggerUtil.log(`bootstrap failure: ${error instanceof Error ? error.message : String(error)}`);
+  SentryUtil.captureException(error, "error", {
+    module: "main",
+    operation: "bootstrap",
+  });
+  process.exit(1);
+});

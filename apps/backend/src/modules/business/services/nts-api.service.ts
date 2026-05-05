@@ -7,6 +7,7 @@ import {
   NTS_API_ERROR_MESSAGES,
 } from "@apps/backend/modules/business/constants/business.contants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 /**
  * 국세청 사업자등록정보 진위확인·상태조회 API 전용 서비스
@@ -144,6 +145,11 @@ export class NtsApiService {
         throw new Error(NTS_API_ERROR_MESSAGES.BUSINESS_STATUS_INACTIVE);
       }
     } catch (error: any) {
+      SentryUtil.captureException(error, "error", {
+        module: "business",
+        operation: "nts-verify-business-registration",
+      });
+
       if (error.message) {
         LoggerUtil.log(`[NTS_API] 사업자등록번호 진위확인 실패: ${error.message}`);
         throw new BadRequestException(`[NTS_API] 사업자등록번호 진위확인 실패: ${error.message}`);

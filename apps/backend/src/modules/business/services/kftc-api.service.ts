@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from "axios";
 import { OnlineTradingCompanyDetailRequestDto } from "@apps/backend/modules/business/dto/business-request.dto";
 import { KFTC_API_ERROR_MESSAGES } from "@apps/backend/modules/business/constants/business.contants";
 import { LoggerUtil } from "@apps/backend/common/utils/logger.util";
+import { SentryUtil } from "@apps/backend/common/utils/sentry.util";
 
 /**
  * 공정거래위원회 통신판매사업자 등록상세 조회 API 전용 서비스
@@ -135,6 +136,11 @@ export class KftcApiService {
         throw new BadRequestException(KFTC_API_ERROR_MESSAGES.OPERATION_STATUS_NOT_NORMAL);
       }
     } catch (error: any) {
+      SentryUtil.captureException(error, "error", {
+        module: "business",
+        operation: "kftc-get-online-trading-company-detail",
+      });
+
       if (error.message) {
         LoggerUtil.log(`[KFTC_API] 통신판매사업자 등록상세 조회 실패: ${error.message}`);
         throw new BadRequestException(

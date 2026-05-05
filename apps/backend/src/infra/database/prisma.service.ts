@@ -51,6 +51,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           this.isConnected = false;
 
           LoggerUtil.log("🚫 Prisma 연결 재시도 모두 실패 — 애플리케이션을 종료합니다.");
+          SentryUtil.captureException(e, "error", {
+            module: "prisma-service",
+            operation: "connect-with-retry",
+            attempt: String(i),
+            retries: String(retries),
+          });
           throw new Error(`데이터베이스 연결에 실패했습니다. (${code}: ${msg})`);
         }
         await new Promise((r) => setTimeout(r, delayMs));
@@ -78,11 +84,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       );
 
       // 연결 실패는 중요한 이벤트이므로 Sentry로 전송
-      if (error instanceof Error) {
-        SentryUtil.captureException(error, "error", {
-          context: "Prisma connection check",
-        });
-      }
+      SentryUtil.captureException(error, "error", {
+        module: "prisma-service",
+        operation: "check-connection",
+      });
 
       return false;
     }
