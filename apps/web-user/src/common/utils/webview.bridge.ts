@@ -119,13 +119,6 @@ export function useWebViewBridge() {
     // Flutter 앱에서 호출할 수 있도록 window.FcmToken 객체 초기화
     window.FcmToken = {
       upsert: ({ token, deviceId }: FcmToken) => {
-        alert(
-          `[임시] FcmToken.upsert 수신\n${JSON.stringify(
-            { token, deviceId },
-            null,
-            2,
-          )}`,
-        );
         if (!token || typeof token !== "string" || !deviceId || typeof deviceId !== "string") {
           console.warn("유효하지 않은 FCM 토큰 또는 디바이스 ID가 전달되었습니다.");
           return;
@@ -140,13 +133,6 @@ export function useWebViewBridge() {
         upsertConsumerFcmToken({ token: normalizedToken, deviceId: normalizedDeviceId });
       },
       remove: ({ deviceId }: Omit<FcmToken, "token">) => {
-        alert(
-          `[임시] FcmToken.remove 수신\n${JSON.stringify(
-            { deviceId },
-            null,
-            2,
-          )}`,
-        );
         if (!deviceId || typeof deviceId !== "string") {
           console.warn("유효하지 않은 디바이스 ID가 전달되었습니다.");
           return;

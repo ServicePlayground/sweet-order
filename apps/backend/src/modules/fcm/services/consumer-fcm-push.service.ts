@@ -20,21 +20,44 @@ export class ConsumerFcmPushService {
 
   async sendToConsumer(params: SendConsumerPushParams): Promise<void> {
     if (!this.fcmService.isEnabled) {
+      SentryUtil.captureMessage("[ConsumerFcmPushService] FCM 비활성화 상태로 발송 스킵", "warning", {
+        module: "consumer-fcm-push",
+        operation: "send-to-consumer",
+        status: "skipped_fcm_disabled",
+        consumerId: params.consumerId,
+      });
       return;
     }
 
     try {
       const tokens = await this.consumerFcmTokenService.getTokensByConsumerId(params.consumerId);
       if (tokens.length === 0) {
+        SentryUtil.captureMessage("[ConsumerFcmPushService] 소비자 FCM 토큰 없음으로 발송 스킵", "warning", {
+          module: "consumer-fcm-push",
+          operation: "send-to-consumer",
+          status: "skipped_no_tokens",
+          consumerId: params.consumerId,
+        });
         return;
       }
 
-      const { invalidTokens } = await this.fcmService.sendToTokens({
+      const { invalidTokens, successCount, failureCount, failureCodes } = await this.fcmService.sendToTokens({
         tokens,
         title: params.title,
         body: params.body,
         data: params.data,
         androidChannelId: params.androidChannelId,
+      });
+      SentryUtil.captureMessage("[ConsumerFcmPushService] FCM 발송 결과", "info", {
+        module: "consumer-fcm-push",
+        operation: "send-to-consumer",
+        status: failureCount > 0 ? "partial_or_failed" : "success",
+        consumerId: params.consumerId,
+        tokenCount: String(tokens.length),
+        successCount: String(successCount),
+        failureCount: String(failureCount),
+        invalidTokenCount: String(invalidTokens.length),
+        failureCodes: failureCodes.join(",") || "none",
       });
 
       if (invalidTokens.length === 0) {

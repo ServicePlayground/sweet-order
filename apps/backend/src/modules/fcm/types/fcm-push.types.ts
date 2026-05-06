@@ -35,4 +35,7 @@ export interface SendFcmTokensParams {
 
 export interface SendFcmTokensResult {
   invalidTokens: string[];
+  successCount: number;
+  failureCount: number;
+  failureCodes: string[];
 }

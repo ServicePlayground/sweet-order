@@ -99,21 +99,21 @@ export class FcmService implements OnModuleInit {
    */
   async sendToTokens(params: SendFcmTokensParams): Promise<SendFcmTokensResult> {
     if (!this.app) {
-      return { invalidTokens: [] };
+      return { invalidTokens: [], successCount: 0, failureCount: 0, failureCodes: [] };
     }
 
     const tokens = FcmService.sanitizeTokens(params.tokens);
     if (tokens.length === 0) {
-      return { invalidTokens: [] };
+      return { invalidTokens: [], successCount: 0, failureCount: 0, failureCodes: [] };
     }
 
     const invalidTokenSet = new Set<string>();
+    const failureCodeSet = new Set<string>();
     const tokenChunks = FcmService.splitIntoChunks(tokens, FCM_MAX_MULTICAST_TOKENS);
+    let successCount = 0;
+    let failureCount = 0;
 
     try {
-      let successCount = 0;
-      let failureCount = 0;
-
       for (const chunk of tokenChunks) {
         const response = await admin.messaging(this.app).sendEachForMulticast({
           tokens: chunk,
@@ -144,6 +144,9 @@ export class FcmService implements OnModuleInit {
         failureCount += response.failureCount;
 
         response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
+          if (!resp.success && resp.error?.code) {
+            failureCodeSet.add(resp.error.code);
+          }
           if (
             !resp.success &&
             (resp.error?.code === "messaging/invalid-registration-token" ||
@@ -156,11 +159,14 @@ export class FcmService implements OnModuleInit {
 
       if (failureCount > 0) {
         const invalidTokens = Array.from(invalidTokenSet);
+        const failureCodes = Array.from(failureCodeSet);
         LoggerUtil.log(
-          `[FcmService] 발송 결과 success=${successCount} failure=${failureCount} invalidTokens=${invalidTokens.length}`,
+          `[FcmService] 발송 결과 success=${successCount} failure=${failureCount} invalidTokens=${invalidTokens.length} failureCodes=${failureCodes.join(",")}`,
         );
       }
     } catch (e) {
+      failureCodeSet.add("exception/send-to-tokens");
+      failureCount += tokens.length;
       LoggerUtil.log(
         `[FcmService] sendToTokens 실패: ${e instanceof Error ? e.message : String(e)}`,
       );
@@ -170,6 +176,11 @@ export class FcmService implements OnModuleInit {
       });
     }
 
-    return { invalidTokens: Array.from(invalidTokenSet) };
+    return {
+      invalidTokens: Array.from(invalidTokenSet),
+      successCount,
+      failureCount,
+      failureCodes: Array.from(failureCodeSet),
+    };
   }
 }
