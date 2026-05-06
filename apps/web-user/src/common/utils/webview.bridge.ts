@@ -91,7 +91,7 @@ export function isWebViewEnvironment(): boolean {
  * 이 훅은 앱 초기화 시 한 번 호출되어야 합니다.
  */
 export function useWebViewBridge() {
-  const { login, handleLogoutByEnvironment } = useAuthStore();
+  const { login, handleLogoutByEnvironment, isAuthenticated, accessToken } = useAuthStore();
   const { setLocation, setAddress } = useUserCurrentLocationStore();
   const { mutate: upsertConsumerFcmToken } = useUpsertConsumerFcmToken();
   const { mutate: removeConsumerFcmToken } = useRemoveConsumerFcmToken();
@@ -119,6 +119,10 @@ export function useWebViewBridge() {
     // Flutter 앱에서 호출할 수 있도록 window.FcmToken 객체 초기화
     window.FcmToken = {
       upsert: ({ token, deviceId }: FcmToken) => {
+        if (!isAuthenticated || !accessToken) {
+          console.warn("로그인 상태가 아니어서 FCM 토큰 upsert를 건너뜁니다.");
+          return;
+        }
         if (!token || typeof token !== "string" || !deviceId || typeof deviceId !== "string") {
           console.warn("유효하지 않은 FCM 토큰 또는 디바이스 ID가 전달되었습니다.");
           return;
@@ -133,6 +137,10 @@ export function useWebViewBridge() {
         upsertConsumerFcmToken({ token: normalizedToken, deviceId: normalizedDeviceId });
       },
       remove: ({ deviceId }: Omit<FcmToken, "token">) => {
+        if (!isAuthenticated || !accessToken) {
+          console.warn("로그인 상태가 아니어서 FCM 토큰 remove를 건너뜁니다.");
+          return;
+        }
         if (!deviceId || typeof deviceId !== "string") {
           console.warn("유효하지 않은 디바이스 ID가 전달되었습니다.");
           return;
@@ -175,6 +183,8 @@ export function useWebViewBridge() {
     setAddress,
     upsertConsumerFcmToken,
     removeConsumerFcmToken,
+    isAuthenticated,
+    accessToken,
   ]);
 }
 
