@@ -20,6 +20,16 @@ export class ConsumerFcmPushService {
 
   async sendToConsumer(params: SendConsumerPushParams): Promise<void> {
     if (!this.fcmService.isEnabled) {
+      SentryUtil.captureMessage(
+        "[ConsumerFcmPushService] FCM 비활성화 상태로 발송 스킵",
+        "warning",
+        {
+          module: "consumer-fcm-push",
+          operation: "send-to-consumer",
+          status: "skipped_fcm_disabled",
+          consumerId: params.consumerId,
+        },
+      );
       return;
     }
 

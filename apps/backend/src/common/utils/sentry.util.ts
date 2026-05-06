@@ -91,4 +91,30 @@ export class SentryUtil {
       );
     }
   }
+
+  /**
+   * 메시지를 Sentry로 전송
+   * @param message 전송할 메시지
+   * @param level 메시지 레벨
+   * @param tags Sentry 태그
+   */
+  static captureMessage(
+    message: string,
+    level: Sentry.SeverityLevel = "info",
+    tags?: Record<string, string>,
+  ): void {
+    if (!this.enabled()) {
+      return;
+    }
+    try {
+      Sentry.captureMessage(message, {
+        level,
+        tags,
+      });
+    } catch (error) {
+      LoggerUtil.log(
+        `Sentry 메시지 전송 실패: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 }

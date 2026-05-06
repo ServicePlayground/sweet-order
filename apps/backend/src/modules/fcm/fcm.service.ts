@@ -29,6 +29,11 @@ export class FcmService implements OnModuleInit {
 
     if (!projectId || !clientEmail || !privateKey) {
       LoggerUtil.log("[FcmService] Firebase 환경변수 미설정 — FCM 비활성화");
+      SentryUtil.captureMessage("[FcmService] Firebase 환경변수 미설정 — FCM 비활성화", "warning", {
+        module: "fcm",
+        operation: "firebase-admin-init",
+        status: "disabled",
+      });
       return;
     }
 
@@ -49,6 +54,11 @@ export class FcmService implements OnModuleInit {
       LoggerUtil.log(
         `[FcmService] Firebase Admin SDK 초기화 실패: ${e instanceof Error ? e.message : String(e)}`,
       );
+      SentryUtil.captureMessage("[FcmService] Firebase Admin SDK 초기화 실패", "error", {
+        module: "fcm",
+        operation: "firebase-admin-init",
+        status: "failure",
+      });
       SentryUtil.captureException(e, "error", {
         module: "fcm",
         operation: "firebase-admin-init",
@@ -96,8 +106,8 @@ export class FcmService implements OnModuleInit {
     const tokenChunks = FcmService.splitIntoChunks(tokens, FCM_MAX_MULTICAST_TOKENS);
 
     try {
-      let successCount = 0;
       let failureCount = 0;
+      let successCount = 0;
 
       for (const chunk of tokenChunks) {
         const response = await admin.messaging(this.app).sendEachForMulticast({
@@ -155,6 +165,8 @@ export class FcmService implements OnModuleInit {
       });
     }
 
-    return { invalidTokens: Array.from(invalidTokenSet) };
+    return {
+      invalidTokens: Array.from(invalidTokenSet),
+    };
   }
 }
