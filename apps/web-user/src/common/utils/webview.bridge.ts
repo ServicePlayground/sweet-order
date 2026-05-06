@@ -93,8 +93,8 @@ export function isWebViewEnvironment(): boolean {
 export function useWebViewBridge() {
   const { login, handleLogoutByEnvironment } = useAuthStore();
   const { setLocation, setAddress } = useUserCurrentLocationStore();
-  const { mutateAsync: upsertConsumerFcmToken } = useUpsertConsumerFcmToken();
-  const { mutateAsync: removeConsumerFcmToken } = useRemoveConsumerFcmToken();
+  const { mutate: upsertConsumerFcmToken } = useUpsertConsumerFcmToken();
+  const { mutate: removeConsumerFcmToken } = useRemoveConsumerFcmToken();
 
   useEffect(() => {
     if (typeof window === "undefined") {
