@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import Header from "@/apps/web-user/common/components/headers/Header";
 import { useOrderDetail } from "@/apps/web-user/features/order/hooks/queries/useOrderDetail";
-import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
+import { OrderResponse, OrderStatus } from "@/apps/web-user/features/order/types/order.type";
 import { ReservationItemCard } from "@/apps/web-user/features/order/components/detail/ReservationItemCard";
 import { OrderStatusBadge } from "@/apps/web-user/features/order/components/OrderStatusBadge";
 
@@ -53,7 +53,7 @@ export default function CancelDetailPage() {
   );
 }
 
-function CancelDetailView({ order }: { order: ReturnType<typeof useOrderDetail>["data"] & {} }) {
+function CancelDetailView({ order }: { order: OrderResponse }) {
   const hasRefundInfo =
     order.orderStatus === OrderStatus.CANCEL_REFUND_PENDING ||
     order.orderStatus === OrderStatus.CANCEL_REFUND_COMPLETED ||
