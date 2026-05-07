@@ -51,6 +51,20 @@ export function ReservationBottomSheet({
     setLetteringMessage,
     requestMessage,
     setRequestMessage,
+    reserverName,
+    setReserverName,
+    reserverPhone,
+    setReserverPhone,
+    agreePayment,
+    setAgreePayment,
+    agreeRefund,
+    setAgreeRefund,
+    agreeOptionChange,
+    setAgreeOptionChange,
+    allAgreed,
+    handleToggleAllAgreements,
+    isAgreementAlertOpen,
+    setIsAgreementAlertOpen,
     imageUrls,
     fileInputRef,
     orderItems,
@@ -153,6 +167,10 @@ export function ReservationBottomSheet({
         <div className="py-[12px]">
           <Button
             onClick={async () => {
+              if (!allAgreed) {
+                setIsAgreementAlertOpen(true);
+                return;
+              }
               // 각 OrderItem의 이미지를 업로드하고 URL 받기
               const itemsWithImageUrls = await Promise.all(
                 orderItems.map(async (item) => {
@@ -288,12 +306,31 @@ export function ReservationBottomSheet({
       handleDeleteClick={handleDeleteClick}
       handleQuantityChange={handleQuantityChange}
       handleAddNewItem={handleAddNewItem}
+      reserverName={reserverName}
+      setReserverName={setReserverName}
+      reserverPhone={reserverPhone}
+      setReserverPhone={setReserverPhone}
+      agreePayment={agreePayment}
+      setAgreePayment={setAgreePayment}
+      agreeRefund={agreeRefund}
+      setAgreeRefund={setAgreeRefund}
+      agreeOptionChange={agreeOptionChange}
+      setAgreeOptionChange={setAgreeOptionChange}
+      allAgreed={allAgreed}
+      handleToggleAllAgreements={handleToggleAllAgreements}
     />
   );
 
   return (
     <>
-      <BottomSheet isOpen={isOpen} onClose={handleClose} title={getTitle()} footer={renderFooter()}>
+      <BottomSheet
+        isOpen={isOpen}
+        onClose={handleClose}
+        title={getTitle()}
+        footer={renderFooter()}
+        fullScreen={view === "confirm"}
+        scrollResetKey={view}
+      >
         {view === "options" && renderOptionsView()}
         {view === "calendar" && renderCalendarView()}
         {view === "confirm" && renderConfirmView()}
@@ -330,6 +367,17 @@ export function ReservationBottomSheet({
         cancelVariant="primary"
         onConfirm={handleDateChangeCancel}
         onCancel={handleDateChangeConfirm}
+      />
+
+      <Modal
+        isOpen={isAgreementAlertOpen}
+        onClose={() => setIsAgreementAlertOpen(false)}
+        title="필수 동의 항목 미동의"
+        description="필수 동의 항목에 모두 동의하셔야 예약이 진행됩니다."
+        confirmText="확인"
+        confirmVariant="primary"
+        onConfirm={() => setIsAgreementAlertOpen(false)}
+        hideCancel
       />
     </>
   );

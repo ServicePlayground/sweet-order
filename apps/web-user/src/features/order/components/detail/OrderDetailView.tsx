@@ -18,7 +18,7 @@ import { NoticeSection } from "./NoticeSection";
 import { PaymentPendingCountdownHeader } from "./PaymentPendingCountdownHeader";
 import { PickupDateChangeBottomSheet } from "./PickupDateChangeBottomSheet";
 import { OptionChangeBottomSheet } from "./OptionChangeBottomSheet";
-import { Icon } from "@/apps/web-user/common/components/icons";
+import { InfoNotice } from "@/apps/web-user/common/components/notice/InfoNotice";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
 
@@ -68,19 +68,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
         if (!notice) return null;
         return (
           <div className="px-5 py-4">
-            <div
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg ${
-                notice.isRed ? "bg-red-50" : "bg-gray-50"
-              }`}
-            >
-              <Icon
-                name="warning"
-                width={16}
-                height={16}
-                className={notice.isRed ? "text-red-400" : "text-gray-400"}
-              />
-              <p className="text-xs text-gray-700">{notice.message}</p>
-            </div>
+            <InfoNotice tone={notice.isRed ? "red" : "gray"} message={notice.message} />
           </div>
         );
       })()}

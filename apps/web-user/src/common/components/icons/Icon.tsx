@@ -52,6 +52,7 @@ import Handle from "./icons/handle.svg";
 import Sort from "./icons/sort.svg";
 import ReviewFill from "./icons/review_fill.svg";
 import Pencil from "./icons/pencil.svg";
+import Pencle from "./icons/pencle.svg";
 import ReviewQna from "./icons/review_qna.svg";
 import Copy from "./icons/copy.svg";
 import Multiply from "./icons/multiply.svg";
@@ -117,6 +118,7 @@ export const iconTypes = {
   sort: Sort,
   reviewFill: ReviewFill,
   pencil: Pencil,
+  pencle: Pencle,
   reviewQna: ReviewQna,
   copy: Copy,
   multiply: Multiply,

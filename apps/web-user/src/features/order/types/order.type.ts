@@ -144,6 +144,10 @@ export interface OrderResponse {
   userCancelReason?: string | null;
   sellerNoShowReason?: string | null;
   refundRequestReason?: string | null;
+  sellerCancelRefundPendingReason?: string | null;
+  refundBankName?: string | null;
+  refundBankAccountNumber?: string | null;
+  refundAccountHolderName?: string | null;
   // 후기 UI 상태
   myReviewUiStatus: OrderMyReviewUiStatus;
   linkedProductReviewId?: string | null;
