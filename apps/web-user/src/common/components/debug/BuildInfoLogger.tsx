@@ -12,8 +12,6 @@ export default function BuildInfoLogger() {
       "color:#10b981;font-weight:bold;",
       {
         VERCEL_GIT_COMMIT_SHA: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? "—",
-        GITHUB_SHA: process.env.NEXT_PUBLIC_GITHUB_SHA ?? "—",
-        GITHUB_REF_NAME: process.env.NEXT_PUBLIC_GITHUB_REF_NAME ?? "—",
       },
     );
   }, []);

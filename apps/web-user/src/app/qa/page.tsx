@@ -249,7 +249,7 @@ export default function QAPage() {
             <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">버전 정보</h2>
           </div>
           <p className="text-xs text-gray-400 mb-4">
-            Vercel 또는 GitHub Actions 빌드 시 주입됩니다. 로컬에서는 보통 비어 있습니다.
+            Vercel 빌드 시 주입됩니다. 로컬에서는 보통 비어 있습니다.
           </p>
 
           <div className="flex flex-col gap-5">
@@ -260,24 +260,6 @@ export default function QAPage() {
                 <p className="text-xs font-mono text-gray-900 break-all leading-relaxed">
                   {process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.trim() ?? "—"}
                 </p>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold text-gray-700 mb-2">GitHub Actions</p>
-              <div className="flex flex-col gap-2">
-                <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1">
-                  <p className="text-[10px] font-mono text-gray-400">GITHUB_SHA</p>
-                  <p className="text-xs font-mono text-gray-900 break-all leading-relaxed">
-                    {process.env.NEXT_PUBLIC_GITHUB_SHA?.trim() ?? "—"}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1">
-                  <p className="text-[10px] font-mono text-gray-400">GITHUB_REF_NAME</p>
-                  <p className="text-xs font-mono text-gray-900 break-all leading-relaxed">
-                    {process.env.NEXT_PUBLIC_GITHUB_REF_NAME?.trim() ?? "—"}
-                  </p>
-                </div>
               </div>
             </div>
           </div>

@@ -9,8 +9,6 @@ export default function BuildInfoLogger() {
   useEffect(() => {
     console.info("%c[Build Info]", "color:#10b981;font-weight:bold;", {
       VERCEL_GIT_COMMIT_SHA: import.meta.env.VITE_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? "—",
-      GITHUB_SHA: import.meta.env.VITE_PUBLIC_GITHUB_SHA ?? "—",
-      GITHUB_REF_NAME: import.meta.env.VITE_PUBLIC_GITHUB_REF_NAME ?? "—",
     });
   }, []);
 
