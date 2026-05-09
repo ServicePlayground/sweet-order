@@ -241,6 +241,47 @@ export default function QAPage() {
             )}
           </div>
         </section>
+
+        {/* 배포·CI 버전 (클라이언트 번들에 박힌 NEXT_PUBLIC_* ) */}
+        <section className="bg-white rounded-2xl p-5 border border-gray-200">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="w-2 h-2 rounded-full bg-slate-400" />
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider">버전 정보</h2>
+          </div>
+          <p className="text-xs text-gray-400 mb-4">
+            Vercel 또는 GitHub Actions 빌드 시 주입됩니다. 로컬에서는 보통 비어 있습니다.
+          </p>
+
+          <div className="flex flex-col gap-5">
+            <div>
+              <p className="text-xs font-bold text-gray-700 mb-2">Vercel</p>
+              <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1">
+                <p className="text-[10px] font-mono text-gray-400">VERCEL_GIT_COMMIT_SHA</p>
+                <p className="text-xs font-mono text-gray-900 break-all leading-relaxed">
+                  {process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.trim() ?? "—"}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold text-gray-700 mb-2">GitHub Actions</p>
+              <div className="flex flex-col gap-2">
+                <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1">
+                  <p className="text-[10px] font-mono text-gray-400">GITHUB_SHA</p>
+                  <p className="text-xs font-mono text-gray-900 break-all leading-relaxed">
+                    {process.env.NEXT_PUBLIC_GITHUB_SHA?.trim() ?? "—"}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-1">
+                  <p className="text-[10px] font-mono text-gray-400">GITHUB_REF_NAME</p>
+                  <p className="text-xs font-mono text-gray-900 break-all leading-relaxed">
+                    {process.env.NEXT_PUBLIC_GITHUB_REF_NAME?.trim() ?? "—"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

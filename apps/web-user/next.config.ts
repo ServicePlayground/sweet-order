@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  env: {
+    /** Vercel 빌드 시 자동으로 설정되는 커밋 전체 SHA */
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA ?? "",
+    /** GitHub Actions가 자동으로 설정하는 커밋 SHA */
+    NEXT_PUBLIC_GITHUB_SHA: process.env.GITHUB_SHA ?? "",
+    /** GitHub Actions가 자동으로 설정하는 브랜치·태그 이름 */
+    NEXT_PUBLIC_GITHUB_REF_NAME: process.env.GITHUB_REF_NAME ?? "",
+  },
   async redirects() {
     return [
       { source: "/chat", destination: "/", permanent: false },
