@@ -31,6 +31,8 @@ export function ReservationBottomSheet({
   pickupLongitude,
   imageUploadEnabled,
   letteringMaxLength,
+  businessCalendar,
+  refundCancellationPolicy,
   onClose,
 }: ReservationBottomSheetProps) {
   const { mutate: createOrder, isPending: isCreatingOrder } = useCreateOrder();
@@ -63,8 +65,6 @@ export function ReservationBottomSheet({
     setAgreeOptionChange,
     allAgreed,
     handleToggleAllAgreements,
-    isAgreementAlertOpen,
-    setIsAgreementAlertOpen,
     imageUrls,
     fileInputRef,
     orderItems,
@@ -167,10 +167,6 @@ export function ReservationBottomSheet({
         <div className="py-[12px]">
           <Button
             onClick={async () => {
-              if (!allAgreed) {
-                setIsAgreementAlertOpen(true);
-                return;
-              }
               // 각 OrderItem의 이미지를 업로드하고 URL 받기
               const itemsWithImageUrls = await Promise.all(
                 orderItems.map(async (item) => {
@@ -231,6 +227,9 @@ export function ReservationBottomSheet({
                 totalQuantity,
                 totalPrice,
                 storeName,
+                // 예약자 연락처 (입력된 경우만 전달)
+                ...(reserverName.trim() && { reservationContactName: reserverName.trim() }),
+                ...(reserverPhone.trim() && { reservationPhone: reserverPhone.trim() }),
                 // 픽업 정보
                 pickupAddress,
                 pickupRoadAddress,
@@ -244,7 +243,13 @@ export function ReservationBottomSheet({
               // API 호출
               createOrder(orderRequest);
             }}
-            disabled={orderItems.length === 0 || isCreatingOrder}
+            disabled={
+              orderItems.length === 0 ||
+              !reserverName.trim() ||
+              !reserverPhone.trim() ||
+              !allAgreed ||
+              isCreatingOrder
+            }
           >
             {isCreatingOrder
               ? "처리 중..."
@@ -291,6 +296,7 @@ export function ReservationBottomSheet({
       setTempSelectedDate={setTempSelectedDate}
       tempSelectedTime={tempSelectedTime}
       setTempSelectedTime={setTempSelectedTime}
+      businessCalendar={businessCalendar}
     />
   );
 
@@ -318,6 +324,7 @@ export function ReservationBottomSheet({
       setAgreeOptionChange={setAgreeOptionChange}
       allAgreed={allAgreed}
       handleToggleAllAgreements={handleToggleAllAgreements}
+      refundCancellationPolicy={refundCancellationPolicy}
     />
   );
 
@@ -369,16 +376,6 @@ export function ReservationBottomSheet({
         onCancel={handleDateChangeConfirm}
       />
 
-      <Modal
-        isOpen={isAgreementAlertOpen}
-        onClose={() => setIsAgreementAlertOpen(false)}
-        title="필수 동의 항목 미동의"
-        description="필수 동의 항목에 모두 동의하셔야 예약이 진행됩니다."
-        confirmText="확인"
-        confirmVariant="primary"
-        onConfirm={() => setIsAgreementAlertOpen(false)}
-        hideCancel
-      />
     </>
   );
 }

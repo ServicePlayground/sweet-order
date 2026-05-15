@@ -44,7 +44,7 @@ function getLoginInfo(user: {
 const QUICK_LINKS = [
   { icon: "reservation", label: "내 예약", href: PATHS.MY_ORDERS },
   { icon: "review", label: "내 후기", href: PATHS.MY_REVIEWS },
-  { icon: "saved", label: "저장", href: PATHS.SAVED },
+  { icon: "saved", label: "저장", href: PATHS.MY_SAVED },
   { icon: "recent", label: "최근 본", href: PATHS.RECENT },
 ] as const;
 

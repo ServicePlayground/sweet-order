@@ -7,13 +7,10 @@ import Image from "next/image";
 import { InfoNotice } from "@/apps/web-user/common/components/notice/InfoNotice";
 import { LabeledInput } from "@/apps/web-user/common/components/inputs/LabeledInput";
 import { Checkbox } from "@/apps/web-user/common/components/inputs/Checkbox";
-
-const REFUND_RULES = [
-  { period: "~ 픽업 3일 전", rule: "취소 시 전액 환불" },
-  { period: "픽업 2일 전", rule: "취소 시 50% 환불" },
-  { period: "픽업 1일 전", rule: "취소 불가 / 환불 불가" },
-  { period: "픽업 당일", rule: "취소 불가 / 환불 불가" },
-];
+import {
+  formatRefundRulePeriodLabel,
+  type RefundCancellationPolicy,
+} from "@/apps/web-user/features/store/types/store.type";
 
 interface ReservationConfirmViewProps {
   orderItems: OrderItem[];
@@ -38,6 +35,8 @@ interface ReservationConfirmViewProps {
   setAgreeOptionChange: (value: boolean) => void;
   allAgreed: boolean;
   handleToggleAllAgreements: (value: boolean) => void;
+  /** 판매자 환불·취소 규정. 미정의면 안내 박스에서만 빈 메시지 노출 */
+  refundCancellationPolicy?: RefundCancellationPolicy;
 }
 
 export function ReservationConfirmView({
@@ -63,7 +62,9 @@ export function ReservationConfirmView({
   setAgreeOptionChange,
   allAgreed,
   handleToggleAllAgreements,
+  refundCancellationPolicy,
 }: ReservationConfirmViewProps) {
+  const refundRules = refundCancellationPolicy?.rules ?? [];
   return (
     <>
       <div className="px-5 pt-5 pb-10 flex flex-col border-b-[14px] border-gray-50">
@@ -232,19 +233,23 @@ export function ReservationConfirmView({
           </div>
           <div>
             <h3 className="text-2sm font-bold text-gray-900 mb-2.5">환불/취소 규정</h3>
-            <div className="rounded-lg border border-gray-100 bg-white overflow-hidden">
-              {REFUND_RULES.map(({ period, rule }) => (
-                <div
-                  key={period}
-                  className="flex items-center text-2sm text-gray-900 border-b border-gray-100 last:border-b-0"
-                >
-                  <span className="w-[110px] px-4 py-3 text-gray-500 border-r border-gray-100 shrink-0">
-                    {period}
-                  </span>
-                  <span className="px-4 py-3 text-gray-900">{rule}</span>
-                </div>
-              ))}
-            </div>
+            {refundRules.length === 0 ? (
+              <p className="text-2sm text-gray-500">등록된 환불/취소 규정이 없습니다.</p>
+            ) : (
+              <div className="rounded-lg border border-gray-100 bg-white overflow-hidden">
+                {refundRules.map(({ daysBeforePickup, refundDescription }, index) => (
+                  <div
+                    key={`${daysBeforePickup}-${index}`}
+                    className="flex items-center text-2sm text-gray-900 border-b border-gray-100 last:border-b-0"
+                  >
+                    <span className="w-[110px] px-4 py-3 text-gray-500 border-r border-gray-100 shrink-0">
+                      {formatRefundRulePeriodLabel(daysBeforePickup)}
+                    </span>
+                    <span className="px-4 py-3 text-gray-900">{refundDescription}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <h3 className="text-2sm font-bold text-gray-900 mb-1">노쇼 정책</h3>

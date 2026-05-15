@@ -29,7 +29,8 @@ export const PATHS = {
   MAP_SEARCH: "/map/search",
 
   // 저장 페이지
-  SAVED: "/mypage/saved",
+  SAVED: "/saved",
+  MY_SAVED: "/mypage/saved",
 
   // 주문 관련 경로
   ORDER: {

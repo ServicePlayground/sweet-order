@@ -17,6 +17,9 @@ import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { ReservationBottomSheet } from "@/apps/web-user/features/product/components/sections/reservation-bottom-sheet";
 import { ProductType } from "@/apps/web-user/features/product/types/product.type";
 import { ProductDetailSkeleton } from "@/apps/web-user/common/components/skeleton/ProductDetailSkeleton";
+import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
+import { useAuthStore } from "@/apps/web-user/common/store/auth.store";
+import { LoginBottomSheet } from "@/apps/web-user/features/auth/components/LoginBottomSheet";
 
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
@@ -28,11 +31,23 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { data: reviewData } = useProductReviews({ productId });
   const { mutate: addLike, isPending: isAddingLike } = useAddProductLike();
   const { mutate: removeLike, isPending: isRemovingLike } = useRemoveProductLike();
+  // 예약 바텀시트 캘린더에서 휴무일 disable + 영업시간 노출용 영업 캘린더
+  const { data: storeDetail } = useStoreDetail(data?.storeId ?? "");
 
   const [isLiked, setIsLiked] = useState(false);
   const isLikeLoading = isAddingLike || isRemovingLike;
 
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [isLoginSheetOpen, setIsLoginSheetOpen] = useState(false);
+  const { isAuthenticated } = useAuthStore();
+
+  const handleReservationClick = () => {
+    if (!isAuthenticated) {
+      setIsLoginSheetOpen(true);
+      return;
+    }
+    setIsBottomSheetOpen(true);
+  };
 
   // 서버에서 isLiked 값이 변경되면 로컬 상태 동기화
   useEffect(() => {
@@ -132,7 +147,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             <span className="text-xs text-gray-900 font-bold">{data.likeCount}</span>
           </button>
           <span className="flex-1">
-            <Button onClick={() => setIsBottomSheetOpen(true)}>
+            <Button onClick={handleReservationClick}>
               {data.productType === ProductType.BASIC_CAKE ? "예약하기" : "예약신청"}
             </Button>
           </span>
@@ -161,7 +176,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         pickupLongitude={data.pickupLongitude}
         imageUploadEnabled={data.imageUploadEnabled}
         letteringMaxLength={data.letteringMaxLength}
+        businessCalendar={storeDetail?.businessCalendar}
+        refundCancellationPolicy={data.storeRefundCancellationPolicy}
         onClose={() => setIsBottomSheetOpen(false)}
+      />
+
+      <LoginBottomSheet
+        isOpen={isLoginSheetOpen}
+        onClose={() => setIsLoginSheetOpen(false)}
       />
     </div>
   );

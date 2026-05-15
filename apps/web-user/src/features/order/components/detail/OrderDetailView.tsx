@@ -21,6 +21,7 @@ import { OptionChangeBottomSheet } from "./OptionChangeBottomSheet";
 import { InfoNotice } from "@/apps/web-user/common/components/notice/InfoNotice";
 import { Button } from "@/apps/web-user/common/components/buttons/Button";
 import { PATHS } from "@/apps/web-user/common/constants/paths.constant";
+import { useStoreDetail } from "@/apps/web-user/features/store/hooks/queries/useStoreDetail";
 
 function getStatusNotice(status: OrderStatus): {
   message: string;
@@ -45,6 +46,8 @@ interface OrderDetailViewProps {
 }
 
 export function OrderDetailView({ order }: OrderDetailViewProps) {
+  // 픽업 날짜 변경 바텀시트의 캘린더 휴무일/영업시간 적용용
+  const { data: storeDetail } = useStoreDetail(order.storeId);
   const [isMapSheetOpen, setIsMapSheetOpen] = useState(false);
   const [isInquirySheetOpen, setIsInquirySheetOpen] = useState(false);
   const [isPickupDateSheetOpen, setIsPickupDateSheetOpen] = useState(false);
@@ -99,7 +102,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
           order={order}
           onChangeOptions={(item) => setOptionEditTargetItem(item)}
         />
-        <NoticeSection />
+        <NoticeSection refundCancellationPolicy={order.storeRefundCancellationPolicy} />
 
         <NavigationBottomSheet
           isOpen={isMapSheetOpen}
@@ -120,6 +123,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
           orderId={order.id}
           initialPickupDate={order.pickupDate}
           onSuccess={() => setShowPickupDateUpdatedToast(true)}
+          businessCalendar={storeDetail?.businessCalendar}
         />
         <OptionChangeBottomSheet
           isOpen={optionEditTargetItem !== null}

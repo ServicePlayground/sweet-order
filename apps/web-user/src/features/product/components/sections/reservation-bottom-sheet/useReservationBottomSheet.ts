@@ -93,7 +93,6 @@ export function useReservationBottomSheet({
   const [agreePayment, setAgreePayment] = useState(false);
   const [agreeRefund, setAgreeRefund] = useState(false);
   const [agreeOptionChange, setAgreeOptionChange] = useState(false);
-  const [isAgreementAlertOpen, setIsAgreementAlertOpen] = useState(false);
   const allAgreed = agreePayment && agreeRefund && agreeOptionChange;
   const handleToggleAllAgreements = (next: boolean) => {
     setAgreePayment(next);
@@ -133,7 +132,6 @@ export function useReservationBottomSheet({
       setAgreePayment(false);
       setAgreeRefund(false);
       setAgreeOptionChange(false);
-      setIsAgreementAlertOpen(false);
     }
   }, [isOpen]);
 
@@ -428,8 +426,6 @@ export function useReservationBottomSheet({
     setAgreeOptionChange,
     allAgreed,
     handleToggleAllAgreements,
-    isAgreementAlertOpen,
-    setIsAgreementAlertOpen,
 
     // Images
     attachedImages,
