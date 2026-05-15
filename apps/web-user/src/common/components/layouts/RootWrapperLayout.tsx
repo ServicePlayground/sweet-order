@@ -8,6 +8,7 @@ import { ConfirmAlert } from "@/apps/web-user/common/components/alerts/ConfirmAl
 import BuildInfoLogger from "@/apps/web-user/common/components/debug/BuildInfoLogger";
 import { AuthProvider } from "@/apps/web-user/common/components/providers/AuthProvider";
 import { AlarmRealtimeListener } from "@/apps/web-user/features/alarm/components/AlarmRealtimeListener";
+import { IntroScreen } from "@/apps/web-user/common/components/intro/IntroScreen";
 
 interface RootWrapperLayoutProps {
   children: ReactNode;
@@ -51,6 +52,7 @@ export default function RootWrapperLayout({ children }: RootWrapperLayoutProps) 
     <AuthProvider>
       <BuildInfoLogger />
       <AlarmRealtimeListener />
+      <IntroScreen />
       <div className="w-full sm:w-[640px] h-screen mx-auto sm:border-x border-gray-200 overflow-y-auto overflow-x-hidden scrollbar-hide">
         <Header variant={headerVariant} title={headerTitle} />
         <div>{children}</div>

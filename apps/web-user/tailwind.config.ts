@@ -106,11 +106,18 @@ const config: Config = {
             transform: "translateY(0)",
           },
         },
+        "pop-in": {
+          "0%": { transform: "scale(0.3)", opacity: "0" },
+          "60%": { transform: "scale(1.15)", opacity: "1" },
+          "80%": { transform: "scale(0.95)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
+        "pop-in": "pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both",
       },
     },
   },
