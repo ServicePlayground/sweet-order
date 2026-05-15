@@ -28,6 +28,7 @@ export default function QAPage() {
     "idle",
   );
   const [geocodeResponse, setGeocodeResponse] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [googleAuthHref, setGoogleAuthHref] = useState<string | null>(null);
   const [kakaoAuthHref, setKakaoAuthHref] = useState<string | null>(null);
 
@@ -42,10 +43,19 @@ export default function QAPage() {
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       setLocationStatus("error");
+      setLocationError("navigator.geolocation 사용 불가 (브라우저 미지원)");
       return;
     }
     setLocationStatus("loading");
     setGeocodeResponse(null);
+    setLocationError(null);
+
+    const startedAt = Date.now();
+    const isSecure = typeof window !== "undefined" ? window.isSecureContext : false;
+    const protocol = typeof window !== "undefined" ? window.location.protocol : "?";
+    const host = typeof window !== "undefined" ? window.location.host : "?";
+    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "?";
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
@@ -65,7 +75,26 @@ export default function QAPage() {
         setLocationStatus("success");
       },
       (error) => {
-        console.error("위치 요청 실패:", error.message);
+        const elapsed = Date.now() - startedAt;
+        const codeName =
+          error.code === 1
+            ? "PERMISSION_DENIED"
+            : error.code === 2
+              ? "POSITION_UNAVAILABLE"
+              : error.code === 3
+                ? "TIMEOUT"
+                : "UNKNOWN";
+        const details = [
+          `code: ${error.code} (${codeName})`,
+          `message: ${error.message || "(empty)"}`,
+          `elapsed: ${elapsed}ms`,
+          `isSecureContext: ${isSecure}`,
+          `protocol: ${protocol}`,
+          `host: ${host}`,
+          `userAgent: ${ua}`,
+        ].join("\n");
+        console.error("위치 요청 실패:", details);
+        setLocationError(details);
         setLocationStatus("error");
       },
     );
@@ -129,9 +158,16 @@ export default function QAPage() {
               <span>{longitude ?? "-"}</span>
             </div>
             {locationStatus === "error" && (
-              <p className="text-red-400 text-xs mt-1">
-                위치 권한이 거부됐거나 오류가 발생했습니다.
-              </p>
+              <div className="mt-1">
+                <p className="text-red-400 text-xs">
+                  위치 권한이 거부됐거나 오류가 발생했습니다.
+                </p>
+                {locationError && (
+                  <pre className="mt-2 bg-red-50 border border-red-200 rounded-xl p-3 text-[10px] text-red-700 overflow-x-auto whitespace-pre-wrap break-all">
+                    {locationError}
+                  </pre>
+                )}
+              </div>
             )}
             {geocodeResponse && (
               <div className="mt-3">
