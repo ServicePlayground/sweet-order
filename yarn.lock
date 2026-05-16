@@ -4009,6 +4009,7 @@ __metadata:
     "@types/node": "npm:^20.3.1"
     "@types/passport": "npm:1.0.17"
     "@types/passport-jwt": "npm:^4"
+    "@types/speakeasy": "npm:^2.0.10"
     axios: "npm:^1.12.2"
     bcrypt: "npm:^6.0.0"
     class-transformer: "npm:^0.5.1"
@@ -4024,8 +4025,41 @@ __metadata:
     reflect-metadata: "npm:^0.1.13"
     rxjs: "npm:^7.8.1"
     socket.io: "npm:^4.8.3"
+    speakeasy: "npm:^2.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:5.5.4"
+  languageName: unknown
+  linkType: soft
+
+"@picake/web-admin@workspace:apps/web-admin":
+  version: 0.0.0-use.local
+  resolution: "@picake/web-admin@workspace:apps/web-admin"
+  dependencies:
+    "@radix-ui/react-label": "npm:^2.1.8"
+    "@radix-ui/react-slot": "npm:^1.2.4"
+    "@tanstack/react-query": "npm:^5.90.5"
+    "@tanstack/react-query-devtools": "npm:^5.90.2"
+    "@types/react": "npm:^18.2.0"
+    "@types/react-dom": "npm:^18.2.0"
+    "@types/react-router-dom": "npm:^5.3.3"
+    "@vitejs/plugin-react": "npm:4.3.4"
+    autoprefixer: "npm:^10.4.22"
+    axios: "npm:1.12.2"
+    class-variance-authority: "npm:^0.7.1"
+    clsx: "npm:^2.1.1"
+    lucide-react: "npm:^0.555.0"
+    postcss: "npm:^8.5.6"
+    qrcode.react: "npm:^4.2.0"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-error-boundary: "npm:^6.0.0"
+    react-router-dom: "npm:^7.9.4"
+    tailwind-merge: "npm:^2.6.0"
+    tailwindcss: "npm:^3.4.18"
+    tailwindcss-animate: "npm:^1.0.7"
+    typescript: "npm:5.5.4"
+    vite: "npm:6.2.0"
+    zustand: "npm:5.0.8"
   languageName: unknown
   linkType: soft
 
@@ -6814,6 +6848,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/speakeasy@npm:^2.0.10":
+  version: 2.0.10
+  resolution: "@types/speakeasy@npm:2.0.10"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/4a9304373a4fe5b7931409384fd948c1ff3ae4cb0b2f5a69f407852f2e3186c4276c969292c634ea722bab859e84cdaf7d006588ce8a3c48ee4199b2deb2dc08
+  languageName: node
+  linkType: hard
+
 "@types/tedious@npm:^4.0.14":
   version: 4.0.14
   resolution: "@types/tedious@npm:4.0.14"
@@ -7964,6 +8007,13 @@ __metadata:
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
   checksum: 10c0/9308baf0a7e4838a82bbfd11e01b1cb0f0cf2893bc1676c27c2a8c0e70cbae1c59120c3268517a8ae7fb6376b4639ef81ca22582611dbee4ed28df945134aaee
+  languageName: node
+  linkType: hard
+
+"base32.js@npm:0.0.1":
+  version: 0.0.1
+  resolution: "base32.js@npm:0.0.1"
+  checksum: 10c0/bea4a63d7f19d55487b487edeb674c06afc6209cafd497a611f65f2483ec48df72c55bb47555c9d03080c4e468d2cd4f26b2d49b36959a1cc30e37a3923bd79e
   languageName: node
   linkType: hard
 
@@ -13520,6 +13570,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qrcode.react@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "qrcode.react@npm:4.2.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/68c691d130e5fda2f57cee505ed7aea840e7d02033100687b764601f9595e1116e34c13876628a93e1a5c2b85e4efc27d30b2fda72e2050c02f3e1c4e998d248
+  languageName: node
+  linkType: hard
+
 "qs@npm:6.13.0":
   version: 6.13.0
   resolution: "qs@npm:6.13.0"
@@ -14725,6 +14784,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"speakeasy@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "speakeasy@npm:2.0.0"
+  dependencies:
+    base32.js: "npm:0.0.1"
+  checksum: 10c0/14dfc1e3dfc3e3e4ebe62a08cbea7cfc97b7ca79984b9ad8246cb2f994eab1d38b2e6e7cc6ce719210cf57b175dfec1602b87205c3db5f14aca751f62448dd51
+  languageName: node
+  linkType: hard
+
 "ssri@npm:^13.0.0":
   version: 13.0.0
   resolution: "ssri@npm:13.0.0"
@@ -15063,6 +15131,13 @@ __metadata:
   version: 3.2.4
   resolution: "symbol-tree@npm:3.2.4"
   checksum: 10c0/dfbe201ae09ac6053d163578778c53aa860a784147ecf95705de0cd23f42c851e1be7889241495e95c37cabb058edb1052f141387bef68f705afc8f9dd358509
+  languageName: node
+  linkType: hard
+
+"tailwind-merge@npm:^2.6.0":
+  version: 2.6.1
+  resolution: "tailwind-merge@npm:2.6.1"
+  checksum: 10c0/f9b5d7ba37f6c6dc7bb7a090f08252e8d827b5abfc1031bf468c5274ce104409e7952a0075a3e009aab53adda8c6d133bc1dd9d3427e2ae5bc00306f9ce1fbff
   languageName: node
   linkType: hard
 
