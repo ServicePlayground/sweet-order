@@ -11,6 +11,9 @@ import { useAuthStore, useAuthHasHydrated } from "@/apps/web-user/common/store/a
 import { UpcomingOrderCard } from "../../features/order/components/UpcomingOrderCard";
 import { useMyOrders } from "@/apps/web-user/features/order/hooks/queries/useMyOrders";
 import { OrderStatus } from "@/apps/web-user/features/order/types/order.type";
+import { ProfileEditBottomSheet } from "@/apps/web-user/features/mypage/components/ProfileEditBottomSheet";
+import { useUpdateMypageProfile } from "@/apps/web-user/features/mypage/hooks/mutations/useUpdateMypageProfile";
+import { Toast } from "@/apps/web-user/common/components/toast/Toast";
 
 function getLoginInfo(user: {
   googleId: string;
@@ -41,7 +44,7 @@ function getLoginInfo(user: {
 const QUICK_LINKS = [
   { icon: "reservation", label: "내 예약", href: PATHS.MY_ORDERS },
   { icon: "review", label: "내 후기", href: PATHS.MY_REVIEWS },
-  { icon: "saved", label: "저장", href: PATHS.SAVED },
+  { icon: "saved", label: "저장", href: PATHS.MY_SAVED },
   { icon: "recent", label: "최근 본", href: PATHS.RECENT },
 ] as const;
 
@@ -50,6 +53,9 @@ export default function MypagePage() {
   const hasHydrated = useAuthHasHydrated();
   const { data: user } = useMypageProfile();
   const [isAppGuideOpen, setIsAppGuideOpen] = useState(false);
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
+  const [showProfileUpdatedToast, setShowProfileUpdatedToast] = useState(false);
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useUpdateMypageProfile();
   const { data: ordersData } = useMyOrders({ type: "UPCOMING" });
   const upcomingCount =
     ordersData?.pages
@@ -98,7 +104,7 @@ export default function MypagePage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Icon name="mypage" width={44} height={44} className="text-gray-400" />
+                <Icon name="mypage" width={44} height={44} className="text-gray-200" />
               )}
             </div>
 
@@ -111,6 +117,7 @@ export default function MypagePage() {
             </div>
             <button
               type="button"
+              onClick={() => setIsProfileEditOpen(true)}
               className="flex items-center justify-center h-[32px] w-[83px] text-xs font-bold text-gray-900 border border-gray-100 rounded-md"
             >
               프로필 수정
@@ -209,6 +216,37 @@ export default function MypagePage() {
         onConfirm={() => setIsAppGuideOpen(false)}
         hideCancel
       />
+
+      <ProfileEditBottomSheet
+        isOpen={isProfileEditOpen}
+        onClose={() => setIsProfileEditOpen(false)}
+        initialNickname={user?.nickname ?? ""}
+        initialProfileImageUrl={user?.profileImageUrl}
+        isSubmitting={isUpdatingProfile}
+        onSubmit={({ nickname, profileImageUrl }) => {
+          updateProfile(
+            { nickname, profileImageUrl },
+            {
+              onSuccess: () => {
+                setIsProfileEditOpen(false);
+                setShowProfileUpdatedToast(true);
+              },
+            },
+          );
+        }}
+      />
+
+      {showProfileUpdatedToast && (
+        <Toast
+          message="수정완료"
+          iconName="checkCircle"
+          iconClassName="text-green-400"
+          variant="column"
+          position="center"
+          duration={1000}
+          onClose={() => setShowProfileUpdatedToast(false)}
+        />
+      )}
 
       <BottomNav />
     </div>

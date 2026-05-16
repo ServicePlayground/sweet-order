@@ -7,6 +7,7 @@
 export const AUDIENCE = {
   CONSUMER: "consumer",
   SELLER: "seller",
+  ADMIN: "admin",
 } as const;
 export type AudienceConst = (typeof AUDIENCE)[keyof typeof AUDIENCE];
 
