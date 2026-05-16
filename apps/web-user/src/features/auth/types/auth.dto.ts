@@ -1,8 +1,10 @@
 import { AUTH_ERROR_MESSAGES } from "@/apps/web-user/features/auth/constants/auth.constant";
 
+/** 백엔드 JWT `aud`와 동일 */
 export const AUDIENCE = {
   CONSUMER: "consumer",
   SELLER: "seller",
+  ADMIN: "admin",
 } as const;
 export type AudienceConst = (typeof AUDIENCE)[keyof typeof AUDIENCE];
 
